@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7A17AEAA-DD17-4D57-ACD9-B74A450D9E39}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Revenj.Features.RestCache</RootNamespace>
+    <AssemblyName>Revenj.Features.RestCache</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CachingCrudCommands.cs" />
+    <Compile Include="CachingDomainCommands.cs" />
+    <Compile Include="CachingService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\NGS.Security.Interface\NGS.Security.Interface.csproj">
+      <Project>{6745FC14-607B-440B-AF83-19C460695C10}</Project>
+      <Name>NGS.Security.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Serialization.Interface\NGS.Serialization.Interface.csproj">
+      <Project>{9C4534E8-B8EB-44F6-A759-C752F0DEA675}</Project>
+      <Name>NGS.Serialization.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Utility\NGS.Utility.csproj">
+      <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
+      <Name>NGS.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">
+      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
+      <Name>NGS.DomainPatterns.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\Revenj.Plugins.Rest.Commands\Revenj.Plugins.Rest.Commands.csproj">
+      <Project>{C06DA32E-8685-4D7A-806F-8A95E85C13EA}</Project>
+      <Name>Revenj.Plugins.Rest.Commands</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Server\Revenj.Api.Interface\Revenj.Api.Interface.csproj">
+      <Project>{7DACDADE-BA4D-4950-AA99-DF9CC9A5619E}</Project>
+      <Name>Revenj.Api.Interface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\NGS.snk">
+      <Link>NGS.snk</Link>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

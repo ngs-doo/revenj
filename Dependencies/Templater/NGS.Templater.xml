@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NGS.Templater</name>
+    </assembly>
+    <members>
+        <member name="T:NGS.Templater.IDocumentFactory">
+            <summary>
+            Creates template document interface
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactory.Open(System.String)">
+            <summary>
+            Opens a document from the specified path.
+            Templater will recognize the appropriate document format from the file extension.
+            </summary>
+            <param name="path">Path to template document file; this file will be overwritten with the processed document</param>
+            <returns>Template document interface</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactory.Open(System.IO.Stream,System.String)">
+            <summary>
+            Opens a document from the specified stream.
+            The extension string indicates the type of document in the stream.
+            </summary>
+            <param name="stream">Stream containing the template document; this stream will be used to output the processed document</param>
+            <param name="extension">Template extension</param>
+            <returns>Template document interface</returns>
+        </member>
+        <member name="T:NGS.Templater.ITemplater">
+            <summary>
+            Provides access to low level API.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">
+            <summary>
+            Metadata for each specific tag.
+            Metadata is used for value conversions and formatting.
+            </summary>
+            <param name="tag">Tag for which metadata is required</param>
+            <param name="all">True returns metadata for all matching tags, false returns metadata for just the first one</param>
+            <returns>String array of tag metadata. If tag is not found empty array will be returned</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">
+            <summary>
+            Replace first specified tag with provided value.
+            Some document formats and value converters support complex values (DateTime, Image, ...)
+            </summary>
+            <param name="tag">Tag to be replaced</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Successful replacement</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">
+            <summary>
+            Resize context which contains all specified tags.
+            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
+            </summary>
+            <param name="tags">Tags which specifies the context</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Clone(System.Int32)">
+            <summary>
+            Clones a document.
+            </summary>
+            <param name="count">Number of clones to create</param>
+            <returns>An IEnumerable&lt;ITemplater&gt; with cloned tags, text and other document properties</returns>
+        </member>
+        <member name="P:NGS.Templater.ITemplater.Tags">
+            <summary>
+            Recognized tags in the document.
+            Each tag is enumerated once.
+            </summary>
+        </member>
+        <member name="T:NGS.Templater.Configuration">
+            <summary>
+            Public entry point.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.Configuration.Configure(System.String,System.String)">
+            <summary>
+            Create instance of document factory using provided license information.
+            </summary>
+            <param name="customer">License owner</param>
+            <param name="license">License key</param>
+            <returns>Document factory</returns>
+        </member>
+        <member name="M:NGS.Templater.Configuration.Configure(System.String)">
+            <summary>
+            Create instance of document factory using provided custom license file (default is 'templater.lic').
+            File can be embedded in assembly.
+            </summary>
+            <param name="path">Path to license file</param>
+            <returns>Document factory</returns>
+        </member>
+        <member name="P:NGS.Templater.Configuration.Factory">
+            <summary>
+            Create instance of document factory.
+            License will be checked from 'templater.lic' file.
+            File can be embedded in assembly.
+            </summary>
+        </member>
+        <member name="T:NGS.Templater.PdfConverter">
+            <summary>
+            Utility for converting various document formats to pdf.
+            Uses OpenOffice.org/LibreOffice to make conversion
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.PdfConverter.Convert(System.Byte[],System.String)">
+            <summary>
+            Converts input document (ex. MyDocument.xlsx) to output pdf
+            </summary>
+            <param name="content">input document content</param>
+            <param name="ext">input document extension</param>
+            <returns>output pdf content</returns>
+        </member>
+        <member name="M:NGS.Templater.PdfConverter.Convert(System.String,System.String)">
+            <summary>
+            Converts input document (ex. MyDocument.docx) to output pdf
+            Requires full path to document (ex. C:\Documents\MyDocument.docx)
+            </summary>
+            <param name="from">input document</param>
+            <param name="toPdf">output pdf file</param>
+        </member>
+        <member name="T:NGS.Templater.ITemplateDocument">
+            <summary>
+            Template document with analyzed tags.
+            Modifies document in memory and saves changes on dispose.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.ITemplateDocument.Process``1(``0)">
+            <summary>
+            Modifies document according to rules for specified data type.
+            Tags are resolved from properties, fields, methods, column names, etc...
+            </summary>
+            <typeparam name="T">Specific rules will be chosen based on this type</typeparam>
+            <param name="data">Data for modifying tags</param>
+            <returns>Itself</returns>
+        </member>
+        <member name="P:NGS.Templater.ITemplateDocument.Templater">
+            <summary>
+            Provides access to low level API.
+            </summary>
+        </member>
+        <member name="T:NGS.Templater.TemplaterHelper">
+            <summary>
+            Helper methods for ITemplater
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.TemplaterHelper.ReplaceAll(NGS.Templater.ITemplater,System.String,System.Object)">
+            <summary>
+            Helper method for replacing all occurrences of the specified tag with the provided value.
+            </summary>
+            <param name="templater">Templater which contains specified tags</param>
+            <param name="tag">Tag to be replaced</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Number of replaced tags</returns>
+        </member>
+        <member name="M:NGS.Templater.TemplaterHelper.HasMetadata(NGS.Templater.ITemplater,System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Helper method for checking if any of the provided tags has specified metadata.
+            </summary>
+            <param name="templater">Templater</param>
+            <param name="tags">Tags to be checked</param>
+            <param name="metadata">Metadata for which to search for</param>
+            <returns>Metadata found at least once</returns>
+        </member>
+        <member name="M:NGS.Templater.TemplaterHelper.Resize(NGS.Templater.ITemplater,System.String,System.Int32)">
+            <summary>
+            Helper method with single argument for resize function.
+            </summary>
+            <param name="templater">Templater</param>
+            <param name="tag">Tag which specifies the context</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+    </members>
+</doc>

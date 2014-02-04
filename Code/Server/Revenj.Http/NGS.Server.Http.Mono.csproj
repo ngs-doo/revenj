@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6AD42C2E-99E1-4F28-9B59-7B404C37B0A9}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NGS.Server.Http</RootNamespace>
+    <AssemblyName>NGS.Server.Http</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Remotion.Linq">
+      <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Autofac">
+      <HintPath>..\..\..\Dependencies\Autofac\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Integration.Mef">
+      <HintPath>..\..\..\Dependencies\Autofac\Autofac.Integration.Mef.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>..\..\..\Dependencies\Npgsql\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\..\..\Dependencies\Npgsql\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>..\..\..\Dependencies\Protobuf\protobuf-net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="HttpServer.cs" />
+    <Compile Include="HttpService.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="HttpService.Designer.cs">
+      <DependentUpon>HttpService.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Platform.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DryIocConfiguration.cs" />
+    <Compile Include="Routes.cs" />
+    <Compile Include="HttpThreadContex.cs" />
+    <Compile Include="RouteHandler.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\NGS.snk">
+      <Link>NGS.snk</Link>
+    </None>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">
+      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
+      <Name>NGS.DomainPatterns.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Extensibility.Interface\NGS.Extensibility.Interface.csproj">
+      <Project>{E7DE330D-1E7C-486E-BAE6-222B87256408}</Project>
+      <Name>NGS.Extensibility.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\NGS.Plugins.Rest.Commands\NGS.Plugins.Rest.Commands.csproj">
+      <Project>{C06DA32E-8685-4D7A-806F-8A95E85C13EA}</Project>
+      <Name>NGS.Plugins.Rest.Commands</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\NGS.Plugins.Server.Commands\NGS.Plugins.Server.Commands.csproj">
+      <Project>{D71A0FE0-0D80-48D2-B8F4-094DED490179}</Project>
+      <Name>NGS.Plugins.Server.Commands</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Logging.Interface\NGS.Logging.Interface.csproj">
+      <Project>{E4040A4F-0730-4784-AA6C-E3A950AA9A4B}</Project>
+      <Name>NGS.Logging.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Serialization.Interface\NGS.Serialization.Interface.csproj">
+      <Project>{9C4534E8-B8EB-44F6-A759-C752F0DEA675}</Project>
+      <Name>NGS.Serialization.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Utility\NGS.Utility.csproj">
+      <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
+      <Name>NGS.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Features\Cache\NGS.Features.RestCache\NGS.Features.RestCache.csproj">
+      <Project>{7A17AEAA-DD17-4D57-ACD9-B74A450D9E39}</Project>
+      <Name>NGS.Features.RestCache</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NGS.Server.Api.Interface\NGS.Server.Api.Interface.csproj">
+      <Project>{7DACDADE-BA4D-4950-AA99-DF9CC9A5619E}</Project>
+      <Name>NGS.Server.Api.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NGS.Server.Api\NGS.Server.Api.Mono.csproj">
+      <Project>{30CDA3F6-A7A1-499B-B209-118079235744}</Project>
+      <Name>NGS.Server.Api.Mono</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Extensibility\NGS.Extensibility.csproj">
+      <Project>{3BCE35A8-8B3D-4611-B8AB-D524EA4D7908}</Project>
+      <Name>NGS.Extensibility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Database\NGS.DatabasePersistence.Postgres\NGS.DatabasePersistence.Postgres.csproj">
+      <Project>{6BEE583B-B4CE-489B-A5D3-6EAF071438CC}</Project>
+      <Name>NGS.DatabasePersistence.Postgres</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Database\NGS.DatabasePersistence.Interface\NGS.DatabasePersistence.Interface.csproj">
+      <Project>{2A96E16E-4398-4316-8637-54C0E0EA13ED}</Project>
+      <Name>NGS.DatabasePersistence.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\NGS.Plugins.DatabasePersistence.Postgres\NGS.Plugins.DatabasePersistence.Postgres.csproj">
+      <Project>{8E943C88-AF40-4836-A8F6-681668514C83}</Project>
+      <Name>NGS.Plugins.DatabasePersistence.Postgres</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Serialization\NGS.Serialization.csproj">
+      <Project>{C4F76672-980C-4368-A73A-65288A06A263}</Project>
+      <Name>NGS.Serialization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Security.Interface\NGS.Security.Interface.csproj">
+      <Project>{6745FC14-607B-440B-AF83-19C460695C10}</Project>
+      <Name>NGS.Security.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Security\NGS.Security.csproj">
+      <Project>{9487C1B1-BFF0-48FD-90EC-C5D7093776D9}</Project>
+      <Name>NGS.Security</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NGS.Server.Processing.Interface\NGS.Server.Processing.Interface.csproj">
+      <Project>{721E3056-0F68-4874-B5E0-0B0223ECC4D7}</Project>
+      <Name>NGS.Server.Processing.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NGS.Server.Processing\NGS.Server.Processing.csproj">
+      <Project>{186DA9E7-5A90-4E10-90D3-C8080265EA70}</Project>
+      <Name>NGS.Server.Processing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Logging.NLog\NGS.Logging.NLog.csproj">
+      <Project>{58330196-87BC-4A8A-AECA-67B1873A4E1F}</Project>
+      <Name>NGS.Logging.NLog</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">
+      <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
+      <Name>NGS.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns\NGS.DomainPatterns.csproj">
+      <Project>{FB2B66D2-AA50-4552-9F0E-56F51369E651}</Project>
+      <Name>NGS.DomainPatterns</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

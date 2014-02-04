@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3BCE35A8-8B3D-4611-B8AB-D524EA4D7908}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NGS.Extensibility</RootNamespace>
+    <AssemblyName>NGS.Extensibility</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mono|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Mono\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\..\..\Dependencies\Autofac\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac.Integration.Mef">
+      <HintPath>..\..\..\Dependencies\Autofac\Autofac.Integration.Mef.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Core">
+      <HintPath>..\..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Aspects\AspectConfiguration.cs" />
+    <Compile Include="Attributes\PluginAspect.cs" />
+    <Compile Include="Container\DryIocObjectFactory.cs" />
+    <Compile Include="Container\DryIoc.cs" />
+    <Compile Include="DynamicProxy\IInterceptorRegistrator.cs" />
+    <Compile Include="Plugins\DryIocMefProvider.cs" />
+    <Compile Include="Plugins\PluginsProvider.cs" />
+    <Compile Include="Plugins\PluginsConfiguration.cs" />
+    <Compile Include="Attributes\ServiceAspect.cs" />
+    <Compile Include="SystemInitialization.cs" />
+    <Compile Include="Aspects\AspectRepository.cs" />
+    <Compile Include="DynamicProxy\CastleSelector.cs" />
+    <Compile Include="DynamicProxy\CastleDynamicProxyProvider.cs" />
+    <Compile Include="DynamicProxy\CastleInterceptor.cs" />
+    <Compile Include="Aspects\IAspectComposer.cs" />
+    <Compile Include="DynamicProxy\IDynamicProxyProvider.cs" />
+    <Compile Include="Container\AutofacObjectFactory.cs" />
+    <Compile Include="Plugins\PluginRepository.cs" />
+    <Compile Include="Plugins\AutofacMefProvider.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NGS.Extensibility.Interface\NGS.Extensibility.Interface.csproj">
+      <Project>{E7DE330D-1E7C-486E-BAE6-222B87256408}</Project>
+      <Name>NGS.Extensibility.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NGS.Common\NGS.Common.csproj">
+      <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
+      <Name>NGS.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NGS.Utility\NGS.Utility.csproj">
+      <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
+      <Name>NGS.Utility</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\NGS.snk">
+      <Link>NGS.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Dictionary>
+  <Words>
+    <Recognized>
+      <Word>plugin</Word>
+      <Word>plugins</Word>
+      <Word>Antlr</Word>
+      <Word>Autofac</Word>
+      <Word>Postgres</Word>
+      <Word>Revenj</Word>
+      <Word>Templater</Word>
+      <Word>mixin</Word>
+      <Word>subquery</Word>
+    </Recognized>
+  </Words>
+  <Acronyms>
+    <CasingExceptions>
+      <Acronym>NGS</Acronym>
+      <Acronym>ID</Acronym>
+      <Acronym>URI</Acronym>
+      <Acronym>SOAP</Acronym>
+      <Acronym>REST</Acronym>
+    </CasingExceptions>
+  </Acronyms>
+</Dictionary>

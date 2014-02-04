@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6BEE583B-B4CE-489B-A5D3-6EAF071438CC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NGS.DatabasePersistence.Postgres</RootNamespace>
+    <AssemblyName>NGS.DatabasePersistence.Postgres</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mono|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Mono\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Npgsql">
+      <HintPath>..\..\..\Dependencies\Npgsql\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="Remotion.Linq">
+      <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Attributes\DatabaseFunctionAttribute.cs" />
+    <Compile Include="ConnectionInfo.cs" />
+    <Compile Include="Converters\BoolConverter.cs" />
+    <Compile Include="Converters\ByteaConverter.cs" />
+    <Compile Include="Converters\EnumConverter.cs" />
+    <Compile Include="Converters\S3Converter.cs" />
+    <Compile Include="Converters\XmlConverter.cs" />
+    <Compile Include="Converters\GuidConverter.cs" />
+    <Compile Include="Converters\DateConverter.cs" />
+    <Compile Include="Converters\FloatConverter.cs" />
+    <Compile Include="Converters\DoubleConverter.cs" />
+    <Compile Include="Converters\DecimalConverter.cs" />
+    <Compile Include="Converters\LongConverter.cs" />
+    <Compile Include="Converters\IntConverter.cs" />
+    <Compile Include="Converters\StringConverter.cs" />
+    <Compile Include="Converters\TimestampConverter.cs" />
+    <Compile Include="Converters\SecretConverter.cs" />
+    <Compile Include="Converters\ImageConverter.cs" />
+    <Compile Include="Converters\HstoreConverter.cs" />
+    <Compile Include="Cube\PostgresOlapCubeQuery.cs" />
+    <Compile Include="Attributes\RepositoryAttribute.cs" />
+    <Compile Include="PostgresDatabaseNotification.cs" />
+    <Compile Include="PostgresDataContext.cs" />
+    <Compile Include="PostgresSequence.cs" />
+    <Compile Include="PostgresDatabaseQuery.cs" />
+    <Compile Include="PostgresTypedArray.cs" />
+    <Compile Include="PostgresRecordConverter.cs" />
+    <Compile Include="PostgresQueryManager.cs" />
+    <Compile Include="Converters\IPostgresTypeConverter.cs" />
+    <Compile Include="PostgresObjectFactory.cs" />
+    <Compile Include="PostgresVersionInfo.cs" />
+    <Compile Include="QueryGeneration\QuerySourceConverterFactory.cs" />
+    <Compile Include="QueryGeneration\SelectSubqueryData.cs" />
+    <Compile Include="QueryGeneration\QueryComposition\IQuerySimplification.cs" />
+    <Compile Include="QueryGeneration\QueryComposition\QueryParts.cs" />
+    <Compile Include="QueryGeneration\QueryComposition\SubqueryParts.cs" />
+    <Compile Include="QueryGeneration\TypeUtility.cs" />
+    <Compile Include="QueryGeneration\Visitors\IMemberMatcher.cs" />
+    <Compile Include="QueryGeneration\Visitors\IExpressionMatcher.cs" />
+    <Compile Include="QueryGeneration\Visitors\IProjectionMatcher.cs" />
+    <Compile Include="QueryGeneration\Visitors\SubquerySelectExpressionTreeVisitor.cs" />
+    <Compile Include="QueryGeneration\Visitors\SubqueryGeneratorQueryModelVisitor.cs" />
+    <Compile Include="QueryGeneration\Visitors\ProjectorBuildingExpressionTreeVisitor.cs" />
+    <Compile Include="QueryGeneration\Queryable.cs" />
+    <Compile Include="QueryGeneration\QueryExecutor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryGeneration\SqlCommandData.cs" />
+    <Compile Include="QueryGeneration\Visitors\SelectExpressionTreeVisitor.cs" />
+    <Compile Include="QueryGeneration\Visitors\SqlGeneratorExpressionTreeVisitor.cs" />
+    <Compile Include="QueryGeneration\Visitors\SqlGeneratorQueryModelVisitor.cs" />
+    <Compile Include="QueryGeneration\QueryComposition\MainQueryParts.cs" />
+    <Compile Include="QueryGeneration\ResultObjectMapping.cs" />
+    <Compile Include="Attributes\SqlSourceAttribute.cs" />
+    <Compile Include="Converters\ValueTuple.cs" />
+    <Compile Include="Converters\PostgresTuple.cs" />
+    <Compile Include="Converters\ArrayTuple.cs" />
+    <Compile Include="Converters\RecordTuple.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">
+      <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
+      <Name>NGS.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Extensibility.Interface\NGS.Extensibility.Interface.csproj">
+      <Project>{E7DE330D-1E7C-486E-BAE6-222B87256408}</Project>
+      <Name>NGS.Extensibility.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Logging.Interface\NGS.Logging.Interface.csproj">
+      <Project>{e4040a4f-0730-4784-aa6c-e3a950aa9a4b}</Project>
+      <Name>NGS.Logging.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Utility\NGS.Utility.csproj">
+      <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
+      <Name>NGS.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">
+      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
+      <Name>NGS.DomainPatterns.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NGS.DatabasePersistence.Interface\NGS.DatabasePersistence.Interface.csproj">
+      <Project>{2A96E16E-4398-4316-8637-54C0E0EA13ED}</Project>
+      <Name>NGS.DatabasePersistence.Interface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\NGS.snk">
+      <Link>NGS.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

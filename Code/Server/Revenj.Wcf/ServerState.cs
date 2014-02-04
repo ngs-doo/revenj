@@ -1,0 +1,23 @@
+﻿using System;
+using NGS.Extensibility;
+
+namespace Revenj.Wcf
+{
+	internal class ServerState : ISystemState
+	{
+		public ServerState()
+		{
+			IsBooting = true;
+		}
+
+		public bool IsBooting { get; internal set; }
+		public bool IsReady { get; private set; }
+		public event Action<IObjectFactory> Ready = f => { };
+		public void Started(IObjectFactory factory)
+		{
+			IsBooting = false;
+			IsReady = true;
+			Ready(factory);
+		}
+	}
+}

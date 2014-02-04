@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mono|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Mono\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;MONO</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C06DA32E-8685-4D7A-806F-8A95E85C13EA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Revenj.Plugins.Rest.Commands</RootNamespace>
+    <AssemblyName>Revenj.Plugins.Rest.Commands</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Serialize.Linq">
+      <HintPath>..\..\..\Dependencies\Serialize.Linq\Serialize.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MessageFormat.cs" />
+    <Compile Include="PassThroughSerialization.cs" />
+    <Compile Include="ReportingCommands.cs" />
+    <Compile Include="IReportingCommands.cs" />
+    <Compile Include="DomainCommands.cs" />
+    <Compile Include="IDomainCommands.cs" />
+    <Compile Include="IStandardCommands.cs" />
+    <Compile Include="CrudCommands.cs" />
+    <Compile Include="ICrudCommands.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpecificationFromNode.cs" />
+    <Compile Include="StandardCommands.cs" />
+    <Compile Include="Utility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\NGS.snk">
+      <Link>NGS.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">
+      <Project>{00dafab8-31c5-4dc6-a4a8-afa7b97bbfdd}</Project>
+      <Name>NGS.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Serialization.Interface\NGS.Serialization.Interface.csproj">
+      <Project>{9c4534e8-b8eb-44f6-a759-c752f0dea675}</Project>
+      <Name>NGS.Serialization.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\NGS.Utility\NGS.Utility.csproj">
+      <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
+      <Name>NGS.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">
+      <Project>{1bc1aa42-67b6-4efd-b717-2ab6feb981b8}</Project>
+      <Name>NGS.DomainPatterns.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Server\Revenj.Api.Interface\Revenj.Api.Interface.csproj">
+      <Project>{7dacdade-ba4d-4950-aa99-df9cc9a5619e}</Project>
+      <Name>Revenj.Api.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Server\Revenj.Processing.Interface\Revenj.Processing.Interface.csproj">
+      <Project>{721e3056-0f68-4874-b5e0-0b0223ecc4d7}</Project>
+      <Name>Revenj.Processing.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Revenj.Plugins.Server.Commands\Revenj.Plugins.Server.Commands.csproj">
+      <Project>{d71a0fe0-0d80-48d2-b8f4-094ded490179}</Project>
+      <Name>Revenj.Plugins.Server.Commands</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
