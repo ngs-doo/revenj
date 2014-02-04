@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
 namespace NGS.DomainPatterns
 {
@@ -31,7 +30,7 @@ namespace NGS.DomainPatterns
 	/// </summary>
 	/// <typeparam name="TAggregate">aggregate root type</typeparam>
 	public interface IDomainEvent<TAggregate> : IDomainEvent
-		where TAggregate : class, IAggregateRoot
+		where TAggregate : IAggregateRoot
 	{
 		/// <summary>
 		/// Apply domain event on an aggregate root
@@ -64,6 +63,7 @@ namespace NGS.DomainPatterns
 		/// <returns>observable to processed domain events</returns>
 		IObservable<TEvent> Track<TEvent>();
 	}
+	//TODO: IDomainEvent signature?!
 	/// <summary>
 	/// Domain event store.
 	/// Events can only be submitted. Submitted events can't be changed.
@@ -71,6 +71,7 @@ namespace NGS.DomainPatterns
 	/// </summary>
 	/// <typeparam name="TEvent">domain event type</typeparam>
 	public interface IDomainEventStore<TEvent> : IQueryableRepository<TEvent>, IRepository<TEvent>
+		where TEvent : IDomainEvent
 	{
 		/// <summary>
 		/// Submit domain events to the store.
@@ -111,7 +112,8 @@ namespace NGS.DomainPatterns
 		/// <typeparam name="TEvent">domain event type</typeparam>
 		/// <param name="domainEvent">domain event</param>
 		/// <returns>event identifier</returns>
-		string Submit<TEvent>(TEvent domainEvent);
+		string Submit<TEvent>(TEvent domainEvent)
+			where TEvent : IDomainEvent;
 	}
 	/// <summary>
 	/// Handle domain event.
@@ -129,7 +131,9 @@ namespace NGS.DomainPatterns
 	}
 
 	//TODO remove!?
+	[Obsolete("will be removed")]
 	public interface IDomainEventRepository<out TEvent> : IQueryableRepository<TEvent>, IRepository<TEvent>
+		where TEvent : IDomainEvent
 	{
 		TEvent Submit(Action<TEvent> initialize);
 	}
@@ -147,11 +151,15 @@ namespace NGS.DomainPatterns
 		/// <param name="domainEvent">raise domain event</param>
 		/// <returns>event identifier</returns>
 		public static string Submit<TEvent>(this IDomainEventStore<TEvent> store, TEvent domainEvent)
+			where TEvent : IDomainEvent
 		{
 			Contract.Requires(store != null);
 			Contract.Requires(domainEvent != null);
 
-			return store.Submit(new[] { domainEvent }).FirstOrDefault();
+			var uris = store.Submit(new[] { domainEvent });
+			if (uris != null && uris.Length != 0)
+				return uris[0];
+			return null;
 		}
 		/// <summary>
 		/// Mark single domain event as processed.

@@ -113,6 +113,7 @@ Example argument:
 		}
 
 		private class FindCommand<TDomainObject> : IFindCommand
+			where TDomainObject : IIdentifiable
 		{
 			public TOutput Find<TOutput>(
 				ISerialization<TOutput> output,

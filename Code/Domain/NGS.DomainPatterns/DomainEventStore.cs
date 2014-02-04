@@ -17,6 +17,7 @@ namespace NGS.DomainPatterns
 		}
 
 		public string Submit<TEvent>(TEvent domainEvent)
+			where TEvent : IDomainEvent
 		{
 			Func<object, string> store;
 			if (!EventStores.TryGetValue(typeof(TEvent), out store))

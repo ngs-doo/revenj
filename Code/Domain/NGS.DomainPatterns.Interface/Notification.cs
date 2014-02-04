@@ -41,6 +41,7 @@ namespace NGS.DomainPatterns
 			/// Aggregate root was deleted
 			/// </summary>
 			Delete
+			//TODO: mark and submit for events!?
 		};
 		/// <summary>
 		/// Create notification information
@@ -66,6 +67,7 @@ namespace NGS.DomainPatterns
 		/// Observe notifications
 		/// </summary>
 		IObservable<NotifyInfo> Notifications { get; }
+		//TODO specialized signature!?
 		/// <summary>
 		/// Specify interest in only subset of notifications.
 		/// </summary>

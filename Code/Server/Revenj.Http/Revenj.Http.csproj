@@ -83,6 +83,7 @@
       <DependentUpon>HttpService.cs</DependentUpon>
     </Compile>
     <Compile Include="HttpThreadContex.cs" />
+    <Compile Include="NoAuth.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -20,7 +20,7 @@ namespace Revenj.Wcf
 		{
 			Contract.Requires(logFactory != null);
 
-			ErrorLogger = logFactory.Create("NGS.Server.Errors");
+			ErrorLogger = logFactory.Create("Revenj.Wcf.Errors");
 		}
 
 		public bool HandleError(Exception error)

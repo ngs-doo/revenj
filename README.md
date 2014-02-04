@@ -36,7 +36,7 @@ C# backend components with deep DSL Platform integration.
  * in-memory caching layer
 
 
-#How to use:
+#Getting started:
 
 Register at https://dsl-platform.com and create an external project. You will need a Postgres instance and .NET/Mono server.
 
@@ -63,7 +63,8 @@ Have fun.
 
 ps. few notes:
 
+ * http server is easiest to set up; just overwrite GeneratedModel.dll in cache folder or reference it from another location
  * security is disabled in default configuration
- * https does not work, server certificate must be referenced
- * it's recommended to keep GeneratedModel in shadow copied folder, or move it to bin (instead of cache as defined in appSettings - <add key="ServerAssembly" value="cache\GeneratedModel.dll" />)
  * write DSL with the help of DDD for DSL Visual Studio plugin
+ * server certificate must be referenced to get wcf working
+ * it's recommended to keep GeneratedModel in shadow copied folder, or move it to bin (instead of cache as defined in appSettings - &lt;add key="ServerAssembly" value="cache\GeneratedModel.dll" /&gt;)

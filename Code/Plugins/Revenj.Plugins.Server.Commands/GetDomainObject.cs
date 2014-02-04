@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Security;
 using NGS;
@@ -126,6 +124,7 @@ Please check your arguments.", name);
 		}
 
 		private class FindCommand<TResult> : IFindCommand
+			where TResult : IIdentifiable
 		{
 			public FindResult<TOutput> Find<TOutput>(
 				ISerialization<TOutput> output,
@@ -138,59 +137,6 @@ Please check your arguments.", name);
 				var filtered = permissions.ApplyFilters(found);
 				return new FindResult<TOutput> { Result = output.Serialize(filtered), Count = filtered.Length };
 			}
-		}
-	}
-
-	public static class GetDomainObjectHelper
-	{
-		internal class Repository<TData, TFormat> : IRepository<TData>
-		{
-			private readonly IServiceLocator Locator;
-			private readonly GetDomainObject GetCommand;
-			private readonly ISerialization<TFormat> Serializer;
-
-			internal Repository(
-				IServiceLocator locator,
-				GetDomainObject getCommand,
-				ISerialization<TFormat> serializer)
-			{
-				this.Locator = locator;
-				this.GetCommand = getCommand;
-				this.Serializer = serializer;
-			}
-
-			public static TData[] Find(
-				IServiceLocator locator,
-				GetDomainObject getCommand,
-				ISerialization<TFormat> serializer,
-				IEnumerable<string> uris)
-			{
-				var result =
-					getCommand.Execute(
-						serializer,
-						serializer,
-						serializer.Serialize(
-							new GetDomainObject.Argument
-							{
-								Name = typeof(TData).FullName,
-								Uri = uris.ToArray()
-							}));
-				return serializer.Deserialize<TFormat, TData[]>(result.Data, locator);
-			}
-
-			public TData[] Find(IEnumerable<string> uris)
-			{
-				return Find(Locator, GetCommand, Serializer, uris);
-			}
-		}
-
-		public static IRepository<TData> CreateRepository<TData, TFormat>(this IServiceLocator locator)
-		{
-			return
-				new Repository<TData, TFormat>(
-					locator,
-					locator.Resolve<GetDomainObject>(),
-					locator.Resolve<ISerialization<TFormat>>());
 		}
 	}
 }

@@ -172,6 +172,7 @@ namespace NGS.DatabasePersistence.Oracle
 		public IObservable<NotifyInfo> Notifications { get; private set; }
 
 		private IRepository<T> GetRepository<T>()
+			where T : IIdentifiable
 		{
 			object repository;
 			if (!Repositories.TryGetValue(typeof(T), out repository))

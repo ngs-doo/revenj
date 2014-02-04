@@ -11,7 +11,7 @@ namespace Revenj.Wcf
 		{
 			var register = new[] { typeof(RestApplication), typeof(SoapApplication), typeof(CommandConverter) };
 			var logger = Platform.Start<ILogFactory>(register);
-			logger.Create("NGS.Server.Api").Info("Started at " + DateTime.Now);
+			logger.Create("Revenj.Wcf").Info("Started at " + DateTime.Now);
 		}
 	}
 }

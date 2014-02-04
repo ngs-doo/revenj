@@ -5,13 +5,13 @@ using System.Linq;
 
 namespace NGS.DomainPatterns
 {
-	//TODO: TValue should implement IIdentifiable
 	/// <summary>
 	/// Data access abstraction. 
 	/// Lookup data by its identifier.
 	/// </summary>
 	/// <typeparam name="TValue">data type</typeparam>
 	public interface IRepository<out TValue>
+		where TValue : IIdentifiable
 	{
 		/// <summary>
 		/// Find objects by provided identifiers
@@ -48,13 +48,13 @@ namespace NGS.DomainPatterns
 		/// <returns>found items</returns>
 		TValue[] Search<TCondition>(ISpecification<TCondition> specification, int? limit, int? offset);
 	}
-	//TODO: TRoot should implement IAggregateRoot
 	/// <summary>
 	/// Aggregate root persistable repository.
 	/// Besides querying capabilities, repository has set based API for persistance.
 	/// </summary>
 	/// <typeparam name="TRoot">aggregate root type</typeparam>
 	public interface IPersistableRepository<TRoot> : IQueryableRepository<TRoot>, IRepository<TRoot>
+		where TRoot : IAggregateRoot
 	{
 		/// <summary>
 		/// Persist aggregate roots. Bulk persistance.
@@ -90,6 +90,7 @@ namespace NGS.DomainPatterns
 			IEnumerable<TRoot> insert,
 			IEnumerable<TRoot> update,
 			IEnumerable<TRoot> delete)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 
@@ -141,6 +142,7 @@ namespace NGS.DomainPatterns
 		/// <param name="uri">object identifier</param>
 		/// <returns>found object</returns>
 		public static TValue Find<TValue>(this IRepository<TValue> repository, string uri)
+			where TValue : IIdentifiable
 		{
 			Contract.Requires(repository != null);
 			Contract.Requires(uri != null);
@@ -159,6 +161,7 @@ namespace NGS.DomainPatterns
 		/// <param name="data">new aggregates</param>
 		/// <returns>created indentifiers</returns>
 		public static string[] Insert<TRoot>(this IPersistableRepository<TRoot> repository, IEnumerable<TRoot> data)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 
@@ -174,6 +177,7 @@ namespace NGS.DomainPatterns
 		/// <param name="repository">persistable repository</param>
 		/// <param name="data">aggregates to save</param>
 		public static void Update<TRoot>(this IPersistableRepository<TRoot> repository, IEnumerable<TRoot> data)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 
@@ -188,6 +192,7 @@ namespace NGS.DomainPatterns
 		/// <param name="repository">persistable repository</param>
 		/// <param name="data">collection of old and chaned aggregates</param>
 		public static void Update<TRoot>(this IPersistableRepository<TRoot> repository, IEnumerable<KeyValuePair<TRoot, TRoot>> data)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 
@@ -201,6 +206,7 @@ namespace NGS.DomainPatterns
 		/// <param name="repository">persistable repository</param>
 		/// <param name="data">aggregates to delete</param>
 		public static void Delete<TRoot>(this IPersistableRepository<TRoot> repository, IEnumerable<TRoot> data)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 
@@ -217,6 +223,7 @@ namespace NGS.DomainPatterns
 		/// <param name="data">new aggregate</param>
 		/// <returns>assigned identifier</returns>
 		public static string Insert<TRoot>(this IPersistableRepository<TRoot> repository, TRoot data)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 			Contract.Requires(data != null);
@@ -231,6 +238,7 @@ namespace NGS.DomainPatterns
 		/// <param name="repository">persistable repository</param>
 		/// <param name="data">changed aggregate</param>
 		public static void Update<TRoot>(this IPersistableRepository<TRoot> repository, TRoot data)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 
@@ -245,6 +253,7 @@ namespace NGS.DomainPatterns
 		/// <param name="oldValue">old aggregate instance</param>
 		/// <param name="newValue">new aggregate instance</param>
 		public static void Update<TRoot>(this IPersistableRepository<TRoot> repository, TRoot oldValue, TRoot newValue)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 			Contract.Requires(oldValue != null);
@@ -259,6 +268,7 @@ namespace NGS.DomainPatterns
 		/// <param name="repository">persistable repository</param>
 		/// <param name="data">aggregate to delete</param>
 		public static void Delete<TRoot>(this IPersistableRepository<TRoot> repository, TRoot data)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 			Contract.Requires(data != null);
@@ -274,6 +284,7 @@ namespace NGS.DomainPatterns
 		/// <param name="uri">aggregate identifier</param>
 		/// <returns>deleted aggregate root</returns>
 		public static TRoot Delete<TRoot>(this IPersistableRepository<TRoot> repository, string uri)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 			Contract.Requires(uri != null);
@@ -295,6 +306,7 @@ namespace NGS.DomainPatterns
 		/// <param name="update">change method</param>
 		/// <returns>found and changed aggregate</returns>
 		public static TRoot Update<TRoot>(this IPersistableRepository<TRoot> repository, string uri, Action<TRoot> update)
+			where TRoot : IAggregateRoot
 		{
 			Contract.Requires(repository != null);
 			Contract.Requires(uri != null);

@@ -2,6 +2,8 @@
 using System.Configuration;
 using System.IO;
 using System.Net;
+using System.Security;
+using System.ServiceModel.Web;
 using System.Text;
 using System.Threading;
 using NGS.DomainPatterns;
@@ -101,30 +103,35 @@ namespace Revenj.Http
 							stream.CopyTo(response.OutputStream);
 						}
 					}
-					else
-					{
-						response.ContentLength64 = Encoding.UTF8.GetByteCount(auth.Error);
-						response.StatusCode = (int)auth.ResponseCode;
-						using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(auth.Error)))
-							ms.CopyTo(response.OutputStream);
-					}
+					else ReturnError(response, (int)auth.ResponseCode, auth.Error);
 				}
 				else
 				{
 					var unknownRoute = "Unknown route " + request.RawUrl + " on method " + request.HttpMethod;
-					response.ContentLength64 = Encoding.UTF8.GetByteCount(unknownRoute);
-					using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(unknownRoute)))
-						ms.CopyTo(response.OutputStream);
+					ReturnError(response, 404, unknownRoute);
 				}
+			}
+			catch (SecurityException sex)
+			{
+				ReturnError(response, (int)HttpStatusCode.Forbidden, sex.Message);
+			}
+			catch (WebFaultException<string> wfe)
+			{
+				ReturnError(response, (int)wfe.StatusCode, wfe.Detail);
 			}
 			catch (Exception ex)
 			{
-				response.StatusCode = 500;
-				response.ContentLength64 = Encoding.UTF8.GetByteCount(ex.Message);
-				using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(ex.Message)))
-					ms.CopyTo(response.OutputStream);
-				response.Close();
+				ReturnError(response, 500, ex.Message);
 			}
+		}
+
+		private static void ReturnError(HttpListenerResponse response, int status, string message)
+		{
+			response.StatusCode = status;
+			response.ContentType = "text/plain; charset=\"utf-8\"";
+			response.ContentLength64 = Encoding.UTF8.GetByteCount(message);
+			using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(message)))
+				ms.CopyTo(response.OutputStream);
 		}
 	}
 }
