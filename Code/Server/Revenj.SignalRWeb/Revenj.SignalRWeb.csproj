@@ -40,17 +40,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.AspNet.SignalR.Core">
-      <HintPath>..\..\..\..\Dependencies\SignalR\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+      <HintPath>..\..\..\Dependencies\SignalR\Microsoft.AspNet.SignalR.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Owin">
-      <HintPath>..\..\..\..\Dependencies\SignalR\Microsoft.AspNet.SignalR.Owin.dll</HintPath>
+      <HintPath>..\..\..\Dependencies\SignalR\Microsoft.AspNet.SignalR.Owin.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.SystemWeb">
-      <HintPath>..\..\..\..\Dependencies\SignalR\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+      <HintPath>..\..\..\Dependencies\SignalR\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Owin.Host.SystemWeb">
-      <HintPath>..\..\..\..\Dependencies\SignalR\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+      <HintPath>..\..\..\Dependencies\SignalR\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure">
       <HintPath>..\..\..\..\Dependencies\SignalR\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -59,7 +59,7 @@
       <HintPath>..\..\..\..\Dependencies\SignalR\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Owin">
-      <HintPath>..\..\..\..\Dependencies\SignalR\Owin.dll</HintPath>
+      <HintPath>..\..\..\Dependencies\SignalR\Owin.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Core">
       <HintPath>..\..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
