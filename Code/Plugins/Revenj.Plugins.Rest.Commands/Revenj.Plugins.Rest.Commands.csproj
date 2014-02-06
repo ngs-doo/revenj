@@ -11,6 +11,8 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -24,6 +26,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -88,11 +92,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">
-      <Project>{00dafab8-31c5-4dc6-a4a8-afa7b97bbfdd}</Project>
+      <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
       <Name>NGS.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Core\NGS.Serialization.Interface\NGS.Serialization.Interface.csproj">
-      <Project>{9c4534e8-b8eb-44f6-a759-c752f0dea675}</Project>
+      <Project>{9C4534E8-B8EB-44F6-A759-C752F0DEA675}</Project>
       <Name>NGS.Serialization.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Core\NGS.Utility\NGS.Utility.csproj">
@@ -100,19 +104,19 @@
       <Name>NGS.Utility</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">
-      <Project>{1bc1aa42-67b6-4efd-b717-2ab6feb981b8}</Project>
+      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
       <Name>NGS.DomainPatterns.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Server\Revenj.Api.Interface\Revenj.Api.Interface.csproj">
-      <Project>{7dacdade-ba4d-4950-aa99-df9cc9a5619e}</Project>
+      <Project>{7DACDADE-BA4D-4950-AA99-DF9CC9A5619E}</Project>
       <Name>Revenj.Api.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Server\Revenj.Processing.Interface\Revenj.Processing.Interface.csproj">
-      <Project>{721e3056-0f68-4874-b5e0-0b0223ecc4d7}</Project>
+      <Project>{721E3056-0F68-4874-B5E0-0B0223ECC4D7}</Project>
       <Name>Revenj.Processing.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Revenj.Plugins.Server.Commands\Revenj.Plugins.Server.Commands.csproj">
-      <Project>{d71a0fe0-0d80-48d2-b8f4-094ded490179}</Project>
+      <Project>{D71A0FE0-0D80-48D2-B8F4-094DED490179}</Project>
       <Name>Revenj.Plugins.Server.Commands</Name>
     </ProjectReference>
   </ItemGroup>

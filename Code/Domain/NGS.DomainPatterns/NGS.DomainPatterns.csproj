@@ -47,6 +47,8 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NGS.Templater">
@@ -54,7 +56,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reactive.Core">
       <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
@@ -67,6 +68,7 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\SystemStartupAspect.cs" />
@@ -89,7 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">
-      <Project>{00dafab8-31c5-4dc6-a4a8-afa7b97bbfdd}</Project>
+      <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
       <Name>NGS.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Core\NGS.Extensibility.Interface\NGS.Extensibility.Interface.csproj">
@@ -97,7 +99,7 @@
       <Name>NGS.Extensibility.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Core\NGS.Utility\NGS.Utility.csproj">
-      <Project>{0058c57f-1d45-408b-b681-336889b0111e}</Project>
+      <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
       <Name>NGS.Utility</Name>
     </ProjectReference>
     <ProjectReference Include="..\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">

@@ -38,7 +38,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Oracle.DataAccess">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Dependencies\Oracle\Oracle.DataAccess.dll</HintPath>
     </Reference>
     <Reference Include="Remotion.Linq">

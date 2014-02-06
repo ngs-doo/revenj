@@ -200,21 +200,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>del *.dll /q</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>copy ..\..\..\..\Plugins\NGS.Plugins.DatabasePersistence.Postgres\bin\$(ConfigurationName)\NGS.Plugins.DatabasePersistence.Postgres.dll .
-copy ..\..\..\..\Plugins\Revenj.Plugins.Server.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Server.Commands.dll .
-copy ..\..\..\..\Plugins\Revenj.Plugins.Rest.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Rest.Commands.dll .
-copy ..\..\..\..\Features\Revenj.Features.RestCache\bin\$(ConfigurationName)\Revenj.Features.RestCache.dll .
-copy ..\..\..\..\Features\NGS.Features.Mailer\bin\$(ConfigurationName)\NGS.Features.Mailer.dll .
-copy ..\..\..\..\Features\NGS.Features.Storage\bin\$(ConfigurationName)\NGS.Features.Storage.dll .
-copy ..\..\..\..\..\Dependencies\Templater\NGS.Templater.dll .
-copy ..\..\..\..\..\Dependencies\LitS3\LitS3.dll .
-copy ..\..\..\..\..\Dependencies\Serialize.Linq\Serialize.Linq.dll .
-</PostBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

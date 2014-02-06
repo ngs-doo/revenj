@@ -15,6 +15,7 @@ Thumbs.db
 *.ncb
 *.suo
 *.sln.docstates
+*.userprefs
 *.tlb
 *.tlh
 *.bak

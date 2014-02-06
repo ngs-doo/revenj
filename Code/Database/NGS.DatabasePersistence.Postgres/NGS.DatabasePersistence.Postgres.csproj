@@ -47,6 +47,8 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Npgsql">
@@ -138,7 +140,7 @@
       <Name>NGS.Extensibility.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Core\NGS.Logging.Interface\NGS.Logging.Interface.csproj">
-      <Project>{e4040a4f-0730-4784-aa6c-e3a950aa9a4b}</Project>
+      <Project>{E4040A4F-0730-4784-AA6C-E3A950AA9A4B}</Project>
       <Name>NGS.Logging.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Core\NGS.Utility\NGS.Utility.csproj">

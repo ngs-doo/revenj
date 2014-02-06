@@ -48,6 +48,8 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -85,7 +87,7 @@
       <Name>NGS.DomainPatterns.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\NGS.Extensibility.Interface\NGS.Extensibility.Interface.csproj">
-      <Project>{e7de330d-1e7c-486e-bae6-222b87256408}</Project>
+      <Project>{E7DE330D-1E7C-486E-BAE6-222B87256408}</Project>
       <Name>NGS.Extensibility.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\NGS.Security.Interface\NGS.Security.Interface.csproj">
