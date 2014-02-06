@@ -16,8 +16,10 @@ namespace Revenj.Wcf
 			set
 			{
 				Response.ContentType = value;
+#if !MONO
 				if (value == "application/json")
 					Response.Format = WebMessageFormat.Json;
+#endif
 			}
 		}
 

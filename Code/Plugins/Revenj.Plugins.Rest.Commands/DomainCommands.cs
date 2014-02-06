@@ -289,7 +289,7 @@ namespace Revenj.Plugins.Rest.Commands
 					{
 						Name = domainType.FullName,
 						Uri = uri,
-						Data = domainEvent
+						Data = validatedObject
 					});
 		}
 

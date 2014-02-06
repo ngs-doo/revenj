@@ -33,7 +33,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;MONO</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -151,10 +151,6 @@
       <Project>{7DACDADE-BA4D-4950-AA99-DF9CC9A5619E}</Project>
       <Name>Revenj.Api.Interface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Revenj.Wcf\Revenj.Wcf.csproj">
-      <Project>{30CDA3F6-A7A1-499B-B209-118079235744}</Project>
-      <Name>Revenj.Wcf</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Revenj.Processing.Interface\Revenj.Processing.Interface.csproj">
       <Project>{721E3056-0F68-4874-B5E0-0B0223ECC4D7}</Project>
       <Name>Revenj.Processing.Interface</Name>
@@ -162,6 +158,34 @@
     <ProjectReference Include="..\Revenj.Processing\Revenj.Processing.csproj">
       <Project>{186DA9E7-5A90-4E10-90D3-C8080265EA70}</Project>
       <Name>Revenj.Processing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Revenj.Wcf\Revenj.Wcf.Mono.csproj">
+      <Project>{30CDA3F6-A7A1-499B-B209-118079235745}</Project>
+      <Name>Revenj.Wcf.Mono</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\NGS.Plugins.DatabasePersistence.Postgres\NGS.Plugins.DatabasePersistence.Postgres.csproj">
+      <Project>{8E943C88-AF40-4836-A8F6-681668514C83}</Project>
+      <Name>NGS.Plugins.DatabasePersistence.Postgres</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Features\NGS.Features.Mailer\NGS.Features.Mailer.csproj">
+      <Project>{1F7D1B31-5726-4D1B-B03D-449C2026D879}</Project>
+      <Name>NGS.Features.Mailer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Features\NGS.Features.Storage\NGS.Features.Storage.csproj">
+      <Project>{D8A96FAF-B87E-4B6E-9A3E-BBE567F23C50}</Project>
+      <Name>NGS.Features.Storage</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Features\Revenj.Features.RestCache\Revenj.Features.RestCache.csproj">
+      <Project>{7A17AEAA-DD17-4D57-ACD9-B74A450D9E39}</Project>
+      <Name>Revenj.Features.RestCache</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\Revenj.Plugins.Rest.Commands\Revenj.Plugins.Rest.Commands.csproj">
+      <Project>{C06DA32E-8685-4D7A-806F-8A95E85C13EA}</Project>
+      <Name>Revenj.Plugins.Rest.Commands</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Plugins\Revenj.Plugins.Server.Commands\Revenj.Plugins.Server.Commands.csproj">
+      <Project>{D71A0FE0-0D80-48D2-B8F4-094DED490179}</Project>
+      <Name>Revenj.Plugins.Server.Commands</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

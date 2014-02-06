@@ -69,7 +69,6 @@ namespace Revenj.Plugins.Server.Commands
 			if (stream != null)
 			{
 				var sb = new StringBuilder("{ ", 64);
-				var bytes = new List<byte>();
 				int cur = -1;
 				int i = 0;
 				for (; i < 10; i++)
