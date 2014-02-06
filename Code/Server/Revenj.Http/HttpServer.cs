@@ -40,7 +40,7 @@ namespace Revenj.Http
 			{
 				var authType = Type.GetType(customAuth);
 				if (!typeof(HttpAuth).IsAssignableFrom(authType))
-					throw new ConfigurationErrorsException("Custom auth does not inherit from HttpAuth. Please inheri from " + typeof(HttpAuth).FullName);
+					throw new ConfigurationErrorsException("Custom auth does not inherit from HttpAuth. Please inherit from " + typeof(HttpAuth).FullName);
 				Authentication = locator.Resolve<HttpAuth>(authType);
 			}
 			else Authentication = locator.Resolve<HttpAuth>();
