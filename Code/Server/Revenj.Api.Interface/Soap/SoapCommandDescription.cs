@@ -5,7 +5,7 @@ namespace Revenj.Api
 	/// <summary>
 	/// SOAP command description.
 	/// </summary>
-	[DataContract]
+	[DataContract(Namespace = "")]
 	public class SoapCommandDescription
 	{
 		/// <summary>
