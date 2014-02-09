@@ -2,7 +2,7 @@
 
 namespace NGS.Security
 {
-	public interface IUserRoles : IIdentifiable
+	public interface IUserRoles : IAggregateRoot
 	{
 		string Name { get; }
 		string ParentName { get; }
