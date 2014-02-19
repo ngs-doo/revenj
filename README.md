@@ -38,7 +38,7 @@ C# backend components with deep DSL Platform integration.
 
 #Getting started:
 
-Register at https://dsl-platform.com and create an external project. You will need a Postgres instance and .NET server (Mono support comming soon).
+Register at https://dsl-platform.com and create an external project. You will need a Postgres instance and .NET server/Mono.
 
 Write some DSL describing your domain. DSL Platform will build/maintain all infrastructure related problems such as:
 
