@@ -21,6 +21,7 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 			SupportedMethods = new Dictionary<MethodInfo, MethodCallDelegate>();
 			SupportedMethods.Add(typeof(Enumerable).GetMethod("ToArray"), ArrayAgg);
 			SupportedMethods.Add(typeof(Enumerable).GetMethod("ToList"), ArrayAgg);
+			SupportedMethods.Add(typeof(CollectionExtensions).GetMethod("ToSet"), ArrayAgg);
 		}
 
 		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)

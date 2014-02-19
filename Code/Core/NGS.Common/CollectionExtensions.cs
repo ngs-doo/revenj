@@ -21,5 +21,16 @@ namespace NGS
 		{
 			return first.Concat(second);
 		}
+
+		/// <summary>
+		/// Create HashSet from source collection. Common missing LINQ method
+		/// </summary>
+		/// <typeparam name="T">collection type</typeparam>
+		/// <param name="collection">source collection</param>
+		/// <returns>collection as set</returns>
+		public static HashSet<T> ToSet<T>(this IEnumerable<T> collection)
+		{
+			return new HashSet<T>(collection);
+		}
 	}
 }

@@ -20,6 +20,7 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 			SupportedMethods.Add("IsProperSubsetOf", IsSubset);
 			SupportedMethods.Add("IsSupersetOf", IsSuperset);
 			SupportedMethods.Add("IsProperSupersetOf", IsSuperset);
+			SupportedMethods.Add("Overlaps", Overlaps);
 		}
 
 		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)
@@ -59,6 +60,19 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 			visitExpression(methodCall.Object);
 			queryBuilder.Append("::").Append(name).Append("[]");
 			queryBuilder.Append(" @> ");
+			visitExpression(methodCall.Arguments[0]);
+			queryBuilder.Append("::").Append(name).Append("[]");
+			queryBuilder.Append(")");
+		}
+
+		private static void Overlaps(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			var type = methodCall.Object.Type.GetGenericArguments()[0];
+			var name = NpgsqlTypes.TypeConverter.GetTypeName(type);
+			queryBuilder.Append("(");
+			visitExpression(methodCall.Object);
+			queryBuilder.Append("::").Append(name).Append("[]");
+			queryBuilder.Append(" && ");
 			visitExpression(methodCall.Arguments[0]);
 			queryBuilder.Append("::").Append(name).Append("[]");
 			queryBuilder.Append(")");

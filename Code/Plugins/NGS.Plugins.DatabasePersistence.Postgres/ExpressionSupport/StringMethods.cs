@@ -54,6 +54,8 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 			SupportedMethods.Add(typeof(double).GetMethod("Parse", new[] { typeof(string) }), StringToDouble);
 			SupportedMethods.Add(typeof(float).GetMethod("Parse", new[] { typeof(string) }), StringToFloat);
 			SupportedMethods.Add(typeof(Guid).GetMethod("Parse", new[] { typeof(string) }), StringToGuid);
+			SupportedMethods.Add(typeof(string).GetMethod("Substring", new[] { typeof(int) }), SubstringFrom);
+			SupportedMethods.Add(typeof(string).GetMethod("Substring", new[] { typeof(int), typeof(int) }), SubstringFromTo);
 		}
 
 		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)
@@ -249,6 +251,40 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 		{
 			visitExpression(methodCall.Arguments[0]);
 			queryBuilder.Append("::uuid");
+		}
+
+		private static void SubstringFrom(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			queryBuilder.Append("substr(");
+			visitExpression(methodCall.Object);
+			queryBuilder.Append(",");
+			var ce = methodCall.Arguments[0] as ConstantExpression;
+			if (ce != null && ce.Type == typeof(int))
+				queryBuilder.Append(1 + (int)ce.Value);
+			else
+			{
+				queryBuilder.Append("1 + ");
+				visitExpression(methodCall.Arguments[0]);
+			}
+			queryBuilder.Append(")");
+		}
+
+		private static void SubstringFromTo(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			queryBuilder.Append("substr(");
+			visitExpression(methodCall.Object);
+			queryBuilder.Append(",");
+			var ce = methodCall.Arguments[0] as ConstantExpression;
+			if (ce != null && ce.Type == typeof(int))
+				queryBuilder.Append(1 + (int)ce.Value);
+			else
+			{
+				queryBuilder.Append("1 + ");
+				visitExpression(methodCall.Arguments[0]);
+			}
+			queryBuilder.Append(",");
+			visitExpression(methodCall.Arguments[1]);
+			queryBuilder.Append(")");
 		}
 	}
 }

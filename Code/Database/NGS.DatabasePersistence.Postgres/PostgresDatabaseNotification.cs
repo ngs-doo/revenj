@@ -148,6 +148,7 @@ namespace NGS.DatabasePersistence.Postgres
 		public IObservable<KeyValuePair<string[], Lazy<T[]>>> Track<T>()
 			where T : IIdentifiable
 		{
+			//TODO: notifications can lag and when they do, scope can be disposed
 			var type = typeof(T);
 			return
 				Notifications.Where(it =>

@@ -101,7 +101,6 @@ namespace NGS.DatabasePersistence.Postgres
 			OpenConnections.TryRemove(query, out connection);
 			try
 			{
-				//TODO: can't access state on disposed connection - needs fixing
 				if (connection != null && connection.State == ConnectionState.Open)
 					connection.Close();
 			}

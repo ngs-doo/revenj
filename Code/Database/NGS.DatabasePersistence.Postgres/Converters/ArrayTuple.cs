@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NGS.Common;
 using NGS.Utility;
 
@@ -57,15 +58,14 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			return null;
 		}
 
-		public static ArrayTuple Create<T>(HashSet<T> elements, Func<T, PostgresTuple> converter)
+		public static ArrayTuple Create<T>(IEnumerable<T> elements, Func<T, PostgresTuple> converter)
 		{
 			if (elements != null)
 			{
-				var arr = new T[elements.Count];
-				elements.CopyTo(arr);
-				var tuples = new PostgresTuple[arr.Length];
-				for (int i = 0; i < arr.Length; i++)
-					tuples[i] = converter(arr[i]);
+				var tuples = new PostgresTuple[elements.Count()];
+				var i = 0;
+				foreach (var el in elements)
+					tuples[i++] = converter(el);
 				return new ArrayTuple(tuples);
 			}
 			return null;
