@@ -149,7 +149,7 @@ namespace NGS.Extensibility
 						type,
 						args,
 						from extType in ci.Extensions
-						//TODO razmisliti o factory.Resolve
+						//TODO consider factory.Resolve
 						select Activator.CreateInstance(extType)))
 			}))
 				dict.Add(item.Type, item.Factory);

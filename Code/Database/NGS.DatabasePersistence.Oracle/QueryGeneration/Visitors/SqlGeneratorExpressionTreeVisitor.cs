@@ -308,7 +308,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.Visitors
 			return Expression.New(expression.Constructor, expression.Arguments);
 		}
 
-		//TODO provjeriti ovo sa where dijelom
+		//TODO check with where condition
 		protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
 		{
 			foreach (var candidate in QueryParts.ExpressionMatchers)

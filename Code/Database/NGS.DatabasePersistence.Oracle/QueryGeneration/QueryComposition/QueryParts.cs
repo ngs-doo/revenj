@@ -302,7 +302,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 			{
 				if (sqe.QueryModel.CanUseMain())
 					return GetQuerySourceFromExpression(name, type, sqe.QueryModel.MainFromClause.FromExpression);
-				//TODO hack za replaceanje generiranog id-a
+				//TODO hack za id replace
 				var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(sqe.QueryModel, this, ContextName, Context.Select());
 				var sql = "({0}) \"{1}\"".With(subquery.BuildSqlString(true), name);
 				var grouping = sqe.QueryModel.ResultOperators.FirstOrDefault(it => it is GroupResultOperator) as GroupResultOperator;
