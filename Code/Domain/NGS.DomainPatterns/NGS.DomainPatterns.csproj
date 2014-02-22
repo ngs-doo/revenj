@@ -79,10 +79,9 @@
     <Compile Include="DomainTypeResolver.cs" />
     <Compile Include="History.cs" />
     <Compile Include="DomainModel.cs" />
-    <Compile Include="EntityKeys\BigEntityKey.cs" />
+    <Compile Include="Counters\NumberCounter.cs" />
     <Compile Include="SingleDomainEventSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EntityKeys\StandardEntityKey.cs" />
     <Compile Include="Aspects\EventProcessorAspect.cs" />
     <Compile Include="ServiceLocator.cs" />
     <Compile Include="Specifications\SpecificationByExpression.cs" />
