@@ -16,7 +16,7 @@ namespace Revenj.Wcf
 	{
 		private readonly IPrincipalFactory PrincipalFactory = ContainerWcfHost.Resolve<IPrincipalFactory>();
 		private static readonly string DefaultAuthorization = ConfigurationManager.AppSettings["DefaultAuthorization"];
-		private readonly IAuthentication Authentication = ContainerWcfHost.Resolve<IAuthentication>();
+		protected readonly IAuthentication Authentication = ContainerWcfHost.Resolve<IAuthentication>();
 		private static readonly HashSet<string> PublicUrl = new HashSet<string>();
 		private static readonly HashSet<string> PublicTemplate = new HashSet<string>();
 		private static readonly string MissingBasicAuth = "Basic realm=\"" + Environment.MachineName + "\"";
@@ -63,6 +63,27 @@ namespace Revenj.Wcf
 			public string Name { get { return name; } }
 		}
 
+		protected virtual IIdentity GetIdentity(string authHeader)
+		{
+			var splt = authHeader.Split(' ');
+			var authType = splt[0];
+			if (splt.Length != 2)
+				Utility.ThrowError("Invalid authorization header.", HttpStatusCode.Unauthorized);
+
+			var token = Encoding.UTF8.GetString(Convert.FromBase64String(splt[1]));
+			var cred = token.Split(':');
+
+			if (cred.Length != 2)
+				Utility.ThrowError("Invalid authorization header content.", HttpStatusCode.Unauthorized);
+
+			var user = cred[0];
+
+			if (string.IsNullOrEmpty(user))
+				Utility.ThrowError("User not specified in authorization header.", HttpStatusCode.Unauthorized);
+
+			return new RestIdentity(authType, Authentication.IsAuthenticated(user, cred[1]), user);
+		}
+
 		private IIdentity GetClientIdentity(EvaluationContext evaluationContext)
 		{
 			object obj;
@@ -75,21 +96,7 @@ namespace Revenj.Wcf
 					Utility.ThrowError("Authorization header not provided.", HttpStatusCode.Unauthorized);
 				}
 
-				var splt = authorization.Split(' ');
-				var authType = splt[0];
-				if (splt.Length != 2)
-					Utility.ThrowError("Invalid authorization header.", HttpStatusCode.Unauthorized);
-
-				var cred = Encoding.UTF8.GetString(Convert.FromBase64String(splt[1])).Split(':');
-				if (cred.Length != 2)
-					Utility.ThrowError("Invalid authorization header content.", HttpStatusCode.Unauthorized);
-
-				var user = cred[0];
-
-				if (string.IsNullOrEmpty(user))
-					Utility.ThrowError("User not specified in authorization header.", HttpStatusCode.Unauthorized);
-
-				var identity = new RestIdentity(authType, Authentication.IsAuthenticated(user, cred[1]), user);
+				var identity = GetIdentity(authorization);
 				var template = ThreadContext.Request.UriTemplateMatch;
 				if (!identity.IsAuthenticated)
 				{
@@ -97,7 +104,7 @@ namespace Revenj.Wcf
 						&& (template.RequestUri != null && PublicUrl.Contains(template.RequestUri.LocalPath)
 						|| template.Template != null && PublicTemplate.Contains(template.Template.ToString())))
 						return identity;
-					Utility.ThrowError("User {0} was not authenticated.".With(user), HttpStatusCode.Forbidden);
+					Utility.ThrowError("User {0} was not authenticated.".With(identity.Name), HttpStatusCode.Forbidden);
 				}
 				else if (template == null)
 				{
