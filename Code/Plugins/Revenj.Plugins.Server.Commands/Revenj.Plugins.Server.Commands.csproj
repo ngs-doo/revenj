@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
@@ -122,11 +122,6 @@
       <Project>{721E3056-0F68-4874-B5E0-0B0223ECC4D7}</Project>
       <Name>Revenj.Processing.Interface</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\NGS.snk">
-      <Link>NGS.snk</Link>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">

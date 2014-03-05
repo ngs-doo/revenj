@@ -175,18 +175,6 @@
       <Project>{D8A96FAF-B87E-4B6E-9A3E-BBE567F23C50}</Project>
       <Name>NGS.Features.Storage</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Features\Revenj.Features.RestCache\Revenj.Features.RestCache.csproj">
-      <Project>{7A17AEAA-DD17-4D57-ACD9-B74A450D9E39}</Project>
-      <Name>Revenj.Features.RestCache</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Plugins\Revenj.Plugins.Rest.Commands\Revenj.Plugins.Rest.Commands.csproj">
-      <Project>{C06DA32E-8685-4D7A-806F-8A95E85C13EA}</Project>
-      <Name>Revenj.Plugins.Rest.Commands</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Plugins\Revenj.Plugins.Server.Commands\Revenj.Plugins.Server.Commands.csproj">
-      <Project>{D71A0FE0-0D80-48D2-B8F4-094DED490179}</Project>
-      <Name>Revenj.Plugins.Server.Commands</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">

@@ -163,10 +163,6 @@
       <Project>{186DA9E7-5A90-4E10-90D3-C8080265EA70}</Project>
       <Name>Revenj.Processing</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Features\Revenj.Features.RestCache\Revenj.Features.RestCache.csproj">
-      <Project>{7A17AEAA-DD17-4D57-ACD9-B74A450D9E39}</Project>
-      <Name>Revenj.Features.RestCache</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
