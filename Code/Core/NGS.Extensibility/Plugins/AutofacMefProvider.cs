@@ -27,9 +27,14 @@ namespace NGS.Extensibility
 				{
 					try
 					{
-						//TODO this is taking 2 sec to initialize
-						foreach (var directory in configuration.Directories)
-							builder.RegisterComposablePartCatalog(new DirectoryCatalog(directory));
+						if (configuration.Directories != null)
+							foreach (var directory in configuration.Directories)
+								if (directory != null)
+									builder.RegisterComposablePartCatalog(new DirectoryCatalog(directory));
+						if (configuration.Assemblies != null)
+							foreach (var asm in configuration.Assemblies)
+								if (asm != null)
+									builder.RegisterComposablePartCatalog(new AssemblyCatalog(asm));
 					}
 					catch (System.Reflection.ReflectionTypeLoadException ex)
 					{
