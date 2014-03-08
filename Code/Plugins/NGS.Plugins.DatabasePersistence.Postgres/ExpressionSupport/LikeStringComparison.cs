@@ -38,11 +38,46 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 			return false;
 		}
 
+		private static void EscapeForLike(Expression exp, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			var ce = exp as ConstantExpression;
+			if (ce != null)
+			{
+				var value = ce.Value as string;
+				queryBuilder.Append('\'')
+					.Append(value.Replace(@"\", @"\\").Replace("_", "\\_").Replace("%", "\\%"))
+					.Append('\'');
+			}
+			else
+			{
+				queryBuilder.Append(" REPLACE(REPLACE(REPLACE(");
+				visitExpression(exp);
+				queryBuilder.Append(@", '\','\\'), '_','\_'), '%','\%') ");
+			}
+		}
+
+		private static bool GuardForNull(bool equal, Expression exp, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			visitExpression(exp);
+			if (equal)
+				queryBuilder.Append(" IS NULL");
+			else
+				queryBuilder.Append(" IS NOT NULL");
+			return true;
+		}
+
 		private static bool CompareString(bool equal, MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
 			var count = methodCall.Arguments.Count;
 			if (count != 2 && count != 3)
 				return false;
+
+			var ce = methodCall.Arguments[0] as ConstantExpression;
+			if (ce != null && ce.Value == null)
+				return GuardForNull(equal, methodCall.Arguments[1], queryBuilder, visitExpression);
+			ce = methodCall.Arguments[1] as ConstantExpression;
+			if (ce != null && ce.Value == null)
+				return GuardForNull(equal, methodCall.Arguments[0], queryBuilder, visitExpression);
 
 			if (count == 2)
 			{
@@ -51,7 +86,7 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 				if (!equal)
 					queryBuilder.Append(" NOT");
 				queryBuilder.Append(" LIKE ");
-				visitExpression(methodCall.Arguments[1]);
+				EscapeForLike(methodCall.Arguments[1], queryBuilder, visitExpression);
 			}
 			else if (count == 3)
 			{
@@ -66,7 +101,7 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 						queryBuilder.Append(" ILIKE ");
 					else
 						queryBuilder.Append(" LIKE ");
-					visitExpression(methodCall.Arguments[1]);
+					EscapeForLike(methodCall.Arguments[1], queryBuilder, visitExpression);
 				}
 				else if (methodCall.Arguments[2].Type == typeof(StringComparison))
 				{
@@ -85,7 +120,7 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 							queryBuilder.Append(" ILIKE ");
 							break;
 					}
-					visitExpression(methodCall.Arguments[1]);
+					EscapeForLike(methodCall.Arguments[1], queryBuilder, visitExpression);
 				}
 				else return false;
 			}

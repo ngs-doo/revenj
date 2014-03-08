@@ -73,6 +73,30 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 			return false;
 		}
 
+		private static void EscapeForLike(Expression exp, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			var ce = exp as ConstantExpression;
+			if (ce != null)
+			{
+				var value = ce.Value as string;
+				queryBuilder.Append('\'')
+					.Append(value.Replace(@"\", @"\\").Replace("_", "\\_").Replace("%", "\\%"))
+					.Append('\'');
+			}
+			else
+			{
+				queryBuilder.Append(" REPLACE(REPLACE(REPLACE(");
+				visitExpression(exp);
+				queryBuilder.Append(@", '\','\\'), '_','\_'), '%','\%') ");
+			}
+		}
+
+		private static bool CheckIfNull(Expression exp)
+		{
+			var ce = exp as ConstantExpression;
+			return ce != null && ce.Value == null;
+		}
+
 		private static void ChooseComparison(MethodCallExpression methodCall, StringBuilder queryBuilder)
 		{
 			if (methodCall.Arguments.Count == 2)
@@ -95,39 +119,59 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 
 		private static void MatchStringEquals(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
-			queryBuilder.Append("(");
-			visitExpression(methodCall.Object);
-			ChooseComparison(methodCall, queryBuilder);
-			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(")");
+			if (CheckIfNull(methodCall.Arguments[0]))
+				queryBuilder.Append(" FALSE ");
+			else
+			{
+				queryBuilder.Append("(");
+				visitExpression(methodCall.Object);
+				ChooseComparison(methodCall, queryBuilder);
+				EscapeForLike(methodCall.Arguments[0], queryBuilder, visitExpression);
+				queryBuilder.Append(")");
+			}
 		}
 
 		private static void MatchStringContains(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
-			queryBuilder.Append("(");
-			visitExpression(methodCall.Object);
-			queryBuilder.Append(" LIKE '%' || ");
-			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(" || '%')");
+			if (CheckIfNull(methodCall.Arguments[0]))
+				queryBuilder.Append(" FALSE ");
+			else
+			{
+				queryBuilder.Append("(");
+				visitExpression(methodCall.Object);
+				queryBuilder.Append(" LIKE '%' || ");
+				EscapeForLike(methodCall.Arguments[0], queryBuilder, visitExpression);
+				queryBuilder.Append(" || '%')");
+			}
 		}
 
 		private static void MatchStringStartsWith(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
-			queryBuilder.Append("(");
-			visitExpression(methodCall.Object);
-			ChooseComparison(methodCall, queryBuilder);
-			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(" || '%')");
+			if (CheckIfNull(methodCall.Arguments[0]))
+				queryBuilder.Append(" FALSE ");
+			else
+			{
+				queryBuilder.Append("(");
+				visitExpression(methodCall.Object);
+				ChooseComparison(methodCall, queryBuilder);
+				EscapeForLike(methodCall.Arguments[0], queryBuilder, visitExpression);
+				queryBuilder.Append(" || '%')");
+			}
 		}
 
 		private static void MatchStringEndsWith(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
-			queryBuilder.Append("(");
-			visitExpression(methodCall.Object);
-			ChooseComparison(methodCall, queryBuilder);
-			queryBuilder.Append(" '%' || ");
-			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(")");
+			if (CheckIfNull(methodCall.Arguments[0]))
+				queryBuilder.Append(" FALSE ");
+			else
+			{
+				queryBuilder.Append("(");
+				visitExpression(methodCall.Object);
+				ChooseComparison(methodCall, queryBuilder);
+				queryBuilder.Append(" '%' || ");
+				EscapeForLike(methodCall.Arguments[0], queryBuilder, visitExpression);
+				queryBuilder.Append(" )");
+			}
 		}
 
 		private static void MatchStringToUpper(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)

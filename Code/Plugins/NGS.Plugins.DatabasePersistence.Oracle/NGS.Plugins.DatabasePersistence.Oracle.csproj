@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExpressionSupport\LikeStringComparison.cs" />
     <Compile Include="ExpressionSupport\LinqMethods.cs" />
     <Compile Include="ExpressionSupport\StringMethods.cs" />
     <Compile Include="MemberSupport\CommonMembers.cs" />

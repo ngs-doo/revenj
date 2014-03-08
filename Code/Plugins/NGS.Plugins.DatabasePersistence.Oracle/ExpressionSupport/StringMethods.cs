@@ -71,12 +71,13 @@ namespace NGS.Plugins.DatabasePersistence.Oracle.ExpressionSupport
 			return false;
 		}
 
-		private static bool ChooseComparison(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		private static void Compare(bool before, bool after, MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			bool caseInsensitive = false;
+			bool ignoreCase = false;
+			ConstantExpression ce;
 			if (methodCall.Arguments.Count == 2)
 			{
-				var ce = methodCall.Arguments[1] as ConstantExpression;
+				ce = methodCall.Arguments[1] as ConstantExpression;
 				switch ((StringComparison)ce.Value)
 				{
 					case StringComparison.CurrentCulture:
@@ -84,53 +85,121 @@ namespace NGS.Plugins.DatabasePersistence.Oracle.ExpressionSupport
 					case StringComparison.Ordinal:
 						break;
 					default:
-						queryBuilder.Append("UPPER(");
-						caseInsensitive = true;
+						ignoreCase = true;
 						break;
 				}
 			}
-			visitExpression(methodCall.Object);
-			if (caseInsensitive)
-				queryBuilder.Append(") LIKE UPPER(");
+			if (context.InSelect)
+				queryBuilder.Append(" CASE WHEN");
 			else
+				queryBuilder.Append("(");
+			ce = methodCall.Object as ConstantExpression;
+			if (ce != null)
+			{
+				if (ignoreCase)
+					visitExpression(ConstantExpression.Constant((ce.Value as string).ToUpper(), ce.Type));
+				else
+					visitExpression(ce);
+			}
+			else
+			{
+				if (ignoreCase)
+				{
+					queryBuilder.Append(" UPPER(");
+					visitExpression(methodCall.Object);
+					queryBuilder.Append(")");
+				}
+				else
+					visitExpression(methodCall.Object);
+			}
+			bool asLike = before || after;
+			if (asLike)
 				queryBuilder.Append(" LIKE ");
-			return caseInsensitive;
+			else
+				queryBuilder.Append(" = ");
+			if (before)
+				queryBuilder.Append("'%' || ");
+			ce = methodCall.Arguments[0] as ConstantExpression;
+			if (ce != null)
+			{
+				if (asLike)
+				{
+					var value = ce.Value as string;
+					if (ignoreCase)
+						value = value.ToUpper();
+					value = value.Replace(@"\", @"\\").Replace(@"_", @"\_").Replace(@"%", @"\%");
+					visitExpression(ConstantExpression.Constant(value, ce.Type));
+				}
+				else if (ignoreCase)
+					visitExpression(ConstantExpression.Constant((ce.Value as string).ToUpper(), ce.Type));
+				else
+					visitExpression(ce);
+			}
+			else
+			{
+				if (asLike)
+				{
+					if (ignoreCase)
+						queryBuilder.Append(" UPPER(");
+					queryBuilder.Append("REPLACE(REPLACE(REPLACE(");
+					visitExpression(methodCall.Object);
+					queryBuilder.Append(@", '\','\\'), '_','\_'), '%','\%')");
+					if (ignoreCase)
+						queryBuilder.Append(")");
+				}
+				else if (ignoreCase)
+				{
+					queryBuilder.Append(" UPPER(");
+					visitExpression(methodCall.Object);
+					queryBuilder.Append(")");
+				}
+				else
+					visitExpression(methodCall.Object);
+			}
+			if (after)
+				queryBuilder.Append(" || '%'");
+			if (asLike)
+				queryBuilder.Append(@" ESCAPE '\' ");
+			if (context.InSelect)
+				queryBuilder.Append(" THEN 'Y' ELSE 'N' END");
+			else
+				queryBuilder.Append(")");
+		}
+
+		private static bool CheckForNull(Expression exp, StringBuilder queryBuilder, QueryContext context)
+		{
+			var ce = exp as ConstantExpression;
+			if (ce == null || ce.Value != null)
+				return false;
+			if (context.InSelect)
+				queryBuilder.Append("'N'");
+			else
+				queryBuilder.Append(" 0=1");
+			return true;
 		}
 
 		private static void MatchStringEquals(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			queryBuilder.Append("(");
-			var ci = ChooseComparison(methodCall, queryBuilder, visitExpression);
-			visitExpression(methodCall.Arguments[0]);
-			if (ci) queryBuilder.Append(")");
-			queryBuilder.Append(")");
+			if (!CheckForNull(methodCall.Arguments[0], queryBuilder, context))
+				Compare(false, false, methodCall, queryBuilder, visitExpression, context);
 		}
 
 		private static void MatchStringContains(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			queryBuilder.Append("(");
-			visitExpression(methodCall.Object);
-			queryBuilder.Append(" LIKE '%' || ");
-			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(" || '%')");
+			if (!CheckForNull(methodCall.Arguments[0], queryBuilder, context))
+				Compare(true, true, methodCall, queryBuilder, visitExpression, context);
 		}
 
 		private static void MatchStringStartsWith(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			queryBuilder.Append("(");
-			var ci = ChooseComparison(methodCall, queryBuilder, visitExpression);
-			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(" || '%')");
-			if (ci) queryBuilder.Append(")");
+			if (!CheckForNull(methodCall.Arguments[0], queryBuilder, context))
+				Compare(false, true, methodCall, queryBuilder, visitExpression, context);
 		}
 
 		private static void MatchStringEndsWith(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			queryBuilder.Append("(");
-			var ci = ChooseComparison(methodCall, queryBuilder, visitExpression);
-			queryBuilder.Append(" '%' || ");
-			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(")");
+			if (!CheckForNull(methodCall.Arguments[0], queryBuilder, context))
+				Compare(true, false, methodCall, queryBuilder, visitExpression, context);
 		}
 
 		private static void MatchStringToUpper(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
@@ -196,7 +265,7 @@ namespace NGS.Plugins.DatabasePersistence.Oracle.ExpressionSupport
 		*/
 		private static void ReplaceString(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			queryBuilder.Append("replace(");
+			queryBuilder.Append("REPLACE(");
 			visitExpression(methodCall.Object);
 			queryBuilder.Append(",");
 			visitExpression(methodCall.Arguments[0]);
@@ -209,14 +278,15 @@ namespace NGS.Plugins.DatabasePersistence.Oracle.ExpressionSupport
 		{
 			//TODO check if length is greater than 0
 			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(" is null ");
+			queryBuilder.Append(" IS NULL ");
 		}
 
 		private static void IsNullOrWhiteSpace(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
 			//TODO different from C#
+			queryBuilder.Append("TRIM(");
 			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(" is null ");
+			queryBuilder.Append(") IS NULL ");
 		}
 	}
 }
