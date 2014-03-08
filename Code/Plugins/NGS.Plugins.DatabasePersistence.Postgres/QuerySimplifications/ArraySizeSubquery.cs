@@ -34,6 +34,8 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.QuerySimplifications
 
 			var me = parts.MainFrom.FromExpression as MemberExpression;
 			var qsre = me.Expression as QuerySourceReferenceExpression;
+			if (me.Type == typeof(byte[]))
+				return @"COALESCE(octet_length((""{0}"").""{1}""), 0)".With(qsre.ReferencedQuerySource.ItemName, me.Member.Name);
 			return @"COALESCE(array_upper((""{0}"").""{1}"", 1), 0)".With(qsre.ReferencedQuerySource.ItemName, me.Member.Name);
 		}
 	}
