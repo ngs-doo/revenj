@@ -32,7 +32,7 @@ namespace DSL
 			state.IsBooting = false;
 			var objectFactory = container.Resolve<IObjectFactory>();
 			var locator = objectFactory.Resolve<IServiceLocator>();
-			ContainerWcfHost.Resolver = s => locator.Resolve(s, null);
+			ContainerWcfHost.Resolver = s => locator.Resolve(s);
 			state.Started(objectFactory);
 			return locator.Resolve<TService>();
 		}

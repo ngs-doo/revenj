@@ -97,6 +97,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			registry.RegisterDelegate<IDomainModel>(c => new NGS.DomainPatterns.DomainModel(serverModels, c.Resolve<IObjectFactory>()), Reuse.Singleton);
 			registry.Register<ITypeResolver, DomainTypeResolver>(Reuse.Singleton);
 			registry.Register<IServiceLocator, ServiceLocator>(Reuse.InCurrentScope);
+			registry.Register<IServiceProvider, ServiceLocator>(Reuse.InCurrentScope);
 			registry.Register(typeof(IDataCache<>), typeof(DataCache<>), Reuse.InCurrentScope);
 			registry.Register<IDomainEventSource, DomainEventSource>(Reuse.InCurrentScope);
 			registry.Register<IDomainEventStore, DomainEventStore>(Reuse.InCurrentScope);

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -78,7 +79,7 @@ namespace Revenj.Core
 			builder.RegisterType<NGS.DomainPatterns.DomainModel>();
 			builder.Register(c => c.Resolve<NGS.DomainPatterns.DomainModel.Factory>()(serverModels)).As<IDomainModel>().SingleInstance();
 			builder.RegisterType<DomainTypeResolver>().As<ITypeResolver>().SingleInstance();
-			builder.RegisterType<ServiceLocator>().As<IServiceLocator>().InstancePerLifetimeScope();
+			builder.RegisterType<ServiceLocator>().As<IServiceLocator, IServiceProvider>().InstancePerLifetimeScope();
 			builder.RegisterGeneric(typeof(DataCache<>)).As(typeof(IDataCache<>)).InstancePerLifetimeScope();
 			builder.RegisterType<DomainEventSource>().As<IDomainEventSource>().InstancePerLifetimeScope();
 			builder.RegisterType<DomainEventStore>().As<IDomainEventStore>().InstancePerLifetimeScope();
