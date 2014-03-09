@@ -22,5 +22,9 @@ namespace Revenj.Processing
 		/// Specific results for each commands.
 		/// </summary>
 		IEnumerable<ICommandResultDescription<TFormat>> ExecutedCommandResults { get; }
+		/// <summary>
+		/// Total elapsed milliseconds.
+		/// </summary>
+		long Duration { get; }
 	}
 }

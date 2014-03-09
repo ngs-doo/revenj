@@ -8,17 +8,20 @@ namespace Revenj.Processing
 		public string Message { get; private set; }
 		public HttpStatusCode Status { get; private set; }
 		public IEnumerable<ICommandResultDescription<TFormat>> ExecutedCommandResults { get; private set; }
+		public long Duration { get; private set; }
 
 		public static ProcessingResult<TFormat> Create(
 			string message,
 			HttpStatusCode status,
-			IEnumerable<ICommandResultDescription<TFormat>> executedCommands)
+			IEnumerable<ICommandResultDescription<TFormat>> executedCommands,
+			long duration)
 		{
 			return new ProcessingResult<TFormat>
 			{
 				Message = message,
 				Status = status,
-				ExecutedCommandResults = executedCommands
+				ExecutedCommandResults = executedCommands,
+				Duration = duration
 			};
 		}
 	}

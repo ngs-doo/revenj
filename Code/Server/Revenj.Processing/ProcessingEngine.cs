@@ -106,7 +106,8 @@ namespace Revenj.Processing
 					ProcessingResult<TOutput>.Create(
 						"There are no commands to execute.",
 						HttpStatusCode.BadRequest,
-						null);
+						null,
+						0);
 
 			var stopwatch = Stopwatch.StartNew();
 
@@ -121,7 +122,8 @@ namespace Revenj.Processing
 						ProcessingResult<TOutput>.Create(
 							"You don't have permission to execute command: " + c.CommandType.FullName,
 							HttpStatusCode.Forbidden,
-							null);
+							null,
+							stopwatch.ElapsedMilliseconds);
 				}
 
 			var inputSerializer = GetSerializer<TInput>();
@@ -144,7 +146,8 @@ namespace Revenj.Processing
 							"Unknown command: {0}. Check if requested command is registered in the system".With(
 								c.Description.CommandType),
 							HttpStatusCode.BadRequest,
-							null);
+							null,
+							stopwatch.ElapsedMilliseconds);
 				}
 			}
 
@@ -163,8 +166,16 @@ namespace Revenj.Processing
 					{
 						Logger.Error("Can't start query. Error: " + ex.ToString());
 						return Exceptions.DebugMode
-							? ProcessingResult<TOutput>.Create(ex.ToString(), HttpStatusCode.ServiceUnavailable, null)
-							: ProcessingResult<TOutput>.Create("Unable to create database connection", HttpStatusCode.ServiceUnavailable, null);
+							? ProcessingResult<TOutput>.Create(
+								ex.ToString(),
+								HttpStatusCode.ServiceUnavailable,
+								null,
+								stopwatch.ElapsedMilliseconds)
+							: ProcessingResult<TOutput>.Create(
+								"Unable to create database connection",
+								HttpStatusCode.ServiceUnavailable,
+								null,
+								stopwatch.ElapsedMilliseconds);
 					}
 					scope.RegisterInstance(query);
 					if (useTransaction)
@@ -182,7 +193,11 @@ namespace Revenj.Processing
 						if ((int)result.Status >= 400)
 						{
 							TransactionManager.EndQuery(query, false);
-							return ProcessingResult<TOutput>.Create(result.Message, result.Status, executedCommands);
+							return ProcessingResult<TOutput>.Create(
+								result.Message,
+								result.Status,
+								executedCommands,
+								stopwatch.ElapsedMilliseconds);
 						}
 					}
 
@@ -191,7 +206,8 @@ namespace Revenj.Processing
 						ProcessingResult<TOutput>.Create(
 							"Commands executed in: " + stopwatch.ElapsedMilliseconds.ToString() + " ms.",
 							HttpStatusCode.OK,
-							executedCommands);
+							executedCommands,
+							stopwatch.ElapsedMilliseconds);
 				}
 				catch (SecurityException ex)
 				{
@@ -204,7 +220,8 @@ namespace Revenj.Processing
 						ProcessingResult<TOutput>.Create(
 							"You don't have authorization to perform requested action: " + ex.Message,
 							HttpStatusCode.Forbidden,
-							executedCommands);
+							executedCommands,
+							stopwatch.ElapsedMilliseconds);
 				}
 				catch (AggregateException ex)
 				{
@@ -214,19 +231,32 @@ namespace Revenj.Processing
 								ex.GetDetailedExplanation()));
 					TransactionManager.EndQuery(query, false);
 					return Exceptions.DebugMode
-						? ProcessingResult<TOutput>.Create(ex.GetDetailedExplanation(), HttpStatusCode.InternalServerError, executedCommands)
+						? ProcessingResult<TOutput>.Create(
+							ex.GetDetailedExplanation(),
+							HttpStatusCode.InternalServerError,
+							executedCommands,
+							stopwatch.ElapsedMilliseconds)
 						: ProcessingResult<TOutput>.Create(
 							string.Join(Environment.NewLine, ex.InnerExceptions.Select(it => it.Message)),
 							HttpStatusCode.InternalServerError,
-							executedCommands);
+							executedCommands,
+							stopwatch.ElapsedMilliseconds);
 				}
 				catch (OutOfMemoryException ex)
 				{
 					Logger.Error("Out of memory error. Error: " + ex.GetDetailedExplanation());
 					TransactionManager.EndQuery(query, false);
 					return Exceptions.DebugMode
-						? ProcessingResult<TOutput>.Create(ex.GetDetailedExplanation(), HttpStatusCode.ServiceUnavailable, executedCommands)
-						: ProcessingResult<TOutput>.Create(ex.Message, HttpStatusCode.ServiceUnavailable, executedCommands);
+						? ProcessingResult<TOutput>.Create(
+							ex.GetDetailedExplanation(),
+							HttpStatusCode.ServiceUnavailable,
+							executedCommands,
+							stopwatch.ElapsedMilliseconds)
+						: ProcessingResult<TOutput>.Create(
+							ex.Message,
+							HttpStatusCode.ServiceUnavailable,
+							executedCommands,
+							stopwatch.ElapsedMilliseconds);
 				}
 				catch (Exception ex)
 				{
@@ -236,8 +266,16 @@ namespace Revenj.Processing
 								ex.GetDetailedExplanation()));
 					TransactionManager.EndQuery(query, false);
 					return Exceptions.DebugMode
-						? ProcessingResult<TOutput>.Create(ex.GetDetailedExplanation(), HttpStatusCode.InternalServerError, executedCommands)
-						: ProcessingResult<TOutput>.Create(ex.Message, HttpStatusCode.InternalServerError, executedCommands);
+						? ProcessingResult<TOutput>.Create(
+							ex.GetDetailedExplanation(),
+							HttpStatusCode.InternalServerError,
+							executedCommands,
+							stopwatch.ElapsedMilliseconds)
+						: ProcessingResult<TOutput>.Create(
+							ex.Message,
+							HttpStatusCode.InternalServerError,
+							executedCommands,
+							stopwatch.ElapsedMilliseconds);
 				}
 			}
 		}

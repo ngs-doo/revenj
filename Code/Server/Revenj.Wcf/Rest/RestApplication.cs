@@ -59,6 +59,8 @@ namespace Revenj.Wcf
 			if (result.Status == HttpStatusCode.ServiceUnavailable)
 				HttpRuntime.UnloadAppDomain();
 
+			ThreadContext.Response.Headers.Add("X-Duration", result.Duration.ToString());
+
 			if ((int)result.Status >= 300)
 				return new ExecuteResult<TOutput> { Error = Utility.ReturnError(result.Message, result.Status) };
 

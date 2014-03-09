@@ -45,7 +45,8 @@ namespace Revenj.Processing
 					ProcessingResult<TOutput>.Create(
 						"There are no commands to execute.",
 						HttpStatusCode.BadRequest,
-						null);
+						null,
+						stopwatch.ElapsedMilliseconds);
 
 			var inputSerializer = Scope.Resolve<ISerialization<TInput>>();
 			var outputSerializer = Scope.Resolve<ISerialization<TOutput>>();
@@ -64,7 +65,8 @@ namespace Revenj.Processing
 							ProcessingResult<TOutput>.Create(
 								"You don't have permission to execute command: " + c.CommandType.FullName,
 								HttpStatusCode.Forbidden,
-								executedCommands);
+								executedCommands,
+								stopwatch.ElapsedMilliseconds);
 					}
 
 				foreach (var cd in commandDescriptions)
@@ -75,14 +77,21 @@ namespace Revenj.Processing
 						throw new FrameworkException("Result returned null for " + cd.CommandType);
 					executedCommands.Add(CommandResultDescription<TOutput>.Create(cd.RequestID, result));
 					if ((int)result.Status >= 400)
-						return ProcessingResult<TOutput>.Create(result.Message, result.Status, executedCommands);
+					{
+						return ProcessingResult<TOutput>.Create(
+							result.Message,
+							result.Status,
+							executedCommands,
+							stopwatch.ElapsedMilliseconds);
+					}
 				}
 
 				return
 					ProcessingResult<TOutput>.Create(
 						"Commands executed in: {0} ms.".With(stopwatch.ElapsedMilliseconds),
 						HttpStatusCode.OK,
-						executedCommands);
+						executedCommands,
+						stopwatch.ElapsedMilliseconds);
 			}
 			catch (SecurityException ex)
 			{
@@ -94,7 +103,8 @@ namespace Revenj.Processing
 					ProcessingResult<TOutput>.Create(
 						"You don't have authorization to perform requested action: {0}".With(ex.Message),
 						HttpStatusCode.Forbidden,
-						executedCommands);
+						executedCommands,
+						stopwatch.ElapsedMilliseconds);
 			}
 			catch (AggregateException ex)
 			{
@@ -103,18 +113,31 @@ namespace Revenj.Processing
 							Thread.CurrentPrincipal.Identity.Name,
 							ex.GetDetailedExplanation()));
 				return Exceptions.DebugMode
-					? ProcessingResult<TOutput>.Create(ex.GetDetailedExplanation(), HttpStatusCode.InternalServerError, executedCommands)
+					? ProcessingResult<TOutput>.Create(
+						ex.GetDetailedExplanation(),
+						HttpStatusCode.InternalServerError,
+						executedCommands,
+						stopwatch.ElapsedMilliseconds)
 					: ProcessingResult<TOutput>.Create(
 						string.Join(Environment.NewLine, ex.InnerExceptions.Select(it => it.Message)),
 						HttpStatusCode.InternalServerError,
-						executedCommands);
+						executedCommands,
+						stopwatch.ElapsedMilliseconds);
 			}
 			catch (OutOfMemoryException ex)
 			{
 				LogFactory.Create("Processing context").Error("Out of memory error. Error: " + ex.GetDetailedExplanation());
 				return Exceptions.DebugMode
-					? ProcessingResult<TOutput>.Create(ex.GetDetailedExplanation(), HttpStatusCode.ServiceUnavailable, executedCommands)
-					: ProcessingResult<TOutput>.Create(ex.Message, HttpStatusCode.ServiceUnavailable, executedCommands);
+					? ProcessingResult<TOutput>.Create(
+						ex.GetDetailedExplanation(),
+						HttpStatusCode.ServiceUnavailable,
+						executedCommands,
+						stopwatch.ElapsedMilliseconds)
+					: ProcessingResult<TOutput>.Create(
+						ex.Message,
+						HttpStatusCode.ServiceUnavailable,
+						executedCommands,
+						stopwatch.ElapsedMilliseconds);
 			}
 			catch (Exception ex)
 			{
@@ -123,8 +146,16 @@ namespace Revenj.Processing
 							Thread.CurrentPrincipal.Identity.Name,
 							ex.GetDetailedExplanation()));
 				return Exceptions.DebugMode
-					? ProcessingResult<TOutput>.Create(ex.GetDetailedExplanation(), HttpStatusCode.InternalServerError, executedCommands)
-					: ProcessingResult<TOutput>.Create(ex.Message, HttpStatusCode.InternalServerError, executedCommands);
+					? ProcessingResult<TOutput>.Create(
+						ex.GetDetailedExplanation(),
+						HttpStatusCode.InternalServerError,
+						executedCommands,
+						stopwatch.ElapsedMilliseconds)
+					: ProcessingResult<TOutput>.Create(
+						ex.Message,
+						HttpStatusCode.InternalServerError,
+						executedCommands,
+						stopwatch.ElapsedMilliseconds);
 			}
 		}
 	}
