@@ -1,8 +1,6 @@
-﻿using NGS.DomainPatterns;
-
-namespace NGS.Security
+﻿namespace NGS.Security
 {
-	public interface IRolePermission : IAggregateRoot
+	public interface IRolePermission
 	{
 		string Name { get; }
 		string RoleID { get; }

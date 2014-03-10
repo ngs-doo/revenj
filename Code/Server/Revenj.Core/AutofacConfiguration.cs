@@ -6,7 +6,6 @@ using System.Xml.Linq;
 using Autofac;
 using Autofac.Builder;
 using NGS.DatabasePersistence;
-using NGS.DatabasePersistence.Oracle;
 using NGS.DatabasePersistence.Postgres;
 using NGS.DomainPatterns;
 using NGS.Extensibility;
@@ -27,8 +26,8 @@ namespace Revenj.Core
 			SetupExtensibility(builder);
 			if (database == Core.Database.Postgres)
 				SetupPostgres(builder, connectionString);
-			else
-				SetupOracle(builder, connectionString);
+			//else
+			//SetupOracle(builder, connectionString);
 			SetupPatterns(builder);
 			SetupSerialization(builder);
 
@@ -84,6 +83,7 @@ namespace Revenj.Core
 			builder.RegisterType<DomainEventSource>().As<IDomainEventSource>().InstancePerLifetimeScope();
 			builder.RegisterType<DomainEventStore>().As<IDomainEventStore>().InstancePerLifetimeScope();
 			builder.RegisterGeneric(typeof(SingleDomainEventSource<>)).As(typeof(IDomainEventSource<>)).InstancePerLifetimeScope();
+			builder.RegisterGeneric(typeof(RegisterChangeNotifications<>)).As(typeof(IObservable<>)).SingleInstance();
 		}
 
 		private static void SetupPostgres(Autofac.ContainerBuilder builder, string cs)
@@ -98,7 +98,7 @@ namespace Revenj.Core
 
 			builder.RegisterType<NGS.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
 		}
-
+		/*
 		private static void SetupOracle(Autofac.ContainerBuilder builder, string cs)
 		{
 			builder.RegisterInstance(new NGS.DatabasePersistence.Oracle.ConnectionInfo(cs));
@@ -111,7 +111,7 @@ namespace Revenj.Core
 
 			builder.RegisterType<NGS.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
 		}
-
+		*/
 		private static void SetupSerialization(Autofac.ContainerBuilder builder)
 		{
 			builder.RegisterType<GenericDataContractResolver>().SingleInstance();

@@ -102,6 +102,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			registry.Register<IDomainEventSource, DomainEventSource>(Reuse.InCurrentScope);
 			registry.Register<IDomainEventStore, DomainEventStore>(Reuse.InCurrentScope);
 			registry.Register(typeof(IDomainEventSource<>), typeof(SingleDomainEventSource<>), Reuse.InCurrentScope);
+			registry.Register(typeof(RegisterChangeNotifications<>), typeof(IObservable<>), Reuse.Singleton);
 		}
 
 		private static Assembly LoadAssembly(string name)

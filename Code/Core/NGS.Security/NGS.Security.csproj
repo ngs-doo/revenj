@@ -82,10 +82,6 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">
-      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
-      <Name>NGS.DomainPatterns.Interface</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NGS.Extensibility.Interface\NGS.Extensibility.Interface.csproj">
       <Project>{E7DE330D-1E7C-486E-BAE6-222B87256408}</Project>
       <Name>NGS.Extensibility.Interface</Name>

@@ -51,6 +51,7 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="NGS.Templater">
       <HintPath>..\..\..\Dependencies\Templater\NGS.Templater.dll</HintPath>
     </Reference>
@@ -72,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\SystemStartupAspect.cs" />
+    <Compile Include="ChangeNotifications.cs" />
     <Compile Include="DocumentReport.cs" />
     <Compile Include="DataCache.cs" />
     <Compile Include="DomainEventSource.cs" />

@@ -1,8 +1,6 @@
-﻿using NGS.DomainPatterns;
-
-namespace NGS.Security
+﻿namespace NGS.Security
 {
-	public interface IGlobalPermission : IAggregateRoot
+	public interface IGlobalPermission
 	{
 		string Name { get; }
 		bool IsAllowed { get; }

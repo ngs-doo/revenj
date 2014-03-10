@@ -1,8 +1,6 @@
-﻿using NGS.DomainPatterns;
-
-namespace NGS.Security
+﻿namespace NGS.Security
 {
-	public interface IUser : IAggregateRoot
+	public interface IUser
 	{
 		string Name { get; }
 		string Password { get; }

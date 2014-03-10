@@ -109,10 +109,6 @@
       <Project>{2A96E16E-4398-4316-8637-54C0E0EA13ED}</Project>
       <Name>NGS.DatabasePersistence.Interface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Database\NGS.DatabasePersistence.Oracle\NGS.DatabasePersistence.Oracle.csproj">
-      <Project>{7AFCA200-73CC-4C4D-8815-C512448118D2}</Project>
-      <Name>NGS.DatabasePersistence.Oracle</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Database\NGS.DatabasePersistence.Postgres\NGS.DatabasePersistence.Postgres.csproj">
       <Project>{6BEE583B-B4CE-489B-A5D3-6EAF071438CC}</Project>
       <Name>NGS.DatabasePersistence.Postgres</Name>
@@ -124,10 +120,6 @@
     <ProjectReference Include="..\..\Domain\NGS.DomainPatterns\NGS.DomainPatterns.csproj">
       <Project>{FB2B66D2-AA50-4552-9F0E-56F51369E651}</Project>
       <Name>NGS.DomainPatterns</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Plugins\NGS.Plugins.DatabasePersistence.Oracle\NGS.Plugins.DatabasePersistence.Oracle.csproj">
-      <Project>{D60AB12C-6F49-438B-AE0A-E77141492740}</Project>
-      <Name>NGS.Plugins.DatabasePersistence.Oracle</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Plugins\NGS.Plugins.DatabasePersistence.Postgres\NGS.Plugins.DatabasePersistence.Postgres.csproj">
       <Project>{8E943C88-AF40-4836-A8F6-681668514C83}</Project>

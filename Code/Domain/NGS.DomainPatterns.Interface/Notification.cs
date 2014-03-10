@@ -72,8 +72,7 @@ namespace NGS.DomainPatterns
 		/// Specify interest in only subset of notifications.
 		/// </summary>
 		/// <typeparam name="T">domain object type</typeparam>
-		/// <returns>pair of domain object identifiers, with lazily reified instanced</returns>
-		IObservable<KeyValuePair<string[], Lazy<T[]>>> Track<T>()
-			where T : IIdentifiable;
+		/// <returns>pair of domain object identifiers, with lazily reified instance</returns>
+		IObservable<KeyValuePair<string[], Lazy<T[]>>> Track<T>();
 	}
 }

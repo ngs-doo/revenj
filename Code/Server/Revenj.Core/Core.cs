@@ -11,10 +11,10 @@ namespace DSL
 			return Setup(Database.Postgres, connectionString);
 		}
 
-		public static IServiceLocator SetupOracle(string connectionString)
+		/*public static IServiceLocator SetupOracle(string connectionString)
 		{
 			return Setup(Database.Oracle, connectionString);
-		}
+		}*/
 
 		private static IServiceLocator Setup(Database db, string connectionString)
 		{

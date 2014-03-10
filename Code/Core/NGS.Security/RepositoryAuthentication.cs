@@ -1,24 +1,24 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Security;
-using NGS.DomainPatterns;
 
 namespace NGS.Security
 {
 	public class RepositoryAuthentication : IAuthentication
 	{
-		private readonly IDataCache<IUser> Repository;
+		private readonly Func<string, IUser> Lookup;
 
-		public RepositoryAuthentication(IDataCache<IUser> repository)
+		public RepositoryAuthentication(Func<string, IUser> lookup)
 		{
-			Contract.Requires(repository != null);
+			Contract.Requires(lookup != null);
 
-			this.Repository = repository;
+			this.Lookup = lookup;
 		}
 
 		public bool IsAuthenticated(string user, SecureString password)
 		{
-			var found = Repository.Find(user);
+			var found = Lookup(user);
 			return found != null
 				&& found.Password == Marshal.PtrToStringBSTR(Marshal.SecureStringToBSTR(password))
 				&& found.IsAllowed;
@@ -26,7 +26,7 @@ namespace NGS.Security
 
 		public bool IsAuthenticated(string user, string password)
 		{
-			var found = Repository.Find(user);
+			var found = Lookup(user);
 			return found != null
 				&& found.Password == password
 				&& found.IsAllowed;

@@ -36,14 +36,14 @@ namespace NGS.Features.Mailer
 		}
 
 		public readonly ISerialization<byte[]> Serialization;
-		public readonly IRepository<IMailMessage> Repository;
+		public readonly Func<string, IMailMessage> Repository;
 
 		public MailService(IServiceLocator locator)
 		{
 			Contract.Requires(locator != null);
 
 			this.Serialization = locator.Resolve<ISerialization<byte[]>>();
-			this.Repository = locator.Resolve<IRepository<IMailMessage>>();
+			this.Repository = locator.Resolve<Func<string, IMailMessage>>();
 		}
 
 		protected abstract IMailMessage Create();
@@ -67,7 +67,7 @@ namespace NGS.Features.Mailer
 
 		public bool TrySend(string uri)
 		{
-			var found = Repository.Find(uri);
+			var found = Repository(uri);
 			if (found == null)
 				throw new ArgumentException("Can't find message {0}".With(uri));
 			if (found.SentAt != null)

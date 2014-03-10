@@ -27,7 +27,8 @@ namespace NGS.DatabasePersistence.Oracle
 		private readonly Lazy<IDomainModel> DomainModel;
 		private readonly ConcurrentDictionary<string, List<Type>> Targets = new ConcurrentDictionary<string, List<Type>>(1, 17);
 		private int RetryCount;
-		private readonly ConcurrentDictionary<Type, object> Repositories = new ConcurrentDictionary<Type, object>(1, 17);
+		private readonly ConcurrentDictionary<Type, IRepository<IIdentifiable>> Repositories =
+			new ConcurrentDictionary<Type, IRepository<IIdentifiable>>(1, 17);
 		private readonly IServiceLocator Locator;
 		private readonly ILogger Logger;
 
@@ -171,20 +172,19 @@ namespace NGS.DatabasePersistence.Oracle
 
 		public IObservable<NotifyInfo> Notifications { get; private set; }
 
-		private IRepository<T> GetRepository<T>()
-			where T : IIdentifiable
+		private IRepository<IIdentifiable> GetRepository<T>(string name)
 		{
-			object repository;
+			IRepository<IIdentifiable> repository;
 			if (!Repositories.TryGetValue(typeof(T), out repository))
 			{
-				repository = Locator.Resolve<IRepository<T>>();
+				var source = DomainModel.Value.Find(name);
+				repository = Locator.Resolve<IRepository<IIdentifiable>>(typeof(IRepository<>).MakeGenericType(source));
 				Repositories.TryAdd(typeof(T), repository);
 			}
-			return (IRepository<T>)repository;
+			return repository;
 		}
 
 		public IObservable<KeyValuePair<string[], Lazy<T[]>>> Track<T>()
-			where T : IIdentifiable
 		{
 			var type = typeof(T);
 			return
@@ -203,7 +203,7 @@ namespace NGS.DatabasePersistence.Oracle
 						Targets.TryAdd(it.Name, list);
 					}
 					return list.Contains(type);
-				}).Select(it => new KeyValuePair<string[], Lazy<T[]>>(it.URI, new Lazy<T[]>(() => GetRepository<T>().Find(it.URI))));
+				}).Select(it => new KeyValuePair<string[], Lazy<T[]>>(it.URI, new Lazy<T[]>(() => GetRepository<T>(it.Name).Find(it.URI) as T[])));
 		}
 
 		public void Dispose()

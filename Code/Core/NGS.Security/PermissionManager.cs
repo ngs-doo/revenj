@@ -6,7 +6,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Principal;
-using NGS.DomainPatterns;
 using NGS.Extensibility;
 
 namespace NGS.Security
@@ -49,16 +48,16 @@ namespace NGS.Security
 
 		public PermissionManager(
 			IObjectFactory objectFactory,
-			IDataChangeNotification changeNotification)
+			IObservable<Lazy<IGlobalPermission>> globalChanges,
+			IObservable<Lazy<IRolePermission>> roleChanges)
 		{
 			Contract.Requires(objectFactory != null);
-			Contract.Requires(changeNotification != null);
+			Contract.Requires(globalChanges != null);
+			Contract.Requires(roleChanges != null);
 
 			this.ObjectFactory = objectFactory;
-			var moduleChanges = changeNotification.Track<IGlobalPermission>();
-			var domainObjectChages = changeNotification.Track<IRolePermission>();
-			GlobalSubscription = moduleChanges.Subscribe(_ => PermissionsChanged = true);
-			RoleSubscription = domainObjectChages.Subscribe(_ => PermissionsChanged = true);
+			GlobalSubscription = globalChanges.Subscribe(_ => PermissionsChanged = true);
+			RoleSubscription = roleChanges.Subscribe(_ => PermissionsChanged = true);
 		}
 
 		private void CheckPermissions()
@@ -67,14 +66,14 @@ namespace NGS.Security
 				return;
 			using (var scope = ObjectFactory.CreateInnerFactory())
 			{
-				var globals = scope.Resolve<IQueryableRepository<IGlobalPermission>>();
-				var roles = scope.Resolve<IQueryableRepository<IRolePermission>>();
+				var globals = scope.Resolve<IQueryable<IGlobalPermission>>();
+				var roles = scope.Resolve<IQueryable<IRolePermission>>();
 
 				GlobalPermissions =
-					globals.FindAll<IGlobalPermission>().ToList()
+					globals.ToList()
 					.ToDictionary(it => it.Name, it => it.IsAllowed);
 				RolePermissions =
-					(from dop in roles.FindAll<IRolePermission>().ToList()
+					(from dop in roles.ToList()
 					 group dop by dop.Name into g
 					 let values = g.Select(it => new Pair { Name = it.RoleID, IsAllowed = it.IsAllowed })
 					 select new { g.Key, values })

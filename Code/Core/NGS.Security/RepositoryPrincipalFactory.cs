@@ -3,31 +3,30 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Security.Principal;
-using NGS.DomainPatterns;
 
 namespace NGS.Security
 {
 	public class RepositoryPrincipalFactory : IPrincipalFactory, IDisposable
 	{
-		private readonly IQueryableRepository<IUserRoles> Repository;
+		private readonly IQueryable<IUserRoles> LoadRoles;
 		private Dictionary<string, HashSet<string>> RoleCache = new Dictionary<string, HashSet<string>>();
 		private readonly IDisposable Subscription;
 
 		public RepositoryPrincipalFactory(
-			IQueryableRepository<IUserRoles> repository,
-			IDataChangeNotification notifications)
+			IQueryable<IUserRoles> loadRoles,
+			IObservable<Lazy<IUserRoles>> roleChanges)
 		{
-			Contract.Requires(repository != null);
-			Contract.Requires(notifications != null);
+			Contract.Requires(loadRoles != null);
+			Contract.Requires(roleChanges != null);
 
-			this.Repository = repository;
-			Subscription = notifications.Track<IUserRoles>().Subscribe(_ => RefreshCache());
+			this.LoadRoles = loadRoles;
+			Subscription = roleChanges.Subscribe(_ => RefreshCache());
 			RefreshCache();
 		}
 
 		private void RefreshCache()
 		{
-			var allRoles = Repository.FindAll().ToList();
+			var allRoles = LoadRoles.ToList();
 			var roles =
 				(from r in allRoles
 				 group r by r.Name into grp
