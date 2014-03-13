@@ -19,10 +19,23 @@
         </member>
         <member name="M:NGS.Templater.IDocumentFactory.Open(System.IO.Stream,System.String)">
             <summary>
-            Opens a document from the specified stream.
+            Opens a document from the specified stream. 
+            Stream will be overwritten with populated result and must support seek and write operation.
             The extension string indicates the type of document in the stream.
             </summary>
             <param name="stream">Stream containing the template document; this stream will be used to output the processed document</param>
+            <param name="extension">Template extension</param>
+            <returns>Template document interface</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactory.Open(System.IO.Stream,System.IO.Stream,System.String)">
+            <summary>
+            Opens a document from the specified stream.
+            Input stream is used for reading template.
+            Output stream is used for writing populated document.
+            The extension string indicates the type of document in the stream.
+            </summary>
+            <param name="input">Stream containing the template document</param>
+            <param name="output">Result stream will be used to output the processed document</param>
             <param name="extension">Template extension</param>
             <returns>Template document interface</returns>
         </member>
@@ -98,28 +111,6 @@
             License will be checked from 'templater.lic' file.
             File can be embedded in assembly.
             </summary>
-        </member>
-        <member name="T:NGS.Templater.PdfConverter">
-            <summary>
-            Utility for converting various document formats to pdf.
-            Uses OpenOffice.org/LibreOffice to make conversion
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.PdfConverter.Convert(System.Byte[],System.String)">
-            <summary>
-            Converts input document (ex. MyDocument.xlsx) to output pdf
-            </summary>
-            <param name="content">input document content</param>
-            <param name="ext">input document extension</param>
-            <returns>output pdf content</returns>
-        </member>
-        <member name="M:NGS.Templater.PdfConverter.Convert(System.String,System.String)">
-            <summary>
-            Converts input document (ex. MyDocument.docx) to output pdf
-            Requires full path to document (ex. C:\Documents\MyDocument.docx)
-            </summary>
-            <param name="from">input document</param>
-            <param name="toPdf">output pdf file</param>
         </member>
         <member name="T:NGS.Templater.ITemplateDocument">
             <summary>
