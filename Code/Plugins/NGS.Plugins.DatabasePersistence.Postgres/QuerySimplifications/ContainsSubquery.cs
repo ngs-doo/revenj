@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,9 +19,7 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.QuerySimplifications
 			var me = parts != null ? parts.MainFrom.FromExpression as MemberExpression : null;
 			var pe = parts != null ? parts.MainFrom.FromExpression as ParameterExpression : null;
 			return parts != null
-				&& (ce != null && (ce.Type.IsArray
-									|| ce.Type.IsGenericType && (ce.Type.GetGenericTypeDefinition() == typeof(List<>)
-																|| ce.Type.GetGenericTypeDefinition() == typeof(HashSet<>)))
+				&& (ce != null && ce.Type.IsSupportedCollectionType()
 					|| me != null
 					|| pe != null)
 				&& !parts.ShouldQueryInMemory

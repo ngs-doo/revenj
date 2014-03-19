@@ -84,6 +84,7 @@
     <Compile Include="QuerySimplifications\FastCountWithoutPredicate.cs" />
     <Compile Include="QuerySimplifications\ExistsSubquery.cs" />
     <Compile Include="QuerySimplifications\InverseExistsSubquery.cs" />
+    <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">

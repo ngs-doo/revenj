@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Text;
@@ -19,6 +20,10 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 			var countDict = new Dictionary<Type, MemberCallDelegate>();
 			countDict[typeof(List<>)] = GetLength;
 			countDict[typeof(HashSet<>)] = GetLength;
+			countDict[typeof(ReadOnlyCollection<>)] = GetLength;
+			countDict[typeof(LinkedList<>)] = GetLength;
+			countDict[typeof(Queue<>)] = GetLength;
+			countDict[typeof(Stack<>)] = GetLength;
 			SupportedMembers["Count"] = countDict;
 		}
 
