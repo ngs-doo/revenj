@@ -14,7 +14,7 @@ using Oracle.DataAccess.Client;
 
 namespace NGS.DatabasePersistence.Oracle
 {
-	public class OracleAdvancedQueueNotification : IDataChangeNotification, IDisposable
+	public class OracleAdvancedQueueNotification : IEagerNotification, IDisposable
 	{
 		private static readonly string ConsumerName = ConfigurationManager.AppSettings["Oracle.QueueConsumer"] ?? "Local";
 
@@ -146,6 +146,8 @@ namespace NGS.DatabasePersistence.Oracle
 				Logger.Error(e.QueueName + ": " + e.AvailableMessages + ex.ToString());
 			}
 		}
+
+		public void Notify(NotifyInfo info) { Subject.OnNext(info); }
 
 		private void ProcessNotifyConverters(List<OracleNotifyInfoConverter> converters)
 		{

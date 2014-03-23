@@ -6,30 +6,23 @@ using System.Linq;
 
 namespace NGS.DomainPatterns
 {
-	public class DataCache<TValue> : IDataCache<TValue>, IDisposable
+	public class WeakCache<TValue> : IDataCache<TValue>
 		where TValue : class, IAggregateRoot
 	{
 		private readonly IRepository<TValue> Repository;
-		private static int CpuCount = Environment.ProcessorCount;
-		private static int InitialCount = Environment.ProcessorCount < 17 ? 17 : Environment.ProcessorCount * 2 - 1;
-		private readonly WeakReference Cache = new WeakReference(new ConcurrentDictionary<string, TValue>(CpuCount, InitialCount));
-		private readonly IDisposable Subscription;
+		private readonly WeakReference Cache = new WeakReference(null);
 
-		public DataCache(
-			IRepository<TValue> repository,
-			IDataChangeNotification notifications)
+		public WeakCache(IRepository<TValue> repository)
 		{
 			Contract.Requires(repository != null);
-			Contract.Requires(notifications != null);
 
 			this.Repository = repository;
-			Subscription = notifications.Track<TValue>().Subscribe(kv => Invalidate(kv.Key));
 		}
 
 		public void Invalidate(IEnumerable<string> uris)
 		{
 			var dict = Cache.Target as ConcurrentDictionary<string, TValue>;
-			if (uris != null && dict != null)
+			if (dict != null && uris != null)
 			{
 				TValue v;
 				foreach (var uri in uris)
@@ -47,7 +40,7 @@ namespace NGS.DomainPatterns
 			var dict = Cache.Target as ConcurrentDictionary<string, TValue>;
 			if (dict == null)
 			{
-				dict = new ConcurrentDictionary<string, TValue>(CpuCount, InitialCount);
+				dict = new ConcurrentDictionary<string, TValue>(1, 17);
 				Cache.Target = dict;
 			}
 			else
@@ -77,7 +70,7 @@ namespace NGS.DomainPatterns
 			var dict = Cache.Target as ConcurrentDictionary<string, TValue>;
 			if (dict == null)
 			{
-				dict = new ConcurrentDictionary<string, TValue>(CpuCount, InitialCount);
+				dict = new ConcurrentDictionary<string, TValue>(1, 17);
 				Cache.Target = dict;
 			}
 			else
@@ -90,11 +83,6 @@ namespace NGS.DomainPatterns
 			if (found.Length == 1)
 				dict.TryAdd(uri[0], found[0]);
 			return found;
-		}
-
-		public void Dispose()
-		{
-			Subscription.Dispose();
 		}
 	}
 }

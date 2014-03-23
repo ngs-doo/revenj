@@ -67,15 +67,19 @@
     <Reference Include="System.Reactive.Linq">
       <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aspects\SystemStartupAspect.cs" />
+    <Compile Include="Cache\WeakCache.cs" />
+    <Compile Include="Cache\LazyCache.cs" />
+    <Compile Include="Cache\EagerCache.cs" />
     <Compile Include="ChangeNotifications.cs" />
     <Compile Include="DocumentReport.cs" />
-    <Compile Include="DataCache.cs" />
+    <Compile Include="Cache\LookupCache.cs" />
     <Compile Include="DomainEventSource.cs" />
     <Compile Include="DomainEventStore.cs" />
     <Compile Include="DomainTypeResolver.cs" />

@@ -34,13 +34,15 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.QuerySimplifications
 			var pe = me.Expression as ParameterExpression;
 			if (me.Type == typeof(byte[]))
 			{
-				return @"COALESCE(octet_length((""{0}"").""{1}""), 0)".With(
+				return @"COALESCE(octet_length(({2}""{0}"").""{1}""), 0)".With(
 					qsre != null ? qsre.ReferencedQuerySource.ItemName : pe.Name,
-					me.Member.Name);
+					me.Member.Name,
+					pe != null ? query.ContextName : string.Empty);
 			}
-			return @"COALESCE(array_upper((""{0}"").""{1}"", 1), 0)".With(
+			return @"COALESCE(array_upper(({2}""{0}"").""{1}"", 1), 0)".With(
 				qsre != null ? qsre.ReferencedQuerySource.ItemName : pe.Name,
-				me.Member.Name);
+				me.Member.Name,
+				pe != null ? query.ContextName : string.Empty);
 		}
 	}
 }

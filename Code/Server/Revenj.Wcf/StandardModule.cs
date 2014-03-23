@@ -112,7 +112,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			builder.Register(c => c.Resolve<NGS.DomainPatterns.DomainModel.Factory>()(serverModels)).As<IDomainModel>().SingleInstance();
 			builder.RegisterType<DomainTypeResolver>().As<ITypeResolver>().SingleInstance();
 			builder.RegisterType<ServiceLocator>().As<IServiceLocator, IServiceProvider>().InstancePerLifetimeScope();
-			builder.RegisterGeneric(typeof(DataCache<>)).As(typeof(IDataCache<>)).InstancePerLifetimeScope();
+			builder.RegisterGeneric(typeof(WeakCache<>)).As(typeof(IDataCache<>)).InstancePerLifetimeScope();
 			builder.RegisterType<DomainEventSource>().As<IDomainEventSource>().InstancePerLifetimeScope();
 			builder.RegisterType<DomainEventStore>().As<IDomainEventStore>().InstancePerLifetimeScope();
 			builder.RegisterGeneric(typeof(SingleDomainEventSource<>)).As(typeof(IDomainEventSource<>)).InstancePerLifetimeScope();
@@ -140,7 +140,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 			builder.RegisterType<PostgresQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<PostgresDatabaseQuery>().As<IPostgresDatabaseQuery>();
 			builder.Register(c => c.Resolve<IDatabaseQueryManager>().CreateQuery()).As<IDatabaseQuery>().InstancePerLifetimeScope();
-			builder.RegisterType<PostgresDatabaseNotification>().As<IDataChangeNotification>().SingleInstance();
+			builder.RegisterType<PostgresDatabaseNotification>().As<IDataChangeNotification, IEagerNotification>().SingleInstance();
 
 			builder.RegisterType<PostgresObjectFactory>().As<IPostgresConverterRepository, IPostgresConverterFactory>().SingleInstance();
 

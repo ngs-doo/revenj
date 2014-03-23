@@ -45,6 +45,7 @@ namespace NGS.DatabasePersistence.Oracle
 
 		private readonly object sync = new object();
 		private readonly Lazy<OracleAQQueue> Queue;
+		private bool BrokenTransaction;
 
 		public OracleDatabaseQuery(
 			OracleConnection connection,
@@ -72,7 +73,14 @@ namespace NGS.DatabasePersistence.Oracle
 		{
 			return new OracleCommand { BindByName = true };
 		}
-		public bool InTransaction { get { return Transaction != null; } }
+
+		public bool InTransaction
+		{
+			get
+			{
+				return Transaction != null && (BrokenTransaction || Transaction.Connection != null);
+			}
+		}
 
 		private static FrameworkException FormatException(OracleException ex, IDbCommand command)
 		{
@@ -159,6 +167,7 @@ namespace NGS.DatabasePersistence.Oracle
 			}
 			catch (OracleException ex)
 			{
+				BrokenTransaction = !tryRecover;
 				var logger = LogFactory.Create("Oracle database layer - execute non query");
 				logger.Trace(command.CommandText);
 				logger.Error(ex.ToString());
@@ -210,6 +219,7 @@ namespace NGS.DatabasePersistence.Oracle
 			}
 			catch (OracleException ex)
 			{
+				BrokenTransaction = !tryRecover;
 				var logger = LogFactory.Create("Oracle database layer - execute non query");
 				logger.Trace(command.CommandText);
 				logger.Error(ex.ToString());
@@ -283,6 +293,7 @@ namespace NGS.DatabasePersistence.Oracle
 			}
 			catch (OracleException ex)
 			{
+				BrokenTransaction = !tryRecover;
 				var logger = LogFactory.Create("Oracle database layer - fill table");
 				logger.Trace(command.CommandText);
 				logger.Error(ex.ToString());
@@ -310,6 +321,8 @@ namespace NGS.DatabasePersistence.Oracle
 			}
 		}
 
+		//TODO: think about moving this just before transaction commit so Oracle can be switched to in memory queue
+		//TODO: which doesn't need to be persisted. invalid notify should only result in more processing
 		public void Notify(OracleNotifyInfoConverter[] notifiers, string target)
 		{
 			if (notifiers == null || notifiers.Length == 0)

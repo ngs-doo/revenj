@@ -41,6 +41,7 @@ namespace NGS.DatabasePersistence.Postgres
 
 		private NpgsqlConnection Connection;
 		private readonly NpgsqlTransaction Transaction;
+		private bool BrokenTransaction;
 
 		private readonly ILogFactory LogFactory;
 
@@ -63,7 +64,14 @@ namespace NGS.DatabasePersistence.Postgres
 		{
 			return new NpgsqlCommand();
 		}
-		public bool InTransaction { get { return Transaction != null; } }
+
+		public bool InTransaction
+		{
+			get
+			{
+				return Transaction != null && (BrokenTransaction || Transaction.Connection != null);
+			}
+		}
 
 		private static FrameworkException FormatException(NpgsqlException ex)
 		{
@@ -146,6 +154,7 @@ Near: " + ex.Where, ex);
 			}
 			catch (NpgsqlException ex)
 			{
+				BrokenTransaction = !tryRecover;
 				var logger = LogFactory.Create("Postgres database layer - execute non query");
 				logger.Trace("{0}:{1} - {2}".With(Connection.Host, Connection.Port, Connection.Database));
 				logger.Trace(command.CommandText);
@@ -210,6 +219,7 @@ Near: " + ex.Where, ex);
 			}
 			catch (NpgsqlException ex)
 			{
+				BrokenTransaction = !tryRecover;
 				var logger = LogFactory.Create("Postgres database layer - execute data reader");
 				logger.Trace("{0}:{1} - {2}".With(Connection.Host, Connection.Port, Connection.Database));
 				logger.Trace(command.CommandText);
@@ -296,6 +306,7 @@ Near: " + ex.Where, ex);
 			}
 			catch (NpgsqlException ex)
 			{
+				BrokenTransaction = !tryRecover;
 				var logger = LogFactory.Create("Postgres database layer - fill table");
 				logger.Trace("{0}:{1} - {2}".With(Connection.Host, Connection.Port, Connection.Database));
 				logger.Trace(command.CommandText);
@@ -414,6 +425,7 @@ Near: " + ex.Where, ex);
 			}
 			catch (NpgsqlException ex)
 			{
+				BrokenTransaction = !tryRecover;
 				var logger = LogFactory.Create("Postgres database layer - execute scalar");
 				logger.Trace(command.CommandText);
 				logger.Error(ex.ToString());

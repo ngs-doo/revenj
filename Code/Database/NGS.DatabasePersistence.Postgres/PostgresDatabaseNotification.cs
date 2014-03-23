@@ -14,7 +14,7 @@ using Npgsql;
 
 namespace NGS.DatabasePersistence.Postgres
 {
-	public class PostgresDatabaseNotification : IDataChangeNotification, IDisposable
+	public class PostgresDatabaseNotification : IEagerNotification, IDisposable
 	{
 		private NpgsqlConnection Connection;
 		private readonly Subject<NotifyInfo> Subject = new Subject<NotifyInfo>();
@@ -93,6 +93,8 @@ namespace NGS.DatabasePersistence.Postgres
 			}
 		}
 
+		public void Notify(NotifyInfo info) { Subject.OnNext(info); }
+
 		private void Connection_Notification(object sender, NpgsqlNotificationEventArgs e)
 		{
 			try
@@ -106,7 +108,6 @@ namespace NGS.DatabasePersistence.Postgres
 					var array = e.AdditionalInformation.Substring(firstSeparator + secondSeparator + 2).Trim();
 					if (array.Length > 0)
 					{
-
 						var uris = StringConverter.ParseCollection(new StringReader(array), 0, false).ToArray();
 						switch (op)
 						{

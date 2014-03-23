@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Oracle.DataAccess">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Dependencies\Oracle\Oracle.DataAccess.dll</HintPath>
     </Reference>
     <Reference Include="Remotion.Linq">
@@ -142,6 +143,10 @@
     <ProjectReference Include="..\..\Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">
       <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
       <Name>NGS.DomainPatterns.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns\NGS.DomainPatterns.csproj">
+      <Project>{FB2B66D2-AA50-4552-9F0E-56F51369E651}</Project>
+      <Name>NGS.DomainPatterns</Name>
     </ProjectReference>
     <ProjectReference Include="..\NGS.DatabasePersistence.Interface\NGS.DatabasePersistence.Interface.csproj">
       <Project>{2A96E16E-4398-4316-8637-54C0E0EA13ED}</Project>

@@ -98,7 +98,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			registry.Register<ITypeResolver, DomainTypeResolver>(Reuse.Singleton);
 			registry.Register<IServiceLocator, ServiceLocator>(Reuse.InCurrentScope);
 			registry.Register<IServiceProvider, ServiceLocator>(Reuse.InCurrentScope);
-			registry.Register(typeof(IDataCache<>), typeof(DataCache<>), Reuse.InCurrentScope);
+			registry.Register(typeof(IDataCache<>), typeof(WeakCache<>), Reuse.InCurrentScope);
 			registry.Register<IDomainEventSource, DomainEventSource>(Reuse.InCurrentScope);
 			registry.Register<IDomainEventStore, DomainEventStore>(Reuse.InCurrentScope);
 			registry.Register(typeof(IDomainEventSource<>), typeof(SingleDomainEventSource<>), Reuse.InCurrentScope);
@@ -127,6 +127,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 			registry.Register<IPostgresDatabaseQuery, PostgresDatabaseQuery>();
 			registry.RegisterDelegate(r => r.Resolve<IDatabaseQueryManager>().CreateQuery(), Reuse.InCurrentScope);
 			registry.Register<IDataChangeNotification, PostgresDatabaseNotification>(Reuse.Singleton);
+			registry.Register<IEagerNotification, PostgresDatabaseNotification>(Reuse.Singleton);
 
 			registry.Register<IPostgresConverterRepository, PostgresObjectFactory>(Reuse.Singleton);
 			registry.Register<IPostgresConverterFactory, PostgresObjectFactory>(Reuse.Singleton);

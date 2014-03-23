@@ -7,6 +7,11 @@ using System.Reactive.Subjects;
 
 namespace NGS.DomainPatterns
 {
+	public interface IEagerNotification : IDataChangeNotification
+	{
+		void Notify(NotifyInfo info);
+	}
+
 	public class RegisterChangeNotifications<TSource> : IObservable<TSource>, IDisposable
 	{
 		private readonly IDisposable ChangeNotification;

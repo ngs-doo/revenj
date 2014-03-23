@@ -5,19 +5,32 @@ using System.Diagnostics.Contracts;
 namespace NGS.DomainPatterns
 {
 	/// <summary>
-	/// Data cache service. 
-	/// Aggregates resolved from this service will be cached in its scope.
-	/// Invalidate uris on aggregate change.
+	/// Data cache service using uri lookup.
+	/// Identifiable object resolved from this service will be cached.
+	/// Invalidate uris on object change.
 	/// </summary>
-	/// <typeparam name="TValue">aggregate root type</typeparam>
+	/// <typeparam name="TValue">domain object type</typeparam>
 	public interface IDataCache<TValue> : IRepository<TValue>
-		where TValue : IAggregateRoot
+		where TValue : IIdentifiable
 	{
 		/// <summary>
-		/// Changed aggregate should be removed from cache.
+		/// Changed objects should be removed from cache.
 		/// </summary>
 		/// <param name="uris">changed uris</param>
 		void Invalidate(IEnumerable<string> uris);
+	}
+	/// <summary>
+	/// Entire data source cache service.
+	/// When entire class of objects is kept in memory, data source cache can be used.
+	/// </summary>
+	/// <typeparam name="TValue"></typeparam>
+	public interface IDataSourceCache<TValue> : IDataCache<TValue>, IQueryableRepository<TValue>
+		where TValue : IIdentifiable
+	{
+		/// <summary>
+		/// Invalidate entire cache.
+		/// </summary>
+		void InvalidateAll();
 	}
 	/// <summary>
 	/// Cachable domain objects.
@@ -33,9 +46,9 @@ namespace NGS.DomainPatterns
 		Dictionary<Type, IEnumerable<string>> GetRelationships();
 	}
 	/// <summary>
-	/// Utility for data cache
+	/// Cache utility
 	/// </summary>
-	public static class DataCacheHelper
+	public static class CacheHelper
 	{
 		/// <summary>
 		/// Invalidate single aggregate root.
