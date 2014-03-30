@@ -147,21 +147,22 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 		private static void SubtractDateTime(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
 			queryBuilder.Append("(");
-			visitExpression(methodCall.Object);
+			var ce = methodCall.Object as ConstantExpression;
+			if (ce != null) ToDbTimestamp(queryBuilder, ce);
+			else visitExpression(methodCall.Object);
 			queryBuilder.Append(" - ");
-			var ce = methodCall.Arguments[0] as ConstantExpression;
-			if (ce != null)
-			{
-				var dt = (DateTime)ce.Value;
-				queryBuilder.Append("'");
-				queryBuilder.Append(TimestampConverter.ToDatabase(dt));
-				queryBuilder.Append("'::timestamptz)");
-			}
-			else
-			{
-				visitExpression(methodCall.Arguments[0]);
-				queryBuilder.Append(")");
-			}
+			ce = methodCall.Arguments[0] as ConstantExpression;
+			if (ce != null) ToDbTimestamp(queryBuilder, ce);
+			else visitExpression(methodCall.Arguments[0]);
+			queryBuilder.Append(")");
+		}
+
+		private static void ToDbTimestamp(StringBuilder queryBuilder, ConstantExpression ce)
+		{
+			var dt = (DateTime)ce.Value;
+			queryBuilder.Append("'");
+			queryBuilder.Append(TimestampConverter.ToDatabase(dt));
+			queryBuilder.Append("'::timestamptz");
 		}
 	}
 }

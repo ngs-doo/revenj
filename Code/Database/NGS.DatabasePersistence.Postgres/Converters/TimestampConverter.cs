@@ -45,6 +45,8 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 		//TODO private
 		public static string ToDatabase(DateTime value)
 		{
+			if (value.Kind == DateTimeKind.Utc)
+				return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF+00");
 			return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") +
 				(value.IsDaylightSavingTime() ? TimeZoneWithDaylightSaving : TimeZoneWithoutDaylightSaving);
 		}

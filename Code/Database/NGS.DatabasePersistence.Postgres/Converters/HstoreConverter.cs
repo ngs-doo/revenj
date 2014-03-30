@@ -8,7 +8,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 {
 	public static class HstoreConverter
 	{
-		//TODO: to private
+		//TODO: to private (this is only a hackish way to parse hstore)
 		public static Dictionary<string, string> FromDatabase(string value)
 		{
 			if (value == null)
@@ -16,7 +16,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			var dict = new Dictionary<string, string>();
 			if (string.IsNullOrWhiteSpace(value))
 				return dict;
-			var parts = value.Substring(1, value.Length - 2).Split(new[] { "\", \"" }, StringSplitOptions.None);
+			var parts = value.Substring(1, value.Length - 2).Split(new[] { "\", \"", "\",\"" }, StringSplitOptions.None);
 			foreach (var p in parts)
 			{
 				var splt = p.Split(new[] { "\"=>\"" }, StringSplitOptions.None);

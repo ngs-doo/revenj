@@ -193,6 +193,13 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			return SqlGeneratorExpressionTreeVisitor.GetSqlExpression(expression, this, contextName);
 		}
 
+		private static bool EndsWithQuerySource(MemberExpression me)
+		{
+			return me != null
+				&& (me.Expression is QuerySourceReferenceExpression
+					|| EndsWithQuerySource(me.Expression as MemberExpression));
+		}
+
 		public string GetFromPart()
 		{
 			if (MainFrom == null)
@@ -200,11 +207,7 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 
 			var sb = new StringBuilder();
 
-			if (AdditionalJoins.Any(it =>
-			{
-				var me = it.FromExpression as MemberExpression;
-				return me != null && me.Expression is QuerySourceReferenceExpression;
-			}))
+			if (AdditionalJoins.Any(it => EndsWithQuerySource(it.FromExpression as MemberExpression)))
 				sb.AppendFormat("FROM ({0}) sq ", GetInnerFromPart());
 			else
 				sb.AppendFormat("FROM {0}", GetQuerySourceFromExpression(MainFrom.ItemName, MainFrom.ItemType, MainFrom.FromExpression));
@@ -228,7 +231,7 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			foreach (var aj in AdditionalJoins)
 			{
 				var me = aj.FromExpression as MemberExpression;
-				if (me != null && me.Expression is QuerySourceReferenceExpression)
+				if (EndsWithQuerySource(me))
 					continue;
 				if (groupPairs.Any(it => it.j == aj))
 					continue;
@@ -292,9 +295,9 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 				var me = aj.FromExpression as MemberExpression;
 				if (me != null)
 				{
-					var qsre = me.Expression as QuerySourceReferenceExpression;
-					if (qsre != null)
-						sb.AppendFormat(", unnest(\"{0}\".\"{1}\") AS \"{2}\"", qsre.ReferencedQuerySource.ItemName, me.Member.Name, aj.ItemName);
+					var src = BuildMemberPath(me, false);
+					if (src != null)
+						sb.AppendFormat(", unnest({0}) AS \"{1}\"", src, aj.ItemName);
 				}
 			}
 
@@ -328,18 +331,43 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 	", OrderBy.Last().Orderings.Select(o => GetSqlExpression(o.Expression) + (o.OrderingDirection == OrderingDirection.Desc ? " DESC " : " ASC "))));
 		}
 
+		private static string BuildMemberPath(MemberExpression me, bool nest)
+		{
+			var list = new List<string>();
+			while (me != null)
+			{
+				list.Add(me.Member.Name);
+				var qse = me.Expression as QuerySourceReferenceExpression;
+				if (qse != null)
+				{
+					var sb = new StringBuilder();
+					sb.Append("\"").Append(qse.ReferencedQuerySource.ItemName).Append("\"");
+					list.Reverse();
+					foreach (var m in list)
+					{
+						if (nest)
+						{
+							sb.Insert(0, '(');
+							sb.Append(')');
+						}
+						sb.Append(".\"").Append(m).Append("\"");
+					}
+					return sb.ToString();
+				}
+				me = me.Expression as MemberExpression;
+			}
+			return null;
+		}
+
 		//TODO vjerojatno ponekad ne treba ignorirati expression
 		public string GetQuerySourceFromExpression(string name, Type type, Expression fromExpression)
 		{
 			var me = fromExpression as MemberExpression;
 			if (me != null)
 			{
-				var qse = me.Expression as QuerySourceReferenceExpression;
-				if (qse != null)
-					return @"(SELECT sq as ""{2}"" FROM unnest((""{0}"").""{1}"") sq) AS ""{2}""".With(
-						qse.ReferencedQuerySource.ItemName,
-						me.Member.Name,
-						name);
+				var src = BuildMemberPath(me, true);
+				if (src != null)
+					return @"(SELECT sq as ""{1}"" FROM unnest({0}) sq) AS ""{1}""".With(src, name);
 			}
 
 			var sqe = fromExpression as SubQueryExpression;
