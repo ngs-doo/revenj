@@ -45,8 +45,19 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 		//TODO private
 		public static string ToDatabase(DateTime value)
 		{
-			return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") +
-				(value.IsDaylightSavingTime() ? TimeZoneWithDaylightSaving : TimeZoneWithoutDaylightSaving);
+            if (value.Kind == DateTimeKind.Utc || value.Kind == DateTimeKind.Unspecified)
+            {
+                return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF+00", CultureInfo.InvariantCulture);
+            }
+            else if (value.Kind == DateTimeKind.Local)
+            {
+                return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF", CultureInfo.InvariantCulture) +
+                    (value.IsDaylightSavingTime() ? TimeZoneWithDaylightSaving : TimeZoneWithoutDaylightSaving);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unknown date format");
+            }
 		}
 
 		public static ValueTuple ToTuple(DateTime value)
