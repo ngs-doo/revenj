@@ -54,10 +54,18 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
-					list.Add(null);
+					cur = reader.Read();
+					if (cur == 'U')
+					{
+						reader.Read();
+						reader.Read();
+						list.Add(null);
+					}
+					else
+					{
+						list.Add(float.NaN);
+						reader.Read();
+					}
 					cur = reader.Read();
 				}
 				else
@@ -94,10 +102,18 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
-					list.Add(0);
+					cur = reader.Read();
+					if (cur == 'U')
+					{
+						reader.Read();
+						reader.Read();
+						list.Add(0);
+					}
+					else
+					{
+						list.Add(float.NaN);
+						reader.Read();
+					}
 					cur = reader.Read();
 				}
 				else
