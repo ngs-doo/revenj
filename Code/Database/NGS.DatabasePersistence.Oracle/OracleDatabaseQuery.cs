@@ -17,7 +17,7 @@ namespace NGS.DatabasePersistence.Oracle
 		void Notify(OracleNotifyInfoConverter[] notifiers, string target);
 	}
 
-	public class OracleDatabaseQuery : IOracleDatabaseQuery
+	public class OracleDatabaseQuery : IOracleDatabaseQuery, IDisposable
 	{
 		public static int MinBatchSize { get; private set; }
 		private static readonly OracleAQAgent[] Recipients;
@@ -332,6 +332,19 @@ namespace NGS.DatabasePersistence.Oracle
 			for (int i = 0; i < msgs.Length; i++)
 				msgs[i] = new OracleAQMessage(notifiers[i]) { SenderId = sender, Recipients = Recipients };
 			Queue.Value.EnqueueArray(msgs);
+		}
+
+		public void Dispose()
+		{
+			try
+			{
+				if (Connection != null && Connection.State == ConnectionState.Open)
+					Connection.Close();
+			}
+			catch (Exception ex)
+			{
+				LogFactory.Create("Oracle database layer - dispose").Error(ex.ToString());
+			}
 		}
 	}
 }

@@ -191,8 +191,11 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				return null;
 			var buf = new StringBuilder(2 + value.Length * 2);
 			buf.Append('\\').Append('x');
-			foreach (var b in value)
+			for (int i = 0; i < value.Length; i++)
+			{
+				var b = value[i];
 				buf.Append(CharMap[b >> 4]).Append(CharMap[b & 0xf]);
+			}
 			return buf.ToString();
 		}
 
@@ -215,8 +218,9 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 
 			private void BuildArray(StreamWriter sw)
 			{
-				foreach (var b in Value)
+				for (int i = 0; i < Value.Length; i++)
 				{
+					var b = Value[i];
 					sw.Write(CharMap[b >> 4]);
 					sw.Write(CharMap[b & 0xf]);
 				}

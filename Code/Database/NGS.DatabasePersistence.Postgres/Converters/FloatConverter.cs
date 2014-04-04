@@ -24,13 +24,13 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 
 		private static float ParseFloat(TextReader reader, ref int cur)
 		{
-			var buf = new char[14];
+			var buf = new char[16];
 			var ind = 0;
 			do
 			{
 				buf[ind++] = (char)cur;
 				cur = reader.Read();
-			} while (cur != -1 && ind < 14 && cur != ',' && cur != ')' && cur != '}');
+			} while (cur != -1 && ind < 16 && cur != ',' && cur != ')' && cur != '}');
 			return float.Parse(new string(buf, 0, ind), NumberStyles.Float, CultureInfo.InvariantCulture);
 		}
 

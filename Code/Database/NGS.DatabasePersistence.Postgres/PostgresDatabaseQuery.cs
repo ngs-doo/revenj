@@ -20,7 +20,7 @@ namespace NGS.DatabasePersistence.Postgres
 		long Count<T>(ISpecification<T> filter);
 	}
 
-	public class PostgresDatabaseQuery : IPostgresDatabaseQuery
+	public class PostgresDatabaseQuery : IPostgresDatabaseQuery, IDisposable
 	{
 		public static int MinBatchSize { get; private set; }
 		public static long MaxObjectSize { get; private set; }
@@ -127,7 +127,6 @@ Near: " + ex.Where, ex);
 					NpgsqlConnection.ClearAllPools();
 				}
 				Connection = new NpgsqlConnection(cs);
-				Connection.Open();
 			}
 		}
 
@@ -489,6 +488,19 @@ Near: " + ex.Where, ex);
 		{
 			var command = AddSource<T>("COUNT(*)", filter);
 			return (long)ExecuteScalar(command, true);
+		}
+
+		public void Dispose()
+		{
+			try
+			{
+				if (Connection != null && Connection.State == ConnectionState.Open)
+					Connection.Close();
+			}
+			catch (Exception ex)
+			{
+				LogFactory.Create("Postgres database layer - dispose").Error(ex.ToString());
+			}
 		}
 	}
 }

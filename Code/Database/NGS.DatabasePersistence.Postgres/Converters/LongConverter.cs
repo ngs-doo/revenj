@@ -26,7 +26,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			var neg = cur == '-';
 			if (neg)
 				cur = reader.Read();
-			int res = 0;
+			long res = 0;
 			do
 			{
 				res = res * 10 + (cur - 48);

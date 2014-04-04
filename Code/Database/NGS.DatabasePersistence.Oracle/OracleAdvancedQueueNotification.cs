@@ -48,6 +48,8 @@ namespace NGS.DatabasePersistence.Oracle
 			Logger = logFactory.Create("Oracle notification");
 			Notifications = Subject.AsObservable();
 			SetUpConnection();
+			AppDomain.CurrentDomain.ProcessExit += (s, ea) => IsDisposed = true;
+			AppDomain.CurrentDomain.DomainUnload += (s, ea) => IsDisposed = true;
 		}
 
 		private void SetUpConnection()

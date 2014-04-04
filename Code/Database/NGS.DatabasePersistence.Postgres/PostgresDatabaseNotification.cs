@@ -42,6 +42,8 @@ namespace NGS.DatabasePersistence.Postgres
 			Logger = logFactory.Create("Postgres notification");
 			Notifications = Subject.AsObservable();
 			SetUpConnection(connectionInfo.ConnectionString + ";SyncNotification=true");
+			AppDomain.CurrentDomain.ProcessExit += (s, ea) => IsDisposed = true;
+			AppDomain.CurrentDomain.DomainUnload += (s, ea) => IsDisposed = true;
 		}
 
 		private void SetUpConnection(string connectionString)
@@ -54,10 +56,16 @@ namespace NGS.DatabasePersistence.Postgres
 			}
 			try
 			{
+				Logger.Trace("Setting up notification connection");
 				if (Connection != null)
 				{
 					Connection.StateChange -= Connection_StateChange;
 					Connection.Notification -= Connection_Notification;
+					try { Connection.Close(); }
+					catch (Exception ex)
+					{
+						Logger.Error(ex.ToString());
+					}
 					try { Connection.Dispose(); }
 					catch (Exception ex)
 					{
@@ -84,6 +92,7 @@ namespace NGS.DatabasePersistence.Postgres
 		{
 			if (IsDisposed)
 				return;
+			Logger.Trace("Notification state changed: " + e.CurrentState.ToString());
 			if (e.CurrentState == ConnectionState.Closed
 				|| e.CurrentState == ConnectionState.Broken)
 				SetUpConnection(Connection.ConnectionString);
