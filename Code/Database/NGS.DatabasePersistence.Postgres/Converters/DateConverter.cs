@@ -20,7 +20,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
-				return DateTime.Today;
+				return DateTime.MinValue;
 			var res = ParseDate(reader, cur);
 			reader.Read();
 			return res;
@@ -119,7 +119,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					reader.Read();
 					reader.Read();
 					reader.Read();
-					list.Add(DateTime.Today);
+					list.Add(DateTime.MinValue);
 				}
 				else
 				{

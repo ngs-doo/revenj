@@ -66,15 +66,19 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			return ParseTimestamp(reader, context);
+			var dt = ParseTimestamp(reader, context);
+			reader.Read();
+			return dt;
 		}
 
 		public static DateTime Parse(TextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
-				return DateTime.Now;
-			return ParseTimestamp(reader, context);
+				return DateTime.MinValue;
+			var dt = ParseTimestamp(reader, context);
+			reader.Read();
+			return dt;
 		}
 
 		public static DateTime ParseTimestamp(TextReader reader, int context)
@@ -82,14 +86,14 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			for (int i = 0; i < context - 1; i++)
 				reader.Read();
 			var buf = new char[40];
-			var cur = reader.Read(buf, 0, 19);
-			var x = 19;
+			var x = reader.Read(buf, 0, 19);
+			int cur;
 			do
 			{
 				cur = reader.Read();
 				buf[x++] = (char)cur;
-			} while (cur != -1 && (cur == '.' || cur == '+' || cur == '-' || cur == ':' || cur >= '0' && cur <= '9'));
-			for (int i = 0; i < context; i++)
+			} while (cur != -1 && cur != '\\' && cur != '"' && cur != ',' && cur != ')' && cur != '}');
+			for (int i = 0; i < context - 1; i++)
 				reader.Read();
 			//TODO optimize
 			return DateTime.Parse(new string(buf, 0, x - 1), CultureInfo.InvariantCulture);
@@ -147,6 +151,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				for (int i = 0; i < context; i++)
 					reader.Read();
 			}
+			var innerContext = context << 1;
 			var list = new List<DateTime>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -159,11 +164,11 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					reader.Read();
 					reader.Read();
 					reader.Read();
-					list.Add(DateTime.Now);
+					list.Add(DateTime.MinValue);
 				}
 				else
 				{
-					list.Add(ParseTimestamp(reader, cur));
+					list.Add(ParseTimestamp(reader, innerContext));
 				}
 				cur = reader.Read();
 			}
