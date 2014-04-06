@@ -8,7 +8,7 @@ namespace NGS.DomainPatterns
 	[Serializable]
 	[DataContract]
 	public class History<TRoot> : IHistory<TRoot>
-		where TRoot : IAggregateRoot
+		where TRoot : IObjectHistory
 	{
 		[DataMember]
 		public Snapshot<TRoot>[] Snapshots { get; private set; }
@@ -29,7 +29,7 @@ namespace NGS.DomainPatterns
 	[Serializable]
 	[DataContract]
 	public class Snapshot<TRoot> : ISnapshot<TRoot>
-		where TRoot : IAggregateRoot
+		where TRoot : IObjectHistory
 	{
 		[DataMember]
 		public DateTime At { get; private set; }

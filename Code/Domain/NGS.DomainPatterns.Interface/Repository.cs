@@ -27,6 +27,7 @@ namespace NGS.DomainPatterns
 	/// </summary>
 	/// <typeparam name="TValue">data type</typeparam>
 	public interface IQueryableRepository<out TValue>
+		where TValue : IDataSource
 	{
 		/// <summary>
 		/// Query data using provided expression (optional).
@@ -117,6 +118,7 @@ namespace NGS.DomainPatterns
 		/// <param name="repository">queryable repository</param>
 		/// <returns>projection to data</returns>
 		public static IQueryable<TValue> FindAll<TValue>(this IQueryableRepository<TValue> repository)
+			where TValue : IDataSource
 		{
 			Contract.Requires(repository != null);
 
@@ -129,6 +131,7 @@ namespace NGS.DomainPatterns
 		/// <param name="repository">queryable repository</param>
 		/// <returns>found items</returns>
 		public static TValue[] SearchAll<TValue>(this IQueryableRepository<TValue> repository)
+			where TValue : IDataSource
 		{
 			Contract.Requires(repository != null);
 

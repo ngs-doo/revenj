@@ -65,6 +65,8 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.Visitors
 
 		public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
 		{
+			QueryParts.AddOrderBy(orderByClause);
+
 			base.VisitOrderByClause(orderByClause, queryModel, index);
 		}
 

@@ -105,6 +105,9 @@ Example argument:
 			var domainObjectType = DomainModel.Find(domainName);
 			if (domainObjectType == null)
 				throw new ArgumentException("Couldn't find domain object: {0}".With(domainName));
+			if (!typeof(IDataSource).IsAssignableFrom(domainObjectType))
+				throw new ArgumentException(@"Specified type ({0}) is not a data source. 
+Please check your arguments.".With(domainName));
 			if (!Permissions.CanAccess(domainObjectType))
 				throw new SecurityException("You don't have permission to access: {0}.".With(domainName));
 			if (string.IsNullOrWhiteSpace(specificationName))
@@ -188,6 +191,7 @@ Example argument:
 		}
 
 		private static IQueryableRepository<T> GetRepository<T>(IServiceLocator locator)
+			where T : IDataSource
 		{
 			try
 			{
@@ -211,7 +215,7 @@ Example argument:
 		}
 
 		private class SearchDomainObjectCommand<TDomainObject> : ISearchDomainObjectCommand<TDomainObject>
-			where TDomainObject : class
+			where TDomainObject : class, IDataSource
 		{
 			public virtual TDomainObject[] FindBy<TFormat>(
 				ISerialization<TFormat> serializer,
@@ -275,7 +279,7 @@ Example argument:
 		}
 
 		private class SearchDomainObjectWithSpecificationCommand<TDomainObject, TSpecification> : SearchDomainObjectCommand<TDomainObject>
-			where TDomainObject : class
+			where TDomainObject : class, IDataSource
 		{
 			public override TDomainObject[] FindBy<TFormat>(
 				ISerialization<TFormat> serializer,

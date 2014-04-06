@@ -3,6 +3,11 @@
 namespace NGS.DomainPatterns
 {
 	/// <summary>
+	/// Queryable domain object signature
+	/// </summary>
+	public interface IDataSource { }
+
+	/// <summary>
 	/// Entity domain object signature.
 	/// </summary>
 	public interface IEntity : IEquatable<IEntity>
@@ -12,7 +17,7 @@ namespace NGS.DomainPatterns
 	/// Domain objects with URI property.
 	/// URI is string representation of it's unique identity.
 	/// </summary>
-	public interface IIdentifiable
+	public interface IIdentifiable : IDataSource
 	{
 		string URI { get; }
 	}

@@ -94,7 +94,6 @@
     <Compile Include="Cube\PostgresOlapCubeQuery.cs" />
     <Compile Include="Attributes\RepositoryAttribute.cs" />
     <Compile Include="PostgresDatabaseNotification.cs" />
-    <Compile Include="PostgresDataContext.cs" />
     <Compile Include="PostgresSequence.cs" />
     <Compile Include="PostgresDatabaseQuery.cs" />
     <Compile Include="PostgresTypedArray.cs" />

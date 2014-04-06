@@ -63,8 +63,8 @@ namespace Revenj.Plugins.Server.Commands
 					@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 
-			if (!typeof(IAggregateRoot).IsAssignableFrom(rootType))
-				return CommandResult<TOutput>.Fail(@"Specified type ({0}) is not an aggregate root. 
+			if (!typeof(IObjectHistory).IsAssignableFrom(rootType))
+				return CommandResult<TOutput>.Fail(@"Specified type ({0}) does not support history tracking. 
 Please check your arguments.".With(argument.Name), null);
 
 			if (!Permissions.CanAccess(rootType))
@@ -111,7 +111,7 @@ Example argument:
 		}
 
 		private class FindCommand<TRoot> : IFindCommand
-			where TRoot : IAggregateRoot
+			where TRoot : IObjectHistory
 		{
 			public FindResult<TOutput> Find<TOutput>(ISerialization<TOutput> output, IServiceLocator locator, string[] uris)
 			{

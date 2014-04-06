@@ -70,6 +70,8 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors
 
 		public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
 		{
+			QueryParts.AddOrderBy(orderByClause);
+
 			base.VisitOrderByClause(orderByClause, queryModel, index);
 		}
 

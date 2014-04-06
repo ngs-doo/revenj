@@ -157,7 +157,7 @@ namespace NGS.DomainPatterns
 			Contract.Requires(domainEvent != null);
 
 			var uris = store.Submit(new[] { domainEvent });
-			if (uris != null && uris.Length != 0)
+			if (uris != null && uris.Length == 1)
 				return uris[0];
 			return null;
 		}

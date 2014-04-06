@@ -71,6 +71,14 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			return false;
 		}
 
+		private static ConstantExpression ConvertToEnum(UnaryExpression ua, ConstantExpression ce)
+		{
+			var type = ua.Operand.Type;
+			if (ce == null || !type.IsEnum)
+				return null;
+			return Expression.Constant(Enum.ToObject(type, (int)ce.Value), type);
+		}
+
 		protected override Expression VisitBinaryExpression(BinaryExpression expression)
 		{
 			SqlExpression.Append(" ");
@@ -79,37 +87,58 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp)))
 					return expression;
 
+			var left = expression.Left;
+			var right = expression.Right;
+
+			if (left.Type == typeof(int) && right.Type == typeof(int)
+				&& (left.NodeType == ExpressionType.Convert && right.NodeType == ExpressionType.Constant
+					|| left.NodeType == ExpressionType.Constant && right.NodeType == ExpressionType.Convert))
+			{
+				var ual = left as UnaryExpression;
+				var uar = right as UnaryExpression;
+				if (ual != null)
+				{
+					var ce = ConvertToEnum(ual, right as ConstantExpression);
+					if (ce != null) right = ce;
+				}
+				else if (uar != null)
+				{
+					var ce = ConvertToEnum(uar, left as ConstantExpression);
+					if (ce != null) left = ce;
+				}
+			}
+
 			switch (expression.NodeType)
 			{
 				case ExpressionType.Coalesce:
 					SqlExpression.Append(" COALESCE(");
-					VisitExpression(expression.Left);
+					VisitExpression(left);
 					SqlExpression.Append(", ");
-					VisitExpression(expression.Right);
+					VisitExpression(right);
 					SqlExpression.Append(")");
 					return expression;
 			}
 
 			SqlExpression.Append("(");
 
-			var nullLeft = IsNullExpression(expression.Left);
-			var nullRight = IsNullExpression(expression.Right);
+			var nullLeft = IsNullExpression(left);
+			var nullRight = IsNullExpression(right);
 			if ((expression.NodeType == ExpressionType.NotEqual || expression.NodeType == ExpressionType.Equal)
 				&& (nullLeft || nullRight))
 			{
 				if (expression.NodeType == ExpressionType.NotEqual)
 					SqlExpression.Append("(NOT ");
 				if (nullRight)
-					VisitExpression(expression.Left);
+					VisitExpression(left);
 				else
-					VisitExpression(expression.Right);
+					VisitExpression(right);
 				SqlExpression.Append(" IS NULL)");
 				if (expression.NodeType == ExpressionType.NotEqual)
 					SqlExpression.Append(")");
 				return expression;
 			}
 
-			VisitExpression(expression.Left);
+			VisitExpression(left);
 
 			// In production code, handle this via lookup tables.
 			switch (expression.NodeType)
@@ -176,15 +205,15 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors
 					break;
 			}
 
-			VisitExpression(expression.Right);
+			VisitExpression(right);
 
 			if (expression.NodeType == ExpressionType.NotEqual)
 			{
 				SqlExpression.Append(" OR (");
-				if (expression.Left is ConstantExpression || expression.Left is PartialEvaluationExceptionExpression)
-					VisitExpression(expression.Right);
+				if (left is ConstantExpression || left is PartialEvaluationExceptionExpression)
+					VisitExpression(right);
 				else
-					VisitExpression(expression.Left);
+					VisitExpression(left);
 				SqlExpression.Append(" IS NULL)");
 			}
 

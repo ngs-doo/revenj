@@ -78,6 +78,7 @@
     <Compile Include="Cache\LazyCache.cs" />
     <Compile Include="Cache\EagerCache.cs" />
     <Compile Include="ChangeNotifications.cs" />
+    <Compile Include="DataContext.cs" />
     <Compile Include="DocumentReport.cs" />
     <Compile Include="Cache\LookupCache.cs" />
     <Compile Include="DomainEventSource.cs" />

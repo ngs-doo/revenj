@@ -84,6 +84,7 @@ namespace Revenj.Core
 			builder.RegisterType<DomainEventStore>().As<IDomainEventStore>().InstancePerLifetimeScope();
 			builder.RegisterGeneric(typeof(SingleDomainEventSource<>)).As(typeof(IDomainEventSource<>)).InstancePerLifetimeScope();
 			builder.RegisterGeneric(typeof(RegisterChangeNotifications<>)).As(typeof(IObservable<>)).SingleInstance();
+			builder.RegisterType<DataContext>().As<IDataContext>().InstancePerLifetimeScope();
 		}
 
 		private static void SetupPostgres(Autofac.ContainerBuilder builder, string cs)
