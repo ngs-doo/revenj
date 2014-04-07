@@ -77,7 +77,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				return "NULL";
 			using (var cms = ChunkedMemoryStream.Create())
 			{
-				var sw = new StreamWriter(cms);
+				var sw = cms.GetWriter();
 				Action<StreamWriter, char> mappings = null;
 				if (quote)
 				{
@@ -107,17 +107,18 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					sw.Write('\'');
 				sw.Flush();
 				cms.Position = 0;
-				using (var sr = new StreamReader(cms))
-					return sr.ReadToEnd();
+				return cms.GetReader().ReadToEnd();
 			}
 		}
+
+		private static MemoryStream NullStream = new MemoryStream(new byte[] { (byte)'N', (byte)'U', (byte)'L', (byte)'L' });
 
 		public Stream Build()
 		{
 			if (Elements == null)
-				return new MemoryStream(new byte[] { (byte)'N', (byte)'U', (byte)'L', (byte)'L' });
+				return NullStream;
 			var cms = ChunkedMemoryStream.Create();
-			var sw = new StreamWriter(cms);
+			var sw = cms.GetWriter();
 			sw.Write('{');
 			for (int i = 0; i < Elements.Length; i++)
 			{

@@ -17,7 +17,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 		{
 			using (var cms = ChunkedMemoryStream.Create())
 			{
-				var sw = new StreamWriter(cms);
+				var sw = cms.GetWriter();
 				if (quote)
 				{
 					sw.Write('\'');
@@ -27,8 +27,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				else InsertRecord(sw, string.Empty, null);
 				sw.Flush();
 				cms.Position = 0;
-				using (var sr = new StreamReader(cms))
-					return sr.ReadToEnd();
+				return cms.GetReader().ReadToEnd();
 			}
 		}
 
@@ -41,22 +40,33 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 
 		public static void EscapeBulkCopy(StreamWriter sw, char c)
 		{
-			if (c == '\\')
-				sw.Write("\\\\");
-			else if (c == '\t')
-				sw.Write("\\t");
-			else if (c == '\n')
-				sw.Write("\\n");
-			else if (c == '\r')
-				sw.Write("\\r");
-			else if (c == '\v')
-				sw.Write("\\v");
-			else if (c == '\b')
-				sw.Write("\\b");
-			else if (c == '\f')
-				sw.Write("\\f");
-			else
-				sw.Write(c);
+			switch (c)
+			{
+				case '\\':
+					sw.Write("\\\\");
+					break;
+				case '\t':
+					sw.Write("\\t");
+					break;
+				case '\n':
+					sw.Write("\\n");
+					break;
+				case '\r':
+					sw.Write("\\r");
+					break;
+				case '\v':
+					sw.Write("\\v");
+					break;
+				case '\b':
+					sw.Write("\\b");
+					break;
+				case '\f':
+					sw.Write("\\f");
+					break;
+				default:
+					sw.Write(c);
+					break;
+			}
 		}
 
 		private static ConcurrentDictionary<string, string> QuoteEscape = new ConcurrentDictionary<string, string>(1, 17);

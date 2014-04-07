@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using NGS.Utility;
 
 namespace NGS.DatabasePersistence.Postgres.Converters
@@ -26,9 +25,8 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			if (value.Length > 1 && value[0] == '\\' && value[1] == 'x')
 			{
 				var data = new byte[value.Length / 2 - 1];
-				var len = data.Length;
 				var pos = 2;
-				for (int i = 0; i < len; i++)
+				for (int i = 0; i < data.Length; i++)
 					data[i] = (byte)((CharLookup[value[pos++]] << 4) + CharLookup[value[pos++]]);
 				return data;
 			}
@@ -74,6 +72,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			cur = reader.Peek();
 			if (cur == '}')
 				reader.Read();
+			var emptyColl = allowNulls ? null : new byte[0];
 			while (cur != -1 && cur != '}')
 			{
 				cur = reader.Read();
@@ -82,7 +81,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					reader.Read();
 					reader.Read();
 					reader.Read();
-					list.Add(allowNulls ? null : new byte[0]);
+					list.Add(emptyColl);
 					cur = reader.Read();
 				}
 				else
@@ -148,6 +147,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			cur = reader.Peek();
 			if (cur == '}')
 				reader.Read();
+			var emptyCol = allowNulls ? null : new MemoryStream();
 			while (cur != -1 && cur != '}')
 			{
 				cur = reader.Read();
@@ -156,7 +156,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					reader.Read();
 					reader.Read();
 					reader.Read();
-					list.Add(allowNulls ? null : new MemoryStream());
+					list.Add(emptyCol);
 					cur = reader.Read();
 				}
 				else
@@ -189,14 +189,17 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 		{
 			if (value == null)
 				return null;
-			var buf = new StringBuilder(2 + value.Length * 2);
-			buf.Append('\\').Append('x');
+			var buf = new char[2 + value.Length * 2];
+			buf[0] = '\\';
+			buf[1] = 'x';
+			var cnt = 2;
 			for (int i = 0; i < value.Length; i++)
 			{
 				var b = value[i];
-				buf.Append(CharMap[b >> 4]).Append(CharMap[b & 0xf]);
+				buf[cnt++] = CharMap[b >> 4];
+				buf[cnt++] = CharMap[b & 0xf];
 			}
-			return buf.ToString();
+			return new string(buf);
 		}
 
 		public static PostgresTuple ToTuple(byte[] value)
@@ -232,7 +235,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					return "NULL";
 				using (var cms = ChunkedMemoryStream.Create())
 				{
-					var sw = new StreamWriter(cms);
+					var sw = cms.GetWriter();
 					if (quote)
 					{
 						sw.Write('\'');
@@ -242,14 +245,13 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					else InsertRecord(sw, string.Empty, null);
 					sw.Flush();
 					cms.Position = 0;
-					using (var sr = new StreamReader(cms))
-						return sr.ReadToEnd();
+					return cms.GetReader().ReadToEnd();
 				}
 			}
 
 			public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
 			{
-				if (Value != null && Value.Length > 0)
+				if (Value != null)
 				{
 					var pref = BuildSlashEscape(escaping.Length);
 					if (mappings != null)
@@ -298,7 +300,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					return "NULL";
 				using (var cms = ChunkedMemoryStream.Create())
 				{
-					var sw = new StreamWriter(cms);
+					var sw = cms.GetWriter();
 					if (quote)
 					{
 						sw.Write('\'');
@@ -308,8 +310,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					else InsertRecord(sw, string.Empty, null);
 					sw.Flush();
 					cms.Position = 0;
-					using (var sr = new StreamReader(cms))
-						return sr.ReadToEnd();
+					return cms.GetReader().ReadToEnd();
 				}
 			}
 

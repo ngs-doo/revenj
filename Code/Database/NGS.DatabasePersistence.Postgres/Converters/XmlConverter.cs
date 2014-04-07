@@ -49,7 +49,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				var cms = ChunkedMemoryStream.Create();
 				xml.Save(cms);
 				cms.Position = 0;
-				Reader = new StreamReader(cms);
+				Reader = cms.GetReader();
 			}
 
 			public override bool MustEscapeRecord { get { return true; } }

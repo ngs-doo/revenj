@@ -37,6 +37,22 @@ namespace NGS.DatabasePersistence.Postgres
 			sw.Write('\'');
 		}
 
+		public static void ToArray<T>(StreamWriter sw, T[] data, Func<T, RecordTuple> converter)
+		{
+			if (data == null)
+			{
+				sw.Write("NULL");
+				return;
+			}
+			var arr = new RecordTuple[data.Length];
+			for (int i = 0; i < data.Length; i++)
+				arr[i] = converter(data[i]);
+			sw.Write('\'');
+			var tuple = new ArrayTuple(arr);
+			tuple.InsertRecord(sw, string.Empty, PostgresTuple.EscapeQuote);
+			sw.Write('\'');
+		}
+
 		public static List<T> ParseCollection<T>(TextReader reader, int context, IServiceLocator locator, Func<TextReader, int, int, IServiceLocator, T> parseItem)
 		{
 			var cur = reader.Read();

@@ -83,7 +83,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			if (cur == ',' || cur == ')')
 				return null;
 			var cms = ChunkedMemoryStream.Create();
-			var sw = new StreamWriter(cms);
+			var sw = cms.GetWriter();
 			if (cur != '"' && cur != '\\')
 			{
 				while (cur != -1 && cur != ',' && cur != ')')
@@ -138,6 +138,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			cur = reader.Peek();
 			if (cur == '}')
 				reader.Read();
+			var emptyCol = allowNull ? null : string.Empty;
 			while (cur != -1 && cur != '}')
 			{
 				cur = reader.Read();
@@ -171,7 +172,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 					} while (cur != -1 && cur != ',' && cur != '}');
 					var val = sb.ToString();
 					if (val == "NULL")
-						list.Add(allowNull ? null : string.Empty);
+						list.Add(emptyCol);
 					else
 						list.Add(val);
 				}
@@ -205,7 +206,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			{
 				cur = reader.Read();
 				var cms = ChunkedMemoryStream.Create();
-				var sw = new StreamWriter(cms);
+				var sw = cms.GetWriter();
 				if (cur == '"' || cur == '\\')
 				{
 					for (int i = 0; i < innerContext; i++)

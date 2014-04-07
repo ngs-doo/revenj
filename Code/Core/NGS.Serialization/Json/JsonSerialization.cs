@@ -119,10 +119,11 @@ namespace NGS.Serialization
 			serializer.TypeNameHandling = type != declaredType || !(declaredType.IsClass || declaredType.IsValueType) ? TypeNameHandling.Objects : TypeNameHandling.Auto;
 			serializer.Binder = Binder;
 			var cms = ChunkedMemoryStream.Create();
-			var sw = new StreamWriter(cms);
+			var sw = cms.GetWriter();
 			serializer.Serialize(sw, value);
 			sw.Flush();
 			cms.Position = 0;
+			//TODO: GetReader !?
 			return new StreamReader(cms, Encoding.UTF8);
 		}
 

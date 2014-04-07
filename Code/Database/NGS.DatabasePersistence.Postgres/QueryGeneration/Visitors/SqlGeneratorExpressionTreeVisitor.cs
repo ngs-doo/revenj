@@ -111,11 +111,11 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			switch (expression.NodeType)
 			{
 				case ExpressionType.Coalesce:
-					SqlExpression.Append(" COALESCE(");
+					SqlExpression.Append(" (COALESCE(");
 					VisitExpression(left);
 					SqlExpression.Append(", ");
 					VisitExpression(right);
-					SqlExpression.Append(")");
+					SqlExpression.Append("))");
 					return expression;
 			}
 

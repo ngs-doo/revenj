@@ -63,7 +63,7 @@ namespace NGS.DatabasePersistence.Oracle.Converters
 					(from u in update
 					 where u.Key.URI != u.Value.URI
 					 select u.Key).ToList();
-				if (changedUri.Any())
+				if (changedUri.Count != 0)
 					list.Add(new OracleNotifyInfoConverter
 					{
 						Source = source,

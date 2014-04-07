@@ -16,6 +16,8 @@ namespace NGS.Utility
 		private int CurrentPosition;
 		private int TotalSize;
 		private const int BlockSize = 8192;
+		private readonly StreamWriter Writer;
+		private readonly StreamReader Reader;
 
 		private static int SizeLimit = 16 * Environment.ProcessorCount;
 		private static ConcurrentQueue<ChunkedMemoryStream> PoolQueue = new ConcurrentQueue<ChunkedMemoryStream>();
@@ -50,6 +52,8 @@ namespace NGS.Utility
 		public ChunkedMemoryStream()
 		{
 			Blocks.Add(new byte[BlockSize]);
+			Writer = new StreamWriter(this);
+			Reader = new StreamReader(this);
 		}
 		/// <summary>
 		/// Create in memory stream based on another stream.
@@ -281,29 +285,17 @@ namespace NGS.Utility
 			return cms;
 		}
 
-		private StreamWriter Writer;
 		/// <summary>
 		/// Reuse same stream writer on this stream.
 		/// </summary>
 		/// <returns>stream writer</returns>
-		public StreamWriter GetWriter()
-		{
-			if (Writer == null)
-				Writer = new StreamWriter(this);
-			return Writer;
-		}
+		public StreamWriter GetWriter() { return Writer; }
 
-		private StreamReader Reader;
 		/// <summary>
 		/// Reuse same stream reader on this stream.
 		/// </summary>
 		/// <returns>stream reader</returns>
-		public StreamReader GetReader()
-		{
-			if (Reader == null)
-				Reader = new StreamReader(this);
-			return Reader;
-		}
+		public StreamReader GetReader() { return Reader; }
 
 		bool disposed;
 
