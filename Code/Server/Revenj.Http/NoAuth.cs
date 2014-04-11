@@ -7,7 +7,7 @@ namespace Revenj.Http
 	{
 		private readonly string[] NoRoles = new string[0];
 
-		public NoAuth() : base(null, null) { }
+		public NoAuth() : base(null, null, null) { }
 
 		public override AuthorizeOrError TryAuthorize(HttpListenerContext context, RouteHandler route)
 		{

@@ -16,7 +16,8 @@ namespace Revenj.Wcf
 	{
 		private readonly IPrincipalFactory PrincipalFactory = ContainerWcfHost.Resolve<IPrincipalFactory>();
 		private static readonly string DefaultAuthorization = ConfigurationManager.AppSettings["DefaultAuthorization"];
-		protected readonly IAuthentication Authentication = ContainerWcfHost.Resolve<IAuthentication>();
+		protected readonly IAuthentication<string> PassAuthentication = ContainerWcfHost.Resolve<IAuthentication<string>>();
+		protected readonly IAuthentication<byte[]> HashAuthentication = ContainerWcfHost.Resolve<IAuthentication<byte[]>>();
 		private static readonly HashSet<string> PublicUrl = new HashSet<string>();
 		private static readonly HashSet<string> PublicTemplate = new HashSet<string>();
 		private static readonly string MissingBasicAuth = "Basic realm=\"" + Environment.MachineName + "\"";
@@ -81,7 +82,11 @@ namespace Revenj.Wcf
 			if (string.IsNullOrEmpty(user))
 				Utility.ThrowError("User not specified in authorization header.", HttpStatusCode.Unauthorized);
 
-			return new RestIdentity(authType, Authentication.IsAuthenticated(user, cred[1]), user);
+			var isAuthenticated = authType == "Hash"
+				? HashAuthentication.IsAuthenticated(user, Convert.FromBase64String(cred[1]))
+				: PassAuthentication.IsAuthenticated(user, cred[1]);
+
+			return new RestIdentity(authType, isAuthenticated, user);
 		}
 
 		private IIdentity GetClientIdentity(EvaluationContext evaluationContext)

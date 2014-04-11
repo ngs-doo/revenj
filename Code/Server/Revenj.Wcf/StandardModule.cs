@@ -3,6 +3,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security;
 using System.Text;
 using System.Xml.Linq;
 using Autofac;
@@ -47,7 +48,7 @@ namespace Revenj.Wcf
 			SetupPatterns(builder);
 			SetupSerialization(builder);
 
-			builder.RegisterType<RepositoryAuthentication>().As<IAuthentication>();
+			builder.RegisterType<RepositoryAuthentication>().As<IAuthentication<SecureString>, IAuthentication<string>, IAuthentication<byte[]>>();
 			builder.RegisterType<RepositoryPrincipalFactory>().As<IPrincipalFactory>();
 			builder.RegisterType<PermissionManager>().As<IPermissionManager>().SingleInstance();
 

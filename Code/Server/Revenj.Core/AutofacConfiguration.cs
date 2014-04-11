@@ -18,6 +18,12 @@ namespace Revenj.Core
 {
 	internal static class AutofacConfiguration
 	{
+		static AutofacConfiguration()
+		{
+			//TODO force plugin initialization
+			new NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport.CommonMembers();
+		}
+
 		public static IServiceLocator Configure(Database database, string connectionString)
 		{
 			var state = new SystemState();

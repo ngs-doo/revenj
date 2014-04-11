@@ -1,5 +1,4 @@
 ﻿using System.IdentityModel.Selectors;
-using System.Security;
 using System.ServiceModel;
 using NGS;
 using NGS.Security;
@@ -8,15 +7,11 @@ namespace Revenj.Wcf
 {
 	public class StandardLoginValidator : UserNamePasswordValidator
 	{
-		private readonly IAuthentication Authentication = ContainerWcfHost.Resolve<IAuthentication>();
+		private readonly IAuthentication<string> Authentication = ContainerWcfHost.Resolve<IAuthentication<string>>();
 
 		public override void Validate(string userName, string password)
 		{
-			var secure = new SecureString();
-			if (password != null)
-				foreach (var p in password)
-					secure.AppendChar(p);
-			if (!Authentication.IsAuthenticated(userName, secure))
+			if (!Authentication.IsAuthenticated(userName, password))
 				throw new FaultException("User {0} was not authenticated".With(userName));
 		}
 	}

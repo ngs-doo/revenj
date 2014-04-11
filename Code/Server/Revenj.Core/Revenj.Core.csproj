@@ -132,7 +132,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>copy ..\..\..\..\Plugins\NGS.Plugins.DatabasePersistence.Postgres\bin\$(ConfigurationName)\NGS.Plugins.DatabasePersistence.Postgres.dll .
-copy ..\..\..\..\Plugins\NGS.Plugins.DatabasePersistence.Oracle\bin\$(ConfigurationName)\NGS.Plugins.DatabasePersistence.Oracle.dll .
+REM copy ..\..\..\..\Plugins\NGS.Plugins.DatabasePersistence.Oracle\bin\$(ConfigurationName)\NGS.Plugins.DatabasePersistence.Oracle.dll .
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

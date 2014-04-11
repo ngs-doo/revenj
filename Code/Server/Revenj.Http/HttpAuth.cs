@@ -13,7 +13,8 @@ namespace Revenj.Http
 	{
 		protected readonly IPrincipalFactory PrincipalFactory;
 		private static readonly string DefaultAuthorization = ConfigurationManager.AppSettings["DefaultAuthorization"];
-		protected readonly IAuthentication Authentication;
+		protected readonly IAuthentication<string> PassAuthentication;
+		protected readonly IAuthentication<byte[]> HashAuthentication;
 		protected static readonly HashSet<string> PublicUrl = new HashSet<string>();
 		protected static readonly HashSet<UriTemplate> PublicTemplate = new HashSet<UriTemplate>();
 		private static readonly string MissingBasicAuth = "Basic realm=\"" + Environment.MachineName + "\"";
@@ -31,10 +32,12 @@ namespace Revenj.Http
 
 		public HttpAuth(
 			IPrincipalFactory principalFactory,
-			IAuthentication authentication)
+			IAuthentication<string> passAuthentication,
+			IAuthentication<byte[]> hashAuthentication)
 		{
 			this.PrincipalFactory = principalFactory;
-			this.Authentication = authentication;
+			this.PassAuthentication = passAuthentication;
+			this.HashAuthentication = hashAuthentication;
 		}
 
 		private struct RestIdentity : IIdentity
@@ -103,7 +106,11 @@ namespace Revenj.Http
 			if (string.IsNullOrEmpty(user))
 				return AuthorizeOrError.Fail("User not specified in authorization header.", HttpStatusCode.Unauthorized);
 
-			var identity = new RestIdentity(authType, Authentication.IsAuthenticated(user, cred[1]), user);
+			var isAuthenticated = authType == "Hash"
+				? HashAuthentication.IsAuthenticated(user, Convert.FromBase64String(cred[1]))
+				: PassAuthentication.IsAuthenticated(user, cred[1]);
+
+			var identity = new RestIdentity(authType, isAuthenticated, user);
 			if (!identity.IsAuthenticated)
 			{
 				if ((PublicUrl.Contains(request.RawUrl)
