@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -70,9 +69,9 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors
 						else
 						{
 							var obj = dr.GetValue(index + 1);
-							var sb = obj as StringBuilder;
-							if (sb != null)
-								array = PostgresRecordConverter.ParseArray(sb);
+							var tr = obj as TextReader;
+							if (tr != null)
+								array = PostgresRecordConverter.ParseArray(tr.ReadToEnd());
 							else
 								array = PostgresRecordConverter.ParseArray(obj as string);
 						};
@@ -257,10 +256,7 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors
 								var obj = dr.GetValue(cnt);
 								//TODO fix dead code usage
 								var tr = obj as TextReader;
-								var sb = obj as StringBuilder;
-								if (sb != null)
-									array = PostgresRecordConverter.ParseArray(sb);
-								else if (tr != null)
+								if (tr != null)
 									array = PostgresRecordConverter.ParseArray(tr.ReadToEnd());
 								else
 									array = PostgresRecordConverter.ParseArray(obj as string);

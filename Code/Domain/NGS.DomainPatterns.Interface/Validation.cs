@@ -10,8 +10,7 @@ namespace NGS.DomainPatterns
 	/// validation and provides an explanation why.
 	/// </summary>
 	/// <typeparam name="TEntity">domain object type</typeparam>
-	[ContractClass(typeof(ValidationContract<>))]
-	public interface IValidation<TEntity>
+	public interface IValidation<TEntity> where TEntity : IIdentifiable
 	{
 		/// <summary>
 		/// Apply filter on provided items and filter items which fail 
@@ -21,6 +20,13 @@ namespace NGS.DomainPatterns
 		/// <returns>invalid items</returns>
 		IQueryable<TEntity> FindInvalidItems(IQueryable<TEntity> items);
 		/// <summary>
+		/// Check if provided objects can be persisted.
+		/// Sometimes invalid objects are allowed to be persisted, but they are still considered invalid.
+		/// </summary>
+		/// <param name="items">items to check</param>
+		/// <returns>all items can be persisted</returns>
+		bool CanPersist(IEnumerable<TEntity> items);
+		/// <summary>
 		/// Reason why does provided object fail validation.
 		/// </summary>
 		/// <param name="item">invalid object</param>
@@ -28,23 +34,6 @@ namespace NGS.DomainPatterns
 		string GetErrorDescription(TEntity item);
 	}
 
-	[ContractClassFor(typeof(IValidation<>))]
-	internal sealed class ValidationContract<TEntity> : IValidation<TEntity>
-	{
-		public IQueryable<TEntity> FindInvalidItems(IQueryable<TEntity> items)
-		{
-			Contract.Requires(items != null);
-			Contract.Ensures(Contract.Result<IQueryable<TEntity>>() != null);
-
-			return null;
-		}
-		public string GetErrorDescription(TEntity item)
-		{
-			Contract.Requires(item != null);
-
-			return null;
-		}
-	}
 	/// <summary>
 	/// Validation result signature.
 	/// </summary>
@@ -68,6 +57,7 @@ namespace NGS.DomainPatterns
 		/// <param name="items">invalid items</param>
 		/// <returns>aggregated result message</returns>
 		public static string GenerateDescription<TEntity>(this IValidation<TEntity> validation, IEnumerable<TEntity> items)
+			where TEntity : IIdentifiable
 		{
 			Contract.Requires(validation != null);
 			Contract.Requires(items != null);

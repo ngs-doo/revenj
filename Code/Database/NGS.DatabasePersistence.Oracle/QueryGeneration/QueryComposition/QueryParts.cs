@@ -591,16 +591,33 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 			}
 			else if (single.Count == 1)
 			{
+				var minLimit = "2";
+				if (limit.Count != 0)
+				{
+					if (limit.TrueForAll(it => it.Count is ConstantExpression))
+					{
+						var min = limit.Min(it => (int)(it.Count as ConstantExpression).Value);
+						if (min > 1) min = 2;
+						minLimit = min.ToString();
+					}
+					else
+					{
+						minLimit = "LEAST(2," + string.Join(", ", limit.Select(it => GetSqlExpression(it.Count))) + ")";
+					}
+				}
 				if (offset.Count == 0)
 				{
 					sb.Insert(0, "SELECT * FROM (");
-					sb.Append(") sq WHERE RowNum < 3");
+					sb.Append(") sq WHERE RowNum <= ");
+					sb.Append(minLimit);
 				}
 				if (offset.Count == 1)
 				{
 					var exp = GetSqlExpression(offset[0].Count);
 					sb.Insert(0, "SELECT * FROM ( SELECT /*+ FIRST_ROWS(n) */ sq.*, RowNum rn$ FROM (");
-					sb.Append(") sq WHERE RowNum <= 2 + ");
+					sb.Append(") sq WHERE RowNum <= ");
+					sb.Append(minLimit);
+					sb.Append(" + ");
 					sb.Append(exp);
 					sb.Append(") WHERE rn$ > ");
 					sb.Append(exp);

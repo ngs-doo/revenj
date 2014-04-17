@@ -675,7 +675,23 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 			}
 			else if (single.Count == 1)
 			{
-				sb.Append("LIMIT 2");
+				if (limit.Count == 0)
+					sb.Append("LIMIT 2");
+				else
+				{
+					if (limit.TrueForAll(it => it.Count is ConstantExpression))
+					{
+						var min = limit.Min(it => (int)(it.Count as ConstantExpression).Value);
+						if (min > 1) min = 2;
+						sb.Append("LIMIT ").Append(min);
+					}
+					else
+					{
+						sb.Append("LIMIT LEAST(2,");
+						sb.Append(string.Join(", ", limit.Select(it => GetSqlExpression(it.Count))));
+						sb.AppendLine(")");
+					}
+				}
 				if (offset.Count == 1)
 					sb.AppendLine("OFFSET " + GetSqlExpression(offset[0].Count));
 			}
