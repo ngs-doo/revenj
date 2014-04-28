@@ -186,7 +186,7 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 				var repository = GetRepository<TDomainObject>(locator);
 				IQueryable<TDomainObject> result;
 				if (specification == null)
-					result = repository.FindAll();
+					result = repository.Query();
 				else
 					result = repository.Query((dynamic)specification);
 				return result.LongCount();

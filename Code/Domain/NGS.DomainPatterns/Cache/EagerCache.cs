@@ -28,7 +28,7 @@ namespace NGS.DomainPatterns
 			this.Repository = repository;
 
 			Subscription = notifications.Notifications.Subscribe(Synchronize);
-			var found = repository.SearchAll();
+			var found = repository.Search();
 			Data = new ConcurrentDictionary<string, TValue>(1, found.Length);
 			foreach (var f in found)
 				Data.TryAdd(f.URI, f);
@@ -90,7 +90,7 @@ namespace NGS.DomainPatterns
 
 		public void InvalidateAll()
 		{
-			var found = Repository.SearchAll();
+			var found = Repository.Search();
 			var data = new ConcurrentDictionary<string, TValue>(1, found.Length);
 			foreach (var f in found)
 				data.TryAdd(f.URI, f);

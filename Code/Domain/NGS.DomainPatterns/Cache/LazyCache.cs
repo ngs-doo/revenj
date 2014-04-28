@@ -46,7 +46,7 @@ namespace NGS.DomainPatterns
 			if (Invalid)
 			{
 				Invalid = false;
-				Data = Repository.FindAll().ToList().ToDictionary(it => it.URI, it => it);
+				Data = Repository.Query().ToList().ToDictionary(it => it.URI, it => it);
 			}
 		}
 

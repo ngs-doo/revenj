@@ -117,7 +117,7 @@ namespace NGS.DomainPatterns
 		/// <typeparam name="TValue">data type</typeparam>
 		/// <param name="repository">queryable repository</param>
 		/// <returns>projection to data</returns>
-		public static IQueryable<TValue> FindAll<TValue>(this IQueryableRepository<TValue> repository)
+		public static IQueryable<TValue> Query<TValue>(this IQueryableRepository<TValue> repository)
 			where TValue : IDataSource
 		{
 			Contract.Requires(repository != null);
@@ -130,7 +130,7 @@ namespace NGS.DomainPatterns
 		/// <typeparam name="TValue">data type</typeparam>
 		/// <param name="repository">queryable repository</param>
 		/// <returns>found items</returns>
-		public static TValue[] SearchAll<TValue>(this IQueryableRepository<TValue> repository)
+		public static TValue[] Search<TValue>(this IQueryableRepository<TValue> repository)
 			where TValue : IDataSource
 		{
 			Contract.Requires(repository != null);
