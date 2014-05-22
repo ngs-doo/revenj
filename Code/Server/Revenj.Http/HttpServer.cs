@@ -123,6 +123,10 @@ namespace Revenj.Http
 			{
 				ReturnError(response, 500, ex.Message);
 			}
+			finally
+			{
+				response.Close();
+			}
 		}
 
 		private static void ReturnError(HttpListenerResponse response, int status, string message)
