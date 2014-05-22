@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Linq.Expressions;
-using NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 using System.ComponentModel.Composition;
+using System.Linq.Expressions;
+using System.Text;
+using NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 
 namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 {
@@ -26,17 +24,17 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 				var ceLeft = expression.Left as ConstantExpression;
 				var ceRight = expression.Right as ConstantExpression;
 
-				if (ceLeft != null && ceLeft.Type == typeof(bool))
+				if (ceLeft != null && (ceLeft.Type == typeof(bool) || ceLeft.Type == typeof(bool?)))
 				{
-					if ((bool)ceLeft.Value)
+					if (true.Equals(ceLeft.Value))
 						visitExpression(expression.Right);
 					else
 						queryBuilder.Append("false ");
 					return true;
 				}
-				else if (ceRight != null && ceRight.Type == typeof(bool))
+				else if (ceRight != null && (ceRight.Type == typeof(bool) || ceRight.Type == typeof(bool?)))
 				{
-					if ((bool)ceRight.Value)
+					if (true.Equals(ceRight.Value))
 						visitExpression(expression.Left);
 					else
 						queryBuilder.Append("false ");
@@ -53,17 +51,17 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 				var ceLeft = expression.Left as ConstantExpression;
 				var ceRight = expression.Right as ConstantExpression;
 
-				if (ceLeft != null && ceLeft.Type == typeof(bool))
+				if (ceLeft != null && (ceLeft.Type == typeof(bool) || ceLeft.Type == typeof(bool?)))
 				{
-					if ((bool)ceLeft.Value)
+					if (true.Equals(ceLeft.Value))
 						queryBuilder.Append("true ");
 					else
 						visitExpression(expression.Right);
 					return true;
 				}
-				else if (ceRight != null && ceRight.Type == typeof(bool))
+				else if (ceRight != null && (ceRight.Type == typeof(bool) || ceRight.Type == typeof(bool?)))
 				{
-					if ((bool)ceRight.Value)
+					if (true.Equals(ceRight.Value))
 						queryBuilder.Append("true ");
 					else
 						visitExpression(expression.Left);

@@ -46,7 +46,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
 			sb.Append(string.Join(@", 
-	", Selects.Select(it => it.Sql))).AppendLine();
+	", Selects.Where(it => it.Sql != null).Select(it => it.Sql))).AppendLine();
 			sb.Append(GetFromPart());
 			sb.Append(GetWherePart());
 			sb.Append(GetOrderPart());

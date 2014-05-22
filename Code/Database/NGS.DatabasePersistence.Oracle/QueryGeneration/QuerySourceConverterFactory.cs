@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using NGS.Common;
 using NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition;
 using NGS.DatabasePersistence.Oracle.QueryGeneration.Visitors;
-using NGS.DomainPatterns;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.ResultOperators;
@@ -23,7 +22,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 			if (fc != null)
 				return CreateResult(fc, parts);
 
-			return CreateResult(qs.ItemName, qs.ItemType, qs, parts);
+			return CreateResult(qs.ItemName, qs.ItemType, qs, parts, true);
 		}
 
 		public class Result
@@ -48,22 +47,22 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 				{
 					var type = ce.Value.GetType();
 					if (type.IsQueryable())
-						return CreateResult(qs.ItemName, type.GetGenericArguments()[0], qs, parts);
+						return CreateResult(qs.ItemName, type.GetGenericArguments()[0], qs, parts, true);
 					else
-						return CreateResult(qs.ItemName, qs.ItemType, qs, parts);
+						return CreateResult(qs.ItemName, qs.ItemType, qs, parts, true);
 				}
 				else if (fc.FromExpression is QuerySourceReferenceExpression)
 				{
-					return CreateResult(qs.ItemName, qs.ItemType, qs, parts);
+					return CreateResult(qs.ItemName, qs.ItemType, qs, parts, true);
 				}
 				else if (fc.FromExpression is SubQueryExpression)
 				{
 					var sqe = fc.FromExpression as SubQueryExpression;
 					var source = GetOriginalSource(sqe.QueryModel.MainFromClause);
-					return CreateResult(qs.ItemName, source.ItemType, qs, parts);
+					return CreateResult(qs.ItemName, source.ItemType, qs, parts, false);
 				}
 			}
-			return CreateResult(qs.ItemName, qs.ItemType, qs, parts);
+			return CreateResult(qs.ItemName, qs.ItemType, qs, parts, true);
 		}
 
 		private static Result CreateResult(FromClauseBase fromClause, QueryParts parts)
@@ -73,8 +72,8 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 			{
 				var type = ce.Value.GetType();
 				if (type.IsQueryable())
-					return CreateResult(fromClause.ItemName, type.GetGenericArguments()[0], fromClause, parts);
-				return CreateResult(fromClause.ItemName, fromClause.ItemType, fromClause, parts);
+					return CreateResult(fromClause.ItemName, type.GetGenericArguments()[0], fromClause, parts, true);
+				return CreateResult(fromClause.ItemName, fromClause.ItemType, fromClause, parts, true);
 			}
 			var qsre = fromClause.FromExpression as QuerySourceReferenceExpression;
 			if (qsre != null)
@@ -89,28 +88,34 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 						{
 							var smf = sq.QueryModel.MainFromClause.ItemType;
 							if (fromClause.ItemType.IsAssignableFrom(smf))
-								return CreateResult(fromClause.ItemName, smf, fromClause, parts);
+								return CreateResult(fromClause.ItemName, smf, fromClause, parts, false);
 						}
 					}
 				}
-				return CreateResult(fromClause.ItemName, fromClause.ItemType, fromClause, parts);
+				return CreateResult(fromClause.ItemName, fromClause.ItemType, fromClause, parts, true);
 			}
 			var sqe = fromClause.FromExpression as SubQueryExpression;
 			if (sqe != null)
 			{
 				var source = GetOriginalSource(sqe.QueryModel.MainFromClause);
+				//TODO: ugly hack to decide if VALUE(X) should be used or not
+				var simplified = fromClause is MainFromClause
+					? parts.TryToSimplifyMainFrom(fromClause as MainFromClause)
+					: fromClause is AdditionalFromClause
+					? parts.TryToSimplifyAdditionalFrom(fromClause as AdditionalFromClause)
+					: null;
 				if (fromClause.ItemType == source.ItemType
 					|| fromClause.ItemType.IsAssignableFrom(source.ItemType)
 					|| fromClause.ItemType.IsGrouping())
-					return CreateResult(fromClause.ItemName, source.ItemType, fromClause, parts);
+					return CreateResult(fromClause.ItemName, source.ItemType, fromClause, parts, source == simplified);
 				return CreateProjector(fromClause.ItemName, fromClause, sqe, parts);
 			}
 			var nae = fromClause.FromExpression as NewArrayExpression;
 			if (nae != null)
-				return CreateResult(fromClause.ItemName, fromClause.ItemType, fromClause, parts);
+				return CreateResult(fromClause.ItemName, fromClause.ItemType, fromClause, parts, true);
 			var me = fromClause.FromExpression as MemberExpression;
 			if (me != null)
-				return CreateResult(fromClause.ItemName, fromClause.ItemType, fromClause, parts);
+				return CreateResult(fromClause.ItemName, fromClause.ItemType, fromClause, parts, true);
 			throw new NotImplementedException("Unknown from clause. Please provide feedback about missing feature.");
 		}
 
@@ -137,24 +142,27 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 			string name,
 			Type type,
 			IQuerySource qs,
-			QueryParts parts)
+			QueryParts parts,
+			bool canConvert)
 		{
+			var asValue = type.AsValue();
 			var result =
 				new Result
 				{
 					QuerySource = qs,
 					Name = name,
 					Type = type,
-					AsValue = type.AsValue(),
+					AsValue = canConvert && asValue,
 					CanBeNull = CanBeNull(qs)
 				};
-			if (result.AsValue)
+			if (asValue)
 				result.Instancer = value => (value as IOracleDto).Convert(parts.Locator);
 			else if (type.IsNullable())
 			{
 				var baseType = type.GetGenericArguments()[0];
 				result.Instancer = value => value != null ? Convert.ChangeType(value, baseType) : null;
 			}
+			//TODO better conversion. using oracle converters
 			else result.Instancer = value => Convert.ChangeType(value, type);
 			return result;
 		}
@@ -204,7 +212,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 			var list = new List<Func<object, object>>();
 			foreach (var s in subquery.Selects)
 			{
-				var factory = QuerySourceConverterFactory.CreateResult(s.Name, s.ItemType, s.QuerySource, parts);
+				var factory = QuerySourceConverterFactory.CreateResult(s.Name, s.ItemType, s.QuerySource, parts, true);
 				if (s.Expression == null)
 					throw new FrameworkException("Null expression!?");
 				results[s.Expression] = factory.Instancer;
@@ -235,7 +243,15 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 			QueryParts parts)
 		{
 			var type = fromClause.ItemType;
-			var result = new Result { QuerySource = fromClause, Name = name, Type = type, AsValue = typeof(IIdentifiable).IsAssignableFrom(type), CanBeNull = true };
+			var result =
+				new Result
+				{
+					QuerySource = fromClause,
+					Name = name,
+					Type = type,
+					AsValue = type.AsValue(),
+					CanBeNull = true
+				};
 			var method = ProjectionMethod.Method.GetGenericMethodDefinition().MakeGenericMethod(type);
 			var instancer = (Func<string, object>)method.Invoke(null, new object[] { sqe, parts });
 			result.Instancer = value => instancer(value.ToString());

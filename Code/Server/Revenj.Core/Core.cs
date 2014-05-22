@@ -6,9 +6,9 @@ namespace DSL
 {
 	public static class Core
 	{
-		public static IServiceLocator SetupPostgres(string connectionString)
+		public static IServiceLocator SetupPostgres(string connectionString, bool withAspects = false)
 		{
-			return Setup(Database.Postgres, connectionString);
+			return Setup(Database.Postgres, connectionString, withAspects);
 		}
 
 		/*public static IServiceLocator SetupOracle(string connectionString)
@@ -16,11 +16,11 @@ namespace DSL
 			return Setup(Database.Oracle, connectionString);
 		}*/
 
-		private static IServiceLocator Setup(Database db, string connectionString)
+		private static IServiceLocator Setup(Database db, string connectionString, bool withAspects)
 		{
 			if (string.IsNullOrEmpty(connectionString))
 				throw new ArgumentNullException("connectionString", "Connection string not provided");
-			return AutofacConfiguration.Configure(db, connectionString);
+			return AutofacConfiguration.Configure(db, connectionString, withAspects);
 		}
 	}
 }

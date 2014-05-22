@@ -291,7 +291,7 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				if (converter != null)
 				{
 					SqlExpression.Append('\'').Append(converter(value).Replace("'", "''")).Append('\'');
-					if (value is IAggregateRoot || value is IIdentifiable || value is IEntity)
+					if (value is IIdentifiable || value is IEntity)
 						SqlExpression.Append("::").Append(source);
 					else if (value is ICloneable)
 						SqlExpression.Append("::\"").Append(type.Namespace).Append("\".\"").Append(type.Name).Append('"');

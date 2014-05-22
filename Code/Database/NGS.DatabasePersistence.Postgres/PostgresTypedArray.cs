@@ -1,34 +1,37 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using NGS.DatabasePersistence.Postgres.Converters;
 using NGS.DomainPatterns;
+using NGS.Utility;
 
 namespace NGS.DatabasePersistence.Postgres
 {
 	public static class PostgresTypedArray
 	{
-		//TODO remove use of StringBuilder
 		public static string ToArray<T>(IEnumerable<T> data, Func<T, string> converter)
 		{
 			if (data == null)
 				return "NULL";
-			var sb = new StringBuilder("'");
-			var value = PostgresRecordConverter.CreateArray(data, it => converter(it));
-			sb.Append(value.Replace("'", "''"));
-			sb.Append("'");
-			return sb.ToString();
+			using (var cms = ChunkedMemoryStream.Create())
+			{
+				Func<T, PostgresTuple> toTuple = v => new ValueTuple(converter(v), false, true);
+				var writer = cms.GetWriter();
+				ToArray(writer, data, toTuple);
+				writer.Flush();
+				cms.Position = 0;
+				return cms.GetReader().ReadToEnd();
+			}
 		}
 
-		public static void ToArray<T>(StreamWriter sw, IEnumerable<T> data, Func<T, RecordTuple> converter)
+		public static void ToArray<T>(StreamWriter sw, IEnumerable<T> data, Func<T, PostgresTuple> converter)
 		{
 			if (data == null)
 			{
 				sw.Write("NULL");
 				return;
 			}
-			var list = new List<RecordTuple>();
+			var list = new List<PostgresTuple>();
 			foreach (var item in data)
 				list.Add(converter(item));
 			sw.Write('\'');
@@ -37,14 +40,14 @@ namespace NGS.DatabasePersistence.Postgres
 			sw.Write('\'');
 		}
 
-		public static void ToArray<T>(StreamWriter sw, T[] data, Func<T, RecordTuple> converter)
+		public static void ToArray<T>(StreamWriter sw, T[] data, Func<T, PostgresTuple> converter)
 		{
 			if (data == null)
 			{
 				sw.Write("NULL");
 				return;
 			}
-			var arr = new RecordTuple[data.Length];
+			var arr = new PostgresTuple[data.Length];
 			for (int i = 0; i < data.Length; i++)
 				arr[i] = converter(data[i]);
 			sw.Write('\'');

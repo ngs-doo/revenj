@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using Autofac;
 using Autofac.Builder;
+using Autofac.Core;
 using NGS.DatabasePersistence;
 using NGS.DatabasePersistence.Postgres;
 using NGS.DomainPatterns;
@@ -24,12 +25,12 @@ namespace Revenj.Core
 			new NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport.CommonMembers();
 		}
 
-		public static IServiceLocator Configure(Database database, string connectionString)
+		public static IServiceLocator Configure(Database database, string connectionString, bool withAspects)
 		{
 			var state = new SystemState();
 			var builder = new ContainerBuilder();
 			builder.RegisterInstance(state).As<ISystemState>();
-			SetupExtensibility(builder);
+			SetupExtensibility(builder, withAspects);
 			if (database == Core.Database.Postgres)
 				SetupPostgres(builder, connectionString);
 			//else
@@ -54,7 +55,27 @@ namespace Revenj.Core
 			return factory.Resolve<IServiceLocator>();
 		}
 
-		private static void SetupExtensibility(Autofac.ContainerBuilder builder)
+		class AspectsModule : Autofac.Module
+		{
+			private readonly AspectRepository Repository;
+
+			public AspectsModule(AspectRepository repository)
+			{
+				this.Repository = repository;
+			}
+
+			protected override void AttachToComponentRegistration(
+				IComponentRegistry componentRegistry,
+				IComponentRegistration registration)
+			{
+				registration.Preparing += (_, pea) => Repository.Preparing(pea);
+				registration.Activating += (_, aea) => Repository.Activating(aea);
+
+				base.AttachToComponentRegistration(componentRegistry, registration);
+			}
+		}
+
+		private static void SetupExtensibility(Autofac.ContainerBuilder builder, bool withAspects)
 		{
 			var dynamicProxy = new CastleDynamicProxyProvider();
 			var aopRepository = new AspectRepository(dynamicProxy);
@@ -69,6 +90,17 @@ namespace Revenj.Core
 
 			builder.RegisterInstance(aopRepository).As<IAspectRegistrator, IAspectComposer, IInterceptorRegistrator>();
 			builder.RegisterInstance(dynamicProxy).As<IMixinProvider, IDynamicProxyProvider>();
+
+			if (withAspects)
+			{
+				var autofacModules =
+					from type in NGS.Utility.AssemblyScanner.GetAllTypes()
+					where type.IsPublic && typeof(Autofac.Module).IsAssignableFrom(type) && type.GetConstructor(new Type[0]) != null
+					select type;
+				foreach (var m in autofacModules)
+					builder.RegisterModule((Autofac.Module)Activator.CreateInstance(m));
+				builder.RegisterModule(new AspectsModule(aopRepository));
+			}
 		}
 
 		private static void SetupPatterns(Autofac.ContainerBuilder builder)

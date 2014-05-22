@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition;
-using NGS.DomainPatterns;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
@@ -43,16 +43,42 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.Visitors
 				Query.AddSelectPart(qs, qs.ItemName, qs.ItemName, typeof(bool), (_, dr) => dr.GetBoolean(0));
 			}
 			else
+			{
 				CreateSelector(expression.ReferencedQuerySource);
+			}
 			return expression;
 		}
+
+		class PropertySource : IQuerySource
+		{
+			public IQuerySource Parent;
+			public PropertyInfo Property;
+
+			public PropertySource(IQuerySource parent, PropertyInfo pi)
+			{
+				this.Parent = parent;
+				this.Property = pi;
+				this.ItemName = parent.ItemName + "." + pi.Name;
+				this.ItemType = pi.PropertyType;
+			}
+
+			public string ItemName { get; set; }
+			public Type ItemType { get; set; }
+		}
+
 
 		private void CreateSelector(IQuerySource qs)
 		{
 			var index = Query.CurrentSelectIndex;
 			if (qs.ItemType.IsGrouping())
 			{
-				var factoryKey = QuerySourceConverterFactory.CreateResult("Key", qs.ItemType.GetGenericArguments()[0], qs, Query);
+				var factoryKey =
+					QuerySourceConverterFactory.CreateResult(
+						"Key",
+						qs.ItemType.GetGenericArguments()[0],
+						qs,
+						Query,
+						false);
 				var factoryValue = QuerySourceConverterFactory.Create(qs, Query);
 				var genericType = qs.ItemType.CreateGrouping();
 				if (Query.AddSelectPart(
@@ -71,10 +97,36 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.Visitors
 					}))
 					Query.CurrentSelectIndex++;
 			}
+			else if (typeof(IOracleReader).IsAssignableFrom(qs.ItemType))
+			{
+				var props = qs.ItemType.GetProperties();
+				var selectors = new PropertySource[props.Length];
+				for (int i = 0; i < selectors.Length; i++)
+				{
+					var s = selectors[i] = new PropertySource(qs, props[i]);
+					Query.AddSelectPart(
+						s,
+						"\"{0}\".\"{1}\" AS \"{0}.{1}\"".With(s.Parent.ItemName, s.Property.Name),
+						s.ItemName,
+						s.ItemType,
+						null);
+				}
+				Query.AddSelectPart(
+					qs,
+					null,
+					qs.ItemName,
+					qs.ItemType,
+					(_, dr) =>
+					{
+						var inst = (IOracleReader)Activator.CreateInstance(qs.ItemType);
+						inst.Read(qs.ItemName, dr, Query.Locator);
+						return inst;
+					});
+			}
 			else
 			{
 				var factory = QuerySourceConverterFactory.Create(qs, Query);
-				var ii = factory.CanBeNull && factory.AsValue && typeof(IIdentifiable).IsAssignableFrom(factory.Type);
+				var ii = factory.CanBeNull && factory.AsValue;
 				Query.AddSelectPart(
 					factory.QuerySource,
 					ii ? "CASE WHEN \"{0}\".URI IS NULL THEN NULL ELSE VALUE(\"{0}\") END".With(factory.Name)

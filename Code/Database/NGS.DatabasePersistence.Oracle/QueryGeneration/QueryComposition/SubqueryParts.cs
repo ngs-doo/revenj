@@ -97,7 +97,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 						}
 					}
 				}
-				sb.Append(string.Join(@", ", Selects.Select(it => it.Sql)));
+				sb.Append(string.Join(@", ", Selects.Where(it => it.Sql != null).Select(it => it.Sql)));
 			}
 
 			sb.AppendLine();

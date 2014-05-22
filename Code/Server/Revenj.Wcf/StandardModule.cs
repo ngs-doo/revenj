@@ -8,6 +8,7 @@ using System.Text;
 using System.Xml.Linq;
 using Autofac;
 using Autofac.Builder;
+using Autofac.Core;
 using NGS.DatabasePersistence;
 using NGS.DatabasePersistence.Postgres;
 using NGS.DomainPatterns;
@@ -62,6 +63,26 @@ namespace Revenj.Wcf
 			base.Load(builder);
 		}
 
+		class AspectsModule : Autofac.Module
+		{
+			private readonly AspectRepository Repository;
+
+			public AspectsModule(AspectRepository repository)
+			{
+				this.Repository = repository;
+			}
+
+			protected override void AttachToComponentRegistration(
+				IComponentRegistry componentRegistry,
+				IComponentRegistration registration)
+			{
+				registration.Preparing += (_, pea) => Repository.Preparing(pea);
+				registration.Activating += (_, aea) => Repository.Activating(aea);
+
+				base.AttachToComponentRegistration(componentRegistry, registration);
+			}
+		}
+
 		private static void SetupExtensibility(Autofac.ContainerBuilder builder)
 		{
 			var dynamicProxy = new CastleDynamicProxyProvider();
@@ -84,6 +105,9 @@ namespace Revenj.Wcf
 
 			builder.RegisterInstance(aopRepository).As<IAspectRegistrator, IAspectComposer, IInterceptorRegistrator>();
 			builder.RegisterInstance(dynamicProxy).As<IMixinProvider, IDynamicProxyProvider>();
+
+			if (ConfigurationManager.AppSettings["Revenj.AllowAspects"] == "true")
+				builder.RegisterModule(new AspectsModule(aopRepository));
 		}
 
 		private static void SetupPatterns(Autofac.ContainerBuilder builder)
@@ -148,6 +172,26 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 
 			builder.RegisterType<NGS.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
 		}
+
+		/*
+		//TODO: Oracle has ugly dependencies. Use it only when necessary
+		private static void SetupOracle(Autofac.ContainerBuilder builder)
+		{
+			var cs = ConfigurationManager.AppSettings["ConnectionString"];
+			if (string.IsNullOrEmpty(cs))
+				throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
+Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
+
+			builder.RegisterInstance(new NGS.DatabasePersistence.Oracle.ConnectionInfo(cs));
+			builder.RegisterType<OracleQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
+			builder.RegisterType<OracleDatabaseQuery>().As<IOracleDatabaseQuery>();
+			builder.Register(c => c.Resolve<IDatabaseQueryManager>().CreateQuery()).As<IDatabaseQuery>().InstancePerLifetimeScope();
+			builder.RegisterType<OracleAdvancedQueueNotification>().As<IDataChangeNotification>().SingleInstance();
+
+			builder.RegisterType<OracleObjectFactory>().As<IOracleConverterRepository, IOracleConverterFactory>().SingleInstance();
+
+			builder.RegisterType<NGS.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
+		}*/
 
 		private static void SetupSerialization(Autofac.ContainerBuilder builder)
 		{

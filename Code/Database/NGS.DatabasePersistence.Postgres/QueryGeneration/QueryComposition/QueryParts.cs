@@ -66,13 +66,11 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 
 		public bool AddSelectPart(IQuerySource qs, string sql, string name, Type type, Func<ResultObjectMapping, IDataReader, object> instancer)
 		{
-			bool contains = Selects.Select(kv => kv.Name).Contains(name);
-			if (!contains)
-			{
-				Selects.Add(new SelectSource { QuerySource = qs, Sql = sql, Name = name, ItemType = type, Instancer = instancer });
-				CurrentSelectIndex++;
-			}
-			return !contains;
+			if (Selects.Any(kv => kv.Name == name))
+				return false;
+			Selects.Add(new SelectSource { QuerySource = qs, Sql = sql, Name = name, ItemType = type, Instancer = instancer });
+			CurrentSelectIndex++;
+			return true;
 		}
 
 		public void SetFrom(MainFromClause from)
@@ -85,15 +83,14 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 		private void TryToSimplifyMainFrom()
 		{
 			var from = MainFrom;
-			SubQueryExpression sqe = from.FromExpression as SubQueryExpression;
+			var sqe = from.FromExpression as SubQueryExpression;
 			do
 			{
 				from = sqe.QueryModel.MainFromClause;
 				var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(sqe.QueryModel, this);
 				if (subquery.Conditions.Count > 0
 					|| subquery.Joins.Count > 0
-					|| subquery.ResultOperators.Count > 1
-					|| subquery.ResultOperators.Count == 1 && subquery.ResultOperators[0] is CastResultOperator == false
+					|| subquery.ResultOperators.Any(it => it is CastResultOperator == false && it is DefaultIfEmptyResultOperator == false)
 					|| subquery.AdditionalJoins.Count > 0)
 					return;
 				sqe = from.FromExpression as SubQueryExpression;
@@ -139,22 +136,32 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 		{
 			if (value == null)
 				return "NULL";
-			if (value is string)
-				return "'" + value.ToString().Replace("'", "''") + "'::VARCHAR";
 			var type = value.GetType();
-			if (value is IAggregateRoot || value is IIdentifiable || value is IEntity)
+			var serialization = ConverterFactory.GetSerializationFactory(type);
+			if (serialization != null)
 			{
 				///TODO use BuildTuple with quote method
-				var serialization = ConverterFactory.GetSerializationFactory(type);
 				var result = "('" + serialization(value).Replace("'", "''") + "'::";
-				var source = SqlSourceAttribute.FindSource(type);
+				string source = null;
+				if (value is IIdentifiable || value is IEntity)
+					source = SqlSourceAttribute.FindSource(type);
+				else if (value is ICloneable)
+					source = "\"" + type.Namespace + "\".\"" + type.Name + "\"";
 				if (source == null)
 					throw new FrameworkException("Can't find source for " + type.FullName);
 				return result + source + ").*";
 			}
+			else if (type.IsEnum)
+			{
+				return "'" + value + "'::\"" + type.Namespace + "\".\"" + type.Name + "\"";
+			}
 			if (NpgsqlTypes.TypeConverter.CanConvert(type))
-				return NpgsqlTypes.TypeConverter.Convert(type, value);
-			//TODO probably wrong
+			{
+				var val = NpgsqlTypes.TypeConverter.Convert(type, value);
+				var name = NpgsqlTypes.TypeConverter.GetTypeName(type);
+				return val + "::" + name;
+			}
+			//TODO probably wrong. better to throw an exception!?
 			return value.ToString();
 		}
 
@@ -174,11 +181,12 @@ namespace NGS.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			}
 			if (NpgsqlTypes.TypeConverter.CanConvert(element))
 			{
-				var arr =
+				var val =
 					Postgres.PostgresTypedArray.ToArray(
 						values,
 						v => NpgsqlTypes.TypeConverter.Convert(element, v));
-				return arr;
+				var name = NpgsqlTypes.TypeConverter.GetTypeName(element);
+				return val + "::" + name + "[]";
 			}
 			throw new NotSupportedException("Don't know how to convert array!");
 		}

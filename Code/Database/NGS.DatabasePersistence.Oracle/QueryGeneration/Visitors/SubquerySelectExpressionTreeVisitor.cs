@@ -39,7 +39,19 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.Visitors
 				if (Query.ParentQuery.MainFrom.Equals(qs))
 					return expression;
 			}
-			Query.AddSelectPart(qs, "\"{0}\"".With(qs.ItemName), qs.ItemName, qs.ItemType, null);
+			if (typeof(IOracleReader).IsAssignableFrom(qs.ItemType))
+			{
+				//TODO: expand query
+				Query.AddSelectPart(qs, "\"{0}\"".With(qs.ItemName), qs.ItemName, qs.ItemType, null);
+			}
+			else if (qs.ItemType.AsValue())
+			{
+				Query.AddSelectPart(qs, "VALUE(\"{0}\") AS \"{0}\"".With(qs.ItemName), qs.ItemName, qs.ItemType, null);
+			}
+			else
+			{
+				Query.AddSelectPart(qs, "\"{0}\"".With(qs.ItemName), qs.ItemName, qs.ItemType, null);
+			}
 
 			return expression;
 		}

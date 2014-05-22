@@ -72,40 +72,54 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 
 		public bool AddSelectPart(IQuerySource qs, string sql, string name, Type type, Func<ResultObjectMapping, IDataReader, object> instancer)
 		{
-			bool contains = Selects.Select(kv => kv.Name).Contains(name);
-			if (!contains)
-			{
+			if (Selects.Any(kv => kv.Name == name))
+				return false;
 				Selects.Add(new SelectSource { QuerySource = qs, Sql = sql, Name = name, ItemType = type, Instancer = instancer });
+			if (sql != null)
 				CurrentSelectIndex++;
-			}
-			return !contains;
+			return true;
 		}
 
 		public void SetFrom(MainFromClause from)
 		{
 			MainFrom = from;
 			if (from != QuerySourceConverterFactory.GetOriginalSource(from))
-				TryToSimplifyMainFrom();
+				MainFrom = TryToSimplifyMainFrom(MainFrom);
 		}
 
-		private void TryToSimplifyMainFrom()
+		internal MainFromClause TryToSimplifyMainFrom(MainFromClause from)
 		{
-			var from = MainFrom;
-			SubQueryExpression sqe = from.FromExpression as SubQueryExpression;
-			do
+			var name = from.ItemName;
+			var sqe = from.FromExpression as SubQueryExpression;
+			while (sqe != null)
 			{
-				from = sqe.QueryModel.MainFromClause;
 				var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(sqe.QueryModel, this, ContextName, Context.Select());
 				if (subquery.Conditions.Count > 0
 					|| subquery.Joins.Count > 0
-					|| subquery.ResultOperators.Count > 1
-					|| subquery.ResultOperators.Count == 1 && subquery.ResultOperators[0] is CastResultOperator == false
+					|| subquery.ResultOperators.Any(it => it is CastResultOperator == false && it is DefaultIfEmptyResultOperator == false)
 					|| subquery.AdditionalJoins.Count > 0)
-					return;
+					return from;
+				from = sqe.QueryModel.MainFromClause;
 				sqe = from.FromExpression as SubQueryExpression;
-			} while (sqe != null);
-			from.ItemName = MainFrom.ItemName;
-			MainFrom = from;
+			}
+			from.ItemName = name;
+			return from;
+		}
+
+		internal FromClauseBase TryToSimplifyAdditionalFrom(AdditionalFromClause additionalFrom)
+		{
+			FromClauseBase from = additionalFrom;
+			var sqe = from.FromExpression as SubQueryExpression;
+			if (sqe != null)
+			{
+				var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(sqe.QueryModel, this, ContextName, Context.Select());
+				if (subquery.Joins.Count > 0
+					|| subquery.ResultOperators.Any(it => it is CastResultOperator == false && it is DefaultIfEmptyResultOperator == false)
+					|| subquery.AdditionalJoins.Count > 0)
+					return from;
+				return TryToSimplifyMainFrom(sqe.QueryModel.MainFromClause);
+			}
+			return from;
 		}
 
 		public void AddJoin(JoinClause join)
@@ -302,7 +316,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 			{
 				if (sqe.QueryModel.CanUseMain())
 					return GetQuerySourceFromExpression(name, type, sqe.QueryModel.MainFromClause.FromExpression);
-				//TODO hack za id replace
+				//TODO hack za replaceanje generiranog id-a
 				var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(sqe.QueryModel, this, ContextName, Context.Select());
 				var sql = "({0}) \"{1}\"".With(subquery.BuildSqlString(true), name);
 				var grouping = sqe.QueryModel.ResultOperators.FirstOrDefault(it => it is GroupResultOperator) as GroupResultOperator;
@@ -327,6 +341,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 					return FormatStringArray(ce.Value, name, ce.Type);
 				else if (ce.Value is IEnumerable)
 					return FormatStringEnumerable(ce.Value, name, ce.Type);
+				//TODO: sql injection!?
 				return "(SELECT {0} AS \"{1}\" FROM dual) \"{1}\"".With(ce.Value, name);
 			}
 
@@ -373,6 +388,7 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 					return FormatStringArray(ce.Value, name, ce.Type);
 				else if (ce.Value is IEnumerable)
 					return FormatStringEnumerable(ce.Value, name, ce.Type);
+				//TODO: sql injection!?
 				return "(SELECT {0} FROM dual) \"{1}\"".With(ce.Value, name);
 			}
 

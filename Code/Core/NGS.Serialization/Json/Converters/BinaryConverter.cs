@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -49,6 +50,16 @@ namespace NGS.Serialization.Json.Converters
 					Serialize(ms.ToArray(), sw);
 				}
 			}
+		}
+
+		public static byte[] Deserialize(StreamReader sr, int nextToken)
+		{
+			return new byte[0];
+		}
+
+		public static List<byte[]> DeserializeCollection(StreamReader sr, int nextToken)
+		{
+			return new List<byte[]>();
 		}
 	}
 }

@@ -34,7 +34,9 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 		public ResultObjectMapping ProcessRow(IDataReader dr)
 		{
 			var result = new ResultObjectMapping();
-			Query.Selects.ForEach(it => result.Add(it.QuerySource, it.Instancer(result, dr)));
+			foreach (var it in Query.Selects)
+				if (it.Instancer != null)
+					result.Add(it.QuerySource, it.Instancer(result, dr));
 			return result;
 		}
 	}

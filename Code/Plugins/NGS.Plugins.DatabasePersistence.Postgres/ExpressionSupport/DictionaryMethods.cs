@@ -40,24 +40,40 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 
 		private static void ContainsKey(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
-			queryBuilder.Append("(");
+			queryBuilder.Append('(');
 			visitExpression(methodCall.Object);
+			queryBuilder.Append(" ? ");
 			var ce = methodCall.Arguments[0] as ConstantExpression;
 			if (ce != null)
-				queryBuilder.AppendFormat(" ? '{0}')", ce.Value);
+			{
+				visitExpression(ce);
+				queryBuilder.Append(')');
+			}
 			else
-				queryBuilder.AppendFormat(" ? ({0}))", methodCall.Arguments[0]);
+			{
+				queryBuilder.Append('(');
+				visitExpression(methodCall.Arguments[0]);
+				queryBuilder.Append("))");
+			}
 		}
 
 		private static void GetValue(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
 			queryBuilder.Append("(");
 			visitExpression(methodCall.Object);
+			queryBuilder.Append(" -> ");
 			var ce = methodCall.Arguments[0] as ConstantExpression;
 			if (ce != null)
-				queryBuilder.AppendFormat(" -> '{0}')", ce.Value);
+			{
+				visitExpression(ce);
+				queryBuilder.Append(')');
+			}
 			else
-				queryBuilder.AppendFormat(" -> ({0}))", methodCall.Arguments[0]);
+			{
+				queryBuilder.Append('(');
+				visitExpression(methodCall.Arguments[0]);
+				queryBuilder.Append("))");
+			}
 		}
 	}
 }

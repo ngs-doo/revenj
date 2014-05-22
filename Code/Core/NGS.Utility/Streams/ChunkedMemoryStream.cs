@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace NGS.Utility
@@ -52,9 +53,20 @@ namespace NGS.Utility
 		public ChunkedMemoryStream()
 		{
 			Blocks.Add(new byte[BlockSize]);
-			Writer = new StreamWriter(this);
+			Writer = new CustomWriter(this);
 			Reader = new StreamReader(this);
 		}
+
+		class CustomWriter : StreamWriter
+		{
+			private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
+
+			public CustomWriter(ChunkedMemoryStream cms)
+				: base(cms) { }
+
+			public override IFormatProvider FormatProvider { get { return Invariant; } }
+		}
+
 		/// <summary>
 		/// Create in memory stream based on another stream.
 		/// Provided stream will not be disposed.

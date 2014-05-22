@@ -73,15 +73,18 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 			return false;
 		}
 
+		private static readonly char[] EscapeChars = new[] { '\\', '%', '_' };
+
 		private static void EscapeForLike(Expression exp, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
 			var ce = exp as ConstantExpression;
 			if (ce != null)
 			{
 				var value = ce.Value as string;
-				queryBuilder.Append('\'')
-					.Append(value.Replace(@"\", @"\\").Replace("_", "\\_").Replace("%", "\\%"))
-					.Append('\'');
+				if (value.IndexOfAny(EscapeChars) >= 0)
+					visitExpression(ConstantExpression.Constant(value.Replace(@"\", @"\\").Replace("_", "\\_").Replace("%", "\\%"), typeof(string)));
+				else
+					visitExpression(ce);
 			}
 			else
 			{
@@ -238,13 +241,11 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 		{
 			queryBuilder.Append("replace(");
 			visitExpression(methodCall.Object);
-			queryBuilder.Append(",'");
-			var ce = methodCall.Arguments[0] as ConstantExpression;
-			queryBuilder.Append(ce.Value.ToString().Replace("'", "\\'"));
-			queryBuilder.Append("','");
-			ce = methodCall.Arguments[1] as ConstantExpression;
-			queryBuilder.Append(ce.Value.ToString().Replace("'", "\\'"));
-			queryBuilder.Append("')");
+			queryBuilder.Append(",");
+			visitExpression(methodCall.Arguments[0]);
+			queryBuilder.Append(",");
+			visitExpression(methodCall.Arguments[1]);
+			queryBuilder.Append(")");
 		}
 
 		private static void IsNullOrEmpty(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)

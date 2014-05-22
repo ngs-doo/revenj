@@ -86,6 +86,7 @@
     <Compile Include="Converters\DateArrayConverter.cs" />
     <Compile Include="Cube\OracleOlapCubeQuery.cs" />
     <Compile Include="IOracleDto.cs" />
+    <Compile Include="IOracleReader.cs" />
     <Compile Include="OracleDatabaseQuery.cs" />
     <Compile Include="Converters\OracleNotifyInfoConverter.cs" />
     <Compile Include="OracleQueryManager.cs" />

@@ -76,6 +76,7 @@ namespace NGS.Plugins.DatabasePersistence.Postgres.QuerySimplifications
 			if (qsre != null && qsre.ReferencedQuerySource.Equals(query.MainFrom)
 				&& NpgsqlTypes.TypeConverter.CanConvert(query.MainFrom.ItemType))
 			{
+				//TODO: values
 				return array.Length == 1
 					? exp + " = " + NpgsqlTypes.TypeConverter.Convert(query.MainFrom.ItemType, array[0])
 					: exp + " IN ("

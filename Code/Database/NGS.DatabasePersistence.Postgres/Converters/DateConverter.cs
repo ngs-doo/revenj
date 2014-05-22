@@ -33,7 +33,8 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				throw new NotSupportedException("Negative dates are not supported by .NET.");
 			var buf = new char[10];
 			buf[0] = (char)cur;
-			reader.Read(buf, 1, 9);
+			var read = reader.Read(buf, 1, 9);
+			if (read != 9) for (int i = read + 1; i < 10; i++) buf[i] = (char)reader.Read();
 			if (buf[4] != '-')
 				return ParseDateSlow(buf, reader);
 			return new DateTime(IntConverter.ParsePositive(buf, 0, 4), IntConverter.ParsePositive(buf, 5, 7), IntConverter.ParsePositive(buf, 8, 10));

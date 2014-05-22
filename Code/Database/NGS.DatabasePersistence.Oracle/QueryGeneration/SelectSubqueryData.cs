@@ -33,7 +33,11 @@ namespace NGS.DatabasePersistence.Oracle.QueryGeneration
 		public ResultObjectMapping ProcessRow(ResultObjectMapping parent, object row)
 		{
 			var result = new ResultObjectMapping();
-			Selects.ForEach(it => result.Add(it.Key, it.Value(row)));
+			for (int i = 0; i < Selects.Count; i++)
+			{
+				var sel = Selects[i];
+				result.Add(sel.Key, sel.Value(row));
+			}
 			result.Add(parent);
 			return result;
 		}

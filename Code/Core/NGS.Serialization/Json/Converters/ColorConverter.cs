@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 
 namespace NGS.Serialization.Json.Converters
@@ -15,6 +16,21 @@ namespace NGS.Serialization.Json.Converters
 				sw.Write("null");
 			else
 				sw.Write(value.Value.ToArgb());
+		}
+
+		public static Color Deserialize(StreamReader sr, int nextToken)
+		{
+			return Color.Black;
+		}
+
+		public static List<Color> DeserializeCollection(StreamReader sr, int nextToken)
+		{
+			return new List<Color>();
+		}
+
+		public static List<Color?> DeserializeCollectionNullable(StreamReader sr, int nextToken)
+		{
+			return new List<Color?>();
 		}
 	}
 }

@@ -9,6 +9,8 @@ namespace NGS
 	/// </summary>
 	public static class StringExtensions
 	{
+		private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
+
 		/// <summary>
 		/// Single argument helper method.
 		/// "print {0} now".With(arg)
@@ -18,7 +20,7 @@ namespace NGS
 		/// <returns>formatted string</returns>
 		public static string With(this string value, object arg)
 		{
-			return string.Format(CultureInfo.InvariantCulture, value, arg ?? "<null>");
+			return string.Format(Invariant, value, arg ?? "<null>");
 		}
 
 		/// <summary>
@@ -31,7 +33,7 @@ namespace NGS
 		/// <returns>formatted string</returns>
 		public static string With(this string value, object arg1, object arg2)
 		{
-			return string.Format(CultureInfo.InvariantCulture, value, arg1 ?? "<null>", arg2 ?? "<null>");
+			return string.Format(Invariant, value, arg1 ?? "<null>", arg2 ?? "<null>");
 		}
 
 		/// <summary>
@@ -45,7 +47,7 @@ namespace NGS
 		/// <returns>formatted string</returns>
 		public static string With(this string value, object arg1, object arg2, object arg3)
 		{
-			return string.Format(CultureInfo.InvariantCulture, value, arg1 ?? "<null>", arg2 ?? "<null>", arg3 ?? "<null>");
+			return string.Format(Invariant, value, arg1 ?? "<null>", arg2 ?? "<null>", arg3 ?? "<null>");
 		}
 
 		/// <summary>
@@ -58,7 +60,7 @@ namespace NGS
 		public static string With(this string value, params object[] args)
 		{
 			var formattedArgs = args.Select(it => it != null ? it : "<null>").ToArray();
-			return string.Format(CultureInfo.InvariantCulture, value, formattedArgs);
+			return string.Format(Invariant, value, formattedArgs);
 		}
 	}
 }

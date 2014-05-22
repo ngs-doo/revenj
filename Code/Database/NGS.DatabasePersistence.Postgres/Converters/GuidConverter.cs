@@ -26,7 +26,8 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 		{
 			var buf = new char[37];
 			buf[0] = (char)cur;
-			reader.Read(buf, 1, 36);
+			int read = reader.Read(buf, 1, 36);
+			if (read != 36) for (int i = read + 1; i < 37; i++) buf[i] = (char)reader.Read();
 			//TODO char[] to byte[] conversion
 			return new Guid(new string(buf, 0, 36));
 		}
@@ -35,7 +36,8 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 		{
 			var buf = new char[36];
 			buf[0] = (char)cur;
-			reader.Read(buf, 1, 35);
+			int read = reader.Read(buf, 1, 35);
+			if (read != 35) for (int i = read + 1; i < 36; i++) buf[i] = (char)reader.Read();
 			return new Guid(new string(buf, 0, 36));
 		}
 

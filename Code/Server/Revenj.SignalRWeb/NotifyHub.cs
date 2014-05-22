@@ -108,6 +108,34 @@ namespace Revenj.SignalRWeb
 				Clients.Caller.Error("Error registering for " + domainObject);
 		}
 
+		public void WatchSpecification(string domainObject, string specification, string json)
+		{
+			if (!IsRunning)
+			{
+				Clients.Caller.Error("In shutdown. Try again later");
+				return;
+			}
+			var found = Model.Find(domainObject);
+			if (found == null
+				|| !typeof(IAggregateRoot).IsAssignableFrom(found) && !typeof(IDomainEvent).IsAssignableFrom(found))
+			{
+				Clients.Caller.Error("Unknown object " + domainObject);
+				return;
+			}
+			var specType = Model.Find(domainObject + "+" + specification);
+			if (specType == null || !typeof(ISpecification<>).MakeGenericType(found).IsAssignableFrom(specType))
+			{
+				Clients.Caller.Error("Unknown specification " + specification);
+				return;
+			}
+			var rl = (IListener)Activator.CreateInstance(typeof(DomainObjectListen<>).MakeGenericType(found));
+			var cid = Context.ConnectionId;
+			if (rl.Register(cid, specType, json, id => NotifySpecificationMatch(cid, id)))
+				Clients.Caller.Success("Registered for " + specification + " in " + domainObject);
+			else
+				Clients.Caller.Error("Error registering for " + domainObject);
+		}
+
 		public void UnListen(string domainObject)
 		{
 			var found = Model.Find(domainObject);
@@ -131,6 +159,7 @@ namespace Revenj.SignalRWeb
 		interface IListener
 		{
 			bool Register(string connectionId, Action<string[]> onChanged);
+			bool Register(string connectionId, Type specificationType, string specificationJson, Action<string> onMatched);
 		}
 
 		class DomainObjectListen<TDomainObject> : IListener
@@ -161,6 +190,44 @@ namespace Revenj.SignalRWeb
 				}
 				return true;
 			}
+
+			public bool Register(string connectionId, Type type, string specificationJson, Action<string> onMatched)
+			{
+				Func<TDomainObject, bool> isMatched;
+				try
+				{
+					ISpecification<TDomainObject> specification = (ISpecification<TDomainObject>)Newtonsoft.Json.JsonConvert.DeserializeObject(specificationJson, type);
+					isMatched = specification.IsSatisfied.Compile();
+				}
+				catch { return false; }
+				ConcurrentDictionary<string, IDisposable> dict;
+				if (!Listeners.TryGetValue(typeof(TDomainObject), out dict))
+				{
+					dict = new ConcurrentDictionary<string, IDisposable>();
+					if (!Listeners.TryAdd(typeof(TDomainObject), dict))
+						return false;
+				}
+				var name = typeof(TDomainObject).FullName;
+				var listener = ChangeNotification.Track<TDomainObject>().Subscribe(kv =>
+					{
+						foreach (var v in kv.Value.Value)
+							if (isMatched(v))
+								onMatched(v.URI);
+					});
+				if (!dict.TryAdd(connectionId, listener))
+					listener.Dispose();
+				else
+				{
+					ConcurrentBag<Type> bag;
+					if (!Connections.TryGetValue(connectionId, out bag))
+					{
+						bag = new ConcurrentBag<Type>();
+						Connections.TryAdd(connectionId, bag);
+					}
+					bag.Add(typeof(TDomainObject));
+				}
+				return true;
+			}
 		}
 
 		void NotifyDomainObjectChanges(string clientID, string name, string[] ids)
@@ -171,6 +238,11 @@ namespace Revenj.SignalRWeb
 		void NotifySingleUriChange(string clientID)
 		{
 			Messages.Add(() => Clients.Client(clientID).Changed());
+		}
+
+		void NotifySpecificationMatch(string clientID, string id)
+		{
+			Messages.Add(() => Clients.Client(clientID).Matched(id));
 		}
 	}
 }

@@ -67,6 +67,8 @@ namespace NGS.Serialization
 				return null;
 			//fast path
 			if (contentType == "application/json")
+				return Json.DeserializeJson(source, target, context);
+			if (contentType == "application/json-experimental")
 				return Json.Deserialize(source, target, context);
 			if (contentType == "application/x-protobuf")
 				return Protobuf.Deserialize(source, target, context);
