@@ -23,11 +23,19 @@ namespace NGS.Utility
 		private static int SizeLimit = 16 * Environment.ProcessorCount;
 		private static ConcurrentQueue<ChunkedMemoryStream> PoolQueue = new ConcurrentQueue<ChunkedMemoryStream>();
 		private static int CurrentEstimate = SizeLimit;
+		private readonly Lazy<char[]> CharBuffer = new Lazy<char[]>(() => new char[BlockSize * 4]);
+
+		private static readonly char[] CharMap;
+		private static readonly int[] CharLookup;
 
 		static ChunkedMemoryStream()
 		{
 			for (int i = 0; i < SizeLimit; i++)
 				PoolQueue.Enqueue(new ChunkedMemoryStream());
+			CharMap = "0123456789abcdef".ToCharArray();
+			CharLookup = new int['f' + 1];
+			for (int i = 0; i < CharMap.Length; i++)
+				CharLookup[CharMap[i]] = i;
 		}
 
 		/// <summary>
@@ -73,23 +81,27 @@ namespace NGS.Utility
 		/// </summary>
 		/// <param name="another">stream to copy</param>
 		public ChunkedMemoryStream(Stream another)
-			: this(another, false) { }
+			: this(another, false, true) { }
 		/// <summary>
 		/// Create in memory stream based on another stream.
 		/// Specify wheater should provided stream be disposed after copying.
 		/// </summary>
 		/// <param name="another">stream to copy</param>
 		/// <param name="dispose">dispose provided stream</param>
-		public ChunkedMemoryStream(Stream another, bool dispose)
+		/// <param name="reset">reset provided stream to original position</param>
+		public ChunkedMemoryStream(Stream another, bool dispose, bool reset)
 			: this()
 		{
 			var buf = new byte[BlockSize];
+			var initialPosition = another.Position;
 			int read;
 			while ((read = another.Read(buf, 0, BlockSize)) > 0)
 				Write(buf, 0, read);
 			CurrentPosition = 0;
 			if (dispose)
 				another.Dispose();
+			if (reset && another.CanSeek)
+				another.Position = initialPosition;
 		}
 
 		/// <summary>
@@ -270,9 +282,18 @@ namespace NGS.Utility
 		public Stream ToBase64Stream()
 		{
 			var cms = Create();
-			var sw = new StreamWriter(cms);
+			ToBase64Writer(cms.GetWriter());
+			cms.Position = 0;
+			return cms;
+		}
+
+		/// <summary>
+		/// Convert stream to Base 64 String representation in the provided writer.
+		/// </summary>
+		public void ToBase64Writer(StreamWriter sw)
+		{
 			var tmpBuf = new byte[3];
-			var base64 = new char[BlockSize * 4];
+			var base64 = CharBuffer.Value;
 			var total = TotalSize > BlockSize ? TotalSize / BlockSize : 0;
 			int len;
 			var off = 0;
@@ -293,8 +314,34 @@ namespace NGS.Utility
 			len = Convert.ToBase64CharArray(Blocks[total], off, TotalSize != BlockSize ? TotalSize % BlockSize - off : BlockSize, base64, 0);
 			sw.Write(base64, 0, len);
 			sw.Flush();
-			cms.Position = 0;
-			return cms;
+		}
+
+		/// <summary>
+		/// Convert stream to Postgres representation of bytea
+		/// </summary>
+		/// <param name="sw"></param>
+		public void ToPostgresBytea(StreamWriter sw)
+		{
+			var total = TotalSize > BlockSize ? TotalSize / BlockSize : 0;
+			var remaining = TotalSize % BlockSize;
+			byte[] block;
+			for (int i = 0; i < total; i++)
+			{
+				block = Blocks[i];
+				for (int j = 0; j < block.Length; j++)
+				{
+					var b = block[j];
+					sw.Write(CharMap[b >> 4]);
+					sw.Write(CharMap[b & 0xf]);
+				}
+			}
+			block = Blocks[total];
+			for (int j = 0; j < remaining; j++)
+			{
+				var b = block[j];
+				sw.Write(CharMap[b >> 4]);
+				sw.Write(CharMap[b & 0xf]);
+			}
 		}
 
 		/// <summary>

@@ -108,7 +108,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<decimal?> DeserializeDecimalCollectionNullable(StreamReader sr, int nextToken)
+		public static List<decimal?> DeserializeDecimalNullableCollection(StreamReader sr, int nextToken)
 		{
 			var res = new List<decimal?>();
 			if (nextToken == 'n')
@@ -172,7 +172,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<int?> DeserializeIntCollectionNullable(StreamReader sr, int nextToken)
+		public static List<int?> DeserializeIntNullableCollection(StreamReader sr, int nextToken)
 		{
 			var res = new List<int?>();
 			if (nextToken == 'n')
@@ -236,7 +236,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<long?> DeserializeLongCollectionNullable(StreamReader sr, int nextToken)
+		public static List<long?> DeserializeLongNullableCollection(StreamReader sr, int nextToken)
 		{
 			var res = new List<long?>();
 			if (nextToken == 'n')
@@ -293,7 +293,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<double?> DeserializeDoubleCollectionNullable(StreamReader sr, char[] buffer, int nextToken)
+		public static List<double?> DeserializeDoubleNullableCollection(StreamReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<double?>();
 			if (nextToken == 'n')
@@ -350,7 +350,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<float?> DeserializeFloatCollectionNullable(StreamReader sr, char[] buffer, int nextToken)
+		public static List<float?> DeserializeFloatNullableCollection(StreamReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<float?>();
 			if (nextToken == 'n')

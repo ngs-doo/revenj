@@ -99,7 +99,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<DateTime?> DeserializeDateCollectionNullable(StreamReader sr, int nextToken)
+		public static List<DateTime?> DeserializeDateNullableCollection(StreamReader sr, int nextToken)
 		{
 			var res = new List<DateTime?>();
 			if (nextToken == 'n')
@@ -155,7 +155,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<DateTime?> DeserializeTimestampCollectionNullable(StreamReader sr, char[] buffer, int nextToken)
+		public static List<DateTime?> DeserializeTimestampNullableCollection(StreamReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<DateTime?>();
 			if (nextToken == 'n')

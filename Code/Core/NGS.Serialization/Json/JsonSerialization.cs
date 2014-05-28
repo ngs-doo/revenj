@@ -219,19 +219,19 @@ namespace NGS.Serialization
 						}
 						if (array[array.Length - 1] != null)
 							array[array.Length - 1].Serialize(sw, SharedSerializer.Serialize);
-			else
+						else
 							sw.Write("null");
 					}
 					sw.Write(']');
 				}
 				else if (value is IList<IJsonObject>)
-			{
+				{
 					var list = value as IList<IJsonObject>;
 					sw.Write('[');
 					if (list.Count > 0)
 					{
 						for (int i = 0; i < list.Count - 1; i++)
-				{
+						{
 							if (list[i] != null)
 								list[i].Serialize(sw, SharedSerializer.Serialize);
 							else
@@ -246,12 +246,12 @@ namespace NGS.Serialization
 					sw.Write(']');
 				}
 				else if (value is ICollection<IJsonObject>)
-					{
+				{
 					var col = value as ICollection<IJsonObject>;
-						sw.Write('[');
+					sw.Write('[');
 					var total = col.Count - 1;
 					if (total > 0)
-						{
+					{
 						var enumerator = col.GetEnumerator();
 						IJsonObject item;
 						for (var i = 0; enumerator.MoveNext() && i < total; i++)
@@ -269,8 +269,8 @@ namespace NGS.Serialization
 						else
 							sw.Write("null");
 					}
-						sw.Write(']');
-					}
+					sw.Write(']');
+				}
 				else
 				{
 					SharedSerializer.Serialize(sw, value);
@@ -317,14 +317,48 @@ namespace NGS.Serialization
 			}
 			var ser = GetSerializer(target);
 			if (ser == null)
-			return serializer.Deserialize(sr, target);
+				return serializer.Deserialize(sr, target);
 			return ser.Deserialize(sr, context, serializer.Deserialize);
+		}
+
+		private static bool IsWhiteSpace(int c)
+		{
+			switch (c)
+			{
+				case 9:
+				case 10:
+				case 11:
+				case 12:
+				case 13:
+				case 32:
+				case 160:
+				case 5760:
+				case 8192:
+				case 8193:
+				case 8194:
+				case 8195:
+				case 8196:
+				case 8197:
+				case 8198:
+				case 8199:
+				case 8200:
+				case 8201:
+				case 8202:
+				case 8232:
+				case 8233:
+				case 8239:
+				case 8287:
+				case 12288:
+					return true;
+				default:
+					return false;
+			}
 		}
 
 		public static int GetNextToken(StreamReader sr)
 		{
 			int c = sr.Read();
-			while (c == 13 && c == 10 && c == 32 && c == '\t')
+			while (IsWhiteSpace(c))
 				c = sr.Read();
 			return c;
 		}
@@ -332,7 +366,7 @@ namespace NGS.Serialization
 		public static int MoveToNextToken(StreamReader sr, int nextToken)
 		{
 			int c = nextToken;
-			while (c == 13 && c == 10 && c == 32 && c == '\t')
+			while (IsWhiteSpace(c))
 				c = sr.Read();
 			return c;
 		}
@@ -383,10 +417,9 @@ namespace NGS.Serialization
 			return hash;
 		}
 
-		public static List<T> DeserializeCollection<T>(StreamReader sr, Func<T> factory)
+		public static List<T> DeserializeObjectCollection<T>(StreamReader sr, int nextToken, Func<T> factory)
 		{
 			var res = new List<T>();
-			int nextToken = GetNextToken(sr);
 			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			res.Add(factory());
 			while ((nextToken = GetNextToken(sr)) == ',')
@@ -402,11 +435,27 @@ namespace NGS.Serialization
 			return res;
 		}
 
-		public static List<T> DeserializeNullableCollection<T>(StreamReader sr, Func<T> factory)
+		public static List<T> DeserializeCollection<T>(StreamReader sr, int nextToken, Func<int, T> factory)
+		{
+			var res = new List<T>();
+			res.Add(factory(nextToken));
+			while ((nextToken = GetNextToken(sr)) == ',')
+			{
+				nextToken = GetNextToken(sr);
+				res.Add(factory(nextToken));
+			}
+			if (nextToken != ']')
+			{
+				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+			return res;
+		}
+
+		public static List<T> DeserializeNullableObjectCollection<T>(StreamReader sr, int nextToken, Func<T> factory)
 			where T : class
 		{
 			var res = new List<T>();
-			int nextToken = GetNextToken(sr);
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
@@ -415,7 +464,7 @@ namespace NGS.Serialization
 			}
 			else if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			else res.Add(factory());
-			while ((nextToken = GetNextToken(sr)) != ',')
+			while ((nextToken = GetNextToken(sr)) == ',')
 			{
 				nextToken = GetNextToken(sr);
 				if (nextToken == 'n')
@@ -426,6 +475,36 @@ namespace NGS.Serialization
 				}
 				else if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 				res.Add(factory());
+			}
+			if (nextToken != ']')
+			{
+				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+			return res;
+		}
+
+		public static List<T> DeserializeNullableCollection<T>(StreamReader sr, int nextToken, Func<int, T> factory)
+			where T : class
+		{
+			var res = new List<T>();
+			if (nextToken == 'n')
+			{
+				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+					res.Add(null);
+				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+			}
+			else res.Add(factory(nextToken));
+			while ((nextToken = GetNextToken(sr)) == ',')
+			{
+				nextToken = GetNextToken(sr);
+				if (nextToken == 'n')
+				{
+					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+						res.Add(null);
+					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+				}
+				else res.Add(factory(nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -506,6 +585,12 @@ namespace NGS.Serialization
 			{
 				c = sr.Read();
 				sw.Write((char)c);
+				if (c == '\\')
+				{
+					c = sr.Read();
+					sw.Write((char)c);
+					c = (char)0;
+				}
 			}
 			return MemoizeGetNextToken(sr, sw);
 		}
@@ -514,7 +599,7 @@ namespace NGS.Serialization
 		{
 			int c = sr.Read();
 			sw.Write((char)c);
-			while (c == 13 && c == 10 && c == 32 && c == '\t')
+			while (IsWhiteSpace(c))
 			{
 				c = sr.Read();
 				sw.Write((char)c);
@@ -541,7 +626,7 @@ namespace NGS.Serialization
 					else throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 					if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 					nextToken = MemoizeGetNextToken(sr, sw);
-					Memorize(sr, nextToken, sw);
+					nextToken = Memorize(sr, nextToken, sw);
 				}
 				if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + global::NGS.Serialization.JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 				return MemoizeGetNextToken(sr, sw);

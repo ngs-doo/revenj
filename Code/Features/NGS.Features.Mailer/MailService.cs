@@ -6,8 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using NGS.DomainPatterns;
-using NGS.Features.Mailer.Serialization;
-using NGS.Serialization;
 
 namespace NGS.Features.Mailer
 {
@@ -35,15 +33,13 @@ namespace NGS.Features.Mailer
 				SmtpMaxRetries = x;
 		}
 
-		public readonly ISerialization<byte[]> Serialization;
-		public readonly Func<string, IMailMessage> Repository;
+		protected readonly Func<string, IMailMessage> Lookup;
 
 		public MailService(IServiceLocator locator)
 		{
 			Contract.Requires(locator != null);
 
-			this.Serialization = locator.Resolve<ISerialization<byte[]>>();
-			this.Repository = locator.Resolve<Func<string, IMailMessage>>();
+			this.Lookup = locator.Resolve<Func<string, IMailMessage>>();
 		}
 
 		protected abstract IMailMessage Create();
@@ -56,7 +52,7 @@ namespace NGS.Features.Mailer
 			foreach (var msg in messages)
 			{
 				var item = Create();
-				item.Message = new SerializableMailMessage(msg);
+				item.Message = msg;
 				var retries = maxRetries ?? SmtpMaxRetries;
 				if (retries != null)
 					item.RetriesAllowed = retries.Value;
@@ -67,7 +63,7 @@ namespace NGS.Features.Mailer
 
 		public bool TrySend(string uri)
 		{
-			var found = Repository(uri);
+			var found = Lookup(uri);
 			if (found == null)
 				throw new ArgumentException("Can't find message {0}".With(uri));
 			if (found.SentAt != null)
@@ -81,7 +77,7 @@ namespace NGS.Features.Mailer
 			found.Attempts++;
 			try
 			{
-				smtp.Send(found.Message.GetMailMessage());
+				smtp.Send(found.Message);
 				found.SentAt = DateTime.Now;
 				return true;
 			}

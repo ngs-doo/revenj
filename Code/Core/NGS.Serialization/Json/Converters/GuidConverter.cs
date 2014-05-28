@@ -117,7 +117,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<Guid?> DeserializeCollectionNullable(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Guid?> DeserializeNullableCollection(StreamReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<Guid?>();
 			if (nextToken == 'n')

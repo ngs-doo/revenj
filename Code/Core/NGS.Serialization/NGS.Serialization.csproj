@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Json\Converters\ColorConverter.cs" />
     <Compile Include="Json\Converters\BinaryConverter.cs" />
+    <Compile Include="Json\Converters\DictionaryConverter.cs" />
     <Compile Include="Json\Converters\DateTimeConverter.cs" />
     <Compile Include="Protobuf\Converters\ProtoStream.cs" />
     <Compile Include="Protobuf\Converters\ProtoMemoryStream.cs" />

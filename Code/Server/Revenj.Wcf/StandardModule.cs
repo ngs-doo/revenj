@@ -157,7 +157,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 
 		private static void SetupPostgres(Autofac.ContainerBuilder builder)
 		{
-			var cs = ConfigurationManager.AppSettings["ConnectionString"];
+			var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
 			if (string.IsNullOrEmpty(cs))
 				throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
 Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
@@ -177,7 +177,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 		//TODO: Oracle has ugly dependencies. Use it only when necessary
 		private static void SetupOracle(Autofac.ContainerBuilder builder)
 		{
-			var cs = ConfigurationManager.AppSettings["ConnectionString"];
+			var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
 			if (string.IsNullOrEmpty(cs))
 				throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
 Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");

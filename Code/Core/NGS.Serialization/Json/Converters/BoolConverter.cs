@@ -76,7 +76,7 @@ namespace NGS.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<bool?> DeserializeCollectionNullable(StreamReader sr, int nextToken)
+		public static List<bool?> DeserializeNullableCollection(StreamReader sr, int nextToken)
 		{
 			var res = new List<bool?>();
 			if (nextToken == 't')

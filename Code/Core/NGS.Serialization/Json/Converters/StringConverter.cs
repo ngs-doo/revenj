@@ -65,6 +65,17 @@ namespace NGS.Serialization.Json.Converters
 			sw.Write('"');
 		}
 
+		public static string DeserializeNullable(StreamReader sr, char[] buffer, int nextToken)
+		{
+			if (nextToken == 'n')
+			{
+				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+					return null;
+				throw new SerializationException("Invalid null value found at " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+			return Deserialize(sr, buffer, nextToken);
+		}
+
 		public static string Deserialize(StreamReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
@@ -142,6 +153,22 @@ namespace NGS.Serialization.Json.Converters
 			return sb.ToString();
 		}
 		public static List<string> DeserializeCollection(StreamReader sr, char[] buffer, int nextToken)
+		{
+			var res = new List<string>();
+			res.Add(Deserialize(sr, buffer, nextToken));
+			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
+			{
+				nextToken = JsonSerialization.GetNextToken(sr);
+				res.Add(Deserialize(sr, buffer, nextToken));
+			}
+			if (nextToken != ']')
+			{
+				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+			return res;
+		}
+		public static List<string> DeserializeNullableCollection(StreamReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<string>();
 			if (nextToken == 'n')

@@ -65,16 +65,8 @@
     <Compile Include="QueueService.Designer.cs">
       <DependentUpon>QueueService.cs</DependentUpon>
     </Compile>
-    <Compile Include="Serialization\SerializableAlternateView.cs" />
-    <Compile Include="Serialization\SerializableAttachment.cs" />
-    <Compile Include="Serialization\SerializableCollection.cs" />
-    <Compile Include="Serialization\SerializableContentDisposition.cs" />
-    <Compile Include="Serialization\SerializableContentType.cs" />
-    <Compile Include="Serialization\SerializableLinkedResource.cs" />
-    <Compile Include="Serialization\SerializableMailAddress.cs" />
     <Compile Include="MailService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serialization\SerializableMailMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">
