@@ -10,6 +10,7 @@ namespace Revenj.Http
 	public class RouteHandler
 	{
 		public readonly UriTemplate Template;
+		internal readonly string Service;
 		private readonly UriPattern Pattern;
 		private readonly bool WithStream;
 		private readonly int TotalParams;
@@ -19,8 +20,9 @@ namespace Revenj.Http
 
 		public RouteHandler(string service, string template, object instance, MethodInfo method)
 		{
-			this.Template = new UriTemplate("/" + service + (template == "*" ? "/*" : template));
-			this.Pattern = new UriPattern("/" + service + (template == "*" ? "/*" : template));
+			this.Service = "/" + service.ToLowerInvariant();
+			this.Template = new UriTemplate(template == "*" ? "/*" : template);
+			this.Pattern = new UriPattern(template == "*" ? "/*" : template);
 			var methodParams = method.GetParameters();
 			TotalParams = methodParams.Length;
 			WithStream = TotalParams != 0 && methodParams[TotalParams - 1].ParameterType == typeof(Stream);

@@ -12,7 +12,7 @@ namespace Revenj.Http
 {
 	internal class Routes
 	{
-		private readonly Dictionary<string, List<RouteHandler>> MethodRoutes = new Dictionary<string, List<RouteHandler>>();
+		private readonly Dictionary<string, Dictionary<string, List<RouteHandler>>> MethodRoutes = new Dictionary<string, Dictionary<string, List<RouteHandler>>>();
 		private readonly ConcurrentDictionary<string, KeyValuePair<RouteHandler, Uri>> Cache = new ConcurrentDictionary<string, KeyValuePair<RouteHandler, Uri>>();
 
 		public Routes(IServiceLocator locator)
@@ -70,9 +70,12 @@ namespace Revenj.Http
 
 		private void Add(string method, RouteHandler handler)
 		{
+			Dictionary<string, List<RouteHandler>> dict;
+			if (!MethodRoutes.TryGetValue(method, out dict))
+				MethodRoutes[method] = dict = new Dictionary<string, List<RouteHandler>>();
 			List<RouteHandler> list;
-			if (!MethodRoutes.TryGetValue(method, out list))
-				MethodRoutes[method] = list = new List<RouteHandler>();
+			if (!dict.TryGetValue(handler.Service, out list))
+				dict[handler.Service] = list = new List<RouteHandler>();
 			list.Add(handler);
 		}
 
@@ -86,13 +89,24 @@ namespace Revenj.Http
 				return rh.Key;
 			}
 			templateMatch = null;
-			List<RouteHandler> handlers;
+			Dictionary<string, List<RouteHandler>> handlers;
 			if (!MethodRoutes.TryGetValue(request.HttpMethod, out handlers))
+				return null;
+			if (request.Url.Segments.Length < 2)
+				return null;
+			string service;
+			int pos = request.RawUrl.IndexOf('/', 1);
+			if (pos == -1)
+				service = request.RawUrl.ToLowerInvariant();
+			else
+				service = request.RawUrl.Substring(0, pos).ToLowerInvariant();
+			List<RouteHandler> routes;
+			if (!handlers.TryGetValue(service, out routes))
 				return null;
 			var reqUrl = request.Url;
 			var url = reqUrl.ToString();
-			var baseAddr = new Uri(url.Substring(0, url.Length - request.RawUrl.Length));
-			foreach (var h in handlers)
+			var baseAddr = new Uri(url.Substring(0, url.Length - request.RawUrl.Length + service.Length));
+			foreach (var h in routes)
 			{
 				var match = h.Template.Match(baseAddr, reqUrl);
 				if (match != null)

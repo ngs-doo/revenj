@@ -51,6 +51,9 @@ namespace Revenj.Http
 			try
 			{
 				Listener.Start();
+				Console.WriteLine("Server running on:");
+				foreach (var url in Listener.Prefixes)
+					Console.WriteLine(url);
 				while (true)
 				{
 					try
@@ -121,6 +124,8 @@ namespace Revenj.Http
 			}
 			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
+				Logger.Error(ex.ToString());
 				ReturnError(response, 500, ex.Message);
 			}
 			finally
