@@ -6,7 +6,7 @@ namespace NGS.DomainPatterns
 {
 	/// <summary>
 	/// Access to data. Proxy to various features, such as 
-	/// repositories, reports, notifications, olap, validation...
+	/// repositories, reports, notifications, OLAP, validation...
 	/// Cache will be used if available.
 	/// Data is available using current scope.
 	/// If transaction is used, changes will be visible to other scopes only after commit.
@@ -24,11 +24,11 @@ namespace NGS.DomainPatterns
 		/// LINQ queries to data
 		/// </summary>
 		/// <typeparam name="T">data type</typeparam>
-		/// <returns>linq projection</returns>
+		/// <returns>LINQ projection</returns>
 		IQueryable<T> Query<T>() where T : IDataSource;
 		/// <summary>
 		/// Create new aggregate roots. 
-		/// Data will be sent immediatelly to the backing store.
+		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="aggregates">new aggregates</param>
@@ -37,14 +37,14 @@ namespace NGS.DomainPatterns
 		/// Update existing aggregate roots. Provide pair of old and new.
 		/// Old value is optional. Change track value will be used on null values.
 		/// Lookup to DB will be performed if neither old value or change track value is available.
-		/// Data will be sent immediatelly to the backing store.
+		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="pairs">aggregate pairs</param>
 		void Update<T>(KeyValuePair<T, T>[] pairs) where T : IAggregateRoot;
 		/// <summary>
 		/// Delete existing aggregate roots.
-		/// Data will be sent immediatelly to the backing store.
+		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="aggregates">remove provided aggregate roots</param>
@@ -99,11 +99,11 @@ namespace NGS.DomainPatterns
 	public static class DataContextHelper
 	{
 		/// <summary>
-		/// Find identifiable object using provided uri
+		/// Find identifiable object using provided URI
 		/// </summary>
 		/// <typeparam name="T">data type</typeparam>
 		/// <param name="context">data context</param>
-		/// <param name="uri">search by uri</param>
+		/// <param name="uri">search by URI</param>
 		/// <returns>found object or null</returns>
 		public static T Find<T>(this IDataContext context, string uri) where T : IIdentifiable
 		{
@@ -114,7 +114,7 @@ namespace NGS.DomainPatterns
 		}
 		/// <summary>
 		/// Create new aggregate root.
-		/// Data will be sent immediatelly to the backing store.
+		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="context">data context</param>
@@ -124,8 +124,26 @@ namespace NGS.DomainPatterns
 			context.Create(new[] { root });
 		}
 		/// <summary>
+		/// Bulk update existing aggregate roots.
+		/// Data will be sent immediately to the backing store.
+		/// Change tracking value will be used if available.
+		/// </summary>
+		/// <typeparam name="T">aggregate type</typeparam>
+		/// <param name="context">data context</param>
+		/// <param name="aggregates">aggregate root instances</param>
+		public static void Update<T>(this IDataContext context, T[] aggregates) where T : IAggregateRoot
+		{
+			var pairs = new KeyValuePair<T, T>[aggregates.Length];
+			for (int i = 0; i < aggregates.Length; i++)
+			{
+				var ct = aggregates[i] as IChangeTracking<T>;
+				pairs[i] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), aggregates[i]);
+			}
+			context.Update(pairs);
+		}
+		/// <summary>
 		/// Update existing aggregate root.
-		/// Data will be sent immediatelly to the backing store.
+		/// Data will be sent immediately to the backing store.
 		/// Change tracking value will be used if available.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
@@ -138,7 +156,7 @@ namespace NGS.DomainPatterns
 		}
 		/// <summary>
 		/// Update existing aggregate root.
-		/// Data will be sent immediatelly to the backing store.
+		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="context">data context</param>
@@ -150,7 +168,7 @@ namespace NGS.DomainPatterns
 		}
 		/// <summary>
 		/// Delete existing aggregate root.
-		/// Data will be sent immediatelly to the backing store.
+		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="context">data context</param>
@@ -164,7 +182,7 @@ namespace NGS.DomainPatterns
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="context">data context</param>
-		/// <param name="uri">root uri</param>
+		/// <param name="uri">root URI</param>
 		/// <returns>found history</returns>
 		public static IHistory<T> History<T>(this IDataContext context, string uri) where T : IObjectHistory
 		{
