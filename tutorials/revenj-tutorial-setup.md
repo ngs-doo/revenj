@@ -83,7 +83,7 @@ To start the Revenj Http server let's add start external program to out project 
 
 ![Start http as external application](pictures/start-external.png)
 
-The last thing we need to change the config file; point it to our lib folder and adjust the connection string:
+The last thing we need to do is to change the config file; point it to our lib folder and adjust the connection string:
 
 ![Configure app config](pictures/configure-config.png)
 
@@ -108,9 +108,9 @@ POST request came to the `Crud.svc/Tutorial.Example` url. This is handled by the
 
 During initialization, Revenj Http looked up all WCF service contracts and initialized them. Revenj Http is actually using .NET HttpListener, but it's passing its requests to matched WCF service contracts, in this case `Crud.svc` Create method.
 
-Its implementation `CrudCommands.cs` is just passing it through the Revenj pipeline to the underlying Create class in `Revenj.Plugins.Server.Commands` project:
+Its implementation `CrudCommands.cs` is just passing it through the Revenj pipeline to the underlying Create class in `Revenj.Plugins.Server.Commands` project, which:
 
- - it performs basic validations
+ - performs basic validations
  - checks caller permissions
  - deserializes object (or casts is from previously deserialized one) to correct type
  - calls insert on repository with it 
@@ -162,22 +162,22 @@ If we add a reference to our lib and take a look how that looks from Visual stud
 
 Repositories and various other services have internal modifier, but are available through Revenj interfaces. So ExampleList repository can be resolved as `IQueryableRepository<ExampleList>` or by using `IDataContext` with its `Query<ExampleList>()` method. If for some reason custom repository needs to be used, a registration to the container with the new repository will override the default registration.
 
-It's interesting to take a look at the database and how it will be modeled. Since object-oriented features are utilized for some aspects of the model, such as `Set`, `List` and `value object`, appropriate advanced features will be used in Postgres:
+It's interesting to take a look at the database to see the model. Advanced object-oriented features of Postgres are utilized for some aspects of the model, such as `Set`, `List` and `value object`:
 
 ![Postgres model](pictures/postgres-model.png)
 
-If you look at the database you will find collection of `varchar(10)` named Tags, collection of types named *Ideas*, history table matching exact structure, `persist_Example` function which accepts arrays as arguments and is optimized for processing bulk data. If necessary, optimized single insert/update function can be created in the database and called from repository. Data access doesn't actually go through the tables, but through the views, so, if required, [DBA](http://en.wikipedia.org/wiki/Database_administrator) can alter objects created by the Platform and report an issue which will then result in a better database object or an additional modeling concept. Of course, dropping down to SQL when everything else fails can be done through the DSL.
+If you look at the database you will find collection of `varchar(10)` named *Tags*, collection of types named *Ideas*, history table matching exact structure, `persist_Example` function which accepts arrays as arguments and is optimized for bulk processing. If necessary, optimized single insert/update function can be created in the database and called from repository. Data access doesn't actually go through the tables, but through the views, so, if required, [DBA](http://en.wikipedia.org/wiki/Database_administrator) can alter objects created by the Platform and report an issue which will then result in a better database object or an additional modeling concept. Of course, dropping down to SQL when everything else fails can be done through the DSL.
 
 ###Conclusion
 
 So while some [ORMs](http://en.wikipedia.org/wiki/Object-relational_mapping) can support simple NoSQL models, neither is close to supporting advanced NoSQL-like modeling in the database DSL Platform provides and Revenj utilizes. Of course, nobody is forcing developer to use object oriented features, collections and various other non-relational constructs, but since those can provide various optimizations they are often useful.
 
-Basic premise behind DSL is to have a ubiquitous language not only in the core domain, but everywhere. This greatly improves communication between various developers. If they utilize correct domain terminology, brings application a lot closer to the domain-expert which can now validate model by reading DSL - a formal documentation.
+Basic premise behind DSL is to have a ubiquitous language not only in the core domain, but everywhere. This greatly improves communication between various developers. If they utilize correct domain terminology, this brings application a lot closer to the domain-expert which can now validate model by reading DSL - a formal documentation.
 
-Let's look at few examples of the boilerplate validations which were created. Aggregate root has a `Set<string(10)>` field. Since neither the field, nor the content of the field is optional, generated code will check for it. Also, since we are using a `string(10)` type, it will also check if neither of the tag is longer than 10 chars. All those checks improve the quality of our data, but are often cumbersome to write.
+Let's look at few examples of the boilerplate validations which were created. Aggregate root has a `Set<string(10)>` field. Since neither the field, nor the content of the field is optional, generated code will check for nulls. Also, since we are using a `string(10)` type, it will guard against tags longer than 10 chars. All those checks improve the quality of our data, but are often cumbersome to write.
 
 **But what about some advanced features available as a single DSL line, such as history concept?**
 
-This concept is translated to various objects in the database, snippets of code during persist, casts between representations, specialized services in the code, basically various boilerplate one would need to write/specify to get such a complex feature. And it's complex since history objects is also typesafe in the database. If we just stored the object as JSON or something similar in a field, it would introduce problems down the line when we tried to change the model. Goal of the DSL Platform is to help you write code which will not turn into legacy. To be able to do that, DSL Platform maintains typesafe models everywhere. If domain is explored during lifetime of the application, deeper insights should happen. They result in fields being moved around, renames, nullability changes and various other small and big changes. To keep up with that, automatic migrations keep model in sync with the database and typesafe compilers warn about hand written code on top of recreated DSL model.
+This concept is translated to various objects in the database, snippets of code during persist, casts between representations, specialized services in the code, basically various boilerplate one would need to write/specify to get such a complex feature. And it's complex since history objects is also typesafe in the database. If we just stored the object as JSON or something similar in a field, it would introduce problems down the line when we tried to change the model. Goal of the DSL Platform is to help you write code which will not turn into legacy. To be able to do that, DSL Platform maintains typesafe models everywhere. If domain is explored during lifetime of the application, deeper insights should happen. They result in fields being moved around, renames, nullability changes and various other small and big changes. To keep up with that, [automatic migrations](https://docs.dsl-platform.com/dsl-migrations) keep model in sync with the database and typesafe compilers warn about hand written code on top of recreated DSL model.
 
 Regarding the history feature, from the developer point of view, he will just use a `IRepository<IHistory<Example>>`, while the compilers will take care of all the boring work.
