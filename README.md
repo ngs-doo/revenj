@@ -2,6 +2,10 @@ Revenj
 ======
 C# backend components with deep DSL Platform integration.
 
+##Tutorials:
+
+ * [Setting up Visual studio](tutorials/revenj-tutorial-setup.md)
+
 ##Infrastructure for invasive software composition with DSL Platform C# compiler:
 
  * database API - LINQ to Postgres and Oracle
@@ -38,7 +42,7 @@ C# backend components with deep DSL Platform integration.
 
 #Getting started:
 
-Register at https://dsl-platform.com and create an external project. You will need a Postgres instance and .NET server/Mono.
+Register at https://dsl-platform.com so you can use online compiler. You will also need a Postgres instance and .NET/Mono.
 
 Write some DSL describing your domain. DSL Platform will build/maintain all infrastructure related problems such as:
 
@@ -50,7 +54,7 @@ Write some DSL describing your domain. DSL Platform will build/maintain all infr
  * cache invalidation
  * optimized serialization converters
 
-Download SQL script or let DSL Platform manage your database directly. Download GeneratedModel.dll and plug it into Revenj.
+Download SQL script or let DSL Platform manage your database. Download GeneratedModel.dll and plug it into Revenj.
 Now you have a fully functional server with lot's of features. 
 Consume generated library from within C# server, or use it as REST server from other languages such as:
 
