@@ -59,10 +59,6 @@ We'll also use a Revenj-core which is somewhat optimized for use as a library:
 
 ![Downloading Revenj core](pictures/revenj-core.png)
 
-Let's hook up everything in test project:
-
-![Downloading Revenj core](pictures/test-project-events.png)
-
 We should add reference to the `RevenjTutorial` project, `Revenj.Core` in dependencies/Server, `NGS.DomainPatterns.Interface` to access the signatures, generated model and we should be ready to go. Let's write a test which will initialize the Revenj instance, hook up our aggregate event handlers, create an aggregate and apply two async events on it. Let's also write an extension method to ease the use of API somewhat, at the end of the test. We should have something like this:
 
 ![Aggregate event test](pictures/testing-aggregate-events.png)
