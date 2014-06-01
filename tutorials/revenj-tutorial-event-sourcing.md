@@ -92,13 +92,14 @@ Another issue is that we are running this service outside of transactions, which
 
 ###Processing Domain Events
 
-We also didn't touch the notion of event replay-ability, but will do that in the next tutorial. For now, let's finish up with sending some events to the server with Fiddler. REST API for events is available by default in `DomainCommands.cs` from the plugins rest commands project. If we look at the signature and the implementation, we will see a reoccurring pattern. Service signature:
+We also didn't touch the notion of event replay-ability, but will do that in the next [tutorial](revenj-tutorial-aggregate-events.md). For now, let's finish up with sending some events to the server with Fiddler. REST API for events is available by default in `DomainCommands.cs` from the plugins rest commands project. If we look at the signature and the implementation, we will see a reoccurring pattern. Service signature:
 
     [WebInvoke(Method="POST", UriTemplate="/submit/{domainEvent}?result={result}")]
     Stream SubmitEvent(string domainEvent, string result, Stream body);
 
-translates the url to correct domain event type, deserializes it from provided POST body using specified Content-Type header (or as XML by default) and sends it down to plugin server command: `SubmitEvent`
-`SubmitEvent` is similar as previous command in a sense that it's a generic command which does basic validations, permission checks and just pass it to the appropriate service - `IDomainEventStore` which looks like:
+translates the url to correct domain event type, deserializes it from provided POST body using specified Content-Type header (or as XML by default) and sends it down to the plugin server command: `SubmitEvent`.
+
+`SubmitEvent` is similar as previous command in a sense that it's a generic command which does basic validations, permission checks and just pass it to the appropriate service - in this case `IDomainEventStore`, which looks like:
 
     public interface IDomainEventStore
     {
@@ -129,13 +130,13 @@ We have extended module *EventSourcing* with a new aggregate root which has prim
 
 ![Mutating domain event](pictures/event-return-instance-handler.png)
 
-Where we create a customer in event handler and mutate the event to set the value of new id. We can also show how to write extension methods on top of generated classes. There are several ways to extend the behavior of automatically maintained model and this is one of them (ignore for now that it would be much easier just to sanitize name within the handler, the main point is that we now have SanitizeName method on top of *Customer* class created from the model).
+where we create a customer in the event handler and mutate the event to set the value of a new id. We can also show how to write extension methods on top of generated classes. There are several ways to extend the behavior of automatically maintained model and this is one of them (ignore for now that it would be much easier just to sanitize name within the handler, the main point is that we now have SanitizeName method on top of *Customer* class created from the model).
 Let's send some event down the write and see how it behaves:
 
 ![Message to REST service](pictures/event-instance-fiddler.png)
 
-In http response we can see that the event has been populated by the server with several fields, but most importantly by id field for the identity of the new customer. If we do a lookup for the customer by the provided identity we get a sanitized newly created customer:
+In the http response we can see that the event has been populated by the server with several fields, but most importantly with id field for the identity of the new customer. If we do a lookup for the customer by the provided identity we get a sanitized newly created customer:
 
 ![Loading created customer](pictures/event-customer-sanitized.png)
 
-*If you have issues with id not being assigned/customer not being created, it's probably due to event handler not being picked up during initialization, probably because DLL was not in the correct folder, so check output folder for the project that it goes to the dependencies/Server folder (to keep it simple for now).*
+*If you have issues with id not being assigned/customer not being created, it's probably due to event handler not being picked up during initialization. This usually happens because DLL was not in the correct folder, so check the output folder for the project that it goes to the dependencies/Server folder (to keep it simple for now).*

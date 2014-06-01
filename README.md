@@ -5,7 +5,8 @@ C# backend components with deep DSL Platform integration.
 ##Tutorials:
 
  * [Setting up Visual studio and REST server](tutorials/revenj-tutorial-setup.md)
- * [Basic Event sourcing in Revenj](tutorials/revenj-tutorial-event-sourcing.md)
+ * [Event sourcing in Revenj](tutorials/revenj-tutorial-event-sourcing.md)
+ * [Using advanced Event sourcing features in Revenj](tutorials/revenj-tutorial-aggregate-events.md)
 
 ##Infrastructure for invasive software composition with DSL Platform C# compiler:
 
