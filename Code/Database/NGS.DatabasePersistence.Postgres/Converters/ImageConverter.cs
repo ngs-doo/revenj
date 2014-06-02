@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
+using NGS.Utility;
 
 namespace NGS.DatabasePersistence.Postgres.Converters
 {
@@ -41,7 +41,7 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 				return null;
 			using (var ms = new MemoryStream())
 			{
-				value.Save(ms, ImageFormat.Png);
+				value.Save(ms, value.RawFormat);
 				ms.Position = 0;
 				return ByteaConverter.ToDatabase(ms.ToArray());
 			}
@@ -51,10 +51,11 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 		{
 			if (value == null)
 				return null;
-			using (var ms = new MemoryStream())
+			using (var cms = ChunkedMemoryStream.Create())
 			{
-				value.Save(ms, ImageFormat.Png);
-				return ByteaConverter.ToTuple(ms.ToArray());
+				value.Save(cms, value.RawFormat);
+				cms.Position = 0;
+				return ByteaConverter.ToTuple(cms);
 			}
 		}
 	}

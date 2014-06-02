@@ -207,6 +207,17 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			return value != null ? new ByteTuple(value) : null;
 		}
 
+		public static PostgresTuple ToTuple(Stream stream)
+		{
+			if (stream == null)
+				return null;
+			var cms = stream as ChunkedMemoryStream;
+			if (cms != null) return new StreamTuple(cms);
+			var ms = stream as MemoryStream;
+			if (ms != null) return new ByteTuple(ms.ToArray());
+			return new StreamTuple(new ChunkedMemoryStream(stream));
+		}
+
 		class ByteTuple : PostgresTuple
 		{
 			private readonly byte[] Value;
@@ -231,8 +242,6 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 
 			public override string BuildTuple(bool quote)
 			{
-				if (Value == null)
-					return "NULL";
 				using (var cms = ChunkedMemoryStream.Create())
 				{
 					var sw = cms.GetWriter();
@@ -251,18 +260,15 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 
 			public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
 			{
-				if (Value != null)
+				var pref = BuildSlashEscape(escaping.Length);
+				if (mappings != null)
 				{
-					var pref = BuildSlashEscape(escaping.Length);
-					if (mappings != null)
-					{
-						foreach (var p in pref)
-							mappings(sw, p);
-					}
-					else sw.Write(pref);
-					sw.Write('x');
-					BuildArray(sw);
+					foreach (var p in pref)
+						mappings(sw, p);
 				}
+				else sw.Write(pref);
+				sw.Write('x');
+				BuildArray(sw);
 			}
 
 			public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
@@ -274,9 +280,10 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 
 		class StreamTuple : PostgresTuple
 		{
-			private readonly Stream Value;
+			//TODO: dispose!?
+			private readonly ChunkedMemoryStream Value;
 
-			public StreamTuple(Stream value)
+			public StreamTuple(ChunkedMemoryStream value)
 			{
 				this.Value = value;
 			}
@@ -284,20 +291,8 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 			public override bool MustEscapeRecord { get { return true; } }
 			public override bool MustEscapeArray { get { return true; } }
 
-			private void BuildArray(StreamWriter sw)
-			{
-				int cur;
-				while ((cur = Value.ReadByte()) != -1)
-				{
-					sw.Write(CharMap[cur >> 4]);
-					sw.Write(CharMap[cur & 0xf]);
-				}
-			}
-
 			public override string BuildTuple(bool quote)
 			{
-				if (Value == null)
-					return "NULL";
 				using (var cms = ChunkedMemoryStream.Create())
 				{
 					var sw = cms.GetWriter();
@@ -316,18 +311,15 @@ namespace NGS.DatabasePersistence.Postgres.Converters
 
 			public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
 			{
-				if (Value != null)
+				var pref = BuildSlashEscape(escaping.Length);
+				if (mappings != null)
 				{
-					var pref = BuildSlashEscape(escaping.Length);
-					if (mappings != null)
-					{
-						foreach (var p in pref)
-							mappings(sw, p);
-					}
-					else sw.Write(pref);
-					sw.Write('x');
-					BuildArray(sw);
+					foreach (var p in pref)
+						mappings(sw, p);
 				}
+				else sw.Write(pref);
+				sw.Write('x');
+				Value.ToPostgresBytea(sw);
 			}
 
 			public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
