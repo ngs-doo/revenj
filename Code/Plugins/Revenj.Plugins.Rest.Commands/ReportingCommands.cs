@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.ServiceModel;
-using System.Xml.Linq;
 using NGS.DomainPatterns;
 using NGS.Serialization;
 using Revenj.Api;
@@ -34,31 +32,33 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var reportType = Utility.CheckDomainObject(DomainModel, report);
 			var validatedData = Utility.ParseObject(Serialization, reportType, body, true, Locator);
+			if (validatedData.IsFailure) return validatedData.Error;
 			return Converter.PassThrough<PopulateReport, PopulateReport.Argument<object>>(
 				new PopulateReport.Argument<object>
 				{
-					ReportName = reportType.FullName,
-					Data = validatedData
+					ReportName = reportType.Result.FullName,
+					Data = validatedData.Result
 				});
 		}
 
 		public Stream CreateReport(string report, string templater, Stream body)
 		{
 			var reportType = Utility.CheckDomainObject(DomainModel, report);
-			Utility.CheckDomainObject(DomainModel, reportType.FullName + "+" + templater);
+			var templaterType = Utility.CheckDomainObject(DomainModel, reportType, templater);
 			var validatedData = Utility.ParseObject(Serialization, reportType, body, true, Locator);
+			if (templaterType.IsFailure || validatedData.IsFailure) return templaterType.Error ?? validatedData.Error;
 			return Converter.PassThrough<CreateReport, CreateReport.Argument<object>>(
 				new CreateReport.Argument<object>
 				{
-					ReportName = reportType.FullName,
+					ReportName = reportType.Result.FullName,
 					TemplaterName = templater,
-					Data = validatedData
+					Data = validatedData.Result
 				});
 		}
 
 		private Stream OlapCube(
-			Type cubeType,
-			Type specificationType,
+			Either<Type> cubeType,
+			Either<Type> specType,
 			string templater,
 			string dimensions,
 			string facts,
@@ -67,25 +67,24 @@ namespace Revenj.Plugins.Rest.Commands
 			string offset,
 			Stream data)
 		{
+			var spec = Utility.ParseObject(Serialization, specType, data, true, Locator);
+			if (cubeType.IsFailure || specType.IsFailure || spec.IsFailure)
+				return cubeType.Error ?? specType.Error ?? spec.Error;
 			var dimArr = string.IsNullOrEmpty(dimensions) ? new string[0] : dimensions.Split(',');
 			var factArr = string.IsNullOrEmpty(facts) ? new string[0] : facts.Split(',');
 			if (dimArr.Length == 0 && factArr.Length == 0)
-				Utility.ThrowError("At least one dimension or fact must be specified", HttpStatusCode.BadRequest);
+				return Either<object>.BadRequest("At least one dimension or fact must be specified").Error;
 			var ordDict = Utility.ParseOrder(order);
 			int? intLimit, intOffset;
 			Utility.ParseLimitOffset(limit, offset, out intLimit, out intOffset);
 
-			var specification = specificationType != null
-				? Utility.ParseObject(Serialization, specificationType, data, true, Locator)
-				: null;
-
 			return Converter.PassThrough<OlapCubeReport, OlapCubeReport.Argument<object>>(
 				new OlapCubeReport.Argument<object>
 				{
-					CubeName = cubeType.FullName,
+					CubeName = cubeType.Result.FullName,
 					TemplaterName = templater,
-					SpecificationName = specificationType != null ? specificationType.FullName : null,
-					Specification = specification,
+					SpecificationName = specType.Result != null ? specType.Result.FullName : null,
+					Specification = spec.Result,
 					Dimensions = dimArr,
 					Facts = factArr,
 					Order = ordDict,
@@ -120,31 +119,28 @@ namespace Revenj.Plugins.Rest.Commands
 			Stream body)
 		{
 			if (string.IsNullOrEmpty(specification))
-				Utility.ThrowError("Specification must be specified", HttpStatusCode.BadRequest);
+				return Either<object>.BadRequest("Specification must be specified").Error;
 			var cubeType = Utility.CheckDomainObject(DomainModel, cube);
-			var specType =
-				Utility.CheckDomainObject(
-					DomainModel,
-					(specification.Contains("+") ? string.Empty : cubeType.FullName + "+") + specification);
-			Utility.CheckDomainObject(DomainModel, cubeType.FullName + "+" + templater);
+			var specType = Utility.CheckDomainObject(DomainModel, cubeType, specification);
 			return OlapCube(cubeType, specType, templater, dimensions, facts, order, limit, offset, body);
 		}
 
 		private Stream OlapCube(
-			Type cubeType,
+			Either<Type> cubeType,
 			string templater,
 			string dimensions,
 			string facts,
 			string order,
-			object specification,
+			Either<object> spec,
 			string limit,
 			string offset)
 		{
-			Utility.CheckDomainObject(DomainModel, cubeType.FullName + "+" + templater);
+			var templaterType = Utility.CheckDomainObject(DomainModel, cubeType, templater);
+			if (templaterType.IsFailure || spec.IsFailure) return templaterType.Error ?? spec.Error;
 			var dimArr = string.IsNullOrEmpty(dimensions) ? new string[0] : dimensions.Split(',');
 			var factArr = string.IsNullOrEmpty(facts) ? new string[0] : facts.Split(',');
 			if (dimArr.Length == 0 && factArr.Length == 0)
-				Utility.ThrowError("At least one dimension or fact must be specified", HttpStatusCode.BadRequest);
+				return Either<object>.BadRequest("At least one dimension or fact must be specified").Error;
 			var ordDict = Utility.ParseOrder(order);
 			int? intLimit, intOffset;
 			Utility.ParseLimitOffset(limit, offset, out intLimit, out intOffset);
@@ -152,10 +148,10 @@ namespace Revenj.Plugins.Rest.Commands
 				Converter.PassThrough<OlapCubeReport, OlapCubeReport.Argument<object>>(
 					new OlapCubeReport.Argument<object>
 					{
-						CubeName = cubeType.FullName,
+						CubeName = cubeType.Result.FullName,
 						TemplaterName = templater,
 						SpecificationName = null,
-						Specification = specification,
+						Specification = spec.Result,
 						Dimensions = dimArr,
 						Facts = factArr,
 						Order = ordDict,
@@ -175,13 +171,8 @@ namespace Revenj.Plugins.Rest.Commands
 			string offset)
 		{
 			var cubeType = Utility.CheckDomainObject(DomainModel, cube);
-			var specType = string.IsNullOrEmpty(specification)
-				? null
-				: Utility.CheckDomainObject(
-					DomainModel,
-					(specification.Contains("+") ? string.Empty : cubeType.FullName + "+") + specification);
-
-			var spec = specType != null ? Utility.SpecificationFromQuery(specType) : null;
+			var specType = Utility.CheckDomainObject(DomainModel, cubeType, specification);
+			var spec = Utility.SpecificationFromQuery(specType);
 			return OlapCube(cubeType, templater, dimensions, facts, order, spec, limit, offset);
 		}
 
@@ -196,23 +187,9 @@ namespace Revenj.Plugins.Rest.Commands
 			Stream body)
 		{
 			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.Value == null)
-				Utility.ThrowError("Cube data source not found. Static DataSource property not found.", HttpStatusCode.NotImplemented);
-
-			object spec;
-			switch (Utility.GetIncomingFormat())
-			{
-				case MessageFormat.Json:
-					spec = Utility.ParseGenericSpecification<string>(Serialization, ci.Key, body);
-					break;
-				case MessageFormat.ProtoBuf:
-					spec = Utility.ParseGenericSpecification<MemoryStream>(Serialization, ci.Key, body);
-					break;
-				default:
-					spec = Utility.ParseGenericSpecification<XElement>(Serialization, ci.Key, body);
-					break;
-			}
-			return OlapCube(ci.Key, templater, dimensions, facts, order, spec, limit, offset);
+			if (ci.IsFailure) return ci.Error;
+			var spec = Serialization.ParseGenericSpecification(ci.Result.Value, body);
+			return OlapCube(ci.Result.Key, templater, dimensions, facts, order, spec, limit, offset);
 		}
 
 		public Stream OlapCubeWithGenericSpecificationQuery(
@@ -225,11 +202,9 @@ namespace Revenj.Plugins.Rest.Commands
 			string offset)
 		{
 			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.Value == null)
-				Utility.ThrowError("Cube data source not found. Static DataSource property not found.", HttpStatusCode.NotImplemented);
-
-			var spec = Utility.GenericSpecificationFromQuery(ci.Value);
-			return OlapCube(ci.Key, templater, dimensions, facts, order, spec, limit, offset);
+			if (ci.IsFailure) return ci.Error;
+			var spec = Utility.GenericSpecificationFromQuery(ci.Result.Value);
+			return OlapCube(ci.Result.Key, templater, dimensions, facts, order, spec, limit, offset);
 		}
 
 		public Stream OlapCubeWithExpression(
@@ -243,16 +218,17 @@ namespace Revenj.Plugins.Rest.Commands
 			Stream body)
 		{
 			var ci = Utility.CheckCube(DomainModel, cube);
-			Utility.CheckDomainObject(DomainModel, ci.Key.FullName + "+" + templater);
-			if (ci.Value == null)
-				Utility.ThrowError("Cube data source not found. Static DataSource property not found.", HttpStatusCode.NotImplemented);
-			var spec = Utility.ParseExpressionSpecification(Serialization, ci.Key, body);
-			return OlapCube(ci.Key, templater, dimensions, facts, order, spec, limit, offset);
+			if (ci.IsFailure) return ci.Error;
+			var type = Utility.CheckDomainObject(DomainModel, ci.Result.Key, templater);
+			if (type.IsFailure) return type.Error;
+			var spec = Utility.ParseExpressionSpecification(Serialization, ci.Result.Value, body);
+			return OlapCube(ci.Result.Key, templater, dimensions, facts, order, spec, limit, offset);
 		}
 
 		public Stream GetHistory(string root, string uris)
 		{
-			Utility.CheckAggregateRoot(DomainModel, root);
+			var type = Utility.CheckAggregateRoot(DomainModel, root);
+			if (type.IsFailure) return type.Error;
 			return
 				Converter.PassThrough<GetRootHistory, GetRootHistory.Argument>(
 					new GetRootHistory.Argument
@@ -264,24 +240,23 @@ namespace Revenj.Plugins.Rest.Commands
 
 		public Stream GetHistoryFrom(string root, Stream body)
 		{
-			Utility.CheckAggregateRoot(DomainModel, root);
-			var uris = Serialization.Deserialize<string[]>(body, ThreadContext.Request.ContentType);
+			var type = Utility.CheckAggregateRoot(DomainModel, root);
+			var uris = Serialization.TryDeserialize<string[]>(body);
+			if (type.IsFailure || uris.IsFailure) return type.Error ?? uris.Error;
 			return
 				Converter.PassThrough<GetRootHistory, GetRootHistory.Argument>(
 					new GetRootHistory.Argument
 					{
 						Name = root,
-						Uri = uris
+						Uri = uris.Result
 					});
 		}
 
 		public Stream FindTemplater(string file, string domainObject, string uri)
 		{
-			Utility.CheckIdentifiable(DomainModel, domainObject);
-			var requestPdf =
-				(ThreadContext.Request.Accept ?? string.Empty)
-				.Equals("application/pdf", StringComparison.CurrentCultureIgnoreCase);
-
+			var type = Utility.CheckIdentifiable(DomainModel, domainObject);
+			if (type.IsFailure) return type.Error;
+			var requestPdf = ThreadContext.Request.Accept == "application/pdf";
 			var result =
 				Converter.PassThrough<TemplaterProcessDocument, TemplaterProcessDocument.Argument<object>>(
 					new TemplaterProcessDocument.Argument<object>
@@ -305,19 +280,10 @@ namespace Revenj.Plugins.Rest.Commands
 		private Stream SearchTemplater(
 			string file,
 			string domainObject,
-			string specification,
-			Func<Type, object> buildSpecification)
+			Either<object> spec)
 		{
-			var type = Utility.CheckDomainObject(DomainModel, domainObject);
-			var specType = string.IsNullOrEmpty(specification)
-				? type
-				: Utility.CheckDomainObject(
-					DomainModel,
-					(specification.Contains("+") ? string.Empty : type.FullName + "+") + specification);
-			var requestPdf =
-				(ThreadContext.Request.Accept ?? string.Empty)
-				.Equals("application/pdf", StringComparison.CurrentCultureIgnoreCase);
-
+			if (spec.IsFailure) return spec.Error;
+			var requestPdf = ThreadContext.Request.Accept == "application/pdf";
 			var result =
 				Converter.PassThrough<TemplaterProcessDocument, TemplaterProcessDocument.Argument<object>>(
 					new TemplaterProcessDocument.Argument<object>
@@ -328,8 +294,8 @@ namespace Revenj.Plugins.Rest.Commands
 								new SearchDomainObject.Argument<object>
 								{ 
 									SpecificationName = null,
-									Specification = buildSpecification(specType),
-									Name = type.FullName 
+									Specification = spec.Result,
+									Name = domainObject 
 								}},
 						ToPdf = requestPdf
 					},
@@ -348,42 +314,42 @@ namespace Revenj.Plugins.Rest.Commands
 
 		public Stream SearchTemplaterWithSpecificationQuery(string file, string domainObject, string specification, Stream body)
 		{
-			Func<Type, object> getSpec = type => Utility.ParseObject(Serialization, type, body, false, Locator);
-			return SearchTemplater(file, domainObject, specification, getSpec);
+			var type = Utility.CheckDomainObject(DomainModel, domainObject);
+			var specType = Utility.CheckDomainObject(DomainModel, type, specification);
+			if (specType.IsFailure || specType.Result == null)
+				return specType.Error ?? Either<object>.BadRequest("Specification must be specified").Error;
+			var spec = Utility.ParseObject(Serialization, specType, body, false, Locator);
+			return SearchTemplater(file, domainObject, spec);
 		}
 
 		public Stream SearchTemplaterQuery(string file, string domainObject, string specification)
 		{
-			Func<Type, object> getSpec = type => string.IsNullOrEmpty(specification) ? null : Utility.SpecificationFromQuery(type);
-			return SearchTemplater(file, domainObject, specification, getSpec);
+			var type = Utility.CheckDomainObject(DomainModel, domainObject);
+			var specType = Utility.CheckDomainObject(DomainModel, type, specification);
+			var spec = Utility.SpecificationFromQuery(specType);
+			if (specType.IsFailure || spec.IsFailure) return specType.Error ?? spec.Error;
+			return SearchTemplater(file, domainObject, spec);
 		}
 
 		public Stream SearchTemplaterWithGenericSpecification(string file, string domainObject, Stream body)
 		{
-			switch (Utility.GetIncomingFormat())
-			{
-				case MessageFormat.Json:
-					Func<Type, object> getJsonSpec = type => Utility.ParseGenericSpecification<string>(Serialization, type, body);
-					return SearchTemplater(file, domainObject, null, getJsonSpec);
-				case MessageFormat.ProtoBuf:
-					Func<Type, object> getProtobufSpec = type => Utility.ParseGenericSpecification<MemoryStream>(Serialization, type, body);
-					return SearchTemplater(file, domainObject, null, getProtobufSpec);
-				default:
-					Func<Type, object> getXmlSpec = type => Utility.ParseGenericSpecification<XElement>(Serialization, type, body);
-					return SearchTemplater(file, domainObject, null, getXmlSpec);
-			}
+			var type = Utility.CheckDomainObject(DomainModel, domainObject);
+			var spec = Serialization.ParseGenericSpecification(type, body);
+			return SearchTemplater(file, domainObject, spec);
 		}
 
 		public Stream SearchTemplaterWithGenericSpecificationQuery(string file, string domainObject)
 		{
-			Func<Type, object> getSpec = type => Utility.GenericSpecificationFromQuery(type);
-			return SearchTemplater(file, domainObject, null, getSpec);
+			var type = Utility.CheckDomainObject(DomainModel, domainObject);
+			var spec = Utility.GenericSpecificationFromQuery(type);
+			return SearchTemplater(file, domainObject, spec);
 		}
 
 		public Stream SearchTemplaterWithExpression(string file, string domainObject, Stream body)
 		{
-			Func<Type, object> getSpec = type => Utility.ParseExpressionSpecification(Serialization, type, body);
-			return SearchTemplater(file, domainObject, null, getSpec);
+			var type = Utility.CheckDomainObject(DomainModel, domainObject);
+			var spec = Utility.ParseExpressionSpecification(Serialization, type, body);
+			return SearchTemplater(file, domainObject, spec);
 		}
 	}
 }

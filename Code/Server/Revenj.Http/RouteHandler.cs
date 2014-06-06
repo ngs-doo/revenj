@@ -50,12 +50,10 @@ namespace Revenj.Http
 			for (int i = 0; i < match.BoundVariables.Count; i++)
 				args[UppercaseArgumentOrder[match.BoundVariables.GetKey(i)]] = match.BoundVariables[i];
 
-			// Fixes bug in Mono's TemplateMatch
-#if MONO
+			//TODO: remove when Mono fixes Template match
 			var last = match.BoundVariables.Count - 1;
 			if (last >= 0 && args[last].Length > 0 && args[last][0] == '/')
 				args[last] = args[last].Substring(1);
-#endif
 
 			return Invocation(args, listener.Request.InputStream);
 		}

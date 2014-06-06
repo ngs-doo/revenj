@@ -5,78 +5,91 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.ServiceModel.Web;
 using System.Xml.Linq;
 using NGS;
 using NGS.DomainPatterns;
 using NGS.Serialization;
+using NGS.Utility;
 using Revenj.Api;
 using Revenj.Plugins.Server.Commands;
 using Serialize.Linq.Nodes;
 
 namespace Revenj.Plugins.Rest.Commands
 {
-	public static class Utility
+	internal static class Utility
 	{
 		internal static readonly ISerialization<object> PassThrough = new PassThroughSerialization();
 
-		public static Type CheckDomainObject(IDomainModel domainModel, string name)
+		public static Either<Type> CheckDomainObject(IDomainModel domainModel, string name)
 		{
 			var type = domainModel.Find(name);
 			if (type == null)
-				Utility.ThrowError("Can't find domain object: {0}".With(name), HttpStatusCode.BadRequest);
+				return "Can't find domain object: {0}".With(name);
 			return type;
 		}
 
-		public static KeyValuePair<Type, Type> CheckCube(IDomainModel domainModel, string name)
+		public static Either<Type> CheckDomainObject(IDomainModel domainModel, Either<Type> parentType, string name)
+		{
+			if (parentType.IsFailure) return parentType;
+			if (name == null) return Either<Type>.Empty;
+			var type = name.Contains("+") ? domainModel.Find(name) : domainModel.Find(parentType.Result.FullName + "+" + name);
+			if (type == null)
+				return "Can't find domain object: {0}".With(name);
+			return type;
+		}
+
+		public static Either<KeyValuePair<Type, Type>> CheckCube(IDomainModel domainModel, string name)
 		{
 			var type = domainModel.Find(name);
 			if (type == null)
-				Utility.ThrowError("Can't find olap cube: {0}".With(name), HttpStatusCode.BadRequest);
+				return "Can't find olap cube: {0}".With(name);
 			if (!typeof(IOlapCubeQuery).IsAssignableFrom(type))
-				Utility.ThrowError("{0} is not an olap cube.".With(name), HttpStatusCode.BadRequest);
+				return "{0} is not an olap cube.".With(name);
 			//TODO ugly hack. fix later
 			var prop = type.GetProperty("DataSource");
 			var source = prop != null ? (Type)prop.GetValue(null, null) : null;
+			if (source == null)
+				return Either<KeyValuePair<Type, Type>>.Fail("Cube data source not found. Static DataSource property not found.", HttpStatusCode.NotImplemented);
 			return new KeyValuePair<Type, Type>(type, source);
 		}
 
-		public static Type CheckAggregateRoot(IDomainModel domainModel, string name)
+		public static Either<Type> CheckAggregateRoot(IDomainModel domainModel, string name)
 		{
 			var type = CheckDomainObject(domainModel, name);
-			if (!typeof(IAggregateRoot).IsAssignableFrom(type))
-				Utility.ThrowError("{0} is not an aggregate root".With(name), HttpStatusCode.BadRequest);
+			if (type.IsSuccess && !typeof(IAggregateRoot).IsAssignableFrom(type.Result))
+				return "{0} is not an aggregate root".With(name);
 			return type;
 		}
 
-		public static void CheckIdentifiable(IDomainModel domainModel, string name)
+		public static Either<Type> CheckIdentifiable(IDomainModel domainModel, string name)
 		{
 			var type = CheckDomainObject(domainModel, name);
-			if (!typeof(IIdentifiable).IsAssignableFrom(type))
-				Utility.ThrowError("{0} doesn't have URI".With(name), HttpStatusCode.BadRequest);
-		}
-
-		public static Type CheckDomainEvent(IDomainModel domainModel, string name)
-		{
-			var type = CheckDomainObject(domainModel, name);
-			if (!typeof(IDomainEvent).IsAssignableFrom(type))
-				Utility.ThrowError("{0} is not a domain event".With(name), HttpStatusCode.BadRequest);
+			if (type.IsSuccess && !typeof(IIdentifiable).IsAssignableFrom(type.Result))
+				return "{0} doesn't have URI".With(name);
 			return type;
 		}
 
-		public static XElement ParseXml(Stream data)
+		public static Either<Type> CheckDomainEvent(IDomainModel domainModel, string name)
+		{
+			var type = CheckDomainObject(domainModel, name);
+			if (type.IsSuccess && !typeof(IDomainEvent).IsAssignableFrom(type.Result))
+				return "{0} is not a domain event".With(name);
+			return type;
+		}
+
+		public static Either<XElement> ParseXml(Stream data)
 		{
 			if (data == null)
-				return null;
+				return Either<XElement>.Succes(null);
 			try
 			{
 				return XElement.Load(data);
 			}
 			catch (Exception ex)
 			{
-				throw new WebFaultException<string>(@"Sent data is not a valid Xml. 
+				return @"Sent data is not a valid Xml. 
 Set Content-type header to correct format or fix sent data.
-Error: {0}".With(ex.Message), HttpStatusCode.BadRequest);
+Error: {0}".With(ex.Message);
 			}
 		}
 
@@ -87,35 +100,37 @@ Error: {0}".With(ex.Message), HttpStatusCode.BadRequest);
 
 		private static string SerializeToString(this IWireSerialization serializer, object instance)
 		{
-			using (var ms = new MemoryStream())
+			using (var cms = ChunkedMemoryStream.Create())
 			{
-				var ct = serializer.Serialize(instance, ThreadContext.Request.Accept, ms);
+				var ct = serializer.Serialize(instance, ThreadContext.Request.Accept, cms);
 				ThreadContext.Response.ContentType = ct;
-				var sr = new StreamReader(ms);
-				return sr.ReadToEnd();
+				return cms.GetReader().ReadToEnd();
 			}
 		}
 
-		public static object ParseObject(
+		public static Either<object> ParseObject(
 			IWireSerialization serializer,
-			Type type,
+			Either<Type> maybeType,
 			Stream data,
 			bool canCreate,
 			IServiceLocator locator)
 		{
+			if (maybeType.IsFailure) return maybeType.Error;
+			var type = maybeType.Result;
+			if (type == null) return Either<object>.Empty;
 			if (data == null)
 			{
 				if (canCreate == false)
-					ThrowError(@"{0} must be provided. Example: 
-{1}".With(type.FullName, serializer.EmptyInstanceString(type)), HttpStatusCode.BadRequest);
+					return @"{0} must be provided. Example: 
+{1}".With(type.FullName, serializer.EmptyInstanceString(type));
 				try
 				{
 					return Activator.CreateInstance(type);
 				}
 				catch (Exception ex)
 				{
-					ThrowError(@"Can't create instance of {0}. Data must be provided. Error: {1}. Example: 
-{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type)), HttpStatusCode.BadRequest);
+					return @"Can't create instance of {0}. Data must be provided. Error: {1}. Example: 
+{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type));
 				}
 			}
 			try
@@ -127,49 +142,53 @@ Error: {0}".With(ex.Message), HttpStatusCode.BadRequest);
 			catch (TargetInvocationException tie)
 			{
 				var ex = tie.InnerException ?? tie;
-				throw new WebFaultException<string>(@"Can't deserialize {0}. Error: {1}. Example: 
-{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type)), HttpStatusCode.BadRequest);
+				return @"Can't deserialize {0}. Error: {1}. Example: 
+{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type));
 			}
 			catch (Exception ex)
 			{
-				throw new WebFaultException<string>(@"Can't deserialize {0}. Error: {1}. Example: 
-{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type)), HttpStatusCode.BadRequest);
+				return @"Can't deserialize {0}. Error: {1}. Example: 
+{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type));
 			}
 		}
 
-		public static object SpecificationFromQuery(Type specType)
+		public static Either<object> SpecificationFromQuery(Either<Type> specType)
 		{
-			object instance = null;
+			if (specType.IsFailure) return specType.Error;
+			var type = specType.Result;
+			if (type == null) return Either<object>.Empty;
 			try
 			{
 				var queryParams = ThreadContext.Request.UriTemplateMatch.QueryParameters;
-				var ctor = specType.GetConstructors().FirstOrDefault();
-				instance = ctor.Invoke(ctor.GetParameters().Select(_ => (object)null).ToArray());
+				var ctor = type.GetConstructors().FirstOrDefault();
+				var instance = ctor.Invoke(ctor.GetParameters().Select(_ => (object)null).ToArray());
 				foreach (var k in queryParams.AllKeys)
 				{
-					var prop = specType.GetProperty(k);
+					var prop = type.GetProperty(k);
 					if (prop != null)
 						prop.SetValue(instance, Convert.ChangeType(queryParams[k], prop.PropertyType), null);
 				}
+				return instance;
 			}
 			catch (Exception ex)
 			{
-				ThrowError("Error creating object from query string. " + ex.Message, HttpStatusCode.BadRequest);
+				return "Error creating object from query string. " + ex.Message;
 			}
-			return instance;
 		}
 
-		public static object GenericSpecificationFromQuery(Type domainType)
+		public static Either<object> GenericSpecificationFromQuery(Either<Type> domainType)
 		{
+			if (domainType.IsFailure) return domainType.Error;
+			var type = domainType.Result;
 			try
 			{
 				var arg = new Dictionary<string, List<KeyValuePair<int, object>>>();
-				var specType = typeof(GenericSpecification<,>).MakeGenericType(domainType, typeof(object));
+				var specType = typeof(GenericSpecification<,>).MakeGenericType(type, typeof(object));
 				//TODO better match parameters. allow > != ~ etc...
 				var queryParams = ThreadContext.Request.UriTemplateMatch.QueryParameters;
 				foreach (var k in queryParams.AllKeys)
 				{
-					var prop = domainType.GetProperty(k);
+					var prop = type.GetProperty(k);
 					if (prop != null)
 					{
 						List<KeyValuePair<int, object>> list;
@@ -182,45 +201,19 @@ Error: {0}".With(ex.Message), HttpStatusCode.BadRequest);
 			}
 			catch (Exception ex)
 			{
-				ThrowError("Error creating object from query string. " + ex.Message, HttpStatusCode.BadRequest);
+				return "Error creating object from query string. " + ex.Message;
 			}
-			return null;
 		}
 
-		public static MessageFormat GetFormat(string type)
+		public static MessageFormat GetIncomingFormat()
 		{
-			type = (type ?? string.Empty).ToLowerInvariant().Trim();
+			var type = (ThreadContext.Request.ContentType ?? string.Empty).ToLowerInvariant().Trim();
 			return
 				type == "application/json"
 				? MessageFormat.Json
 				: type == "application/x-protobuf"
 					? MessageFormat.ProtoBuf
 					: MessageFormat.Xml;
-		}
-
-		public static MessageFormat GetIncomingFormat()
-		{
-			return GetFormat(ThreadContext.Request.ContentType);
-		}
-
-		public static void ThrowError(string message, HttpStatusCode code)
-		{
-			ThreadContext.Response.StatusCode = code;
-			//TODO: should return text/plain, but that doesn't work
-			switch (ThreadContext.Request.Accept)
-			{
-				case "application/json":
-					ThreadContext.Response.ContentType = "application/json";
-					break;
-				default:
-					ThreadContext.Response.ContentType = "application/xml; charset=\"utf-8\"";
-					break;
-			}
-#if MONO
-			throw new System.Exception(message);
-#else
-			throw new WebFaultException<string>(message, code);
-#endif
 		}
 
 		public static Dictionary<string, bool> ParseOrder(string order)
@@ -251,14 +244,30 @@ Error: {0}".With(ex.Message), HttpStatusCode.BadRequest);
 				offset = null;
 		}
 
-		public static object ParseGenericSpecification<TFormat>(IWireSerialization serializer, Type domainType, Stream data)
+		public static Either<object> ParseGenericSpecification(this IWireSerialization serialization, Either<Type> target, Stream data)
 		{
+			if (target.IsFailure) return target.Error;
+			switch (GetIncomingFormat())
+			{
+				case MessageFormat.Json:
+					return ParseGenericSpecification<string>(serialization, target, data);
+				case MessageFormat.ProtoBuf:
+					return ParseGenericSpecification<MemoryStream>(serialization, target, data);
+				default:
+					return ParseGenericSpecification<XElement>(serialization, target, data);
+			}
+		}
+
+		public static Either<object> ParseGenericSpecification<TFormat>(this IWireSerialization serializer, Either<Type> domainType, Stream data)
+		{
+			if (domainType.IsFailure) return domainType.Error;
 			var genSer = serializer.GetSerializer<TFormat>();
-			var specType = typeof(GenericSpecification<,>).MakeGenericType(domainType, typeof(TFormat));
+			var specType = typeof(GenericSpecification<,>).MakeGenericType(domainType.Result, typeof(TFormat));
 			try
 			{
-				var arg = Utility.ParseObject(serializer, typeof(Dictionary<string, List<KeyValuePair<int, TFormat>>>), data, true, null);
-				return Activator.CreateInstance(specType, genSer, arg);
+				var arg = ParseObject(serializer, typeof(Dictionary<string, List<KeyValuePair<int, TFormat>>>), data, true, null);
+				if (arg.IsFailure) return arg.Error;
+				return Activator.CreateInstance(specType, genSer, arg.Result);
 			}
 			catch (Exception ex)
 			{
@@ -266,26 +275,26 @@ Error: {0}".With(ex.Message), HttpStatusCode.BadRequest);
 					ex = ex.InnerException;
 				var specArg = new Dictionary<string, List<KeyValuePair<int, TFormat>>>();
 				specArg["URI"] = new List<KeyValuePair<int, TFormat>>(new[] { new KeyValuePair<int, TFormat>(1, genSer.Serialize("1001")) });
-				throw new WebFaultException<string>(@"Error deserializing specification. " + ex.Message + @"
+				return @"Error deserializing specification. " + ex.Message + @"
 Example: 
-" + serializer.SerializeToString(specArg), HttpStatusCode.BadRequest);
+" + serializer.SerializeToString(specArg);
 			}
 		}
 
-		public static object ParseExpressionSpecification(IWireSerialization serializer, Type domainType, Stream data)
+		public static Either<object> ParseExpressionSpecification(IWireSerialization serializer, Either<Type> domainType, Stream data)
 		{
+			if (domainType.IsFailure) return domainType.Error;
 			try
 			{
 				var expressionNode = serializer.Deserialize<LambdaExpressionNode>(data, ThreadContext.Request.ContentType);
-				return Activator.CreateInstance(typeof(SpecificationFromNode<>).MakeGenericType(domainType), expressionNode);
+				return Activator.CreateInstance(typeof(SpecificationFromNode<>).MakeGenericType(domainType.Result), expressionNode);
 			}
 			catch (Exception ex)
 			{
 				if (ex.InnerException != null)
 					ex = ex.InnerException;
-				Utility.ThrowError(@"Error deserializing expression. " + ex.Message, HttpStatusCode.BadRequest);
+				return @"Error deserializing expression. " + ex.Message;
 			}
-			return null;
 		}
 	}
 }

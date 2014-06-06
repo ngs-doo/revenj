@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
-using System.Net;
+using System.Security;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
-using System.ServiceModel.Web;
 using NGS.Logging;
 using NGS.Utility;
 
@@ -25,10 +24,10 @@ namespace Revenj.Wcf
 
 		public bool HandleError(Exception error)
 		{
-			var wfe = error as WebFaultException<string>;
+			var se = error as SecurityException;
 			var fe = error as FaultException;
-			return wfe != null && wfe.StatusCode != HttpStatusCode.InternalServerError
-				|| wfe == null && fe != null;
+			var anse = error as ActionNotSupportedException;
+			return se != null || fe != null || anse != null;
 		}
 
 		public void ProvideFault(
@@ -36,13 +35,15 @@ namespace Revenj.Wcf
 			MessageVersion version,
 			ref Message fault)
 		{
-			//TODO Mono error handling
-			var wfe = error as WebFaultException<string>;
+			var se = error as SecurityException;
 			var fe = error as FaultException;
-			if (wfe != null && wfe.StatusCode != HttpStatusCode.InternalServerError)
-				ErrorLogger.Trace(() => wfe.Detail);
+			var anse = error as ActionNotSupportedException;
+			if (se != null)
+				ErrorLogger.Trace(() => se.Message);
 			else if (fe != null)
 				ErrorLogger.Trace(() => fe.Message);
+			else if (anse != null)
+				ErrorLogger.Trace(() => anse.Message);
 			else
 				ErrorLogger.Error(error.GetDetailedExplanation());
 		}

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.ServiceModel.Web;
 using System.Xml.Linq;
-using NGS;
 using Revenj.Processing;
 
 namespace Revenj.Wcf
@@ -15,19 +11,16 @@ namespace Revenj.Wcf
 		public XElement Data { get; set; }
 		public Type CommandType { get; private set; }
 
-		public XmlCommandDescription(string[] args, Stream message, Type commandType)
+		public XmlCommandDescription(XElement data, Type commandType)
 		{
 			this.CommandType = commandType;
-			if (message != null)
-				try
-				{
-					this.Data = XElement.Load(message);
-				}
-				catch (Exception ex)
-				{
-					throw new WebFaultException<string>("Error parsing request body. {0}".With(ex.Message), HttpStatusCode.BadRequest);
-				}
-			else if (args != null && args.Length > 0)
+			this.Data = data;
+		}
+
+		public XmlCommandDescription(string[] args, Type commandType)
+		{
+			this.CommandType = commandType;
+			if (args != null && args.Length > 0)
 			{
 				var xml =
 					new XElement(XName.Get(commandType.Name),

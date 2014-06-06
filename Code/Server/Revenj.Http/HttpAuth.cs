@@ -6,6 +6,7 @@ using System.Security.Principal;
 using System.Text;
 using NGS;
 using NGS.Security;
+using System.Security;
 
 namespace Revenj.Http
 {

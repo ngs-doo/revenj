@@ -21,32 +21,26 @@ namespace Revenj.Wcf
 		{
 			get
 			{
-#if MONO
 				var hms = Request.Headers["If-Modified-Since"];
 				if (string.IsNullOrEmpty(hms))
 					return null;
 				System.DateTime dt;
 				System.DateTime.TryParse(hms, out dt);
 				return dt;
-#else
-				return Request.IfModifiedSince;
-#endif
+				//return Request.IfModifiedSince; TODO: Mono doesnt support this parameter
 			}
 		}
 		public DateTime? IfUnmodifiedSince
 		{
 			get
 			{
-#if MONO
 				var hms = Request.Headers["If-Unmodified-Since"];
 				if (string.IsNullOrEmpty(hms))
 					return null;
 				System.DateTime dt;
 				System.DateTime.TryParse(hms, out dt);
 				return dt;
-#else
-				return Request.IfUnmodifiedSince;
-#endif
+				//return Request.IfUnmodifiedSince; TODO: Mono doesnt support this parameter
 			}
 		}
 		public string GetHeader(string name) { return Request.Headers[name]; }

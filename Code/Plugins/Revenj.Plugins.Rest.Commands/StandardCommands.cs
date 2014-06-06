@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.ServiceModel;
 using System.Text;
-using System.Xml.Linq;
 using NGS.DomainPatterns;
 using NGS.Serialization;
 using Revenj.Api;
@@ -36,17 +34,21 @@ namespace Revenj.Plugins.Rest.Commands
 
 		enum MethodEnum { Insert, Update, Delete }
 
-		private Stream Persist(MethodEnum method, Type root, Stream data)
+		private Stream Persist(MethodEnum method, Either<Type> maybeRoot, Stream data)
 		{
-			var array = (object[])Utility.ParseObject(Serialization, root.MakeArrayType(), data, false, Locator);
+			if (maybeRoot.IsFailure) return maybeRoot.Error;
+			var rootType = maybeRoot.Result;
+			var array = Utility.ParseObject(Serialization, Either<Type>.Succes(rootType.MakeArrayType()), data, false, Locator);
+			if (array.IsFailure) return array.Error;
+			var arg = (object[])array.Result;
 			return
 				Converter.PassThrough<PersistAggregateRoot, PersistAggregateRoot.Argument<object>>(
 					new PersistAggregateRoot.Argument<object>
 					{
-						RootName = root.FullName,
-						ToInsert = method == MethodEnum.Insert ? array : null,
-						ToUpdate = method == MethodEnum.Update ? CreateKvMethod.MakeGenericMethod(root).Invoke(this, new[] { array }) : null,
-						ToDelete = method == MethodEnum.Delete ? array : null
+						RootName = rootType.FullName,
+						ToInsert = method == MethodEnum.Insert ? arg : null,
+						ToUpdate = method == MethodEnum.Update ? CreateKvMethod.MakeGenericMethod(rootType).Invoke(this, new[] { arg }) : null,
+						ToDelete = method == MethodEnum.Delete ? arg : null
 					});
 		}
 
@@ -74,8 +76,8 @@ namespace Revenj.Plugins.Rest.Commands
 		}
 
 		private Stream OlapCube(
-			Type cubeType,
-			Type specificationType,
+			Either<Type> cubeType,
+			Either<Type> specType,
 			string dimensions,
 			string facts,
 			string order,
@@ -86,21 +88,20 @@ namespace Revenj.Plugins.Rest.Commands
 			var dimArr = string.IsNullOrEmpty(dimensions) ? new string[0] : dimensions.Split(',');
 			var factArr = string.IsNullOrEmpty(facts) ? new string[0] : facts.Split(',');
 			if (dimArr.Length == 0 && factArr.Length == 0)
-				Utility.ThrowError("At least one dimension or fact must be specified", HttpStatusCode.BadRequest);
+				return Either<object>.BadRequest("At least one dimension or fact must be specified").Error;
 			var ordDict = Utility.ParseOrder(order);
 			int? intLimit, intOffset;
 			Utility.ParseLimitOffset(limit, offset, out intLimit, out intOffset);
 
-			var specification = specificationType != null
-				? Utility.ParseObject(Serialization, specificationType, data, true, Locator)
-				: null;
+			var spec = Utility.ParseObject(Serialization, specType, data, true, Locator);
+			if (cubeType.IsFailure || specType.IsFailure || spec.IsFailure) return cubeType.Error ?? specType.Error ?? spec.Error;
 
 			return Converter.PassThrough<AnalyzeOlapCube, AnalyzeOlapCube.Argument<object>>(
 				new AnalyzeOlapCube.Argument<object>
 				{
-					CubeName = cubeType.FullName,
-					SpecificationName = specificationType != null ? specificationType.FullName : null,
-					Specification = specification,
+					CubeName = cubeType.Result.FullName,
+					SpecificationName = specType.Result != null ? specType.Result.FullName : null,
+					Specification = spec.Result,
 					Dimensions = dimArr,
 					Facts = factArr,
 					Order = ordDict,
@@ -133,39 +134,36 @@ namespace Revenj.Plugins.Rest.Commands
 			Stream body)
 		{
 			if (string.IsNullOrEmpty(specification))
-				Utility.ThrowError("Specification must be specified", HttpStatusCode.BadRequest);
+				return Either<object>.BadRequest("Specification must be specified").Error;
 			var cubeType = Utility.CheckDomainObject(DomainModel, cube);
-			var specType =
-				Utility.CheckDomainObject(
-					DomainModel,
-					(specification.Contains("+") ? string.Empty : cubeType.FullName + "+") + specification);
+			var specType = Utility.CheckDomainObject(DomainModel, cubeType, specification);
 			return OlapCube(cubeType, specType, dimensions, facts, order, limit, offset, body);
 		}
 
 		private Stream OlapCube(
-			Type cubeType,
+			Either<Type> cubeType,
 			string dimensions,
 			string facts,
 			string order,
-			object specification,
+			Either<object> spec,
 			string limit,
 			string offset)
 		{
+			if (cubeType.IsFailure || spec.IsFailure) return cubeType.Error ?? spec.Error;
 			var dimArr = string.IsNullOrEmpty(dimensions) ? new string[0] : dimensions.Split(',');
 			var factArr = string.IsNullOrEmpty(facts) ? new string[0] : facts.Split(',');
 			if (dimArr.Length == 0 && factArr.Length == 0)
-				Utility.ThrowError("At least one dimension or fact must be specified", HttpStatusCode.BadRequest);
+				return Either<object>.BadRequest("At least one dimension or fact must be specified").Error;
 			var ordDict = Utility.ParseOrder(order);
 			int? intLimit, intOffset;
 			Utility.ParseLimitOffset(limit, offset, out intLimit, out intOffset);
-
 			return
 				Converter.PassThrough<AnalyzeOlapCube, AnalyzeOlapCube.Argument<object>>(
 					new AnalyzeOlapCube.Argument<object>
 					{
-						CubeName = cubeType.FullName,
+						CubeName = cubeType.Result.FullName,
 						SpecificationName = null,
-						Specification = specification,
+						Specification = spec.Result,
 						Dimensions = dimArr,
 						Facts = factArr,
 						Order = ordDict,
@@ -184,13 +182,8 @@ namespace Revenj.Plugins.Rest.Commands
 			string offset)
 		{
 			var cubeType = Utility.CheckDomainObject(DomainModel, cube);
-			var specType = string.IsNullOrEmpty(specification)
-				? null
-				: Utility.CheckDomainObject(
-					DomainModel,
-					(specification.Contains("+") ? string.Empty : cubeType.FullName + "+") + specification);
-
-			var spec = specType != null ? Utility.SpecificationFromQuery(specType) : null;
+			var specType = Utility.CheckDomainObject(DomainModel, cubeType, specification);
+			var spec = Utility.SpecificationFromQuery(specType);
 			return OlapCube(cubeType, dimensions, facts, order, spec, limit, offset);
 		}
 
@@ -204,22 +197,9 @@ namespace Revenj.Plugins.Rest.Commands
 			Stream body)
 		{
 			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.Value == null)
-				Utility.ThrowError("Cube data source not found. Static DataSource property not found.", HttpStatusCode.NotImplemented);
-			object spec;
-			switch (Utility.GetIncomingFormat())
-			{
-				case MessageFormat.Json:
-					spec = Utility.ParseGenericSpecification<string>(Serialization, ci.Key, body);
-					break;
-				case MessageFormat.ProtoBuf:
-					spec = Utility.ParseGenericSpecification<MemoryStream>(Serialization, ci.Key, body);
-					break;
-				default:
-					spec = Utility.ParseGenericSpecification<XElement>(Serialization, ci.Key, body);
-					break;
-			}
-			return OlapCube(ci.Key, dimensions, facts, order, spec, limit, offset);
+			if (ci.IsFailure) return ci.Error;
+			var spec = Serialization.ParseGenericSpecification(ci.Result.Value, body);
+			return OlapCube(ci.Result.Key, dimensions, facts, order, spec, limit, offset);
 		}
 
 		public Stream OlapCubeWithGenericSpecificationQuery(
@@ -231,11 +211,9 @@ namespace Revenj.Plugins.Rest.Commands
 			string offset)
 		{
 			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.Value == null)
-				Utility.ThrowError("Cube data source not found. Static DataSource property not found.", HttpStatusCode.NotImplemented);
-
-			var spec = Utility.GenericSpecificationFromQuery(ci.Value);
-			return OlapCube(ci.Key, dimensions, facts, order, spec, limit, offset);
+			if (ci.IsFailure) return ci.Error;
+			var spec = Utility.GenericSpecificationFromQuery(ci.Result.Value);
+			return OlapCube(ci.Result.Key, dimensions, facts, order, spec, limit, offset);
 		}
 
 		public Stream OlapCubeWithExpression(
@@ -248,17 +226,13 @@ namespace Revenj.Plugins.Rest.Commands
 			Stream body)
 		{
 			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.Value == null)
-				Utility.ThrowError("Cube data source not found. Static DataSource property not found.", HttpStatusCode.NotImplemented);
-
-			var spec = Utility.ParseExpressionSpecification(Serialization, ci.Key, body);
-			return OlapCube(ci.Key, dimensions, facts, order, spec, limit, offset);
+			if (ci.IsFailure) return ci.Error;
+			var spec = Utility.ParseExpressionSpecification(Serialization, ci.Result.Value, body);
+			return OlapCube(ci.Result.Key, dimensions, facts, order, spec, limit, offset);
 		}
 
 		private Stream Execute<TFormat>(string service, TFormat data)
 		{
-			if (typeof(TFormat) == typeof(StreamReader))
-				return Execute(service, (data as StreamReader).ReadToEnd());
 			return Converter.ConvertStream<ExecuteService, ExecuteService.Argument<TFormat>>(
 				new ExecuteService.Argument<TFormat>
 				{
@@ -272,12 +246,15 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			switch (Utility.GetIncomingFormat())
 			{
+				//TODO: maybe it's ok to use stream reader now!?
 				case MessageFormat.Json:
-					return Execute(service, new StreamReader(body, Encoding.UTF8));
+					return Execute(service, new StreamReader(body, Encoding.UTF8).ReadToEnd());
 				case MessageFormat.ProtoBuf:
-					return Execute(service, body);
+					return Execute<Stream>(service, body);
 				default:
-					return Execute(service, Utility.ParseXml(body));
+					var xml = Utility.ParseXml(body);
+					if (xml.IsFailure) return xml.Error;
+					return Execute(service, xml.Result);
 			}
 		}
 	}

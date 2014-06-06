@@ -114,7 +114,14 @@ namespace Revenj.Wcf
 				case "application/x-protobuf":
 					return ExecuteCommand(engine, Serialization, new ProtobufCommandDescription(args, message, commandType), accept);
 				default:
-					return ExecuteCommand(engine, Serialization, new XmlCommandDescription(args, message, commandType), accept);
+					if (message != null)
+					{
+						XElement el;
+						try { el = XElement.Load(message); }
+						catch (Exception ex) { return Utility.ReturnError("Error parsing request body. " + ex.Message, HttpStatusCode.BadRequest); }
+						return ExecuteCommand(engine, Serialization, new XmlCommandDescription(el, commandType), accept);
+					}
+					return ExecuteCommand(engine, Serialization, new XmlCommandDescription(args, commandType), accept);
 			}
 		}
 

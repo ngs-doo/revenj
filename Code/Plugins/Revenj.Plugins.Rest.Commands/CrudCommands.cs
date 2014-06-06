@@ -31,18 +31,20 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var rootType = Utility.CheckAggregateRoot(DomainModel, root);
 			var validatedData = Utility.ParseObject(Serialization, rootType, body, false, Locator);
+			if (validatedData.IsFailure) return validatedData.Error;
 			return
 				Converter.PassThrough<Create, Create.Argument<object>>(
 					new Create.Argument<object>
 					{
-						Name = rootType.FullName,
-						Data = validatedData
+						Name = rootType.Result.FullName,
+						Data = validatedData.Result
 					});
 		}
 
 		public Stream Read(string domainObject, string uri)
 		{
-			Utility.CheckIdentifiable(DomainModel, domainObject);
+			var type = Utility.CheckIdentifiable(DomainModel, domainObject);
+			if (type.IsFailure) return type.Error;
 			return
 				Converter.PassThrough<Read, Read.Argument>(
 					new Read.Argument
@@ -61,13 +63,14 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var rootType = Utility.CheckAggregateRoot(DomainModel, root);
 			var validatedData = Utility.ParseObject(Serialization, rootType, body, false, Locator);
+			if (validatedData.IsFailure) return validatedData.Error;
 			return
 				Converter.PassThrough<Update, Update.Argument<object>>(
 					new Update.Argument<object>
 					{
-						Name = rootType.FullName,
+						Name = rootType.Result.FullName,
 						Uri = uri,
-						Data = validatedData
+						Data = validatedData.Result
 					});
 		}
 
@@ -78,7 +81,8 @@ namespace Revenj.Plugins.Rest.Commands
 
 		public Stream Delete(string root, string uri)
 		{
-			Utility.CheckAggregateRoot(DomainModel, root);
+			var type = Utility.CheckAggregateRoot(DomainModel, root);
+			if (type.IsFailure) return type.Error;
 			return
 				Converter.PassThrough<Delete, Delete.Argument>(
 					new Delete.Argument

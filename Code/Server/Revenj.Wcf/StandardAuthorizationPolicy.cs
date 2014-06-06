@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IdentityModel.Claims;
 using System.IdentityModel.Policy;
-using System.Net;
+using System.Security;
 using System.Security.Principal;
+using System.ServiceModel;
 using System.Text;
 using NGS;
 using NGS.Security;
@@ -69,18 +70,18 @@ namespace Revenj.Wcf
 			var splt = authHeader.Split(' ');
 			var authType = splt[0];
 			if (splt.Length != 2)
-				Utility.ThrowError("Invalid authorization header.", HttpStatusCode.Unauthorized);
+				throw new SecurityException("Invalid authorization header.");
 
 			var token = Encoding.UTF8.GetString(Convert.FromBase64String(splt[1]));
 			var cred = token.Split(':');
 
 			if (cred.Length != 2)
-				Utility.ThrowError("Invalid authorization header content.", HttpStatusCode.Unauthorized);
+				throw new SecurityException("Invalid authorization header content.");
 
 			var user = cred[0];
 
 			if (string.IsNullOrEmpty(user))
-				Utility.ThrowError("User not specified in authorization header.", HttpStatusCode.Unauthorized);
+				throw new SecurityException("User not specified in authorization header.");
 
 			var isAuthenticated = authType == "Hash"
 				? HashAuthentication.IsAuthenticated(user, Convert.FromBase64String(cred[1]))
@@ -98,7 +99,7 @@ namespace Revenj.Wcf
 				if (authorization == null)
 				{
 					ThreadContext.Response.Headers["WWW-Authenticate"] = MissingBasicAuth;
-					Utility.ThrowError("Authorization header not provided.", HttpStatusCode.Unauthorized);
+					throw new SecurityException("Authorization header not provided.");
 				}
 
 				var identity = GetIdentity(authorization);
@@ -109,19 +110,19 @@ namespace Revenj.Wcf
 						&& (template.RequestUri != null && PublicUrl.Contains(template.RequestUri.LocalPath)
 						|| template.Template != null && PublicTemplate.Contains(template.Template.ToString())))
 						return identity;
-					Utility.ThrowError("User {0} was not authenticated.".With(identity.Name), HttpStatusCode.Forbidden);
+					throw new SecurityException("User {0} was not authenticated.".With(identity.Name));
 				}
 				else if (template == null)
 				{
 					var url = ThreadContext.Request.RequestUri;
-					Utility.ThrowError("Unknown route: " + url.PathAndQuery, HttpStatusCode.NotFound);
+					throw new ActionNotSupportedException("Unknown route: " + url.PathAndQuery);
 				}
 				return identity;
 			}
 
 			var identities = obj as IList<IIdentity>;
 			if (identities == null || identities.Count < 1)
-				Utility.ThrowError("No Identity found.", HttpStatusCode.Unauthorized);
+				throw new SecurityException("No Identity found.");
 
 			return identities[0];
 		}

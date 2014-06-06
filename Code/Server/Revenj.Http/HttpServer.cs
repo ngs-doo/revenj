@@ -3,7 +3,7 @@ using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Security;
-using System.ServiceModel.Web;
+using System.ServiceModel;
 using System.Text;
 using System.Threading;
 using NGS.DomainPatterns;
@@ -118,9 +118,9 @@ namespace Revenj.Http
 			{
 				ReturnError(response, (int)HttpStatusCode.Forbidden, sex.Message);
 			}
-			catch (WebFaultException<string> wfe)
+			catch (ActionNotSupportedException anse)
 			{
-				ReturnError(response, (int)wfe.StatusCode, wfe.Detail);
+				ReturnError(response, 404, anse.Message);
 			}
 			catch (Exception ex)
 			{
