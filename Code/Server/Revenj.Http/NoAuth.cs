@@ -9,13 +9,13 @@ namespace Revenj.Http
 {
 	public class NoAuth : HttpAuth, IPermissionManager
 	{
-		private readonly string[] NoRoles = new string[0];
+		private static readonly GenericPrincipal Guest = new GenericPrincipal(new GenericIdentity("guest"), new string[0]);
 
 		public NoAuth() : base(null, null, null) { }
 
 		public override AuthorizeOrError TryAuthorize(HttpListenerContext context, RouteHandler route)
 		{
-			return AuthorizeOrError.Success(new GenericPrincipal(new GenericIdentity("guest"), NoRoles));
+			return AuthorizeOrError.Success(Guest);
 		}
 
 		public bool CanAccess(string identifier, IPrincipal user) { return true; }

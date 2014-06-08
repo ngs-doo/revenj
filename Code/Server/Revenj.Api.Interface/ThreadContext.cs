@@ -19,8 +19,6 @@ namespace Revenj.Api
 		string ContentType { get; }
 		Uri RequestUri { get; }
 		UriTemplateMatch UriTemplateMatch { get; set; }
-		DateTime? IfModifiedSince { get; }
-		DateTime? IfUnmodifiedSince { get; }
 		string GetHeader(string name);
 	}
 

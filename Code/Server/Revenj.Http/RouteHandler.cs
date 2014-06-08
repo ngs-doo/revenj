@@ -9,8 +9,8 @@ namespace Revenj.Http
 {
 	public class RouteHandler
 	{
-		public readonly UriTemplate Template;
 		internal readonly string Service;
+		internal readonly string Template;
 		internal readonly UriPattern Pattern;
 		private readonly bool WithStream;
 		private readonly int TotalParams;
@@ -20,7 +20,7 @@ namespace Revenj.Http
 		public RouteHandler(string service, string template, object instance, MethodInfo method)
 		{
 			this.Service = "/" + service.ToLowerInvariant();
-			this.Template = new UriTemplate(template == "*" ? "/*" : template);
+			this.Template = template;
 			this.Pattern = new UriPattern(template == "*" ? "/*" : template);
 			var methodParams = method.GetParameters();
 			TotalParams = methodParams.Length;
@@ -37,13 +37,6 @@ namespace Revenj.Http
 				else
 					expArgs[i] = lamParams[1];
 			}
-			/*if (template.Contains("{*") && TotalParams > 0)
-			{
-				var last = TotalParams - 1;
-				if (WithStream) last--;
-				if (last >= 0)
-					ArgumentOrder["*" + methodParams[last].Name.ToUpperInvariant()] = last;
-			}*/
 			var mce = Expression.Call(Expression.Constant(instance, instance.GetType()), method, expArgs);
 			var lambda = Expression.Lambda<Func<string[], Stream, Stream>>(mce, lamParams);
 			Invocation = lambda.Compile();
@@ -51,9 +44,10 @@ namespace Revenj.Http
 
 		public Stream Handle(UriTemplateMatch match, HttpListenerContext listener)
 		{
+			var boundVars = match.BoundVariables;
 			var args = new string[TotalParams];
-			for (int i = 0; i < match.BoundVariables.Count; i++)
-				args[ArgumentOrder[match.BoundVariables.GetKey(i)]] = match.BoundVariables[i];
+			for (int i = 0; i < boundVars.Count; i++)
+				args[ArgumentOrder[boundVars.GetKey(i)]] = boundVars[i];
 
 			return Invocation(args, listener.Request.InputStream);
 		}

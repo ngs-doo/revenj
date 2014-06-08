@@ -87,7 +87,7 @@ namespace Revenj.Http
 			if (Cache.TryGetValue(reqId, out handler))
 			{
 				argUrl = request.RawUrl.Substring(handler.Service.Length);
-				templateMatch = handler.Pattern.ExtractMatches(argUrl, request.Url);
+				templateMatch = handler.Pattern.ExtractMatch(argUrl, request.Url);
 				return handler;
 			}
 			templateMatch = null;

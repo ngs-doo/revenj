@@ -345,6 +345,19 @@ namespace NGS.Utility
 		}
 
 		/// <summary>
+		/// Optimized version of copy to stream
+		/// </summary>
+		/// <param name="stream">destination stream</param>
+		public new void CopyTo(Stream stream)
+		{
+			var total = TotalSize > BlockSize ? TotalSize / BlockSize : 0;
+			var remaining = TotalSize % BlockSize;
+			for (int i = 0; i < total; i++)
+				stream.Write(Blocks[i], 0, BlockSize);
+			stream.Write(Blocks[total], 0, remaining);
+		}
+
+		/// <summary>
 		/// Reuse same stream writer on this stream.
 		/// </summary>
 		/// <returns>stream writer</returns>

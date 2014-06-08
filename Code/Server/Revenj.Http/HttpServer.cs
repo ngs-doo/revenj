@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using NGS.DomainPatterns;
 using NGS.Logging;
+using NGS.Utility;
 using Revenj.Api;
 
 namespace Revenj.Http
@@ -101,9 +102,18 @@ namespace Revenj.Http
 						Thread.CurrentPrincipal = auth.Principal;
 						using (var stream = route.Handle(templateMatch, context))
 						{
-							if (stream.CanSeek)
-								response.ContentLength64 = stream.Length;
-							stream.CopyTo(response.OutputStream);
+							var cms = stream as ChunkedMemoryStream;
+							if (cms != null)
+							{
+								response.ContentLength64 = cms.Length;
+								cms.CopyTo(response.OutputStream);
+							}
+							else
+							{
+								if (stream.CanSeek)
+									response.ContentLength64 = stream.Length;
+								stream.CopyTo(response.OutputStream);
+							}
 						}
 					}
 					else ReturnError(response, (int)auth.ResponseCode, auth.Error);

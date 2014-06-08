@@ -17,7 +17,7 @@ namespace Revenj.Http
 		protected readonly IAuthentication<string> PassAuthentication;
 		protected readonly IAuthentication<byte[]> HashAuthentication;
 		protected static readonly HashSet<string> PublicUrl = new HashSet<string>();
-		protected static readonly HashSet<UriTemplate> PublicTemplate = new HashSet<UriTemplate>();
+		protected static readonly HashSet<string> PublicTemplate = new HashSet<string>();
 		private static readonly string MissingBasicAuth = "Basic realm=\"" + Environment.MachineName + "\"";
 
 		static HttpAuth()
@@ -27,7 +27,7 @@ namespace Revenj.Http
 				if (key.StartsWith("PublicUrl"))
 					PublicUrl.Add(ConfigurationManager.AppSettings[key]);
 				else if (key.StartsWith("PublicTemplate"))
-					PublicTemplate.Add(new UriTemplate(ConfigurationManager.AppSettings[key]));
+					PublicTemplate.Add(ConfigurationManager.AppSettings[key]);
 			}
 		}
 

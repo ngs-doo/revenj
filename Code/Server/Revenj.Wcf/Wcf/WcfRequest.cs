@@ -17,32 +17,6 @@ namespace Revenj.Wcf
 			get { return Request.UriTemplateMatch; }
 			set { Request.UriTemplateMatch = value; }
 		}
-		public DateTime? IfModifiedSince
-		{
-			get
-			{
-				var hms = Request.Headers["If-Modified-Since"];
-				if (string.IsNullOrEmpty(hms))
-					return null;
-				System.DateTime dt;
-				System.DateTime.TryParse(hms, out dt);
-				return dt;
-				//return Request.IfModifiedSince; TODO: Mono doesnt support this parameter
-			}
-		}
-		public DateTime? IfUnmodifiedSince
-		{
-			get
-			{
-				var hms = Request.Headers["If-Unmodified-Since"];
-				if (string.IsNullOrEmpty(hms))
-					return null;
-				System.DateTime dt;
-				System.DateTime.TryParse(hms, out dt);
-				return dt;
-				//return Request.IfUnmodifiedSince; TODO: Mono doesnt support this parameter
-			}
-		}
 		public string GetHeader(string name) { return Request.Headers[name]; }
 
 		public Uri RequestUri

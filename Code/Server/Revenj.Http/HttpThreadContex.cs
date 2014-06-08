@@ -46,14 +46,6 @@ namespace Revenj.Http
 			get { return TemplateMatch; }
 			set { TemplateMatch = value; }
 		}
-		public DateTime? IfModifiedSince
-		{
-			get { return null; }
-		}
-		public DateTime? IfUnmodifiedSince
-		{
-			get { return null; }
-		}
 		public string GetHeader(string name)
 		{
 			return Request.Headers.Get(name);

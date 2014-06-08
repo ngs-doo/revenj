@@ -27,24 +27,24 @@ namespace Revenj.Http
 		{
 			if (!TemplatePattern.IsMatch(url))
 				return null;
-			return ExtractMatches(url, uri);
+			return ExtractMatch(url, uri);
 		}
 
-		public UriTemplateMatch ExtractMatches(string url, Uri uri)
+		public UriTemplateMatch ExtractMatch(string url, Uri uri)
 		{
 			var result = new UriTemplateMatch();
-			foreach (Match match in TemplatePattern.Matches(url))
+			var boundVars = result.BoundVariables;
+			var relativeSegments = result.RelativePathSegments;
+			var queryParams = result.QueryParameters;
+			var match = TemplatePattern.Match(url);
+			var groups = match.Groups;
+			for (int i = 1; i < groups.Count; i++)
 			{
-				int tokenIndex = 0;
-				foreach (Group group in match.Groups)
-				{
-					if (tokenIndex > 0 && group.Success)
-						result.BoundVariables.Add(Tokens[tokenIndex - 1], group.Value);
-					tokenIndex++;
-				}
+				boundVars.Add(Tokens[i - 1], groups[i].Value);
 			}
-			for (int i = 2; i < uri.Segments.Length; i++)
-				result.RelativePathSegments.Add(uri.Segments[i]);
+			var segments = uri.Segments;
+			for (int i = 2; i < segments.Length; i++)
+				relativeSegments.Add(segments[i]);
 			int pos = 1;
 			var query = uri.Query;
 			var sbName = new StringBuilder();
@@ -59,8 +59,8 @@ namespace Revenj.Http
 				pos++;
 				var key = Uri.UnescapeDataString(sbName.ToString());
 				var value = Uri.UnescapeDataString(sbValue.ToString());
-				result.BoundVariables.Add(key.ToUpperInvariant(), value);
-				result.QueryParameters.Add(key, value);
+				boundVars.Add(key.ToUpperInvariant(), value);
+				queryParams.Add(key, value);
 			}
 			return result;
 		}
