@@ -28,14 +28,10 @@ namespace NGS.DomainPatterns
 			var ext = Path.GetExtension(TemplateFile);
 			var cms = ChunkedMemoryStream.Create();
 			using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
-			{
-				fs.CopyTo(cms);
-			}
-			cms.Position = 0;
-			using (var document = Factory.Open(cms, ext))
+			using (var document = Factory.Open(fs, cms, ext))
 			{
 				if (data != null)
-					foreach (var d in data)
+					foreach (dynamic d in data)
 						document.Process(d);
 			}
 			cms.Position = 0;

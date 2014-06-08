@@ -110,15 +110,10 @@ Example argument:
 			if (!File.Exists(file))
 				throw new FileNotFoundException("Can't locate file: {0}. Check if correct file is specified.".With(argument.File));
 
+			var ext = Path.GetExtension(argument.File);
 			var cms = ChunkedMemoryStream.Create();
 			using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
-			{
-				fs.CopyTo(cms);
-			}
-			cms.Position = 0;
-			var ext = Path.GetExtension(argument.File);
-
-			using (var document = TemplaterFactory.Open(cms, ext))
+			using (var document = TemplaterFactory.Open(fs, cms, ext))
 			{
 				if (argument.GetSources != null)
 					foreach (var source in argument.GetSources)

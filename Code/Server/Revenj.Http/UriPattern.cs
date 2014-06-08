@@ -14,13 +14,16 @@ namespace Revenj.Http
 
 		private readonly Regex TemplatePattern;
 		private readonly string[] Tokens;
+		public readonly int Groups;
 
 		public UriPattern(string template)
 		{
 			template = template.TrimEnd('*').ToUpperInvariant();
 			Tokens = GetTokens(template);
-			var finalPattern = BuildRegex(template);
+			var segments = BuildRegex(template);
+			var finalPattern = EscapePattern.Replace(segments, PathGroup);
 			TemplatePattern = new Regex(finalPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			Groups = TemplatePattern.GetGroupNumbers().Length;
 		}
 
 		public UriTemplateMatch Match(string url, Uri uri)
@@ -69,12 +72,8 @@ namespace Revenj.Http
 		{
 			var iof = template.IndexOf('?');
 			if (iof != -1)
-			{
-				var beforeQuery = RegexMetaPattern.Replace(template.Substring(0, iof), RegexMetaCharactersReplacements);
-				return EscapePattern.Replace(beforeQuery, PathGroup);
-			}
-			var segments = RegexMetaPattern.Replace(template, RegexMetaCharactersReplacements) + ".*";
-			return EscapePattern.Replace(segments, PathGroup);
+				return RegexMetaPattern.Replace(template.Substring(0, iof), RegexMetaCharactersReplacements);
+			return RegexMetaPattern.Replace(template, RegexMetaCharactersReplacements) + ".*";
 		}
 
 		private string[] GetTokens(string template)

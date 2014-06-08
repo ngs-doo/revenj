@@ -76,7 +76,11 @@ namespace Revenj.Http
 			List<RouteHandler> list;
 			if (!dict.TryGetValue(handler.Service, out list))
 				dict[handler.Service] = list = new List<RouteHandler>();
-			list.Add(handler);
+			var first = list.FindIndex(it => it.Pattern.Groups < handler.Pattern.Groups);
+			if (first != -1)
+				list.Insert(first, handler);
+			else
+				list.Add(handler);
 		}
 
 		public RouteHandler Find(HttpListenerRequest request, out UriTemplateMatch templateMatch)
