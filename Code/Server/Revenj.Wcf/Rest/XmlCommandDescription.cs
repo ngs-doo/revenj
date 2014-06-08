@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Xml.Linq;
 using Revenj.Processing;
@@ -17,22 +18,21 @@ namespace Revenj.Wcf
 			this.Data = data;
 		}
 
-		public XmlCommandDescription(string[] args, Type commandType)
+		public XmlCommandDescription(NameValueCollection args, Type commandType)
 		{
 			this.CommandType = commandType;
-			if (args != null && args.Length > 0)
+			if (args != null && args.Count > 0)
 			{
 				var xml =
 					new XElement(XName.Get(commandType.Name),
 						new XAttribute(XNamespace.Xmlns.GetName("i"), "http://www.w3.org/2001/XMLSchema-instance"));
 				var properties =
-					from a in args
-					let splt = a.Split('=')
-					where splt.Length == 2
-					let isArr = splt[1].Contains(',')
-					let vals = splt[1].Split(',').Where(it => it.Length > 0).ToArray()
-					orderby splt[0]
-					select new { Property = splt[0], IsArray = isArr, ArrayValues = vals, Value = splt[1] };
+					from key in args.AllKeys
+					let val = args[key]
+					let isArr = key.Contains(',')
+					let arrVal = isArr ? val.Split(',').Where(it => it.Length > 0).ToArray() : null
+					orderby key
+					select new { Property = key, IsArray = isArr, ArrayValues = arrVal, Value = val };
 				foreach (var p in properties)
 				{
 					if (!p.IsArray)

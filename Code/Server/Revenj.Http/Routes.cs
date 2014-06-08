@@ -13,7 +13,7 @@ namespace Revenj.Http
 	internal class Routes
 	{
 		private readonly Dictionary<string, Dictionary<string, List<RouteHandler>>> MethodRoutes = new Dictionary<string, Dictionary<string, List<RouteHandler>>>();
-		private readonly ConcurrentDictionary<string, KeyValuePair<RouteHandler, Uri>> Cache = new ConcurrentDictionary<string, KeyValuePair<RouteHandler, Uri>>();
+		private readonly ConcurrentDictionary<string, RouteHandler> Cache = new ConcurrentDictionary<string, RouteHandler>(1, 127);
 
 		public Routes(IServiceLocator locator)
 		{
@@ -82,11 +82,13 @@ namespace Revenj.Http
 		public RouteHandler Find(HttpListenerRequest request, out UriTemplateMatch templateMatch)
 		{
 			var reqId = request.HttpMethod + ":" + request.Url.LocalPath;
-			KeyValuePair<RouteHandler, Uri> rh;
-			if (Cache.TryGetValue(reqId, out rh))
+			RouteHandler handler;
+			string argUrl;
+			if (Cache.TryGetValue(reqId, out handler))
 			{
-				templateMatch = rh.Key.Template.Match(rh.Value, request.Url);
-				return rh.Key;
+				argUrl = request.RawUrl.Substring(handler.Service.Length);
+				templateMatch = handler.Pattern.ExtractMatches(argUrl, request.Url);
+				return handler;
 			}
 			templateMatch = null;
 			Dictionary<string, List<RouteHandler>> handlers;
@@ -103,16 +105,14 @@ namespace Revenj.Http
 			List<RouteHandler> routes;
 			if (!handlers.TryGetValue(service, out routes))
 				return null;
-			var reqUrl = request.Url;
-			var url = reqUrl.ToString();
-			var baseAddr = new Uri(url.Substring(0, url.Length - request.RawUrl.Length + service.Length));
+			argUrl = request.RawUrl.Substring(service.Length);
 			foreach (var h in routes)
 			{
-				var match = h.Template.Match(baseAddr, reqUrl);
+				var match = h.Pattern.Match(argUrl, request.Url);
 				if (match != null)
 				{
 					templateMatch = match;
-					Cache.TryAdd(reqId, new KeyValuePair<RouteHandler, Uri>(h, baseAddr));
+					Cache.TryAdd(reqId, h);
 					return h;
 				}
 			}

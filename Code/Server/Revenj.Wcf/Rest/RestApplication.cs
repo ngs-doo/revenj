@@ -82,18 +82,10 @@ namespace Revenj.Wcf
 		public Stream Post(Stream message)
 		{
 			var template = ThreadContext.Request.UriTemplateMatch;
-			var command = template.RelativePathSegments.FirstOrDefault();
-			var args = Uri.UnescapeDataString(template.QueryParameters.ToString()).Split('&');
+			var command = template.RelativePathSegments.Count > 0 ? template.RelativePathSegments[0] : null;
 
 			if (command == null)
-			{
-				// RelavitvePathSegments doesn't work with wilcard templates in Mono
-				if (template.WildcardPathSegments.Count > 0)
-					command = template.WildcardPathSegments[0];
-
-				if (command == null)
-					return Utility.ReturnError("Command not specified", HttpStatusCode.BadRequest);
-			}
+				return Utility.ReturnError("Command not specified", HttpStatusCode.BadRequest);
 
 			var commandType = CommandsRepository.Find(command);
 			if (commandType == null)
@@ -110,9 +102,9 @@ namespace Revenj.Wcf
 			switch (ThreadContext.Request.ContentType)
 			{
 				case "application/json":
-					return ExecuteCommand(engine, Serialization, new JsonCommandDescription(args, message, commandType), accept);
+					return ExecuteCommand(engine, Serialization, new JsonCommandDescription(template.QueryParameters, message, commandType), accept);
 				case "application/x-protobuf":
-					return ExecuteCommand(engine, Serialization, new ProtobufCommandDescription(args, message, commandType), accept);
+					return ExecuteCommand(engine, Serialization, new ProtobufCommandDescription(template.QueryParameters, message, commandType), accept);
 				default:
 					if (message != null)
 					{
@@ -121,7 +113,7 @@ namespace Revenj.Wcf
 						catch (Exception ex) { return Utility.ReturnError("Error parsing request body. " + ex.Message, HttpStatusCode.BadRequest); }
 						return ExecuteCommand(engine, Serialization, new XmlCommandDescription(el, commandType), accept);
 					}
-					return ExecuteCommand(engine, Serialization, new XmlCommandDescription(args, commandType), accept);
+					return ExecuteCommand(engine, Serialization, new XmlCommandDescription(template.QueryParameters, commandType), accept);
 			}
 		}
 

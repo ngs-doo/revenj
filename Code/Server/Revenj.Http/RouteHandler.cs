@@ -11,10 +11,9 @@ namespace Revenj.Http
 	{
 		public readonly UriTemplate Template;
 		internal readonly string Service;
-		private readonly UriPattern Pattern;
+		internal readonly UriPattern Pattern;
 		private readonly bool WithStream;
 		private readonly int TotalParams;
-		private readonly Dictionary<string, int> UppercaseArgumentOrder = new Dictionary<string, int>();
 		private readonly Dictionary<string, int> ArgumentOrder = new Dictionary<string, int>();
 		private readonly Func<string[], Stream, Stream> Invocation;
 
@@ -32,13 +31,19 @@ namespace Revenj.Http
 			var expArgs = new Expression[TotalParams];
 			for (int i = 0; i < TotalParams; i++)
 			{
-				UppercaseArgumentOrder[methodParams[i].Name.ToUpperInvariant()] = i;
-				ArgumentOrder[methodParams[i].Name] = i;
+				ArgumentOrder[methodParams[i].Name.ToUpperInvariant()] = i;
 				if (i < TotalParams - 1 || !WithStream)
 					expArgs[i] = Expression.ArrayIndex(lamParams[0], Expression.Constant(i));
 				else
 					expArgs[i] = lamParams[1];
 			}
+			/*if (template.Contains("{*") && TotalParams > 0)
+			{
+				var last = TotalParams - 1;
+				if (WithStream) last--;
+				if (last >= 0)
+					ArgumentOrder["*" + methodParams[last].Name.ToUpperInvariant()] = last;
+			}*/
 			var mce = Expression.Call(Expression.Constant(instance, instance.GetType()), method, expArgs);
 			var lambda = Expression.Lambda<Func<string[], Stream, Stream>>(mce, lamParams);
 			Invocation = lambda.Compile();
@@ -48,17 +53,8 @@ namespace Revenj.Http
 		{
 			var args = new string[TotalParams];
 			for (int i = 0; i < match.BoundVariables.Count; i++)
-				args[UppercaseArgumentOrder[match.BoundVariables.GetKey(i)]] = match.BoundVariables[i];
+				args[ArgumentOrder[match.BoundVariables.GetKey(i)]] = match.BoundVariables[i];
 
-			return Invocation(args, listener.Request.InputStream);
-		}
-
-		public Stream Handle(HttpListenerContext listener)
-		{
-			var args = new string[TotalParams];
-			var match = Pattern.Parse(listener.Request.Url.PathAndQuery);
-			foreach (var kv in match)
-				args[ArgumentOrder[kv.Key]] = kv.Value;
 			return Invocation(args, listener.Request.InputStream);
 		}
 	}
