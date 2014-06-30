@@ -83,18 +83,20 @@ namespace Revenj.Http
 				list.Add(handler);
 		}
 
-		public RouteHandler Find(HttpListenerRequest request, out UriTemplateMatch templateMatch)
+		public RouteHandler Find(HttpListenerRequest request, out RouteMatch routeMatch)
 		{
-			var reqId = request.HttpMethod + ":" + request.Url.LocalPath;
+			var url = request.Url;
+			var rawUrl = request.RawUrl;
+			var reqId = request.HttpMethod + ":" + url.AbsolutePath;
 			RouteHandler handler;
 			string argUrl;
 			if (Cache.TryGetValue(reqId, out handler))
 			{
-				argUrl = request.RawUrl.Substring(handler.Service.Length);
-				templateMatch = handler.Pattern.ExtractMatch(argUrl, request.Url);
+				argUrl = rawUrl.Substring(handler.Service.Length);
+				routeMatch = handler.Pattern.ExtractMatch(argUrl, url);
 				return handler;
 			}
-			templateMatch = null;
+			routeMatch = null;
 			Dictionary<string, List<RouteHandler>> handlers;
 			if (!MethodRoutes.TryGetValue(request.HttpMethod, out handlers))
 				return null;
@@ -103,19 +105,19 @@ namespace Revenj.Http
 			string service;
 			int pos = request.RawUrl.IndexOf('/', 1);
 			if (pos == -1)
-				service = request.RawUrl.ToLowerInvariant();
+				service = rawUrl.ToLowerInvariant();
 			else
-				service = request.RawUrl.Substring(0, pos).ToLowerInvariant();
+				service = rawUrl.Substring(0, pos).ToLowerInvariant();
 			List<RouteHandler> routes;
 			if (!handlers.TryGetValue(service, out routes))
 				return null;
-			argUrl = request.RawUrl.Substring(service.Length);
+			argUrl = rawUrl.Substring(service.Length);
 			foreach (var h in routes)
 			{
-				var match = h.Pattern.Match(argUrl, request.Url);
+				var match = h.Pattern.Match(argUrl, url);
 				if (match != null)
 				{
-					templateMatch = match;
+					routeMatch = match;
 					Cache.TryAdd(reqId, h);
 					return h;
 				}

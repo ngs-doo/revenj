@@ -81,7 +81,8 @@ namespace Revenj.Wcf
 
 		public Stream Post(Stream message)
 		{
-			var template = ThreadContext.Request.UriTemplateMatch;
+			var request = ThreadContext.Request;
+			var template = request.UriTemplateMatch;
 			var command = template.RelativePathSegments.Count > 0 ? template.RelativePathSegments[0] : null;
 
 			if (command == null)
@@ -91,15 +92,15 @@ namespace Revenj.Wcf
 			if (commandType == null)
 				return Utility.ReturnError("Unknown command " + command, HttpStatusCode.NotFound);
 
-			var accept = (ThreadContext.Request.Accept ?? "application/xml").ToLowerInvariant();
+			var accept = (request.Accept ?? "application/xml").ToLowerInvariant();
 
-			var sessionID = ThreadContext.Request.GetHeader("X-NGS-Session-ID") ?? string.Empty;
+			var sessionID = request.GetHeader("X-NGS-Session-ID") ?? string.Empty;
 			var scope = ObjectFactory.FindScope(sessionID);
 			if (!string.IsNullOrEmpty(sessionID) && scope == null)
 				return Utility.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
 			var engine = scope != null ? scope.Resolve<IProcessingEngine>() : ProcessingEngine;
 
-			switch (ThreadContext.Request.ContentType)
+			switch (request.ContentType)
 			{
 				case "application/json":
 					return ExecuteCommand(engine, Serialization, new JsonCommandDescription(template.QueryParameters, message, commandType), accept);

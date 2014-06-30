@@ -14,44 +14,43 @@ namespace Revenj.Http
 
 		private readonly Regex TemplatePattern;
 		private readonly string[] Tokens;
+		private readonly HashSet<string> TokenSet;
+		private readonly int TokensCount;
 		public readonly int Groups;
 
 		public UriPattern(string template)
 		{
 			template = template.TrimEnd('*').ToUpperInvariant();
 			Tokens = GetTokens(template);
+			TokenSet = new HashSet<string>(Tokens);
+			TokensCount = Tokens.Length;
 			var segments = BuildRegex(template);
 			var finalPattern = EscapePattern.Replace(segments, PathGroup);
 			TemplatePattern = new Regex(finalPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			Groups = TemplatePattern.GetGroupNumbers().Length;
 		}
 
-		public UriTemplateMatch Match(string url, Uri uri)
+		public RouteMatch Match(string url, Uri uri)
 		{
 			if (!TemplatePattern.IsMatch(url))
 				return null;
 			return ExtractMatch(url, uri);
 		}
 
-		public UriTemplateMatch ExtractMatch(string url, Uri uri)
+		public RouteMatch ExtractMatch(string url, Uri uri)
 		{
-			var result = new UriTemplateMatch();
-			var boundVars = result.BoundVariables;
-			var relativeSegments = result.RelativePathSegments;
-			var queryParams = result.QueryParameters;
 			var match = TemplatePattern.Match(url);
+			var boundVars = new Dictionary<string, string>(TokensCount);
 			var groups = match.Groups;
 			for (int i = 1; i < groups.Count; i++)
-			{
 				boundVars.Add(Tokens[i - 1], groups[i].Value);
-			}
-			var segments = uri.Segments;
-			for (int i = 2; i < segments.Length; i++)
-				relativeSegments.Add(segments[i]);
+			if (groups.Count == TokensCount + 1)
+				return new RouteMatch(boundVars, uri);
 			int pos = 1;
 			var query = uri.Query;
 			var sbName = new StringBuilder();
 			var sbValue = new StringBuilder();
+			var queryParams = new Dictionary<string, string>();
 			while (pos < query.Length)
 			{
 				sbName.Length = 0;
@@ -62,10 +61,12 @@ namespace Revenj.Http
 				pos++;
 				var key = Uri.UnescapeDataString(sbName.ToString());
 				var value = Uri.UnescapeDataString(sbValue.ToString());
-				boundVars.Add(key.ToUpperInvariant(), value);
+				var upper = key.ToUpperInvariant();
+				if (TokenSet.Contains(upper))
+					boundVars.Add(upper, value);
 				queryParams.Add(key, value);
 			}
-			return result;
+			return new RouteMatch(boundVars, queryParams, uri);
 		}
 
 		private string BuildRegex(string template)

@@ -107,7 +107,7 @@ namespace Revenj.Wcf
 				if (!identity.IsAuthenticated)
 				{
 					if (template != null
-						&& (template.RequestUri != null && PublicUrl.Contains(template.RequestUri.LocalPath)
+						&& (template.RequestUri != null && PublicUrl.Contains(template.RequestUri.AbsolutePath)
 						|| template.Template != null && PublicTemplate.Contains(template.Template.ToString())))
 						return identity;
 					throw new SecurityException("User {0} was not authenticated.".With(identity.Name));

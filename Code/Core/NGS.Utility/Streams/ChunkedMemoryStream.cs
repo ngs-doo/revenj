@@ -13,17 +13,13 @@ namespace NGS.Utility
 	/// </summary>
 	public class ChunkedMemoryStream : Stream
 	{
-		private List<byte[]> Blocks = new List<byte[]>();
-		private int CurrentPosition;
-		private int TotalSize;
 		private const int BlockSize = 8192;
-		private readonly StreamWriter Writer;
-		private readonly StreamReader Reader;
+		private const int BlockShift = 13;
+		private const int BlockAnd = 8191;
 
 		private static int SizeLimit = 16 * Environment.ProcessorCount;
 		private static ConcurrentQueue<ChunkedMemoryStream> PoolQueue = new ConcurrentQueue<ChunkedMemoryStream>();
 		private static int CurrentEstimate = SizeLimit;
-		private readonly Lazy<char[]> CharBuffer = new Lazy<char[]>(() => new char[BlockSize * 4]);
 
 		private static readonly char[] CharMap;
 		private static readonly int[] CharLookup;
@@ -37,6 +33,14 @@ namespace NGS.Utility
 			for (int i = 0; i < CharMap.Length; i++)
 				CharLookup[CharMap[i]] = i;
 		}
+
+		private List<byte[]> Blocks = new List<byte[]>();
+		private int CurrentPosition;
+		private int TotalSize;
+		private readonly StreamWriter Writer;
+		private readonly StreamReader Reader;
+
+		private readonly Lazy<char[]> CharBuffer = new Lazy<char[]>(() => new char[BlockSize * 4]);
 
 		/// <summary>
 		/// Create or get a new instance of memory stream
@@ -142,7 +146,7 @@ namespace NGS.Utility
 		/// <returns>length of bytes read</returns>
 		public override int Read(byte[] buffer, int offset, int count)
 		{
-			var off = CurrentPosition % BlockSize;
+			var off = CurrentPosition & BlockAnd;
 			var min = BlockSize - off;
 			if (count < min)
 				min = count;
@@ -150,7 +154,7 @@ namespace NGS.Utility
 				min = TotalSize - CurrentPosition;
 			if (min > 0)
 			{
-				var pos = CurrentPosition / BlockSize;
+				var pos = CurrentPosition >> BlockShift;
 				Buffer.BlockCopy(Blocks[pos], off, buffer, offset, min);
 				CurrentPosition += min;
 			}
@@ -203,13 +207,13 @@ namespace NGS.Utility
 		/// <summary>
 		/// Write byte to stream.
 		/// Advances current position by one.
-		/// Adds a new block if necesessary.
+		/// Adds a new block if necessary.
 		/// </summary>
 		/// <param name="value">byte to write</param>
 		public override void WriteByte(byte value)
 		{
-			var off = CurrentPosition % BlockSize;
-			var pos = CurrentPosition / BlockSize;
+			var off = CurrentPosition & BlockAnd;
+			var pos = CurrentPosition >> BlockShift;
 			Blocks[pos][off] = value;
 			CurrentPosition += 1;
 			if (BlockSize == off + 1 && Blocks.Count == pos + 1)
@@ -232,8 +236,8 @@ namespace NGS.Utility
 			int cur = count;
 			while (cur > 0)
 			{
-				var off = CurrentPosition % BlockSize;
-				var pos = CurrentPosition / BlockSize;
+				var pos = CurrentPosition >> BlockShift;
+				var off = CurrentPosition & BlockAnd;
 				var min = BlockSize - off;
 				if (cur < min)
 					min = cur;
@@ -257,7 +261,7 @@ namespace NGS.Utility
 			var cms = another as ChunkedMemoryStream ?? new ChunkedMemoryStream(another);
 			if (cms.TotalSize != TotalSize)
 				return false;
-			var len = TotalSize / BlockSize;
+			var len = TotalSize >> BlockShift;
 			for (int i = 0; i < len; i++)
 			{
 				var nb = cms.Blocks[i];
@@ -268,9 +272,9 @@ namespace NGS.Utility
 			}
 			var nlb = cms.Blocks[len];
 			var olb = Blocks[len];
-			var diff = TotalSize % BlockSize;
-			for (int j = 0; j < diff; j++)
-				if (nlb[j] != olb[j])
+			var diff = TotalSize & BlockAnd;
+			for (int i = 0; i < diff; i++)
+				if (nlb[i] != olb[i])
 					return false;
 			return true;
 		}
@@ -294,7 +298,8 @@ namespace NGS.Utility
 		{
 			var tmpBuf = new byte[3];
 			var base64 = CharBuffer.Value;
-			var total = TotalSize > BlockSize ? TotalSize / BlockSize : 0;
+			var total = TotalSize >> BlockShift;
+			var remaining = TotalSize & BlockAnd;
 			int len;
 			var off = 0;
 			for (int i = 0; i < total; i++)
@@ -311,7 +316,7 @@ namespace NGS.Utility
 				sw.Write(base64, 0, len);
 				off = (off + 1) & 3;
 			}
-			len = Convert.ToBase64CharArray(Blocks[total], off, TotalSize != BlockSize ? TotalSize % BlockSize - off : BlockSize, base64, 0);
+			len = Convert.ToBase64CharArray(Blocks[total], off, remaining != 0 ? remaining - off : BlockSize, base64, 0);
 			sw.Write(base64, 0, len);
 			sw.Flush();
 		}
@@ -322,8 +327,8 @@ namespace NGS.Utility
 		/// <param name="sw"></param>
 		public void ToPostgresBytea(StreamWriter sw)
 		{
-			var total = TotalSize > BlockSize ? TotalSize / BlockSize : 0;
-			var remaining = TotalSize % BlockSize;
+			var total = TotalSize >> BlockShift;
+			var remaining = TotalSize & BlockAnd;
 			byte[] block;
 			for (int i = 0; i < total; i++)
 			{
@@ -350,8 +355,8 @@ namespace NGS.Utility
 		/// <param name="stream">destination stream</param>
 		public new void CopyTo(Stream stream)
 		{
-			var total = TotalSize > BlockSize ? TotalSize / BlockSize : 0;
-			var remaining = TotalSize % BlockSize;
+			var total = TotalSize >> BlockShift;
+			var remaining = TotalSize & BlockAnd;
 			for (int i = 0; i < total; i++)
 				stream.Write(Blocks[i], 0, BlockSize);
 			stream.Write(Blocks[total], 0, remaining);

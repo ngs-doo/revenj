@@ -42,12 +42,11 @@ namespace Revenj.Http
 			Invocation = lambda.Compile();
 		}
 
-		public Stream Handle(UriTemplateMatch match, HttpListenerContext listener)
+		public Stream Handle(Dictionary<string, string> boundVars, HttpListenerContext listener)
 		{
-			var boundVars = match.BoundVariables;
 			var args = new string[TotalParams];
-			for (int i = 0; i < boundVars.Count; i++)
-				args[ArgumentOrder[boundVars.GetKey(i)]] = boundVars[i];
+			foreach (var kv in boundVars)
+				args[ArgumentOrder[kv.Key]] = kv.Value;
 
 			return Invocation(args, listener.Request.InputStream);
 		}

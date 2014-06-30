@@ -69,19 +69,19 @@ namespace Revenj.Features.RestCache
 			{
 				if (!Permissions.CanAccess(typeof(T)))
 					return Explain("You don't have permission to access: " + typeof(T));
+				var response = ThreadContext.Response;
 				var aggs = Cache.Find(new[] { uri });
 				var filtered = Permissions.ApplyFilters(aggs);
 				if (filtered.Length == 1)
 				{
-					ThreadContext.Response.StatusCode = HttpStatusCode.OK;
+					response.StatusCode = HttpStatusCode.OK;
 					var cms = ChunkedMemoryStream.Create();
 					var ct = Serialization.Serialize(filtered[0], ThreadContext.Request.Accept, cms);
-					ThreadContext.Response.ContentType = ct;
-					ThreadContext.Response.ContentLength = cms.Position;
+					response.ContentType = ct;
 					cms.Position = 0;
 					return cms;
 				}
-				ThreadContext.Response.StatusCode = HttpStatusCode.NotFound;
+				response.StatusCode = HttpStatusCode.NotFound;
 				return Explain("Can't find " + typeof(T).FullName + " with Uri: " + uri);
 			}
 
@@ -91,11 +91,11 @@ namespace Revenj.Features.RestCache
 					return Explain("You don't have permission to access: " + typeof(T));
 				var aggs = Cache.Find(uri);
 				var filtered = Permissions.ApplyFilters(aggs);
-				ThreadContext.Response.StatusCode = HttpStatusCode.OK;
+				var response = ThreadContext.Response;
+				response.StatusCode = HttpStatusCode.OK;
 				var cms = ChunkedMemoryStream.Create();
 				var ct = Serialization.Serialize(filtered, ThreadContext.Request.Accept, cms);
-				ThreadContext.Response.ContentType = ct;
-				ThreadContext.Response.ContentLength = cms.Position;
+				response.ContentType = ct;
 				cms.Position = 0;
 				return cms;
 			}

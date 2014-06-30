@@ -86,6 +86,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DryIocConfiguration.cs" />
     <Compile Include="RouteHandler.cs" />
+    <Compile Include="RouteMatch.cs" />
     <Compile Include="Routes.cs" />
     <Compile Include="HttpAuth.cs" />
     <Compile Include="UriPattern.cs" />

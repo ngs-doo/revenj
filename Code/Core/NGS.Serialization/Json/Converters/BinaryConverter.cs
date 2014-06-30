@@ -10,6 +10,8 @@ namespace NGS.Serialization.Json.Converters
 	public static class BinaryConverter
 	{
 		private const int BlockSize = 1024;
+		private const int BlockAnd = 1023;
+		private const int BlockShift = 10;
 
 		public static void Serialize(byte[] value, StreamWriter sw)
 		{
@@ -27,7 +29,8 @@ namespace NGS.Serialization.Json.Converters
 			{
 				var tmpBuf = new byte[3];
 				var base64 = new char[BlockSize * 4];
-				var total = value.Length > BlockSize ? value.Length / BlockSize : 0;
+				var total = value.Length >> BlockShift;
+				var remaining = value.Length & BlockAnd;
 				int len;
 				var off = 0;
 				sw.Write('"');
@@ -43,7 +46,7 @@ namespace NGS.Serialization.Json.Converters
 					sw.Write(base64, 0, len);
 					off = (off + 1) & 3;
 				}
-				len = Convert.ToBase64CharArray(value, total * BlockSize + off, value.Length != BlockSize ? value.Length % BlockSize - off : BlockSize, base64, 0);
+				len = Convert.ToBase64CharArray(value, total * BlockSize + off, remaining != 0 ? remaining - off : BlockSize, base64, 0);
 				sw.Write(base64, 0, len);
 				sw.Write('"');
 			}

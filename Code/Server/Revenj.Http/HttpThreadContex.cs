@@ -10,16 +10,16 @@ namespace Revenj.Http
 	{
 		private readonly HttpListenerRequest Request;
 		private readonly HttpListenerResponse Response;
-		private UriTemplateMatch TemplateMatch;
+		private readonly RouteMatch RouteMatch;
 
 		public HttpThreadContex(
 			HttpListenerRequest request,
 			HttpListenerResponse response,
-			UriTemplateMatch templateMatch)
+			RouteMatch routeMatch)
 		{
 			this.Request = request;
 			this.Response = response;
-			this.TemplateMatch = templateMatch;
+			this.RouteMatch = routeMatch;
 			var at = request.AcceptTypes;
 			if (at != null && at.Length != 0)
 				AcceptType = at[0];
@@ -38,12 +38,18 @@ namespace Revenj.Http
 		string IResponseContext.ContentType
 		{
 			get { return Response.ContentType; }
-			set { Response.ContentType = value; }
+			set { Response.ContentType = value; }//PERF: slow
 		}
 		public Uri RequestUri { get { return Request.Url; } }
+		private UriTemplateMatch TemplateMatch;
 		public UriTemplateMatch UriTemplateMatch
 		{
-			get { return TemplateMatch; }
+			get
+			{
+				if (TemplateMatch == null)
+					TemplateMatch = RouteMatch.CreateTemplateMatch();
+				return TemplateMatch;
+			}
 			set { TemplateMatch = value; }
 		}
 		public string GetHeader(string name)

@@ -89,18 +89,18 @@ namespace Revenj.Http
 			var response = context.Response;
 			try
 			{
-				UriTemplateMatch templateMatch;
-				var route = Routes.Find(request, out templateMatch);
+				RouteMatch match;
+				var route = Routes.Find(request, out match);
 				if (route != null)
 				{
 					var auth = Authentication.TryAuthorize(context, route);
 					if (auth.Principal != null)
 					{
-						var ctx = new HttpThreadContex(request, response, templateMatch);
+						var ctx = new HttpThreadContex(request, response, match);
 						ThreadContext.Request = ctx;
 						ThreadContext.Response = ctx;
 						Thread.CurrentPrincipal = auth.Principal;
-						using (var stream = route.Handle(templateMatch, context))
+						using (var stream = route.Handle(match.BoundVars, context))
 						{
 							var cms = stream as ChunkedMemoryStream;
 							if (cms != null)
