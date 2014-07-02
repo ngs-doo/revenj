@@ -384,13 +384,14 @@ namespace NGS.Utility
 				disposed = true;
 				CurrentPosition = 0;
 				TotalSize = 0;
-				if (CurrentEstimate < SizeLimit)
+				if (CurrentEstimate < SizeLimit || Blocks.Count > 10000)
 				{
 					PoolQueue.Enqueue(this);
 					CurrentEstimate++;
 				}
 				else
 				{
+					Blocks.RemoveRange(1, Blocks.Count - 1);
 					CurrentEstimate = PoolQueue.Count;
 				}
 			}
