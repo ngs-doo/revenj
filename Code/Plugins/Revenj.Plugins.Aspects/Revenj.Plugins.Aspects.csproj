@@ -50,6 +50,7 @@
     <Reference Include="Castle.Core">
       <HintPath>..\..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
@@ -58,6 +59,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Configuration.cs" />
+    <Compile Include="Commands\RestCommandsIntercepter.cs" />
+    <Compile Include="Commands\ProcessingCommandsIntercepter.cs" />
     <Compile Include="DatabaseTrace\Configuration.cs" />
     <Compile Include="DatabaseTrace\QueryInterceptor.cs" />
     <Compile Include="PerformanceTrace\Configuration.cs" />
@@ -86,6 +90,14 @@
     <ProjectReference Include="..\..\Database\NGS.DatabasePersistence.Interface\NGS.DatabasePersistence.Interface.csproj">
       <Project>{2A96E16E-4398-4316-8637-54C0E0EA13ED}</Project>
       <Name>NGS.DatabasePersistence.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Server\Revenj.Api.Interface\Revenj.Api.Interface.csproj">
+      <Project>{7DACDADE-BA4D-4950-AA99-DF9CC9A5619E}</Project>
+      <Name>Revenj.Api.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Server\Revenj.Processing.Interface\Revenj.Processing.Interface.csproj">
+      <Project>{721E3056-0F68-4874-B5E0-0B0223ECC4D7}</Project>
+      <Name>Revenj.Processing.Interface</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

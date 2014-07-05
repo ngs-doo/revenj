@@ -57,6 +57,9 @@
     <Reference Include="Autofac.Configuration">
       <HintPath>..\..\..\Dependencies\Autofac\Autofac.Configuration.dll</HintPath>
     </Reference>
+    <Reference Include="Castle.Core">
+      <HintPath>..\..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Remotion.Linq">
       <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>
@@ -216,6 +219,7 @@
     <PostBuildEvent>copy ..\..\..\Plugins\NGS.Plugins.DatabasePersistence.Postgres\bin\$(ConfigurationName)\NGS.Plugins.DatabasePersistence.Postgres.dll .
 copy ..\..\..\Plugins\Revenj.Plugins.Server.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Server.Commands.dll .
 copy ..\..\..\Plugins\Revenj.Plugins.Rest.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Rest.Commands.dll .
+copy ..\..\..\Plugins\Revenj.Plugins.Aspects\bin\$(ConfigurationName)\Revenj.Plugins.Aspects.dll .
 copy ..\..\..\Features\Revenj.Features.RestCache\bin\$(ConfigurationName)\Revenj.Features.RestCache.dll .
 copy ..\..\..\Features\NGS.Features.Mailer\bin\$(ConfigurationName)\NGS.Features.Mailer.dll .
 copy ..\..\..\Features\NGS.Features.Storage\bin\$(ConfigurationName)\NGS.Features.Storage.dll .

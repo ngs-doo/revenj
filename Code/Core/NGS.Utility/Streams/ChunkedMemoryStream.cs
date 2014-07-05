@@ -88,7 +88,7 @@ namespace NGS.Utility
 			: this(another, false, true) { }
 		/// <summary>
 		/// Create in memory stream based on another stream.
-		/// Specify wheater should provided stream be disposed after copying.
+		/// Specify whether should provided stream be disposed after copying.
 		/// </summary>
 		/// <param name="another">stream to copy</param>
 		/// <param name="dispose">dispose provided stream</param>
@@ -113,7 +113,7 @@ namespace NGS.Utility
 		/// </summary>
 		public override bool CanRead { get { return true; } }
 		/// <summary>
-		/// Can this stream be seeked? Always true
+		/// Can this stream be sought? Always true
 		/// </summary>
 		public override bool CanSeek { get { return true; } }
 		/// <summary>
@@ -393,8 +393,14 @@ namespace NGS.Utility
 				{
 					Blocks.RemoveRange(1, Blocks.Count - 1);
 					CurrentEstimate = PoolQueue.Count;
+					GC.SuppressFinalize(this);
 				}
 			}
+		}
+
+		~ChunkedMemoryStream()
+		{
+			Dispose(false);
 		}
 	}
 }

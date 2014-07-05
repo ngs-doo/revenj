@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ServiceModel;
 using System.ServiceModel.Web;
+using NGS;
 using Revenj.Api;
 
 namespace Revenj.Wcf
@@ -22,6 +23,18 @@ namespace Revenj.Wcf
 		public Uri RequestUri
 		{
 			get { return OperationContext.Current.RequestContext.RequestMessage.Headers.To; }
+		}
+
+		public override string ToString()
+		{
+			long cl = -1;
+			try { cl = ContentLength; }
+			catch { }
+			return @"WCF
+URL: {0}
+Accept: {1}
+Content type: {2}
+Content length: {3}".With(RequestUri.AbsoluteUri, Accept, ContentType, cl);
 		}
 	}
 }

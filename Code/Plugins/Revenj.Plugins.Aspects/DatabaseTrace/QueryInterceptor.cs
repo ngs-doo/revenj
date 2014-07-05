@@ -30,40 +30,34 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 
 		public int LogExecuteNonQuery(IDbCommand command, Func<IDbCommand, int> query)
 		{
-			var sw = Stopwatch.StartNew();
+			var start = Stopwatch.GetTimestamp();
 			try
 			{
 				return query(command);
 			}
 			finally
 			{
-				sw.Stop();
-				if (sw.ElapsedMilliseconds > TimerLimit)
-				{
-					var msg =
-						"Execute non query duration: {0}ms, Sql: {1}".With(
-							sw.ElapsedMilliseconds,
-							command.CommandText);
-					Logger.Trace(() => msg);
-				}
+				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+				if (duration > TimerLimit)
+					Logger.Trace(() => "Execute non query duration: {0}ms, Sql: {1}".With(duration, command.CommandText));
 			}
 		}
 
 		public int LogExecuteNonQuery(StringBuilder builder, Func<StringBuilder, int> query)
 		{
-			var sw = Stopwatch.StartNew();
+			var start = Stopwatch.GetTimestamp();
 			try
 			{
 				return query(builder);
 			}
 			finally
 			{
-				sw.Stop();
-				if (sw.ElapsedMilliseconds > TimerLimit)
+				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+				if (duration > TimerLimit)
 				{
 					Logger.Trace(() =>
 						"Execute non query duration: {0}ms, Sql: {1}".With(
-							sw.ElapsedMilliseconds,
+							duration,
 							builder.ToString(0, Math.Min(10000, builder.Length))));
 				}
 			}
@@ -74,22 +68,16 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 			Action<IDataReader> action,
 			Action<IDbCommand, Action<IDataReader>> query)
 		{
-			var sw = Stopwatch.StartNew();
+			var start = Stopwatch.GetTimestamp();
 			try
 			{
 				query(command, action);
 			}
 			finally
 			{
-				sw.Stop();
-				if (sw.ElapsedMilliseconds > TimerLimit)
-				{
-					var msg =
-						"Execute data reader duration: {0}ms, Sql: {1}".With(
-							sw.ElapsedMilliseconds,
-							command.CommandText);
-					Logger.Trace(() => msg);
-				}
+				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+				if (duration > TimerLimit)
+					Logger.Trace(() => "Execute data reader duration: {0}ms, Sql: {1}".With(duration, command.CommandText));
 			}
 		}
 
@@ -98,22 +86,16 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 			DataTable table,
 			Func<IDbCommand, DataTable, int> query)
 		{
-			var sw = Stopwatch.StartNew();
+			var start = Stopwatch.GetTimestamp();
 			try
 			{
 				return query(command, table);
 			}
 			finally
 			{
-				sw.Stop();
-				if (sw.ElapsedMilliseconds > TimerLimit)
-				{
-					var msg =
-						"Fill table duration: {0}ms, Sql: {1}".With(
-							sw.ElapsedMilliseconds,
-							command.CommandText);
-					Logger.Trace(() => msg);
-				}
+				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+				if (duration > TimerLimit)
+					Logger.Trace(() => "Fill table duration: {0}ms, Sql: {1}".With(duration, command.CommandText));
 			}
 		}
 	}

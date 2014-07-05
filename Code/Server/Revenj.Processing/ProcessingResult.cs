@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 
 namespace Revenj.Processing
@@ -14,14 +16,14 @@ namespace Revenj.Processing
 			string message,
 			HttpStatusCode status,
 			IEnumerable<ICommandResultDescription<TFormat>> executedCommands,
-			long duration)
+			long start)
 		{
 			return new ProcessingResult<TFormat>
 			{
 				Message = message,
 				Status = status,
 				ExecutedCommandResults = executedCommands,
-				Duration = duration
+				Duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond
 			};
 		}
 	}

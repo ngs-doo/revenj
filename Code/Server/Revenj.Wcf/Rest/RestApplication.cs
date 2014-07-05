@@ -1,5 +1,7 @@
 ﻿﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -51,20 +53,17 @@ namespace Revenj.Wcf
 		private static ExecuteResult<TOutput> Execute<TInput, TOutput>(IProcessingEngine engine, IServerCommandDescription<TInput> command)
 		{
 			var result = engine.Execute<TInput, TOutput>(new[] { command });
-			var subresult = result.ExecutedCommandResults != null ? result.ExecutedCommandResults.FirstOrDefault() : null;
-			ThreadContext.Response.StatusCode = subresult != null && subresult.Result != null
-				? subresult.Result.Status
+			var first = result.ExecutedCommandResults != null ? result.ExecutedCommandResults.FirstOrDefault() : null;
+			ThreadContext.Response.StatusCode = first != null && first.Result != null
+				? first.Result.Status
 				: result.Status;
 
 			if (result.Status == HttpStatusCode.ServiceUnavailable)
 				HttpRuntime.UnloadAppDomain();
 
-			ThreadContext.Response.Headers.Add("X-Duration", result.Duration.ToString());
-
 			if ((int)result.Status >= 300)
 				return new ExecuteResult<TOutput> { Error = Utility.ReturnError(result.Message, result.Status) };
 
-			var first = result.ExecutedCommandResults.FirstOrDefault();
 			if (first == null)
 				return new ExecuteResult<TOutput> { Error = Utility.ReturnError("Missing result", HttpStatusCode.InternalServerError) };
 
@@ -92,33 +91,46 @@ namespace Revenj.Wcf
 			if (commandType == null)
 				return Utility.ReturnError("Unknown command " + command, HttpStatusCode.NotFound);
 
+			var start = Stopwatch.GetTimestamp();
+
 			var accept = (request.Accept ?? "application/xml").ToLowerInvariant();
 
-			var sessionID = request.GetHeader("X-NGS-Session-ID") ?? string.Empty;
-			var scope = ObjectFactory.FindScope(sessionID);
-			if (!string.IsNullOrEmpty(sessionID) && scope == null)
-				return Utility.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
-			var engine = scope != null ? scope.Resolve<IProcessingEngine>() : ProcessingEngine;
+			var engine = ProcessingEngine;
+			var sessionID = request.GetHeader("X-NGS-Session-ID");
+			if (sessionID != null)
+			{
+				var scope = ObjectFactory.FindScope(sessionID);
+				if (scope == null)
+					return Utility.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
+				engine = scope.Resolve<IProcessingEngine>();
+			}
 
+			Stream stream;
 			switch (request.ContentType)
 			{
 				case "application/json":
-					return ExecuteCommand(engine, Serialization, new JsonCommandDescription(template.QueryParameters, message, commandType), accept);
+					stream = ExecuteCommand(engine, Serialization, new JsonCommandDescription(template.QueryParameters, message, commandType), accept);
+					break;
 				case "application/x-protobuf":
-					return ExecuteCommand(engine, Serialization, new ProtobufCommandDescription(template.QueryParameters, message, commandType), accept);
+					stream = ExecuteCommand(engine, Serialization, new ProtobufCommandDescription(template.QueryParameters, message, commandType), accept);
+					break;
 				default:
 					if (message != null)
 					{
 						XElement el;
 						try { el = XElement.Load(message); }
 						catch (Exception ex) { return Utility.ReturnError("Error parsing request body. " + ex.Message, HttpStatusCode.BadRequest); }
-						return ExecuteCommand(engine, Serialization, new XmlCommandDescription(el, commandType), accept);
+						stream = ExecuteCommand(engine, Serialization, new XmlCommandDescription(el, commandType), accept);
 					}
-					return ExecuteCommand(engine, Serialization, new XmlCommandDescription(template.QueryParameters, commandType), accept);
+					else stream = ExecuteCommand(engine, Serialization, new XmlCommandDescription(template.QueryParameters, commandType), accept);
+					break;
 			}
+			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+			ThreadContext.Response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
+			return stream;
 		}
 
-		public static Stream ExecuteCommand<TFormat>(
+		internal static Stream ExecuteCommand<TFormat>(
 			IProcessingEngine engine,
 			IWireSerialization serialization,
 			IServerCommandDescription<TFormat> command,

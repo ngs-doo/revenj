@@ -110,6 +110,7 @@ namespace NGS.DatabasePersistence.Postgres
 			{
 				if (e.Condition == "events" || e.Condition == "aggregate_roots")
 				{
+					Logger.Debug(() => "Postgres notification: " + e.Condition + " with " + e.AdditionalInformation);
 					var firstSeparator = e.AdditionalInformation.IndexOf(':');
 					var name = e.AdditionalInformation.Substring(0, firstSeparator);
 					var secondSeparator = e.AdditionalInformation.Substring(firstSeparator + 1).IndexOf(':');

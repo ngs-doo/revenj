@@ -10,8 +10,8 @@
 	/// </summary>
 	public enum LogLevel
 	{
-		Debug = 0,
-		Trace = 1,
+		Trace = 0,
+		Debug = 1,
 		Info = 2,
 		Error = 4,
 		Fatal = 8

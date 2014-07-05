@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security;
@@ -38,15 +39,7 @@ namespace Revenj.Processing
 
 		public IProcessingResult<TOutput> Execute<TInput, TOutput>(IServerCommandDescription<TInput>[] commandDescriptions)
 		{
-			var stopwatch = Stopwatch.StartNew();
-
-			if (commandDescriptions == null || commandDescriptions.Length == 0)
-				return
-					ProcessingResult<TOutput>.Create(
-						"There are no commands to execute.",
-						HttpStatusCode.BadRequest,
-						null,
-						stopwatch.ElapsedMilliseconds);
+			var start = Stopwatch.GetTimestamp();
 
 			var inputSerializer = Scope.Resolve<ISerialization<TInput>>();
 			var outputSerializer = Scope.Resolve<ISerialization<TOutput>>();
@@ -66,32 +59,34 @@ namespace Revenj.Processing
 								"You don't have permission to execute command: " + c.CommandType.FullName,
 								HttpStatusCode.Forbidden,
 								executedCommands,
-								stopwatch.ElapsedMilliseconds);
+								start);
 					}
 
 				foreach (var cd in commandDescriptions)
 				{
+					var startCommand = Stopwatch.GetTimestamp();
 					var command = Scope.Resolve<IServerCommand>(cd.CommandType);
 					var result = command.Execute(inputSerializer, outputSerializer, cd.Data);
 					if (result == null)
 						throw new FrameworkException("Result returned null for " + cd.CommandType);
-					executedCommands.Add(CommandResultDescription<TOutput>.Create(cd.RequestID, result));
+					executedCommands.Add(CommandResultDescription<TOutput>.Create(cd.RequestID, result, startCommand));
 					if ((int)result.Status >= 400)
 					{
 						return ProcessingResult<TOutput>.Create(
 							result.Message,
 							result.Status,
 							executedCommands,
-							stopwatch.ElapsedMilliseconds);
+							start);
 					}
 				}
 
+				var duration = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				return
 					ProcessingResult<TOutput>.Create(
-						"Commands executed in: {0} ms.".With(stopwatch.ElapsedMilliseconds),
+						"Commands executed in: " + duration.ToString(CultureInfo.InvariantCulture) + " ms.",
 						HttpStatusCode.OK,
 						executedCommands,
-						stopwatch.ElapsedMilliseconds);
+						start);
 			}
 			catch (SecurityException ex)
 			{
@@ -104,7 +99,7 @@ namespace Revenj.Processing
 						"You don't have authorization to perform requested action: {0}".With(ex.Message),
 						HttpStatusCode.Forbidden,
 						executedCommands,
-						stopwatch.ElapsedMilliseconds);
+						start);
 			}
 			catch (AggregateException ex)
 			{
@@ -117,12 +112,12 @@ namespace Revenj.Processing
 						ex.GetDetailedExplanation(),
 						HttpStatusCode.InternalServerError,
 						executedCommands,
-						stopwatch.ElapsedMilliseconds)
+						start)
 					: ProcessingResult<TOutput>.Create(
 						string.Join(Environment.NewLine, ex.InnerExceptions.Select(it => it.Message)),
 						HttpStatusCode.InternalServerError,
 						executedCommands,
-						stopwatch.ElapsedMilliseconds);
+						start);
 			}
 			catch (OutOfMemoryException ex)
 			{
@@ -132,12 +127,12 @@ namespace Revenj.Processing
 						ex.GetDetailedExplanation(),
 						HttpStatusCode.ServiceUnavailable,
 						executedCommands,
-						stopwatch.ElapsedMilliseconds)
+						start)
 					: ProcessingResult<TOutput>.Create(
 						ex.Message,
 						HttpStatusCode.ServiceUnavailable,
 						executedCommands,
-						stopwatch.ElapsedMilliseconds);
+						start);
 			}
 			catch (Exception ex)
 			{
@@ -150,12 +145,12 @@ namespace Revenj.Processing
 						ex.GetDetailedExplanation(),
 						HttpStatusCode.InternalServerError,
 						executedCommands,
-						stopwatch.ElapsedMilliseconds)
+						start)
 					: ProcessingResult<TOutput>.Create(
 						ex.Message,
 						HttpStatusCode.InternalServerError,
 						executedCommands,
-						stopwatch.ElapsedMilliseconds);
+						start);
 			}
 		}
 	}

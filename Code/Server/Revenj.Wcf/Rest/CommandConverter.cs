@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Xml.Linq;
@@ -49,17 +51,25 @@ namespace Revenj.Wcf
 
 		public Stream PassThrough<TCommand, TArgument>(TArgument argument, string accept)
 		{
-			var sessionID = ThreadContext.Request.GetHeader("X-NGS-Session-ID") ?? string.Empty;
-			var scope = ObjectFactory.FindScope(sessionID);
-			if (!string.IsNullOrEmpty(sessionID) && scope == null)
-				return Utility.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
-			var engine = scope != null ? scope.Resolve<IProcessingEngine>() : ProcessingEngine;
-			return
+			var start = Stopwatch.GetTimestamp();
+			var engine = ProcessingEngine;
+			var sessionID = ThreadContext.Request.GetHeader("X-NGS-Session-ID");
+			if (sessionID != null)
+			{
+				var scope = ObjectFactory.FindScope(sessionID);
+				if (scope == null)
+					return Utility.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
+				engine = scope.Resolve<IProcessingEngine>();
+			}
+			var stream =
 				RestApplication.ExecuteCommand<object>(
 					engine,
 					Serialization,
 					new ObjectCommandDescription { Data = argument, CommandType = typeof(TCommand) },
 					accept);
+			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+			ThreadContext.Response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
+			return stream;
 		}
 
 		public Stream ConvertStream<TCommand, TArgument>(TArgument argument)

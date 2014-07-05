@@ -24,12 +24,14 @@ namespace Revenj.Wcf
 			if (serviceType == null)
 				throw new ConfigurationErrorsException("Can't find service " + name);
 
-
 			ServiceHost host;
 			var att = (ServiceBehaviorAttribute[])serviceType.GetCustomAttributes(typeof(ServiceBehaviorAttribute), false);
 			if (att.Length == 1 && att[0].InstanceContextMode == InstanceContextMode.Single)
 			{
 				var instance = Resolver(serviceType);
+				//TODO: investigate castle issue with aspect for rest application
+				//var ith = instance as Castle.DynamicProxy.IProxyTargetAccessor;
+				//host = new ServiceHost(ith != null ? ith.DynProxyGetTarget() : instance, baseAddresses);
 				host = new ServiceHost(instance, baseAddresses);
 			}
 			else

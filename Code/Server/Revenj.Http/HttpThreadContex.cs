@@ -152,5 +152,17 @@ namespace Revenj.Http
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() { return Response.Headers.GetEnumerator(); }
+
+		public override string ToString()
+		{
+			long cl = -1;
+			try { cl = Request.ContentLength64; }
+			catch { }
+			return string.Format(@"HTTP REQ:
+URL: {0}
+Accept: {1}
+Content type: {2}
+Content length: {3}", RequestUri.AbsoluteUri, Accept, Request.ContentType, cl);
+		}
 	}
 }

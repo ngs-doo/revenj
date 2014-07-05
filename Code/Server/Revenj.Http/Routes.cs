@@ -48,7 +48,7 @@ namespace Revenj.Http
 			if (type == null)
 				throw new ConfigurationErrorsException("Invalid service defined in " + ra.Value + ". Type " + serv.Value + " not found.");
 			var instance = locator.Resolve(type);
-			foreach (var i in type.GetInterfaces())
+			foreach (var i in new[] { type }.Union(type.GetInterfaces()))
 			{
 				foreach (var m in i.GetMethods())
 				{

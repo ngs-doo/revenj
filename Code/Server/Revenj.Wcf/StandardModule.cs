@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security;
+using System.ServiceModel;
 using System.Text;
 using System.Xml.Linq;
 using Autofac;
@@ -39,6 +40,7 @@ namespace Revenj.Wcf
 
 		protected override void Load(Autofac.ContainerBuilder builder)
 		{
+			//TODO: register applications as implementation only
 			builder.RegisterType<RestApplication>().As<RestApplication, IRestApplication>();
 			builder.RegisterType<SoapApplication>().As<SoapApplication, ISoapApplication>();
 			builder.RegisterType<CommandConverter>().As<ICommandConverter>();
@@ -70,6 +72,8 @@ namespace Revenj.Wcf
 			public AspectsModule(AspectRepository repository)
 			{
 				this.Repository = repository;
+				//FIX for Castle interception issue
+				Castle.DynamicProxy.Generators.AttributesToAvoidReplicating.Add(typeof(ServiceContractAttribute));
 			}
 
 			protected override void AttachToComponentRegistration(

@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using Castle.DynamicProxy;
@@ -29,23 +30,20 @@ namespace Revenj.Plugins.Aspects.PerformanceTrace
 		public void Intercept(IInvocation invocation)
 		{
 			var logger = LogFactory.Create(invocation.TargetType.FullName);
-			var sw = new Stopwatch();
+			var start = Stopwatch.GetTimestamp();
 			try
 			{
-				sw.Start();
 				invocation.Proceed();
 			}
 			finally
 			{
-				sw.Stop();
-				if (sw.ElapsedMilliseconds > TimerLimit)
+				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+				if (duration > TimerLimit)
 				{
-					var msg =
-						"Type: {0}, method: {1}, duration: {2}ms.".With(
+					logger.Trace(() => "Type: {0}, method: {1}, duration: {2}ms.".With(
 							invocation.InvocationTarget.GetType(),
 							invocation.Method.Name,
-							sw.ElapsedMilliseconds);
-					logger.Trace(() => msg);
+							duration));
 				}
 			}
 		}

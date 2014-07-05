@@ -14,5 +14,9 @@
 		/// Execution result from server command
 		/// </summary>
 		ICommandResult<TFormat> Result { get; }
+		/// <summary>
+		/// Total elapsed milliseconds.
+		/// </summary>
+		long Duration { get; }
 	}
 }

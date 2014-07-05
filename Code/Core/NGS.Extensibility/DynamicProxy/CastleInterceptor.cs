@@ -28,24 +28,45 @@ namespace NGS.Extensibility
 			List<Func<object, object[], Func<object[], object>, object>> aroundList;
 			List<Func<object, object[], object, object>> afterList;
 
-			if (BeforeAspects != null && BeforeAspects.TryGetValue(invocation.Method, out beforeList))
-				beforeList.ForEach(it => it(invocation.Proxy, invocation.Arguments));
+			var method = invocation.Method;
 
-			if (AroundAspects != null && AroundAspects.TryGetValue(invocation.Method, out aroundList))
-				aroundList.ForEach(it => invocation.ReturnValue =
-					it(invocation.Proxy, invocation.Arguments, args =>
-					{
-						if (args != null && !args.SequenceEqual(invocation.Arguments))
-							for (int i = 0; i < args.Length; i++)
-								invocation.Arguments[i] = args[i];
-						invocation.Proceed();
-						return invocation.ReturnValue;
-					}));
+			if (BeforeAspects != null
+				&& (BeforeAspects.TryGetValue(method, out beforeList)
+				|| method.IsGenericMethod && BeforeAspects.TryGetValue(method.GetGenericMethodDefinition(), out beforeList)))
+			{
+				foreach (var before in beforeList)
+					before(invocation.Proxy, invocation.Arguments);
+			}
+
+			if (AroundAspects != null
+				&& (AroundAspects.TryGetValue(method, out aroundList)
+				|| method.IsGenericMethod && AroundAspects.TryGetValue(method.GetGenericMethodDefinition(), out aroundList)))
+			{
+				foreach (var around in aroundList)
+				{
+					invocation.ReturnValue =
+						around(invocation.Proxy, invocation.Arguments, args =>
+						{
+							if (args != null && !args.SequenceEqual(invocation.Arguments))
+								for (int i = 0; i < args.Length; i++)
+									invocation.Arguments[i] = args[i];
+							invocation.Proceed();
+							return invocation.ReturnValue;
+						});
+				}
+			}
 			else
+			{
 				invocation.Proceed();
+			}
 
-			if (AfterAspects != null && AfterAspects.TryGetValue(invocation.Method, out afterList))
-				afterList.ForEach(it => invocation.ReturnValue = it(invocation.Proxy, invocation.Arguments, invocation.ReturnValue));
+			if (AfterAspects != null
+				&& (AfterAspects.TryGetValue(method, out afterList)
+				|| method.IsGenericMethod && AfterAspects.TryGetValue(method.GetGenericMethodDefinition(), out afterList)))
+			{
+				foreach (var after in afterList)
+					invocation.ReturnValue = after(invocation.Proxy, invocation.Arguments, invocation.ReturnValue);
+			}
 		}
 	}
 }
