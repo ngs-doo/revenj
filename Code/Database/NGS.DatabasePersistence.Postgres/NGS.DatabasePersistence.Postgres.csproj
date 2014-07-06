@@ -93,6 +93,7 @@
     <Compile Include="Converters\HstoreConverter.cs" />
     <Compile Include="Cube\PostgresOlapCubeQuery.cs" />
     <Compile Include="Attributes\RepositoryAttribute.cs" />
+    <Compile Include="PostgresConnectionManager.cs" />
     <Compile Include="PostgresDatabaseNotification.cs" />
     <Compile Include="PostgresSequence.cs" />
     <Compile Include="PostgresDatabaseQuery.cs" />

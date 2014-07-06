@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Diagnostics.Contracts;
 using NGS.Common;
 using NGS.Logging;
@@ -10,11 +9,11 @@ namespace NGS.DatabasePersistence.Postgres
 {
 	public class PostgresQueryManager : IDatabaseQueryManager, IDisposable
 	{
-		private readonly ConnectionInfo ConnectionInfo;
-
-		private readonly ILogFactory LogFactory;
 		private static int CpuCount = Environment.ProcessorCount;
 		private static int InitialCount = Environment.ProcessorCount < 17 ? 17 : Environment.ProcessorCount * 2 - 1;
+
+		private readonly IConnectionManager Connections;
+		private readonly ILogFactory LogFactory;
 		private readonly ConcurrentDictionary<IDatabaseQuery, NpgsqlTransaction> OpenTransactions =
 			new ConcurrentDictionary<IDatabaseQuery, NpgsqlTransaction>(CpuCount, InitialCount);
 		private readonly ConcurrentDictionary<IDatabaseQuery, NpgsqlConnection> OpenConnections =
@@ -22,41 +21,25 @@ namespace NGS.DatabasePersistence.Postgres
 		private readonly Func<NpgsqlConnection, NpgsqlTransaction, ILogFactory, IPostgresDatabaseQuery> QueryFactory;
 
 		public PostgresQueryManager(
-			ConnectionInfo connectionInfo,
+			IConnectionManager connections,
 			ILogFactory logFactory,
 			Func<NpgsqlConnection, NpgsqlTransaction, ILogFactory, IPostgresDatabaseQuery> queryFactory)
 		{
-			Contract.Requires(connectionInfo != null);
-			Contract.Requires(connectionInfo.ConnectionString != null);
+			Contract.Requires(connections != null);
 			Contract.Requires(logFactory != null);
 			Contract.Requires(queryFactory != null);
 
-			this.ConnectionInfo = connectionInfo;
+			this.Connections = connections;
 			this.LogFactory = logFactory;
 			this.QueryFactory = queryFactory;
 		}
 
 		public IDatabaseQuery StartQuery(bool withTransaction)
 		{
-			var connection = ConnectionInfo.GetConnection();
+			var connection = Connections.Create(withTransaction);
 			NpgsqlTransaction transaction = null;
 			if (withTransaction)
-			{
-				try
-				{
-					connection.Open();
-				}
-				catch (Exception ex)
-				{
-					LogFactory.Create("Postgres database layer - start query").Error(ex.ToString());
-					try { connection.Close(); }
-					catch { }
-					NpgsqlConnection.ClearAllPools();
-					connection = ConnectionInfo.GetConnection();
-					connection.Open();
-				}
 				transaction = connection.BeginTransaction();
-			}
 			IDatabaseQuery query;
 			try
 			{
@@ -80,6 +63,7 @@ namespace NGS.DatabasePersistence.Postgres
 			if (query == null)
 				return;
 			bool failure = false;
+			bool released = false;
 			if (query.InTransaction)
 			{
 				NpgsqlTransaction transaction;
@@ -93,23 +77,14 @@ namespace NGS.DatabasePersistence.Postgres
 						transaction.Commit();
 					else
 						transaction.Rollback();
-					conn.Close();
+					Connections.Release(conn, success);
+					released = true;
 				}
 				else failure = success;
 			}
 			NpgsqlConnection connection;
-			OpenConnections.TryRemove(query, out connection);
-			try
-			{
-				if (connection != null && connection.State == ConnectionState.Open)
-					connection.Close();
-			}
-			catch (Exception ex)
-			{
-				var log = LogFactory.Create("Postgres database layer - end query");
-				log.Error(ex.ToString());
-				log.Info("Transactions: {0}, connections: {1}".With(OpenTransactions.Count, OpenConnections.Count));
-			}
+			if (OpenConnections.TryRemove(query, out connection) && !released)
+				Connections.Release(connection, success);
 			if (failure)
 				throw new FrameworkException("Transaction can't be committed since connection is null");
 		}
@@ -126,12 +101,12 @@ namespace NGS.DatabasePersistence.Postgres
 						try
 						{
 							tran.Rollback();
-							conn.Close();
 						}
 						catch (Exception tex)
 						{
 							LogFactory.Create("Postgres database layer - hanging transaction").Error(tex.ToString());
 						}
+						Connections.Release(conn, false);
 					}
 				}
 				OpenTransactions.Clear();
@@ -143,17 +118,7 @@ namespace NGS.DatabasePersistence.Postgres
 			try
 			{
 				foreach (var c in OpenConnections.Values)
-					if (c.State == ConnectionState.Open)
-					{
-						try
-						{
-							c.Close();
-						}
-						catch (Exception cex)
-						{
-							LogFactory.Create("Postgres database layer - hanging connection").Error(cex.ToString());
-						}
-					}
+					Connections.Release(c, false);
 				OpenConnections.Clear();
 			}
 			catch (Exception ex)

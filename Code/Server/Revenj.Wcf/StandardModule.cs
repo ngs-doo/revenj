@@ -167,6 +167,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
 
 			builder.RegisterInstance(new NGS.DatabasePersistence.Postgres.ConnectionInfo(cs));
+			builder.RegisterType<PostgresConnectionManager>().As<IConnectionManager>().SingleInstance();
 			builder.RegisterType<PostgresQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<PostgresDatabaseQuery>().As<IPostgresDatabaseQuery>();
 			builder.Register(c => c.Resolve<IDatabaseQueryManager>().CreateQuery()).As<IDatabaseQuery>().InstancePerLifetimeScope();

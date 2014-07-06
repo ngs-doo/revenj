@@ -42,6 +42,7 @@ namespace NGS.DatabasePersistence.Postgres
 		private NpgsqlConnection Connection;
 		private readonly NpgsqlTransaction Transaction;
 		private bool BrokenTransaction;
+		private bool DifferentConnection;
 
 		private readonly ILogFactory LogFactory;
 
@@ -127,6 +128,7 @@ Near: " + ex.Where, ex);
 					NpgsqlConnection.ClearAllPools();
 				}
 				Connection = new NpgsqlConnection(cs);
+				DifferentConnection = true;
 			}
 		}
 
@@ -494,7 +496,7 @@ Near: " + ex.Where, ex);
 		{
 			try
 			{
-				if (Connection != null && Connection.State == ConnectionState.Open)
+				if (DifferentConnection && Connection.State == ConnectionState.Open)
 					Connection.Close();
 			}
 			catch (Exception ex)

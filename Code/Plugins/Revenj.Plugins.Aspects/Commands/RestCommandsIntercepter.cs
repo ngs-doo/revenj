@@ -28,6 +28,12 @@ namespace Revenj.Plugins.Aspects.Commands
 			this.Logger = logFactory.Create("REST commands trace");
 		}
 
+		private void LogMemoryUsage()
+		{
+			Logger.Debug(() => "GC memory usage: " + (GC.GetTotalMemory(false) / 1024 / 1024m).ToString("N3", CultureInfo.InvariantCulture) + "MB");
+			Logger.Debug(() => "Process memory usage: " + (Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024m).ToString("N3", CultureInfo.InvariantCulture) + "MB");
+		}
+
 		public Stream PassThrough(object[] args, Func<object[], object> baseCall)
 		{
 			var start = Stopwatch.GetTimestamp();
@@ -44,7 +50,7 @@ namespace Revenj.Plugins.Aspects.Commands
 				if (elapsed > TimerLimit)
 				{
 					Logger.Debug(() => "Returning stream for pass through: " + ta.FullName + ". Duration: " + elapsed + "ms. Size: " + (stream != null && stream.CanSeek ? stream.Length.ToString() + "B" : "Unknown"));
-					Logger.Debug(() => "Memory usage: " + (GC.GetTotalMemory(false) / 1024 / 1024m).ToString("N3", CultureInfo.InvariantCulture) + "MB");
+					LogMemoryUsage();
 				}
 			}
 			return stream;
@@ -66,7 +72,7 @@ namespace Revenj.Plugins.Aspects.Commands
 				if (elapsed > TimerLimit)
 				{
 					Logger.Debug(() => "Returning stream for get REST req: " + req.RequestUri.AbsoluteUri + ". Duration: " + elapsed + "ms. Size: " + (stream != null && stream.CanSeek ? stream.Length.ToString() + "B" : "Unknown"));
-					Logger.Debug(() => "Memory usage: " + (GC.GetTotalMemory(false) / 1024 / 1024m).ToString("N3", CultureInfo.InvariantCulture) + "MB");
+					LogMemoryUsage();
 				}
 			}
 			return stream;
@@ -88,7 +94,7 @@ namespace Revenj.Plugins.Aspects.Commands
 				if (elapsed > TimerLimit)
 				{
 					Logger.Debug(() => "Returning stream for post REST req: " + req.RequestUri.AbsoluteUri + ". Duration: " + elapsed + "ms. Size: " + (stream != null && stream.CanSeek ? stream.Length.ToString() + "B" : "Unknown"));
-					Logger.Debug(() => "Memory usage: " + (GC.GetTotalMemory(false) / 1024 / 1024m).ToString("N3", CultureInfo.InvariantCulture) + "MB");
+					LogMemoryUsage();
 				}
 			}
 			return stream;

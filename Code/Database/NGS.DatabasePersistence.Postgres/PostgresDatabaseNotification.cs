@@ -92,7 +92,7 @@ namespace NGS.DatabasePersistence.Postgres
 		{
 			if (IsDisposed)
 				return;
-			Logger.Trace("Notification state changed: " + e.CurrentState.ToString());
+			Logger.Trace(() => "Notification state changed: " + e.CurrentState.ToString());
 			if (e.CurrentState == ConnectionState.Closed
 				|| e.CurrentState == ConnectionState.Broken)
 				SetUpConnection(Connection.ConnectionString);
