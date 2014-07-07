@@ -389,11 +389,7 @@ namespace NGS.Utility
 					MemoryPool.Push(this);
 					CurrentEstimate++;
 				}
-				else
-				{
-					Blocks.RemoveRange(1, Blocks.Count - 1);
-					CurrentEstimate = MemoryPool.Count;
-				}
+				else CurrentEstimate = MemoryPool.Count;
 			}
 		}
 	}
