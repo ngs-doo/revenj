@@ -18,7 +18,7 @@ namespace NGS.Utility
 		private const int BlockAnd = 8191;
 
 		private static int SizeLimit = 16 * Environment.ProcessorCount;
-		private static ConcurrentQueue<ChunkedMemoryStream> PoolQueue = new ConcurrentQueue<ChunkedMemoryStream>();
+		private static ConcurrentStack<ChunkedMemoryStream> MemoryPool = new ConcurrentStack<ChunkedMemoryStream>();
 		private static int CurrentEstimate = SizeLimit;
 
 		private static readonly char[] CharMap;
@@ -27,7 +27,7 @@ namespace NGS.Utility
 		static ChunkedMemoryStream()
 		{
 			for (int i = 0; i < SizeLimit; i++)
-				PoolQueue.Enqueue(new ChunkedMemoryStream());
+				MemoryPool.Push(new ChunkedMemoryStream());
 			CharMap = "0123456789abcdef".ToCharArray();
 			CharLookup = new int['f' + 1];
 			for (int i = 0; i < CharMap.Length; i++)
@@ -49,13 +49,13 @@ namespace NGS.Utility
 		public static ChunkedMemoryStream Create()
 		{
 			ChunkedMemoryStream stream;
-			if (PoolQueue.TryDequeue(out stream))
+			if (MemoryPool.TryPop(out stream))
 			{
 				CurrentEstimate--;
 				stream.disposed = false;
 				return stream;
 			}
-			CurrentEstimate = PoolQueue.Count;
+			CurrentEstimate = MemoryPool.Count;
 			return new ChunkedMemoryStream();
 		}
 
@@ -386,21 +386,15 @@ namespace NGS.Utility
 				TotalSize = 0;
 				if (CurrentEstimate < SizeLimit || Blocks.Count > 10000)
 				{
-					PoolQueue.Enqueue(this);
+					MemoryPool.Push(this);
 					CurrentEstimate++;
 				}
 				else
 				{
 					Blocks.RemoveRange(1, Blocks.Count - 1);
-					CurrentEstimate = PoolQueue.Count;
-					GC.SuppressFinalize(this);
+					CurrentEstimate = MemoryPool.Count;
 				}
 			}
-		}
-
-		~ChunkedMemoryStream()
-		{
-			Dispose(false);
 		}
 	}
 }
