@@ -94,6 +94,7 @@
     <Compile Include="Routes.cs" />
     <Compile Include="HttpAuth.cs" />
     <Compile Include="UriPattern.cs" />
+    <Compile Include="RouteMatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">
