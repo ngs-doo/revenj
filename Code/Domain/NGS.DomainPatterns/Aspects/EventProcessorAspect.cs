@@ -10,7 +10,7 @@ namespace NGS.DomainPatterns
 	{
 		public void Initialize(IObjectFactory factory)
 		{
-			foreach (var type in AssemblyScanner.GetAllTypes().Where(it => it.IsPublic || it.IsNestedPublic))
+			foreach (var type in AssemblyScanner.GetAllTypes().Where(it => !it.IsAbstract && it.IsClass))
 			{
 				var interfaces =
 					(from i in type.GetInterfaces()

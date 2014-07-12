@@ -18,11 +18,6 @@ namespace NGS.DomainPatterns
 		/// When domain event was processed
 		/// </summary>
 		DateTime? ProcessedAt { get; }
-		/// <summary>
-		/// Process event by invoking domain event handlers.
-		/// </summary>
-		/// <param name="locator">service locator</param>
-		void Process(IServiceLocator locator);
 	}
 	/// <summary>
 	/// Domain event which is bound to an aggregate.
@@ -119,15 +114,16 @@ namespace NGS.DomainPatterns
 	/// Handle domain event.
 	/// When domain event is processed by the server, all domain event handlers are invoked to
 	/// process it. If one domain event handler throws an exception, entire submission is canceled.
+	/// If Event[] is used, collection of events can be processed at once.
 	/// </summary>
 	/// <typeparam name="TEvent">domain event type</typeparam>
-	public interface IDomainEventHandler<TEvent>
+	public interface IDomainEventHandler<THandle>
 	{
 		/// <summary>
 		/// Handle domain event submission.
 		/// </summary>
-		/// <param name="domainEvent">processing domain event</param>
-		void Handle(TEvent domainEvent);
+		/// <param name="input">processing domain event(s)</param>
+		void Handle(THandle input);
 	}
 
 	//TODO remove!?
