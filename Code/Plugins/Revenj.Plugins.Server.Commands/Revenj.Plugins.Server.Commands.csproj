@@ -63,6 +63,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="CommandResult.cs" />
     <Compile Include="Search\GenericSearchFilter.cs" />
     <Compile Include="Search\GenericSpecification.cs" />

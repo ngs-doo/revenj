@@ -48,6 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="CachingCrudCommands.cs" />
     <Compile Include="CachingDomainCommands.cs" />
     <Compile Include="CachingService.cs" />
