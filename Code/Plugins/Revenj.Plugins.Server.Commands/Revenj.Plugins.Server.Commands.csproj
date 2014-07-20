@@ -84,12 +84,10 @@
     <Compile Include="Reporting\GetRootHistory.cs" />
     <Compile Include="Reporting\TemplaterProcessDocument.cs" />
     <Compile Include="Reporting\FindInvalidData.cs" />
-    <Compile Include="PropagateResult.cs" />
     <Compile Include="GetDomainObject.cs" />
     <Compile Include="PersistAggregateRoot.cs" />
     <Compile Include="Search\SearchDomainObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Transformations\GetFromUri.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>

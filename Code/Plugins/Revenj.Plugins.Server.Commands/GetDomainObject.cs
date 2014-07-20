@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
@@ -103,14 +104,21 @@ Please check your arguments.", name);
 			public int Count;
 		}
 
+		private static ConcurrentDictionary<Type, IFindCommand> Cache = new ConcurrentDictionary<Type, IFindCommand>();
+
 		private FindResult<TOutput> GetAndReturn<TOutput>(
 			ISerialization<TOutput> output,
 			string name,
 			string[] uri)
 		{
 			var objectType = ValidateArgument(name, uri);
-			var commandType = typeof(FindCommand<>).MakeGenericType(objectType);
-			var command = Activator.CreateInstance(commandType) as IFindCommand;
+			IFindCommand command;
+			if (!Cache.TryGetValue(objectType, out command))
+			{
+				var commandType = typeof(FindCommand<>).MakeGenericType(objectType);
+				command = Activator.CreateInstance(commandType) as IFindCommand;
+				Cache.TryAdd(objectType, command);
+			}
 			return command.Find(output, Locator, Permissions, uri);
 		}
 

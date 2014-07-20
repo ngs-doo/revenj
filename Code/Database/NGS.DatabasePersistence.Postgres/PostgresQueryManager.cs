@@ -12,7 +12,7 @@ namespace NGS.DatabasePersistence.Postgres
 		private static int CpuCount = Environment.ProcessorCount;
 		private static int InitialCount = Environment.ProcessorCount < 17 ? 17 : Environment.ProcessorCount * 2 - 1;
 
-		private readonly IConnectionManager Connections;
+		private readonly IConnectionPool Connections;
 		private readonly ILogFactory LogFactory;
 		private readonly ConcurrentDictionary<IDatabaseQuery, NpgsqlTransaction> OpenTransactions =
 			new ConcurrentDictionary<IDatabaseQuery, NpgsqlTransaction>(CpuCount, InitialCount);
@@ -21,7 +21,7 @@ namespace NGS.DatabasePersistence.Postgres
 		private readonly Func<NpgsqlConnection, NpgsqlTransaction, ILogFactory, IPostgresDatabaseQuery> QueryFactory;
 
 		public PostgresQueryManager(
-			IConnectionManager connections,
+			IConnectionPool connections,
 			ILogFactory logFactory,
 			Func<NpgsqlConnection, NpgsqlTransaction, ILogFactory, IPostgresDatabaseQuery> queryFactory)
 		{
@@ -36,7 +36,7 @@ namespace NGS.DatabasePersistence.Postgres
 
 		public IDatabaseQuery StartQuery(bool withTransaction)
 		{
-			var connection = Connections.Create(withTransaction);
+			var connection = Connections.Take(withTransaction);
 			NpgsqlTransaction transaction = null;
 			if (withTransaction)
 				transaction = connection.BeginTransaction();

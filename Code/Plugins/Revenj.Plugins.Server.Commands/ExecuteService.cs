@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -51,6 +52,8 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument<TFormat> { Name = "CheckInfo" });
 		}
 
+		private static ConcurrentDictionary<Type, IExecuteCommand> Cache = new ConcurrentDictionary<Type, IExecuteCommand>();
+
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -85,8 +88,13 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var commandType = typeof(ExecuteServiceCommand<,>).MakeGenericType(serviceInterface.GetGenericArguments());
-				var command = Activator.CreateInstance(commandType) as IExecuteServiceCommand;
+				IExecuteCommand command;
+				if (!Cache.TryGetValue(serviceType, out command))
+				{
+					var commandType = typeof(ExecuteServiceCommand<,>).MakeGenericType(serviceInterface.GetGenericArguments());
+					command = Activator.CreateInstance(commandType) as IExecuteCommand;
+					Cache.TryAdd(serviceType, command);
+				}
 				var result = command.Execute(input, output, Locator, serviceType, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Created, result, "Service executed");
@@ -101,7 +109,7 @@ Example argument:
 			}
 		}
 
-		private interface IExecuteServiceCommand
+		private interface IExecuteCommand
 		{
 			TOutput Execute<TInput, TOutput>(
 				ISerialization<TInput> input,
@@ -111,7 +119,7 @@ Example argument:
 				TInput data);
 		}
 
-		private class ExecuteServiceCommand<TArgument, TResult> : IExecuteServiceCommand
+		private class ExecuteServiceCommand<TArgument, TResult> : IExecuteCommand
 		{
 			public TOutput Execute<TInput, TOutput>(
 				ISerialization<TInput> input,

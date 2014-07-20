@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
@@ -72,6 +73,8 @@ namespace Revenj.Plugins.Server.Commands
 			}
 		}
 
+		private static ConcurrentDictionary<Type, IPersistCommand> Cache = new ConcurrentDictionary<Type, IPersistCommand>();
+
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -102,8 +105,13 @@ Please check your arguments.".With(argument.RootName), null);
 
 			try
 			{
-				var commandType = typeof(PersistAggregateRootCommand<>).MakeGenericType(rootType);
-				var command = Activator.CreateInstance(commandType) as IPersistAggregateRootCommand<IAggregateRoot>;
+				IPersistCommand command;
+				if (!Cache.TryGetValue(rootType, out command))
+				{
+					var commandType = typeof(PersistAggregateRootCommand<>).MakeGenericType(rootType);
+					command = Activator.CreateInstance(commandType) as IPersistCommand;
+					Cache.TryAdd(rootType, command);
+				}
 				var uris = command.Persist(input, Locator, argument.ToInsert, argument.ToUpdate, argument.ToDelete);
 
 				return CommandResult<TOutput>.Success(output.Serialize(uris), "Data persisted");
@@ -118,8 +126,7 @@ Example argument:
 			}
 		}
 
-		private interface IPersistAggregateRootCommand<out TRoot>
-			where TRoot : IAggregateRoot
+		private interface IPersistCommand
 		{
 			string[] Persist<TFormat>(
 				ISerialization<TFormat> serializer,
@@ -129,7 +136,7 @@ Example argument:
 				TFormat toDelete);
 		}
 
-		private class PersistAggregateRootCommand<TRoot> : IPersistAggregateRootCommand<TRoot>
+		private class PersistAggregateRootCommand<TRoot> : IPersistCommand
 			where TRoot : IAggregateRoot, new()
 		{
 			public string[] Persist<TFormat>(

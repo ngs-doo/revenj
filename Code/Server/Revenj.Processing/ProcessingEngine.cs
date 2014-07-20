@@ -11,7 +11,6 @@ using System.Security;
 using System.Threading;
 using NGS;
 using NGS.Common;
-using NGS.DatabasePersistence;
 using NGS.Extensibility;
 using NGS.Logging;
 using NGS.Security;
@@ -23,7 +22,7 @@ namespace Revenj.Processing
 	public class ProcessingEngine : IProcessingEngine
 	{
 		private readonly IObjectFactory ObjectFactory;
-		private readonly IDatabaseQueryManager TransactionManager;
+		private readonly IProcessingScopePool ScopePool;
 		private readonly IPermissionManager Permissions;
 		private readonly ILogger Logger;
 		private readonly Dictionary<Type, Type> ActualCommands = new Dictionary<Type, Type>();
@@ -31,24 +30,23 @@ namespace Revenj.Processing
 
 		public ProcessingEngine(
 			IObjectFactory objectFactory,
-			IDatabaseQueryManager transactionManager,
+			IProcessingScopePool scopePool,
 			IPermissionManager permissions,
 			ILogFactory logFactory,
 			IExtensibilityProvider extensibilityProvider)
 		{
 			Contract.Requires(objectFactory != null);
-			Contract.Requires(transactionManager != null);
+			Contract.Requires(scopePool != null);
 			Contract.Requires(permissions != null);
 			Contract.Requires(logFactory != null);
 			Contract.Requires(extensibilityProvider != null);
 
 			this.ObjectFactory = objectFactory.CreateInnerFactory();
-			this.TransactionManager = transactionManager;
+			this.ScopePool = scopePool;
 			this.Permissions = permissions;
 			this.Logger = logFactory.Create("Processing engine");
 			var commandTypes = extensibilityProvider.FindPlugins<IServerCommand>();
 
-			ObjectFactory.RegisterTypes(commandTypes, InstanceScope.Transient);
 			foreach (var ct in commandTypes)
 				ActualCommands[ct] = ct;
 			foreach (var ct in commandTypes)
@@ -105,6 +103,7 @@ namespace Revenj.Processing
 			var start = Stopwatch.GetTimestamp();
 
 			foreach (var c in commandDescriptions)
+			{
 				if (!Permissions.CanAccess(c.CommandType))
 				{
 					Logger.Trace(
@@ -118,6 +117,7 @@ namespace Revenj.Processing
 							null,
 							start);
 				}
+			}
 
 			var inputSerializer = GetSerializer<TInput>();
 			var outputSerializer = GetSerializer<TOutput>();
@@ -144,134 +144,123 @@ namespace Revenj.Processing
 				}
 			}
 
-			var scopeID = useTransaction ? Guid.NewGuid().ToString() : null;
-			using (var scope = ObjectFactory.CreateScope(scopeID))
+			var executedCommands = new List<ICommandResultDescription<TOutput>>(commandDescriptions.Length);
+			Scope scope = null;
+			try
 			{
-				var executedCommands = new List<ICommandResultDescription<TOutput>>(commandDescriptions.Length);
-				IDatabaseQuery query = null;
 				try
 				{
-					try
-					{
-						query = TransactionManager.StartQuery(useTransaction);
-					}
-					catch (Exception ex)
-					{
-						Logger.Error("Can't start query. Error: " + ex.ToString());
-						return Exceptions.DebugMode
-							? ProcessingResult<TOutput>.Create(
-								ex.ToString(),
-								HttpStatusCode.ServiceUnavailable,
-								null,
-								start)
-							: ProcessingResult<TOutput>.Create(
-								"Unable to create database connection",
-								HttpStatusCode.ServiceUnavailable,
-								null,
-								start);
-					}
-					scope.RegisterInstance(query);
-					if (useTransaction)
-					{
-						scope.RegisterInstance<IEnumerable<IServerCommandDescription<TInput>>>(commandDescriptions);
-						scope.RegisterInstance<IEnumerable<ICommandResultDescription<TOutput>>>(executedCommands);
-						scope.RegisterType(typeof(ProcessingContext), typeof(IProcessingEngine), InstanceScope.Singleton);
-					}
-					foreach (var cmd in commands)
-					{
-						var startCommand = Stopwatch.GetTimestamp();
-						var result = cmd.GetCommand(scope).Execute(inputSerializer, outputSerializer, cmd.Description.Data);
-						if (result == null)
-							throw new FrameworkException("Result returned null for " + cmd.Target.FullName);
-						executedCommands.Add(CommandResultDescription<TOutput>.Create(cmd.Description.RequestID, result, startCommand));
-						if ((int)result.Status >= 400)
-						{
-							TransactionManager.EndQuery(query, false);
-							return ProcessingResult<TOutput>.Create(
-								result.Message,
-								result.Status,
-								executedCommands,
-								start);
-						}
-					}
-
-					TransactionManager.EndQuery(query, true);
-					var duration = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
-					return
-						ProcessingResult<TOutput>.Create(
-							"Commands executed in: " + duration.ToString(CultureInfo.InvariantCulture) + " ms.",
-							HttpStatusCode.OK,
-							executedCommands,
-							start);
-				}
-				catch (SecurityException ex)
-				{
-					Logger.Trace(
-						() => "Security error. User: {0}. Error: {1}.".With(
-								Thread.CurrentPrincipal.Identity.Name,
-								ex.ToString()));
-					TransactionManager.EndQuery(query, false);
-					return
-						ProcessingResult<TOutput>.Create(
-							"You don't have authorization to perform requested action: " + ex.Message,
-							HttpStatusCode.Forbidden,
-							executedCommands,
-							start);
-				}
-				catch (AggregateException ex)
-				{
-					Logger.Trace(
-						() => "Multiple errors. User: {0}. Error: {1}.".With(
-								Thread.CurrentPrincipal.Identity.Name,
-								ex.GetDetailedExplanation()));
-					TransactionManager.EndQuery(query, false);
-					return Exceptions.DebugMode
-						? ProcessingResult<TOutput>.Create(
-							ex.GetDetailedExplanation(),
-							HttpStatusCode.InternalServerError,
-							executedCommands,
-							start)
-						: ProcessingResult<TOutput>.Create(
-							string.Join(Environment.NewLine, ex.InnerExceptions.Select(it => it.Message)),
-							HttpStatusCode.InternalServerError,
-							executedCommands,
-							start);
-				}
-				catch (OutOfMemoryException ex)
-				{
-					Logger.Error("Out of memory error. Error: " + ex.GetDetailedExplanation());
-					TransactionManager.EndQuery(query, false);
-					return Exceptions.DebugMode
-						? ProcessingResult<TOutput>.Create(
-							ex.GetDetailedExplanation(),
-							HttpStatusCode.ServiceUnavailable,
-							executedCommands,
-							start)
-						: ProcessingResult<TOutput>.Create(
-							ex.Message,
-							HttpStatusCode.ServiceUnavailable,
-							executedCommands,
-							start);
+					scope = ScopePool.Take(!useTransaction);
 				}
 				catch (Exception ex)
 				{
-					Logger.Trace(
-						() => "Unexpected error. User: {0}. Error: {1}.".With(
-								Thread.CurrentPrincipal.Identity.Name,
-								ex.GetDetailedExplanation()));
-					TransactionManager.EndQuery(query, false);
+					Logger.Error("Can't start query. Error: " + ex.ToString());
 					return Exceptions.DebugMode
 						? ProcessingResult<TOutput>.Create(
-							ex.GetDetailedExplanation(),
-							HttpStatusCode.InternalServerError,
-							executedCommands,
+							ex.ToString(),
+							HttpStatusCode.ServiceUnavailable,
+							null,
 							start)
 						: ProcessingResult<TOutput>.Create(
-							ex.Message,
-							HttpStatusCode.InternalServerError,
-							executedCommands,
+							"Unable to create database connection",
+							HttpStatusCode.ServiceUnavailable,
+							null,
 							start);
 				}
+				foreach (var cmd in commands)
+				{
+					var startCommand = Stopwatch.GetTimestamp();
+					var result = cmd.GetCommand(scope.Factory).Execute(inputSerializer, outputSerializer, cmd.Description.Data);
+					if (result == null)
+						throw new FrameworkException("Result returned null for " + cmd.Target.FullName);
+					executedCommands.Add(CommandResultDescription<TOutput>.Create(cmd.Description.RequestID, result, startCommand));
+					if ((int)result.Status >= 400)
+					{
+						ScopePool.Release(scope, false);
+						return ProcessingResult<TOutput>.Create(
+							result.Message,
+							result.Status,
+							executedCommands,
+							start);
+					}
+				}
+
+				ScopePool.Release(scope, true);
+				var duration = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+				return
+					ProcessingResult<TOutput>.Create(
+						"Commands executed in: " + duration.ToString(CultureInfo.InvariantCulture) + " ms.",
+						HttpStatusCode.OK,
+						executedCommands,
+						start);
+			}
+			catch (SecurityException ex)
+			{
+				Logger.Trace(
+					() => "Security error. User: {0}. Error: {1}.".With(
+							Thread.CurrentPrincipal.Identity.Name,
+							ex.ToString()));
+				ScopePool.Release(scope, false);
+				return
+					ProcessingResult<TOutput>.Create(
+						"You don't have authorization to perform requested action: " + ex.Message,
+						HttpStatusCode.Forbidden,
+						executedCommands,
+						start);
+			}
+			catch (AggregateException ex)
+			{
+				Logger.Trace(
+					() => "Multiple errors. User: {0}. Error: {1}.".With(
+							Thread.CurrentPrincipal.Identity.Name,
+							ex.GetDetailedExplanation()));
+				ScopePool.Release(scope, false);
+				return Exceptions.DebugMode
+					? ProcessingResult<TOutput>.Create(
+						ex.GetDetailedExplanation(),
+						HttpStatusCode.InternalServerError,
+						executedCommands,
+						start)
+					: ProcessingResult<TOutput>.Create(
+						string.Join(Environment.NewLine, ex.InnerExceptions.Select(it => it.Message)),
+						HttpStatusCode.InternalServerError,
+						executedCommands,
+						start);
+			}
+			catch (OutOfMemoryException ex)
+			{
+				Logger.Error("Out of memory error. Error: " + ex.GetDetailedExplanation());
+				ScopePool.Release(scope, false);
+				return Exceptions.DebugMode
+					? ProcessingResult<TOutput>.Create(
+						ex.GetDetailedExplanation(),
+						HttpStatusCode.ServiceUnavailable,
+						executedCommands,
+						start)
+					: ProcessingResult<TOutput>.Create(
+						ex.Message,
+						HttpStatusCode.ServiceUnavailable,
+						executedCommands,
+						start);
+			}
+			catch (Exception ex)
+			{
+				Logger.Trace(
+					() => "Unexpected error. User: {0}. Error: {1}.".With(
+						Thread.CurrentPrincipal.Identity.Name,
+						ex.GetDetailedExplanation()));
+				ScopePool.Release(scope, false);
+				return Exceptions.DebugMode
+					? ProcessingResult<TOutput>.Create(
+						ex.GetDetailedExplanation(),
+						HttpStatusCode.InternalServerError,
+						executedCommands,
+						start)
+					: ProcessingResult<TOutput>.Create(
+						ex.Message,
+						HttpStatusCode.InternalServerError,
+						executedCommands,
+						start);
 			}
 		}
 	}

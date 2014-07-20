@@ -43,6 +43,7 @@ namespace Revenj.Http
 			registry.Register<ILogFactory, LogFactory>(Reuse.Singleton);
 			registry.Register<ILogger, NLogLogger>();
 			registry.Register<IProcessingEngine, ProcessingEngine>(Reuse.Singleton);
+			registry.Register<IProcessingScopePool, ProcessingScopePool>(Reuse.Singleton);
 		}
 
 		private static void SetupExtensibility(IRegistry registry)
@@ -124,7 +125,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
 
 			registry.RegisterInstance(new NGS.DatabasePersistence.Postgres.ConnectionInfo(cs));
-			registry.Register<IConnectionManager, PostgresConnectionManager>(Reuse.Singleton);
+			registry.Register<IConnectionPool, PostgresConnectionPool>(Reuse.Singleton);
 			registry.Register<IDatabaseQueryManager, PostgresQueryManager>(Reuse.InCurrentScope);
 			registry.Register<IPostgresDatabaseQuery, PostgresDatabaseQuery>();
 			registry.RegisterDelegate(r => r.Resolve<IDatabaseQueryManager>().CreateQuery(), Reuse.InCurrentScope);

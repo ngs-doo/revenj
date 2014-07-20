@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
@@ -57,6 +58,8 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument<TFormat> { Name = "Module.Event" });
 		}
 
+		private static ConcurrentDictionary<Type, ISubmitCommand> Cache = new ConcurrentDictionary<Type, ISubmitCommand>();
+
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -85,8 +88,13 @@ Please check your arguments.".With(argument.Name), null);
 
 			try
 			{
-				var commandType = typeof(SubmitEventCommand<>).MakeGenericType(eventType);
-				var command = Activator.CreateInstance(commandType) as ISubmitEventCommand;
+				ISubmitCommand command;
+				if (!Cache.TryGetValue(eventType, out command))
+				{
+					var commandType = typeof(SubmitEventCommand<>).MakeGenericType(eventType);
+					command = Activator.CreateInstance(commandType) as ISubmitCommand;
+					Cache.TryAdd(eventType, command);
+				}
 				var result = command.Submit(input, output, Locator, EventStore, argument.ReturnInstance ?? false, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Created, result, "Event stored");
@@ -101,7 +109,7 @@ Example argument:
 			}
 		}
 
-		private interface ISubmitEventCommand
+		private interface ISubmitCommand
 		{
 			TOutput Submit<TInput, TOutput>(
 				ISerialization<TInput> input,
@@ -112,7 +120,7 @@ Example argument:
 				TInput data);
 		}
 
-		private class SubmitEventCommand<TEvent> : ISubmitEventCommand
+		private class SubmitEventCommand<TEvent> : ISubmitCommand
 			where TEvent : IDomainEvent
 		{
 			public TOutput Submit<TInput, TOutput>(

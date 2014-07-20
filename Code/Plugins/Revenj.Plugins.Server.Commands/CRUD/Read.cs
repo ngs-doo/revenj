@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using NGS;
@@ -55,6 +55,8 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument { Name = objectType.FullName, Uri = "1001" });
 		}
 
+		private static ConcurrentDictionary<Type, IFindCommand> Cache = new ConcurrentDictionary<Type, IFindCommand>();
+
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
@@ -82,8 +84,13 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var commandType = typeof(FindCommand<>).MakeGenericType(objectType);
-				var command = Activator.CreateInstance(commandType) as IFindCommand;
+				IFindCommand command;
+				if (!Cache.TryGetValue(objectType, out command))
+				{
+					var commandType = typeof(FindCommand<>).MakeGenericType(objectType);
+					command = Activator.CreateInstance(commandType) as IFindCommand;
+					Cache.TryAdd(objectType, command);
+				}
 				var result = command.Find(output, Locator, Permissions, argument.Uri);
 
 				return result != null
@@ -123,8 +130,10 @@ Example argument:
 			{
 				var repository = locator.Resolve<IRepository<TDomainObject>>();
 				var data = repository.Find(new[] { uri });
-				var filtered = permissions.ApplyFilters(data).FirstOrDefault();
-				return filtered != null ? output.Serialize(filtered) : default(TOutput);
+				var filtered = permissions.ApplyFilters(data);
+				if (filtered.Length == 1)
+					return output.Serialize(filtered[0]);
+				return default(TOutput);
 			}
 		}
 	}

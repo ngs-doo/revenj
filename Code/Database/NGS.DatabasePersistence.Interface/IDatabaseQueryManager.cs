@@ -21,7 +21,7 @@ namespace NGS.DatabasePersistence
 		/// If query is created with a transaction provide true for success to commit transaction.
 		/// </summary>
 		/// <param name="query">database query</param>
-		/// <param name="success">was query successfull</param>
+		/// <param name="success">was query successful</param>
 		void EndQuery(IDatabaseQuery query, bool success);
 	}
 	/// <summary>

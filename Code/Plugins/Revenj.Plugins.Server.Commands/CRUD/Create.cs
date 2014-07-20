@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
@@ -69,6 +70,8 @@ namespace Revenj.Plugins.Server.Commands
 			}
 		}
 
+		private static ConcurrentDictionary<Type, ICreateCommand> Cache = new ConcurrentDictionary<Type, ICreateCommand>();
+
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -101,8 +104,13 @@ Please check your arguments.".With(argument.Name), null);
 
 			try
 			{
-				var commandType = typeof(CreateCommand<>).MakeGenericType(rootType);
-				var command = Activator.CreateInstance(commandType) as ICreateCommand;
+				ICreateCommand command;
+				if (!Cache.TryGetValue(rootType, out command))
+				{
+					var commandType = typeof(CreateCommand<>).MakeGenericType(rootType);
+					command = Activator.CreateInstance(commandType) as ICreateCommand;
+					Cache.TryAdd(rootType, command);
+				}
 				var result = command.Create(input, output, Locator, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Created, result, "Object created");

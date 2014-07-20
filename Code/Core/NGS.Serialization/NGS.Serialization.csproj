@@ -88,7 +88,6 @@
     <Compile Include="Json\StringBuilderReader.cs" />
     <Compile Include="WireSerialization.cs" />
     <Compile Include="XmlSerialization.cs" />
-    <Compile Include="XslTransformation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\NGS.snk">

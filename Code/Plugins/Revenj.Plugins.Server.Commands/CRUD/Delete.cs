@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
@@ -60,6 +61,8 @@ namespace Revenj.Plugins.Server.Commands
 					});
 		}
 
+		private static ConcurrentDictionary<Type, IDeleteCommand> Cache = new ConcurrentDictionary<Type, IDeleteCommand>();
+
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
@@ -94,8 +97,13 @@ Please check your arguments.".With(argument.Name), null);
 
 			try
 			{
-				var commandType = typeof(DeleteCommand<>).MakeGenericType(rootType);
-				var command = Activator.CreateInstance(commandType) as IDeleteCommand;
+				IDeleteCommand command;
+				if (!Cache.TryGetValue(rootType, out command))
+				{
+					var commandType = typeof(DeleteCommand<>).MakeGenericType(rootType);
+					command = Activator.CreateInstance(commandType) as IDeleteCommand;
+					Cache.TryAdd(rootType, command);
+				}
 				var result = command.Delete(input, output, Locator, argument.Uri);
 
 				return CommandResult<TOutput>.Success(result, "Object deleted");

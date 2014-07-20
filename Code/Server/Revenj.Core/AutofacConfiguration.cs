@@ -128,7 +128,7 @@ namespace Revenj.Core
 		private static void SetupPostgres(Autofac.ContainerBuilder builder, string cs)
 		{
 			builder.RegisterInstance(new NGS.DatabasePersistence.Postgres.ConnectionInfo(cs));
-			builder.RegisterType<PostgresConnectionManager>().As<IConnectionManager>().SingleInstance();
+			builder.RegisterType<PostgresConnectionPool>().As<IConnectionPool>().SingleInstance();
 			builder.RegisterType<PostgresQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<PostgresDatabaseQuery>().As<IPostgresDatabaseQuery>();
 			builder.Register(c => c.Resolve<IDatabaseQueryManager>().CreateQuery()).As<IDatabaseQuery>().InstancePerLifetimeScope();

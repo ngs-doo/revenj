@@ -7,13 +7,13 @@ using Npgsql;
 
 namespace NGS.DatabasePersistence.Postgres
 {
-	public interface IConnectionManager
+	public interface IConnectionPool
 	{
-		NpgsqlConnection Create(bool open);
+		NpgsqlConnection Take(bool open);
 		void Release(NpgsqlConnection connection, bool valid);
 	}
 
-	public class PostgresConnectionManager : IConnectionManager
+	public class PostgresConnectionPool : IConnectionPool, IDisposable
 	{
 		private readonly BlockingCollection<NpgsqlConnection> Connections = new BlockingCollection<NpgsqlConnection>(new ConcurrentBag<NpgsqlConnection>());
 
@@ -30,7 +30,7 @@ namespace NGS.DatabasePersistence.Postgres
 
 		private readonly ILogger Logger;
 
-		public PostgresConnectionManager(ConnectionInfo info, ILogFactory logFactory)
+		public PostgresConnectionPool(ConnectionInfo info, ILogFactory logFactory)
 		{
 			this.Info = info;
 			if (!int.TryParse(ConfigurationManager.AppSettings["Database.PoolSize"], out Size))
@@ -47,7 +47,7 @@ namespace NGS.DatabasePersistence.Postgres
 		}
 
 
-		public NpgsqlConnection Create(bool open)
+		public NpgsqlConnection Take(bool open)
 		{
 			NpgsqlConnection conn;
 			switch (Mode)
@@ -96,10 +96,9 @@ namespace NGS.DatabasePersistence.Postgres
 					}
 					break;
 				default:
-					if (valid && connection.State == ConnectionState.Open)
+					if (valid && connection.State == ConnectionState.Open && Connections.Count < Size)
 					{
-						if (Connections.Count < Size)
-							Connections.Add(connection);
+						Connections.Add(connection);
 					}
 					else
 					{
@@ -114,6 +113,21 @@ namespace NGS.DatabasePersistence.Postgres
 					}
 					break;
 			}
+		}
+
+		public void Dispose()
+		{
+			try
+			{
+				foreach (var con in Connections)
+				{
+					try { con.Close(); }
+					catch (Exception ex) { Logger.Trace(ex.ToString()); }
+				}
+				Connections.Dispose();
+				NpgsqlConnection.ClearAllPools();
+			}
+			catch (Exception e) { Logger.Trace(e.ToString()); }
 		}
 	}
 }

@@ -51,6 +51,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +63,7 @@
     <Compile Include="ProcessingContext.cs" />
     <Compile Include="ProcessingEngine.cs" />
     <Compile Include="ProcessingResult.cs" />
+    <Compile Include="ProcessingScopePool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

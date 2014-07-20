@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
@@ -73,6 +74,8 @@ namespace Revenj.Plugins.Server.Commands
 			}
 		}
 
+		private static ConcurrentDictionary<Type, IUpdateCommand> Cache = new ConcurrentDictionary<Type, IUpdateCommand>();
+
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -113,8 +116,13 @@ Please check your arguments.".With(argument.Name), null);
 
 			try
 			{
-				var commandType = typeof(UpdateCommand<>).MakeGenericType(rootType);
-				var command = Activator.CreateInstance(commandType) as IUpdateCommand;
+				IUpdateCommand command;
+				if (!Cache.TryGetValue(rootType, out command))
+				{
+					var commandType = typeof(UpdateCommand<>).MakeGenericType(rootType);
+					command = Activator.CreateInstance(commandType) as IUpdateCommand;
+					Cache.TryAdd(rootType, command);
+				}
 				var result = command.Update(input, output, Locator, argument.Uri, argument.Data);
 
 				return CommandResult<TOutput>.Success(result, "Object updated");
