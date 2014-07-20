@@ -43,7 +43,7 @@ namespace Revenj.Http
 			registry.Register<ILogFactory, LogFactory>(Reuse.Singleton);
 			registry.Register<ILogger, NLogLogger>();
 			registry.Register<IProcessingEngine, ProcessingEngine>(Reuse.Singleton);
-			registry.Register<IProcessingScopePool, ProcessingScopePool>(Reuse.Singleton);
+			registry.Register<IScopePool, ScopePool>(Reuse.Singleton);
 		}
 
 		private static void SetupExtensibility(IRegistry registry)

@@ -18,6 +18,8 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(Read))]
 	public class Read : IReadOnlyServerCommand
 	{
+		private static ConcurrentDictionary<Type, IFindCommand> Cache = new ConcurrentDictionary<Type, IFindCommand>(1, 127);
+
 		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -54,8 +56,6 @@ namespace Revenj.Plugins.Server.Commands
 		{
 			return serializer.Serialize(new Argument { Name = objectType.FullName, Uri = "1001" });
 		}
-
-		private static ConcurrentDictionary<Type, IFindCommand> Cache = new ConcurrentDictionary<Type, IFindCommand>();
 
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{

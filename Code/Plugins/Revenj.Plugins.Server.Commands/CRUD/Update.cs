@@ -20,6 +20,8 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(Update))]
 	public class Update : IServerCommand
 	{
+		private static ConcurrentDictionary<Type, IUpdateCommand> Cache = new ConcurrentDictionary<Type, IUpdateCommand>(1, 127);
+
 		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -69,12 +71,10 @@ namespace Revenj.Plugins.Server.Commands
 			}
 			catch
 			{
-				//falback to simple example since sometimes calculated properties will throw exception during serialization
+				//fallback to simple example since sometimes calculated properties will throw exception during serialization
 				return CreateExampleArgument(serializer);
 			}
 		}
-
-		private static ConcurrentDictionary<Type, IUpdateCommand> Cache = new ConcurrentDictionary<Type, IUpdateCommand>();
 
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{

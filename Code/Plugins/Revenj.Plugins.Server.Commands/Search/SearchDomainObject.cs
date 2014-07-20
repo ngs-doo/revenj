@@ -215,7 +215,7 @@ Please check your arguments.".With(domainName));
 		}
 
 		private class SearchDomainObjectCommand<TDomainObject> : ISearchDomainObjectCommand<TDomainObject>
-			where TDomainObject : class, IDataSource
+			where TDomainObject : IDataSource
 		{
 			public virtual TDomainObject[] FindBy<TFormat>(
 				ISerialization<TFormat> serializer,
@@ -279,7 +279,7 @@ Please check your arguments.".With(domainName));
 		}
 
 		private class SearchDomainObjectWithSpecificationCommand<TDomainObject, TSpecification> : SearchDomainObjectCommand<TDomainObject>
-			where TDomainObject : class, IDataSource
+			where TDomainObject : IDataSource
 		{
 			public override TDomainObject[] FindBy<TFormat>(
 				ISerialization<TFormat> serializer,

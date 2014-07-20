@@ -20,6 +20,8 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(ExecuteService))]
 	public class ExecuteService : IServerCommand
 	{
+		private static ConcurrentDictionary<Type, IExecuteCommand> Cache = new ConcurrentDictionary<Type, IExecuteCommand>(1, 127);
+
 		private readonly IServiceLocator Locator;
 		private readonly ITypeResolver TypeResolver;
 		private readonly IPermissionManager Permissions;
@@ -51,8 +53,6 @@ namespace Revenj.Plugins.Server.Commands
 		{
 			return serializer.Serialize(new Argument<TFormat> { Name = "CheckInfo" });
 		}
-
-		private static ConcurrentDictionary<Type, IExecuteCommand> Cache = new ConcurrentDictionary<Type, IExecuteCommand>();
 
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{

@@ -18,6 +18,8 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(Delete))]
 	public class Delete : IServerCommand
 	{
+		private static ConcurrentDictionary<Type, IDeleteCommand> Cache = new ConcurrentDictionary<Type, IDeleteCommand>(1, 127);
+
 		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -60,8 +62,6 @@ namespace Revenj.Plugins.Server.Commands
 						Uri = "1001"
 					});
 		}
-
-		private static ConcurrentDictionary<Type, IDeleteCommand> Cache = new ConcurrentDictionary<Type, IDeleteCommand>();
 
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{

@@ -19,6 +19,8 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(Create))]
 	public class Create : IServerCommand
 	{
+		private static ConcurrentDictionary<Type, ICreateCommand> Cache = new ConcurrentDictionary<Type, ICreateCommand>(1, 127);
+
 		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -69,8 +71,6 @@ namespace Revenj.Plugins.Server.Commands
 				return CreateExampleArgument(serializer);
 			}
 		}
-
-		private static ConcurrentDictionary<Type, ICreateCommand> Cache = new ConcurrentDictionary<Type, ICreateCommand>();
 
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{

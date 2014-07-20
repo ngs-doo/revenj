@@ -63,7 +63,7 @@
     <Compile Include="ProcessingContext.cs" />
     <Compile Include="ProcessingEngine.cs" />
     <Compile Include="ProcessingResult.cs" />
-    <Compile Include="ProcessingScopePool.cs" />
+    <Compile Include="ScopePool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

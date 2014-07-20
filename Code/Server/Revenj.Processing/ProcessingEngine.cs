@@ -22,7 +22,7 @@ namespace Revenj.Processing
 	public class ProcessingEngine : IProcessingEngine
 	{
 		private readonly IObjectFactory ObjectFactory;
-		private readonly IProcessingScopePool ScopePool;
+		private readonly IScopePool ScopePool;
 		private readonly IPermissionManager Permissions;
 		private readonly ILogger Logger;
 		private readonly Dictionary<Type, Type> ActualCommands = new Dictionary<Type, Type>();
@@ -30,7 +30,7 @@ namespace Revenj.Processing
 
 		public ProcessingEngine(
 			IObjectFactory objectFactory,
-			IProcessingScopePool scopePool,
+			IScopePool scopePool,
 			IPermissionManager permissions,
 			ILogFactory logFactory,
 			IExtensibilityProvider extensibilityProvider)

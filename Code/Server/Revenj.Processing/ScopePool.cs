@@ -3,10 +3,11 @@ using System.Collections.Concurrent;
 using System.Configuration;
 using NGS.DatabasePersistence;
 using NGS.Extensibility;
+using NGS.Logging;
 
 namespace Revenj.Processing
 {
-	public interface IProcessingScopePool
+	public interface IScopePool
 	{
 		Scope Take(bool readOnly);
 		void Release(Scope factory, bool valid);
@@ -24,7 +25,7 @@ namespace Revenj.Processing
 		}
 	}
 
-	public class ProcessingScopePool : IProcessingScopePool, IDisposable
+	public class ScopePool : IScopePool, IDisposable
 	{
 		private readonly BlockingCollection<Scope> Scopes = new BlockingCollection<Scope>(new ConcurrentBag<Scope>());
 
@@ -40,11 +41,13 @@ namespace Revenj.Processing
 
 		private readonly IObjectFactory Factory;
 		private readonly IDatabaseQueryManager Queries;
+		private readonly ILogger Logger;
 
-		public ProcessingScopePool(
+		public ScopePool(
 			IObjectFactory factory,
 			IDatabaseQueryManager queries,
-			IExtensibilityProvider extensibilityProvider)
+			IExtensibilityProvider extensibilityProvider,
+			ILogFactory logFactory)
 		{
 			this.Factory = factory;
 			this.Queries = queries;
@@ -60,6 +63,7 @@ namespace Revenj.Processing
 				for (int i = 0; i < Size; i++)
 					Scopes.Add(SetupReadonlyScope());
 			}
+			Logger = logFactory.Create("Scope pool");
 		}
 
 		private Scope SetupReadonlyScope()
@@ -71,8 +75,9 @@ namespace Revenj.Processing
 				inner.RegisterInstance(query);
 				return new Scope(inner, query);
 			}
-			catch
+			catch (Exception ex)
 			{
+				Logger.Error("Error setting up readonly scope: " + ex.ToString());
 				inner.Dispose();
 				throw;
 			}
@@ -89,8 +94,9 @@ namespace Revenj.Processing
 				inner.RegisterType(typeof(ProcessingContext), typeof(IProcessingEngine), InstanceScope.Singleton);
 				return new Scope(inner, query);
 			}
-			catch
+			catch (Exception ex)
 			{
+				Logger.Error("Error setting up writable scope: " + ex.ToString());
 				inner.Dispose();
 				throw;
 			}
@@ -123,7 +129,7 @@ namespace Revenj.Processing
 					scope.Factory.Dispose();
 					break;
 				default:
-					if (valid && Scopes.Count < Size)
+					if (valid && !scope.Query.InTransaction && Scopes.Count < Size)
 					{
 						Scopes.Add(scope);
 					}
@@ -140,12 +146,26 @@ namespace Revenj.Processing
 
 		public void Dispose()
 		{
-			foreach (var s in Scopes)
+			try
 			{
-				Queries.EndQuery(s.Query, false);
-				s.Factory.Dispose();
+				foreach (var s in Scopes)
+				{
+					try
+					{
+						Queries.EndQuery(s.Query, false);
+						s.Factory.Dispose();
+					}
+					catch (Exception ex)
+					{
+						Logger.Error("Error cleaning up pool: " + ex.ToString());
+					}
+				}
+				Scopes.Dispose();
 			}
-			Scopes.Dispose();
+			catch (Exception ex2)
+			{
+				Logger.Error("Error disposing pool: " + ex2.ToString());
+			}
 		}
 	}
 }

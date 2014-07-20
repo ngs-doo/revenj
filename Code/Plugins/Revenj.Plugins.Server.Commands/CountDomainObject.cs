@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(CountDomainObject))]
 	public class CountDomainObject : IReadOnlyServerCommand
 	{
+		private static ConcurrentDictionary<Type, ICountCommand> Cache = new ConcurrentDictionary<Type, ICountCommand>(1, 127);
+
 		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -93,7 +96,7 @@ Example argument:
 			return command.FindCount(Locator, specification);
 		}
 
-		private IFindDomainObjectCountCommand PrepareCommand(string domainName, string specificationName)
+		private ICountCommand PrepareCommand(string domainName, string specificationName)
 		{
 			if (domainName == null)
 				throw new ArgumentException("Domain object name not provided.");
@@ -107,8 +110,14 @@ Please check your arguments.".With(domainName));
 				throw new SecurityException("You don't have permission to access: {0}.".With(domainName));
 			if (string.IsNullOrWhiteSpace(specificationName))
 			{
-				var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);
-				return Activator.CreateInstance(commandType) as IFindDomainObjectCountCommand;
+				ICountCommand command;
+				if (!Cache.TryGetValue(domainObjectType, out command))
+				{
+					var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);
+					command = Activator.CreateInstance(commandType) as ICountCommand;
+					Cache.TryAdd(domainObjectType, command);
+				}
+				return command;
 			}
 			else
 			{
@@ -117,12 +126,13 @@ Please check your arguments.".With(domainName));
 					?? DomainModel.Find(specificationName);
 				if (specificationType == null)
 					throw new ArgumentException("Couldn't find specification: {0}".With(specificationName));
+				//TODO: cache command
 				var commandType = typeof(SearchDomainObjectWithSpecificationCommand<,>).MakeGenericType(domainObjectType, specificationType);
-				return Activator.CreateInstance(commandType) as IFindDomainObjectCountCommand;
+				return Activator.CreateInstance(commandType) as ICountCommand;
 			}
 		}
 
-		private interface IFindDomainObjectCountCommand
+		private interface ICountCommand
 		{
 			long FindCount<TInput>(ISerialization<TInput> input, IServiceLocator locator, TInput data);
 			long FindCount<TSpecification>(IServiceLocator locator, TSpecification specification);
@@ -141,8 +151,8 @@ Please check your arguments.".With(domainName));
 			}
 		}
 
-		private class SearchDomainObjectCommand<TDomainObject> : IFindDomainObjectCountCommand
-			where TDomainObject : class, IDataSource
+		private class SearchDomainObjectCommand<TDomainObject> : ICountCommand
+			where TDomainObject : IDataSource
 		{
 			public virtual long FindCount<TFormat>(
 				ISerialization<TFormat> serializer,
@@ -194,7 +204,7 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 		}
 
 		private class SearchDomainObjectWithSpecificationCommand<TDomainObject, TSpecification> : SearchDomainObjectCommand<TDomainObject>
-			where TDomainObject : class, IDataSource
+			where TDomainObject : IDataSource
 		{
 			public override long FindCount<TFormat>(
 				ISerialization<TFormat> serializer,

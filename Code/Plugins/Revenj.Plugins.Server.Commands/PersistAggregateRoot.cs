@@ -21,6 +21,8 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(PersistAggregateRoot))]
 	public class PersistAggregateRoot : IServerCommand
 	{
+		private static ConcurrentDictionary<Type, IPersistCommand> Cache = new ConcurrentDictionary<Type, IPersistCommand>(1, 127);
+
 		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -72,8 +74,6 @@ namespace Revenj.Plugins.Server.Commands
 				return CreateExampleArgument(serializer);
 			}
 		}
-
-		private static ConcurrentDictionary<Type, IPersistCommand> Cache = new ConcurrentDictionary<Type, IPersistCommand>();
 
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{

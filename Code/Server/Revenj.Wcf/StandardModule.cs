@@ -59,7 +59,7 @@ namespace Revenj.Wcf
 			builder.RegisterType<NLogLogger>().As<ILogger>();
 
 			builder.RegisterType(typeof(ProcessingEngine)).As(typeof(IProcessingEngine)).SingleInstance();
-			builder.RegisterType(typeof(ProcessingScopePool)).As(typeof(IProcessingScopePool)).SingleInstance();
+			builder.RegisterType(typeof(ScopePool)).As(typeof(IScopePool)).SingleInstance();
 
 			builder.RegisterType<OnContainerBuild>().As<IStartable>();
 

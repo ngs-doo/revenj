@@ -20,6 +20,8 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(SubmitEvent))]
 	public class SubmitEvent : IServerCommand
 	{
+		private static ConcurrentDictionary<Type, ISubmitCommand> Cache = new ConcurrentDictionary<Type, ISubmitCommand>(1, 127);
+
 		private readonly IDomainEventStore EventStore;
 		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
@@ -57,8 +59,6 @@ namespace Revenj.Plugins.Server.Commands
 		{
 			return serializer.Serialize(new Argument<TFormat> { Name = "Module.Event" });
 		}
-
-		private static ConcurrentDictionary<Type, ISubmitCommand> Cache = new ConcurrentDictionary<Type, ISubmitCommand>();
 
 		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
 		{
