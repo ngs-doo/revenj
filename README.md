@@ -130,7 +130,7 @@ DSL model:
       report Aggregation {
         int[] inputs;
 		int? maxActions;
-        CapturedAction[] actionsMatchingInputs 'a => a.points.Overlaps(inputs)' order by pointInTimeSnapshot.modifiedAt limit maxActions;
+        CapturedAction[] actionsMatchingInputs 'a => a.points.Overlaps(inputs)' limit maxActions;
 		List<ComplexObject> last5objects 'co => true' order by modifiedAt desc limit 5;
 		Legacy[] matchingLegacy 'l => inputs.Contains(l.id)';
       }
@@ -161,7 +161,7 @@ URI is a string version of primary key; which mostly differs on composite primar
 LISTEN/NOTIFY from Postgres is utilized to provide on commit information about data change.
 
     IDataContext context = ...
-    context.Track<CapturedActions>().Select(ca => ...);
+    context.Track<CapturedAction>().Select(ca => ...);
 
 ####Populating report object:
 
@@ -184,7 +184,7 @@ This means it's enough to write an implementation class and place DLL alongside 
     class CapturedActionHandler : IDomainEventHandler<CapturedAction[]> {
       private readonly IDataContext context;
       public CapturedActionHandler(IDataContext context) { this.context = context; }
-      public void Handle(CapturedActions[] inputs) {
+      public void Handle(CapturedAction[] inputs) {
         ...
       }
     }
