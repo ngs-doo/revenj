@@ -100,6 +100,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			registry.Register<IServiceLocator, ServiceLocator>(Reuse.InCurrentScope);
 			registry.Register<IServiceProvider, ServiceLocator>(Reuse.InCurrentScope);
 			registry.Register(typeof(IDataCache<>), typeof(WeakCache<>), Reuse.InCurrentScope);
+			registry.Register(typeof(WeakCache<>), typeof(WeakCache<>), Reuse.InCurrentScope);
 			registry.Register<IDomainEventSource, DomainEventSource>(Reuse.InCurrentScope);
 			registry.Register<IDomainEventStore, DomainEventStore>(Reuse.InCurrentScope);
 			registry.Register(typeof(IDomainEventSource<>), typeof(SingleDomainEventSource<>), Reuse.InCurrentScope);

@@ -132,7 +132,7 @@ Near: " + ex.Where, ex);
 			}
 		}
 
-		private static bool ShouldTryRecover(Exception ex)
+		private static bool ShouldTryRecover(NpgsqlException ex)
 		{
 			return ex.InnerException is IOException
 				|| ex.Message.StartsWith("A timeout has occured.");
@@ -173,6 +173,11 @@ Near: " + ex.Where, ex);
 						ResetConnection();
 					throw FormatException(ex);
 				}
+			}
+			catch (PostgresException ex)
+			{
+				LogFactory.Create("Postgres database layer - execute non query").Trace(ex.ToString());
+				throw;
 			}
 			catch (Exception ex)
 			{
@@ -238,6 +243,11 @@ Near: " + ex.Where, ex);
 						ResetConnection();
 					throw FormatException(ex);
 				}
+			}
+			catch (PostgresException ex)
+			{
+				LogFactory.Create("Postgres database layer - execute data reader").Trace(ex.ToString());
+				throw;
 			}
 			catch (Exception ex)
 			{
@@ -325,6 +335,11 @@ Near: " + ex.Where, ex);
 						ResetConnection();
 					throw FormatException(ex);
 				}
+			}
+			catch (PostgresException ex)
+			{
+				LogFactory.Create("Postgres database layer - fill table").Trace(ex.ToString());
+				throw;
 			}
 			catch (Exception ex)
 			{
@@ -443,9 +458,14 @@ Near: " + ex.Where, ex);
 					throw FormatException(ex);
 				}
 			}
+			catch (PostgresException ex)
+			{
+				LogFactory.Create("Postgres database layer - execute scalar").Trace(ex.ToString());
+				throw;
+			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Postgres database layer - execute data reader").Error(ex.ToString());
+				LogFactory.Create("Postgres database layer - execute scalar").Error(ex.ToString());
 				if (tryRecover)
 				{
 					ResetConnection();

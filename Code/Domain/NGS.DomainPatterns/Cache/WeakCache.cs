@@ -9,10 +9,10 @@ namespace NGS.DomainPatterns
 	public class WeakCache<TValue> : IDataCache<TValue>
 		where TValue : class, IAggregateRoot
 	{
-		private readonly IRepository<TValue> Repository;
+		private readonly Lazy<IRepository<TValue>> Repository;
 		private readonly WeakReference Cache = new WeakReference(null);
 
-		public WeakCache(IRepository<TValue> repository)
+		public WeakCache(Lazy<IRepository<TValue>> repository)
 		{
 			Contract.Requires(repository != null);
 
@@ -54,7 +54,7 @@ namespace NGS.DomainPatterns
 			}
 			if (list.Count != result.Count)
 			{
-				var values = Repository.Find(list.Except(result.Select(it => it.URI)));
+				var values = Repository.Value.Find(list.Except(result.Select(it => it.URI)));
 				foreach (var item in values)
 				{
 					dict.TryAdd(item.URI, item);
@@ -79,7 +79,7 @@ namespace NGS.DomainPatterns
 				if (dict.TryGetValue(uri[0], out item))
 					return new[] { item };
 			}
-			var found = Repository.Find(uri);
+			var found = Repository.Value.Find(uri);
 			if (found.Length == 1)
 				dict.TryAdd(uri[0], found[0]);
 			return found;

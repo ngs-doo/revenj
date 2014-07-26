@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -131,6 +132,21 @@ namespace Revenj.Processing
 					: ProcessingResult<TOutput>.Create(
 						ex.Message,
 						HttpStatusCode.ServiceUnavailable,
+						executedCommands,
+						start);
+			}
+			catch (DbException ex)
+			{
+				LogFactory.Create("Processing context").Trace("DbException: : " + ex.GetDetailedExplanation());
+				return Exceptions.DebugMode
+					? ProcessingResult<TOutput>.Create(
+						ex.GetDetailedExplanation(),
+						HttpStatusCode.Conflict,
+						executedCommands,
+						start)
+					: ProcessingResult<TOutput>.Create(
+						ex.Message,
+						HttpStatusCode.Conflict,
 						executedCommands,
 						start);
 			}

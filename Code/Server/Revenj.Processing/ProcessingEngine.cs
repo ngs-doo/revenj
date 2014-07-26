@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -102,8 +103,9 @@ namespace Revenj.Processing
 		{
 			var start = Stopwatch.GetTimestamp();
 
-			foreach (var c in commandDescriptions)
+			for (int i = 0; i < commandDescriptions.Length; i++)
 			{
+				var c = commandDescriptions[i];
 				if (!Permissions.CanAccess(c.CommandType))
 				{
 					Logger.Trace(
@@ -240,6 +242,22 @@ namespace Revenj.Processing
 					: ProcessingResult<TOutput>.Create(
 						ex.Message,
 						HttpStatusCode.ServiceUnavailable,
+						executedCommands,
+						start);
+			}
+			catch (DbException ex)
+			{
+				Logger.Trace("DbException: : " + ex.GetDetailedExplanation());
+				ScopePool.Release(scope, false);
+				return Exceptions.DebugMode
+					? ProcessingResult<TOutput>.Create(
+						ex.GetDetailedExplanation(),
+						HttpStatusCode.Conflict,
+						executedCommands,
+						start)
+					: ProcessingResult<TOutput>.Create(
+						ex.Message,
+						HttpStatusCode.Conflict,
 						executedCommands,
 						start);
 			}

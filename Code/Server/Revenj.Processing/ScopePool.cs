@@ -13,7 +13,7 @@ namespace Revenj.Processing
 		void Release(Scope factory, bool valid);
 	}
 
-	public class Scope
+	public sealed class Scope
 	{
 		public readonly IObjectFactory Factory;
 		public readonly IDatabaseQuery Query;

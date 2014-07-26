@@ -98,6 +98,7 @@
     <Compile Include="Attributes\RepositoryAttribute.cs" />
     <Compile Include="PostgresConnectionPool.cs" />
     <Compile Include="PostgresDatabaseNotification.cs" />
+    <Compile Include="PostgresException.cs" />
     <Compile Include="PostgresSequence.cs" />
     <Compile Include="PostgresDatabaseQuery.cs" />
     <Compile Include="PostgresTypedArray.cs" />
