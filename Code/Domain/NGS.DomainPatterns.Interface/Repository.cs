@@ -31,7 +31,7 @@ namespace NGS.DomainPatterns
 	{
 		/// <summary>
 		/// Query data using provided expression (optional).
-		/// If specification is provided it must be compatibile with data type.
+		/// If specification is provided it must be compatible with data type.
 		/// This is only a projection, actual query will be done after materialization from IQueryable&lt;TValue&gt;
 		/// </summary>
 		/// <typeparam name="TCondition">specification type</typeparam>
@@ -40,7 +40,7 @@ namespace NGS.DomainPatterns
 		IQueryable<TValue> Query<TCondition>(ISpecification<TCondition> specification);
 		/// <summary>
 		/// Search data using provided specification.
-		/// If specification is provided it must be compatibile with data type.
+		/// If specification is provided it must be compatible with data type.
 		/// </summary>
 		/// <typeparam name="TCondition">specification type</typeparam>
 		/// <param name="specification">filter predicate</param>
@@ -51,14 +51,14 @@ namespace NGS.DomainPatterns
 	}
 	/// <summary>
 	/// Aggregate root persistable repository.
-	/// Besides querying capabilities, repository has set based API for persistance.
+	/// Besides querying capabilities, repository has set based API for persistence.
 	/// </summary>
 	/// <typeparam name="TRoot">aggregate root type</typeparam>
 	public interface IPersistableRepository<TRoot> : IQueryableRepository<TRoot>, IRepository<TRoot>
 		where TRoot : IAggregateRoot
 	{
 		/// <summary>
-		/// Persist aggregate roots. Bulk persistance.
+		/// Persist aggregate roots. Bulk persistence.
 		/// Inserted aggregates will return new identifiers.
 		/// Aggregate roots will be modified in place.
 		/// For update aggregates, if old aggregate is not provided, it will be looked up using aggregate identifier.
@@ -75,7 +75,7 @@ namespace NGS.DomainPatterns
 	public static class RepositoryHelper
 	{
 		/// <summary>
-		/// Persist aggregate roots. Bulk persistance.
+		/// Persist aggregate roots. Bulk persistence.
 		/// Inserted aggregates will return new identifiers.
 		/// Aggregate roots will be modified in place.
 		/// For update aggregates, old aggregates will be loaded from change tracking or looked up using aggregate identifier.
@@ -162,7 +162,7 @@ namespace NGS.DomainPatterns
 		/// <typeparam name="TRoot">aggregate type</typeparam>
 		/// <param name="repository">persistable repository</param>
 		/// <param name="data">new aggregates</param>
-		/// <returns>created indentifiers</returns>
+		/// <returns>created identifiers</returns>
 		public static string[] Insert<TRoot>(this IPersistableRepository<TRoot> repository, IEnumerable<TRoot> data)
 			where TRoot : IAggregateRoot
 		{
@@ -193,7 +193,7 @@ namespace NGS.DomainPatterns
 		/// </summary>
 		/// <typeparam name="TRoot">aggregate type</typeparam>
 		/// <param name="repository">persistable repository</param>
-		/// <param name="data">collection of old and chaned aggregates</param>
+		/// <param name="data">collection of old and changed aggregates</param>
 		public static void Update<TRoot>(this IPersistableRepository<TRoot> repository, IEnumerable<KeyValuePair<TRoot, TRoot>> data)
 			where TRoot : IAggregateRoot
 		{

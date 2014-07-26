@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -11,7 +10,6 @@ namespace NGS.DomainPatterns
 	/// It can be used to filter data which satisfy defined condition.
 	/// </summary>
 	/// <typeparam name="TValue">specification type</typeparam>
-	[ContractClass(typeof(SpecificationContract<>))]
 	public interface ISpecification<TValue>
 	{
 		/// <summary>
@@ -19,28 +17,14 @@ namespace NGS.DomainPatterns
 		/// </summary>
 		Expression<Func<TValue, bool>> IsSatisfied { get; }
 	}
-
-	[ContractClassFor(typeof(ISpecification<>))]
-	internal sealed class SpecificationContract<TEntity> : ISpecification<TEntity>
-	{
-		public Expression<Func<TEntity, bool>> IsSatisfied
-		{
-			get
-			{
-				Contract.Ensures(Contract.Result<Expression<Func<TEntity, bool>>>() != null);
-
-				return null;
-			}
-		}
-	}
 	/// <summary>
-	/// Utility for aplying specification on data.
+	/// Utility for applying specification on data.
 	/// </summary>
 	public static class SpecificationHelper
 	{
 		/// <summary>
 		/// Apply specification on data projection.
-		/// Specification must be compatibile with data.
+		/// Specification must be compatible with data.
 		/// </summary>
 		/// <typeparam name="TSource">data type</typeparam>
 		/// <typeparam name="TFilter">specification type</typeparam>

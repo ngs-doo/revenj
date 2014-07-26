@@ -86,13 +86,6 @@ namespace NGS.DomainPatterns
 		/// <returns>unprocessed events</returns>
 		IEnumerable<TEvent> GetQueue();
 	}
-
-	//TODO: not implemented yet
-	public interface IDomainEventQueue<TAggregate>
-		where TAggregate : class, IAggregateRoot
-	{
-		Dictionary<string, IEnumerable<IDomainEvent<TAggregate>>> GetQueues(IEnumerable<string> uris);
-	}
 	/// <summary>
 	/// Domain event store.
 	/// Events can only be submitted. Submitted events can't be changed.
@@ -126,13 +119,6 @@ namespace NGS.DomainPatterns
 		void Handle(THandle input);
 	}
 
-	//TODO remove!?
-	[Obsolete("will be removed")]
-	public interface IDomainEventRepository<out TEvent> : IQueryableRepository<TEvent>, IRepository<TEvent>
-		where TEvent : IDomainEvent
-	{
-		TEvent Submit(Action<TEvent> initialize);
-	}
 	/// <summary>
 	/// Utility for domain events
 	/// </summary>

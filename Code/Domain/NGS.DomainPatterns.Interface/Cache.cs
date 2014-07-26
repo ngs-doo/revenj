@@ -71,7 +71,7 @@ namespace NGS.DomainPatterns
 		/// </summary>
 		/// <typeparam name="TValue">domain object type</typeparam>
 		/// <param name="values">domain objects</param>
-		/// <returns>dependecy collection information</returns>
+		/// <returns>dependency collection information</returns>
 		public static Dictionary<Type, HashSet<string>> GetInvalidValues<TValue>(this IEnumerable<TValue> values)
 			where TValue : ICacheable
 		{

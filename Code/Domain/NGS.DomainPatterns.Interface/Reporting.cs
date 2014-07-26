@@ -35,7 +35,7 @@ namespace NGS.DomainPatterns
 	}
 
 	/// <summary>
-	/// Service for running queries against Olap cube.
+	/// Service for running queries against OLAP cube.
 	/// Pick and choose interesting dimension and fact and run aggregation on them.
 	/// </summary>
 	public interface IOlapCubeQuery
@@ -70,7 +70,7 @@ namespace NGS.DomainPatterns
 			int? offset);
 	}
 	/// <summary>
-	/// Utility for easier use of olap cube
+	/// Utility for easier use of OLAP cube
 	/// </summary>
 	public static class OlapCubeQueryHelper
 	{
@@ -95,9 +95,9 @@ namespace NGS.DomainPatterns
 			return query.Analyze<object>(dimensions, facts, order, null, limit, offset);
 		}
 		/// <summary>
-		/// Create olap cube builder with fluent API.
+		/// Create OLAP cube builder with fluent API.
 		/// </summary>
-		/// <param name="query">olap cube</param>
+		/// <param name="query">OLAP cube</param>
 		/// <returns>builder</returns>
 		public static OlapCubeQueryBuilder Builder(this IOlapCubeQuery query)
 		{
@@ -105,7 +105,7 @@ namespace NGS.DomainPatterns
 		}
 	}
 	/// <summary>
-	/// Fluent interface for building olap query.
+	/// Fluent interface for building OLAP query.
 	/// </summary>
 	public class OlapCubeQueryBuilder
 	{
@@ -117,9 +117,9 @@ namespace NGS.DomainPatterns
 		private readonly Dictionary<string, bool> Order = new Dictionary<string, bool>();
 
 		/// <summary>
-		/// Original olap cube query.
+		/// Original OLAP cube query.
 		/// </summary>
-		/// <param name="query">olap cube query</param>
+		/// <param name="query">OLAP cube query</param>
 		public OlapCubeQueryBuilder(IOlapCubeQuery query)
 		{
 			this.Query = query;
