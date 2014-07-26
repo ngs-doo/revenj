@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Selectors;
 using System.ServiceModel;
-using NGS;
-using NGS.Security;
+using Revenj.Security;
 
 namespace Revenj.Wcf
 {

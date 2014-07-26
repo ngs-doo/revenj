@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ServiceModel;
 using System.ServiceModel.Web;
-using NGS;
 using Revenj.Api;
 
 namespace Revenj.Wcf

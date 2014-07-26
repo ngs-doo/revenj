@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Configuration;
 using System.Runtime.Serialization;
-using NGS;
-using NGS.Extensibility;
-using NGS.Logging;
+using Revenj.Extensibility;
+using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.PerformanceTrace
 {

@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Configuration;
-using NGS;
-using NGS.Extensibility;
+using Revenj.Extensibility;
 
 namespace Revenj.Plugins.Aspects.MethodCalls
 {

@@ -6,10 +6,10 @@ using System.Security;
 using System.ServiceModel;
 using System.Text;
 using System.Threading;
-using NGS.DomainPatterns;
-using NGS.Logging;
-using NGS.Utility;
 using Revenj.Api;
+using Revenj.DomainPatterns;
+using Revenj.Logging;
+using Revenj.Utility;
 
 namespace Revenj.Http
 {

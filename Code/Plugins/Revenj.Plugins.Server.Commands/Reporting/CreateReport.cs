@@ -5,13 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
-using NGS;
-using NGS.DomainPatterns;
-using NGS.Extensibility;
-using NGS.Security;
-using NGS.Serialization;
-using NGS.Utility;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
 using Revenj.Processing;
+using Revenj.Security;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -84,7 +83,7 @@ Please check your arguments.".With(argument.ReportName), null);
 			if (documentType == null)
 				return
 					CommandResult<TOutput>.Fail(
-						"Couldn't find templater type {0} for {1}.".With(argument.TemplaterName, argument.ReportName),
+						"Couldn't find Templater type {0} for {1}.".With(argument.TemplaterName, argument.ReportName),
 						@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 

@@ -10,13 +10,12 @@ using System.Linq;
 using System.Net;
 using System.Security;
 using System.Threading;
-using NGS;
-using NGS.Common;
-using NGS.Extensibility;
-using NGS.Logging;
-using NGS.Security;
-using NGS.Serialization;
-using NGS.Utility;
+using Revenj.Common;
+using Revenj.Extensibility;
+using Revenj.Logging;
+using Revenj.Security;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Processing
 {

@@ -6,12 +6,11 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
-using NGS;
-using NGS.DomainPatterns;
-using NGS.Serialization;
-using NGS.Utility;
 using Revenj.Api;
+using Revenj.DomainPatterns;
 using Revenj.Plugins.Server.Commands;
+using Revenj.Serialization;
+using Revenj.Utility;
 using Serialize.Linq.Nodes;
 
 namespace Revenj.Plugins.Rest.Commands
@@ -95,7 +94,7 @@ Error: {0}".With(ex.Message);
 
 		private static string EmptyInstanceString(this IWireSerialization serializer, Type target)
 		{
-			return SerializeToString(serializer, NGS.Utility.TemporaryResources.CreateRandomObject(target));
+			return SerializeToString(serializer, Revenj.Utility.TemporaryResources.CreateRandomObject(target));
 		}
 
 		private static string SerializeToString(this IWireSerialization serializer, object instance)

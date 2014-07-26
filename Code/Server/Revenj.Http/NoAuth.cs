@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Principal;
-using NGS.Security;
+using Revenj.Security;
 
 namespace Revenj.Http
 {

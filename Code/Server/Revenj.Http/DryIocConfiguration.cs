@@ -6,16 +6,16 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using DryIoc;
-using NGS.DatabasePersistence;
-using NGS.DatabasePersistence.Postgres;
-using NGS.DomainPatterns;
-using NGS.Extensibility;
-using NGS.Logging;
-using NGS.Logging.NLog;
-using NGS.Security;
-using NGS.Serialization;
 using Revenj.Api;
+using Revenj.DatabasePersistence;
+using Revenj.DatabasePersistence.Postgres;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
+using Revenj.Logging;
+using Revenj.Logging.NLog;
 using Revenj.Processing;
+using Revenj.Security;
+using Revenj.Serialization;
 using Revenj.Wcf;
 
 namespace Revenj.Http
@@ -84,7 +84,7 @@ namespace Revenj.Http
 			if (serverModels.Count == 0)
 			{
 				serverModels =
-					(from asm in NGS.Utility.AssemblyScanner.GetAssemblies()
+					(from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
 					 let type = asm.GetType("SystemBoot.Configuration")
 					 where type != null && type.GetMethod("Initialize") != null
 					 select asm)
@@ -95,7 +95,7 @@ Alternatively, explicitly specify sever assembly in the config file.
 Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			}
 
-			registry.RegisterDelegate<IDomainModel>(c => new NGS.DomainPatterns.DomainModel(serverModels, c.Resolve<IObjectFactory>()), Reuse.Singleton);
+			registry.RegisterDelegate<IDomainModel>(c => new Revenj.DomainPatterns.DomainModel(serverModels, c.Resolve<IObjectFactory>()), Reuse.Singleton);
 			registry.Register<ITypeResolver, DomainTypeResolver>(Reuse.Singleton);
 			registry.Register<IServiceLocator, ServiceLocator>(Reuse.InCurrentScope);
 			registry.Register<IServiceProvider, ServiceLocator>(Reuse.InCurrentScope);
@@ -125,7 +125,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 				throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
 Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
 
-			registry.RegisterInstance(new NGS.DatabasePersistence.Postgres.ConnectionInfo(cs));
+			registry.RegisterInstance(new Revenj.DatabasePersistence.Postgres.ConnectionInfo(cs));
 			registry.Register<IConnectionPool, PostgresConnectionPool>(Reuse.Singleton);
 			registry.Register<IDatabaseQueryManager, PostgresQueryManager>(Reuse.InCurrentScope);
 			registry.Register<IPostgresDatabaseQuery, PostgresDatabaseQuery>();
@@ -136,7 +136,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 			registry.Register<IPostgresConverterRepository, PostgresObjectFactory>(Reuse.Singleton);
 			registry.Register<IPostgresConverterFactory, PostgresObjectFactory>(Reuse.Singleton);
 
-			registry.Register<NGS.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
+			registry.Register<Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
 		}
 
 		private static void SetupSerialization(IRegistry registry)

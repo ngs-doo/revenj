@@ -7,9 +7,8 @@ using System.Security;
 using System.Security.Principal;
 using System.ServiceModel;
 using System.Text;
-using NGS;
-using NGS.Security;
 using Revenj.Api;
+using Revenj.Security;
 
 namespace Revenj.Wcf
 {

@@ -1,5 +1,5 @@
 ﻿using System;
-using NGS.Extensibility;
+using Revenj.Extensibility;
 
 namespace Revenj.Core
 {

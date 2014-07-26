@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Configuration;
-using NGS.DatabasePersistence;
-using NGS.Extensibility;
-using NGS.Logging;
+using Revenj.DatabasePersistence;
+using Revenj.Extensibility;
+using Revenj.Logging;
 
 namespace Revenj.Processing
 {

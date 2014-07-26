@@ -1,4 +1,4 @@
-﻿using NGS.Serialization;
+﻿using Revenj.Serialization;
 
 namespace Revenj.Processing
 {

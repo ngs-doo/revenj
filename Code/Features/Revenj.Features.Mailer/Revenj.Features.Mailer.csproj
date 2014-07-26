@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1F7D1B31-5726-4D1B-B03D-449C2026D879}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Revenj.Features.Mailer</RootNamespace>
+    <AssemblyName>Revenj.Features.Mailer</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Reactive.Core">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="IMailMessage.cs" />
+    <Compile Include="IMailService.cs" />
+    <Compile Include="NotSentSpecification.cs" />
+    <Compile Include="QueueProcessor.cs" />
+    <Compile Include="QueueService.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="QueueService.Designer.cs">
+      <DependentUpon>QueueService.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MailService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\SerializableAlternateView.cs" />
+    <Compile Include="Serialization\SerializableAttachment.cs" />
+    <Compile Include="Serialization\SerializableCollection.cs" />
+    <Compile Include="Serialization\SerializableContentDisposition.cs" />
+    <Compile Include="Serialization\SerializableContentType.cs" />
+    <Compile Include="Serialization\SerializableLinkedResource.cs" />
+    <Compile Include="Serialization\SerializableMailAddress.cs" />
+    <Compile Include="Serialization\SerializableMailMessage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Revenj.Common\Revenj.Common.csproj">
+      <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
+      <Name>Revenj.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\Revenj.Extensibility.Interface\Revenj.Extensibility.Interface.csproj">
+      <Project>{E7DE330D-1E7C-486E-BAE6-222B87256408}</Project>
+      <Name>Revenj.Extensibility.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\Revenj.Logging.Interface\Revenj.Logging.Interface.csproj">
+      <Project>{E4040A4F-0730-4784-AA6C-E3A950AA9A4B}</Project>
+      <Name>Revenj.Logging.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\Revenj.Serialization.Interface\Revenj.Serialization.Interface.csproj">
+      <Project>{9C4534E8-B8EB-44F6-A759-C752F0DEA675}</Project>
+      <Name>Revenj.Serialization.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Domain\Revenj.DomainPatterns.Interface\Revenj.DomainPatterns.Interface.csproj">
+      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
+      <Name>Revenj.DomainPatterns.Interface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
+    </None>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="DSL\Mailer.dsl" />
+    <None Include="DSL\Mailer.Mono.dsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="QueueService.resx">
+      <DependentUpon>QueueService.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

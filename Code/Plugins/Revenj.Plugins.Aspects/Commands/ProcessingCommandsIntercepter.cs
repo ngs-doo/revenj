@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
 using System.Linq;
-using NGS.Logging;
+using Revenj.Logging;
 using Revenj.Processing;
 
 namespace Revenj.Plugins.Aspects.Commands

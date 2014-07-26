@@ -2,7 +2,7 @@
 using System.Linq;
 using System.ServiceProcess;
 using DSL;
-using NGS.Extensibility;
+using Revenj.Extensibility;
 
 namespace Revenj.WindowsService
 {

@@ -6,8 +6,8 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
-using NGS.Logging;
-using NGS.Utility;
+using Revenj.Logging;
+using Revenj.Utility;
 
 namespace Revenj.Wcf
 {

@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
-using NGS.Logging;
 using Revenj.Api;
+using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.Commands
 {

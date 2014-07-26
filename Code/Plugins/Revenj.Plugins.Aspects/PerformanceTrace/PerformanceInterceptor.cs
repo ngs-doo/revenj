@@ -3,8 +3,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using Castle.DynamicProxy;
-using NGS;
-using NGS.Logging;
+using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.PerformanceTrace
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using Autofac;
 using Autofac.Configuration;
-using NGS.DomainPatterns;
-using NGS.Extensibility;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
 using Revenj.Wcf;
 
 namespace DSL

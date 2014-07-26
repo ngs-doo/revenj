@@ -1,6 +1,6 @@
 ﻿using System;
-using NGS.DomainPatterns;
 using Revenj.Core;
+using Revenj.DomainPatterns;
 
 namespace DSL
 {

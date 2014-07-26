@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.ServiceModel;
-using NGS.DomainPatterns;
-using NGS.Serialization;
 using Revenj.Api;
+using Revenj.DomainPatterns;
 using Revenj.Plugins.Server.Commands;
+using Revenj.Serialization;
 
 namespace Revenj.Plugins.Rest.Commands
 {

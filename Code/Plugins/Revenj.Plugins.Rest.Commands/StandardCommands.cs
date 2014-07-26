@@ -5,10 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
 using System.Text;
-using NGS.DomainPatterns;
-using NGS.Serialization;
 using Revenj.Api;
+using Revenj.DomainPatterns;
 using Revenj.Plugins.Server.Commands;
+using Revenj.Serialization;
 
 namespace Revenj.Plugins.Rest.Commands
 {

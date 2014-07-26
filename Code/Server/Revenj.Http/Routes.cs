@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.ServiceModel.Web;
 using System.Xml.Linq;
-using NGS.DomainPatterns;
+using Revenj.DomainPatterns;
 
 namespace Revenj.Http
 {

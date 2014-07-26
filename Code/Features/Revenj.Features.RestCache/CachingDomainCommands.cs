@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using System.ServiceModel;
-using NGS.DomainPatterns;
-using NGS.Serialization;
 using Revenj.Api;
+using Revenj.DomainPatterns;
 using Revenj.Plugins.Rest.Commands;
+using Revenj.Serialization;
 
 namespace Revenj.Features.RestCache
 {

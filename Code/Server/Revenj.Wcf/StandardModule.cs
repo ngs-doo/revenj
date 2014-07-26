@@ -10,16 +10,16 @@ using System.Xml.Linq;
 using Autofac;
 using Autofac.Builder;
 using Autofac.Core;
-using NGS.DatabasePersistence;
-using NGS.DatabasePersistence.Postgres;
-using NGS.DomainPatterns;
-using NGS.Extensibility;
-using NGS.Logging;
-using NGS.Logging.NLog;
-using NGS.Security;
-using NGS.Serialization;
 using Revenj.Api;
+using Revenj.DatabasePersistence;
+using Revenj.DatabasePersistence.Postgres;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
+using Revenj.Logging;
+using Revenj.Logging.NLog;
 using Revenj.Processing;
+using Revenj.Security;
+using Revenj.Serialization;
 
 namespace Revenj.Wcf
 {
@@ -126,7 +126,7 @@ namespace Revenj.Wcf
 			if (serverModels.Count == 0)
 			{
 				serverModels =
-					(from asm in NGS.Utility.AssemblyScanner.GetAssemblies()
+					(from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
 					 let type = asm.GetType("SystemBoot.Configuration")
 					 where type != null && type.GetMethod("Initialize") != null
 					 select asm)
@@ -137,9 +137,9 @@ Alternatively, explicitly specify sever assembly in the config file.
 Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			}
 
-			builder.RegisterGeneratedFactory<NGS.DomainPatterns.DomainModel.Factory>();
-			builder.RegisterType<NGS.DomainPatterns.DomainModel>();
-			builder.Register(c => c.Resolve<NGS.DomainPatterns.DomainModel.Factory>()(serverModels)).As<IDomainModel>().SingleInstance();
+			builder.RegisterGeneratedFactory<Revenj.DomainPatterns.DomainModel.Factory>();
+			builder.RegisterType<Revenj.DomainPatterns.DomainModel>();
+			builder.Register(c => c.Resolve<Revenj.DomainPatterns.DomainModel.Factory>()(serverModels)).As<IDomainModel>().SingleInstance();
 			builder.RegisterType<DomainTypeResolver>().As<ITypeResolver>().SingleInstance();
 			builder.RegisterType<ServiceLocator>().As<IServiceLocator, IServiceProvider>().InstancePerLifetimeScope();
 			builder.RegisterGeneric(typeof(WeakCache<>)).As(typeof(WeakCache<>), typeof(IDataCache<>)).InstancePerLifetimeScope();
@@ -167,7 +167,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 				throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
 Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
 
-			builder.RegisterInstance(new NGS.DatabasePersistence.Postgres.ConnectionInfo(cs));
+			builder.RegisterInstance(new Revenj.DatabasePersistence.Postgres.ConnectionInfo(cs));
 			builder.RegisterType<PostgresConnectionPool>().As<IConnectionPool>().SingleInstance();
 			builder.RegisterType<PostgresQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<PostgresDatabaseQuery>().As<IPostgresDatabaseQuery>();
@@ -176,7 +176,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 
 			builder.RegisterType<PostgresObjectFactory>().As<IPostgresConverterRepository, IPostgresConverterFactory>().SingleInstance();
 
-			builder.RegisterType<NGS.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
+			builder.RegisterType<Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
 		}
 
 		/*
@@ -188,7 +188,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 				throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
 Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
 
-			builder.RegisterInstance(new NGS.DatabasePersistence.Oracle.ConnectionInfo(cs));
+			builder.RegisterInstance(new Revenj.DatabasePersistence.Oracle.ConnectionInfo(cs));
 			builder.RegisterType<OracleQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<OracleDatabaseQuery>().As<IOracleDatabaseQuery>();
 			builder.Register(c => c.Resolve<IDatabaseQueryManager>().CreateQuery()).As<IDatabaseQuery>().InstancePerLifetimeScope();
@@ -196,7 +196,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 
 			builder.RegisterType<OracleObjectFactory>().As<IOracleConverterRepository, IOracleConverterFactory>().SingleInstance();
 
-			builder.RegisterType<NGS.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
+			builder.RegisterType<Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
 		}*/
 
 		private static void SetupSerialization(Autofac.ContainerBuilder builder)

@@ -4,8 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Text;
-using NGS;
-using NGS.Logging;
+using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.DatabaseTrace
 {

@@ -5,12 +5,11 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using NGS;
-using NGS.Extensibility;
-using NGS.Serialization;
 using NGS.Templater;
-using NGS.Utility;
+using Revenj.Extensibility;
 using Revenj.Processing;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Plugins.Server.Commands
 {

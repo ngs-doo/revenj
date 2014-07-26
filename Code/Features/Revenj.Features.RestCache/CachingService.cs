@@ -3,11 +3,11 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Text;
-using NGS.DomainPatterns;
-using NGS.Security;
-using NGS.Serialization;
-using NGS.Utility;
 using Revenj.Api;
+using Revenj.DomainPatterns;
+using Revenj.Security;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Features.RestCache
 {

@@ -50,7 +50,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -70,8 +70,8 @@
     <Compile Include="Soap\SoapResultDescription.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\NGS.snk">
-      <Link>NGS.snk</Link>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
     </None>
   </ItemGroup>
   <ItemGroup>

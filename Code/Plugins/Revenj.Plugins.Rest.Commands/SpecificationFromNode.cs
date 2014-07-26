@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
-using NGS.DomainPatterns;
+using Revenj.DomainPatterns;
 using Serialize.Linq.Nodes;
 
 namespace Revenj.Plugins.Rest.Commands

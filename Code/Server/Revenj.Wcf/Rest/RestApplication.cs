@@ -11,11 +11,11 @@ using System.ServiceModel;
 using System.Text;
 using System.Web;
 using System.Xml.Linq;
-using NGS.Extensibility;
-using NGS.Serialization;
-using NGS.Utility;
 using Revenj.Api;
+using Revenj.Extensibility;
 using Revenj.Processing;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Wcf
 {
@@ -96,7 +96,7 @@ namespace Revenj.Wcf
 			var accept = (request.Accept ?? "application/xml").ToLowerInvariant();
 
 			var engine = ProcessingEngine;
-			var sessionID = request.GetHeader("X-NGS-Session-ID");
+			var sessionID = request.GetHeader("X-Revenj-Session-ID");
 			if (sessionID != null)
 			{
 				var scope = ObjectFactory.FindScope(sessionID);

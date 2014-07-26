@@ -2,8 +2,7 @@
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Castle.DynamicProxy;
-using NGS;
-using NGS.Logging;
+using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.MethodCalls
 {

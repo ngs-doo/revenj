@@ -6,14 +6,15 @@ using System.Xml.Linq;
 using Autofac;
 using Autofac.Builder;
 using Autofac.Core;
-using NGS.DatabasePersistence;
-using NGS.DatabasePersistence.Postgres;
-using NGS.DomainPatterns;
-using NGS.Extensibility;
-using NGS.Logging;
-using NGS.Logging.NLog;
-using NGS.Security;
-using NGS.Serialization;
+using Revenj.DatabasePersistence;
+using Revenj.DatabasePersistence.Postgres;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
+using Revenj.Logging;
+using Revenj.Logging.NLog;
+using Revenj.Security;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Core
 {
@@ -22,7 +23,7 @@ namespace Revenj.Core
 		static AutofacConfiguration()
 		{
 			//TODO force plugin initialization
-			new NGS.Plugins.DatabasePersistence.Postgres.ExpressionSupport.CommonMembers();
+			new Revenj.Plugins.DatabasePersistence.Postgres.ExpressionSupport.CommonMembers();
 		}
 
 		public static IServiceLocator Configure(Database database, string connectionString, bool withAspects)
@@ -80,7 +81,7 @@ namespace Revenj.Core
 			var dynamicProxy = new CastleDynamicProxyProvider();
 			var aopRepository = new AspectRepository(dynamicProxy);
 
-			var assemblies = NGS.Utility.AssemblyScanner.GetAssemblies().Where(it => it.FullName.StartsWith("NGS."));
+			var assemblies = Revenj.Utility.AssemblyScanner.GetAssemblies().Where(it => it.FullName.StartsWith("Revenj."));
 			builder.RegisterInstance(new PluginsConfiguration { Assemblies = assemblies });
 
 			builder.RegisterType<SystemInitialization>();
@@ -93,12 +94,11 @@ namespace Revenj.Core
 
 			if (withAspects)
 			{
-				var autofacModules =
-					from type in NGS.Utility.AssemblyScanner.GetAllTypes()
-					where type.IsPublic && typeof(Autofac.Module).IsAssignableFrom(type) && type.GetConstructor(new Type[0]) != null
-					select type;
-				foreach (var m in autofacModules)
-					builder.RegisterModule((Autofac.Module)Activator.CreateInstance(m));
+				foreach (var m in AssemblyScanner.GetAllTypes())
+				{
+					if (m.IsPublic && typeof(Autofac.Module).IsAssignableFrom(m) && m.GetConstructor(new Type[0]) != null)
+						builder.RegisterModule((Autofac.Module)Activator.CreateInstance(m));
+				}
 				builder.RegisterModule(new AspectsModule(aopRepository));
 			}
 		}
@@ -106,15 +106,15 @@ namespace Revenj.Core
 		private static void SetupPatterns(Autofac.ContainerBuilder builder)
 		{
 			var serverModels =
-				(from asm in NGS.Utility.AssemblyScanner.GetAssemblies()
+				(from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
 				 let type = asm.GetType("SystemBoot.Configuration")
 				 where type != null && type.GetMethod("Initialize") != null
 				 select asm)
 				.ToList();
 
-			builder.RegisterGeneratedFactory<NGS.DomainPatterns.DomainModel.Factory>();
-			builder.RegisterType<NGS.DomainPatterns.DomainModel>();
-			builder.Register(c => c.Resolve<NGS.DomainPatterns.DomainModel.Factory>()(serverModels)).As<IDomainModel>().SingleInstance();
+			builder.RegisterGeneratedFactory<Revenj.DomainPatterns.DomainModel.Factory>();
+			builder.RegisterType<Revenj.DomainPatterns.DomainModel>();
+			builder.Register(c => c.Resolve<Revenj.DomainPatterns.DomainModel.Factory>()(serverModels)).As<IDomainModel>().SingleInstance();
 			builder.RegisterType<DomainTypeResolver>().As<ITypeResolver>().SingleInstance();
 			builder.RegisterType<ServiceLocator>().As<IServiceLocator, IServiceProvider>().InstancePerLifetimeScope();
 			builder.RegisterGeneric(typeof(WeakCache<>)).As(typeof(WeakCache<>), typeof(IDataCache<>)).InstancePerLifetimeScope();
@@ -127,7 +127,7 @@ namespace Revenj.Core
 
 		private static void SetupPostgres(Autofac.ContainerBuilder builder, string cs)
 		{
-			builder.RegisterInstance(new NGS.DatabasePersistence.Postgres.ConnectionInfo(cs));
+			builder.RegisterInstance(new Revenj.DatabasePersistence.Postgres.ConnectionInfo(cs));
 			builder.RegisterType<PostgresConnectionPool>().As<IConnectionPool>().SingleInstance();
 			builder.RegisterType<PostgresQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<PostgresDatabaseQuery>().As<IPostgresDatabaseQuery>();
@@ -136,12 +136,12 @@ namespace Revenj.Core
 
 			builder.RegisterType<PostgresObjectFactory>().As<IPostgresConverterRepository, IPostgresConverterFactory>().SingleInstance();
 
-			builder.RegisterType<NGS.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
+			builder.RegisterType<Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
 		}
 		/*
 		private static void SetupOracle(Autofac.ContainerBuilder builder, string cs)
 		{
-			builder.RegisterInstance(new NGS.DatabasePersistence.Oracle.ConnectionInfo(cs));
+			builder.RegisterInstance(new Revenj.DatabasePersistence.Oracle.ConnectionInfo(cs));
 			builder.RegisterType<OracleQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<OracleDatabaseQuery>().As<IOracleDatabaseQuery>();
 			builder.Register(c => c.Resolve<IDatabaseQueryManager>().CreateQuery()).As<IDatabaseQuery>().InstancePerLifetimeScope();
@@ -149,7 +149,7 @@ namespace Revenj.Core
 
 			builder.RegisterType<OracleObjectFactory>().As<IOracleConverterRepository, IOracleConverterFactory>().SingleInstance();
 
-			builder.RegisterType<NGS.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
+			builder.RegisterType<Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
 		}
 		*/
 		private static void SetupSerialization(Autofac.ContainerBuilder builder)

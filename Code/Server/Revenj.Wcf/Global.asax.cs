@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web;
 using DSL;
-using NGS.Logging;
+using Revenj.Logging;
 
 namespace Revenj.Wcf
 {

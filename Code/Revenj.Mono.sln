@@ -3,22 +3,22 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CFF9545-4CA9-462A-AB53-42C85A3A808F}"
 	ProjectSection(SolutionItems) = preProject
-		NGS.snk = NGS.snk
+		Revenj.snk = Revenj.snk
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{307D5263-7AFA-4823-83DA-BA5D37719981}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{C43A819E-AF1A-4040-9231-4F297DD6416F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Plugins.DatabasePersistence.Postgres", "Plugins\NGS.Plugins.DatabasePersistence.Postgres\NGS.Plugins.DatabasePersistence.Postgres.csproj", "{8E943C88-AF40-4836-A8F6-681668514C83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Plugins.DatabasePersistence.Postgres", "Plugins\Revenj.Plugins.DatabasePersistence.Postgres\Revenj.Plugins.DatabasePersistence.Postgres.csproj", "{8E943C88-AF40-4836-A8F6-681668514C83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Plugins.DatabasePersistence.Oracle", "Plugins\NGS.Plugins.DatabasePersistence.Oracle\NGS.Plugins.DatabasePersistence.Oracle.csproj", "{D60AB12C-6F49-438B-AE0A-E77141492740}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Plugins.DatabasePersistence.Oracle", "Plugins\Revenj.Plugins.DatabasePersistence.Oracle\Revenj.Plugins.DatabasePersistence.Oracle.csproj", "{D60AB12C-6F49-438B-AE0A-E77141492740}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.DatabasePersistence.Interface", "Database\NGS.DatabasePersistence.Interface\NGS.DatabasePersistence.Interface.csproj", "{2A96E16E-4398-4316-8637-54C0E0EA13ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.DatabasePersistence.Interface", "Database\Revenj.DatabasePersistence.Interface\Revenj.DatabasePersistence.Interface.csproj", "{2A96E16E-4398-4316-8637-54C0E0EA13ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.DatabasePersistence.Postgres", "Database\NGS.DatabasePersistence.Postgres\NGS.DatabasePersistence.Postgres.csproj", "{6BEE583B-B4CE-489B-A5D3-6EAF071438CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.DatabasePersistence.Postgres", "Database\Revenj.DatabasePersistence.Postgres\Revenj.DatabasePersistence.Postgres.csproj", "{6BEE583B-B4CE-489B-A5D3-6EAF071438CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.DatabasePersistence.Oracle", "Database\NGS.DatabasePersistence.Oracle\NGS.DatabasePersistence.Oracle.csproj", "{7AFCA200-73CC-4C4D-8815-C512448118D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.DatabasePersistence.Oracle", "Database\Revenj.DatabasePersistence.Oracle\Revenj.DatabasePersistence.Oracle.csproj", "{7AFCA200-73CC-4C4D-8815-C512448118D2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{9337DE07-CEB3-456E-8FF3-C6BA4DB6496D}"
 EndProject
@@ -42,37 +42,37 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.SignalRWeb.Mono", "S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{511632A3-D73B-46A7-8509-2A7B59AB01FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Extensibility", "Core\NGS.Extensibility\NGS.Extensibility.csproj", "{3BCE35A8-8B3D-4611-B8AB-D524EA4D7908}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Extensibility", "Core\Revenj.Extensibility\Revenj.Extensibility.csproj", "{3BCE35A8-8B3D-4611-B8AB-D524EA4D7908}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Extensibility.Interface", "Core\NGS.Extensibility.Interface\NGS.Extensibility.Interface.csproj", "{E7DE330D-1E7C-486E-BAE6-222B87256408}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Extensibility.Interface", "Core\Revenj.Extensibility.Interface\Revenj.Extensibility.Interface.csproj", "{E7DE330D-1E7C-486E-BAE6-222B87256408}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Common", "Core\NGS.Common\NGS.Common.csproj", "{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Common", "Core\Revenj.Common\Revenj.Common.csproj", "{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Serialization.Interface", "Core\NGS.Serialization.Interface\NGS.Serialization.Interface.csproj", "{9C4534E8-B8EB-44F6-A759-C752F0DEA675}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Serialization.Interface", "Core\Revenj.Serialization.Interface\Revenj.Serialization.Interface.csproj", "{9C4534E8-B8EB-44F6-A759-C752F0DEA675}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Logging.Interface", "Core\NGS.Logging.Interface\NGS.Logging.Interface.csproj", "{E4040A4F-0730-4784-AA6C-E3A950AA9A4B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Logging.Interface", "Core\Revenj.Logging.Interface\Revenj.Logging.Interface.csproj", "{E4040A4F-0730-4784-AA6C-E3A950AA9A4B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Logging.NLog", "Core\NGS.Logging.NLog\NGS.Logging.NLog.csproj", "{58330196-87BC-4A8A-AECA-67B1873A4E1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Logging.NLog", "Core\Revenj.Logging.NLog\Revenj.Logging.NLog.csproj", "{58330196-87BC-4A8A-AECA-67B1873A4E1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Utility", "Core\NGS.Utility\NGS.Utility.csproj", "{0058C57F-1D45-408B-B681-336889B0111E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Utility", "Core\Revenj.Utility\Revenj.Utility.csproj", "{0058C57F-1D45-408B-B681-336889B0111E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Security.Interface", "Core\NGS.Security.Interface\NGS.Security.Interface.csproj", "{6745FC14-607B-440B-AF83-19C460695C10}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Security.Interface", "Core\Revenj.Security.Interface\Revenj.Security.Interface.csproj", "{6745FC14-607B-440B-AF83-19C460695C10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Security", "Core\NGS.Security\NGS.Security.csproj", "{9487C1B1-BFF0-48FD-90EC-C5D7093776D9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Security", "Core\Revenj.Security\Revenj.Security.csproj", "{9487C1B1-BFF0-48FD-90EC-C5D7093776D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Serialization", "Core\NGS.Serialization\NGS.Serialization.csproj", "{C4F76672-980C-4368-A73A-65288A06A263}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Serialization", "Core\Revenj.Serialization\Revenj.Serialization.csproj", "{C4F76672-980C-4368-A73A-65288A06A263}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{EB086185-A8F5-4FDE-952A-A7F7A09D0C1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.DomainPatterns.Interface", "Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj", "{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.DomainPatterns.Interface", "Domain\Revenj.DomainPatterns.Interface\Revenj.DomainPatterns.Interface.csproj", "{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.DomainPatterns", "Domain\NGS.DomainPatterns\NGS.DomainPatterns.csproj", "{FB2B66D2-AA50-4552-9F0E-56F51369E651}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.DomainPatterns", "Domain\Revenj.DomainPatterns\Revenj.DomainPatterns.csproj", "{FB2B66D2-AA50-4552-9F0E-56F51369E651}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Features", "Features", "{5304F374-4E2F-49A4-8506-4E33FF86C526}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Features.Mailer", "Features\NGS.Features.Mailer\NGS.Features.Mailer.csproj", "{1F7D1B31-5726-4D1B-B03D-449C2026D879}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Features.Mailer", "Features\Revenj.Features.Mailer\Revenj.Features.Mailer.csproj", "{1F7D1B31-5726-4D1B-B03D-449C2026D879}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NGS.Features.Storage", "Features\NGS.Features.Storage\NGS.Features.Storage.csproj", "{D8A96FAF-B87E-4B6E-9A3E-BBE567F23C50}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Features.Storage", "Features\Revenj.Features.Storage\Revenj.Features.Storage.csproj", "{D8A96FAF-B87E-4B6E-9A3E-BBE567F23C50}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Features.RestCache", "Features\Revenj.Features.RestCache\Revenj.Features.RestCache.csproj", "{7A17AEAA-DD17-4D57-ACD9-B74A450D9E39}"
 EndProject

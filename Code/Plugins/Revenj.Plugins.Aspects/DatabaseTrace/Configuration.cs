@@ -2,8 +2,8 @@
 using System.ComponentModel.Composition;
 using System.Configuration;
 using System.Data;
-using NGS.DatabasePersistence;
-using NGS.Extensibility;
+using Revenj.DatabasePersistence;
+using Revenj.Extensibility;
 
 namespace Revenj.Plugins.Aspects.DatabaseTrace
 {

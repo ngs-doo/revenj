@@ -2,8 +2,8 @@
 using System.ServiceProcess;
 using System.Threading;
 using DSL;
-using NGS.DomainPatterns;
-using NGS.Extensibility;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
 
 namespace Revenj.Http
 {

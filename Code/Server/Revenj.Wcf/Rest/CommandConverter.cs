@@ -5,11 +5,11 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Xml.Linq;
-using NGS.Extensibility;
-using NGS.Serialization;
-using NGS.Utility;
 using Revenj.Api;
+using Revenj.Extensibility;
 using Revenj.Processing;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Wcf
 {
@@ -53,7 +53,7 @@ namespace Revenj.Wcf
 		{
 			var start = Stopwatch.GetTimestamp();
 			var engine = ProcessingEngine;
-			var sessionID = ThreadContext.Request.GetHeader("X-NGS-Session-ID");
+			var sessionID = ThreadContext.Request.GetHeader("X-Revenj-Session-ID");
 			if (sessionID != null)
 			{
 				var scope = ObjectFactory.FindScope(sessionID);

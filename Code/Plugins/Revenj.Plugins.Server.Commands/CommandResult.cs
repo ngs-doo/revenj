@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using NGS;
-using NGS.Serialization;
-using NGS.Utility;
 using Revenj.Processing;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Plugins.Server.Commands
 {

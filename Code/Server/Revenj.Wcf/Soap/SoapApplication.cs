@@ -5,9 +5,9 @@ using System.Net;
 using System.ServiceModel;
 using System.Web;
 using System.Xml.Linq;
-using NGS.Common;
-using NGS.Extensibility;
 using Revenj.Api;
+using Revenj.Common;
+using Revenj.Extensibility;
 using Revenj.Processing;
 
 namespace Revenj.Wcf

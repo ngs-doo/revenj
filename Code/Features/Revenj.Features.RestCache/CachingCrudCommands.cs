@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.ServiceModel;
-using NGS.DomainPatterns;
+using Revenj.DomainPatterns;
 using Revenj.Plugins.Rest.Commands;
 
 namespace Revenj.Features.RestCache

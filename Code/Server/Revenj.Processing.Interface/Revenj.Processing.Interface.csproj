@@ -35,7 +35,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mono|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -63,14 +63,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\NGS.Serialization.Interface\NGS.Serialization.Interface.csproj">
+    <ProjectReference Include="..\..\Core\Revenj.Serialization.Interface\Revenj.Serialization.Interface.csproj">
       <Project>{9C4534E8-B8EB-44F6-A759-C752F0DEA675}</Project>
-      <Name>NGS.Serialization.Interface</Name>
+      <Name>Revenj.Serialization.Interface</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\NGS.snk">
-      <Link>NGS.snk</Link>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
     </None>
   </ItemGroup>
   <ItemGroup>

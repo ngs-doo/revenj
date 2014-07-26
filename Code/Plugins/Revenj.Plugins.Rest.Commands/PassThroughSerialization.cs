@@ -1,5 +1,5 @@
 ﻿using System.Runtime.Serialization;
-using NGS.Serialization;
+using Revenj.Serialization;
 
 namespace Revenj.Plugins.Rest.Commands
 {

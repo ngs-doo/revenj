@@ -5,8 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
-using NGS.DomainPatterns;
-using NGS.Serialization;
+using Revenj.DomainPatterns;
+using Revenj.Serialization;
 
 namespace Revenj.Plugins.Server.Commands
 {

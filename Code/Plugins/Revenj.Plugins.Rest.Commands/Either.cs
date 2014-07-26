@@ -2,8 +2,8 @@
 using System.IO;
 using System.Net;
 using System.Text;
-using NGS.Serialization;
 using Revenj.Api;
+using Revenj.Serialization;
 
 namespace Revenj.Plugins.Rest.Commands
 {
@@ -64,7 +64,7 @@ namespace Revenj.Plugins.Rest.Commands
 			{
 				return serialization.Deserialize<T>(message, ThreadContext.Request.ContentType);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				return ex.Message;
 			}

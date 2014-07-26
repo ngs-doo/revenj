@@ -4,14 +4,13 @@ using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Runtime.Serialization;
-using NGS;
-using NGS.Common;
-using NGS.DomainPatterns;
-using NGS.Extensibility;
-using NGS.Security;
-using NGS.Serialization;
-using NGS.Utility;
+using Revenj.Common;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
 using Revenj.Processing;
+using Revenj.Security;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Plugins.Server.Commands
 {

@@ -4,9 +4,7 @@ using System.Configuration;
 using System.Net;
 using System.Security.Principal;
 using System.Text;
-using NGS;
-using NGS.Security;
-using System.Security;
+using Revenj.Security;
 
 namespace Revenj.Http
 {

@@ -3,7 +3,7 @@ using System.Configuration;
 using System.Web.Routing;
 using DSL;
 using Microsoft.AspNet.SignalR;
-using NGS.DomainPatterns;
+using Revenj.DomainPatterns;
 
 namespace Revenj.SignalRWeb
 {

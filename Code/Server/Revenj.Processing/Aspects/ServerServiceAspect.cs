@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 using System.Linq;
-using NGS.Extensibility;
-using NGS.Utility;
+using Revenj.Extensibility;
+using Revenj.Utility;
 
 namespace Revenj.Processing
 {
@@ -10,9 +10,11 @@ namespace Revenj.Processing
 	{
 		public void Initialize(IObjectFactory factory)
 		{
-			foreach (var type in AssemblyScanner.GetAllTypes().Where(it => it.IsPublic || it.IsNestedPublic))
+			foreach (var type in AssemblyScanner.GetAllTypes())
 			{
-				if (type.GetInterfaces().Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IServerService<,>)))
+				if (!type.IsAbstract
+					&& (type.IsPublic || type.IsNestedPublic)
+					&& type.GetInterfaces().Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IServerService<,>)))
 				{
 					var attr = type.GetCustomAttributes(typeof(ServiceAttribute), false) as ServiceAttribute[];
 					if (attr == null || attr.Length == 0)

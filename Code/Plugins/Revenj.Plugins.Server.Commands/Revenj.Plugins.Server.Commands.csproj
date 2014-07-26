@@ -35,7 +35,7 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\NGS.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mono|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -91,33 +91,33 @@
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\NGS.Common\NGS.Common.csproj">
+    <ProjectReference Include="..\..\Core\Revenj.Common\Revenj.Common.csproj">
       <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
-      <Name>NGS.Common</Name>
+      <Name>Revenj.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Core\NGS.Extensibility.Interface\NGS.Extensibility.Interface.csproj">
+    <ProjectReference Include="..\..\Core\Revenj.Extensibility.Interface\Revenj.Extensibility.Interface.csproj">
       <Project>{E7DE330D-1E7C-486E-BAE6-222B87256408}</Project>
-      <Name>NGS.Extensibility.Interface</Name>
+      <Name>Revenj.Extensibility.Interface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Core\NGS.Security.Interface\NGS.Security.Interface.csproj">
+    <ProjectReference Include="..\..\Core\Revenj.Security.Interface\Revenj.Security.Interface.csproj">
       <Project>{6745FC14-607B-440B-AF83-19C460695C10}</Project>
-      <Name>NGS.Security.Interface</Name>
+      <Name>Revenj.Security.Interface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Core\NGS.Serialization.Interface\NGS.Serialization.Interface.csproj">
+    <ProjectReference Include="..\..\Core\Revenj.Serialization.Interface\Revenj.Serialization.Interface.csproj">
       <Project>{9C4534E8-B8EB-44F6-A759-C752F0DEA675}</Project>
-      <Name>NGS.Serialization.Interface</Name>
+      <Name>Revenj.Serialization.Interface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Core\NGS.Utility\NGS.Utility.csproj">
+    <ProjectReference Include="..\..\Core\Revenj.Utility\Revenj.Utility.csproj">
       <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
-      <Name>NGS.Utility</Name>
+      <Name>Revenj.Utility</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns.Interface\NGS.DomainPatterns.Interface.csproj">
+    <ProjectReference Include="..\..\Domain\Revenj.DomainPatterns.Interface\Revenj.DomainPatterns.Interface.csproj">
       <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
-      <Name>NGS.DomainPatterns.Interface</Name>
+      <Name>Revenj.DomainPatterns.Interface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Domain\NGS.DomainPatterns\NGS.DomainPatterns.csproj">
+    <ProjectReference Include="..\..\Domain\Revenj.DomainPatterns\Revenj.DomainPatterns.csproj">
       <Project>{FB2B66D2-AA50-4552-9F0E-56F51369E651}</Project>
-      <Name>NGS.DomainPatterns</Name>
+      <Name>Revenj.DomainPatterns</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Server\Revenj.Processing.Interface\Revenj.Processing.Interface.csproj">
       <Project>{721E3056-0F68-4874-B5E0-0B0223ECC4D7}</Project>

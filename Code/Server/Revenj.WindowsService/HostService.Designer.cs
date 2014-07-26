@@ -31,7 +31,7 @@
 			// 
 			// HostService
 			// 
-			this.ServiceName = "NGS windows service host";
+			this.ServiceName = "Revenj windows service host";
 
 		}
 

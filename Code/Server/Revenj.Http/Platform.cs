@@ -1,7 +1,7 @@
 ﻿using System;
 using DryIoc;
-using NGS.DomainPatterns;
-using NGS.Extensibility;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
 using Revenj.Http;
 
 namespace DSL
