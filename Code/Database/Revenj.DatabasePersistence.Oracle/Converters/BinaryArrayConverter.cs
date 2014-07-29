@@ -8,7 +8,7 @@ using Oracle.DataAccess.Types;
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
 	//TODO this is actually not supported in Oracle. Should convert to TABLE or do some other magic
-	[OracleCustomTypeMapping("-Revenj-.BLOB_ARR")]
+	[OracleCustomTypeMapping("-NGS-.BLOB_ARR")]
 	public class BinaryArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -71,7 +71,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<byte[]>();
-			return "new \"-Revenj-\".BLOB_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-NGS-\".BLOB_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public OracleParameter ToParameter(object value)
@@ -81,7 +81,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public OracleParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<byte[]>()), UdtTypeName = "-Revenj-.BLOB_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<byte[]>()), UdtTypeName = "-NGS-.BLOB_ARR" };
 		}
 	}
 }

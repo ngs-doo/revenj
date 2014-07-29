@@ -8,7 +8,7 @@ using Oracle.DataAccess.Types;
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
 	//TODO merge with string array converter
-	[OracleCustomTypeMapping("-Revenj-.TEXT_ARR")]
+	[OracleCustomTypeMapping("-NGS-.TEXT_ARR")]
 	public class TextArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -70,7 +70,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<string>();
-			return "new \"-Revenj-\".TEXT_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-NGS-\".TEXT_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public OracleParameter ToParameter(object value)
@@ -83,7 +83,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public OracleParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-Revenj-.TEXT_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-NGS-.TEXT_ARR" };
 		}
 	}
 }

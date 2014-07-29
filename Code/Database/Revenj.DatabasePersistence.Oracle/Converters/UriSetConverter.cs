@@ -7,7 +7,7 @@ using Oracle.DataAccess.Types;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-Revenj-.URI_SET")]
+	[OracleCustomTypeMapping("-NGS-.URI_SET")]
 	public class UriSetConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -69,7 +69,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<string>();
-			return "new \"-Revenj-\".URI_SET(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-NGS-\".URI_SET(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public OracleParameter ToParameter(object value)
@@ -79,7 +79,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public OracleParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-Revenj-.URI_SET" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-NGS-.URI_SET" };
 		}
 	}
 }

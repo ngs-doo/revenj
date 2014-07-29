@@ -7,7 +7,7 @@ using Oracle.DataAccess.Types;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-Revenj-.CLOB_ARR")]
+	[OracleCustomTypeMapping("-NGS-.CLOB_ARR")]
 	public class StringArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -69,7 +69,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<string>();
-			return "new \"-Revenj-\".CLOB_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-NGS-\".CLOB_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public OracleParameter ToParameter(object value)
@@ -82,7 +82,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public OracleParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-Revenj-.CLOB_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-NGS-.CLOB_ARR" };
 		}
 	}
 }

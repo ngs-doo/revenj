@@ -7,7 +7,7 @@ using Oracle.DataAccess.Types;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-Revenj-.LONG_ARR")]
+	[OracleCustomTypeMapping("-NGS-.LONG_ARR")]
 	public class LongArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -74,7 +74,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<long?>();
-			return "new \"-Revenj-\".LONG_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-NGS-\".LONG_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public OracleParameter ToParameter(object value)
@@ -84,7 +84,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public OracleParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<long?>()), UdtTypeName = "-Revenj-.LONG_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<long?>()), UdtTypeName = "-NGS-.LONG_ARR" };
 		}
 	}
 }

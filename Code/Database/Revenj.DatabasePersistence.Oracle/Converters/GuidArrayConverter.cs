@@ -8,7 +8,7 @@ using Oracle.DataAccess.Types;
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
 	//TODO does not work
-	[OracleCustomTypeMapping("-Revenj-.GUID_ARR")]
+	[OracleCustomTypeMapping("-NGS-.GUID_ARR")]
 	public class GuidArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -75,7 +75,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<Guid?>();
-			return "new \"-Revenj-\".GUID_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-NGS-\".GUID_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public OracleParameter ToParameter(object value)
@@ -85,7 +85,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public OracleParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<Guid?>()), UdtTypeName = "-Revenj-.GUID_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<Guid?>()), UdtTypeName = "-NGS-.GUID_ARR" };
 		}
 
 		public static string ToOracleString(Guid guid)
