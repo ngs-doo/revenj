@@ -379,8 +379,7 @@ Run the CLC again with same command as above and you will get much more informat
 
 Now let's take a look what's inside our generated ServerModel.dll file to get a better picture of what's going on.  To easiliy browse our server side library we will use monoDevelop application. Create a project inside a monoDevelop and add ServerModel.dll as a reference. Take a look what's inside:
 
-![java model](pictures/model-jar1.png)
-![java model](pictures/model-jar2.png)
+![java model](pictures/model-dll-linux.png)
 
 Repositories and various other services have internal modifier, but are available through Revenj interfaces. So ExampleList repository can be resolved as `IQueryableRepository<ExampleList>` or by using `IDataContext` with its `Query<ExampleList>()` method. If for some reason custom repository needs to be used, a registration to the container with the new repository will override the default registration.
 
