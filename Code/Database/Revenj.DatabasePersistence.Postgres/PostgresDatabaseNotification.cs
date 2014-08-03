@@ -160,9 +160,10 @@ namespace Revenj.DatabasePersistence.Postgres
 		public IObservable<KeyValuePair<string[], Lazy<T[]>>> Track<T>()
 		{
 			//TODO: notifications can lag and when they do, scope can be disposed
+			//TODO: skip while should be reprocessed later!?
 			var type = typeof(T);
 			return
-				Notifications.Where(it =>
+				Notifications.SkipWhile(_ => !DomainModel.IsValueCreated).Where(it =>
 				{
 					HashSet<Type> set;
 					if (!Targets.TryGetValue(it.Name, out set))

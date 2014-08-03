@@ -192,7 +192,7 @@ namespace Revenj.DatabasePersistence.Oracle
 		{
 			var type = typeof(T);
 			return
-				Notifications.Where(it =>
+				Notifications.SkipWhile(_ => !DomainModel.IsValueCreated).Where(it =>
 				{
 					List<Type> list;
 					if (!Targets.TryGetValue(it.Name, out list))
