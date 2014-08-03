@@ -67,6 +67,7 @@ You will also need a Postgres instance and a .NET/Mono.
 Go through the tutorials:
 
  * [Setting up Visual studio and REST server](tutorials/revenj-tutorial-setup.md)
+ * or [Setting up REST server on Linux](tutorials/revenj-tutorial-linux.md)
  * [Event sourcing in Revenj](tutorials/revenj-tutorial-event-sourcing.md)
  * [Using advanced Event sourcing features in Revenj](tutorials/revenj-tutorial-aggregate-events.md)
  * [NoSQL documents in relational database](tutorials/revenj-tutorial-nosql-documents.md)
