@@ -2,7 +2,7 @@
 
 **Revenj** is a framework which can be used on Mono with Postgres. 
 While it can be used as any other framework, it's rather small (feature wise) and it's best used as a backend for [DSL Platform](https://dsl-platform.com). This makes it ideal as a [REST service](http://c2.com/cgi/wiki?RestArchitecturalStyle) built on [DSL](http://c2.com/cgi/wiki?DomainSpecificLanguage) models, or within some other framework such as ASP.NET. 
-*While Revenj supports Oracle too, due to its native dependencies it's only runs on Windows*. 
+*While Revenj supports Oracle too, due to its native dependencies it only runs on Windows*. 
 
 - Revenj contains [LINQ](http://msdn.microsoft.com/en-us/library/bb397926.aspx) provider for Postgres, somewhat different from other LINQ providers since it leverages object-oriented features of Postgres. This allows for having a [NoSQL documents](http://en.wikipedia.org/wiki/Document-oriented_database) inside a relational databases.
 - Revenj also supports various serializations out of the box, such as: Json, Protobuf and XML.
