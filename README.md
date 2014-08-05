@@ -125,7 +125,7 @@ DSL model:
       }
       event CapturedAction {
         ComplexObject pointInTimeSnapshot;
-        Set<int?> points;
+        Set<int?> points { index; }
         list<location>? locations;
 	  }
       report Aggregation {
