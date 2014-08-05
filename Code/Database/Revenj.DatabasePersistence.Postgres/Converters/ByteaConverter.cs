@@ -212,10 +212,15 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			if (stream == null)
 				return null;
 			var cms = stream as ChunkedMemoryStream;
-			if (cms != null) return new StreamTuple(cms);
+			if (cms != null) return new StreamTuple(cms, false);
 			var ms = stream as MemoryStream;
 			if (ms != null) return new ByteTuple(ms.ToArray());
-			return new StreamTuple(new ChunkedMemoryStream(stream));
+			return new StreamTuple(new ChunkedMemoryStream(stream), true);
+		}
+
+		public static PostgresTuple ToTuple(ChunkedMemoryStream stream, bool dispose)
+		{
+			return new StreamTuple(stream, dispose);
 		}
 
 		class ByteTuple : PostgresTuple
@@ -280,12 +285,13 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		class StreamTuple : PostgresTuple
 		{
-			//TODO: dispose!?
 			private readonly ChunkedMemoryStream Value;
+			private readonly bool Dispose;
 
-			public StreamTuple(ChunkedMemoryStream value)
+			public StreamTuple(ChunkedMemoryStream value, bool dispose)
 			{
 				this.Value = value;
+				this.Dispose = dispose;
 			}
 
 			public override bool MustEscapeRecord { get { return true; } }
@@ -320,6 +326,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else sw.Write(pref);
 				sw.Write('x');
 				Value.ToPostgresBytea(sw);
+				if (Dispose) Value.Dispose();
 			}
 
 			public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)

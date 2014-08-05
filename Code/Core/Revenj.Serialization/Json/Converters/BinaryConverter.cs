@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.Serialization;
 using Revenj.Utility;
@@ -13,6 +14,13 @@ namespace Revenj.Serialization.Json.Converters
 		private const int BlockAnd = 1023;
 		private const int BlockShift = 10;
 
+		private static readonly HashSet<Guid> Codecs = new HashSet<Guid>();
+
+		static BinaryConverter()
+		{
+			foreach (var enc in ImageCodecInfo.GetImageEncoders())
+				Codecs.Add(enc.FormatID);
+		}
 		public static void Serialize(byte[] value, StreamWriter sw)
 		{
 			if (value == null)
@@ -63,7 +71,10 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write('"');
 				using (var cms = ChunkedMemoryStream.Create())
 				{
-					value.Save(cms, value.RawFormat);
+					if (Codecs.Contains(value.RawFormat.Guid))
+						value.Save(cms, value.RawFormat);
+					else
+						value.Save(cms, ImageFormat.Png);
 					cms.Position = 0;
 					cms.ToBase64Writer(sw);
 				}

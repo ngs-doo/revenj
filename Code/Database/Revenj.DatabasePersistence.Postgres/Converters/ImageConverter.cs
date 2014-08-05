@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using Revenj.Utility;
 
@@ -7,6 +9,22 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class ImageConverter
 	{
+		private static readonly HashSet<Guid> Codecs = new HashSet<Guid>();
+
+		static ImageConverter()
+		{
+			foreach (var enc in ImageCodecInfo.GetImageEncoders())
+				Codecs.Add(enc.FormatID);
+		}
+
+		private static void SaveImage(Image image, Stream stream)
+		{
+			if (Codecs.Contains(image.RawFormat.Guid))
+				image.Save(stream, image.RawFormat);
+			else
+				image.Save(stream, ImageFormat.Png);
+		}
+
 		public static Image FromDatabase(string value)
 		{
 			if (value == null)
@@ -41,7 +59,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			using (var ms = new MemoryStream())
 			{
-				value.Save(ms, value.RawFormat);
+				SaveImage(value, ms);
 				ms.Position = 0;
 				return ByteaConverter.ToDatabase(ms.ToArray());
 			}
@@ -51,12 +69,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		{
 			if (value == null)
 				return null;
-			using (var cms = ChunkedMemoryStream.Create())
-			{
-				value.Save(cms, value.RawFormat);
-				cms.Position = 0;
-				return ByteaConverter.ToTuple(cms);
-			}
+			var cms = ChunkedMemoryStream.Create();
+			SaveImage(value, cms);
+			cms.Position = 0;
+			return ByteaConverter.ToTuple(cms, true);
 		}
 	}
 }
