@@ -53,7 +53,7 @@ namespace Revenj.Utility
 		}
 		/// <summary>
 		/// Append two string builders.
-		/// This actualy doesn't avoid LOH issues.
+		/// This actually doesn't avoid LOH issues.
 		/// </summary>
 		/// <param name="sb">original string builder</param>
 		/// <param name="append">append additional builder</param>

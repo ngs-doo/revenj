@@ -21,7 +21,7 @@ namespace Revenj.Utility
 			return eo;
 		}
 		/// <summary>
-		/// Convert object ot expando object.
+		/// Convert object to expando object.
 		/// Copy properties from object using reflection.
 		/// </summary>
 		/// <param name="item">source instance</param>

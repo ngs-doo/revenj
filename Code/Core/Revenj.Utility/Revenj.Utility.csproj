@@ -67,7 +67,6 @@
     <Compile Include="DynamicOrderBy.cs" />
     <Compile Include="ExpandoHelper.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="LevensteinDistance.cs" />
     <Compile Include="PdfConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Streams\StreamOperations.cs" />
