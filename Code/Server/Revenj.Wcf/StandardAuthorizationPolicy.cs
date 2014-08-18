@@ -20,7 +20,6 @@ namespace Revenj.Wcf
 		protected readonly IAuthentication<byte[]> HashAuthentication = ContainerWcfHost.Resolve<IAuthentication<byte[]>>();
 		private static readonly HashSet<string> PublicUrl = new HashSet<string>();
 		private static readonly HashSet<string> PublicTemplate = new HashSet<string>();
-		private static readonly string MissingBasicAuth = "Basic realm=\"" + Environment.MachineName + "\"";
 
 		static StandardAuthorizationPolicy()
 		{
@@ -96,10 +95,7 @@ namespace Revenj.Wcf
 			{
 				var authorization = ThreadContext.Request.GetHeader("Authorization") ?? DefaultAuthorization;
 				if (authorization == null)
-				{
-					ThreadContext.Response.Headers["WWW-Authenticate"] = MissingBasicAuth;
-					throw new SecurityException("Authorization header not provided.");
-				}
+					throw new UnauthorizedAccessException("Authorization header not provided.");
 
 				var identity = GetIdentity(authorization);
 				var template = ThreadContext.Request.UriTemplateMatch;
