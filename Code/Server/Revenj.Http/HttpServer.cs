@@ -144,13 +144,20 @@ namespace Revenj.Http
 			}
 		}
 
-		private static void ReturnError(HttpListenerResponse response, int status, string message)
+		private void ReturnError(HttpListenerResponse response, int status, string message)
 		{
-			response.StatusCode = status;
-			response.ContentType = "text/plain; charset=\"utf-8\"";
-			response.ContentLength64 = Encoding.UTF8.GetByteCount(message);
-			using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(message)))
-				ms.CopyTo(response.OutputStream);
+			// Response is disposed before ReturnError is called when sent request is invalid.
+			// This inner try-catch prevents application crash because of that.
+			try {
+				response.StatusCode = status;
+				response.ContentType = "text/plain; charset=\"utf-8\"";
+				response.ContentLength64 = Encoding.UTF8.GetByteCount(message);
+				using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(message)))
+					ms.CopyTo(response.OutputStream);
+			} catch (Exception ex) {
+				Console.WriteLine(ex.Message);
+				Logger.Error(ex.ToString());
+			}
 		}
 	}
 }
