@@ -114,24 +114,24 @@ Enter **y** to accept and clc will download Revenj libraries to default (./reven
 	Unpacked: LitS3.dll. Size: 46kB
 	Unpacked: Mono.Security.dll. Size: 285kB
 	Unpacked: Newtonsoft.Json.dll. Size: 419kB
-	Unpacked: NGS.Common.dll. Size: 6kB
-	Unpacked: NGS.DatabasePersistence.Interface.dll. Size: 8kB
-	Unpacked: NGS.DatabasePersistence.Postgres.dll. Size: 137kB
-	Unpacked: NGS.DomainPatterns.dll. Size: 41kB
-	Unpacked: NGS.DomainPatterns.Interface.dll. Size: 20kB
-	Unpacked: NGS.Extensibility.dll. Size: 110kB
-	Unpacked: NGS.Extensibility.Interface.dll. Size: 35kB
-	Unpacked: NGS.Features.Mailer.dll. Size: 22kB
-	Unpacked: NGS.Features.Storage.dll. Size: 12kB
-	Unpacked: NGS.Logging.Interface.dll. Size: 5kB
-	Unpacked: NGS.Logging.NLog.dll. Size: 5kB
-	Unpacked: NGS.Plugins.DatabasePersistence.Postgres.dll. Size: 47kB
-	Unpacked: NGS.Security.dll. Size: 17kB
-	Unpacked: NGS.Security.Interface.dll. Size: 6kB
-	Unpacked: NGS.Serialization.dll. Size: 49kB
-	Unpacked: NGS.Serialization.Interface.dll. Size: 6kB
-	Unpacked: NGS.Templater.dll. Size: 210kB
-	Unpacked: NGS.Utility.dll. Size: 26kB
+	Unpacked: Revenj.Common.dll. Size: 6kB
+	Unpacked: Revenj.DatabasePersistence.Interface.dll. Size: 8kB
+	Unpacked: Revenj.DatabasePersistence.Postgres.dll. Size: 137kB
+	Unpacked: Revenj.DomainPatterns.dll. Size: 41kB
+	Unpacked: Revenj.DomainPatterns.Interface.dll. Size: 20kB
+	Unpacked: Revenj.Extensibility.dll. Size: 110kB
+	Unpacked: Revenj.Extensibility.Interface.dll. Size: 35kB
+	Unpacked: Revenj.Features.Mailer.dll. Size: 22kB
+	Unpacked: Revenj.Features.Storage.dll. Size: 12kB
+	Unpacked: Revenj.Logging.Interface.dll. Size: 5kB
+	Unpacked: Revenj.Logging.NLog.dll. Size: 5kB
+	Unpacked: Revenj.Plugins.DatabasePersistence.Postgres.dll. Size: 47kB
+	Unpacked: Revenj.Security.dll. Size: 17kB
+	Unpacked: Revenj.Security.Interface.dll. Size: 6kB
+	Unpacked: Revenj.Serialization.dll. Size: 49kB
+	Unpacked: Revenj.Serialization.Interface.dll. Size: 6kB
+	Unpacked: Revenj.Templater.dll. Size: 210kB
+	Unpacked: Revenj.Utility.dll. Size: 26kB
 	Unpacked: NLog.dll. Size: 379kB
 	Unpacked: Npgsql.dll. Size: 308kB
 	Unpacked: protobuf-net.dll. Size: 188kB

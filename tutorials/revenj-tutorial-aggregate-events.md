@@ -38,7 +38,7 @@ Thus, referential integrity is somewhat relaxed which could be improved slightly
 .NET classes are nested inside aggregate and code for previous tutorial will still work, after we rename *Upvote* and *Downvote* to *VoteStats.Upvote* and *VoteStats.Downvote*. 
 But those event handlers are stateful, in a sense they can reference services and change the state of the database (as the current implementation does). 
 If we want to have an domain event which can be replayed, we need to have a "handler" which only affects referenced aggregate root.
-While there is no way to enforce such a constraint in an imperative language, in practice this means that we need to define replayable event handler differently:
+While there is no way to enforce such a constraint in C#, in practice this means that we need to define replayable event handler differently:
 
 ![Replayable event handler](pictures/hooking-up-events.png)
 
@@ -80,7 +80,7 @@ We'll also use a Revenj-core which is somewhat optimized for use as a library:
 
 ![Downloading Revenj core](pictures/revenj-core.png)
 
-We should add reference to the `RevenjTutorial` project, `Revenj.Core` in dependencies/Server, `NGS.DomainPatterns.Interface` to access the signatures, generated model and we should be ready to go. 
+We should add reference to the `RevenjTutorial` project, `Revenj.Core` in dependencies/Server, `Revenj.DomainPatterns.Interface` to access the signatures, generated model and we should be ready to go. 
 Let's write a test which will initialize the Revenj instance, hook up our aggregate event handlers, create an aggregate and apply two async events on it. 
 Let's also write an extension method to ease the use of API somewhat, at the end of the test. 
 We should have something like this:
