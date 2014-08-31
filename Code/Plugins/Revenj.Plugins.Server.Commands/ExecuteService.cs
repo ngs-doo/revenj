@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -149,6 +150,7 @@ Example argument:
 				{
 					return output.Serialize(service.Execute(arg));
 				}
+				catch (SecurityException) { throw; }
 				catch (Exception ex)
 				{
 					string additionalInfo;
