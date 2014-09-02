@@ -26,13 +26,13 @@ Domain is described using various modeling building blocks in a DSL, for example
         timestamp createdOn;
         Set<string(10)> tags { index; }
         Document? *parent;
-		List<Part> parts;
-		Map metadata;
+        List<Part> parts;
+        Map metadata;
         persistence { history; }
       }
       value Part {
         Type type;
-		string content;
+        string content;
         Queue<string> footnotes;
       }
       enum Type {
@@ -43,7 +43,7 @@ Domain is described using various modeling building blocks in a DSL, for example
       snowflake<Document> DocumentList {
         title;
         createdOn;
-		tags;
+        tags;
         order by createdOn desc;
       }
     }
@@ -104,36 +104,36 @@ DSL model:
       root ComplexObject {
         string name;
         Child[] children;
-    	timestamp modifiedAt { versioning; index; }
-    	List<VersionInfo> versions;
+        timestamp modifiedAt { versioning; index; }
+        List<VersionInfo> versions;
       }
       entity Child {
         int version;
         long? uncut;
         ip address;
-        VersionInfo? info;		
+        VersionInfo? info;        
       }
-	  value VersionInfo {
+      value VersionInfo {
         Map dictionary;
         Stack<Date> dates;
         decimal(3) quantity;
         set<decimal(2)?>? numbers;
-      }		
+      }
       SQL Legacy "SELECT id, name FROM legacy_table" {
         int id;
-    	string name;
+        string name;
       }
       event CapturedAction {
         ComplexObject pointInTimeSnapshot;
-        Set<int?> points { index; }
+        Set<int> points { index; }
         list<location>? locations;
-	  }
+      }
       report Aggregation {
         int[] inputs;
-		int? maxActions;
+        int? maxActions;
         CapturedAction[] actionsMatchingInputs 'a => a.points.Overlaps(inputs)' limit maxActions;
-		List<ComplexObject> last5objects 'co => true' order by modifiedAt desc limit 5;
-		Legacy[] matchingLegacy 'l => inputs.Contains(l.id)';
+        List<ComplexObject> last5objects 'co => true' order by modifiedAt desc limit 5;
+        Legacy[] matchingLegacy 'l => inputs.Contains(l.id)';
       }
     }
 
@@ -169,7 +169,7 @@ LISTEN/NOTIFY from Postgres is utilized to provide on commit information about d
 Report can be used to capture various data sources at once and provide it as a single object.
 
     var report = new Aggregation { inputs = new [] { 1, 2, 3}, maxActions = 100 };
-	var result = report.Populate(locator); //provide access to various dependencies
+    var result = report.Populate(locator); //provide access to various dependencies
 
 ####No abstractions, using ADO.NET:
 
@@ -189,7 +189,7 @@ This means it's enough to write an implementation class and place DLL alongside 
         ...
       }
     }
-	
+    
 ####Exposing simple custom REST service:
 
 To add a custom REST service it's enough to implement specialized typesafe signature.
@@ -197,7 +197,7 @@ To add a custom REST service it's enough to implement specialized typesafe signa
     public class MyCustomService : IServerService<int[], List<ComplexObject>> {
       ...
       public MyCustomService(...) { ... }
-      public List<ComplexObject> Execute(int[] arguments) { ... }	  
+      public List<ComplexObject> Execute(int[] arguments) { ... }      
     }
 
 ####Registering custom access permissions:
@@ -206,8 +206,8 @@ By default permissions are checked against the singleton IPermissionManager.
 Custom permissions can be registered by hand if they don't really belong to the DSL.
 
     IPermissionManager permissions = ...
-	permissions.RegisterFilter<CapturedAction>(it => false, "Admin", false); //return empty results for everybody who are not in Admin role
-	
+    permissions.RegisterFilter<CapturedAction>(it => false, "Admin", false); //return empty results for everybody who are not in Admin role
+    
 ##External tools and libraries
 
 DSL can be written in Visual studio with the help of [DDD for DSL](http://visualstudiogallery.msdn.microsoft.com/5b8a140c-5c84-40fc-a551-b255ba7676f4) plugin.
