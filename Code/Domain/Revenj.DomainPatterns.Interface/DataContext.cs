@@ -203,5 +203,16 @@ namespace Revenj.DomainPatterns
 		{
 			return context.InvalidItems<TValidation, TResult>(null);
 		}
+		/// <summary>
+		/// Submit single Domain Event
+		/// </summary>
+		/// <typeparam name="TEvent">domain event type</typeparam>
+		/// <param name="context">data context</param>
+		/// <param name="domainEvent">domain event</param>
+		public static void Submit<TEvent>(this IDataContext context, TEvent domainEvent)
+			where TEvent : IDomainEvent
+		{
+			context.Submit(new[] { domainEvent });
+		}
 	}
 }
