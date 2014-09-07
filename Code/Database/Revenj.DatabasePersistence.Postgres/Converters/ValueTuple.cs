@@ -28,8 +28,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 			else
 			{
-				EscapeArray = EscapeRecord = true;
-				HasMarkers = false;
+				EscapeArray = true;
 			}
 		}
 
