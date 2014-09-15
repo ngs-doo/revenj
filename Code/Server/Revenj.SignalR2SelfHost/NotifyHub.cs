@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -103,6 +104,29 @@ namespace Revenj.SignalR2SelfHost
 			var rl = (IListener)Activator.CreateInstance(typeof(DomainObjectListen<>).MakeGenericType(found));
 			var cid = Context.ConnectionId;
 			if (rl.Register(cid, ids => { if (ids.Contains(uri)) NotifySingleUriChange(cid); }))
+				Clients.Caller.Success("Registered for " + domainObject);
+			else
+				Clients.Caller.Error("Error registering for " + domainObject);
+		}
+		
+		public void WatchCollection(string domainObject, string[] uris)
+		{
+			if (!IsRunning)
+			{
+				Clients.Caller.Error("In shutdown. Try again later");
+				return;
+			}
+			var found = Model.Find(domainObject);
+			if (found == null
+				|| !typeof(IAggregateRoot).IsAssignableFrom(found) && !typeof(IDomainEvent).IsAssignableFrom(found))
+			{
+				Clients.Caller.Error("Unknown object " + domainObject);
+				return;
+			}
+			var rl = (IListener)Activator.CreateInstance(typeof(DomainObjectListen<>).MakeGenericType(found));
+			var cid = Context.ConnectionId;
+			var set = new HashSet<string>(uris);
+			if (rl.Register(cid, ids => { if (set.Overlaps(ids)) NotifyCollectionUriChange(cid, set.Intersect(uris).ToArray()); }))
 				Clients.Caller.Success("Registered for " + domainObject);
 			else
 				Clients.Caller.Error("Error registering for " + domainObject);
@@ -238,6 +262,11 @@ namespace Revenj.SignalR2SelfHost
 		void NotifySingleUriChange(string clientID)
 		{
 			Messages.Add(() => Clients.Client(clientID).Changed());
+		}
+
+		void NotifyCollectionUriChange(string clientID, string[] ids)
+		{
+			Messages.Add(() => Clients.Client(clientID).Found(ids));
 		}
 
 		void NotifySpecificationMatch(string clientID, string id)
