@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Threading;
 using DSL;
 using Microsoft.Owin.Hosting;
 using Owin;
@@ -25,8 +26,7 @@ namespace Revenj.SignalR2SelfHost
 			using (WebApp.Start<Startup>(address))
 			{
 				Console.WriteLine("SignalR started. Listening on " + address);
-				Console.WriteLine("Press any key to exit.");
-				Console.ReadLine();
+				Thread.Sleep(Timeout.Infinite);
 			}
 		}
 	}
