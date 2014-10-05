@@ -52,7 +52,11 @@ In Visual studio create a new Class Library project for .NET 4 or newer:
 
 ![Creating tutorial project](pictures/new-project.png)
 
-Instead we could download a template solution from DSL Platform website, but let's manually edit the sln file to understand what's going on. 
+Now we can use right click on the solution to pull up the properties and select the *Convert to DSL Platform solution* option.
+
+![Adding DSL Platform info to sln file](pictures/convert-solution.png)
+
+We could also manually edit the sln file to understand what's going on. 
 We need to insert a block to sln to enable unmanaged project compilation after which sln file should look something like:
 
 ![Unmanaged DSL Platform project](pictures/sln-changes.png)
