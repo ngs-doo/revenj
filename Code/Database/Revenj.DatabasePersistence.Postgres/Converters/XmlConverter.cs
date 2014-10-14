@@ -42,7 +42,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		class XmlTuple : PostgresTuple
 		{
-			private readonly StreamReader Reader;
+			private readonly TextReader Reader;
 
 			public XmlTuple(XElement xml)
 			{
@@ -55,7 +55,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			public override bool MustEscapeRecord { get { return true; } }
 			public override bool MustEscapeArray { get { return true; } }
 
-			public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				string quoteEscape = null;
 				string slashEscape = null;
@@ -98,7 +98,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				InsertRecord(sw, escaping, mappings);
 			}

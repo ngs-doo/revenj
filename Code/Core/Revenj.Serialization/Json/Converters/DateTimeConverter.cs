@@ -10,7 +10,7 @@ namespace Revenj.Serialization.Json.Converters
 	{
 		private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
-		public static void SerializeDate(DateTime value, StreamWriter sw, char[] buffer)
+		public static void SerializeDate(DateTime value, TextWriter sw, char[] buffer)
 		{
 			buffer[0] = '"';
 			var n = value.Year;
@@ -36,26 +36,26 @@ namespace Revenj.Serialization.Json.Converters
 			buffer[11] = '"';
 			sw.Write(buffer, 0, 12);
 		}
-		public static void SerializeDate(DateTime? value, StreamWriter sw, char[] buffer)
+		public static void SerializeDate(DateTime? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
 			else
 				SerializeDate(value.Value, sw, buffer);
 		}
-		public static void Serialize(DateTime value, StreamWriter sw, char[] buffer)
+		public static void Serialize(DateTime value, TextWriter sw, char[] buffer)
 		{
 			sw.Write('"');
 			sw.Write(value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFFFK"));
 			sw.Write('"');
 		}
-		public static void Serialize(DateTime? value, StreamWriter sw, char[] buffer)
+		public static void Serialize(DateTime? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
 			else Serialize(value.Value, sw, buffer);
 		}
-		public static DateTime DeserializeDate(StreamReader sr, int nextToken)
+		public static DateTime DeserializeDate(TextReader sr, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
@@ -83,7 +83,7 @@ namespace Revenj.Serialization.Json.Converters
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			return new DateTime(year, month, day);
 		}
-		public static List<DateTime> DeserializeDateCollection(StreamReader sr, int nextToken)
+		public static List<DateTime> DeserializeDateCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<DateTime>();
 			res.Add(DeserializeDate(sr, nextToken));
@@ -99,7 +99,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<DateTime?> DeserializeDateNullableCollection(StreamReader sr, int nextToken)
+		public static List<DateTime?> DeserializeDateNullableCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<DateTime?>();
 			if (nextToken == 'n')
@@ -128,7 +128,7 @@ namespace Revenj.Serialization.Json.Converters
 			return res;
 		}
 
-		public static DateTime DeserializeTimestamp(StreamReader sr, char[] buffer, int nextToken)
+		public static DateTime DeserializeTimestamp(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			int i = 0;
@@ -139,7 +139,7 @@ namespace Revenj.Serialization.Json.Converters
 				return DateTime.Parse(new string(buffer, 0, i), Invariant, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
 			return DateTime.Parse(new string(buffer, 0, i), Invariant);
 		}
-		public static List<DateTime> DeserializeTimestampCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<DateTime> DeserializeTimestampCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<DateTime>();
 			res.Add(DeserializeTimestamp(sr, buffer, nextToken));
@@ -155,7 +155,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<DateTime?> DeserializeTimestampNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<DateTime?> DeserializeTimestampNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<DateTime?>();
 			if (nextToken == 'n')

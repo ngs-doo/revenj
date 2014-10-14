@@ -15,7 +15,7 @@ using Revenj.Utility;
 
 namespace Revenj.Serialization
 {
-	public class JsonSerialization : ISerialization<string>, ISerialization<StringBuilder>, ISerialization<StreamReader>
+	public class JsonSerialization : ISerialization<string>, ISerialization<TextReader>
 	{
 		private readonly GenericDeserializationBinder Binder;
 		private readonly ILogger Logger;
@@ -72,48 +72,7 @@ namespace Revenj.Serialization
 			}
 		}
 
-		StringBuilder ISerialization<StringBuilder>.Serialize<T>(T value)
-		{
-			var serializer = new JsonSerializer();
-			serializer.Converters.Add(new StringEnumConverter());
-			var declaredType = typeof(T);
-			var type = value != null ? value.GetType() : declaredType;
-			serializer.TypeNameHandling = type != declaredType || !(declaredType.IsClass || declaredType.IsValueType) ? TypeNameHandling.Objects : TypeNameHandling.Auto;
-			serializer.Binder = Binder;
-			var sb = new StringBuilder();
-			using (var sw = new StringWriter(sb))
-			{
-				serializer.Serialize(sw, value);
-			}
-			return sb;
-		}
-
-		public T Deserialize<T>(StringBuilder data, StreamingContext context)
-		{
-			var serializer = new JsonSerializer();
-			serializer.TypeNameHandling = TypeNameHandling.Auto;
-			serializer.Context = context;
-			serializer.Binder = Binder;
-			var sbr = new StringBuilderReader(data);
-			try
-			{
-				return (T)serializer.Deserialize(sbr, typeof(T));
-			}
-			catch (TargetInvocationException tex)
-			{
-				if (tex.InnerException != null)
-					throw tex.InnerException;
-				throw;
-			}
-			catch (JsonSerializationException ex)
-			{
-				Logger.Trace(ex.ToString());
-				Logger.Trace(data.ToString());
-				throw;
-			}
-		}
-
-		StreamReader ISerialization<StreamReader>.Serialize<T>(T value)
+		TextReader ISerialization<TextReader>.Serialize<T>(T value)
 		{
 			var serializer = new JsonSerializer();
 			serializer.Converters.Add(new StringEnumConverter());
@@ -126,11 +85,10 @@ namespace Revenj.Serialization
 			serializer.Serialize(sw, value);
 			sw.Flush();
 			cms.Position = 0;
-			//TODO: GetReader !?
-			return new StreamReader(cms, Encoding.UTF8);
+			return cms.GetReader();
 		}
 
-		public T Deserialize<T>(StreamReader data, StreamingContext context)
+		public T Deserialize<T>(TextReader data, StreamingContext context)
 		{
 			var serializer = new JsonSerializer();
 			serializer.TypeNameHandling = TypeNameHandling.Auto;
@@ -148,12 +106,6 @@ namespace Revenj.Serialization
 			}
 			catch (JsonSerializationException ex)
 			{
-				if (!data.BaseStream.CanSeek)
-					throw;
-				data.BaseStream.Position = 0;
-				data.DiscardBufferedData();
-				Logger.Trace(ex.ToString());
-				Logger.Trace(data.ReadToEnd());
 				throw;
 			}
 		}
@@ -178,7 +130,7 @@ namespace Revenj.Serialization
 
 		public void Serialize(object value, Stream s)
 		{
-			StreamWriter sw;
+			TextWriter sw;
 			var cms = s as ChunkedMemoryStream;
 			if (cms != null)
 				sw = cms.GetWriter();
@@ -190,7 +142,7 @@ namespace Revenj.Serialization
 
 		public void SerializeJsonObject(object value, Stream s)
 		{
-			StreamWriter sw;
+			TextWriter sw;
 			var cms = s as ChunkedMemoryStream;
 			if (cms != null)
 				sw = cms.GetWriter();
@@ -303,7 +255,7 @@ namespace Revenj.Serialization
 			serializer.TypeNameHandling = TypeNameHandling.Auto;
 			serializer.Context = context;
 			serializer.Binder = Binder;
-			StreamReader sr;
+			TextReader sr;
 			var cms = s as ChunkedMemoryStream;
 			if (cms != null)
 				sr = cms.GetReader();
@@ -355,7 +307,7 @@ namespace Revenj.Serialization
 			}
 		}
 
-		public static int GetNextToken(StreamReader sr)
+		public static int GetNextToken(TextReader sr)
 		{
 			int c = sr.Read();
 			while (IsWhiteSpace(c))
@@ -363,7 +315,7 @@ namespace Revenj.Serialization
 			return c;
 		}
 
-		public static int MoveToNextToken(StreamReader sr, int nextToken)
+		public static int MoveToNextToken(TextReader sr, int nextToken)
 		{
 			int c = nextToken;
 			while (IsWhiteSpace(c))
@@ -380,24 +332,26 @@ namespace Revenj.Serialization
 			return i == buffer.Length || buffer[i] == '\0';
 		}
 
-		public static long PositionInStream(StreamReader sr)
+		public static long PositionInStream(TextReader tr)
 		{
+			var sr = tr as StreamReader;
 			try
 			{
 				var binding = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic
 					| BindingFlags.Instance | BindingFlags.GetField;
-				var charpos = (int)sr.GetType().InvokeMember("charPos", binding, null, sr, null);
-				var charlen = (int)sr.GetType().InvokeMember("charLen", binding, null, sr, null);
+				if (sr != null)
+				{
+					var charpos = (int)sr.GetType().InvokeMember("charPos", binding, null, sr, null);
+					var charlen = (int)sr.GetType().InvokeMember("charLen", binding, null, sr, null);
 
-				return sr.BaseStream.Position - charlen + charpos;
+					return sr.BaseStream.Position - charlen + charpos;
+				}
 			}
-			catch
-			{
-				return -1;
-			}
+			catch { }
+			return -1;
 		}
 
-		public static int FillName(StreamReader sr, char[] buffer, int nextToken)
+		public static int FillName(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
@@ -417,7 +371,7 @@ namespace Revenj.Serialization
 			return hash;
 		}
 
-		public static List<T> DeserializeObjectCollection<T>(StreamReader sr, int nextToken, Func<T> factory)
+		public static List<T> DeserializeObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory)
 		{
 			var res = new List<T>();
 			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
@@ -435,7 +389,7 @@ namespace Revenj.Serialization
 			return res;
 		}
 
-		public static List<T> DeserializeCollection<T>(StreamReader sr, int nextToken, Func<int, T> factory)
+		public static List<T> DeserializeCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
 		{
 			var res = new List<T>();
 			res.Add(factory(nextToken));
@@ -452,7 +406,7 @@ namespace Revenj.Serialization
 			return res;
 		}
 
-		public static List<T> DeserializeNullableObjectCollection<T>(StreamReader sr, int nextToken, Func<T> factory)
+		public static List<T> DeserializeNullableObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory)
 			where T : class
 		{
 			var res = new List<T>();
@@ -484,7 +438,7 @@ namespace Revenj.Serialization
 			return res;
 		}
 
-		public static List<T> DeserializeNullableCollection<T>(StreamReader sr, int nextToken, Func<int, T> factory)
+		public static List<T> DeserializeNullableCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
 			where T : class
 		{
 			var res = new List<T>();
@@ -514,7 +468,7 @@ namespace Revenj.Serialization
 			return res;
 		}
 
-		private static int SkipString(StreamReader sr)
+		private static int SkipString(TextReader sr)
 		{
 			var c = sr.Read();
 			while (c != '"' && c != -1)
@@ -522,7 +476,7 @@ namespace Revenj.Serialization
 			return GetNextToken(sr);
 		}
 
-		public static int Skip(StreamReader sr, int nextToken)
+		public static int Skip(TextReader sr, int nextToken)
 		{
 			if (nextToken == '"') return SkipString(sr);
 			else if (nextToken == '{')
@@ -566,7 +520,7 @@ namespace Revenj.Serialization
 			}
 		}
 
-		public static ChunkedMemoryStream Memorize(StreamReader sr, ref int nextToken)
+		public static ChunkedMemoryStream Memorize(TextReader sr, ref int nextToken)
 		{
 			var cms = ChunkedMemoryStream.Create();
 			var writer = cms.GetWriter();
@@ -577,7 +531,7 @@ namespace Revenj.Serialization
 			return cms;
 		}
 
-		private static int MemoizeSkipString(StreamReader sr, StreamWriter sw)
+		private static int MemoizeSkipString(TextReader sr, TextWriter sw)
 		{
 			var c = sr.Read();
 			sw.Write((char)c);
@@ -595,7 +549,7 @@ namespace Revenj.Serialization
 			return MemoizeGetNextToken(sr, sw);
 		}
 
-		private static int MemoizeGetNextToken(StreamReader sr, StreamWriter sw)
+		private static int MemoizeGetNextToken(TextReader sr, TextWriter sw)
 		{
 			int c = sr.Read();
 			sw.Write((char)c);
@@ -607,7 +561,7 @@ namespace Revenj.Serialization
 			return c;
 		}
 
-		private static int Memorize(StreamReader sr, int nextToken, StreamWriter sw)
+		private static int Memorize(TextReader sr, int nextToken, TextWriter sw)
 		{
 			if (nextToken == '"') return MemoizeSkipString(sr, sw);
 			else if (nextToken == '{')

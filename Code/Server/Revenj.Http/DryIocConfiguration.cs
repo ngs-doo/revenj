@@ -3,7 +3,6 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Xml.Linq;
 using DryIoc;
 using Revenj.Api;
@@ -146,8 +145,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 			registry.Register<GenericDeserializationBinder>(Reuse.Singleton);
 			registry.Register<ISerialization<byte[]>, BinarySerialization>(Reuse.Singleton);
 			registry.Register<ISerialization<string>, JsonSerialization>(Reuse.Singleton);
-			registry.Register<ISerialization<StringBuilder>, JsonSerialization>(Reuse.Singleton);
-			registry.Register<ISerialization<StreamReader>, JsonSerialization>(Reuse.Singleton);
+			registry.Register<ISerialization<TextReader>, JsonSerialization>(Reuse.Singleton);
 			registry.Register<ISerialization<MemoryStream>, ProtobufSerialization>(Reuse.Singleton);
 			registry.Register<ISerialization<Stream>, ProtobufSerialization>(Reuse.Singleton);
 			registry.Register<ISerialization<object>, PassThroughSerialization>(Reuse.Singleton);

@@ -10,8 +10,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 	{
 		public abstract bool MustEscapeRecord { get; }
 		public abstract bool MustEscapeArray { get; }
-		public abstract void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings);
-		public abstract void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings);
+		public abstract void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings);
+		public abstract void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings);
 
 		public virtual string BuildTuple(bool quote)
 		{
@@ -31,14 +31,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public static void EscapeQuote(StreamWriter sw, char c)
+		public static void EscapeQuote(TextWriter sw, char c)
 		{
 			if (c == '\'')
 				sw.Write('\'');
 			sw.Write(c);
 		}
 
-		public static void EscapeBulkCopy(StreamWriter sw, char c)
+		public static void EscapeBulkCopy(TextWriter sw, char c)
 		{
 			switch (c)
 			{

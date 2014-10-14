@@ -32,7 +32,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			using (var cms = ChunkedMemoryStream.Create())
 			{
 				var sw = cms.GetWriter();
-				Action<StreamWriter, char> mappings = null;
+				Action<TextWriter, char> mappings = null;
 				if (quote)
 				{
 					mappings = EscapeQuote;
@@ -69,7 +69,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return Build(false, null);
 		}
 
-		public Stream Build(bool bulk, Action<StreamWriter, char> mappings)
+		public Stream Build(bool bulk, Action<TextWriter, char> mappings)
 		{
 			if (Properties == null)
 				return new MemoryStream(new byte[] { (byte)'N', (byte)'U', (byte)'L', (byte)'L' });
@@ -115,7 +115,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return cms;
 		}
 
-		public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+		public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Properties == null)
 				return;
@@ -150,7 +150,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			sw.Write(')');
 		}
 
-		public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+		public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Properties == null)
 			{

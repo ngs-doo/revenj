@@ -7,11 +7,11 @@ namespace Revenj.Serialization.Json.Converters
 {
 	public static class ColorConverter
 	{
-		public static void Serialize(Color value, StreamWriter sw, char[] buffer)
+		public static void Serialize(Color value, TextWriter sw, char[] buffer)
 		{
 			sw.Write(value.ToArgb());
 		}
-		public static void Serialize(Color? value, StreamWriter sw, char[] buffer)
+		public static void Serialize(Color? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -19,7 +19,7 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write(value.Value.ToArgb());
 		}
 
-		public static Color Deserialize(StreamReader sr, char[] buffer, ref int nextToken)
+		public static Color Deserialize(TextReader sr, char[] buffer, ref int nextToken)
 		{
 			if (nextToken == '"')
 			{
@@ -34,7 +34,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 		}
 
-		public static List<Color> DeserializeCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Color> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<Color>();
 			res.Add(Deserialize(sr, buffer, ref nextToken));
@@ -51,7 +51,7 @@ namespace Revenj.Serialization.Json.Converters
 			return res;
 		}
 
-		public static List<Color?> DeserializeNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Color?> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<Color?>();
 			if (nextToken == 'n')

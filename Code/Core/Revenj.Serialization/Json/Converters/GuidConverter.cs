@@ -25,7 +25,7 @@ namespace Revenj.Serialization.Json.Converters
 'e', '0', 'e', '1', 'e', '2', 'e', '3', 'e', '4', 'e', '5', 'e', '6', 'e', '7', 'e', '8', 'e', '9', 'e', 'a', 'e', 'b', 'e', 'c', 'e', 'd', 'e', 'e', 'e', 'f', 
 'f', '0', 'f', '1', 'f', '2', 'f', '3', 'f', '4', 'f', '5', 'f', '6', 'f', '7', 'f', '8', 'f', '9', 'f', 'a', 'f', 'b', 'f', 'c', 'f', 'd', 'f', 'e', 'f', 'f' };
 
-		public static void Serialize(Guid value, StreamWriter sw, char[] buffer)
+		public static void Serialize(Guid value, TextWriter sw, char[] buffer)
 		{
 			var bytes = value.ToByteArray();
 			var b = bytes[3] * 2;
@@ -84,13 +84,13 @@ namespace Revenj.Serialization.Json.Converters
 			sw.Write(buffer, 0, 36);
 			sw.Write('"');
 		}
-		public static void Serialize(Guid? value, StreamWriter sw, char[] buffer)
+		public static void Serialize(Guid? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
 			else Serialize(value.Value, sw, buffer);
 		}
-		public static Guid Deserialize(StreamReader sr, char[] buffer, int nextToken)
+		public static Guid Deserialize(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
@@ -101,7 +101,7 @@ namespace Revenj.Serialization.Json.Converters
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			return new Guid(new string(buffer, 0, i));
 		}
-		public static List<Guid> DeserializeCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Guid> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<Guid>();
 			res.Add(Deserialize(sr, buffer, nextToken));
@@ -117,7 +117,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<Guid?> DeserializeNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Guid?> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<Guid?>();
 			if (nextToken == 'n')

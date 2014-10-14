@@ -50,7 +50,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return quote ? "'" + Value.Replace("'", "''") + "'" : Value;
 		}
 
-		private void Escape(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+		private void Escape(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			string quoteEscape = null;
 			string slashEscape = null;
@@ -93,7 +93,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+		public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (HasMarkers)
 				Escape(sw, escaping, mappings);
@@ -107,7 +107,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+		public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Value == null)
 				sw.Write("NULL");

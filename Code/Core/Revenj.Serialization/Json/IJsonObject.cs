@@ -6,7 +6,7 @@ namespace Revenj.Serialization
 {
 	public interface IJsonObject
 	{
-		void Serialize(StreamWriter sw, Action<StreamWriter, object> serializer);
-		object Deserialize(StreamReader sr, StreamingContext context, Func<StreamReader, Type, object> serializer);
+		void Serialize(TextWriter sw, Action<TextWriter, object> serializer);
+		object Deserialize(TextReader sr, StreamingContext context, Func<TextReader, Type, object> serializer);
 	}
 }

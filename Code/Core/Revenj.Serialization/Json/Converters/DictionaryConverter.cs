@@ -6,7 +6,7 @@ namespace Revenj.Serialization.Json.Converters
 {
 	public static class DictionaryConverter
 	{
-		public static void SerializeNullable(Dictionary<string, string> value, StreamWriter sw)
+		public static void SerializeNullable(Dictionary<string, string> value, TextWriter sw)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -14,7 +14,7 @@ namespace Revenj.Serialization.Json.Converters
 				Serialize(value, sw);
 		}
 
-		public static void Serialize(Dictionary<string, string> value, StreamWriter sw)
+		public static void Serialize(Dictionary<string, string> value, TextWriter sw)
 		{
 			sw.Write('{');
 			if (value.Count > 0)
@@ -38,7 +38,7 @@ namespace Revenj.Serialization.Json.Converters
 			sw.Write('}');
 		}
 
-		public static Dictionary<string, string> Deserialize(StreamReader sr, char[] buffer, int nextToken)
+		public static Dictionary<string, string> Deserialize(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			var res = new Dictionary<string, string>();
@@ -63,11 +63,11 @@ namespace Revenj.Serialization.Json.Converters
 			if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			return res;
 		}
-		public static List<Dictionary<string, string>> DeserializeCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Dictionary<string, string>> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
 		}
-		public static List<Dictionary<string, string>> DeserializeNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Dictionary<string, string>> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
 		}

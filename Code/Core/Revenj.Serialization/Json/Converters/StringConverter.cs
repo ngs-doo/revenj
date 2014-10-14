@@ -8,7 +8,7 @@ namespace Revenj.Serialization.Json.Converters
 {
 	public static class StringConverter
 	{
-		public static void SerializeNullable(string value, StreamWriter sw)
+		public static void SerializeNullable(string value, TextWriter sw)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -16,7 +16,7 @@ namespace Revenj.Serialization.Json.Converters
 				Serialize(value, sw);
 		}
 
-		public static void Serialize(string value, StreamWriter sw)
+		public static void Serialize(string value, TextWriter sw)
 		{
 			sw.Write('"');
 			char c;
@@ -65,7 +65,7 @@ namespace Revenj.Serialization.Json.Converters
 			sw.Write('"');
 		}
 
-		public static string DeserializeNullable(StreamReader sr, char[] buffer, int nextToken)
+		public static string DeserializeNullable(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken == 'n')
 			{
@@ -76,7 +76,7 @@ namespace Revenj.Serialization.Json.Converters
 			return Deserialize(sr, buffer, nextToken);
 		}
 
-		public static string Deserialize(StreamReader sr, char[] buffer, int nextToken)
+		public static string Deserialize(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			int i = 0;
@@ -152,7 +152,7 @@ namespace Revenj.Serialization.Json.Converters
 			//if (nextToken == -1) throw new SerializationException("Invalid end of string found.");
 			return sb.ToString();
 		}
-		public static List<string> DeserializeCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<string> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<string>();
 			res.Add(Deserialize(sr, buffer, nextToken));
@@ -168,7 +168,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<string> DeserializeNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<string> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<string>();
 			if (nextToken == 'n')

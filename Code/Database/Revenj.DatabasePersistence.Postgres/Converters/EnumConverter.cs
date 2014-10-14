@@ -217,7 +217,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return quote ? "'" + Value + "'" : Value;
 			}
 
-			private void Escape(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			private void Escape(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (mappings != null)
 				{
@@ -227,12 +227,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else sw.Write(Value ?? string.Empty);
 			}
 
-			public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				sw.Write(Value ?? string.Empty);
 			}
 
-			public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 					sw.Write("NULL");

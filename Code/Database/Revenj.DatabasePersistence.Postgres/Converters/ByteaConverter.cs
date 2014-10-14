@@ -235,7 +235,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			public override bool MustEscapeRecord { get { return true; } }
 			public override bool MustEscapeArray { get { return true; } }
 
-			private void BuildArray(StreamWriter sw)
+			private void BuildArray(TextWriter sw)
 			{
 				for (int i = 0; i < Value.Length; i++)
 				{
@@ -263,7 +263,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				var pref = BuildSlashEscape(escaping.Length);
 				if (mappings != null)
@@ -276,7 +276,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				BuildArray(sw);
 			}
 
-			public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				//TODO this is wrong
 				InsertRecord(sw, escaping, mappings);
@@ -315,7 +315,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				var pref = BuildSlashEscape(escaping.Length);
 				if (mappings != null)
@@ -329,7 +329,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				if (Dispose) Value.Dispose();
 			}
 
-			public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				//TODO this is wrong
 				InsertRecord(sw, escaping, mappings);

@@ -37,10 +37,10 @@ namespace Revenj.Utility
 		private List<byte[]> Blocks = new List<byte[]>();
 		private int CurrentPosition;
 		private int TotalSize;
-		private readonly StreamWriter Writer;
-		private readonly StreamReader Reader;
+		private CustomWriter Writer;
+		private BufferedTextReader Reader;
 
-		private readonly Lazy<char[]> CharBuffer = new Lazy<char[]>(() => new char[BlockSize * 4]);
+		private char[] CharBuffer;
 
 		/// <summary>
 		/// Create or get a new instance of memory stream
@@ -65,8 +65,6 @@ namespace Revenj.Utility
 		public ChunkedMemoryStream()
 		{
 			Blocks.Add(new byte[BlockSize]);
-			Writer = new CustomWriter(this);
-			Reader = new StreamReader(this);
 		}
 
 		class CustomWriter : StreamWriter
@@ -136,6 +134,25 @@ namespace Revenj.Utility
 			get { return CurrentPosition; }
 			set { CurrentPosition = (int)value; }
 		}
+
+		/// <summary>
+		/// Read a single byte
+		/// </summary>
+		/// <returns>byte value or -1 for end</returns>
+		public override int ReadByte()
+		{
+			var block = Blocks[CurrentPosition >> BlockShift];
+			if (CurrentPosition < TotalSize)
+				return block[CurrentPosition++ & BlockAnd];
+			else
+				return -1;
+		}
+
+		public byte[] GetCurrentSegment()
+		{
+			return Blocks[CurrentPosition >> BlockShift];
+		}
+
 		/// <summary>
 		/// Read buffer from the stream. 
 		/// Can return less then specified count if remaining block size is less than specified count
@@ -294,10 +311,12 @@ namespace Revenj.Utility
 		/// <summary>
 		/// Convert stream to Base 64 String representation in the provided writer.
 		/// </summary>
-		public void ToBase64Writer(StreamWriter sw)
+		public void ToBase64Writer(TextWriter sw)
 		{
 			var tmpBuf = new byte[3];
-			var base64 = CharBuffer.Value;
+			if (CharBuffer == null)
+				CharBuffer = new char[BlockSize * 4 / 3 + 2];
+			var base64 = CharBuffer;
 			var total = TotalSize >> BlockShift;
 			var remaining = TotalSize & BlockAnd;
 			int len;
@@ -325,7 +344,7 @@ namespace Revenj.Utility
 		/// Convert stream to Postgres representation of bytea
 		/// </summary>
 		/// <param name="sw"></param>
-		public void ToPostgresBytea(StreamWriter sw)
+		public void ToPostgresBytea(TextWriter sw)
 		{
 			var total = TotalSize >> BlockShift;
 			var remaining = TotalSize & BlockAnd;
@@ -363,16 +382,27 @@ namespace Revenj.Utility
 		}
 
 		/// <summary>
-		/// Reuse same stream writer on this stream.
+		/// Reuse same text writer on this stream.
 		/// </summary>
 		/// <returns>stream writer</returns>
-		public StreamWriter GetWriter() { return Writer; }
+		public TextWriter GetWriter()
+		{
+			if (Writer == null)
+				Writer = new CustomWriter(this);
+			return Writer;
+		}
 
 		/// <summary>
-		/// Reuse same stream reader on this stream.
+		/// Reuse same text reader on this stream.
 		/// </summary>
 		/// <returns>stream reader</returns>
-		public StreamReader GetReader() { return Reader; }
+		public TextReader GetReader()
+		{
+			if (Reader == null)
+				Reader = new BufferedTextReader(new StreamReader(this));
+			Reader.Initialize();
+			return Reader;
+		}
 
 		bool disposed;
 

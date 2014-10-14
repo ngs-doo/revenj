@@ -24,7 +24,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			}
 		}
 
-		public static void ToArray<T>(StreamWriter sw, IEnumerable<T> data, Func<T, PostgresTuple> converter)
+		public static void ToArray<T>(TextWriter sw, IEnumerable<T> data, Func<T, PostgresTuple> converter)
 		{
 			if (data == null)
 			{
@@ -40,7 +40,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			sw.Write('\'');
 		}
 
-		public static void ToArray<T>(StreamWriter sw, T[] data, Func<T, PostgresTuple> converter)
+		public static void ToArray<T>(TextWriter sw, T[] data, Func<T, PostgresTuple> converter)
 		{
 			if (data == null)
 			{

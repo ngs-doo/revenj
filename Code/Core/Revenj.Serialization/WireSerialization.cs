@@ -27,7 +27,7 @@ namespace Revenj.Serialization
 			//fast path
 			if (accept == "application/json")
 			{
-				Json.Serialize(value, destination);
+				Json.SerializeJsonObject(value, destination);
 				return "application/json";
 			}
 			if (accept == "application/x-protobuf")
@@ -40,16 +40,11 @@ namespace Revenj.Serialization
 				Xml.Serialize(value, destination);
 				return "application/xml";
 			}
-			if (accept == "application/json-experimental")
-			{
-				Json.SerializeJsonObject(value, destination);
-				return "application/json";
-			}
 			//Slow path
 			accept = (accept ?? "application/json").ToLowerInvariant();
 			if (accept.Contains("application/json"))
 			{
-				Json.Serialize(value, destination);
+				Json.SerializeJsonObject(value, destination);
 				return "application/json";
 			}
 			if (accept.Contains("application/x-protobuf"))
@@ -67,8 +62,6 @@ namespace Revenj.Serialization
 				return null;
 			//fast path
 			if (contentType == "application/json")
-				return Json.DeserializeJson(source, target, context);
-			if (contentType == "application/json-experimental")
 				return Json.Deserialize(source, target, context);
 			if (contentType == "application/x-protobuf")
 				return Protobuf.Deserialize(source, target, context);

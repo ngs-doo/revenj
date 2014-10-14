@@ -6,14 +6,14 @@ namespace Revenj.Serialization.Json.Converters
 {
 	public static class BoolConverter
 	{
-		public static void Serialize(bool value, StreamWriter sw)
+		public static void Serialize(bool value, TextWriter sw)
 		{
 			if (value)
 				sw.Write("true");
 			else
 				sw.Write("false");
 		}
-		public static void Serialize(bool? value, StreamWriter sw)
+		public static void Serialize(bool? value, TextWriter sw)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -22,7 +22,7 @@ namespace Revenj.Serialization.Json.Converters
 			else
 				sw.Write("false");
 		}
-		public static bool Deserialize(StreamReader sr, int nextToken)
+		public static bool Deserialize(TextReader sr, int nextToken)
 		{
 			if (nextToken == 't')
 			{
@@ -36,7 +36,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true or false");
 		}
-		public static List<bool> DeserializeCollection(StreamReader sr, int nextToken)
+		public static List<bool> DeserializeCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<bool>();
 			if (nextToken == 't')
@@ -76,7 +76,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<bool?> DeserializeNullableCollection(StreamReader sr, int nextToken)
+		public static List<bool?> DeserializeNullableCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<bool?>();
 			if (nextToken == 't')

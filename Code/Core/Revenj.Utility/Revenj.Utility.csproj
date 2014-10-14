@@ -63,6 +63,7 @@
     </Compile>
     <Compile Include="Reflection\AssemblyScanner.cs" />
     <Compile Include="StableHashCode.cs" />
+    <Compile Include="Streams\BufferedTextReader.cs" />
     <Compile Include="Streams\ChunkedMemoryStream.cs" />
     <Compile Include="DynamicOrderBy.cs" />
     <Compile Include="ExpandoHelper.cs" />

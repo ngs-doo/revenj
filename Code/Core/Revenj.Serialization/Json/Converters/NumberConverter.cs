@@ -9,11 +9,11 @@ namespace Revenj.Serialization.Json.Converters
 	{
 		private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
-		public static void Serialize(decimal value, StreamWriter sw)
+		public static void Serialize(decimal value, TextWriter sw)
 		{
 			sw.Write(value);
 		}
-		public static void Serialize(decimal? value, StreamWriter sw)
+		public static void Serialize(decimal? value, TextWriter sw)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -21,11 +21,11 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write(value.Value);
 		}
 
-		public static void Serialize(int value, StreamWriter sw)
+		public static void Serialize(int value, TextWriter sw)
 		{
 			sw.Write(value);
 		}
-		public static void Serialize(int? value, StreamWriter sw)
+		public static void Serialize(int? value, TextWriter sw)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -33,11 +33,11 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write(value.Value);
 		}
 
-		public static void Serialize(long value, StreamWriter sw, char[] buffer)
+		public static void Serialize(long value, TextWriter sw, char[] buffer)
 		{
 			sw.Write(value);
 		}
-		public static void Serialize(long? value, StreamWriter sw, char[] buffer)
+		public static void Serialize(long? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -45,11 +45,11 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write(value.Value);
 		}
 
-		public static void Serialize(double value, StreamWriter sw, char[] buffer)
+		public static void Serialize(double value, TextWriter sw, char[] buffer)
 		{
 			sw.Write(value);
 		}
-		public static void Serialize(double? value, StreamWriter sw, char[] buffer)
+		public static void Serialize(double? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -57,11 +57,11 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write(value.Value);
 		}
 
-		public static void Serialize(float value, StreamWriter sw, char[] buffer)
+		public static void Serialize(float value, TextWriter sw, char[] buffer)
 		{
 			sw.Write(value);
 		}
-		public static void Serialize(float? value, StreamWriter sw, char[] buffer)
+		public static void Serialize(float? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -69,7 +69,7 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write(value.Value);
 		}
 
-		public static decimal DeserializeDecimal(StreamReader sr, ref int nextToken)
+		public static decimal DeserializeDecimal(TextReader sr, ref int nextToken)
 		{
 			var negative = nextToken == '-';
 			if (negative) nextToken = sr.Read();
@@ -92,7 +92,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return negative ? -res : res; ;
 		}
-		public static List<decimal> DeserializeDecimalCollection(StreamReader sr, int nextToken)
+		public static List<decimal> DeserializeDecimalCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<decimal>();
 			res.Add(DeserializeDecimal(sr, ref nextToken));
@@ -108,7 +108,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<decimal?> DeserializeDecimalNullableCollection(StreamReader sr, int nextToken)
+		public static List<decimal?> DeserializeDecimalNullableCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<decimal?>();
 			if (nextToken == 'n')
@@ -139,7 +139,7 @@ namespace Revenj.Serialization.Json.Converters
 			return res;
 		}
 
-		public static int DeserializeInt(StreamReader sr, ref int nextToken)
+		public static int DeserializeInt(TextReader sr, ref int nextToken)
 		{
 			int value = 0;
 			int sign = 1;
@@ -156,7 +156,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return sign * value;
 		}
-		public static List<int> DeserializeIntCollection(StreamReader sr, int nextToken)
+		public static List<int> DeserializeIntCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<int>();
 			res.Add(DeserializeInt(sr, ref nextToken));
@@ -172,7 +172,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<int?> DeserializeIntNullableCollection(StreamReader sr, int nextToken)
+		public static List<int?> DeserializeIntNullableCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<int?>();
 			if (nextToken == 'n')
@@ -203,7 +203,7 @@ namespace Revenj.Serialization.Json.Converters
 			return res;
 		}
 
-		public static long DeserializeLong(StreamReader sr, ref int nextToken)
+		public static long DeserializeLong(TextReader sr, ref int nextToken)
 		{
 			long value = 0;
 			int sign = 1;
@@ -220,7 +220,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return sign * value;
 		}
-		public static List<long> DeserializeLongCollection(StreamReader sr, int nextToken)
+		public static List<long> DeserializeLongCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<long>();
 			res.Add(DeserializeLong(sr, ref nextToken));
@@ -236,7 +236,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<long?> DeserializeLongNullableCollection(StreamReader sr, int nextToken)
+		public static List<long?> DeserializeLongNullableCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<long?>();
 			if (nextToken == 'n')
@@ -267,7 +267,7 @@ namespace Revenj.Serialization.Json.Converters
 			return res;
 		}
 
-		public static double DeserializeDouble(StreamReader sr, char[] buffer, ref int nextToken)
+		public static double DeserializeDouble(TextReader sr, char[] buffer, ref int nextToken)
 		{
 			var ind = 0;
 			do
@@ -277,7 +277,7 @@ namespace Revenj.Serialization.Json.Converters
 			} while (ind < buffer.Length && nextToken != ',' && nextToken != '}' && nextToken != ']');
 			return double.Parse(new string(buffer, 0, ind), NumberStyles.Float, Invariant);
 		}
-		public static List<double> DeserializeDoubleCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<double> DeserializeDoubleCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<double>();
 			res.Add(DeserializeDouble(sr, buffer, ref nextToken));
@@ -293,7 +293,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<double?> DeserializeDoubleNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<double?> DeserializeDoubleNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<double?>();
 			if (nextToken == 'n')
@@ -324,7 +324,7 @@ namespace Revenj.Serialization.Json.Converters
 			return res;
 		}
 
-		public static float DeserializeFloat(StreamReader sr, char[] buffer, ref int nextToken)
+		public static float DeserializeFloat(TextReader sr, char[] buffer, ref int nextToken)
 		{
 			var ind = 0;
 			do
@@ -334,7 +334,7 @@ namespace Revenj.Serialization.Json.Converters
 			} while (ind < buffer.Length && nextToken != ',' && nextToken != '}' && nextToken != ']');
 			return float.Parse(new string(buffer, 0, ind), NumberStyles.Float, Invariant);
 		}
-		public static List<float> DeserializeFloatCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<float> DeserializeFloatCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<float>();
 			res.Add(DeserializeFloat(sr, buffer, ref nextToken));
@@ -350,7 +350,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			return res;
 		}
-		public static List<float?> DeserializeFloatNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<float?> DeserializeFloatNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<float?>();
 			if (nextToken == 'n')

@@ -208,7 +208,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			public override bool MustEscapeRecord { get { return true; } }
 			public override bool MustEscapeArray { get { return Value != null; } }
 
-			public override void InsertRecord(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 					return;
@@ -316,7 +316,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public override void InsertArray(StreamWriter sw, string escaping, Action<StreamWriter, char> mappings)
+			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 				{

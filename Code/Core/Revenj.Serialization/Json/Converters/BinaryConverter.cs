@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -10,57 +11,51 @@ namespace Revenj.Serialization.Json.Converters
 {
 	public static class BinaryConverter
 	{
-		private const int BlockSize = 1024;
-		private const int BlockAnd = 1023;
-		private const int BlockShift = 10;
+		private const int BlockSizeDiv3 = 32766;
 
 		private static readonly HashSet<Guid> Codecs = new HashSet<Guid>();
+		private static readonly ConcurrentBag<char[]> Buffers = new ConcurrentBag<char[]>();
 
 		static BinaryConverter()
 		{
 			foreach (var enc in ImageCodecInfo.GetImageEncoders())
 				Codecs.Add(enc.FormatID);
+			for (int i = 0; i < Environment.ProcessorCount; i++)
+				Buffers.Add(new char[65536]);
 		}
-		public static void Serialize(byte[] value, StreamWriter sw)
+
+		public static void Serialize(byte[] value, TextWriter sw)
 		{
 			if (value == null)
 			{
 				sw.Write("null");
 			}
-			else if (value.Length < 85000)
+			else if (value.Length == 0)
 			{
-				sw.Write('"');
-				sw.Write(Convert.ToBase64String(value));
-				sw.Write('"');
+				sw.Write("\"\"");
 			}
 			else
 			{
-				var tmpBuf = new byte[3];
-				var base64 = new char[BlockSize * 4];
-				var total = value.Length >> BlockShift;
-				var remaining = value.Length & BlockAnd;
+				char[] base64;
+				var took = Buffers.TryTake(out base64);
+				if (!took) base64 = new char[65536];
+				var total = value.Length / BlockSizeDiv3;
+				var remaining = value.Length % BlockSizeDiv3;
 				int len;
-				var off = 0;
 				sw.Write('"');
 				for (int i = 0; i < total; i++)
 				{
-					len = Convert.ToBase64CharArray(value, off + i * BlockSize, BlockSize - 2, base64, 0);
+					len = Convert.ToBase64CharArray(value, i * BlockSizeDiv3, BlockSizeDiv3, base64, 0);
 					sw.Write(base64, 0, len);
-					for (int j = 0; j < 2 - off; j++)
-						tmpBuf[j] = value[(i + 1) * BlockSize - 2 + j + off];
-					for (int j = 0; j < 1 + off; j++)
-						tmpBuf[2 - off + j] = value[(i + 1) * BlockSize + j];
-					len = Convert.ToBase64CharArray(tmpBuf, 0, 3, base64, 0);
-					sw.Write(base64, 0, len);
-					off = (off + 1) & 3;
 				}
-				len = Convert.ToBase64CharArray(value, total * BlockSize + off, remaining != 0 ? remaining - off : BlockSize, base64, 0);
+				len = Convert.ToBase64CharArray(value, total * BlockSizeDiv3, remaining, base64, 0);
 				sw.Write(base64, 0, len);
 				sw.Write('"');
+				Buffers.Add(base64);
 			}
 		}
 
-		public static void Serialize(Image value, StreamWriter sw)
+		public static void Serialize(Image value, TextWriter sw)
 		{
 			if (value == null)
 			{
@@ -82,7 +77,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 		}
 
-		public static void Serialize(Stream value, StreamWriter sw)
+		public static void Serialize(Stream value, TextWriter sw)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -102,97 +97,146 @@ namespace Revenj.Serialization.Json.Converters
 
 		private static readonly byte[] EmptyBytes = new byte[0];
 
-		public static byte[] Deserialize(StreamReader sr, char[] buffer, int nextToken)
+		public static byte[] Deserialize(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			if (nextToken == '"') return EmptyBytes;
+			char[] base64;
+			var took = Buffers.TryTake(out base64);
+			if (!took) base64 = new char[65536];
 			var res = new List<byte[]>();
-			var buf = new char[4096];
 			int total = 0;
 			int i = 0;
-			while (nextToken != '"' && nextToken != -1)
+			var br = sr as BufferedTextReader;
+			if (br != null)
 			{
-				buf[i + 0] = (char)nextToken;
-				buf[i + 1] = (char)sr.Read();
-				buf[i + 2] = (char)sr.Read();
-				buf[i + 3] = (char)sr.Read();
-				nextToken = sr.Read();
-				i += 4;
-				if (i == buf.Length)
+				i = 1;
+				base64[0] = (char)nextToken;
+				int len;
+				while ((len = br.ReadUntil(base64, i, '"')) > 0)
 				{
-					var bytes = Convert.FromBase64CharArray(buf, 0, buf.Length);
-					res.Add(bytes);
-					i = 0;
-					total += bytes.Length;
+					i += len;
+					if (i == base64.Length)
+					{
+						var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
+						res.Add(bytes);
+						i = 0;
+						total += bytes.Length;
+					}
+				}
+				nextToken = sr.Read();
+			}
+			else
+			{
+				while (nextToken != '"' && nextToken != -1)
+				{
+					base64[i + 0] = (char)nextToken;
+					base64[i + 1] = (char)sr.Read();
+					base64[i + 2] = (char)sr.Read();
+					base64[i + 3] = (char)sr.Read();
+					nextToken = sr.Read();
+					i += 4;
+					if (i == base64.Length)
+					{
+						var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
+						res.Add(bytes);
+						i = 0;
+						total += bytes.Length;
+					}
 				}
 			}
 			if (i > 0)
 			{
-				var bytes = Convert.FromBase64CharArray(buf, 0, i);
+				var bytes = Convert.FromBase64CharArray(base64, 0, i);
 				res.Add(bytes);
 				total += bytes.Length;
 			}
+			Buffers.Add(base64);
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found end of stream.");
 			var result = new byte[total];
 			var cur = 0;
 			for (i = 0; i < res.Count; i++)
 			{
 				var item = res[i];
-				for (int j = 0; j < item.Length; j++)
-					result[cur++] = item[j];
+				Array.Copy(item, 0, result, cur, item.Length);
+				cur += item.Length;
 			}
 			return result;
 		}
 
-		public static List<byte[]> DeserializeCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<byte[]> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
 		}
 
-		public static List<byte[]> DeserializeNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<byte[]> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
 		}
 
-		public static Stream DeserializeStream(StreamReader sr, char[] buffer, int nextToken)
+		public static Stream DeserializeStream(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			if (nextToken == '"') return new MemoryStream();
 			var res = ChunkedMemoryStream.Create();
-			var buf = new char[4096];
+			char[] base64;
+			var took = Buffers.TryTake(out base64);
+			if (!took) base64 = new char[65536];
 			int i = 0;
-			while (nextToken != '"' && nextToken != -1)
+			var br = sr as BufferedTextReader;
+			if (br != null)
 			{
-				buf[i + 0] = (char)nextToken;
-				buf[i + 1] = (char)sr.Read();
-				buf[i + 2] = (char)sr.Read();
-				buf[i + 3] = (char)sr.Read();
-				nextToken = sr.Read();
-				i += 4;
-				if (i == buf.Length)
+				i = 1;
+				base64[0] = (char)nextToken;
+				int len;
+				while ((len = br.ReadUntil(base64, i, '"')) > 0)
 				{
-					var bytes = Convert.FromBase64CharArray(buf, 0, buf.Length);
-					res.Write(bytes, 0, bytes.Length);
-					i = 0;
+					i += len;
+					if (i == base64.Length)
+					{
+						var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
+						res.Write(bytes, 0, bytes.Length);
+						i = 0;
+					}
+				}
+				nextToken = sr.Read();
+			}
+			else
+			{
+				while (nextToken != '"' && nextToken != -1)
+				{
+					base64[i + 0] = (char)nextToken;
+					base64[i + 1] = (char)sr.Read();
+					base64[i + 2] = (char)sr.Read();
+					base64[i + 3] = (char)sr.Read();
+					nextToken = sr.Read();
+					i += 4;
+					if (i == base64.Length)
+					{
+						var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
+						res.Write(bytes, 0, bytes.Length);
+						i = 0;
+					}
 				}
 			}
 			if (i > 0)
 			{
-				var bytes = Convert.FromBase64CharArray(buf, 0, i);
+				var bytes = Convert.FromBase64CharArray(base64, 0, i);
 				res.Write(bytes, 0, bytes.Length);
 			}
+			Buffers.Add(base64);
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found end of stream.");
 			return res;
 		}
 
-		public static List<Stream> DeserializeStreamCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Stream> DeserializeStreamCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next));
 		}
 
-		public static List<Stream> DeserializeStreamNullableCollection(StreamReader sr, char[] buffer, int nextToken)
+		public static List<Stream> DeserializeStreamNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next));
 		}
