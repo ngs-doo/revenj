@@ -32,7 +32,7 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="aggregates">new aggregates</param>
-		void Create<T>(T[] aggregates) where T : IAggregateRoot;
+		void Create<T>(IEnumerable<T> aggregates) where T : IAggregateRoot;
 		/// <summary>
 		/// Update existing aggregate roots. Provide pair of old and new.
 		/// Old value is optional. Change track value will be used on null values.
@@ -41,20 +41,20 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="pairs">aggregate pairs</param>
-		void Update<T>(KeyValuePair<T, T>[] pairs) where T : IAggregateRoot;
+		void Update<T>(IEnumerable<KeyValuePair<T, T>> pairs) where T : IAggregateRoot;
 		/// <summary>
 		/// Delete existing aggregate roots.
 		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="aggregates">remove provided aggregate roots</param>
-		void Delete<T>(T[] aggregates) where T : IAggregateRoot;
+		void Delete<T>(IEnumerable<T> aggregates) where T : IAggregateRoot;
 		/// <summary>
 		/// Raise domain events
 		/// </summary>
 		/// <typeparam name="T">event type</typeparam>
 		/// <param name="events">domain events</param>
-		void Submit<T>(T[] events) where T : IDomainEvent;
+		void Submit<T>(IEnumerable<T> events) where T : IDomainEvent;
 		/// <summary>
 		/// Populate report
 		/// </summary>
@@ -74,7 +74,7 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="uris">identifiers</param>
 		/// <returns>found history</returns>
-		IHistory<T>[] History<T>(string[] uris) where T : IObjectHistory;
+		IHistory<T>[] History<T>(IEnumerable<string> uris) where T : IObjectHistory;
 		/// <summary>
 		/// OLAP cube builder. Data analysis using dimensions and facts
 		/// </summary>

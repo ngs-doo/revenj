@@ -68,19 +68,19 @@ namespace Revenj.DomainPatterns
 			return (IPersistableRepository<T>)repository;
 		}
 
-		public void Create<T>(T[] aggregates) where T : IAggregateRoot
+		public void Create<T>(IEnumerable<T> aggregates) where T : IAggregateRoot
 		{
 			var repository = GetRepository<T>();
 			repository.Persist(aggregates, null, null);
 		}
 
-		public void Update<T>(KeyValuePair<T, T>[] pairs) where T : IAggregateRoot
+		public void Update<T>(IEnumerable<KeyValuePair<T, T>> pairs) where T : IAggregateRoot
 		{
 			var repository = GetRepository<T>();
 			repository.Persist(null, pairs, null);
 		}
 
-		public void Delete<T>(T[] aggregates) where T : IAggregateRoot
+		public void Delete<T>(IEnumerable<T> aggregates) where T : IAggregateRoot
 		{
 			var repository = GetRepository<T>();
 			repository.Persist(null, null, aggregates);
@@ -98,7 +98,7 @@ namespace Revenj.DomainPatterns
 			return (IDomainEventStore<T>)store;
 		}
 
-		public void Submit<T>(T[] events) where T : IDomainEvent
+		public void Submit<T>(IEnumerable<T> events) where T : IDomainEvent
 		{
 			var store = GetStore<T>();
 			store.Submit(events);
@@ -130,7 +130,7 @@ namespace Revenj.DomainPatterns
 			return (IRepository<IHistory<T>>)repository;
 		}
 
-		public IHistory<T>[] History<T>(string[] uris) where T : IObjectHistory
+		public IHistory<T>[] History<T>(IEnumerable<string> uris) where T : IObjectHistory
 		{
 			var repository = GetHistory<T>();
 			return repository.Find(uris);
