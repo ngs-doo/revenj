@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using Autofac;
 using Autofac.Builder;
@@ -158,7 +157,7 @@ namespace Revenj.Core
 			builder.RegisterType<XmlSerialization>().As<ISerialization<XElement>>().SingleInstance();
 			builder.RegisterType<GenericDeserializationBinder>().SingleInstance();
 			builder.RegisterType<BinarySerialization>().As<ISerialization<byte[]>>().SingleInstance();
-			builder.RegisterType<JsonSerialization>().As<ISerialization<string>, ISerialization<StringBuilder>, ISerialization<StreamReader>>().SingleInstance();
+			builder.RegisterType<JsonSerialization>().As<ISerialization<string>, ISerialization<TextReader>>().SingleInstance();
 			builder.RegisterType<ProtobufSerialization>().As<ISerialization<MemoryStream>, ISerialization<Stream>>().SingleInstance();
 			builder.RegisterType<PassThroughSerialization>().As<ISerialization<object>>().SingleInstance();
 			builder.RegisterType<WireSerialization>().As<IWireSerialization>().SingleInstance();

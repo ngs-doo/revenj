@@ -4,7 +4,6 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Net;
-using System.Xml.Linq;
 using Revenj.Api;
 using Revenj.Extensibility;
 using Revenj.Processing;
@@ -19,34 +18,22 @@ namespace Revenj.Wcf
 		private readonly IObjectFactory ObjectFactory;
 		private readonly IProcessingEngine ProcessingEngine;
 		private readonly IWireSerialization Serialization;
-		private readonly ISerialization<Stream> Protobuf;
-		private readonly ISerialization<XElement> Xml;
-		private readonly ISerialization<StreamReader> Json;
 
 		public CommandConverter(
 			IRestApplication application,
 			IObjectFactory objectFactory,
 			IProcessingEngine processingEngine,
-			IWireSerialization serialization,
-			ISerialization<Stream> protobuf,
-			ISerialization<XElement> xml,
-			ISerialization<StreamReader> json)
+			IWireSerialization serialization)
 		{
 			Contract.Requires(application != null);
 			Contract.Requires(objectFactory != null);
 			Contract.Requires(processingEngine != null);
 			Contract.Requires(serialization != null);
-			Contract.Requires(protobuf != null);
-			Contract.Requires(xml != null);
-			Contract.Requires(json != null);
 
 			this.Application = application;
 			this.ObjectFactory = objectFactory;
 			this.ProcessingEngine = processingEngine;
 			this.Serialization = serialization;
-			this.Protobuf = protobuf;
-			this.Xml = xml;
-			this.Json = json;
 		}
 
 		public Stream PassThrough<TCommand, TArgument>(TArgument argument, string accept)
@@ -79,18 +66,9 @@ namespace Revenj.Wcf
 			ThreadContext.Request.UriTemplateMatch = match;
 			if (argument == null)
 				return Application.Get();
-			switch (ThreadContext.Request.ContentType)
-			{
-				case "application/x-protobuf":
-					return Application.Post(Protobuf.Serialize(argument));
-				case "application/json":
-					return Application.Post(Json.Serialize(argument).BaseStream);
-			}
 			using (var ms = ChunkedMemoryStream.Create())
 			{
-				var sw = ms.GetWriter();
-				sw.Write(Xml.Serialize(argument));
-				sw.Flush();
+				Serialization.Serialize(argument, ThreadContext.Request.ContentType, ms);
 				ms.Position = 0;
 				return Application.Post(ms);
 			}
