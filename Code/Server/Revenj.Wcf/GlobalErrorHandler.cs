@@ -62,19 +62,19 @@ namespace Revenj.Wcf
 			{
 				ErrorLogger.Trace(() => fe.Message);
 				if (fault == null)
-					fault = CreateError(version, se.Message, HttpStatusCode.BadRequest);
+					fault = CreateError(version, fe.Message, HttpStatusCode.BadRequest);
 			}
 			else if (anse != null)
 			{
 				ErrorLogger.Trace(() => anse.Message);
 				if (fault == null)
-					fault = CreateError(version, se.Message, HttpStatusCode.NotFound);
+					fault = CreateError(version, anse.Message, HttpStatusCode.NotFound);
 			}
 			else
 			{
 				ErrorLogger.Error(error.GetDetailedExplanation());
 				if (fault == null)
-					fault = CreateError(version, se.Message, HttpStatusCode.InternalServerError);
+					fault = CreateError(version, error.Message, HttpStatusCode.InternalServerError);
 			}
 		}
 

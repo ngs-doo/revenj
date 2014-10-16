@@ -10,6 +10,7 @@ namespace Revenj.Utility
 		private int InBuffer;
 		private int BufferEnd;
 		private int NextChar;
+		private int TotalBuffersRead;
 
 		public BufferedTextReader(TextReader reader)
 		{
@@ -18,10 +19,13 @@ namespace Revenj.Utility
 
 		public void Initialize()
 		{
+			TotalBuffersRead = 0;
 			InBuffer = 0;
 			BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 			NextChar = BufferEnd > 0 ? Buffer[0] : -1;
 		}
+
+		public int Position { get { return TotalBuffersRead + InBuffer; } }
 
 		public override int Peek()
 		{
@@ -34,6 +38,7 @@ namespace Revenj.Utility
 			InBuffer++;
 			if (InBuffer == BufferEnd)
 			{
+				TotalBuffersRead += BufferEnd;
 				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				InBuffer = 0;
 				NextChar = BufferEnd > 0 ? Buffer[0] : -1;
@@ -49,6 +54,7 @@ namespace Revenj.Utility
 		{
 			if (InBuffer == BufferEnd)
 			{
+				TotalBuffersRead += BufferEnd;
 				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				InBuffer = 0;
 				if (BufferEnd == 0)
@@ -60,6 +66,7 @@ namespace Revenj.Utility
 				target[j] = Buffer[i];
 			if (i == BufferEnd)
 			{
+				TotalBuffersRead += BufferEnd;
 				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				InBuffer = 0;
 				NextChar = BufferEnd > 0 ? Buffer[0] : -1;

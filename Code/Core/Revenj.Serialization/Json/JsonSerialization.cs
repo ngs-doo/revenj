@@ -39,84 +39,63 @@ namespace Revenj.Serialization
 
 		public string Serialize<T>(T value)
 		{
-			var declaredType = typeof(T);
-			var type = value != null ? value.GetType() : declaredType;
-			var settings = new JsonSerializerSettings();
-			settings.Converters.Add(new StringEnumConverter());
-			settings.TypeNameHandling = type != declaredType || !(declaredType.IsClass || declaredType.IsValueType) ? TypeNameHandling.Objects : TypeNameHandling.Auto;
-			settings.Binder = Binder;
-			return JsonConvert.SerializeObject(value, settings);
+			using (var cms = ChunkedMemoryStream.Create())
+			{
+				Serialize(value, cms);
+				cms.Position = 0;
+				return cms.GetReader().ReadToEnd();
+			}
 		}
 
 		public T Deserialize<T>(string data, StreamingContext context)
 		{
-			var settings = new JsonSerializerSettings();
-			settings.TypeNameHandling = TypeNameHandling.Auto;
-			settings.Context = context;
-			settings.Binder = Binder;
-			try
-			{
-				return (T)JsonConvert.DeserializeObject<T>(data, settings);
-			}
-			catch (TargetInvocationException tex)
-			{
-				if (tex.InnerException != null)
-					throw tex.InnerException;
-				throw;
-			}
-			catch (JsonSerializationException ex)
-			{
-				Logger.Trace(ex.ToString());
-				Logger.Trace(data);
-				throw;
-			}
+			return Deserialize<T>(new StringReader(data), context);
 		}
 
 		TextReader ISerialization<TextReader>.Serialize<T>(T value)
 		{
-			var serializer = new JsonSerializer();
-			serializer.Converters.Add(new StringEnumConverter());
-			var declaredType = typeof(T);
-			var type = value != null ? value.GetType() : declaredType;
-			serializer.TypeNameHandling = type != declaredType || !(declaredType.IsClass || declaredType.IsValueType) ? TypeNameHandling.Objects : TypeNameHandling.Auto;
-			serializer.Binder = Binder;
 			var cms = ChunkedMemoryStream.Create();
-			var sw = cms.GetWriter();
-			serializer.Serialize(sw, value);
-			sw.Flush();
+			Serialize(value, cms);
 			cms.Position = 0;
 			return cms.GetReader();
 		}
 
 		public T Deserialize<T>(TextReader data, StreamingContext context)
 		{
-			var serializer = new JsonSerializer();
-			serializer.TypeNameHandling = TypeNameHandling.Auto;
-			serializer.Context = context;
-			serializer.Binder = Binder;
-			try
-			{
-				return (T)serializer.Deserialize(data, typeof(T));
-			}
-			catch (TargetInvocationException tex)
-			{
-				if (tex.InnerException != null)
-					throw tex.InnerException;
-				throw;
-			}
-			catch (JsonSerializationException ex)
-			{
-				throw;
-			}
+			return (T)DeserializeReader(data, typeof(T), context);
 		}
 
-		public object DeserializeJson(Stream stream, Type type, StreamingContext context)
+		public object Deserialize(Stream stream, Type type, StreamingContext context)
 		{
-			var serializer = new JsonSerializer();
-			serializer.TypeNameHandling = TypeNameHandling.Auto;
-			serializer.Context = context;
-			serializer.Binder = Binder;
-			return serializer.Deserialize(new StreamReader(stream, Encoding.UTF8), type);
+			TextReader reader;
+			var cms = stream as ChunkedMemoryStream;
+			if (cms != null)
+				reader = cms.GetReader();
+			else
+				reader = new StreamReader(stream, Encoding.UTF8);
+			return DeserializeReader(reader, type, context);
+		}
+
+		private object DeserializeReader(TextReader reader, Type type, StreamingContext context)
+		{
+			if (MoveToFirstToken(reader) == 'n')
+			{
+				if (reader.Read() == 'n' && reader.Read() == 'u' && reader.Read() == 'l' && reader.Read() == 'l')
+					return null;
+				throw new SerializationException("Expecting null, but found: " + (char)reader.Peek() + " at " + PositionInStream(reader));
+			}
+			var deserializer = GetDeserializer(type);
+			if (deserializer == null)
+			{
+				if (context.Context == null)
+					return SharedSerializer.Deserialize(reader, type);
+				var serializer = new JsonSerializer();
+				serializer.TypeNameHandling = TypeNameHandling.Auto;
+				serializer.Context = context;
+				serializer.Binder = Binder;
+				return serializer.Deserialize(reader, type);
+			}
+			return deserializer.Deserialize(reader, context);
 		}
 
 		class InvariantWriter : StreamWriter
@@ -129,18 +108,6 @@ namespace Revenj.Serialization
 		}
 
 		public void Serialize(object value, Stream s)
-		{
-			TextWriter sw;
-			var cms = s as ChunkedMemoryStream;
-			if (cms != null)
-				sw = cms.GetWriter();
-			else
-				sw = new InvariantWriter(s);
-			SharedSerializer.Serialize(sw, value);
-			sw.Flush();
-		}
-
-		public void SerializeJsonObject(object value, Stream s)
 		{
 			TextWriter sw;
 			var cms = s as ChunkedMemoryStream;
@@ -231,46 +198,97 @@ namespace Revenj.Serialization
 			sw.Flush();
 		}
 
-		private static ConcurrentDictionary<Type, IJsonObject> Cache = new ConcurrentDictionary<Type, IJsonObject>(1, 17);
-		private IJsonObject GetSerializer(Type target)
+		private static ConcurrentDictionary<Type, IDeserializer> Cache = new ConcurrentDictionary<Type, IDeserializer>(1, 17);
+		private IDeserializer GetDeserializer(Type target)
 		{
-			IJsonObject jo = null;
-			if (Cache.TryGetValue(target, out jo))
-				return jo;
+			IDeserializer des = null;
+			if (Cache.TryGetValue(target, out des))
+				return des;
+			Type type = null;
 			if (typeof(IJsonObject).IsAssignableFrom(target))
-				jo = (IJsonObject)Activator.CreateInstance(target);
+				type = target;
 			else if (typeof(IJsonObject[]).IsAssignableFrom(target))
-				jo = (IJsonObject)Activator.CreateInstance(target.GetElementType());
-			else if (typeof(IList<IJsonObject>).IsAssignableFrom(target))
-				jo = (IJsonObject)Activator.CreateInstance(target.GetGenericArguments()[0]);
-			else if (typeof(ICollection<IJsonObject>).IsAssignableFrom(target))
-				jo = (IJsonObject)Activator.CreateInstance(target.GetGenericArguments()[0]);
-			Cache.TryAdd(target, jo);
-			return jo;
+				type = target.GetElementType();
+			else if (target.IsGenericType && typeof(ICollection<IJsonObject>).IsAssignableFrom(target))
+				type = target.GetGenericArguments()[0];
+			if (type != null && typeof(IJsonObject).IsAssignableFrom(type))
+			{
+				var desType = typeof(Deserializer<>).MakeGenericType(type);
+				des = (IDeserializer)Activator.CreateInstance(desType, new object[] { target, SharedSerializer, Binder });
+			}
+			Cache.TryAdd(target, des);
+			return des;
 		}
 
-		public object Deserialize(Stream s, Type target, StreamingContext context)
+		interface IDeserializer
 		{
-			var serializer = new JsonSerializer();
-			serializer.TypeNameHandling = TypeNameHandling.Auto;
-			serializer.Context = context;
-			serializer.Binder = Binder;
-			TextReader sr;
-			var cms = s as ChunkedMemoryStream;
-			if (cms != null)
-				sr = cms.GetReader();
-			else
-				sr = new StreamReader(s, Encoding.UTF8);
-			if (sr.Peek() == 'n')
+			object Deserialize(TextReader reader, StreamingContext context);
+		}
+		class Deserializer<T> : IDeserializer
+			where T : IJsonObject
+		{
+			private readonly IJsonObject Converter;
+			private readonly JsonSerializer JsonNet;
+			private readonly GenericDeserializationBinder Binder;
+			private readonly Type Target;
+			private readonly Type Type;
+			private readonly bool IsSimple;
+			private readonly bool IsArray;
+			private readonly bool IsList;
+			private readonly bool IsSet;
+			private readonly bool IsStack;
+			private readonly bool IsQueue;
+			private readonly bool IsLinkedList;
+
+			public Deserializer(Type target, JsonSerializer jsonNet, GenericDeserializationBinder binder)
 			{
-				if (sr.Read() == 'n' && sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
-					return null;
-				throw new SerializationException("Invalid json provided");
+				this.JsonNet = jsonNet;
+				this.Binder = binder;
+				this.Target = target;
+				this.Type = typeof(T);
+				try
+				{
+					Converter = (IJsonObject)FormatterServices.GetUninitializedObject(Type);
+					IsSimple = Type == Target;
+					IsArray = Target.IsArray;
+					IsList = typeof(IList<IJsonObject>).IsAssignableFrom(Target);
+					IsSet = typeof(ISet<IJsonObject>).IsAssignableFrom(Target);
+					IsStack = typeof(Stack<T>) == Target;
+					IsQueue = typeof(Queue<T>) == Target;
+					IsLinkedList = typeof(LinkedList<T>) == Target;
+				}
+				catch { }
 			}
-			var ser = GetSerializer(target);
-			if (ser == null)
-				return serializer.Deserialize(sr, target);
-			return ser.Deserialize(sr, context, serializer.Deserialize);
+
+			public object Deserialize(TextReader reader, StreamingContext context)
+			{
+				if (Converter == null)
+				{
+					if (context.Context == null)
+						return JsonNet.Deserialize(reader, Target);
+					var serializer = new JsonSerializer();
+					serializer.TypeNameHandling = TypeNameHandling.Auto;
+					serializer.Context = context;
+					serializer.Binder = Binder;
+					return serializer.Deserialize(reader, Target);
+				}
+				var result = Converter.Deserialize(reader, context, JsonNet.Deserialize);
+				if (IsSimple)
+					return result;
+				if (IsArray)
+					return (result as List<T>).ToArray();
+				if (IsSet)
+					return new HashSet<T>(result as List<T>);
+				if (IsList)
+					return result;
+				if (IsStack)
+					return new Stack<T>(result as List<T>);
+				if (IsQueue)
+					return new Queue<T>(result as List<T>);
+				if (IsLinkedList)
+					return new LinkedList<T>(result as List<T>);
+				return result;
+			}
 		}
 
 		private static bool IsWhiteSpace(int c)
@@ -315,6 +333,17 @@ namespace Revenj.Serialization
 			return c;
 		}
 
+		public static int MoveToFirstToken(TextReader sr)
+		{
+			int c = sr.Peek();
+			while (IsWhiteSpace(c))
+			{
+				sr.Read();
+				c = sr.Peek();
+			}
+			return c;
+		}
+
 		public static int MoveToNextToken(TextReader sr, int nextToken)
 		{
 			int c = nextToken;
@@ -335,8 +364,10 @@ namespace Revenj.Serialization
 		public static long PositionInStream(TextReader tr)
 		{
 			var sr = tr as StreamReader;
+			var btr = tr as BufferedTextReader;
 			try
 			{
+				if (btr != null) return btr.Position;
 				var binding = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic
 					| BindingFlags.Instance | BindingFlags.GetField;
 				if (sr != null)

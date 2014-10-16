@@ -4,13 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Revenj.Processing;
+using Revenj.Utility;
 
 namespace Revenj.Wcf
 {
-	public class JsonCommandDescription : IServerCommandDescription<StreamReader>
+	public class JsonCommandDescription : IServerCommandDescription<TextReader>
 	{
 		public string RequestID { get; private set; }
-		public StreamReader Data { get; set; }
+		public TextReader Data { get; set; }
 		public Type CommandType { get; private set; }
 
 		public JsonCommandDescription(NameValueCollection args, Stream message, Type commandType)
@@ -18,7 +19,11 @@ namespace Revenj.Wcf
 			this.CommandType = commandType;
 			if (message != null)
 			{
-				Data = new StreamReader(message, Encoding.UTF8);
+				var cms = message as ChunkedMemoryStream;
+				if (cms != null)
+					Data = cms.GetReader();
+				else
+					Data = new StreamReader(message, Encoding.UTF8);
 			}
 			else if (args != null && args.Count > 0)
 			{
@@ -32,9 +37,8 @@ namespace Revenj.Wcf
 					let isArr = val.Contains(',')
 					let arrVal = isArr ? string.Join(",", val.Split(',').Where(it => it.Length > 0).Select(it => "\"{0}\"".With(it))) : null
 					select "\"{0}\": ".With(key) + (isArr ? "[" + arrVal + "]" : "\"{0}\"".With(val));
-				var ms = new MemoryStream(Encoding.UTF8.GetBytes(start + string.Join(@",
-	", properties) + end));
-				Data = new StreamReader(ms);
+				Data = new StringReader(start + string.Join(@",
+	", properties) + end);
 			}
 		}
 	}

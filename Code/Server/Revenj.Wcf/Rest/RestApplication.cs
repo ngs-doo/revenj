@@ -136,30 +136,7 @@ namespace Revenj.Wcf
 			IServerCommandDescription<TFormat> command,
 			string accept)
 		{
-			if (accept == "application/json-experimental")
-			{
-				var instance = Execute<TFormat, object>(engine, command);
-				if (instance.Error != null)
-					return instance.Error;
-				if (instance.Result == null)
-					return null;
-				var cms = ChunkedMemoryStream.Create();
-				var ct = serialization.Serialize(instance.Result, accept, cms);
-				ThreadContext.Response.ContentType = ct;
-				cms.Position = 0;
-				return cms;
-			}
-			if (accept.Contains("application/json"))
-			{
-				var json = Execute<TFormat, StreamReader>(engine, command);
-				if (json.Error != null)
-					return json.Error;
-				ThreadContext.Response.ContentType = "application/json";
-				if (json.Result == null)
-					return null;
-				return json.Result.BaseStream;
-			}
-			if (accept.Contains("application/octet-stream"))
+			if (accept == "application/octet-stream")
 			{
 				var native = Execute<TFormat, object>(engine, command);
 				if (native.Error != null)
@@ -193,7 +170,7 @@ namespace Revenj.Wcf
 					+ native.Result.GetType().FullName + " to octet-stream. Use application/x-dotnet mime type for .NET binary serialization",
 					HttpStatusCode.BadRequest);
 			}
-			if (accept.Contains("application/base64"))
+			if (accept == "application/base64")
 			{
 				var native = Execute<TFormat, object>(engine, command);
 				if (native.Error != null)
@@ -244,17 +221,9 @@ namespace Revenj.Wcf
 					sb.Append(ch);
 					return sb.ToBase64Stream();
 				}
-				return Utility.ReturnError("Unexpected command result. Cant convert to base64.", HttpStatusCode.BadRequest);
+				return Utility.ReturnError("Unexpected command result. Can't convert to base64.", HttpStatusCode.BadRequest);
 			}
-			if (accept.Contains("application/x-protobuf"))
-			{
-				var proto = Execute<TFormat, Stream>(engine, command);
-				if (proto.Error != null)
-					return proto.Error;
-				ThreadContext.Response.ContentType = "application/x-protobuf";
-				return proto.Result;
-			}
-			if (accept.Contains("application/x-dotnet"))
+			if (accept == "application/x-dotnet")
 			{
 				var native = Execute<TFormat, object>(engine, command);
 				if (native.Error != null)
@@ -269,14 +238,13 @@ namespace Revenj.Wcf
 				cms.Position = 0;
 				return cms;
 			}
-			var xml = Execute<TFormat, XElement>(engine, command);
-			if (xml.Error != null)
-				return xml.Error;
-			ThreadContext.Response.ContentType = "application/xml";
-			if (xml.Result == null)
+			var instance = Execute<TFormat, object>(engine, command);
+			if (instance.Error != null)
+				return instance.Error;
+			if (instance.Result == null)
 				return null;
 			var ms = ChunkedMemoryStream.Create();
-			xml.Result.Save(ms);
+			ThreadContext.Response.ContentType = serialization.Serialize(instance.Result, accept, ms);
 			ms.Position = 0;
 			return ms;
 		}
