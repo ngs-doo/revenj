@@ -13,7 +13,7 @@ namespace Revenj.Utility
 	/// <summary>
 	/// Access to temporary files.
 	/// Default temporary folder is created at Revenj/Temp subfolder in system temporary folder
-	/// Can be overriden with configuration settings: TemporaryPath
+	/// Can be overridden with configuration settings: TemporaryPath
 	/// </summary>
 	public static class TemporaryResources
 	{
@@ -35,6 +35,8 @@ namespace Revenj.Utility
 		{
 			if (!Initialized)
 				InitializeDirectory();
+			if (extension != null && extension.Length > 0 && extension[0] != '.')
+				extension = "." + extension;
 
 			int retry = 5;
 			while (--retry > 0)

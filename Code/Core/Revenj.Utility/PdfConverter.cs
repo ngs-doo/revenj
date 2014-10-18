@@ -7,7 +7,7 @@ using System.Linq;
 namespace Revenj.Utility
 {
 	/// <summary>
-	/// Utility for converting files to pdf.
+	/// Utility for converting files to PDF.
 	/// External PdfConverter utility will be invoked for conversion.
 	/// Path to PdfConverter can't have whitespaces in it (since tool will be invoked using cmd.exe)
 	/// PdfConverterTimeout specify maximum amount of time conversion can take (20 seconds by default).
@@ -16,6 +16,7 @@ namespace Revenj.Utility
 	{
 		private static int PdfConverterTimeout;
 		private static string ConverterPath;
+		private static bool IsWindows;
 
 		static PdfConverter()
 		{
@@ -31,14 +32,16 @@ namespace Revenj.Utility
 				throw new ConfigurationErrorsException("Can't find PdfConverter application");
 			if (ConverterPath.Any(c => char.IsWhiteSpace(c)))
 				throw new ConfigurationErrorsException("PdfConverter must be on path without whitespace characters");
+			var platform = System.Environment.OSVersion.Platform;
+			IsWindows = platform != PlatformID.MacOSX && platform != PlatformID.Unix;
 		}
 		/// <summary>
-		/// Convert provided file content to pdf. 
+		/// Convert provided file content to PDF. 
 		/// Specify extension of the file.
 		/// </summary>
 		/// <param name="content">file content</param>
 		/// <param name="ext">file extension</param>
-		/// <returns>pdf converted file</returns>
+		/// <returns>PDF converted file</returns>
 		public static byte[] Convert(byte[] content, string ext)
 		{
 			var from = TemporaryResources.CreateFile(ext);
@@ -81,20 +84,37 @@ namespace Revenj.Utility
 
 		private static void RunConverter(string from)
 		{
-			var process =
-				Process.Start(
-					new ProcessStartInfo
-					{
-						FileName = "cmd.exe",
-						Arguments = string.Format("/c {0} \"{1}\"", ConverterPath, from),
-						WindowStyle = ProcessWindowStyle.Hidden,
-						UseShellExecute = false
-					});
+			Process process;
+			if (IsWindows)
+			{
+				//Workaround for Windows. On Windows Process can hang. Use cmd.exe to avoid such issue instead.
+				process =
+					Process.Start(
+						new ProcessStartInfo
+						{
+							FileName = "cmd.exe",
+							Arguments = string.Format("/c {0} \"{1}\"", ConverterPath, from),
+							WindowStyle = ProcessWindowStyle.Hidden,
+							UseShellExecute = false
+						});
+			}
+			else
+			{
+				process =
+					Process.Start(
+						new ProcessStartInfo
+						{
+							FileName = ConverterPath,
+							Arguments = "\"" + from + "\"",
+							WindowStyle = ProcessWindowStyle.Hidden,
+							UseShellExecute = false
+						});
+			}
 			if (!process.WaitForExit(PdfConverterTimeout * 1000))
 			{
 				try { process.Dispose(); }
 				catch { }
-				throw new TimeoutException("Timeout creating pdf. ");
+				throw new TimeoutException("Timeout creating PDF. ");
 			}
 		}
 	}
