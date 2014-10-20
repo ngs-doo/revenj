@@ -339,17 +339,21 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 	", OrderBy.Last().Orderings.Select(o => GetSqlExpression(o.Expression) + (o.OrderingDirection == OrderingDirection.Desc ? " DESC " : " ASC "))));
 		}
 
-		private static string BuildMemberPath(MemberExpression me, bool nest)
+		private string BuildMemberPath(MemberExpression me, bool nest)
 		{
 			var list = new List<string>();
 			while (me != null)
 			{
 				list.Add(me.Member.Name);
 				var qse = me.Expression as QuerySourceReferenceExpression;
-				if (qse != null)
+				var par = me.Expression as ParameterExpression;
+				if (qse != null || par != null)
 				{
 					var sb = new StringBuilder();
-					sb.Append("\"").Append(qse.ReferencedQuerySource.ItemName).Append("\"");
+					var name = qse != null ? qse.ReferencedQuerySource.ItemName : par.Name;
+					if (par != null && !string.IsNullOrEmpty(ContextName))
+						sb.Append(ContextName);
+					sb.Append('"').Append(name).Append('"');
 					list.Reverse();
 					foreach (var m in list)
 					{
