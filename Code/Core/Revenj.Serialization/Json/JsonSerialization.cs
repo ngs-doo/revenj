@@ -20,6 +20,7 @@ namespace Revenj.Serialization
 		private readonly GenericDeserializationBinder Binder;
 		private readonly ILogger Logger;
 		private readonly JsonSerializer SharedSerializer;
+		private static readonly StringEnumConverter EnumConverter = new StringEnumConverter();
 
 		public JsonSerialization(
 			GenericDeserializationBinder binder,
@@ -31,7 +32,7 @@ namespace Revenj.Serialization
 			this.Binder = binder;
 			this.Logger = logFactory.Create(GetType().FullName);
 			SharedSerializer = new JsonSerializer();
-			SharedSerializer.Converters.Add(new StringEnumConverter());
+			SharedSerializer.Converters.Add(EnumConverter);
 			SharedSerializer.TypeNameHandling = TypeNameHandling.Auto;
 			SharedSerializer.TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple;
 			SharedSerializer.Binder = binder;
@@ -90,6 +91,7 @@ namespace Revenj.Serialization
 				if (context.Context == null)
 					return SharedSerializer.Deserialize(reader, type);
 				var serializer = new JsonSerializer();
+				serializer.Converters.Add(EnumConverter);
 				serializer.TypeNameHandling = TypeNameHandling.Auto;
 				serializer.Context = context;
 				serializer.Binder = Binder;
@@ -267,6 +269,7 @@ namespace Revenj.Serialization
 					if (context.Context == null)
 						return JsonNet.Deserialize(reader, Target);
 					var serializer = new JsonSerializer();
+					serializer.Converters.Add(EnumConverter);
 					serializer.TypeNameHandling = TypeNameHandling.Auto;
 					serializer.Context = context;
 					serializer.Binder = Binder;
