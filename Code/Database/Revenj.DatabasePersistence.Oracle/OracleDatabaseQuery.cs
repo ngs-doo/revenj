@@ -202,18 +202,19 @@ namespace Revenj.DatabasePersistence.Oracle
 
 		private void ExecuteDataReader(IDbCommand command, Action<IDataReader> action, bool tryRecover)
 		{
-			IDataReader dr = null;
 			bool hasRead = false;
 			try
 			{
 				lock (Transaction ?? sync)
 				{
 					PrepareCommand(command);
-					dr = command.ExecuteReader();
-					while (dr.Read())
+					using (var dr = command.ExecuteReader())
 					{
-						hasRead = true;
-						action(dr);
+						while (dr.Read())
+						{
+							hasRead = true;
+							action(dr);
+						}
 					}
 				}
 			}
@@ -242,15 +243,6 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			finally
 			{
-				try
-				{
-					if (dr != null)
-						dr.Close();
-				}
-				catch (Exception ex)
-				{
-					LogFactory.Create("Oracle database layer - execute data reader").Error(ex.ToString());
-				}
 				command.Transaction = null;
 				command.Connection = null;
 			}
