@@ -46,7 +46,7 @@ namespace Revenj.Serialization.Json.Converters
 		public static void Serialize(DateTime value, TextWriter sw, char[] buffer)
 		{
 			sw.Write('"');
-			sw.Write(value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFFFK"));
+			sw.Write(value.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFK"));
 			sw.Write('"');
 		}
 		public static void Serialize(DateTime? value, TextWriter sw, char[] buffer)

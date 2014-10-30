@@ -34,6 +34,20 @@ namespace Revenj.Serialization.Json.Converters
 				if (sr.Read() == 'a' && sr.Read() == 'l' && sr.Read() == 's' && sr.Read() == 'e')
 					return false;
 			}
+			else if (nextToken == '"')
+			{
+				nextToken = sr.Read();
+				if (nextToken == 't')
+				{
+					if (sr.Read() == 'r' && sr.Read() == 'u' && sr.Read() == 'e' && sr.Read() == '"')
+						return true;
+				}
+				else if (nextToken == 'f')
+				{
+					if (sr.Read() == 'a' && sr.Read() == 'l' && sr.Read() == 's' && sr.Read() == 'e' && sr.Read() == '"')
+						return false;
+				}
+			}
 			throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true or false");
 		}
 		public static List<bool> DeserializeCollection(TextReader sr, int nextToken)
@@ -51,6 +65,20 @@ namespace Revenj.Serialization.Json.Converters
 					res.Add(false);
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true or false");
 			}
+			else if (nextToken == '"')
+			{
+				nextToken = sr.Read();
+				if (nextToken == 't')
+				{
+					if (sr.Read() == 'r' && sr.Read() == 'u' && sr.Read() == 'e' && sr.Read() == '"')
+						res.Add(true);
+				}
+				else if (nextToken == 'f')
+				{
+					if (sr.Read() == 'a' && sr.Read() == 'l' && sr.Read() == 's' && sr.Read() == 'e' && sr.Read() == '"')
+						res.Add(false);
+				}
+			}
 			else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true or false");
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
@@ -66,6 +94,20 @@ namespace Revenj.Serialization.Json.Converters
 					if (sr.Read() == 'a' && sr.Read() == 'l' && sr.Read() == 's' && sr.Read() == 'e')
 						res.Add(false);
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true or false");
+				}
+				else if (nextToken == '"')
+				{
+					nextToken = sr.Read();
+					if (nextToken == 't')
+					{
+						if (sr.Read() == 'r' && sr.Read() == 'u' && sr.Read() == 'e' && sr.Read() == '"')
+							res.Add(true);
+					}
+					else if (nextToken == 'f')
+					{
+						if (sr.Read() == 'a' && sr.Read() == 'l' && sr.Read() == 's' && sr.Read() == 'e' && sr.Read() == '"')
+							res.Add(false);
+					}
 				}
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true or false");
 			}
@@ -97,6 +139,20 @@ namespace Revenj.Serialization.Json.Converters
 					res.Add(null);
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true, false or null");
 			}
+			else if (nextToken == '"')
+			{
+				nextToken = sr.Read();
+				if (nextToken == 't')
+				{
+					if (sr.Read() == 'r' && sr.Read() == 'u' && sr.Read() == 'e' && sr.Read() == '"')
+						res.Add(true);
+				}
+				else if (nextToken == 'f')
+				{
+					if (sr.Read() == 'a' && sr.Read() == 'l' && sr.Read() == 's' && sr.Read() == 'e' && sr.Read() == '"')
+						res.Add(false);
+				}
+			}
 			else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true, false or null");
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
@@ -118,6 +174,20 @@ namespace Revenj.Serialization.Json.Converters
 					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 						res.Add(null);
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true, false or null");
+				}
+				else if (nextToken == '"')
+				{
+					nextToken = sr.Read();
+					if (nextToken == 't')
+					{
+						if (sr.Read() == 'r' && sr.Read() == 'u' && sr.Read() == 'e' && sr.Read() == '"')
+							res.Add(true);
+					}
+					else if (nextToken == 'f')
+					{
+						if (sr.Read() == 'a' && sr.Read() == 'l' && sr.Read() == 's' && sr.Read() == 'e' && sr.Read() == '"')
+							res.Add(false);
+					}
 				}
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true or false");
 			}
