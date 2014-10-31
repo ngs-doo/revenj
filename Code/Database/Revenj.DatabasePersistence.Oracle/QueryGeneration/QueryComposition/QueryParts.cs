@@ -172,14 +172,28 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 
 			var sb = new StringBuilder();
 
+			var mainFromQuery = GetQuerySourceFromExpression(MainFrom.ItemName, MainFrom.ItemType, MainFrom.FromExpression);
 			if (AdditionalJoins.Any(it =>
 			{
 				var me = it.FromExpression as MemberExpression;
 				return me != null && me.Expression is QuerySourceReferenceExpression;
 			}))
-				sb.AppendFormat("FROM ({0}) sq ", GetInnerFromPart());
+			{
+				if (MainFrom.ItemType.AsValue())
+				{
+					sb.Append("FROM ").Append(mainFromQuery);
+					sb.AppendLine();
+					sb.AppendFormat("INNER JOIN ({0}) sq$ ON sq$.id$ = \"{1}\".ROWID", GetInnerFromPart(true, mainFromQuery), MainFrom.ItemName);
+				}
+				else
+				{
+					sb.Append("FROM (").Append(GetInnerFromPart(false, mainFromQuery)).Append(") sq");
+				}
+			}
 			else
-				sb.AppendFormat("FROM {0}", GetQuerySourceFromExpression(MainFrom.ItemName, MainFrom.ItemType, MainFrom.FromExpression));
+			{
+				sb.Append("FROM ").Append(mainFromQuery);
+			}
 
 			var emptyJoins =
 				(from j in AdditionalJoins
@@ -252,10 +266,13 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 			return sb.ToString();
 		}
 
-		private string GetInnerFromPart()
+		private string GetInnerFromPart(bool asValue, string mainFromQuery)
 		{
 			var sb = new StringBuilder("SELECT ");
-			sb.AppendFormat("\"{0}\"", MainFrom.ItemName);
+			if (asValue)
+				sb.AppendFormat("\"{0}\".ROWID as id$", MainFrom.ItemName);
+			else
+				sb.AppendFormat("\"{0}\"", MainFrom.ItemName);
 
 			foreach (var aj in AdditionalJoins)
 			{
@@ -264,11 +281,24 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 				{
 					var qsre = me.Expression as QuerySourceReferenceExpression;
 					if (qsre != null)
-						sb.AppendFormat(", unnest(\"{0}\".\"{1}\") AS \"{2}\"", qsre.ReferencedQuerySource.ItemName, me.Member.Name, aj.ItemName);
+						sb.Append(", \"").Append(aj.ItemName).Append("\".OBJECT_VALUE AS \"").Append(aj.ItemName).Append("\"");
 				}
 			}
 
-			sb.AppendFormat(" FROM {0}", GetQuerySourceFromExpression(MainFrom.ItemName, MainFrom.ItemType, MainFrom.FromExpression));
+			sb.Append(" FROM ").Append(mainFromQuery);
+			foreach (var aj in AdditionalJoins)
+			{
+				var me = aj.FromExpression as MemberExpression;
+				if (me != null)
+				{
+					var qsre = me.Expression as QuerySourceReferenceExpression;
+					if (qsre != null)
+					{
+						sb.AppendLine();
+						sb.AppendFormat(" CROSS JOIN TABLE(\"{0}\".\"{1}\") \"{2}\"", qsre.ReferencedQuerySource.ItemName, me.Member.Name, aj.ItemName);
+					}
+				}
+			}
 
 			return sb.ToString();
 		}
@@ -321,7 +351,7 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 				var sql = "({0}) \"{1}\"".With(subquery.BuildSqlString(true), name);
 				var grouping = sqe.QueryModel.ResultOperators.FirstOrDefault(it => it is GroupResultOperator) as GroupResultOperator;
 				if (grouping == null && subquery.Selects.Count == 1)
-					return sql.Replace("\"" + sqe.QueryModel.MainFromClause.ItemName + "\"", "\"" + name + "\"");
+					return sql.Replace("\"" + subquery.Selects[0].Name + "\"", "\"" + name + "\"");
 				return sql;
 			}
 
@@ -358,6 +388,7 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 			if (fromExpression is QuerySourceReferenceExpression && fromExpression.Type.IsGrouping())
 			{
 				var qse = fromExpression as QuerySourceReferenceExpression;
+				//TODO: convert to Oracle version
 				return
 					"(SELECT (\"{0}\".\"Values\")[i].* FROM generate_series(1, array_upper(\"{0}\".\"Values\", 1)) i) AS \"{1}\"".With(
 						qse.ReferencedQuerySource.ItemName,

@@ -149,7 +149,11 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors
 			{
 				//TODO hack for subexpressions
 				var last = Query.Selects[Query.Selects.Count - 1];
-				last.Sql = "{0}.\"{1}\"".With(last.Sql, expression.Member.Name);
+				//TODO even uglier hack if AS was used
+				if (last.Sql.Contains(" AS ") && last.Name != null)
+					last.Sql = "{0}.\"{1}\" AS \"{2}\"".With(last.Sql.Substring(0, last.Sql.Length - 6 - last.Name.Length), expression.Member.Name, last.Name);
+				else
+					last.Sql = "{0}.\"{1}\"".With(last.Sql, expression.Member.Name);
 				last.Name = expression.Member.Name;
 				last.ItemType = expression.Type;
 				last.Expression = expression;
