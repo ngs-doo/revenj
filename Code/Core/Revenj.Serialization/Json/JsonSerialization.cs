@@ -88,14 +88,23 @@ namespace Revenj.Serialization
 			var deserializer = GetDeserializer(type);
 			if (deserializer == null)
 			{
-				if (context.Context == null)
-					return SharedSerializer.Deserialize(reader, type);
-				var serializer = new JsonSerializer();
-				serializer.Converters.Add(EnumConverter);
-				serializer.TypeNameHandling = TypeNameHandling.Auto;
-				serializer.Context = context;
-				serializer.Binder = Binder;
-				return serializer.Deserialize(reader, type);
+				try
+				{
+					if (context.Context == null)
+						return SharedSerializer.Deserialize(reader, type);
+					var serializer = new JsonSerializer();
+					serializer.Converters.Add(EnumConverter);
+					serializer.TypeNameHandling = TypeNameHandling.Auto;
+					serializer.Context = context;
+					serializer.Binder = Binder;
+					return serializer.Deserialize(reader, type);
+				}
+				catch (TargetInvocationException tex)
+				{
+					if (tex.InnerException != null)
+						throw tex.InnerException;
+					throw;
+				}
 			}
 			return deserializer.Deserialize(reader, context);
 		}
@@ -266,14 +275,23 @@ namespace Revenj.Serialization
 			{
 				if (Converter == null)
 				{
-					if (context.Context == null)
-						return JsonNet.Deserialize(reader, Target);
-					var serializer = new JsonSerializer();
-					serializer.Converters.Add(EnumConverter);
-					serializer.TypeNameHandling = TypeNameHandling.Auto;
-					serializer.Context = context;
-					serializer.Binder = Binder;
-					return serializer.Deserialize(reader, Target);
+					try
+					{
+						if (context.Context == null)
+							return JsonNet.Deserialize(reader, Target);
+						var serializer = new JsonSerializer();
+						serializer.Converters.Add(EnumConverter);
+						serializer.TypeNameHandling = TypeNameHandling.Auto;
+						serializer.Context = context;
+						serializer.Binder = Binder;
+						return serializer.Deserialize(reader, Target);
+					}
+					catch (TargetInvocationException tex)
+					{
+						if (tex.InnerException != null)
+							throw tex.InnerException;
+						throw;
+					}
 				}
 				var result = Converter.Deserialize(reader, context, JsonNet.Deserialize);
 				if (IsSimple)
