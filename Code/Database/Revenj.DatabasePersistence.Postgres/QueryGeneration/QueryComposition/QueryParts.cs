@@ -379,7 +379,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			{
 				var src = BuildMemberPath(me, true);
 				if (src != null)
-					return @"(SELECT sq as ""{1}"" FROM unnest({0}) sq) AS ""{1}""".With(src, name);
+					return @"(SELECT sq AS ""{1}"" FROM unnest({0}) sq) AS ""{1}""".With(src, name);
 			}
 
 			var sqe = fromExpression as SubQueryExpression;
@@ -389,11 +389,27 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 					return GetQuerySourceFromExpression(name, type, sqe.QueryModel.MainFromClause.FromExpression);
 				//TODO hack za replaceanje generiranog id-a
 				var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(sqe.QueryModel, this);
-				var sql = "({0}) AS \"{1}\"".With(subquery.BuildSqlString(true), name);
 				var grouping = sqe.QueryModel.ResultOperators.FirstOrDefault(it => it is GroupResultOperator) as GroupResultOperator;
 				if (grouping == null && subquery.Selects.Count == 1)
-					return sql.Replace("\"" + sqe.QueryModel.MainFromClause.ItemName + "\"", "\"" + name + "\"");
-				return sql;
+				{
+					if (sqe.QueryModel.ResultOperators.Any(it => it is UnionResultOperator))
+					{
+						var ind = subquery.Selects[0].Sql.IndexOf(" AS ");
+						if (ind > 0)
+						{
+							var asName = subquery.Selects[0].Sql.Substring(ind + 4).Trim().Replace("\"", "");
+							if (asName != name)
+								subquery.Selects[0].Sql = subquery.Selects[0].Sql.Substring(0, ind + 4) + "\"" + name + "\"";
+						}
+						else
+						{
+							subquery.Selects[0].Sql = subquery.Selects[0].Sql + " AS \"" + name + "\"";
+						}
+						return "(" + subquery.BuildSqlString(true) + ") \"" + name + "\"";
+					}
+					return "(" + subquery.BuildSqlString(true).Replace("\"" + sqe.QueryModel.MainFromClause.ItemName + "\"", "\"" + name + "\"") + ") \"" + name + "\"";
+				}
+				return "(" + subquery.BuildSqlString(true) + ") \"" + name + "\"";
 			}
 
 			var ce = fromExpression as ConstantExpression;
@@ -468,7 +484,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			var source = SqlSourceAttribute.FindSource(type);
 
 			if (!string.IsNullOrEmpty(source))
-				return "{0} as \"{1}\"".With(source, name);
+				return "{0} AS \"{1}\"".With(source, name);
 
 			throw new NotSupportedException(@"Unknown sql source {0}!
 Add {1} attribute or {2} or {3} or {4} interface".With(

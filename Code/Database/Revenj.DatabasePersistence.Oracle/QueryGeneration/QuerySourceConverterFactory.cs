@@ -190,19 +190,28 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 
 		private static Func<string, T> ProjectMapping<T>(SubQueryExpression sqe, QueryParts parts, SubqueryParts subquery)
 		{
-			var ssd = SelectSubqueryData.Create(parts, subquery);
-
+			Func<string, T> result;
 			var projector = ProjectorBuildingExpressionTreeVisitor<T>.BuildProjector(sqe.QueryModel);
-			Func<string, T> result = value =>
+			if (subquery.Selects.Count == 1)
 			{
-				//TODO fix later
-				return default(T);
-				/*
-				var items = OracleRecordConverter.ParseRecord(value);
-				var rom = ssd.ProcessRow(null, items);
-				var res = projector(rom);
-				return res;*/
-			};
+				var sel = subquery.Selects[0];
+				var factory = CreateResult(sel.Name, sel.ItemType, sel.QuerySource, parts, true);
+				result = value => (T)factory.Instancer(value);
+			}
+			else
+			{
+				var ssd = SelectSubqueryData.Create(parts, subquery);
+				result = value =>
+				{
+					//TODO fix later
+					return default(T);
+					/*
+					var items = OracleRecordConverter.ParseRecord(value);
+					var rom = ssd.ProcessRow(null, items);
+					var res = projector(rom);
+					return res;*/
+				};
+			}
 			return result;
 		}
 
@@ -212,7 +221,7 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 			var list = new List<Func<object, object>>();
 			foreach (var s in subquery.Selects)
 			{
-				var factory = QuerySourceConverterFactory.CreateResult(s.Name, s.ItemType, s.QuerySource, parts, true);
+				var factory = CreateResult(s.Name, s.ItemType, s.QuerySource, parts, true);
 				if (s.Expression == null)
 					throw new FrameworkException("Null expression!?");
 				results[s.Expression] = factory.Instancer;
@@ -253,7 +262,13 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 					CanBeNull = true
 				};
 			var method = ProjectionMethod.Method.GetGenericMethodDefinition().MakeGenericMethod(type);
-			var instancer = (Func<string, object>)method.Invoke(null, new object[] { sqe, parts });
+			var tempInst = method.Invoke(null, new object[] { sqe, parts });
+			var instancer = tempInst as Func<string, object>;
+			if (instancer == null)
+			{
+				var invMethod = tempInst.GetType().GetMethod("Invoke");
+				instancer = value => invMethod.Invoke(tempInst, new object[] { value });
+			}
 			result.Instancer = value => instancer(value.ToString());
 			return result;
 		}

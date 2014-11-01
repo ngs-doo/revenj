@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using System.Text;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
@@ -150,11 +151,31 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors
 				//TODO hack for subexpressions
 				var last = Query.Selects[Query.Selects.Count - 1];
 				//TODO even uglier hack if AS was used
-				if (last.Sql.Contains(" AS ") && last.Name != null)
-					last.Sql = "{0}.\"{1}\" AS \"{2}\"".With(last.Sql.Substring(0, last.Sql.Length - 6 - last.Name.Length), expression.Member.Name, last.Name);
+				var asInd = last.Sql.IndexOf(" AS ");
+				var plain = asInd > 0 ? last.Sql.Substring(0, asInd) : last.Sql;
+				var ctx = new QueryContext(true, false, false);// Query.Context.Select();
+				var sb = new StringBuilder();
+				foreach (var mm in Query.MemberMatchers)
+					if (mm.TryMatch(expression, sb, exp => sb.Append(plain), ctx))
+						break;
+				if (sb.Length > 0)
+				{
+					if (last.Name != null)//TODO: last.name!?
+						sb.Append(" AS \"").Append(last.Name).Append("\"");
+					else
+						sb.Append(" AS \"").Append(expression.Member.Name).Append("\"");
+					last.Sql = sb.ToString();
+				}
 				else
-					last.Sql = "{0}.\"{1}\"".With(last.Sql, expression.Member.Name);
-				last.Name = expression.Member.Name;
+				{
+					if (asInd > 0 && last.Name != null)//TODO: change last name!?
+						last.Sql = "{0}.\"{1}\" AS \"{2}\"".With(plain, expression.Member.Name, last.Name);
+					else
+					{
+						last.Sql = "{0}.\"{1}\"".With(last.Sql, expression.Member.Name);
+						last.Name = expression.Member.Name;
+					}
+				}
 				last.ItemType = expression.Type;
 				last.Expression = expression;
 			}
@@ -195,6 +216,18 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors
 			throw new NotSupportedException("Unsupported method call: " + expression.Method.Name
 				+ " in query " + FormattingExpressionTreeVisitor.Format(expression) + ".");
 		}
+
+		protected override Expression VisitConditionalExpression(ConditionalExpression expression)
+		{
+			if (!Query.CanQueryInMemory)
+			{
+				var ctx = new QueryContext(true, false, false);// Query.Context.Select();
+				var caseWhen = Query.GetSqlExpression(expression, string.Empty, ctx);
+				Query.AddSelectPart(null, caseWhen, null, expression.Type, null);
+			}
+			return expression;
+		}
+
 
 		// Called when a LINQ expression type is not handled above.
 		protected override Exception CreateUnhandledItemException<T>(T unhandledItem, string visitMethod)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using System.Text;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
@@ -138,8 +139,20 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			{
 				//TODO hack for subexpressions
 				var last = Query.Selects[Query.Selects.Count - 1];
-				last.Sql = "({0}).\"{1}\"".With(last.Sql, expression.Member.Name);
-				last.Name = expression.Member.Name;
+				var sb = new StringBuilder();
+				foreach (var mm in Query.MemberMatchers)
+					if (mm.TryMatch(expression, sb, exp => sb.Append(last.Sql)))
+						break;
+				if (sb.Length > 0)
+				{
+					sb.Append(" AS \"").Append(expression.Member.Name).Append("\"");
+					last.Sql = sb.ToString();
+				}
+				else
+				{
+					last.Sql = "({0}).\"{1}\"".With(last.Sql, expression.Member.Name);
+					last.Name = expression.Member.Name;
+				}
 				last.ItemType = expression.Type;
 				last.Expression = expression;
 			}
@@ -179,6 +192,16 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 
 			throw new FrameworkException("Unsupported method call: " + expression.Method.Name
 				+ " in query " + FormattingExpressionTreeVisitor.Format(expression) + ".");
+		}
+
+		protected override Expression VisitConditionalExpression(ConditionalExpression expression)
+		{
+			if (!Query.CanQueryInMemory)
+			{
+				var caseWhen = Query.GetSqlExpression(expression);
+				Query.AddSelectPart(null, caseWhen, null, expression.Type, null);
+			}
+			return expression;
 		}
 
 		// Called when a LINQ expression type is not handled above.

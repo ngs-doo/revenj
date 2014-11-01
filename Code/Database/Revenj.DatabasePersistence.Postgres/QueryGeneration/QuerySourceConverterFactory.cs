@@ -119,6 +119,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			var instanceFactory = parts.ConverterFactory.GetInstanceFactory(type);
 			if (instanceFactory != null)
 				result.Instancer = value => instanceFactory(value, parts.Locator);
+			//TODO: custom converters
 			else if (type.IsNullable())
 			{
 				var baseType = type.GetGenericArguments()[0];
@@ -151,17 +152,26 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 
 		private static Func<string, T> ProjectMapping<T>(SubQueryExpression sqe, QueryParts parts, SubqueryParts subquery)
 		{
-			var ssd = SelectSubqueryData.Create(parts, subquery);
-
+			Func<string, T> result;
 			var projector = ProjectorBuildingExpressionTreeVisitor<T>.BuildProjector(sqe.QueryModel);
-			//TODO TextReader/string !?
-			Func<string, T> result = value =>
+			if (subquery.Selects.Count == 1)
 			{
-				var items = PostgresRecordConverter.ParseRecord(value);
-				var rom = ssd.ProcessRow(null, items);
-				var res = projector(rom);
-				return res;
-			};
+				var sel = subquery.Selects[0];
+				var factory = CreateResult(sel.Name, sel.ItemType, sel.QuerySource, parts);
+				result = value => (T)factory.Instancer(value);
+			}
+			else
+			{
+				var ssd = SelectSubqueryData.Create(parts, subquery);
+				//TODO TextReader/string !?
+				result = value =>
+				{
+					var items = PostgresRecordConverter.ParseRecord(value);
+					var rom = ssd.ProcessRow(null, items);
+					var res = projector(rom);
+					return res;
+				};
+			}
 			return result;
 		}
 
@@ -171,7 +181,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			var list = new List<Func<object, object>>();
 			foreach (var s in subquery.Selects)
 			{
-				var factory = QuerySourceConverterFactory.CreateResult(s.Name, s.ItemType, s.QuerySource, parts);
+				var factory = CreateResult(s.Name, s.ItemType, s.QuerySource, parts);
 				if (s.Expression == null)
 					throw new FrameworkException("Null expression!?");
 				results[s.Expression] = factory.Instancer;
@@ -202,7 +212,13 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 		{
 			var result = new Result { QuerySource = fromClause, Name = name, Type = fromClause.ItemType };
 			var method = ProjectionMethod.Method.GetGenericMethodDefinition().MakeGenericMethod(fromClause.ItemType);
-			var instancer = (Func<string, object>)method.Invoke(null, new object[] { sqe, parts });
+			var tempInst = method.Invoke(null, new object[] { sqe, parts });
+			var instancer = tempInst as Func<string, object>;
+			if (instancer == null)
+			{
+				var invMethod = tempInst.GetType().GetMethod("Invoke");
+				instancer = value => invMethod.Invoke(tempInst, new object[] { value });
+			}
 			result.Instancer = value => instancer(value.ToString());
 			return result;
 		}
