@@ -41,6 +41,16 @@ namespace Revenj.Processing
 		{
 			var start = Stopwatch.GetTimestamp();
 
+			if (commandDescriptions == null || commandDescriptions.Length == 0)
+			{
+				return
+					ProcessingResult<TOutput>.Create(
+						"There are no commands to execute.",
+						HttpStatusCode.BadRequest,
+						null,
+						start);
+			}
+
 			var inputSerializer = Scope.Resolve<ISerialization<TInput>>();
 			var outputSerializer = Scope.Resolve<ISerialization<TOutput>>();
 

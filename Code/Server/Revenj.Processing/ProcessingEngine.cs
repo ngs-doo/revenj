@@ -102,6 +102,16 @@ namespace Revenj.Processing
 		{
 			var start = Stopwatch.GetTimestamp();
 
+			if (commandDescriptions == null || commandDescriptions.Length == 0)
+			{
+				return
+					ProcessingResult<TOutput>.Create(
+						"There are no commands to execute.",
+						HttpStatusCode.BadRequest,
+						null,
+						start);
+			}
+
 			for (int i = 0; i < commandDescriptions.Length; i++)
 			{
 				var c = commandDescriptions[i];
