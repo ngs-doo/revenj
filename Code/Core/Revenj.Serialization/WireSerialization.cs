@@ -25,9 +25,14 @@ namespace Revenj.Serialization
 		public string Serialize(object value, string accept, Stream destination)
 		{
 			//fast path
+			if (accept == "application/json;minimal")
+			{
+				Json.Serialize(value, destination, true);
+				return "application/json";
+			}
 			if (accept == "application/json")
 			{
-				Json.Serialize(value, destination);
+				Json.Serialize(value, destination, false);
 				return "application/json";
 			}
 			if (accept == "application/x-protobuf")
@@ -44,7 +49,7 @@ namespace Revenj.Serialization
 			accept = (accept ?? "application/json").ToLowerInvariant();
 			if (accept.Contains("application/json"))
 			{
-				Json.Serialize(value, destination);
+				Json.Serialize(value, destination, false);
 				return "application/json";
 			}
 			if (accept.Contains("application/x-protobuf"))

@@ -42,7 +42,7 @@ namespace Revenj.Serialization
 		{
 			using (var cms = ChunkedMemoryStream.Create())
 			{
-				Serialize(value, cms);
+				Serialize(value, cms, true);
 				cms.Position = 0;
 				return cms.GetReader().ReadToEnd();
 			}
@@ -56,7 +56,7 @@ namespace Revenj.Serialization
 		TextReader ISerialization<TextReader>.Serialize<T>(T value)
 		{
 			var cms = ChunkedMemoryStream.Create();
-			Serialize(value, cms);
+			Serialize(value, cms, true);
 			cms.Position = 0;
 			return cms.GetReader();
 		}
@@ -118,7 +118,7 @@ namespace Revenj.Serialization
 			public override IFormatProvider FormatProvider { get { return Invariant; } }
 		}
 
-		public void Serialize(object value, Stream s)
+		public void Serialize(object value, Stream s, bool minimal)
 		{
 			TextWriter sw;
 			var cms = s as ChunkedMemoryStream;
@@ -129,7 +129,7 @@ namespace Revenj.Serialization
 			var jo = value as IJsonObject;
 			if (jo != null)
 			{
-				jo.Serialize(sw, SharedSerializer.Serialize);
+				jo.Serialize(sw, minimal, SharedSerializer.Serialize);
 			}
 			else
 			{
@@ -139,18 +139,18 @@ namespace Revenj.Serialization
 					sw.Write('[');
 					if (array.Length > 0)
 					{
-						for (int i = 0; i < array.Length - 1; i++)
-						{
-							if (array[i] != null)
-								array[i].Serialize(sw, SharedSerializer.Serialize);
-							else
-								sw.Write("null");
-							sw.Write(',');
-						}
-						if (array[array.Length - 1] != null)
-							array[array.Length - 1].Serialize(sw, SharedSerializer.Serialize);
+						if (array[0] != null)
+							array[0].Serialize(sw, minimal, SharedSerializer.Serialize);
 						else
 							sw.Write("null");
+						for (int i = 1; i < array.Length; i++)
+						{
+							sw.Write(',');
+							if (array[i] != null)
+								array[i].Serialize(sw, minimal, SharedSerializer.Serialize);
+							else
+								sw.Write("null");
+						}
 					}
 					sw.Write(']');
 				}
@@ -160,18 +160,18 @@ namespace Revenj.Serialization
 					sw.Write('[');
 					if (list.Count > 0)
 					{
-						for (int i = 0; i < list.Count - 1; i++)
-						{
-							if (list[i] != null)
-								list[i].Serialize(sw, SharedSerializer.Serialize);
-							else
-								sw.Write("null");
-							sw.Write(',');
-						}
-						if (list[list.Count - 1] != null)
-							list[list.Count - 1].Serialize(sw, SharedSerializer.Serialize);
+						if (list[0] != null)
+							list[0].Serialize(sw, minimal, SharedSerializer.Serialize);
 						else
 							sw.Write("null");
+						for (int i = 1; i < list.Count; i++)
+						{
+							sw.Write(',');
+							if (list[i] != null)
+								list[i].Serialize(sw, minimal, SharedSerializer.Serialize);
+							else
+								sw.Write("null");
+						}
 					}
 					sw.Write(']');
 				}
@@ -188,14 +188,14 @@ namespace Revenj.Serialization
 						{
 							item = enumerator.Current;
 							if (item != null)
-								item.Serialize(sw, SharedSerializer.Serialize);
+								item.Serialize(sw, minimal, SharedSerializer.Serialize);
 							else
 								sw.Write("null");
 							sw.Write(',');
 						}
 						item = enumerator.Current;
 						if (item != null)
-							item.Serialize(sw, SharedSerializer.Serialize);
+							item.Serialize(sw, minimal, SharedSerializer.Serialize);
 						else
 							sw.Write("null");
 					}
