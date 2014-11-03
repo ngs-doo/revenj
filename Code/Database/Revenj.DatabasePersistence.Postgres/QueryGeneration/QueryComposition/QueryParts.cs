@@ -664,6 +664,11 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 				else
 				{
 					//TODO missing Concat operator
+					if (OrderBy.Count > 0)
+					{
+						sb.Insert(0, '(');
+						sb.AppendLine(")");
+					}
 					sb.AppendLine("UNION ALL");
 					var sqe = uro.Source2 as SubQueryExpression;
 					ResultOperators.ForEach(ro =>

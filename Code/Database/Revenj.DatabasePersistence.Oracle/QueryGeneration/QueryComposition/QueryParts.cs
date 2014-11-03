@@ -604,6 +604,7 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 				{
 					//TODO missing Concat operator
 					sb.AppendLine("UNION ALL");
+					//TODO if order is used, Oracle will fail anyway
 					var sqe = uro.Source2 as SubQueryExpression;
 					ResultOperators.ForEach(ro =>
 					{
