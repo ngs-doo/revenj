@@ -148,11 +148,6 @@ namespace Revenj.Utility
 				return -1;
 		}
 
-		public byte[] GetCurrentSegment()
-		{
-			return Blocks[CurrentPosition >> BlockShift];
-		}
-
 		/// <summary>
 		/// Read buffer from the stream. 
 		/// Can return less then specified count if remaining block size is less than specified count
@@ -196,6 +191,13 @@ namespace Revenj.Utility
 				default:
 					CurrentPosition = TotalSize - (int)offset;
 					break;
+			}
+			if (CurrentPosition > TotalSize)
+			{
+				var max = CurrentPosition >> BlockShift;
+				for (int i = Blocks.Count; i <= max; i++)
+					Blocks.Add(new byte[BlockSize]);
+				TotalSize = CurrentPosition;
 			}
 			return CurrentPosition;
 		}
