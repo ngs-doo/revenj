@@ -315,13 +315,15 @@ namespace Revenj.Utility
 		/// </summary>
 		public void ToBase64Writer(TextWriter sw)
 		{
+			if (TotalSize == 0)
+				return;
 			var tmpBuf = new byte[3];
 			if (CharBuffer == null)
 				CharBuffer = new char[BlockSize * 4 / 3 + 2];
 			var base64 = CharBuffer;
 			var total = TotalSize >> BlockShift;
 			var remaining = TotalSize & BlockAnd;
-			int len;
+			int len = 0;
 			var off = 0;
 			for (int i = 0; i < total; i++)
 			{

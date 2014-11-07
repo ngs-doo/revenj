@@ -20,7 +20,7 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			foreach (var enc in ImageCodecInfo.GetImageEncoders())
 				Codecs.Add(enc.FormatID);
-			for (int i = 0; i < Environment.ProcessorCount; i++)
+			for (int i = 0; i < Environment.ProcessorCount / 2 + 1; i++)
 				Buffers.Add(new char[65536]);
 		}
 

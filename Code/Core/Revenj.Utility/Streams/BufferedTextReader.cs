@@ -81,13 +81,31 @@ namespace Revenj.Utility
 
 		public override int Read(char[] buffer, int index, int count)
 		{
-			if (count == 0)
-				return 0;
-			var result = Read();
-			if (result == -1)
-				return -1;
-			buffer[index] = (char)result;
-			return 1;
+			if (InBuffer == BufferEnd)
+			{
+				TotalBuffersRead += BufferEnd;
+				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
+				InBuffer = 0;
+				if (BufferEnd == 0)
+					return NextChar = -1;
+			}
+			var i = InBuffer;
+			var j = index;
+			for (var c = 0; i < BufferEnd && j < buffer.Length && c < count; i++, j++, c++)
+				buffer[j] = Buffer[i];
+			if (i == BufferEnd)
+			{
+				TotalBuffersRead += BufferEnd;
+				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
+				InBuffer = 0;
+				NextChar = BufferEnd > 0 ? Buffer[0] : -1;
+			}
+			else
+			{
+				NextChar = Buffer[i];
+				InBuffer = i;
+			}
+			return j - index;
 		}
 
 		public override int ReadBlock(char[] buffer, int index, int count)

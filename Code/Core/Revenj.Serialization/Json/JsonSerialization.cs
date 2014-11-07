@@ -303,7 +303,11 @@ namespace Revenj.Serialization
 				if (IsList)
 					return result;
 				if (IsStack)
-					return new Stack<T>(result as List<T>);
+				{
+					var list = result as List<T>;
+					list.Reverse();
+					return new Stack<T>(list);
+				}
 				if (IsQueue)
 					return new Queue<T>(result as List<T>);
 				if (IsLinkedList)
@@ -494,6 +498,36 @@ namespace Revenj.Serialization
 			where T : class
 		{
 			var res = new List<T>();
+			if (nextToken == 'n')
+			{
+				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+					res.Add(null);
+				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+			}
+			else res.Add(factory(nextToken));
+			while ((nextToken = GetNextToken(sr)) == ',')
+			{
+				nextToken = GetNextToken(sr);
+				if (nextToken == 'n')
+				{
+					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+						res.Add(null);
+					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+				}
+				else res.Add(factory(nextToken));
+			}
+			if (nextToken != ']')
+			{
+				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+			return res;
+		}
+
+		public static List<T?> DeserializeNullableStructCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
+			where T : struct
+		{
+			var res = new List<T?>();
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')

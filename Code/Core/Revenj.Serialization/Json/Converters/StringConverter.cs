@@ -65,6 +65,53 @@ namespace Revenj.Serialization.Json.Converters
 			sw.Write('"');
 		}
 
+		public static void SerializePart(char[] value, int max, TextWriter sw)
+		{
+			char c;
+			for (int i = 0; i < value.Length && i < max; i++)
+			{
+				c = value[i];
+				switch (c)
+				{
+					case '\u0000': sw.Write(@"\u0000"); break;
+					case '\u0001': sw.Write(@"\u0001"); break;
+					case '\u0002': sw.Write(@"\u0002"); break;
+					case '\u0003': sw.Write(@"\u0003"); break;
+					case '\u0004': sw.Write(@"\u0004"); break;
+					case '\u0005': sw.Write(@"\u0005"); break;
+					case '\u0006': sw.Write(@"\u0006"); break;
+					case '\u0007': sw.Write(@"\u0007"); break;
+					case '\u0008': sw.Write(@"\b"); break;
+					case '\u0009': sw.Write(@"\t"); break;
+					case '\u000A': sw.Write(@"\n"); break;
+					case '\u000B': sw.Write(@"\u000B"); break;
+					case '\u000C': sw.Write(@"\f"); break;
+					case '\u000D': sw.Write(@"\r"); break;
+					case '\u000E': sw.Write(@"\u000E"); break;
+					case '\u000F': sw.Write(@"\u000F"); break;
+					case '\u0010': sw.Write(@"\u0010"); break;
+					case '\u0011': sw.Write(@"\u0011"); break;
+					case '\u0012': sw.Write(@"\u0012"); break;
+					case '\u0013': sw.Write(@"\u0013"); break;
+					case '\u0014': sw.Write(@"\u0014"); break;
+					case '\u0015': sw.Write(@"\u0015"); break;
+					case '\u0016': sw.Write(@"\u0016"); break;
+					case '\u0017': sw.Write(@"\u0017"); break;
+					case '\u0018': sw.Write(@"\u0018"); break;
+					case '\u0019': sw.Write(@"\u0019"); break;
+					case '\u001A': sw.Write(@"\u001A"); break;
+					case '\u001B': sw.Write(@"\u001B"); break;
+					case '\u001C': sw.Write(@"\u001C"); break;
+					case '\u001D': sw.Write(@"\u001D"); break;
+					case '\u001E': sw.Write(@"\u001E"); break;
+					case '\u001F': sw.Write(@"\u001F"); break;
+					case '\\': sw.Write(@"\\"); break;
+					case '"': sw.Write(@"\"""); break;
+					default: sw.Write(c); break;
+				}
+			}
+		}
+
 		public static string DeserializeNullable(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken == 'n')

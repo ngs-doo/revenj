@@ -74,6 +74,7 @@ namespace Revenj.Serialization.Json.Converters
 			var negative = nextToken == '-';
 			if (negative) nextToken = sr.Read();
 			decimal res = 0;
+			//TODO: first while, then check at the end
 			do
 			{
 				res = res * 10 + (nextToken - '0');

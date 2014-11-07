@@ -57,6 +57,7 @@
       <HintPath>..\..\..\Dependencies\Protobuf\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
@@ -67,8 +68,12 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Json\Converters\ColorConverter.cs" />
+    <Compile Include="Json\Converters\SecretConverter.cs" />
+    <Compile Include="Json\Converters\DrawingConverter.cs" />
     <Compile Include="Json\Converters\BinaryConverter.cs" />
+    <Compile Include="Json\Converters\XmlConverter.cs" />
+    <Compile Include="Json\Converters\PointConverter.cs" />
+    <Compile Include="Json\Converters\NetConverter.cs" />
     <Compile Include="Json\Converters\DictionaryConverter.cs" />
     <Compile Include="Json\Converters\DateTimeConverter.cs" />
     <Compile Include="Protobuf\Converters\ProtoStream.cs" />
