@@ -412,19 +412,19 @@ namespace Revenj.Serialization
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			char c = (char)nextToken;
-			int hash = 23;
 			int i = 0;
+			var hash = 0x811C9DC5;
 			for (; i < buffer.Length && c != '"'; i++, c = (char)sr.Read())
 			{
 				buffer[i] = c;
-				hash = hash * 31 + c;
+				hash = (hash ^ c) * 0x1000193;
 			}
 			nextToken = c;
 			if (i < buffer.Length) buffer[i] = '\0';
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = GetNextToken(sr);
 			if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
-			return hash;
+			return (int)hash;
 		}
 
 		public static List<T> DeserializeObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory)
