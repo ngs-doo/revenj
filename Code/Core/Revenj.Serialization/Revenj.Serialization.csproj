@@ -76,6 +76,7 @@
     <Compile Include="Json\Converters\NetConverter.cs" />
     <Compile Include="Json\Converters\DictionaryConverter.cs" />
     <Compile Include="Json\Converters\DateTimeConverter.cs" />
+    <Compile Include="Json\TextReaderConverter.cs" />
     <Compile Include="Protobuf\Converters\ProtoStream.cs" />
     <Compile Include="Protobuf\Converters\ProtoMemoryStream.cs" />
     <Compile Include="BinarySerialization.cs" />
