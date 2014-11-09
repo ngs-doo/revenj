@@ -54,7 +54,14 @@ namespace Revenj.Processing
 			if (!int.TryParse(ConfigurationManager.AppSettings["Processing.PoolSize"], out Size))
 				Size = 20;
 			if (!Enum.TryParse<PoolMode>(ConfigurationManager.AppSettings["Processing.PoolMode"], out Mode))
-				Mode = PoolMode.IfAvailable;
+			{
+				//TODO: Mono has issues with BlockingCollection. use None as default
+				int p = (int)Environment.OSVersion.Platform;
+				if (p == 4 || p == 6 || p == 128)
+					Mode = PoolMode.None;
+				else
+					Mode = PoolMode.IfAvailable;
+			}
 			var commandTypes = extensibilityProvider.FindPlugins<IServerCommand>();
 			Factory.RegisterTypes(commandTypes, InstanceScope.Context);
 			if (Mode != PoolMode.None)
