@@ -9,8 +9,9 @@ namespace Revenj.Security
 {
 	public class RepositoryAuthentication : IAuthentication<SecureString>, IAuthentication<string>, IAuthentication<byte[]>
 	{
+		private static readonly SHA1 SHA = SHA1.Create();
+
 		private readonly Func<string, IUser> Lookup;
-		private readonly SHA1 SHA = SHA1.Create();
 
 		public RepositoryAuthentication(Func<string, IUser> lookup)
 		{
@@ -24,7 +25,7 @@ namespace Revenj.Security
 			var found = Lookup(user);
 			return found != null
 				&& found.IsAllowed
-				&& found.Password == Marshal.PtrToStringBSTR(Marshal.SecureStringToBSTR(password));
+				&& AreEqual(found.PasswordHash, password);
 		}
 
 		public bool IsAuthenticated(string user, string password)
@@ -32,7 +33,7 @@ namespace Revenj.Security
 			var found = Lookup(user);
 			return found != null
 				&& found.IsAllowed
-				&& found.Password == password;
+				&& AreEqual(found.PasswordHash, SHA.ComputeHash(Encoding.UTF8.GetBytes(password)));
 		}
 
 		public bool IsAuthenticated(string user, byte[] key)
@@ -40,7 +41,7 @@ namespace Revenj.Security
 			var found = Lookup(user);
 			return found != null
 				&& found.IsAllowed
-				&& AreEqual(SHA.ComputeHash(Encoding.UTF8.GetBytes(found.Password)), key);
+				&& AreEqual(found.PasswordHash, key);
 		}
 
 		private static bool AreEqual(byte[] left, byte[] right)
@@ -51,6 +52,24 @@ namespace Revenj.Security
 				if (left[i] != right[i])
 					return false;
 			return true;
+		}
+
+		private static bool AreEqual(byte[] left, SecureString right)
+		{
+			IntPtr bstr = IntPtr.Zero;
+			try
+			{
+				bstr = Marshal.SecureStringToBSTR(right);
+				int len = Marshal.ReadInt32(bstr, -4);
+				var bytes = new byte[len];
+				for (var i = 0; i < bytes.Length; i++)
+					bytes[i] = Marshal.ReadByte(bstr, i);
+				return AreEqual(left, SHA.ComputeHash(Encoding.Convert(Encoding.Unicode, Encoding.UTF8, bytes)));
+			}
+			finally
+			{
+				if (bstr != IntPtr.Zero) Marshal.ZeroFreeBSTR(bstr);
+			}
 		}
 	}
 }

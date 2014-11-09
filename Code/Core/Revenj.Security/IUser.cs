@@ -3,7 +3,7 @@
 	public interface IUser
 	{
 		string Name { get; }
-		string Password { get; }
+		byte[] PasswordHash { get; }
 		bool IsAllowed { get; }
 	}
 }

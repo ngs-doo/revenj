@@ -4,7 +4,7 @@ module Security
 	{
 		string(100) Name;
 		Role(Name) *Role;
-		string Password;
+		binary PasswordHash;
 		bool IsAllowed;
 		implements server 'Revenj.Security.IUser, Revenj.Security';
 	}

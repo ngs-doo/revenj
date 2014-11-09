@@ -43,9 +43,10 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 				return null;
 			var data = ByteaConverter.FromDatabase(value);
 			var ss = new SecureString();
-			var utf8string = Encoding.UTF8.GetString(RsaProvider.Decrypt(data, false));
-			foreach (var c in utf8string)
-				ss.AppendChar(c);
+			var decrypt = RsaProvider.Decrypt(data, false);
+			var chars = Encoding.Unicode.GetChars(decrypt);
+			for (int i = 0; i < chars.Length; i++)
+				ss.AppendChar(chars[i]);
 			return ss;
 		}
 
@@ -55,9 +56,23 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 			var bytes = ByteaConverter.Parse(reader, context);
 			if (bytes == null)
 				return ss;
-			var utf8string = Encoding.UTF8.GetString(RsaProvider.Decrypt(bytes, false));
-			foreach (var c in utf8string)
-				ss.AppendChar(c);
+			var decrypt = RsaProvider.Decrypt(bytes, false);
+			var chars = Encoding.Unicode.GetChars(decrypt);
+			for (int i = 0; i < chars.Length; i++)
+				ss.AppendChar(chars[i]);
+			return ss;
+		}
+
+		public static SecureString ParseNullable(TextReader reader, int context)
+		{
+			var bytes = ByteaConverter.Parse(reader, context);
+			if (bytes == null)
+				return null;
+			var ss = new SecureString();
+			var decrypt = RsaProvider.Decrypt(bytes, false);
+			var chars = Encoding.Unicode.GetChars(decrypt);
+			for (int i = 0; i < chars.Length; i++)
+				ss.AppendChar(chars[i]);
 			return ss;
 		}
 
@@ -69,10 +84,16 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 			var result = new List<SecureString>();
 			foreach (var item in list)
 			{
+				if (item == null)
+				{
+					result.Add(null);
+					continue;
+				}
 				var ss = new SecureString();
-				var utf8string = Encoding.UTF8.GetString(RsaProvider.Decrypt(item, false));
-				foreach (var c in utf8string)
-					ss.AppendChar(c);
+				var bytes = RsaProvider.Decrypt(item, false);
+				var chars = Encoding.Unicode.GetChars(bytes);
+				for (int i = 0; i < chars.Length; i++)
+					ss.AppendChar(chars[i]);
 				result.Add(ss);
 			}
 			return result;
@@ -82,16 +103,32 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 		{
 			if (value == null)
 				return null;
-			var decoded = Marshal.PtrToStringBSTR(Marshal.SecureStringToBSTR(value));
-			return ByteaConverter.ToDatabase(RsaProvider.Encrypt(Encoding.UTF8.GetBytes(decoded), false));
+			return ByteaConverter.ToDatabase(ExtractBytesAndEcrypt(value));
 		}
 
 		public static PostgresTuple ToTuple(SecureString value)
 		{
 			if (value == null)
 				return null;
-			var decoded = Marshal.PtrToStringBSTR(Marshal.SecureStringToBSTR(value));
-			return ByteaConverter.ToTuple(RsaProvider.Encrypt(Encoding.UTF8.GetBytes(decoded), false));
+			return ByteaConverter.ToTuple(ExtractBytesAndEcrypt(value));
+		}
+
+		private static byte[] ExtractBytesAndEcrypt(SecureString value)
+		{
+			IntPtr bstr = IntPtr.Zero;
+			try
+			{
+				bstr = Marshal.SecureStringToBSTR(value);
+				int len = Marshal.ReadInt32(bstr, -4);
+				var bytes = new byte[len];
+				for (var i = 0; i < len; ++i)
+					bytes[i] = Marshal.ReadByte(bstr, i);
+				return RsaProvider.Encrypt(bytes, false);
+			}
+			finally
+			{
+				if (bstr != IntPtr.Zero) Marshal.ZeroFreeBSTR(bstr);
+			}
 		}
 	}
 }
