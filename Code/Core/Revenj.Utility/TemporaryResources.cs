@@ -185,6 +185,7 @@ namespace Revenj.Utility
 				catch { }
 			});
 		}
+		private static Type[] EmptyTypes = new Type[0];
 		/// <summary>
 		/// Create instance of specified type and populate it with
 		/// random values.
@@ -193,7 +194,9 @@ namespace Revenj.Utility
 		/// <returns>object instance</returns>
 		public static object CreateRandomObject(Type target)
 		{
-			object instance = FormatterServices.GetUninitializedObject(target);
+			var ctor = target.GetConstructor(EmptyTypes);
+			//baked in serialization doesn't like uninitialized objects.
+			object instance = ctor != null ? ctor.Invoke(null) : FormatterServices.GetUninitializedObject(target);
 			var rnd = new Random();
 			foreach (var p in instance.GetType().GetProperties())
 			{
