@@ -43,16 +43,30 @@ namespace Revenj.Core
 			builder.RegisterType<LogFactory>().As<ILogFactory>().SingleInstance();
 			builder.RegisterType<NLogLogger>().As<ILogger>();
 
-			var container = builder.Build();
-			var init = container.Resolve<SystemInitialization>();
-			init.Initialize(false);
-			var factory = container.Resolve<IObjectFactory>();
-			//TODO init model
-			factory.Resolve<IDomainModel>();
+			builder.RegisterType<OnContainerBuild>().As<IStartable>();
+
+			var factory = builder.Build().Resolve<IObjectFactory>();
 			state.IsBooting = false;
 			state.Started(factory);
-
 			return factory.Resolve<IServiceLocator>();
+		}
+
+		class OnContainerBuild : Autofac.IStartable
+		{
+			private readonly IObjectFactory Factory;
+
+			public OnContainerBuild(IObjectFactory factory)
+			{
+				this.Factory = factory;
+			}
+
+			public void Start()
+			{
+				var init = Factory.Resolve<SystemInitialization>();
+				init.Initialize(false);
+				//TODO change domain model boot. export to ISystemAspect to avoid explicit initialization
+				Factory.Resolve<IDomainModel>();
+			}
 		}
 
 		class AspectsModule : Autofac.Module
