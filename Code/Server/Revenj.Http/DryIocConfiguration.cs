@@ -23,8 +23,29 @@ namespace Revenj.Http
 	[Obsolete("Not working yet")]
 	public static class DryIocConfiguration
 	{
+		internal class ServerState : ISystemState
+		{
+			public ServerState()
+			{
+				IsBooting = true;
+			}
+
+			public bool IsBooting { get; internal set; }
+			public bool IsReady { get; private set; }
+			public event Action<IObjectFactory> Ready = f => { };
+			public void Started(IObjectFactory factory)
+			{
+				IsBooting = false;
+				IsReady = true;
+				Ready(factory);
+			}
+		}
+
 		public static void Load(IRegistry registry)
 		{
+			registry.RegisterInstance<ISystemState>(new ServerState());
+			registry.RegisterInstance<IPermissionManager>(new NoAuth());
+
 			registry.Register<IRestApplication, RestApplication>(Reuse.Singleton);
 			registry.Register<RestApplication>(Reuse.Singleton);
 			//builder.RegisterType<SoapApplication>().As<SoapApplication, ISoapApplication>();
@@ -37,7 +58,7 @@ namespace Revenj.Http
 
 			//builder.RegisterType<RepositoryAuthentication>().As<IAuthentication>();
 			//builder.RegisterType<RepositoryPrincipalFactory>().As<IPrincipalFactory>();
-			registry.Register<IPermissionManager, PermissionManager>(Reuse.Singleton);
+			//registry.Register<IPermissionManager, PermissionManager>(Reuse.Singleton);
 
 			registry.Register<ILogFactory, LogFactory>(Reuse.Singleton);
 			registry.Register<ILogger, NLogLogger>();
@@ -103,7 +124,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			registry.Register<IDomainEventSource, DomainEventSource>(Reuse.InCurrentScope);
 			registry.Register<IDomainEventStore, DomainEventStore>(Reuse.InCurrentScope);
 			registry.Register(typeof(IDomainEventSource<>), typeof(SingleDomainEventSource<>), Reuse.InCurrentScope);
-			registry.Register(typeof(RegisterChangeNotifications<>), typeof(IObservable<>), Reuse.Singleton);
+			registry.Register(typeof(IObservable<>), typeof(RegisterChangeNotifications<>), Reuse.Singleton);
 			registry.Register<IDataContext, DataContext>(Reuse.InCurrentScope);
 		}
 

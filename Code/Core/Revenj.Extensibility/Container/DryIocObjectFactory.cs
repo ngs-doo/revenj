@@ -11,10 +11,8 @@ namespace Revenj.Extensibility
 	public class DryIocObjectFactory : IObjectFactory
 	{
 		private Container CurrentScope;
-		private Stack<Container> MyScopes = new Stack<Container>();
-
 		private readonly List<IObjectFactoryBuilder> FactoryBuilders = new List<IObjectFactoryBuilder>();
-		private bool ShouldBuildScope;
+		private bool ShouldUpdateScope;
 
 		private readonly DryIocObjectFactory ParentFactory;
 
@@ -39,7 +37,7 @@ namespace Revenj.Extensibility
 			DryIocObjectFactory parentFactory,
 			IAspectComposer aspects,
 			Action cleanup)
-			: this(parentFactory.CurrentScope, aspects)
+			: this(parentFactory.CurrentScope.OpenScope(), aspects)
 		{
 			this.ParentFactory = parentFactory;
 			this.Cleanup = cleanup;
@@ -64,7 +62,7 @@ Check if type should be registered in the container or if correct arguments are 
 
 		public object Resolve(Type type, object[] args)
 		{
-			BuildScopeIfRequired();
+			UpdateScopeIfRequired();
 
 			if (args == null || args.Length == 0)
 			{
@@ -76,7 +74,7 @@ Check if type should be registered in the container or if correct arguments are 
 
 		public bool IsRegistered(Type type)
 		{
-			BuildScopeIfRequired();
+			UpdateScopeIfRequired();
 			return CurrentScope.IsRegistered(type);
 		}
 
@@ -85,7 +83,7 @@ Check if type should be registered in the container or if correct arguments are 
 			lock (sync)
 			{
 				FactoryBuilders.Add(builder);
-				ShouldBuildScope = true;
+				ShouldUpdateScope = true;
 			}
 		}
 
@@ -147,7 +145,7 @@ Check if type should be registered in the container or if correct arguments are 
 					var type = item.AsType ?? item.Instance.GetType();
 					var factory = new DelegateFactory(
 						(_, registry) => Expression.Constant(item.Instance),
-						Reuse.Transient,
+						Reuse.Singleton,
 						null);
 					cb.Register(factory, type, null);
 				}
@@ -173,27 +171,24 @@ Check if type should be registered in the container or if correct arguments are 
 			}
 		}
 
-		private void BuildScopeIfRequired()
+		private void UpdateScopeIfRequired()
 		{
-			if (!ShouldBuildScope)
+			if (!ShouldUpdateScope)
 				return;
 			lock (sync)
 			{
-				if (!ShouldBuildScope)
+				if (!ShouldUpdateScope)
 					return;
-				CurrentScope = CurrentScope.OpenScope();
 				RegisterNew();
 
 				FactoryBuilders.Clear();
-				ShouldBuildScope = false;
-
-				MyScopes.Push(CurrentScope);
+				ShouldUpdateScope = false;
 			}
 		}
 
 		public IObjectFactory CreateScope(string id)
 		{
-			BuildScopeIfRequired();
+			UpdateScopeIfRequired();
 			var innerComposer = Aspects.CreateInnerComposer();
 			DryIocObjectFactory tv;
 			Action cleanup = string.IsNullOrEmpty(id) ? (Action)null : () => TaggedScopes.TryRemove(id, out tv);
@@ -216,9 +211,7 @@ Check if type should be registered in the container or if correct arguments are 
 
 		public void Dispose()
 		{
-			lock (sync)
-				while (MyScopes.Count > 0)
-					MyScopes.Pop().Dispose();
+			CurrentScope.Dispose();
 			Aspects.Dispose();
 			if (Cleanup != null)
 				Cleanup();

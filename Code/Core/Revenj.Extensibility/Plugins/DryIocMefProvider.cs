@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -53,7 +54,10 @@ namespace Revenj.Extensibility
 
 			public Lazy<T, Dictionary<string, object>>[] Resolve<T>()
 			{
-				return Container.Resolve<Lazy<T, Dictionary<string, object>>[]>();
+				var meta = Container.Resolve<Meta<Lazy<T>, ExportMetadataAttribute[]>[]>();
+				return (from m in meta
+						let md = m.Metadata.ToDictionary(it => it.Name, it => it.Value)
+						select new Lazy<T, Dictionary<string, object>>(() => default(T), md)).ToArray();
 			}
 		}
 	}

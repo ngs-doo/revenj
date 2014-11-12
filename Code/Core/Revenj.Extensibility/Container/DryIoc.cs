@@ -33,7 +33,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 
-// TODO: Add doc-comments to all public API.
 namespace DryIoc
 {
 	/// <summary>
@@ -45,7 +44,8 @@ namespace DryIoc
 		{
 			_syncRoot = new object();
 			_factories = new Dictionary<Type, FactoriesEntry>();
-			_decorators = HashTree<Type, DecoratorsEntry[]>.Empty;
+			_decorators = HashTree<Type, DecoratorEntry[]>.Empty;
+			_factoredExpressionCache = HashTree<int, Expression>.Empty;
 			_defaultResolutionCache = HashTree<Type, CompiledFactory>.Empty;
 			_keyedResolutionCache = HashTree<Type, HashTree<object, CompiledFactory>>.Empty;
 
@@ -53,10 +53,10 @@ namespace DryIoc
 
 			// Put reference to container into constants, to support container access inside expression. 
 			// It is common for dynamic scenarios.
-			_constants[REGISTRY_WEAKREF_CONST_INDEX] = new WeakReference(this);
-			_constants[CURRENT_SCOPE_CONST_INDEX] = _constants[SINGLETON_SCOPE_CONST_INDEX] = new Scope();
+			_constants[CONSTANTS_REGISTRY_WEAKREF_INDEX] = new WeakReference(this);
+			_constants[CONSTANTS_CURRENT_SCOPE_INDEX] = _constants[CONSTANTS_SINGLETON_SCOPE_INDEX] = new Scope();
 
-			ResolutionRules = new ResolutionRules();
+			_resolutionRules = new ResolutionRules();
 			(setup ?? DefaultSetup).Invoke(this);
 		}
 
@@ -67,7 +67,7 @@ namespace DryIoc
 			return new Container(this);
 		}
 
-		public ResolutionRules.ResolveUnregisteredService UseRegistrationsFrom(IRegistry registry)
+		public ResolutionRules.ResolveUnregisteredService ResolveUnregisteredFrom(IRegistry registry)
 		{
 			ResolutionRules.ResolveUnregisteredService
 				useRegistryRule = (request, _) => registry.GetOrAddFactory(request, IfUnresolved.ReturnNull);
@@ -77,7 +77,7 @@ namespace DryIoc
 
 		public void Dispose()
 		{
-			((Scope)_constants[CURRENT_SCOPE_CONST_INDEX]).Dispose();
+			((Scope)_constants[CONSTANTS_CURRENT_SCOPE_INDEX]).Dispose();
 		}
 
 		#region Compiled Factory
@@ -85,12 +85,12 @@ namespace DryIoc
 		public static readonly ParameterExpression ConstantsParameter = Expression.Parameter(typeof(object[]), "constants");
 		public static readonly ParameterExpression ResolutionScopeParameter = Expression.Parameter(typeof(Scope), "resolutionScope");
 
-		public static readonly int REGISTRY_WEAKREF_CONST_INDEX = 0;
-		public static readonly int SINGLETON_SCOPE_CONST_INDEX = 1;
-		public static readonly int CURRENT_SCOPE_CONST_INDEX = 2;
+		public static readonly int CONSTANTS_REGISTRY_WEAKREF_INDEX = 0;
+		public static readonly int CONSTANTS_SINGLETON_SCOPE_INDEX = 1;
+		public static readonly int CONSTANTS_CURRENT_SCOPE_INDEX = 2;
 
 		public static readonly Expression RegistryWeakRefExpression = Expression.Convert(
-			Expression.ArrayIndex(ConstantsParameter, Expression.Constant(REGISTRY_WEAKREF_CONST_INDEX)),
+			Expression.ArrayIndex(ConstantsParameter, Expression.Constant(CONSTANTS_REGISTRY_WEAKREF_INDEX)),
 			typeof(WeakReference));
 
 		public static readonly Expression RegistryExpression = Expression.Convert(
@@ -98,11 +98,11 @@ namespace DryIoc
 			typeof(IRegistry));
 
 		public static readonly Expression SingletonScopeExpression = Expression.Convert(
-			Expression.ArrayIndex(ConstantsParameter, Expression.Constant(SINGLETON_SCOPE_CONST_INDEX)),
+			Expression.ArrayIndex(ConstantsParameter, Expression.Constant(CONSTANTS_SINGLETON_SCOPE_INDEX)),
 			typeof(Scope));
 
 		public static readonly Expression CurrentScopeExpression = Expression.Convert(
-			Expression.ArrayIndex(ConstantsParameter, Expression.Constant(CURRENT_SCOPE_CONST_INDEX)),
+			Expression.ArrayIndex(ConstantsParameter, Expression.Constant(CONSTANTS_CURRENT_SCOPE_INDEX)),
 			typeof(Scope));
 
 		#endregion
@@ -111,22 +111,18 @@ namespace DryIoc
 
 		public Factory Register(Factory factory, Type serviceType, object serviceKey)
 		{
-			var implementationType = factory.ThrowIfNull().ImplementationType;
-			if (implementationType != null && serviceType.ThrowIfNull() != typeof(object))
-			{
-				Throw.If(!implementationType.GetImplementedTypes().Contains(serviceType),
-					Error.EXPECTED_IMPL_TYPE_ASSIGNABLE_TO_SERVICE_TYPE, implementationType, serviceType);
-			}
+			serviceType.ThrowIfNull();
+			factory.ThrowIfNull().ThrowIfCannotBeRegisteredWithServiceType(serviceType);
 
 			lock (_syncRoot)
 			{
 				if (factory.Setup.Type == FactoryType.Decorator)
 				{
-					_decorators = _decorators.AddOrUpdate(serviceType, new[] { new DecoratorsEntry(factory) }, Sugar.Append);
+					_decorators = _decorators.AddOrUpdate(serviceType, new[] { new DecoratorEntry(factory) }, Sugar.Append);
 					return factory;
 				}
 
-				var entry = _factories.GetOrAdd(serviceType, _ => new FactoriesEntry());
+				var entry = _factories.GetOrAdd(serviceType, NewFactoriesEntry);
 				if (serviceKey == null)
 				{   // default factories will contain all the factories and LastDefault will just point to the latest, 
 					// for memory saving reasons.
@@ -160,6 +156,11 @@ namespace DryIoc
 			return ((IRegistry)this).GetFactoryOrDefault(serviceType.ThrowIfNull(), serviceName) != null;
 		}
 
+		private static FactoriesEntry NewFactoriesEntry(Type _)
+		{
+			return new FactoriesEntry();
+		}
+
 		#endregion
 
 		#region IResolver
@@ -181,7 +182,7 @@ namespace DryIoc
 				var request = Request.Create(serviceType, serviceKey);
 				var factory = ((IRegistry)this).GetOrAddFactory(request, ifUnresolved);
 				if (factory == null) return null;
-				compiledFactory = factory.GetExpression(request, this).ToFactoryExpression().CompileFactory();
+				compiledFactory = factory.GetExpression(request, this).CompileToFactory();
 				Interlocked.Exchange(ref _keyedResolutionCache,
 					_keyedResolutionCache.AddOrUpdate(serviceType, entry.AddOrUpdate(serviceKey, compiledFactory)));
 			}
@@ -189,15 +190,13 @@ namespace DryIoc
 			return compiledFactory(_constants, resolutionScope: null);
 		}
 
-		private HashTree<Type, CompiledFactory> _defaultResolutionCache;
-		private HashTree<Type, HashTree<object, CompiledFactory>> _keyedResolutionCache;
-
 		private CompiledFactory ResolveAndCacheFactory(Type serviceType, IfUnresolved ifUnresolved)
 		{
 			var request = Request.Create(serviceType);
 			var factory = ((IRegistry)this).GetOrAddFactory(request, ifUnresolved);
-			if (factory == null) return EmptyCompiledFactory;
-			var compiledFactory = factory.GetExpression(request, this).ToFactoryExpression().CompileFactory();
+			if (factory == null)
+				return EmptyCompiledFactory;
+			var compiledFactory = factory.GetExpression(request, this).CompileToFactory();
 			Interlocked.Exchange(ref _defaultResolutionCache,
 				_defaultResolutionCache.AddOrUpdate(serviceType, compiledFactory));
 			return compiledFactory;
@@ -209,7 +208,7 @@ namespace DryIoc
 
 		#region IRegistry
 
-		public ResolutionRules ResolutionRules { get; private set; }
+		public ResolutionRules ResolutionRules { get { return _resolutionRules; } }
 
 		public object[] Constants { get { return _constants; } }
 
@@ -231,6 +230,17 @@ namespace DryIoc
 			return Expression.Convert(constantsAccesssExpr, constantType);
 		}
 
+		Expression IRegistry.GetCachedFactoryExpressionOrDefault(int factoryID)
+		{
+			return _factoredExpressionCache.GetValueOrDefault(factoryID);
+		}
+
+		void IRegistry.CacheFactoryExpression(int factoryID, Expression expression)
+		{
+			Interlocked.Exchange(ref _factoredExpressionCache,
+				_factoredExpressionCache.AddOrUpdate(factoryID, expression));
+		}
+
 		Factory IRegistry.GetOrAddFactory(Request request, IfUnresolved ifUnresolved)
 		{
 			Factory newFactory = null;
@@ -240,7 +250,13 @@ namespace DryIoc
 				Factory factory;
 				if (_factories.TryGetValue(request.ServiceType, out entry) &&
 					entry.TryGet(out factory, request.ServiceType, request.ServiceKey, ResolutionRules.GetSingleRegisteredFactory))
-					return factory.GetFactoryPerRequestOrDefault(request, this) ?? factory;
+				{
+					if (factory.ProvidesFactoryPerRequest)
+						factory = factory.GetFactoryPerRequestOrDefault(request, this);
+					if (factory == null)
+						Throw.If(ifUnresolved == IfUnresolved.Throw, Error.UNABLE_TO_RESOLVE_SERVICE, request);
+					return factory;
+				}
 
 				if (request.OpenGenericServiceType != null &&
 					_factories.TryGetValue(request.OpenGenericServiceType, out entry))
@@ -249,7 +265,8 @@ namespace DryIoc
 					if (entry.TryGet(out genericFactory, request.ServiceType, request.ServiceKey, ResolutionRules.GetSingleRegisteredFactory) ||
 						request.ServiceKey != null && // OR try find generic-wrapper by ignoring service key.
 						entry.TryGet(out genericFactory, request.ServiceType, null, ResolutionRules.GetSingleRegisteredFactory) &&
-						genericFactory.Setup.Type == FactoryType.GenericWrapper)
+						genericFactory.Setup.Type == FactoryType.GenericWrapper &&
+						genericFactory.ProvidesFactoryPerRequest)
 					{
 						newFactory = genericFactory.GetFactoryPerRequestOrDefault(request, this);
 					}
@@ -306,8 +323,8 @@ namespace DryIoc
 				}
 			}
 
-			IEnumerable<DecoratorsEntry> decorators = _decorators.GetValueOrDefault(serviceType);
-			var openGenericDecoratorIndex = decorators == null ? 0 : ((DecoratorsEntry[])decorators).Length;
+			IEnumerable<DecoratorEntry> decorators = _decorators.GetValueOrDefault(serviceType);
+			var openGenericDecoratorIndex = decorators == null ? 0 : ((DecoratorEntry[])decorators).Length;
 			if (request.OpenGenericServiceType != null)
 			{
 				var openGenericDecorators = _decorators.GetValueOrDefault(request.OpenGenericServiceType);
@@ -328,7 +345,7 @@ namespace DryIoc
 					if (((DecoratorSetup)factory.Setup).IsApplicable(request))
 					{
 						// Cache closed generic registration produced by open-generic decorator.
-						if (decoratorIndex++ >= openGenericDecoratorIndex)
+						if (decoratorIndex++ >= openGenericDecoratorIndex && factory.ProvidesFactoryPerRequest)
 							factory = Register(factory.GetFactoryPerRequestOrDefault(request, this), serviceType, null);
 
 						if (decorator.CachedExpression == null)
@@ -419,11 +436,26 @@ namespace DryIoc
 
 		private bool TryFindEntry(out FactoriesEntry entry, Type serviceType)
 		{
-			return _factories.TryGetValue(serviceType, out entry) || serviceType.IsGenericType &&
-				   _factories.TryGetValue(serviceType.GetGenericTypeDefinition().ThrowIfNull(), out entry);
+			return _factories.TryGetValue(serviceType, out entry) ||
+				serviceType.IsGenericType && !serviceType.IsGenericTypeDefinition &&
+				_factories.TryGetValue(serviceType.GetGenericTypeDefinition().ThrowIfNull(), out entry);
 		}
 
-		private static bool AlwaysTrue(Factory _) { return true; }
+		private static bool AlwaysTrue<T>(T _) { return true; }
+
+		#endregion
+
+		#region Internal State
+
+		private readonly ResolutionRules _resolutionRules;
+		private readonly object _syncRoot;
+		private readonly Dictionary<Type, FactoriesEntry> _factories;
+		private HashTree<Type, DecoratorEntry[]> _decorators;
+
+		private object[] _constants;
+		private HashTree<int, Expression> _factoredExpressionCache;
+		private HashTree<Type, CompiledFactory> _defaultResolutionCache;
+		private HashTree<Type, HashTree<object, CompiledFactory>> _keyedResolutionCache;
 
 		#endregion
 
@@ -432,25 +464,21 @@ namespace DryIoc
 		// Creates child container with singleton scope, constants and cache shared with parent. BUT with new CurrentScope.
 		private Container(Container parent)
 		{
-			ResolutionRules = parent.ResolutionRules;
+			_resolutionRules = parent.ResolutionRules;
 
 			var parentConstants = parent._constants;
 			_constants = new object[parentConstants.Length];
 			Array.Copy(parentConstants, 0, _constants, 0, parentConstants.Length);
-			_constants[REGISTRY_WEAKREF_CONST_INDEX] = new WeakReference(this);
-			_constants[CURRENT_SCOPE_CONST_INDEX] = new Scope();
+			_constants[CONSTANTS_REGISTRY_WEAKREF_INDEX] = new WeakReference(this);
+			_constants[CONSTANTS_CURRENT_SCOPE_INDEX] = new Scope();
 
 			_syncRoot = parent._syncRoot;
 			_factories = parent._factories;
 			_decorators = parent._decorators;
+			_factoredExpressionCache = parent._factoredExpressionCache;
 			_defaultResolutionCache = parent._defaultResolutionCache;
 			_keyedResolutionCache = parent._keyedResolutionCache;
 		}
-
-		private readonly object _syncRoot;
-		private readonly Dictionary<Type, FactoriesEntry> _factories;
-		private HashTree<Type, DecoratorsEntry[]> _decorators;
-		private object[] _constants;
 
 		private sealed class FactoriesEntry
 		{
@@ -505,12 +533,12 @@ namespace DryIoc
 			}
 		}
 
-		private sealed class DecoratorsEntry
+		private sealed class DecoratorEntry
 		{
 			public readonly Factory Factory;
 			public Expression CachedExpression;
 
-			public DecoratorsEntry(Factory factory, Expression cachedExpression = null)
+			public DecoratorEntry(Factory factory, Expression cachedExpression = null)
 			{
 				Factory = factory;
 				CachedExpression = cachedExpression;
@@ -524,16 +552,17 @@ namespace DryIoc
 
 	public static partial class FactoryCompiler
 	{
-		public static Expression<CompiledFactory> ToFactoryExpression(this Expression expression)
+		public static Expression<CompiledFactory> ToCompiledFactoryExpression(this Expression expression)
 		{
-			// Removing Convert from expression root, as the result will be converted after invoking CompliedFactory.
+			// Removing not required Convert from expression root, because CompiledFactory result still be converted at the end.
 			if (expression.NodeType == ExpressionType.Convert)
 				expression = ((UnaryExpression)expression).Operand;
 			return Expression.Lambda<CompiledFactory>(expression, Container.ConstantsParameter, Container.ResolutionScopeParameter);
 		}
 
-		public static CompiledFactory CompileFactory(this Expression<CompiledFactory> factoryExpression)
+		public static CompiledFactory CompileToFactory(this Expression expression)
 		{
+			var factoryExpression = expression.ToCompiledFactoryExpression();
 			CompiledFactory factory = null;
 			CompileToMethod(factoryExpression, ref factory);
 			// ReSharper disable ConstantNullCoalescingCondition
@@ -560,12 +589,15 @@ namespace DryIoc
 		public static void Default(IRegistry registry)
 		{
 			registry.ResolutionRules.UnregisteredServices =
-				registry.ResolutionRules.UnregisteredServices.Append(
-					ResolveEnumerableAsStaticArray,
-					ResolveManyDynamically);
+				registry.ResolutionRules.UnregisteredServices.Append(ResolveEnumerableAsStaticArray);
+
+			var manyFactory = new FactoryProvider(
+				(_, __) => new DelegateFactory(GetManyExpression),
+				ServiceSetup.With(FactoryCachePolicy.ShouldNotCacheExpression));
+			registry.Register(typeof(Many<>), manyFactory);
 
 			var funcFactory = new FactoryProvider(
-				(_, __) => new DelegateFactory(GetFuncExpression, Reuse.Singleton),
+				(_, __) => new DelegateFactory(GetFuncExpression),
 				GenericWrapperSetup.With(t => t[t.Length - 1]));
 			foreach (var funcType in FuncTypes)
 				registry.Register(funcType, funcFactory);
@@ -605,7 +637,6 @@ namespace DryIoc
 				if (parent != null && parent.ServiceType == wrappedItemType)
 					condition = factory => factory.ID != parent.FactoryID;
 				var itemKeys = registry.GetKeys(wrappedItemType, condition).ToArray();
-				//TODO: fix
 				//Throw.If(itemKeys.Length == 0, Error.UNABLE_TO_FIND_REGISTERED_ENUMERABLE_ITEMS, wrappedItemType, request);
 
 				var itemExpressions = new List<Expression>(itemKeys.Length);
@@ -617,38 +648,31 @@ namespace DryIoc
 						itemExpressions.Add(itemFactory.GetExpression(itemRequest, registry));
 				}
 
-				Throw.If(itemKeys.Length > 0 && itemExpressions.Count == 0, Error.UNABLE_TO_RESOLVE_ENUMERABLE_ITEMS, itemType, request);
+				Throw.If(itemExpressions.Count != itemKeys.Length, Error.UNABLE_TO_RESOLVE_ENUMERABLE_ITEMS, itemType, request);
 				var newArrayExpr = Expression.NewArrayInit(itemType.ThrowIfNull(), itemExpressions);
 				return newArrayExpr;
 			});
 		};
 
-		public static ResolutionRules.ResolveUnregisteredService ResolveManyDynamically = (req, _) =>
+		public static Expression GetManyExpression(Request request, IRegistry registry)
 		{
-			if (req.OpenGenericServiceType != typeof(Many<>))
-				return null;
+			var dynamicEnumerableType = request.ServiceType;
+			var itemType = dynamicEnumerableType.GetGenericArguments()[0];
 
-			return new DelegateFactory((request, registry) =>
-			{
-				var dynamicEnumerableType = request.ServiceType;
-				var itemType = dynamicEnumerableType.GetGenericArguments()[0];
+			var wrappedItemType = registry.GetWrappedServiceTypeOrSelf(itemType);
 
-				var wrappedItemType = registry.GetWrappedServiceTypeOrSelf(itemType);
+			// Composite pattern support: filter out composite root from available keys.
+			var parentFactoryID = -1;
+			var parent = request.GetNonWrapperParentOrDefault();
+			if (parent != null && parent.ServiceType == wrappedItemType)
+				parentFactoryID = parent.FactoryID;
 
-				// Composite pattern support: filter out composite root from available keys.
-				var parentFactoryID = -1;
-				var parent = request.GetNonWrapperParentOrDefault();
-				if (parent != null && parent.ServiceType == wrappedItemType)
-					parentFactoryID = parent.FactoryID;
+			var resolveMethod = _resolveManyDynamicallyMethod.MakeGenericMethod(itemType, wrappedItemType);
+			var resolveMethodCallExpr = Expression.Call(resolveMethod,
+				Container.RegistryWeakRefExpression, Expression.Constant(parentFactoryID));
 
-				var resolveMethod = _resolveManyDynamicallyMethod.MakeGenericMethod(itemType, wrappedItemType);
-				var resolveMethodCallExpr = Expression.Call(resolveMethod,
-					Container.RegistryWeakRefExpression, Expression.Constant(parentFactoryID));
-
-				return Expression.New(dynamicEnumerableType.GetConstructors()[0], resolveMethodCallExpr);
-			},
-			setup: ServiceSetup.With(FactoryCachePolicy.NotCacheExpression));
-		};
+			return Expression.New(dynamicEnumerableType.GetConstructors()[0], resolveMethodCallExpr);
+		}
 
 		public static Expression GetFuncExpression(Request request, IRegistry registry)
 		{
@@ -678,7 +702,7 @@ namespace DryIoc
 			var factoryExpr = registry
 				.GetOrAddFactory(serviceRequest, IfUnresolved.Throw)
 				.GetExpression(serviceRequest, registry)
-				.ToFactoryExpression();
+				.ToCompiledFactoryExpression();
 
 			var factoryConstExpr = registry.GetConstantExpression(factoryExpr, typeof(Expression<CompiledFactory>));
 			return Expression.New(ctor, factoryConstExpr);
@@ -716,9 +740,11 @@ namespace DryIoc
 				var serviceFactory = registry.GetOrAddFactory(serviceRequest, IfUnresolved.Throw);
 
 				var metaCtor = request.ServiceType.GetConstructors()[0];
-				var serviceExpr = serviceFactory.GetExpression(serviceRequest, registry);
+				//var serviceExpr = serviceFactory.GetExpression(serviceRequest, registry);
 				var metadataExpr = registry.GetConstantExpression(resultMetadata, metadataType);
-				return Expression.New(metaCtor, serviceExpr, metadataExpr);
+				//return Expression.Constant(null);
+				//return Expression.New(metaCtor, serviceExpr, metadataExpr);
+				return Expression.New(metaCtor, Expression.Constant(null, serviceType), metadataExpr);
 			});
 		}
 
@@ -731,9 +757,9 @@ namespace DryIoc
 		}
 
 		private static readonly MethodInfo _resolveManyDynamicallyMethod =
-			typeof(ContainerSetup).GetMethod("DoResolveManyDynamically", BindingFlags.Static | BindingFlags.NonPublic);
+			typeof(ContainerSetup).GetMethod("DoResolveManyDynamically", BindingFlags.Static | BindingFlags.Public).ThrowIfNull();
 
-		internal static IEnumerable<TItem> DoResolveManyDynamically<TItem, TWrappedItem>(WeakReference registryRef, int parentFactoryID)
+		public static IEnumerable<TItem> DoResolveManyDynamically<TItem, TWrappedItem>(WeakReference registryRef, int parentFactoryID)
 		{
 			var itemType = typeof(TItem);
 			var wrappedItemType = typeof(TWrappedItem);
@@ -822,6 +848,20 @@ Please register service OR adjust resolution rules.";
 		public static readonly string EXPECTED_IMPL_TYPE_ASSIGNABLE_TO_SERVICE_TYPE =
 			"Expecting implementation type {0} to be assignable to service type {1} but it is not.";
 
+		public static readonly string UNABLE_TO_REGISTER_OPEN_GENERIC_IMPL_WITH_NON_GENERIC_SERVICE =
+			"Unable to register open-generic implementation {0} with non-generic service {1}.";
+
+		public static readonly string UNABLE_TO_REGISTER_OPEN_GENERIC_IMPL_CAUSE_SERVICE_DOES_NOT_SPECIFY_ALL_TYPE_ARGS =
+			"Unable to register open-generic implementation {0} because service {1} should specify all of its type arguments, but specifies only {2}.";
+
+		public static readonly string USUPPORTED_REGISTRATION_OF_NON_GENERIC_IMPL_TYPE_DEFINITION_BUT_WITH_GENERIC_ARGS =
+@"Unsupported registration of implementation {0} which is not a generic type definition but contains generic parameters. 
+Consider to register generic type definition {1} instead.";
+
+		public static readonly string USUPPORTED_REGISTRATION_OF_NON_GENERIC_SERVICE_TYPE_DEFINITION_BUT_WITH_GENERIC_ARGS =
+@"Unsupported registration of service {0} which is not a generic type definition but contains generic parameters. 
+Consider to register generic type definition {1} instead.";
+
 		public static readonly string EXPECTED_SINGLE_DEFAULT_FACTORY =
 @"Expecting single default registration of {0} but found many:
 {1}.";
@@ -880,10 +920,10 @@ when resolving {1}.";
 			"Delegate factory expression returned NULL when resolving {0}.";
 
 		public static readonly string UNABLE_TO_MATCH_IMPL_BASE_TYPES_WITH_SERVICE_TYPE =
-			"For open-generic implementation {0} unable to match any its base types ({1}) with requested service {2}.";
+			"Unable to match service with any of open-generic implementation {0} implemented types {1} when resolving {2}.";
 
-		public static readonly string UNABLE_TO_GET_SOME_GENERIC_IMPL_TYPE_ARGS =
-			"Unable to get some type arguments <{0}> for implementation {1} when resolving {2}.";
+		public static readonly string UNABLE_TO_FIND_OPEN_GENERIC_IMPL_TYPE_ARG_IN_SERVICE =
+			"Unable to find for open-generic implementation {0} the type argument {1} when resolving {2}.";
 	}
 
 	public static class Registrator
@@ -997,8 +1037,26 @@ when resolving {1}.";
 			string named = null, Func<Type, bool> types = null)
 		{
 			var registration = new ReflectionFactory(implementationType, reuse, withConstructor, setup);
-			foreach (var serviceType in implementationType.GetImplementedTypes().Where(types ?? PublicTypes))
+
+			var implementedTypes = implementationType.GetImplementedTypes(TypeTools.IncludeTypeItself.AsFirst);
+			var implementedServiceTypes = implementedTypes.Where(types ?? PublicTypes);
+			if (implementationType.IsGenericTypeDefinition)
+			{
+				var implTypeArgs = implementationType.GetGenericArguments();
+				implementedServiceTypes = implementedServiceTypes.Where(t =>
+					t.IsGenericType && t.ContainsGenericParameters && t.ContainsAllGenericParameters(implTypeArgs))
+					.Select(t => t.GetGenericTypeDefinition());
+			}
+
+			var atLeastOneRegistered = false;
+			foreach (var serviceType in implementedServiceTypes)
+			{
 				registrator.Register(registration, serviceType, named);
+				atLeastOneRegistered = true;
+			}
+
+			Throw.If(!atLeastOneRegistered, "Unable to register any of implementation {0} implemented services {1}.",
+				implementationType, implementedTypes);
 		}
 
 		/// <summary>
@@ -1148,387 +1206,44 @@ when resolving {1}.";
 		public static void ResolvePropertiesAndFields(this IResolver resolver, object instance, Func<MemberInfo, string> getServiceName = null)
 		{
 			var implType = instance.ThrowIfNull().GetType();
-			getServiceName = getServiceName ?? (_ => null);
-
-			foreach (var property in implType.GetProperties(MembersToResolve).Where(p => p.GetSetMethod() != null))
-			{
-				var value = resolver.Resolve(property.PropertyType, getServiceName(property), IfUnresolved.ReturnNull);
-				if (value != null)
-					property.SetValue(instance, value, null);
-			}
-
-			foreach (var field in implType.GetFields(MembersToResolve).Where(f => !f.IsInitOnly))
-			{
-				var value = resolver.Resolve(field.FieldType, getServiceName(field), IfUnresolved.ReturnNull);
-				if (value != null)
-					field.SetValue(instance, value);
-			}
-		}
-	}
-
-	public enum FactoryType { Service = 0, Decorator, GenericWrapper };
-
-	public enum FactoryCachePolicy { CacheExpression, NotCacheExpression };
-
-	public abstract class FactorySetup
-	{
-		public abstract FactoryType Type { get; }
-		public virtual FactoryCachePolicy CachePolicy { get { return FactoryCachePolicy.CacheExpression; } }
-		public virtual object Metadata { get { return null; } }
-	}
-
-	public class ServiceSetup : FactorySetup
-	{
-		public static readonly ServiceSetup Default = new ServiceSetup();
-
-		public static ServiceSetup With(FactoryCachePolicy cachePolicy = FactoryCachePolicy.CacheExpression, object metadata = null)
-		{
-			return cachePolicy == FactoryCachePolicy.CacheExpression && metadata == null ? Default : new ServiceSetup(cachePolicy, metadata);
-		}
-
-		public static ServiceSetup WithMetadata(object metadata = null)
-		{
-			return metadata == null ? Default : new ServiceSetup(metadata: metadata);
-		}
-
-		public override FactoryType Type { get { return FactoryType.Service; } }
-		public override FactoryCachePolicy CachePolicy { get { return _cachePolicy; } }
-		public override object Metadata { get { return _metadata; } }
-
-		#region Implementation
-
-		private ServiceSetup(FactoryCachePolicy cachePolicy = FactoryCachePolicy.CacheExpression, object metadata = null)
-		{
-			_cachePolicy = cachePolicy;
-			_metadata = metadata;
-		}
-
-		private readonly FactoryCachePolicy _cachePolicy;
-
-		private readonly object _metadata;
-
-		#endregion
-	}
-
-	public class GenericWrapperSetup : FactorySetup
-	{
-		public static readonly GenericWrapperSetup Default = new GenericWrapperSetup();
-
-		public static GenericWrapperSetup With(Func<Type[], Type> selectServiceTypeArg)
-		{
-			return selectServiceTypeArg == null ? Default : new GenericWrapperSetup(selectServiceTypeArg);
-		}
-
-		public override FactoryType Type { get { return FactoryType.GenericWrapper; } }
-		public readonly Func<Type[], Type> GetWrappedServiceType;
-
-		#region Implementation
-
-		private GenericWrapperSetup(Func<Type[], Type> selectServiceTypeFromGenericArgs = null)
-		{
-			GetWrappedServiceType = selectServiceTypeFromGenericArgs ?? SelectSingleByDefault;
-		}
-
-		private static Type SelectSingleByDefault(Type[] typeArgs)
-		{
-			Throw.If(typeArgs.Length != 1, Error.GENERIC_WRAPPER_EXPECTS_SINGLE_TYPE_ARG_BY_DEFAULT, typeArgs);
-			return typeArgs[0];
-		}
-
-		#endregion
-	}
-
-	public class DecoratorSetup : FactorySetup
-	{
-		public static readonly DecoratorSetup Default = new DecoratorSetup();
-
-		public static DecoratorSetup With(Func<Request, bool> condition = null)
-		{
-			return condition == null ? Default : new DecoratorSetup(condition);
-		}
-
-		public override FactoryType Type { get { return FactoryType.Decorator; } }
-		public override FactoryCachePolicy CachePolicy { get { return FactoryCachePolicy.NotCacheExpression; } }
-		public readonly Func<Request, bool> IsApplicable;
-
-		#region Implementation
-
-		private DecoratorSetup(Func<Request, bool> condition = null)
-		{
-			IsApplicable = condition ?? (_ => true);
-		}
-
-		#endregion
-	}
-
-	public abstract class Factory
-	{
-		public static readonly FactorySetup DefaultSetup = ServiceSetup.Default;
-
-		public readonly int ID;
-		public readonly IReuse Reuse;
-
-		public FactorySetup Setup
-		{
-			get { return _setup; }
-			protected internal set { _setup = value ?? DefaultSetup; }
-		}
-
-		public virtual Type ImplementationType { get { return null; } }
-
-		protected Factory(IReuse reuse = null, FactorySetup setup = null)
-		{
-			ID = Interlocked.Increment(ref _idSeedAndCount);
-			Reuse = reuse;
-			Setup = setup;
-		}
-
-		public abstract Factory GetFactoryPerRequestOrDefault(Request request, IRegistry registry);
-
-		public Expression GetExpression(Request request, IRegistry registry)
-		{
-			request = request.ResolveTo(this);
-
-			var decorator = registry.GetDecoratorExpressionOrDefault(request);
-			if (decorator != null && !(decorator is LambdaExpression))
-				return decorator;
-
-			var result = _cachedExpression;
-			if (result == null)
-			{
-				result = CreateExpression(request, registry);
-				if (Reuse != null)
-					result = Reuse.Of(request, registry, ID, result);
-				if (Setup.CachePolicy == FactoryCachePolicy.CacheExpression)
-					Interlocked.Exchange(ref _cachedExpression, result);
-			}
-
-			if (decorator != null)
-				result = Expression.Invoke(decorator, result);
-
-			return result;
-		}
-
-		protected abstract Expression CreateExpression(Request request, IRegistry registry);
-
-		public LambdaExpression GetFuncWithArgsOrDefault(Type funcType, Request request, IRegistry registry, out IList<Type> unusedFuncArgs)
-		{
-			request = request.ResolveTo(this);
-
-			var func = CreateFuncWithArgsOrDefault(funcType, request, registry, out unusedFuncArgs);
-			if (func == null)
-				return null;
-
-			var decorator = registry.GetDecoratorExpressionOrDefault(request);
-			if (decorator != null && !(decorator is LambdaExpression))
-				return Expression.Lambda(funcType, decorator, func.Parameters);
-
-			if (Reuse != null)
-				func = Expression.Lambda(funcType, Reuse.Of(request, registry, ID, func.Body), func.Parameters);
-
-			if (decorator != null)
-				func = Expression.Lambda(funcType, Expression.Invoke(decorator, func.Body), func.Parameters);
-
-			return func;
-		}
-
-		protected virtual LambdaExpression CreateFuncWithArgsOrDefault(Type funcType, Request request, IRegistry registry, out IList<Type> unusedFuncArgs)
-		{
-			unusedFuncArgs = null;
-			return null;
-		}
-
-		#region Implementation
-
-		private static int _idSeedAndCount;
-		private FactorySetup _setup;
-		private Expression _cachedExpression;
-
-		#endregion
-	}
-
-	public delegate ConstructorInfo GetConstructor(Type implementationType);
-
-	public sealed class ReflectionFactory : Factory
-	{
-		public override Type ImplementationType { get { return _implementationType; } }
-
-		public ReflectionFactory(Type implementationType, IReuse reuse = null, GetConstructor getConstructor = null, FactorySetup setup = null)
-			: base(reuse, setup)
-		{
-			_implementationType = implementationType.ThrowIfNull()
-				.ThrowIf(implementationType.IsAbstract, Error.EXPECTED_NON_ABSTRACT_IMPL_TYPE, implementationType);
-			_getConstructor = getConstructor;
-		}
-
-		public override Factory GetFactoryPerRequestOrDefault(Request request, IRegistry _)
-		{
-			if (!_implementationType.IsGenericTypeDefinition)
-				return null;
-
-			var closedTypeArgs = GetClosedTypeArgsForGenericImplementation(_implementationType, request);
-			var closedImplType = _implementationType.MakeGenericType(closedTypeArgs);
-
-			return new ReflectionFactory(closedImplType, Reuse, _getConstructor, Setup);
-		}
-
-		protected override Expression CreateExpression(Request request, IRegistry registry)
-		{
-			var ctor = GetConstructor(ImplementationType);
-			var ctorParams = ctor.GetParameters();
-			Expression[] paramExprs = null;
-			if (ctorParams.Length != 0)
-			{
-				paramExprs = new Expression[ctorParams.Length];
-				for (var i = 0; i < ctorParams.Length; i++)
+			ResolutionRules.ResolveMemberServiceKey tryGetMemberKey = null;
+			if (getServiceName != null)
+				tryGetMemberKey = ((out object key, MemberInfo member, Request _, IRegistry __) =>
 				{
-					var ctorParam = ctorParams[i];
-					var paramKey = registry.ResolutionRules.GetConstructorParameterKeyOrDefault(ctorParam, request, registry);
-					var paramRequest = request.Push(ctorParam.ParameterType, paramKey,
-						new DependencyInfo(DependencyKind.CtorParam, ctorParam.Name));
-					paramExprs[i] = registry.GetOrAddFactory(paramRequest, IfUnresolved.Throw).GetExpression(paramRequest, registry);
+					key = getServiceName(member);
+					return true;
+				});
+			else
+			{
+				var rules = ((IRegistry)resolver).ResolutionRules;
+				if (rules.ShouldResolvePropertiesAndFields)
+					tryGetMemberKey = rules.TryGetPropertyOrFieldServiceKey;
+			}
+
+			var request = Request.Create(implType);
+			var registry = (IRegistry)resolver;
+			foreach (var property in implType.GetProperties(MembersToResolve).Where(Sugar.IsWritableProperty))
+			{
+				object key = null;
+				if (tryGetMemberKey == null || tryGetMemberKey(out key, property, request, registry))
+				{
+					var value = resolver.Resolve(property.PropertyType, key as string, IfUnresolved.ReturnNull);
+					if (value != null)
+						property.SetValue(instance, value, null);
 				}
 			}
 
-			return InitMembersIfRequired(Expression.New(ctor, paramExprs), request, registry);
-		}
-
-		protected override LambdaExpression CreateFuncWithArgsOrDefault(Type funcType, Request request, IRegistry registry, out IList<Type> unusedFuncArgs)
-		{
-			var funcParamTypes = funcType.GetGenericArguments();
-			funcParamTypes.ThrowIf(funcParamTypes.Length == 1, Error.EXPECTED_FUNC_WITH_MULTIPLE_ARGS, funcType);
-
-			var ctor = GetConstructor(ImplementationType);
-			var ctorParams = ctor.GetParameters();
-			var ctorParamExprs = new Expression[ctorParams.Length];
-			var funcInputParamExprs = new ParameterExpression[funcParamTypes.Length - 1]; // (minus Func return parameter).
-
-			for (var cp = 0; cp < ctorParams.Length; cp++)
+			foreach (var field in implType.GetFields(MembersToResolve).Where(Sugar.IsWritableField))
 			{
-				var ctorParam = ctorParams[cp];
-				for (var fp = 0; fp < funcParamTypes.Length - 1; fp++)
+				object key = null;
+				if (tryGetMemberKey == null || tryGetMemberKey(out key, field, request, registry))
 				{
-					var funcParamType = funcParamTypes[fp];
-					if (ctorParam.ParameterType == funcParamType &&
-						funcInputParamExprs[fp] == null) // Skip if Func parameter was already used for constructor.
-					{
-						ctorParamExprs[cp] = funcInputParamExprs[fp] = Expression.Parameter(funcParamType, ctorParam.Name);
-						break;
-					}
-				}
-
-				if (ctorParamExprs[cp] == null) // If no matching constructor parameter found in Func, resolve it from Container.
-				{
-					var paramKey = registry.ResolutionRules.GetConstructorParameterKeyOrDefault(ctorParam, request, registry);
-					var paramRequest = request.Push(ctorParam.ParameterType, paramKey,
-						new DependencyInfo(DependencyKind.CtorParam, ctorParam.Name));
-					ctorParamExprs[cp] = registry.GetOrAddFactory(paramRequest, IfUnresolved.Throw).GetExpression(paramRequest, registry);
+					var value = resolver.Resolve(field.FieldType, key as string, IfUnresolved.ReturnNull);
+					if (value != null)
+						field.SetValue(instance, value);
 				}
 			}
-
-			// Find unused Func parameters (present in Func but not in constructor) and create "_" (ignored) Parameter expressions for them.
-			// In addition store unused parameter in output list for client review.
-			unusedFuncArgs = null;
-			for (var fp = 0; fp < funcInputParamExprs.Length; fp++)
-			{
-				if (funcInputParamExprs[fp] == null) // unused parameter
-				{
-					if (unusedFuncArgs == null) unusedFuncArgs = new List<Type>(2);
-					var funcParamType = funcParamTypes[fp];
-					unusedFuncArgs.Add(funcParamType);
-					funcInputParamExprs[fp] = Expression.Parameter(funcParamType, "_");
-				}
-			}
-
-			var newExpr = Expression.New(ctor, ctorParamExprs);
-			return Expression.Lambda(funcType, InitMembersIfRequired(newExpr, request, registry), funcInputParamExprs);
 		}
-
-		#region Implementation
-
-		private readonly Type _implementationType;
-		private readonly GetConstructor _getConstructor;
-
-		public ConstructorInfo GetConstructor(Type type)
-		{
-			if (_getConstructor != null)
-				return _getConstructor(type);
-
-			var constructors = type.GetConstructors();
-			Throw.If(constructors.Length == 0, Error.NO_PUBLIC_CONSTRUCTOR_DEFINED, type);
-			Throw.If(constructors.Length > 1, Error.UNABLE_TO_SELECT_CONSTRUCTOR, constructors.Length, type);
-			return constructors[0];
-		}
-
-		private Expression InitMembersIfRequired(NewExpression newService, Request request, IRegistry registry)
-		{
-			if (!registry.ResolutionRules.ShouldResolvePropertiesAndFields)
-				return newService;
-
-			var properties = ImplementationType.GetProperties(Resolver.MembersToResolve).Where(p => p.GetSetMethod() != null);
-			var fields = ImplementationType.GetFields(Resolver.MembersToResolve).Where(f => !f.IsInitOnly);
-
-			var bindings = new List<MemberBinding>();
-			foreach (var member in properties.Cast<MemberInfo>().Concat(fields.Cast<MemberInfo>()))
-			{
-				object key;
-				if (registry.ResolutionRules.TryGetPropertyOrFieldServiceKey(out key, member, request, registry))
-				{
-					var memberRequest = request.Push(member.GetMemberType(), key,
-						new DependencyInfo(member is PropertyInfo ? DependencyKind.Property : DependencyKind.Field, member.Name));
-					var memberExpr = registry.GetOrAddFactory(memberRequest, IfUnresolved.Throw).GetExpression(memberRequest, registry);
-					bindings.Add(Expression.Bind(member, memberExpr));
-				}
-			}
-
-			return bindings.Count == 0 ? (Expression)newService : Expression.MemberInit(newService, bindings);
-		}
-
-		private static Type[] GetClosedTypeArgsForGenericImplementation(Type implType, Request request)
-		{
-			var serviceTypeArgs = request.ServiceType.GetGenericArguments();
-			var serviceTypeGenericDefinition = request.OpenGenericServiceType;
-			if (implType == serviceTypeGenericDefinition)
-				return serviceTypeArgs;
-
-			var baseTypes = implType.GetImplementedTypes(TypeTools.BaseOpenGenericsAs.Is, TypeTools.IncludeSelf.Exclude);
-			IDictionary<string, Type> matchedServiceTypeArgs = null;
-			var matchFound = false;
-			for (var i = 0; i < baseTypes.Length && !matchFound; i++)
-			{
-				var baseType = baseTypes[i];
-				if (baseType.ContainsGenericParameters &&
-					baseType.GetGenericTypeDefinition() == serviceTypeGenericDefinition)
-				{
-					matchedServiceTypeArgs = new Dictionary<string, Type>();
-					matchFound = TypeTools.MatchBaseOpenWithClosedGenericTypeArgs(
-						baseType.GetGenericArguments(), serviceTypeArgs,
-						ref matchedServiceTypeArgs);
-				}
-			}
-
-			matchedServiceTypeArgs = matchedServiceTypeArgs
-				.ThrowIfNull(Error.UNABLE_TO_MATCH_IMPL_BASE_TYPES_WITH_SERVICE_TYPE, implType, baseTypes, request);
-
-			var implTypeArgs = implType.GetGenericArguments();
-			for (var i = 0; i < implTypeArgs.Length; i++)
-			{
-				var implTypeArg = implTypeArgs[i];
-				if (implTypeArg.IsGenericParameter)
-				{
-					Type serviceTypeArg;
-					if (matchedServiceTypeArgs.TryGetValue(implTypeArg.Name, out serviceTypeArg))
-						implTypeArgs[i] = serviceTypeArg;
-				}
-			}
-
-			Throw.If(Array.Exists(implTypeArgs, t => t.IsGenericParameter),
-				Error.UNABLE_TO_GET_SOME_GENERIC_IMPL_TYPE_ARGS, implTypeArgs, implType, request);
-
-			return implTypeArgs;
-		}
-
-		#endregion
 	}
 
 	public sealed class Request
@@ -1565,7 +1280,8 @@ when resolving {1}.";
 		public Request ResolveTo(Factory factory)
 		{
 			for (var p = Parent; p != null; p = p.Parent)
-				Throw.If(p.FactoryID == factory.ID, Error.RECURSIVE_DEPENDENCY_DETECTED, this);
+				Throw.If(p.FactoryID == factory.ID && p.FactoryType == FactoryType.Service,
+					Error.RECURSIVE_DEPENDENCY_DETECTED, this);
 			return new Request(Parent, ServiceType, ServiceKey, Dependency, DecoratedFactoryID, factory);
 		}
 
@@ -1643,17 +1359,445 @@ when resolving {1}.";
 		#endregion
 	}
 
-	public class DelegateFactory : Factory
+	public enum FactoryType { Service = 0, Decorator, GenericWrapper };
+
+	public enum FactoryCachePolicy { CouldCacheExpression, ShouldNotCacheExpression };
+
+	public abstract class FactorySetup
+	{
+		public abstract FactoryType Type { get; }
+		public virtual FactoryCachePolicy CachePolicy { get { return FactoryCachePolicy.CouldCacheExpression; } }
+		public virtual object Metadata { get { return null; } }
+	}
+
+	public class ServiceSetup : FactorySetup
+	{
+		public static readonly ServiceSetup Default = new ServiceSetup();
+
+		public static ServiceSetup With(FactoryCachePolicy cachePolicy = FactoryCachePolicy.CouldCacheExpression, object metadata = null)
+		{
+			return cachePolicy == FactoryCachePolicy.CouldCacheExpression && metadata == null ? Default : new ServiceSetup(cachePolicy, metadata);
+		}
+
+		public static ServiceSetup WithMetadata(object metadata = null)
+		{
+			return metadata == null ? Default : new ServiceSetup(metadata: metadata);
+		}
+
+		public override FactoryType Type { get { return FactoryType.Service; } }
+		public override FactoryCachePolicy CachePolicy { get { return _cachePolicy; } }
+		public override object Metadata { get { return _metadata; } }
+
+		#region Implementation
+
+		private ServiceSetup(FactoryCachePolicy cachePolicy = FactoryCachePolicy.CouldCacheExpression, object metadata = null)
+		{
+			_cachePolicy = cachePolicy;
+			_metadata = metadata;
+		}
+
+		private readonly FactoryCachePolicy _cachePolicy;
+
+		private readonly object _metadata;
+
+		#endregion
+	}
+
+	public class GenericWrapperSetup : FactorySetup
+	{
+		public static readonly GenericWrapperSetup Default = new GenericWrapperSetup();
+
+		public static GenericWrapperSetup With(Func<Type[], Type> selectServiceTypeArg)
+		{
+			return selectServiceTypeArg == null ? Default : new GenericWrapperSetup(selectServiceTypeArg);
+		}
+
+		public override FactoryType Type { get { return FactoryType.GenericWrapper; } }
+		public readonly Func<Type[], Type> GetWrappedServiceType;
+
+		#region Implementation
+
+		private GenericWrapperSetup(Func<Type[], Type> selectServiceTypeFromGenericArgs = null)
+		{
+			GetWrappedServiceType = selectServiceTypeFromGenericArgs ?? SelectSingleByDefault;
+		}
+
+		private static Type SelectSingleByDefault(Type[] typeArgs)
+		{
+			Throw.If(typeArgs.Length != 1, Error.GENERIC_WRAPPER_EXPECTS_SINGLE_TYPE_ARG_BY_DEFAULT, typeArgs);
+			return typeArgs[0];
+		}
+
+		#endregion
+	}
+
+	public class DecoratorSetup : FactorySetup
+	{
+		public static readonly DecoratorSetup Default = new DecoratorSetup();
+
+		public static DecoratorSetup With(Func<Request, bool> condition = null)
+		{
+			return condition == null ? Default : new DecoratorSetup(condition);
+		}
+
+		public override FactoryType Type { get { return FactoryType.Decorator; } }
+		public override FactoryCachePolicy CachePolicy { get { return FactoryCachePolicy.ShouldNotCacheExpression; } }
+		public readonly Func<Request, bool> IsApplicable;
+
+		#region Implementation
+
+		private DecoratorSetup(Func<Request, bool> condition = null)
+		{
+			IsApplicable = condition ?? (_ => true);
+		}
+
+		#endregion
+	}
+
+	public abstract class Factory
+	{
+		public static readonly FactorySetup DefaultSetup = ServiceSetup.Default;
+
+		public readonly int ID;
+		public readonly IReuse Reuse;
+
+		public FactorySetup Setup
+		{
+			get { return _setup; }
+			protected internal set { _setup = value ?? DefaultSetup; }
+		}
+
+		public virtual Type ImplementationType { get { return null; } }
+
+		protected Factory(IReuse reuse = null, FactorySetup setup = null)
+		{
+			ID = Interlocked.Increment(ref _idSeedAndCount);
+			Reuse = reuse;
+			Setup = setup;
+		}
+
+		public virtual void ThrowIfCannotBeRegisteredWithServiceType(Type serviceType) { }
+
+		public virtual bool ProvidesFactoryPerRequest { get { return false; } }
+
+		//ncrunch: no coverage start
+		public virtual Factory GetFactoryPerRequestOrDefault(Request request, IRegistry registry) { return null; }
+		//ncrunch: no coverage end
+
+		public Expression GetExpression(Request request, IRegistry registry)
+		{
+			request = request.ResolveTo(this);
+
+			var decorator = registry.GetDecoratorExpressionOrDefault(request);
+			if (decorator != null && !(decorator is LambdaExpression))
+				return decorator;
+
+			var result = registry.GetCachedFactoryExpressionOrDefault(ID);
+			if (result == null)
+			{
+				result = CreateExpression(request, registry);
+				if (Reuse != null)
+					result = Reuse.Apply(request, registry, ID, result);
+				if (Setup.CachePolicy == FactoryCachePolicy.CouldCacheExpression)
+					registry.CacheFactoryExpression(ID, result);
+			}
+
+			if (decorator != null)
+				result = Expression.Invoke(decorator, result);
+
+			return result;
+		}
+
+		protected abstract Expression CreateExpression(Request request, IRegistry registry);
+
+		public LambdaExpression GetFuncWithArgsOrDefault(Type funcType, Request request, IRegistry registry, out IList<Type> unusedFuncArgs)
+		{
+			request = request.ResolveTo(this);
+
+			var func = CreateFuncWithArgsOrDefault(funcType, request, registry, out unusedFuncArgs);
+			if (func == null)
+				return null;
+
+			var decorator = registry.GetDecoratorExpressionOrDefault(request);
+			if (decorator != null && !(decorator is LambdaExpression))
+				return Expression.Lambda(funcType, decorator, func.Parameters);
+
+			if (Reuse != null)
+				func = Expression.Lambda(funcType, Reuse.Apply(request, registry, ID, func.Body), func.Parameters);
+
+			if (decorator != null)
+				func = Expression.Lambda(funcType, Expression.Invoke(decorator, func.Body), func.Parameters);
+
+			return func;
+		}
+
+		protected virtual LambdaExpression CreateFuncWithArgsOrDefault(Type funcType, Request request, IRegistry registry, out IList<Type> unusedFuncArgs)
+		{
+			unusedFuncArgs = null;
+			return null;
+		}
+
+		#region Implementation
+
+		private static int _idSeedAndCount;
+		private FactorySetup _setup;
+
+		#endregion
+	}
+
+	public delegate ConstructorInfo GetConstructor(Type implementationType);
+
+	public sealed class ReflectionFactory : Factory
+	{
+		public override Type ImplementationType { get { return _implementationType; } }
+
+		public override bool ProvidesFactoryPerRequest { get { return _providesFactoryPerRequest; } }
+
+		public ReflectionFactory(Type implementationType, IReuse reuse = null, GetConstructor getConstructor = null, FactorySetup setup = null)
+			: base(reuse, setup)
+		{
+			_implementationType = implementationType.ThrowIfNull()
+				.ThrowIf(implementationType.IsAbstract, Error.EXPECTED_NON_ABSTRACT_IMPL_TYPE, implementationType);
+			_providesFactoryPerRequest = _implementationType.IsGenericTypeDefinition;
+			_getConstructor = getConstructor;
+		}
+
+		public override void ThrowIfCannotBeRegisteredWithServiceType(Type serviceType)
+		{
+			var implType = _implementationType;
+			if (!implType.IsGenericTypeDefinition)
+			{
+				if (implType.IsGenericType && implType.ContainsGenericParameters)
+					Throw.It(Error.USUPPORTED_REGISTRATION_OF_NON_GENERIC_IMPL_TYPE_DEFINITION_BUT_WITH_GENERIC_ARGS,
+						implType, implType.GetGenericTypeDefinition());
+
+				if (implType != serviceType && serviceType != typeof(object))
+					Throw.If(Array.IndexOf(implType.GetImplementedTypes(), serviceType) == -1,
+						Error.EXPECTED_IMPL_TYPE_ASSIGNABLE_TO_SERVICE_TYPE, implType, serviceType);
+			}
+			else if (implType != serviceType)
+			{
+				if (serviceType.IsGenericTypeDefinition)
+				{
+					var implementedTypes = implType.GetImplementedTypes();
+					var implementedOpenGenericTypes = implementedTypes.Where(t =>
+						t.IsGenericType && t.ContainsGenericParameters && t.GetGenericTypeDefinition() == serviceType);
+
+					var implTypeArgs = implType.GetGenericArguments();
+					Throw.If(!implementedOpenGenericTypes.Any(t => t.ContainsAllGenericParameters(implTypeArgs)),
+						Error.UNABLE_TO_REGISTER_OPEN_GENERIC_IMPL_CAUSE_SERVICE_DOES_NOT_SPECIFY_ALL_TYPE_ARGS,
+						implType, serviceType, implementedOpenGenericTypes);
+				}
+				else if (implType.IsGenericType && serviceType.ContainsGenericParameters)
+					Throw.It(Error.USUPPORTED_REGISTRATION_OF_NON_GENERIC_SERVICE_TYPE_DEFINITION_BUT_WITH_GENERIC_ARGS,
+						serviceType, serviceType.GetGenericTypeDefinition());
+				else
+					Throw.It(Error.UNABLE_TO_REGISTER_OPEN_GENERIC_IMPL_WITH_NON_GENERIC_SERVICE, implType, serviceType);
+			}
+		}
+
+		public override Factory GetFactoryPerRequestOrDefault(Request request, IRegistry _)
+		{
+			var closedTypeArgs = _implementationType == request.OpenGenericServiceType
+				? request.ServiceType.GetGenericArguments()
+				: GetClosedTypeArgsForGenericImplementationType(_implementationType, request);
+
+			var closedImplType = _implementationType.MakeGenericType(closedTypeArgs);
+
+			return new ReflectionFactory(closedImplType, Reuse, _getConstructor, Setup);
+		}
+
+		protected override Expression CreateExpression(Request request, IRegistry registry)
+		{
+			var ctor = GetConstructor(_implementationType);
+			var ctorParams = ctor.GetParameters();
+			Expression[] paramExprs = null;
+			if (ctorParams.Length != 0)
+			{
+				paramExprs = new Expression[ctorParams.Length];
+				for (var i = 0; i < ctorParams.Length; i++)
+				{
+					var ctorParam = ctorParams[i];
+					var paramKey = registry.ResolutionRules.GetConstructorParameterKeyOrDefault(ctorParam, request, registry);
+					var paramRequest = request.Push(ctorParam.ParameterType, paramKey,
+						new DependencyInfo(DependencyKind.CtorParam, ctorParam.Name));
+					paramExprs[i] = registry.GetOrAddFactory(paramRequest, IfUnresolved.Throw).GetExpression(paramRequest, registry);
+				}
+			}
+
+			var newExpr = Expression.New(ctor, paramExprs);
+			return InitMembersIfRequired(_implementationType, newExpr, request, registry);
+		}
+
+		protected override LambdaExpression CreateFuncWithArgsOrDefault(Type funcType, Request request, IRegistry registry, out IList<Type> unusedFuncArgs)
+		{
+			var funcParamTypes = funcType.GetGenericArguments();
+			funcParamTypes.ThrowIf(funcParamTypes.Length == 1, Error.EXPECTED_FUNC_WITH_MULTIPLE_ARGS, funcType);
+
+			var ctor = GetConstructor(_implementationType);
+			var ctorParams = ctor.GetParameters();
+			var ctorParamExprs = new Expression[ctorParams.Length];
+			var funcInputParamExprs = new ParameterExpression[funcParamTypes.Length - 1]; // (minus Func return parameter).
+
+			for (var cp = 0; cp < ctorParams.Length; cp++)
+			{
+				var ctorParam = ctorParams[cp];
+				for (var fp = 0; fp < funcParamTypes.Length - 1; fp++)
+				{
+					var funcParamType = funcParamTypes[fp];
+					if (ctorParam.ParameterType == funcParamType &&
+						funcInputParamExprs[fp] == null) // Skip if Func parameter was already used for constructor.
+					{
+						ctorParamExprs[cp] = funcInputParamExprs[fp] = Expression.Parameter(funcParamType, ctorParam.Name);
+						break;
+					}
+				}
+
+				if (ctorParamExprs[cp] == null) // If no matching constructor parameter found in Func, resolve it from Container.
+				{
+					var paramKey = registry.ResolutionRules.GetConstructorParameterKeyOrDefault(ctorParam, request, registry);
+					var paramRequest = request.Push(ctorParam.ParameterType, paramKey,
+						new DependencyInfo(DependencyKind.CtorParam, ctorParam.Name));
+					ctorParamExprs[cp] = registry.GetOrAddFactory(paramRequest, IfUnresolved.Throw).GetExpression(paramRequest, registry);
+				}
+			}
+
+			// Find unused Func parameters (present in Func but not in constructor) and create "_" (ignored) Parameter expressions for them.
+			// In addition store unused parameter in output list for client review.
+			unusedFuncArgs = null;
+			for (var fp = 0; fp < funcInputParamExprs.Length; fp++)
+			{
+				if (funcInputParamExprs[fp] == null) // unused parameter
+				{
+					if (unusedFuncArgs == null) unusedFuncArgs = new List<Type>(2);
+					var funcParamType = funcParamTypes[fp];
+					unusedFuncArgs.Add(funcParamType);
+					funcInputParamExprs[fp] = Expression.Parameter(funcParamType, "_");
+				}
+			}
+
+			var newExpr = Expression.New(ctor, ctorParamExprs);
+			var newExprInitialized = InitMembersIfRequired(_implementationType, newExpr, request, registry);
+			return Expression.Lambda(funcType, newExprInitialized, funcInputParamExprs);
+		}
+
+		#region Implementation
+
+		private readonly Type _implementationType;
+		private readonly bool _providesFactoryPerRequest;
+		private readonly GetConstructor _getConstructor;
+
+		public ConstructorInfo GetConstructor(Type type)
+		{
+			if (_getConstructor != null)
+				return _getConstructor(type);
+
+			var constructors = type.GetConstructors();
+			Throw.If(constructors.Length == 0, Error.NO_PUBLIC_CONSTRUCTOR_DEFINED, type);
+			Throw.If(constructors.Length > 1, Error.UNABLE_TO_SELECT_CONSTRUCTOR, constructors.Length, type);
+			return constructors[0];
+		}
+
+		private static Expression InitMembersIfRequired(Type implementationType, NewExpression newService, Request request, IRegistry registry)
+		{
+			if (!registry.ResolutionRules.ShouldResolvePropertiesAndFields)
+				return newService;
+
+			var properties = implementationType.GetProperties(Resolver.MembersToResolve).Where(Sugar.IsWritableProperty);
+			var fields = implementationType.GetFields(Resolver.MembersToResolve).Where(Sugar.IsWritableField);
+
+			var bindings = new List<MemberBinding>();
+			foreach (var member in properties.Cast<MemberInfo>().Concat(fields.Cast<MemberInfo>()))
+			{
+				object key;
+				if (registry.ResolutionRules.TryGetPropertyOrFieldServiceKey(out key, member, request, registry))
+				{
+					var memberRequest = request.Push(member.GetMemberType(), key,
+						new DependencyInfo(member is PropertyInfo ? DependencyKind.Property : DependencyKind.Field, member.Name));
+					var memberExpr = registry.GetOrAddFactory(memberRequest, IfUnresolved.Throw).GetExpression(memberRequest, registry);
+					bindings.Add(Expression.Bind(member, memberExpr));
+				}
+			}
+
+			return bindings.Count == 0 ? (Expression)newService : Expression.MemberInit(newService, bindings);
+		}
+
+		private static Type[] GetClosedTypeArgsForGenericImplementationType(Type implType, Request request)
+		{
+			var serviceTypeArgs = request.ServiceType.GetGenericArguments();
+			var serviceTypeGenericDefinition = request.OpenGenericServiceType;
+
+			var openImplTypeArgs = implType.GetGenericArguments();
+			var implementedTypes = implType.GetImplementedTypes();
+
+			Type[] resultImplTypeArgs = null;
+			for (var i = 0; resultImplTypeArgs == null && i < implementedTypes.Length; i++)
+			{
+				var implementedType = implementedTypes[i];
+				if (implementedType.IsGenericType && implementedType.ContainsGenericParameters &&
+					implementedType.GetGenericTypeDefinition() == serviceTypeGenericDefinition)
+				{
+					var matchedTypeArgs = new Type[openImplTypeArgs.Length];
+					if (MatchServiceWithImplementedTypeArgs(ref matchedTypeArgs,
+						openImplTypeArgs, implementedType.GetGenericArguments(), serviceTypeArgs))
+						resultImplTypeArgs = matchedTypeArgs;
+				}
+			}
+
+			resultImplTypeArgs = resultImplTypeArgs.ThrowIfNull(
+				Error.UNABLE_TO_MATCH_IMPL_BASE_TYPES_WITH_SERVICE_TYPE, implType, implementedTypes, request);
+
+			var unmatchedArgIndex = Array.IndexOf(resultImplTypeArgs, null);
+			if (unmatchedArgIndex != -1)
+				Throw.It(Error.UNABLE_TO_FIND_OPEN_GENERIC_IMPL_TYPE_ARG_IN_SERVICE,
+					implType, openImplTypeArgs[unmatchedArgIndex], request);
+
+			return resultImplTypeArgs;
+		}
+
+		private static bool MatchServiceWithImplementedTypeArgs(ref Type[] matchedImplArgs,
+			Type[] openImplementationArgs, Type[] openImplementedArgs, Type[] closedServiceArgs)
+		{
+			for (var i = 0; i < openImplementedArgs.Length; i++)
+			{
+				var openImplementedArg = openImplementedArgs[i];
+				var closedServiceArg = closedServiceArgs[i];
+				if (openImplementedArg.IsGenericParameter)
+				{
+					var matchedIndex = Array.FindIndex(openImplementationArgs, t => t.Name == openImplementedArg.Name);
+					if (matchedIndex != -1)
+					{
+						if (matchedImplArgs[matchedIndex] == null)
+							matchedImplArgs[matchedIndex] = closedServiceArg;
+						else if (matchedImplArgs[matchedIndex] != closedServiceArg)
+							return false; // more than one closedServiceArg is matching with single openArg
+					}
+				}
+				else if (openImplementedArg != closedServiceArg)
+				{
+					if (!openImplementedArg.IsGenericType || !openImplementedArg.ContainsGenericParameters ||
+						!closedServiceArg.IsGenericType ||
+						closedServiceArg.GetGenericTypeDefinition() != openImplementedArg.GetGenericTypeDefinition())
+						return false; // openArg and closedArg are different types
+
+					if (!MatchServiceWithImplementedTypeArgs(ref matchedImplArgs, openImplementationArgs,
+						openImplementedArg.GetGenericArguments(), closedServiceArg.GetGenericArguments()))
+						return false; // nested match failed due either one of above reasons.
+				}
+			}
+
+			return true;
+		}
+
+		#endregion
+	}
+
+	public sealed class DelegateFactory : Factory
 	{
 		public DelegateFactory(Func<Request, IRegistry, Expression> getExpression, IReuse reuse = null, FactorySetup setup = null)
 			: base(reuse, setup)
 		{
 			_getExpression = getExpression.ThrowIfNull();
-		}
-
-		public override Factory GetFactoryPerRequestOrDefault(Request request, IRegistry registry)
-		{
-			return null;
 		}
 
 		protected override Expression CreateExpression(Request request, IRegistry registry)
@@ -1668,8 +1812,10 @@ when resolving {1}.";
 		#endregion
 	}
 
-	public class FactoryProvider : Factory
+	public sealed class FactoryProvider : Factory
 	{
+		public override bool ProvidesFactoryPerRequest { get { return true; } }
+
 		public FactoryProvider(Func<Request, IRegistry, Factory> getFactoryOrDefault, FactorySetup setup = null)
 			: base(setup: setup)
 		{
@@ -1722,7 +1868,7 @@ when resolving {1}.";
 			{
 				var item = _items.GetValueOrDefault(id);
 				if (item == null)
-					_items = _items.AddOrUpdate(id, item = factory());
+					Ref.Swap(ref _items, x => x.AddOrUpdate(id, item = factory()));
 				return (T)item;
 			}
 		}
@@ -1746,9 +1892,35 @@ when resolving {1}.";
 		#endregion
 	}
 
+	public static class Ref
+	{
+		/// <remarks>
+		/// First, it evaluates new value using <paramref name="getValue"/> function. 
+		/// Second, it checks that original value is not changed. 
+		/// If it is changed it will retry first step, otherwise it assigns new value and returns original (the one used for <paramref name="getValue"/>).
+		/// </remarks>
+		public static T Swap<T>(ref T value, Func<T, T> getValue) where T : class
+		{
+			var retryCount = 0;
+			while (true)
+			{
+				var oldValue = value;
+				var newValue = getValue(oldValue);
+				if (Interlocked.CompareExchange(ref value, newValue, oldValue) == oldValue)
+					return oldValue;
+				if (++retryCount > RETRY_COUNT_UNTIL_THROW)
+					throw new InvalidOperationException(ERROR_RETRY_COUNT_EXCEEDED);
+			}
+		}
+
+		private const int RETRY_COUNT_UNTIL_THROW = 50;
+		private static readonly string ERROR_RETRY_COUNT_EXCEEDED =
+			"Ref retried to Update for " + RETRY_COUNT_UNTIL_THROW + " times But there is always someone else intervened.";
+	}
+
 	public interface IReuse
 	{
-		Expression Of(Request request, IRegistry registry, int factoryID, Expression factoryExpr);
+		Expression Apply(Request request, IRegistry registry, int factoryID, Expression factoryExpr);
 	}
 
 	public static class Reuse
@@ -1788,7 +1960,7 @@ when resolving {1}.";
 				_scope = scope;
 			}
 
-			public Expression Of(Request _, IRegistry __, int factoryID, Expression factoryExpr)
+			public Expression Apply(Request _, IRegistry __, int factoryID, Expression factoryExpr)
 			{
 				return GetScopedServiceExpression(_scope, factoryID, factoryExpr);
 			}
@@ -1798,7 +1970,7 @@ when resolving {1}.";
 
 		private sealed class SingletonReuse : IReuse
 		{
-			public Expression Of(Request request, IRegistry registry, int factoryID, Expression factoryExpr)
+			public Expression Apply(Request request, IRegistry registry, int factoryID, Expression factoryExpr)
 			{
 				// Create lazy singleton if we have Func somewhere in dependency chain.
 				var parent = request.Parent;
@@ -1806,11 +1978,10 @@ when resolving {1}.";
 					p.OpenGenericServiceType != null && ContainerSetup.FuncTypes.Contains(p.OpenGenericServiceType)))
 					return GetScopedServiceExpression(Container.SingletonScopeExpression, factoryID, factoryExpr);
 
-				// Create singleton now and put into constants.
-				var constants = registry.Constants;
-				var singletonScope = (Scope)constants[Container.SINGLETON_SCOPE_CONST_INDEX];
+				// Create singleton object now and put it into constants.
+				var singletonScope = (Scope)registry.Constants[Container.CONSTANTS_SINGLETON_SCOPE_INDEX];
 				var singleton = singletonScope.GetOrAdd(factoryID,
-					() => factoryExpr.ToFactoryExpression().CompileFactory().Invoke(constants, null));
+					() => factoryExpr.CompileToFactory().Invoke(registry.Constants, null));
 				return registry.GetConstantExpression(singleton, factoryExpr.Type);
 			}
 		}
@@ -1851,6 +2022,9 @@ when resolving {1}.";
 		Type GetWrappedServiceTypeOrSelf(Type serviceType);
 
 		Expression GetConstantExpression(object constant, Type constantType);
+
+		Expression GetCachedFactoryExpressionOrDefault(int factoryID);
+		void CacheFactoryExpression(int factoryID, Expression expression);
 	}
 
 	public sealed class Many<TService>
@@ -1916,6 +2090,11 @@ when resolving {1}.";
 			throw GetException(Format(message, arg0, arg1, arg2));
 		}
 
+		public static void It(string message, object arg0 = null, object arg1 = null, object arg2 = null)
+		{
+			throw GetException(Format(message, arg0, arg1, arg2));
+		}
+
 		private static string Format(this string message, object arg0 = null, object arg1 = null, object arg2 = null)
 		{
 			return string.Format(message, PrintArg(arg0), PrintArg(arg1), PrintArg(arg2));
@@ -1927,17 +2106,37 @@ when resolving {1}.";
 
 	public static class TypeTools
 	{
-		public enum BaseOpenGenericsAs { GenericTypeDefinition, Is }
-		public enum IncludeSelf { IncludeAsFirst, Exclude }
+		// ReSharper disable ConstantNullCoalescingCondition
+		public static Func<Type, string> PrintDetailsDefault = t => t.FullName ?? t.Name;
+		// ReSharper restore ConstantNullCoalescingCondition
 
-		public static Type[] GetImplementedTypes(this Type type,
-			BaseOpenGenericsAs baseOpenGenericsAs = BaseOpenGenericsAs.GenericTypeDefinition,
-			IncludeSelf includeSelf = IncludeSelf.IncludeAsFirst)
+		public static string Print(this Type type, Func<Type, string> printDetails = null)
+		{
+			if (type == null) return null;
+			printDetails = printDetails ?? PrintDetailsDefault;
+			var name = printDetails(type);
+			if (type.IsGenericType) // for generic types
+			{
+				var genericArgs = type.GetGenericArguments();
+				var genericArgsString = type.IsGenericTypeDefinition
+					? new string(',', genericArgs.Length - 1)
+					: String.Join(", ", genericArgs.Select(x => x.Print(printDetails)).ToArray());
+				name = name.Substring(0, name.IndexOf('`')) + "<" + genericArgsString + ">";
+			}
+			return name.Replace('+', '.'); // for nested classes
+		}
+
+		public enum IncludeTypeItself { No, AsFirst }
+
+		/// <summary>
+		/// Returns all type interfaces and base types except object.
+		/// </summary>
+		public static Type[] GetImplementedTypes(this Type type, IncludeTypeItself includeTypeItself = IncludeTypeItself.No)
 		{
 			Type[] results;
 
 			var interfaces = type.GetInterfaces();
-			var interfaceStartIndex = includeSelf == IncludeSelf.IncludeAsFirst ? 1 : 0;
+			var interfaceStartIndex = includeTypeItself == IncludeTypeItself.AsFirst ? 1 : 0;
 			var selfPlusInterfaceCount = interfaceStartIndex + interfaces.Length;
 
 			var baseType = type.BaseType;
@@ -1960,7 +2159,7 @@ when resolving {1}.";
 				results[selfPlusInterfaceCount] = baseType;
 			}
 
-			if (includeSelf == IncludeSelf.IncludeAsFirst)
+			if (includeTypeItself == IncludeTypeItself.AsFirst)
 				results[0] = type;
 
 			if (interfaces.Length == 1)
@@ -1968,70 +2167,43 @@ when resolving {1}.";
 			else if (interfaces.Length > 1)
 				Array.Copy(interfaces, 0, results, interfaceStartIndex, interfaces.Length);
 
-			if (baseOpenGenericsAs == BaseOpenGenericsAs.GenericTypeDefinition &&
-				results.Length > interfaceStartIndex && type.IsGenericTypeDefinition)
-			{
-				for (var i = interfaceStartIndex; i < results.Length; i++)
-				{
-					var interfaceOrBase = results[i];
-					if (interfaceOrBase.IsGenericType && interfaceOrBase.ContainsGenericParameters &&
-						!interfaceOrBase.IsGenericTypeDefinition)
-						results[i] = interfaceOrBase.GetGenericTypeDefinition();
-				}
-			}
-
 			return results;
 		}
 
-		public static bool MatchBaseOpenWithClosedGenericTypeArgs(
-			Type[] openArgs, Type[] closedArgs,
-			ref IDictionary<string, Type> matchesSoFar)
+		public static bool ContainsAllGenericParameters(this Type similarType, Type[] genericParameters)
 		{
-			for (var i = 0; i < openArgs.Length; i++)
-			{
-				var openArg = openArgs[i];
-				var closedArg = closedArgs[i];
-				if (openArg.IsGenericParameter)
-				{
-					Type matchedClosedArg;
-					if (!matchesSoFar.TryGetValue(openArg.Name, out matchedClosedArg))
-						matchesSoFar.Add(openArg.Name, closedArg);
-					else if (matchedClosedArg != closedArg)
-						return false; // different matchedClosedArg and closedArg are matched with single openArg
-				}
-				else if (openArg != closedArg)
-				{
-					if (!openArg.IsGenericType || !openArg.ContainsGenericParameters ||
-						!closedArg.IsGenericType ||
-						closedArg.GetGenericTypeDefinition() != openArg.GetGenericTypeDefinition())
-						return false; // openArg and closedArg are different types
+			var argNames = new string[genericParameters.Length];
+			for (var i = 0; i < genericParameters.Length; i++)
+				argNames[i] = genericParameters[i].Name;
 
-					if (!MatchBaseOpenWithClosedGenericTypeArgs(openArg.GetGenericArguments(),
-						closedArg.GetGenericArguments(), ref matchesSoFar))
-						return false; // nested match failed due either one of above reasons.
-				}
-			}
+			MarkTargetGenericParameters(similarType.GetGenericArguments(), ref argNames);
+
+			for (var i = 0; i < argNames.Length; i++)
+				if (argNames[i] != null)
+					return false;
 
 			return true;
 		}
 
-		public static string Print(this Type type,
-			Func<Type, string> print = null /* by default prints Type.FullName or Type.Name for generic parameters */)
+		#region Implementation
+
+		private static void MarkTargetGenericParameters(Type[] sourceTypeArgs, ref string[] targetArgNames)
 		{
-			if (type == null) return null;
-			// ReSharper disable ConstantNullCoalescingCondition
-			var name = print == null ? (type.FullName ?? type.Name) : print(type); // TODO Move default option to setup.
-			// ReSharper restore ConstantNullCoalescingCondition
-			if (type.IsGenericType) // for generic types
+			for (var i = 0; i < sourceTypeArgs.Length; i++)
 			{
-				var genericArgs = type.GetGenericArguments();
-				var genericArgsString = type.IsGenericTypeDefinition
-					? new string(',', genericArgs.Length - 1)
-					: String.Join(", ", genericArgs.Select(x => x.Print(print)).ToArray());
-				name = name.Substring(0, name.IndexOf('`')) + "<" + genericArgsString + ">";
+				var sourceTypeArg = sourceTypeArgs[i];
+				if (sourceTypeArg.IsGenericParameter)
+				{
+					var matchingTargetArgIndex = Array.IndexOf(targetArgNames, sourceTypeArg.Name);
+					if (matchingTargetArgIndex != -1)
+						targetArgNames[matchingTargetArgIndex] = null;
+				}
+				else if (sourceTypeArg.IsGenericType && sourceTypeArg.ContainsGenericParameters)
+					MarkTargetGenericParameters(sourceTypeArg.GetGenericArguments(), ref targetArgNames);
 			}
-			return name.Replace('+', '.'); // for nested classes
 		}
+
+		#endregion
 	}
 
 	public static class Sugar
@@ -2040,19 +2212,21 @@ when resolving {1}.";
 		{
 			return x is string ? (string)x
 				: (x is Type ? ((Type)x).Print()
-				: (x is IEnumerable<Type> ? ((IEnumerable)x).Print(";" + Environment.NewLine)
-				: (x is IEnumerable ? ((IEnumerable)x).Print()
+				: (x is IEnumerable<Type> ? ((IEnumerable)x).Print(";" + Environment.NewLine, ifEmpty: "<empty>")
+				: (x is IEnumerable ? ((IEnumerable)x).Print(ifEmpty: "<empty>")
 				: (string.Empty + x))));
 		}
 
-		public static string Print(this IEnumerable items, string separator = ", ", Func<object, string> printItem = null)
+		public static string Print(this IEnumerable items,
+			string separator = ", ", Func<object, string> printItem = null, string ifEmpty = null)
 		{
 			if (items == null) return null;
 			printItem = printItem ?? Print;
 			var builder = new StringBuilder();
 			foreach (var item in items)
 				(builder.Length == 0 ? builder : builder.Append(separator)).Append(printItem(item));
-			return builder.ToString();
+			var result = builder.ToString();
+			return result != string.Empty ? result : (ifEmpty ?? string.Empty);
 		}
 
 		public static Type GetMemberType(this MemberInfo member)
@@ -2093,6 +2267,17 @@ when resolving {1}.";
 			Array.Copy(source, result, sourceLength);
 			result[index] = value;
 			return result;
+		}
+
+		public static bool IsWritableProperty(PropertyInfo property)
+		{
+			var setMethod = property.GetSetMethod();
+			return setMethod != null && !setMethod.IsPrivate;
+		}
+
+		public static bool IsWritableField(FieldInfo field)
+		{
+			return !field.IsInitOnly;
 		}
 	}
 
@@ -2346,9 +2531,22 @@ namespace DryIoc.MefAttributedModel
 				else if (attribute is ExportAllAttribute)
 				{
 					var exportAllAttribute = (ExportAllAttribute)attribute;
-					var exportAllInfos = exportAllAttribute.GetAllContractTypes(type)
+					var allContractTypes = exportAllAttribute.GetAllContractTypes(type);
+
+					if (type.IsGenericTypeDefinition)
+					{
+						var implTypeArgs = type.GetGenericArguments();
+						allContractTypes = allContractTypes.Where(t =>
+							t.IsGenericType && t.ContainsGenericParameters && t.ContainsAllGenericParameters(implTypeArgs))
+							.Select(t => t.GetGenericTypeDefinition());
+					}
+
+					var exportAllInfos = allContractTypes
 						.Select(t => new ExportInfo { ServiceType = t, ServiceName = exportAllAttribute.ContractName })
 						.ToArray();
+
+					Throw.If(exportAllInfos.Length == 0, "Unable to get contract types for implementation {0} cause all of its implemented types where filtered out: {1}",
+						type, allContractTypes);
 
 					if (info.Exports != null)
 						for (var index = 0; index < info.Exports.Length; index++)
@@ -2608,11 +2806,15 @@ Only single metadata is supported per implementation type, please remove the res
 		public object GetMetadata(object[] attributes = null)
 		{
 			attributes = attributes ?? Type.GetCustomAttributes(false);
-			var metadataAttribute = MetadataAttributeIndex == -1 ? null
+			var list = attributes.OfType<ExportMetadataAttribute>().ToList();
+			if (!list.Any(it => it.Name == "ClassType"))
+				list.Add(new ExportMetadataAttribute("ClassType", Type));
+			return list.ToArray();
+			/*var metadataAttribute = MetadataAttributeIndex == -1 ? null
 				: attributes.ThrowIf(attributes.Length == 0)[MetadataAttributeIndex];
 			var metadata = !(metadataAttribute is ExportWithMetadataAttribute) ? metadataAttribute
 				: ((ExportWithMetadataAttribute)metadataAttribute).Metadata;
-			return metadata;
+			return metadata;*/
 		}
 
 		public FactorySetup GetSetup(object[] attributes = null)
@@ -2776,12 +2978,13 @@ Only single metadata is supported per implementation type, please remove the res
 		public static Func<Type, bool> ExportedTypes = Registrator.PublicTypes;
 
 		public string ContractName { get; set; }
-		public Type[] ExcludeTypes { get; set; }
+		public Type[] Except { get; set; }
 
-		public IEnumerable<Type> GetAllContractTypes(Type targetType)
+		public IEnumerable<Type> GetAllContractTypes(Type implementationType)
 		{
-			var contractTypes = targetType.GetImplementedTypes().Where(ExportedTypes);
-			return ExcludeTypes == null || ExcludeTypes.Length == 0 ? contractTypes : contractTypes.Except(ExcludeTypes);
+			var contractTypes = implementationType.GetImplementedTypes(TypeTools.IncludeTypeItself.AsFirst)
+				.Where(ExportedTypes);
+			return Except == null || Except.Length == 0 ? contractTypes : contractTypes.Except(Except);
 		}
 	}
 
