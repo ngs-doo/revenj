@@ -109,7 +109,7 @@ namespace Revenj.Plugins.Rest.Commands
 		Stream ExistsWithGenericSpecificationQuery(string domainObject);
 
 		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/count-expression/{domainObject}")]
+		[WebInvoke(Method = "PUT", UriTemplate = "/exists-expression/{domainObject}")]
 		[Description("Check if domain object exists using expression")]
 		Stream ExistsWithExpression(string domainObject, Stream body);
 
