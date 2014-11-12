@@ -14,14 +14,14 @@ namespace Revenj.Plugins.Rest.Commands
 		Stream Find(string domainObject, string uris);
 
 		[OperationContract]
-		[WebGet(UriTemplate = "/find/{domainObject}?uris={uris}")]
+		[WebGet(UriTemplate = "/find/{domainObject}?uris={uris}&order={order}")]
 		[Description("Find domain objects by their URIs")]
-		Stream FindQuery(string domainObject, string uris);
+		Stream FindQuery(string domainObject, string uris, string order);
 
 		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/find/{domainObject}")]
+		[WebInvoke(Method = "PUT", UriTemplate = "/find/{domainObject}?order={order}")]
 		[Description("Find domain objects by their URIs")]
-		Stream FindFrom(string domainObject, Stream body);
+		Stream FindFrom(string domainObject, string order, Stream body);
 
 		[OperationContract]
 		[WebInvoke(Method = "POST", UriTemplate = "/search/{domainObject}/{specification}?limit={limit}&offset={offset}&order={order}&count={count}")]
@@ -82,6 +82,41 @@ namespace Revenj.Plugins.Rest.Commands
 		[WebInvoke(Method = "PUT", UriTemplate = "/count-expression/{domainObject}")]
 		[Description("Count domain object using expression")]
 		Stream CountWithExpression(string domainObject, Stream body);
+
+		[OperationContract]
+		[WebInvoke(Method = "POST", UriTemplate = "/exists/{domainObject}/{specification}")]
+		[Description("Check if domain object with specification exists")]
+		Stream ExistsWithSpecification(string domainObject, string specification, Stream body);
+
+		[OperationContract]
+		[WebInvoke(Method = "PUT", UriTemplate = "/exists/{domainObject}?specification={specification}")]
+		[Description("Check if domain object with specification exists")]
+		Stream ExistsWithSpecificationQuery(string domainObject, string specification, Stream body);
+
+		[OperationContract]
+		[WebGet(UriTemplate = "/exists/{domainObject}?specification={specification}")]
+		[Description("Check if domain object exists using optional specification from query parameters")]
+		Stream ExistsQuery(string domainObject, string specification);
+
+		[OperationContract]
+		[WebInvoke(Method = "PUT", UriTemplate = "/exists-generic/{domainObject}")]
+		[Description("Check if domain object exists using generic specification")]
+		Stream ExistsWithGenericSpecification(string domainObject, Stream body);
+
+		[OperationContract]
+		[WebGet(UriTemplate = "/exists-generic/{domainObject}")]
+		[Description("Check if domain object exists using generic specification. Search arguments are in query string")]
+		Stream ExistsWithGenericSpecificationQuery(string domainObject);
+
+		[OperationContract]
+		[WebInvoke(Method = "PUT", UriTemplate = "/count-expression/{domainObject}")]
+		[Description("Check if domain object exists using expression")]
+		Stream ExistsWithExpression(string domainObject, Stream body);
+
+		[OperationContract]
+		[WebGet(UriTemplate = "/check/{domainObject}?uri={uri}")]
+		[Description("Check if domain object with specified URI exists")]
+		Stream Check(string domainObject, string uri);
 
 		[OperationContract]
 		[WebInvoke(Method = "POST", UriTemplate = "/submit/{domainEvent}?result={result}")]

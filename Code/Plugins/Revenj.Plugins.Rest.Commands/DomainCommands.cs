@@ -36,22 +36,23 @@ namespace Revenj.Plugins.Rest.Commands
 
 		public Stream Find(string domainObject, string uris)
 		{
+			return FindQuery(domainObject, uris, null);
+		}
+
+		public Stream FindQuery(string domainObject, string uris, string order)
+		{
 			Utility.CheckIdentifiable(DomainModel, domainObject);
 			return
 				Converter.PassThrough<GetDomainObject, GetDomainObject.Argument>(
 					new GetDomainObject.Argument
 					{
 						Name = domainObject,
-						Uri = (uris ?? string.Empty).Split(',')
+						Uri = (uris ?? string.Empty).Split(','),
+						MatchOrder = order == "match"
 					});
 		}
 
-		public Stream FindQuery(string domainObject, string uris)
-		{
-			return Find(domainObject, uris);
-		}
-
-		public Stream FindFrom(string domainObject, Stream body)
+		public Stream FindFrom(string domainObject, string order, Stream body)
 		{
 			var type = Utility.CheckIdentifiable(DomainModel, domainObject);
 			var uris = Serialization.TryDeserialize<string[]>(body);
@@ -61,7 +62,8 @@ namespace Revenj.Plugins.Rest.Commands
 					new GetDomainObject.Argument
 					{
 						Name = domainObject,
-						Uri = uris.Result
+						Uri = uris.Result,
+						MatchOrder = order == "match"
 					});
 		}
 
@@ -269,6 +271,89 @@ namespace Revenj.Plugins.Rest.Commands
 			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var spec = Utility.ParseExpressionSpecification(Serialization, doType, body);
 			return Count(doType, spec);
+		}
+
+		private Stream Exists(
+			string domainObject,
+			Stream data,
+			Either<Type> specType)
+		{
+			var spec = Utility.ParseObject(Serialization, specType, data, true, Locator);
+			if (spec.IsFailure) return spec.Error;
+			return
+				Converter.PassThrough<DomainObjectExists, DomainObjectExists.Argument<object>>(
+					new DomainObjectExists.Argument<object>
+					{
+						Name = domainObject,
+						SpecificationName = specType.Result != null ? specType.Result.FullName : null,
+						Specification = spec.Result
+					});
+		}
+
+		public Stream ExistsWithSpecification(string domainObject, string specification, Stream body)
+		{
+			return ExistsWithSpecificationQuery(domainObject, specification, body);
+		}
+
+		public Stream ExistsWithSpecificationQuery(string domainObject, string specification, Stream body)
+		{
+			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
+			var specType = Utility.CheckDomainObject(DomainModel, doType, specification);
+			return Exists(domainObject, body, specType);
+		}
+
+		private Stream Exists(Either<Type> domainType, Either<object> specification)
+		{
+			if (domainType.IsFailure || specification.IsFailure) return domainType.Error ?? specification.Error;
+			return
+				Converter.PassThrough<DomainObjectExists, DomainObjectExists.Argument<object>>(
+					new DomainObjectExists.Argument<object>
+					{
+						Name = domainType.Result.FullName,
+						SpecificationName = null,
+						Specification = specification.Result
+					});
+		}
+
+		public Stream ExistsQuery(string domainObject, string specification)
+		{
+			var domainType = Utility.CheckDomainObject(DomainModel, domainObject);
+			var specType = Utility.CheckDomainObject(DomainModel, domainType, specification);
+			var spec = Utility.SpecificationFromQuery(specType);
+			return Exists(domainType, spec);
+		}
+
+		public Stream ExistsWithGenericSpecification(string domainObject, Stream body)
+		{
+			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
+			var spec = Serialization.ParseGenericSpecification(doType, body);
+			return Exists(doType, spec);
+		}
+
+		public Stream ExistsWithGenericSpecificationQuery(string domainObject)
+		{
+			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
+			var spec = Utility.GenericSpecificationFromQuery(doType);
+			return Exists(doType, spec);
+		}
+
+		public Stream ExistsWithExpression(string domainObject, Stream body)
+		{
+			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
+			var spec = Utility.ParseExpressionSpecification(Serialization, doType, body);
+			return Exists(doType, spec);
+		}
+
+		public Stream Check(string domainObject, string uri)
+		{
+			Utility.CheckIdentifiable(DomainModel, domainObject);
+			return
+				Converter.PassThrough<CheckDomainObject, CheckDomainObject.Argument>(
+					new CheckDomainObject.Argument
+					{
+						Name = domainObject,
+						Uri = uri
+					});
 		}
 
 		public Stream SubmitEvent(string domainEvent, string result, Stream body)

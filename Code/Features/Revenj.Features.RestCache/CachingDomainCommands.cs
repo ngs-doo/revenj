@@ -31,27 +31,27 @@ namespace Revenj.Features.RestCache
 		{
 			var type = DomainModel.Find(domainObject);
 			if (type != null && typeof(IAggregateRoot).IsAssignableFrom(type))
-				return CachingService.ReadFromCache(type, (uris ?? string.Empty).Split(','), Locator);
+				return CachingService.ReadFromCache(type, (uris ?? string.Empty).Split(','), false, Locator);
 			return DomainCommands.Find(domainObject, uris);
 		}
 
-		public Stream FindQuery(string domainObject, string uris)
+		public Stream FindQuery(string domainObject, string uris, string order)
 		{
 			var type = DomainModel.Find(domainObject);
 			if (type != null && typeof(IAggregateRoot).IsAssignableFrom(type))
-				return CachingService.ReadFromCache(type, (uris ?? string.Empty).Split(','), Locator);
-			return DomainCommands.FindQuery(domainObject, uris);
+				return CachingService.ReadFromCache(type, (uris ?? string.Empty).Split(','), order == "match", Locator);
+			return DomainCommands.FindQuery(domainObject, uris, order);
 		}
 
-		public Stream FindFrom(string domainObject, Stream body)
+		public Stream FindFrom(string domainObject, string order, Stream body)
 		{
 			var type = DomainModel.Find(domainObject);
 			if (type != null && typeof(IAggregateRoot).IsAssignableFrom(type))
 			{
 				var uris = Serialization.Deserialize<string[]>(body, ThreadContext.Request.ContentType);
-				return CachingService.ReadFromCache(type, uris, Locator);
+				return CachingService.ReadFromCache(type, uris, order == "match", Locator);
 			}
-			return DomainCommands.FindFrom(domainObject, body);
+			return DomainCommands.FindFrom(domainObject, order, body);
 		}
 
 		public Stream SearchWithSpecification(string domainObject, string specification, string limit, string offset, string order, string count, Stream body)
@@ -127,6 +127,41 @@ namespace Revenj.Features.RestCache
 		public Stream SubmitAggregateEventQuery(string aggregate, string domainEvent, string uri, Stream body)
 		{
 			return DomainCommands.SubmitAggregateEventQuery(aggregate, domainEvent, uri, body);
+		}
+
+		public Stream ExistsWithSpecification(string domainObject, string specification, Stream body)
+		{
+			return DomainCommands.ExistsWithSpecification(domainObject, specification, body);
+		}
+
+		public Stream ExistsWithSpecificationQuery(string domainObject, string specification, Stream body)
+		{
+			return DomainCommands.ExistsWithSpecificationQuery(domainObject, specification, body);
+		}
+
+		public Stream ExistsQuery(string domainObject, string specification)
+		{
+			return DomainCommands.ExistsQuery(domainObject, specification);
+		}
+
+		public Stream ExistsWithGenericSpecification(string domainObject, Stream body)
+		{
+			return DomainCommands.ExistsWithGenericSpecification(domainObject, body);
+		}
+
+		public Stream ExistsWithGenericSpecificationQuery(string domainObject)
+		{
+			return DomainCommands.ExistsWithGenericSpecificationQuery(domainObject);
+		}
+
+		public Stream ExistsWithExpression(string domainObject, Stream body)
+		{
+			return DomainCommands.ExistsWithExpression(domainObject, body);
+		}
+
+		public Stream Check(string domainObject, string uri)
+		{
+			return DomainCommands.Check(domainObject, uri);
 		}
 	}
 }

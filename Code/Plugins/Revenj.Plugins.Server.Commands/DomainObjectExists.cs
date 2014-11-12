@@ -15,16 +15,16 @@ using Revenj.Utility;
 namespace Revenj.Plugins.Server.Commands
 {
 	[Export(typeof(IServerCommand))]
-	[ExportMetadata(Metadata.ClassType, typeof(CountDomainObject))]
-	public class CountDomainObject : IReadOnlyServerCommand
+	[ExportMetadata(Metadata.ClassType, typeof(DomainObjectExists))]
+	public class DomainObjectExists : IReadOnlyServerCommand
 	{
-		private static ConcurrentDictionary<Type, ICountCommand> Cache = new ConcurrentDictionary<Type, ICountCommand>(1, 127);
+		private static ConcurrentDictionary<Type, IExistsCommand> Cache = new ConcurrentDictionary<Type, IExistsCommand>(1, 127);
 
 		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
-		public CountDomainObject(
+		public DomainObjectExists(
 			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
@@ -69,8 +69,8 @@ namespace Revenj.Plugins.Server.Commands
 			try
 			{
 				var command = PrepareCommand(either.Argument.Name, either.Argument.SpecificationName);
-				var count = command.FindCount(input, Locator, either.Argument.Specification);
-				return CommandResult<TOutput>.Success(output.Serialize(count), count.ToString());
+				var exists = command.CheckExists(input, Locator, either.Argument.Specification);
+				return CommandResult<TOutput>.Success(output.Serialize(exists), exists.ToString());
 			}
 			catch (ArgumentException ex)
 			{
@@ -82,16 +82,16 @@ Example argument:
 			}
 		}
 
-		private ICountCommand PrepareCommand(string domainName, string specificationName)
+		private IExistsCommand PrepareCommand(string domainName, string specificationName)
 		{
 			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, domainName);
 			if (string.IsNullOrWhiteSpace(specificationName))
 			{
-				ICountCommand command;
+				IExistsCommand command;
 				if (!Cache.TryGetValue(domainObjectType, out command))
 				{
 					var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);
-					command = Activator.CreateInstance(commandType) as ICountCommand;
+					command = Activator.CreateInstance(commandType) as IExistsCommand;
 					Cache.TryAdd(domainObjectType, command);
 				}
 				return command;
@@ -105,14 +105,14 @@ Example argument:
 					throw new ArgumentException("Couldn't find specification: {0}".With(specificationName));
 				//TODO: cache command
 				var commandType = typeof(SearchDomainObjectWithSpecificationCommand<,>).MakeGenericType(domainObjectType, specificationType);
-				return Activator.CreateInstance(commandType) as ICountCommand;
+				return Activator.CreateInstance(commandType) as IExistsCommand;
 			}
 		}
 
-		private interface ICountCommand
+		private interface IExistsCommand
 		{
-			long FindCount<TInput>(ISerialization<TInput> input, IServiceLocator locator, TInput data);
-			long FindCount<TSpecification>(IServiceLocator locator, TSpecification specification);
+			bool CheckExists<TInput>(ISerialization<TInput> input, IServiceLocator locator, TInput data);
+			bool CheckExists<TSpecification>(IServiceLocator locator, TSpecification specification);
 		}
 
 		private static IQueryableRepository<T> GetRepository<T>(IServiceLocator locator)
@@ -128,10 +128,10 @@ Example argument:
 			}
 		}
 
-		private class SearchDomainObjectCommand<TDomainObject> : ICountCommand
+		private class SearchDomainObjectCommand<TDomainObject> : IExistsCommand
 			where TDomainObject : IDataSource
 		{
-			public virtual long FindCount<TFormat>(
+			public virtual bool CheckExists<TFormat>(
 				ISerialization<TFormat> serializer,
 				IServiceLocator locator,
 				TFormat data)
@@ -165,10 +165,10 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 							new FrameworkException("Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
 					}
 				}
-				return result.LongCount();
+				return result.Any();
 			}
 
-			public long FindCount<TSpecification>(IServiceLocator locator, TSpecification specification)
+			public bool CheckExists<TSpecification>(IServiceLocator locator, TSpecification specification)
 			{
 				var repository = GetRepository<TDomainObject>(locator);
 				IQueryable<TDomainObject> result;
@@ -176,14 +176,14 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 					result = repository.Query();
 				else
 					result = repository.Query((dynamic)specification);
-				return result.LongCount();
+				return result.Any();
 			}
 		}
 
 		private class SearchDomainObjectWithSpecificationCommand<TDomainObject, TSpecification> : SearchDomainObjectCommand<TDomainObject>
 			where TDomainObject : IDataSource
 		{
-			public override long FindCount<TFormat>(
+			public override bool CheckExists<TFormat>(
 				ISerialization<TFormat> serializer,
 				IServiceLocator locator,
 				TFormat data)
@@ -225,7 +225,7 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 						"Error while executing query: {0}.".With(ex.Message),
 						new FrameworkException("Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
 				}
-				return result.LongCount();
+				return result.Any();
 			}
 		}
 	}

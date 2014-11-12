@@ -5,7 +5,6 @@ using System.Configuration;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Security;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -99,16 +98,7 @@ Example argument:
 
 		private ISearchDomainObjectCommand<object> PrepareCommand(string domainName, string specificationName)
 		{
-			if (domainName == null)
-				throw new ArgumentException("Domain object name not provided.");
-			var domainObjectType = DomainModel.Find(domainName);
-			if (domainObjectType == null)
-				throw new ArgumentException("Couldn't find domain object: {0}".With(domainName));
-			if (!typeof(IDataSource).IsAssignableFrom(domainObjectType))
-				throw new ArgumentException(@"Specified type ({0}) is not a data source. 
-Please check your arguments.".With(domainName));
-			if (!Permissions.CanAccess(domainObjectType))
-				throw new SecurityException("You don't have permission to access: {0}.".With(domainName));
+			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, domainName);
 			if (string.IsNullOrWhiteSpace(specificationName))
 			{
 				var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);

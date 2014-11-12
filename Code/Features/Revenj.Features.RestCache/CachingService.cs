@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Revenj.Features.RestCache
 	internal static class CachingService
 	{
 		private static readonly ConcurrentDictionary<Type, Func<string, Stream>> SingleLookups = new ConcurrentDictionary<Type, Func<string, Stream>>();
-		private static readonly ConcurrentDictionary<Type, Func<string[], Stream>> CollectionLookups = new ConcurrentDictionary<Type, Func<string[], Stream>>();
+		private static readonly ConcurrentDictionary<Type, Func<string[], bool, Stream>> CollectionLookups = new ConcurrentDictionary<Type, Func<string[], bool, Stream>>();
 
 		internal static Stream ReadFromCache(Type type, string uri, IServiceLocator locator)
 		{
@@ -28,22 +29,22 @@ namespace Revenj.Features.RestCache
 			return converter(uri);
 		}
 
-		internal static Stream ReadFromCache(Type type, string[] uri, IServiceLocator locator)
+		internal static Stream ReadFromCache(Type type, string[] uri, bool matchOrder, IServiceLocator locator)
 		{
-			Func<string[], Stream> converter;
+			Func<string[], bool, Stream> converter;
 			if (!CollectionLookups.TryGetValue(type, out converter))
 			{
 				var al = (IAggregateLookup)Activator.CreateInstance(typeof(AggregateLookup<>).MakeGenericType(type), locator);
 				converter = al.Find;
 				CollectionLookups.TryAdd(type, converter);
 			}
-			return converter(uri);
+			return converter(uri, matchOrder);
 		}
 
 		interface IAggregateLookup
 		{
 			Stream Find(string uri);
-			Stream Find(string[] uris);
+			Stream Find(string[] uris, bool matchOrder);
 		}
 
 		class AggregateLookup<T> : IAggregateLookup
@@ -52,6 +53,23 @@ namespace Revenj.Features.RestCache
 			private readonly IDataCache<T> Cache;
 			private readonly IWireSerialization Serialization;
 			private readonly IPermissionManager Permissions;
+
+			class UriComparer : IComparer<T>
+			{
+				private readonly Dictionary<string, int> Uri;
+
+				public UriComparer(string[] uri)
+				{
+					Uri = new Dictionary<string, int>();
+					for (int i = 0; i < uri.Length; i++)
+						Uri[uri[i]] = i;
+				}
+
+				public int Compare(T x, T y)
+				{
+					return Uri[x.URI] - Uri[y.URI];
+				}
+			}
 
 			public AggregateLookup(IServiceLocator locator)
 			{
@@ -85,12 +103,14 @@ namespace Revenj.Features.RestCache
 				return Explain("Can't find " + typeof(T).FullName + " with Uri: " + uri);
 			}
 
-			public Stream Find(string[] uri)
+			public Stream Find(string[] uri, bool matchOrder)
 			{
 				if (!Permissions.CanAccess(typeof(T)))
 					return Explain("You don't have permission to access: " + typeof(T));
 				var aggs = Cache.Find(uri);
 				var filtered = Permissions.ApplyFilters(aggs);
+				if (matchOrder && filtered.Length > 1)
+					Array.Sort(filtered, new UriComparer(uri));
 				var response = ThreadContext.Response;
 				response.StatusCode = HttpStatusCode.OK;
 				var cms = ChunkedMemoryStream.Create();

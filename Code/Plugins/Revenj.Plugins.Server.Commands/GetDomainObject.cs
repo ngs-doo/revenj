@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
@@ -44,6 +45,8 @@ namespace Revenj.Plugins.Server.Commands
 			public string Name;
 			[DataMember]
 			public string[] Uri;
+			[DataMember]
+			public bool MatchOrder;
 		}
 
 		private static TFormat CreateExampleArgument<TFormat>(ISerialization<TFormat> serializer)
@@ -59,7 +62,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var result = GetAndReturn(output, either.Argument.Name, either.Argument.Uri);
+				var result = GetAndReturn(output, either.Argument.Name, either.Argument.Uri, either.Argument.MatchOrder);
 				return CommandResult<TOutput>.Success(result.Result, "Found {0} item(s)", result.Count);
 			}
 			catch (ArgumentException ex)
@@ -70,11 +73,6 @@ namespace Revenj.Plugins.Server.Commands
 Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 			}
-		}
-
-		public TFormat Execute<TFormat>(ISerialization<TFormat> serialization, string name, string[] uri)
-		{
-			return GetAndReturn(serialization, name, uri).Result;
 		}
 
 		private Type ValidateArgument(string name, string[] uri)
@@ -108,7 +106,8 @@ Please check your arguments.", name);
 		private FindResult<TOutput> GetAndReturn<TOutput>(
 			ISerialization<TOutput> output,
 			string name,
-			string[] uri)
+			string[] uri,
+			bool matchOrder)
 		{
 			var objectType = ValidateArgument(name, uri);
 			IFindCommand command;
@@ -118,7 +117,7 @@ Please check your arguments.", name);
 				command = Activator.CreateInstance(commandType) as IFindCommand;
 				Cache.TryAdd(objectType, command);
 			}
-			return command.Find(output, Locator, Permissions, uri);
+			return command.Find(output, Locator, Permissions, uri, matchOrder);
 		}
 
 		private interface IFindCommand
@@ -127,21 +126,42 @@ Please check your arguments.", name);
 				ISerialization<TOutput> output,
 				IServiceLocator locator,
 				IPermissionManager permissions,
-				string[] uris);
+				string[] uris,
+				bool matchOrder);
 		}
 
 		private class FindCommand<TResult> : IFindCommand
 			where TResult : IIdentifiable
 		{
+			class UriComparer : IComparer<TResult>
+			{
+				private readonly Dictionary<string, int> Uri;
+
+				public UriComparer(string[] uri)
+				{
+					Uri = new Dictionary<string, int>();
+					for (int i = 0; i < uri.Length; i++)
+						Uri[uri[i]] = i;
+				}
+
+				public int Compare(TResult x, TResult y)
+				{
+					return Uri[x.URI] - Uri[y.URI];
+				}
+			}
+
 			public FindResult<TOutput> Find<TOutput>(
 				ISerialization<TOutput> output,
 				IServiceLocator locator,
 				IPermissionManager permissions,
-				string[] uris)
+				string[] uris,
+				bool matchOrder)
 			{
 				var repository = locator.Resolve<IRepository<TResult>>();
 				var found = repository.Find(uris);
 				var filtered = permissions.ApplyFilters(found);
+				if (matchOrder && uris.Length > 1)
+					Array.Sort(filtered, new UriComparer(uris));
 				return new FindResult<TOutput> { Result = output.Serialize(filtered), Count = filtered.Length };
 			}
 		}
