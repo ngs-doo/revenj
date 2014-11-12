@@ -54,34 +54,34 @@ namespace Revenj.Features.RestCache
 			return DomainCommands.FindFrom(domainObject, body);
 		}
 
-		public Stream SearchWithSpecification(string domainObject, string specification, string limit, string offset, string order, Stream body)
+		public Stream SearchWithSpecification(string domainObject, string specification, string limit, string offset, string order, string count, Stream body)
 		{
-			return DomainCommands.SearchWithSpecification(domainObject, specification, limit, offset, order, body);
+			return DomainCommands.SearchWithSpecification(domainObject, specification, limit, offset, order, count, body);
 		}
 
-		public Stream SearchWithSpecificationQuery(string domainObject, string specification, string limit, string offset, string order, Stream body)
+		public Stream SearchWithSpecificationQuery(string domainObject, string specification, string limit, string offset, string order, string count, Stream body)
 		{
-			return DomainCommands.SearchWithSpecificationQuery(domainObject, specification, limit, offset, order, body);
+			return DomainCommands.SearchWithSpecificationQuery(domainObject, specification, limit, offset, order, count, body);
 		}
 
-		public Stream SearchQuery(string domainObject, string specification, string limit, string offset, string order)
+		public Stream SearchQuery(string domainObject, string specification, string limit, string offset, string order, string count)
 		{
-			return DomainCommands.SearchQuery(domainObject, specification, limit, offset, order);
+			return DomainCommands.SearchQuery(domainObject, specification, limit, offset, order, count);
 		}
 
-		public Stream SearchWithGenericSpecification(string domainObject, string limit, string offset, string order, Stream body)
+		public Stream SearchWithGenericSpecification(string domainObject, string limit, string offset, string order, string count, Stream body)
 		{
-			return DomainCommands.SearchWithGenericSpecification(domainObject, limit, offset, order, body);
+			return DomainCommands.SearchWithGenericSpecification(domainObject, limit, offset, order, count, body);
 		}
 
-		public Stream SearchWithGenericSpecificationQuery(string domainObject, string limit, string offset, string order)
+		public Stream SearchWithGenericSpecificationQuery(string domainObject, string limit, string offset, string order, string count)
 		{
-			return DomainCommands.SearchWithGenericSpecificationQuery(domainObject, limit, offset, order);
+			return DomainCommands.SearchWithGenericSpecificationQuery(domainObject, limit, offset, order, count);
 		}
 
-		public Stream SearchWithExpression(string domainObject, string limit, string offset, string order, Stream body)
+		public Stream SearchWithExpression(string domainObject, string limit, string offset, string order, string count, Stream body)
 		{
-			return DomainCommands.SearchWithExpression(domainObject, limit, offset, order, body);
+			return DomainCommands.SearchWithExpression(domainObject, limit, offset, order, count, body);
 		}
 
 		public Stream CountWithSpecification(string domainObject, string specification, Stream body)

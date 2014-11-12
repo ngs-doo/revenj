@@ -44,15 +44,17 @@ namespace Revenj.Wcf
 			this.CommandsRepository = commandsRepository;
 		}
 
-		class ExecuteResult<TFormat>
+		class ExecuteResult
 		{
 			public Stream Error;
-			public TFormat Result;
+			public object Result;
 		}
 
-		private static ExecuteResult<TOutput> Execute<TInput, TOutput>(IProcessingEngine engine, IServerCommandDescription<TInput> command)
+		private static ExecuteResult Execute<TInput>(
+			IProcessingEngine engine,
+			IServerCommandDescription<TInput>[] commands)
 		{
-			var result = engine.Execute<TInput, TOutput>(new[] { command });
+			var result = engine.Execute<TInput, object>(commands);
 			var first = result.ExecutedCommandResults != null ? result.ExecutedCommandResults.FirstOrDefault() : null;
 			ThreadContext.Response.StatusCode = first != null && first.Result != null
 				? first.Result.Status
@@ -62,15 +64,18 @@ namespace Revenj.Wcf
 				HttpRuntime.UnloadAppDomain();
 
 			if ((int)result.Status >= 300)
-				return new ExecuteResult<TOutput> { Error = Utility.ReturnError(result.Message, result.Status) };
+				return new ExecuteResult { Error = Utility.ReturnError(result.Message, result.Status) };
 
 			if (first == null)
-				return new ExecuteResult<TOutput> { Error = Utility.ReturnError("Missing result", HttpStatusCode.InternalServerError) };
+				return new ExecuteResult { Error = Utility.ReturnError("Missing result", HttpStatusCode.InternalServerError) };
 
 			if ((int)first.Result.Status >= 300)
-				return new ExecuteResult<TOutput> { Error = Utility.ReturnError(first.Result.Message, first.Result.Status) };
+				return new ExecuteResult { Error = Utility.ReturnError(first.Result.Message, first.Result.Status) };
 
-			return new ExecuteResult<TOutput> { Result = first.Result.Data };
+			foreach (var ar in result.ExecutedCommandResults.Skip(1))
+				ThreadContext.Response.Headers[ar.RequestID] = ar.Result.Data.ToString();
+
+			return new ExecuteResult { Result = first.Result.Data };
 		}
 
 		public Stream Get()
@@ -109,10 +114,10 @@ namespace Revenj.Wcf
 			switch (request.ContentType)
 			{
 				case "application/json":
-					stream = ExecuteCommand(engine, Serialization, new JsonCommandDescription(template.QueryParameters, message, commandType), accept);
+					stream = ExecuteCommands(engine, Serialization, new[] { new JsonCommandDescription(template.QueryParameters, message, commandType) }, accept);
 					break;
 				case "application/x-protobuf":
-					stream = ExecuteCommand(engine, Serialization, new ProtobufCommandDescription(template.QueryParameters, message, commandType), accept);
+					stream = ExecuteCommands(engine, Serialization, new[] { new ProtobufCommandDescription(template.QueryParameters, message, commandType) }, accept);
 					break;
 				default:
 					if (message != null)
@@ -120,9 +125,9 @@ namespace Revenj.Wcf
 						XElement el;
 						try { el = XElement.Load(message); }
 						catch (Exception ex) { return Utility.ReturnError("Error parsing request body. " + ex.Message, HttpStatusCode.BadRequest); }
-						stream = ExecuteCommand(engine, Serialization, new XmlCommandDescription(el, commandType), accept);
+						stream = ExecuteCommands(engine, Serialization, new[] { new XmlCommandDescription(el, commandType) }, accept);
 					}
-					else stream = ExecuteCommand(engine, Serialization, new XmlCommandDescription(template.QueryParameters, commandType), accept);
+					else stream = ExecuteCommands(engine, Serialization, new[] { new XmlCommandDescription(template.QueryParameters, commandType) }, accept);
 					break;
 			}
 			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
@@ -130,76 +135,74 @@ namespace Revenj.Wcf
 			return stream;
 		}
 
-		internal static Stream ExecuteCommand<TFormat>(
+		internal static Stream ExecuteCommands<TFormat>(
 			IProcessingEngine engine,
 			IWireSerialization serialization,
-			IServerCommandDescription<TFormat> command,
+			IServerCommandDescription<TFormat>[] commands,
 			string accept)
 		{
+			var result = Execute(engine, commands);
+			if (result.Error != null)
+				return result.Error;
+			if (result.Result == null)
+			{
+				ThreadContext.Response.ContentType = accept;
+				return null;
+			}
 			if (accept == "application/octet-stream")
 			{
-				var native = Execute<TFormat, object>(engine, command);
-				if (native.Error != null)
-					return native.Error;
 				ThreadContext.Response.ContentType = "application/octet-stream";
-				if (native.Result == null)
-					return null;
-				if (native.Result is Stream)
-					return native.Result as Stream;
-				else if (native.Result is StreamReader)
-					return (native.Result as StreamReader).BaseStream;
+				if (result.Result is Stream)
+					return result.Result as Stream;
+				else if (result.Result is StreamReader)
+					return (result.Result as StreamReader).BaseStream;
 				//Warning LOH leak
-				else if (native.Result is StringBuilder)
-					return (native.Result as StringBuilder).ToStream();
+				else if (result.Result is StringBuilder)
+					return (result.Result as StringBuilder).ToStream();
 				//Warning LOH leak
-				else if (native.Result is byte[])
-					return new MemoryStream(native.Result as byte[]);
+				else if (result.Result is byte[])
+					return new MemoryStream(result.Result as byte[]);
 				//Warning LOH leak
-				else if (native.Result is string)
-					return new StringBuilder(native.Result as string).ToStream();
+				else if (result.Result is string)
+					return new StringBuilder(result.Result as string).ToStream();
 				//Warning LOH leak
-				else if (native.Result is char[])
+				else if (result.Result is char[])
 				{
-					var ch = native.Result as char[];
+					var ch = result.Result as char[];
 					var sb = new StringBuilder(ch.Length);
 					sb.Append(ch);
 					return sb.ToStream();
 				}
 				return Utility.ReturnError(
 					"Unexpected command result. Can't convert "
-					+ native.Result.GetType().FullName + " to octet-stream. Use application/x-dotnet mime type for .NET binary serialization",
+					+ result.Result.GetType().FullName + " to octet-stream. Use application/x-dotnet mime type for .NET binary serialization",
 					HttpStatusCode.BadRequest);
 			}
 			if (accept == "application/base64")
 			{
-				var native = Execute<TFormat, object>(engine, command);
-				if (native.Error != null)
-					return native.Error;
 				ThreadContext.Response.ContentType = "application/base64";
-				if (native.Result == null)
-					return null;
-				if (native.Result is Stream)
+				if (result.Result is Stream)
 				{
-					var stream = native.Result as Stream;
+					var stream = result.Result as Stream;
 					try { return stream.ToBase64Stream(); }
 					finally { stream.Dispose(); }
 				}
-				else if (native.Result is StreamReader)
+				else if (result.Result is StreamReader)
 				{
-					var sr = native.Result as StreamReader;
+					var sr = result.Result as StreamReader;
 					try { return sr.BaseStream.ToBase64Stream(); }
 					finally { sr.Dispose(); }
 				}
 				//Warning LOH leak
-				else if (native.Result is StringBuilder)
+				else if (result.Result is StringBuilder)
 				{
-					var sb = native.Result as StringBuilder;
+					var sb = result.Result as StringBuilder;
 					return sb.ToBase64Stream();
 				}
 				//Warning LOH leak
-				else if (native.Result is byte[])
+				else if (result.Result is byte[])
 				{
-					var bytes = native.Result as byte[];
+					var bytes = result.Result as byte[];
 					using (var cms = ChunkedMemoryStream.Create())
 					{
 						cms.Write(bytes, 0, bytes.Length);
@@ -208,15 +211,15 @@ namespace Revenj.Wcf
 					}
 				}
 				//Warning LOH leak
-				else if (native.Result is string)
+				else if (result.Result is string)
 				{
-					var sb = new StringBuilder(native.Result as string);
+					var sb = new StringBuilder(result.Result as string);
 					return sb.ToBase64Stream();
 				}
 				//Warning LOH leak
-				else if (native.Result is char[])
+				else if (result.Result is char[])
 				{
-					var ch = native.Result as char[];
+					var ch = result.Result as char[];
 					var sb = new StringBuilder(ch.Length);
 					sb.Append(ch);
 					return sb.ToBase64Stream();
@@ -225,26 +228,16 @@ namespace Revenj.Wcf
 			}
 			if (accept == "application/x-dotnet")
 			{
-				var native = Execute<TFormat, object>(engine, command);
-				if (native.Error != null)
-					return native.Error;
 				ThreadContext.Response.ContentType = "application/x-dotnet";
-				if (native.Result == null)
-					return null;
 				var bf = new BinaryFormatter();
 				bf.AssemblyFormat = FormatterAssemblyStyle.Simple;
 				var cms = ChunkedMemoryStream.Create();
-				bf.Serialize(cms, native.Result);
+				bf.Serialize(cms, result.Result);
 				cms.Position = 0;
 				return cms;
 			}
-			var instance = Execute<TFormat, object>(engine, command);
-			if (instance.Error != null)
-				return instance.Error;
-			if (instance.Result == null)
-				return null;
 			var ms = ChunkedMemoryStream.Create();
-			ThreadContext.Response.ContentType = serialization.Serialize(instance.Result, accept, ms);
+			ThreadContext.Response.ContentType = serialization.Serialize(result.Result, accept, ms);
 			ms.Position = 0;
 			return ms;
 		}

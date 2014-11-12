@@ -36,7 +36,7 @@ namespace Revenj.Wcf
 			this.Serialization = serialization;
 		}
 
-		public Stream PassThrough<TCommand, TArgument>(TArgument argument, string accept)
+		public Stream PassThrough<TCommand, TArgument>(TArgument argument, string accept, AdditionalCommand[] additionalCommands)
 		{
 			var start = Stopwatch.GetTimestamp();
 			var engine = ProcessingEngine;
@@ -48,12 +48,14 @@ namespace Revenj.Wcf
 					return Utility.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
 				engine = scope.Resolve<IProcessingEngine>();
 			}
-			var stream =
-				RestApplication.ExecuteCommand<object>(
-					engine,
-					Serialization,
-					new ObjectCommandDescription { Data = argument, CommandType = typeof(TCommand) },
-					accept);
+			var commands = new ObjectCommandDescription[1 + (additionalCommands != null ? additionalCommands.Length : 0)];
+			commands[0] = new ObjectCommandDescription { Data = argument, CommandType = typeof(TCommand) };
+			for (int i = 1; i < commands.Length; i++)
+			{
+				var ac = additionalCommands[i - 1];
+				commands[i] = new ObjectCommandDescription { RequestID = ac.ToHeader, CommandType = ac.CommandType, Data = ac.Argument };
+			}
+			var stream = RestApplication.ExecuteCommands<object>(engine, Serialization, commands, accept);
 			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 			ThreadContext.Response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
 			return stream;

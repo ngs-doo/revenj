@@ -24,34 +24,34 @@ namespace Revenj.Plugins.Rest.Commands
 		Stream FindFrom(string domainObject, Stream body);
 
 		[OperationContract]
-		[WebInvoke(Method = "POST", UriTemplate = "/search/{domainObject}/{specification}?limit={limit}&offset={offset}&order={order}")]
+		[WebInvoke(Method = "POST", UriTemplate = "/search/{domainObject}/{specification}?limit={limit}&offset={offset}&order={order}&count={count}")]
 		[Description("Search domain object with specification")]
-		Stream SearchWithSpecification(string domainObject, string specification, string limit, string offset, string order, Stream body);
+		Stream SearchWithSpecification(string domainObject, string specification, string limit, string offset, string order, string count, Stream body);
 
 		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/search/{domainObject}?specification={specification}&limit={limit}&offset={offset}&order={order}")]
+		[WebInvoke(Method = "PUT", UriTemplate = "/search/{domainObject}?specification={specification}&limit={limit}&offset={offset}&order={order}&count={count}")]
 		[Description("Search domain object with specification")]
-		Stream SearchWithSpecificationQuery(string domainObject, string specification, string limit, string offset, string order, Stream body);
+		Stream SearchWithSpecificationQuery(string domainObject, string specification, string limit, string offset, string order, string count, Stream body);
 
 		[OperationContract]
-		[WebGet(UriTemplate = "/search/{domainObject}?specification={specification}&limit={limit}&offset={offset}&order={order}")]
+		[WebGet(UriTemplate = "/search/{domainObject}?specification={specification}&limit={limit}&offset={offset}&order={order}&count={count}")]
 		[Description("Search domain object with optional specification from query parameters")]
-		Stream SearchQuery(string domainObject, string specification, string limit, string offset, string order);
+		Stream SearchQuery(string domainObject, string specification, string limit, string offset, string order, string count);
 
 		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/search-generic/{domainObject}?limit={limit}&offset={offset}&order={order}")]
+		[WebInvoke(Method = "PUT", UriTemplate = "/search-generic/{domainObject}?limit={limit}&offset={offset}&order={order}&count={count}")]
 		[Description("Search domain object using generic specification")]
-		Stream SearchWithGenericSpecification(string domainObject, string limit, string offset, string order, Stream body);
+		Stream SearchWithGenericSpecification(string domainObject, string limit, string offset, string order, string count, Stream body);
 
 		[OperationContract]
-		[WebGet(UriTemplate = "/search-generic/{domainObject}?limit={limit}&offset={offset}&order={order}")]
+		[WebGet(UriTemplate = "/search-generic/{domainObject}?limit={limit}&offset={offset}&order={order}&count={count}")]
 		[Description("Search domain object using generic specification. Search arguments are in query string")]
-		Stream SearchWithGenericSpecificationQuery(string domainObject, string limit, string offset, string order);
+		Stream SearchWithGenericSpecificationQuery(string domainObject, string limit, string offset, string order, string count);
 
 		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/search-expression/{domainObject}?limit={limit}&offset={offset}&order={order}")]
+		[WebInvoke(Method = "PUT", UriTemplate = "/search-expression/{domainObject}?limit={limit}&offset={offset}&order={order}&count={count}")]
 		[Description("Search domain object using expression")]
-		Stream SearchWithExpression(string domainObject, string limit, string offset, string order, Stream body);
+		Stream SearchWithExpression(string domainObject, string limit, string offset, string order, string count, Stream body);
 
 		[OperationContract]
 		[WebInvoke(Method = "POST", UriTemplate = "/count/{domainObject}/{specification}")]

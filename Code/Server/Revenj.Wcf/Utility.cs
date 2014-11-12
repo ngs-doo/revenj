@@ -5,7 +5,7 @@ using Revenj.Api;
 
 namespace Revenj.Wcf
 {
-	public static class Utility
+	internal static class Utility
 	{
 		public static Stream ReturnError(string message, HttpStatusCode code)
 		{

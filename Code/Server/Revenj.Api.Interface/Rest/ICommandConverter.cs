@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Revenj.Api
 {
@@ -16,8 +17,9 @@ namespace Revenj.Api
 		/// <typeparam name="TArgument">server command argument</typeparam>
 		/// <param name="argument">argument value</param>
 		/// <param name="accept">expected result from Accept mime type</param>
+		/// <param name="additionalCommands">run additional commands and save result to header</param>
 		/// <returns>result converted to requested mime type</returns>
-		Stream PassThrough<TCommand, TArgument>(TArgument argument, string accept);
+		Stream PassThrough<TCommand, TArgument>(TArgument argument, string accept, AdditionalCommand[] additionalCommands);
 		/// <summary>
 		/// Call IRestApplication Get/Post with serialized argument
 		/// </summary>
@@ -28,10 +30,30 @@ namespace Revenj.Api
 		Stream ConvertStream<TCommand, TArgument>(TArgument argument);
 	}
 	/// <summary>
+	/// Run multiple commands and add response to specified header
+	/// </summary>
+	public class AdditionalCommand
+	{
+		/// <summary>
+		/// Argument for specified command
+		/// </summary>
+		public object Argument { get; set; }
+		/// <summary>
+		/// Command type
+		/// </summary>
+		public Type CommandType { get; set; }
+		/// <summary>
+		/// Header where to save result
+		/// </summary>
+		public string ToHeader { get; set; }
+	}
+
+	/// <summary>
 	/// Utility for command converter
 	/// </summary>
 	public static class CommandConverterHelper
 	{
+		private static AdditionalCommand[] EmptyCommands = new AdditionalCommand[0];
 		/// <summary>
 		/// Pass request to the server command.
 		/// Request is casted instead of deserialized.
@@ -46,7 +68,7 @@ namespace Revenj.Api
 		public static Stream PassThrough<TCommand, TArgument>(this ICommandConverter converter, TArgument argument)
 		{
 			var accept = (ThreadContext.Request.Accept ?? "application/xml").ToLowerInvariant();
-			return converter.PassThrough<TCommand, TArgument>(argument, accept);
+			return converter.PassThrough<TCommand, TArgument>(argument, accept, EmptyCommands);
 		}
 	}
 }

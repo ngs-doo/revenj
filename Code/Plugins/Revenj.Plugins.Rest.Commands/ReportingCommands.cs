@@ -265,7 +265,8 @@ namespace Revenj.Plugins.Rest.Commands
 						GetSources = new[] { new GetDomainObject.Argument { Name = domainObject, Uri = new[] { uri } } },
 						ToPdf = requestPdf
 					},
-					"application/octet-stream");
+					"application/octet-stream",
+					null);
 			ThreadContext.Response.ContentType = requestPdf
 				? "application/pdf"
 				: "application/octet-stream";
@@ -299,7 +300,8 @@ namespace Revenj.Plugins.Rest.Commands
 								}},
 						ToPdf = requestPdf
 					},
-					"application/octet-stream");
+					"application/octet-stream",
+					null);
 
 			ThreadContext.Response.ContentType = requestPdf
 				? "application/pdf"

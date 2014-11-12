@@ -4,6 +4,7 @@ using System.ServiceModel;
 using Revenj.Api;
 using Revenj.DomainPatterns;
 using Revenj.Plugins.Server.Commands;
+using Revenj.Processing;
 using Revenj.Serialization;
 
 namespace Revenj.Plugins.Rest.Commands
@@ -11,19 +12,24 @@ namespace Revenj.Plugins.Rest.Commands
 	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
 	public class DomainCommands : IDomainCommands
 	{
+		private static AdditionalCommand[] EmptyCommands = new AdditionalCommand[0];
+
 		private readonly IServiceLocator Locator;
 		private readonly ICommandConverter Converter;
+		private readonly IProcessingEngine Processing;
 		private readonly IDomainModel DomainModel;
 		private readonly IWireSerialization Serialization;
 
 		public DomainCommands(
 			IServiceLocator locator,
 			ICommandConverter converter,
+			IProcessingEngine processing,
 			IDomainModel domainModel,
 			IWireSerialization serialization)
 		{
 			this.Locator = locator;
 			this.Converter = converter;
+			this.Processing = processing;
 			this.DomainModel = domainModel;
 			this.Serialization = serialization;
 		}
@@ -65,13 +71,33 @@ namespace Revenj.Plugins.Rest.Commands
 			Either<Type> specType,
 			string limit,
 			string offset,
-			string order)
+			string order,
+			string count)
 		{
 			int? intLimit, intOffset;
 			Utility.ParseLimitOffset(limit, offset, out intLimit, out intOffset);
 			var ordDict = Utility.ParseOrder(order);
 			var spec = Utility.ParseObject(Serialization, specType, data, true, Locator);
 			if (doType.IsFailure || specType.IsFailure || spec.IsFailure) return doType.Error ?? specType.Error ?? spec.Error;
+			var additionalCommands = EmptyCommands;
+			if (intLimit != null && (count == "yes" || ThreadContext.Request.GetHeader("IncludeCount") == "yes"))
+			{
+				additionalCommands = new[] 
+				{ 
+					new AdditionalCommand 
+					{ 
+						Argument = new CountDomainObject.Argument<object>
+						{
+							Name = doType.Result.FullName,
+							SpecificationName = specType.Result != null ? specType.Result.FullName : null,
+							Specification = spec.Result
+						},
+						CommandType = typeof(CountDomainObject),
+						ToHeader = "Total-Results"
+					} 
+				};
+			}
+			var accept = (ThreadContext.Request.Accept ?? "application/xml").ToLowerInvariant();
 			return
 				Converter.PassThrough<SearchDomainObject, SearchDomainObject.Argument<object>>(
 					new SearchDomainObject.Argument<object>
@@ -82,19 +108,21 @@ namespace Revenj.Plugins.Rest.Commands
 						Limit = intLimit,
 						Offset = intOffset,
 						Order = ordDict
-					});
+					},
+					accept,
+					additionalCommands);
 		}
 
-		public Stream SearchWithSpecification(string domainObject, string specification, string limit, string offset, string order, Stream body)
+		public Stream SearchWithSpecification(string domainObject, string specification, string limit, string offset, string order, string count, Stream body)
 		{
-			return SearchWithSpecificationQuery(domainObject, specification, limit, offset, order, body);
+			return SearchWithSpecificationQuery(domainObject, specification, limit, offset, order, count, body);
 		}
 
-		public Stream SearchWithSpecificationQuery(string domainObject, string specification, string limit, string offset, string order, Stream body)
+		public Stream SearchWithSpecificationQuery(string domainObject, string specification, string limit, string offset, string order, string count, Stream body)
 		{
 			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var specType = Utility.CheckDomainObject(DomainModel, doType, specification);
-			return Search(doType, body, specType, limit, offset, order);
+			return Search(doType, body, specType, limit, offset, order, count);
 		}
 
 		private Stream Search(
@@ -102,12 +130,32 @@ namespace Revenj.Plugins.Rest.Commands
 			string limit,
 			string offset,
 			string order,
-			Either<object> specification)
+			Either<object> specification,
+			string count)
 		{
 			if (domainType.IsFailure || specification.IsFailure) return domainType.Error ?? specification.Error;
 			int? intLimit, intOffset;
 			Utility.ParseLimitOffset(limit, offset, out intLimit, out intOffset);
 			var ordDict = Utility.ParseOrder(order);
+			var additionalCommands = EmptyCommands;
+			if (intLimit != null && (count == "yes" || ThreadContext.Request.GetHeader("IncludeCount") == "yes"))
+			{
+				additionalCommands = new[] 
+				{ 
+					new AdditionalCommand 
+					{ 
+						Argument = new CountDomainObject.Argument<object>
+						{
+							Name = domainType.Result.FullName,
+							SpecificationName = null,
+							Specification = specification.Result
+						},
+						CommandType = typeof(CountDomainObject),
+						ToHeader = "Total-Results"
+					} 
+				};
+			}
+			var accept = (ThreadContext.Request.Accept ?? "application/xml").ToLowerInvariant();
 			return
 				Converter.PassThrough<SearchDomainObject, SearchDomainObject.Argument<object>>(
 					new SearchDomainObject.Argument<object>
@@ -118,36 +166,38 @@ namespace Revenj.Plugins.Rest.Commands
 						Limit = intLimit,
 						Offset = intOffset,
 						Order = ordDict
-					});
+					},
+					accept,
+					additionalCommands);
 		}
 
-		public Stream SearchQuery(string domainObject, string specification, string limit, string offset, string order)
+		public Stream SearchQuery(string domainObject, string specification, string limit, string offset, string order, string count)
 		{
 			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var specType = Utility.CheckDomainObject(DomainModel, doType, specification);
 			var spec = Utility.SpecificationFromQuery(specType);
-			return Search(doType, limit, offset, order, spec);
+			return Search(doType, limit, offset, order, spec, count);
 		}
 
-		public Stream SearchWithGenericSpecification(string domainObject, string limit, string offset, string order, Stream body)
+		public Stream SearchWithGenericSpecification(string domainObject, string limit, string offset, string order, string count, Stream body)
 		{
 			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var spec = Serialization.ParseGenericSpecification(doType, body);
-			return Search(doType, limit, offset, order, spec);
+			return Search(doType, limit, offset, order, spec, count);
 		}
 
-		public Stream SearchWithGenericSpecificationQuery(string domainObject, string limit, string offset, string order)
+		public Stream SearchWithGenericSpecificationQuery(string domainObject, string limit, string offset, string order, string count)
 		{
 			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var spec = Utility.GenericSpecificationFromQuery(doType);
-			return Search(doType, limit, offset, order, spec);
+			return Search(doType, limit, offset, order, spec, count);
 		}
 
-		public Stream SearchWithExpression(string domainObject, string limit, string offset, string order, Stream body)
+		public Stream SearchWithExpression(string domainObject, string limit, string offset, string order, string count, Stream body)
 		{
 			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var spec = Utility.ParseExpressionSpecification(Serialization, doType, body);
-			return Search(doType, limit, offset, order, spec);
+			return Search(doType, limit, offset, order, spec, count);
 		}
 
 		private Stream Count(
