@@ -561,8 +561,12 @@ namespace Revenj.Serialization
 		private static int SkipString(TextReader sr)
 		{
 			var c = sr.Read();
-			while (c != '"' && c != -1)
+			var prev = c;
+			while ((c != '"' || prev == '\\') && c != -1)
+			{
+				prev = c;
 				c = sr.Read();
+			}
 			return GetNextToken(sr);
 		}
 
@@ -585,9 +589,9 @@ namespace Revenj.Serialization
 					else throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 					if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 					nextToken = GetNextToken(sr);
-					Skip(sr, nextToken);
+					nextToken = Skip(sr, nextToken);
 				}
-				if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + global::Revenj.Serialization.JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 				return GetNextToken(sr);
 			}
 			else if (nextToken == '[')
@@ -599,7 +603,7 @@ namespace Revenj.Serialization
 					nextToken = GetNextToken(sr);
 					nextToken = Skip(sr, nextToken);
 				}
-				if (nextToken != ']') throw new SerializationException("Expecting ']' at position " + global::Revenj.Serialization.JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				if (nextToken != ']') throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 				return GetNextToken(sr);
 			}
 			else
@@ -672,7 +676,7 @@ namespace Revenj.Serialization
 					nextToken = MemoizeGetNextToken(sr, sw);
 					nextToken = Memorize(sr, nextToken, sw);
 				}
-				if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + global::Revenj.Serialization.JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 				return MemoizeGetNextToken(sr, sw);
 			}
 			else if (nextToken == '[')
@@ -684,7 +688,7 @@ namespace Revenj.Serialization
 					nextToken = MemoizeGetNextToken(sr, sw);
 					nextToken = Memorize(sr, nextToken, sw);
 				}
-				if (nextToken != ']') throw new SerializationException("Expecting ']' at position " + global::Revenj.Serialization.JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				if (nextToken != ']') throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 				return MemoizeGetNextToken(sr, sw);
 			}
 			else
