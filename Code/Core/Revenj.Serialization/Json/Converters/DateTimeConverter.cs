@@ -86,6 +86,11 @@ namespace Revenj.Serialization.Json.Converters
 		public static List<DateTime> DeserializeDateCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<DateTime>();
+			DeserializeDateCollection(sr, nextToken, res);
+			return res;
+		}
+		public static void DeserializeDateCollection(TextReader sr, int nextToken, ICollection<DateTime> res)
+		{
 			res.Add(DeserializeDate(sr, nextToken));
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
@@ -97,11 +102,15 @@ namespace Revenj.Serialization.Json.Converters
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 		public static List<DateTime?> DeserializeDateNullableCollection(TextReader sr, int nextToken)
 		{
 			var res = new List<DateTime?>();
+			DeserializeDateNullableCollection(sr, nextToken, res);
+			return res;
+		}
+		public static void DeserializeDateNullableCollection(TextReader sr, int nextToken, ICollection<DateTime?> res)
+		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
@@ -125,7 +134,6 @@ namespace Revenj.Serialization.Json.Converters
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 
 		public static DateTime DeserializeTimestamp(TextReader sr, char[] buffer, int nextToken)
@@ -142,6 +150,11 @@ namespace Revenj.Serialization.Json.Converters
 		public static List<DateTime> DeserializeTimestampCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<DateTime>();
+			DeserializeTimestampCollection(sr, buffer, nextToken, res);
+			return res;
+		}
+		public static void DeserializeTimestampCollection(TextReader sr, char[] buffer, int nextToken, ICollection<DateTime> res)
+		{
 			res.Add(DeserializeTimestamp(sr, buffer, nextToken));
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
@@ -153,11 +166,15 @@ namespace Revenj.Serialization.Json.Converters
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 		public static List<DateTime?> DeserializeTimestampNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<DateTime?>();
+			DeserializeTimestampNullableCollection(sr, buffer, nextToken, res);
+			return res;
+		}
+		public static void DeserializeTimestampNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<DateTime?> res)
+		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
@@ -181,7 +198,6 @@ namespace Revenj.Serialization.Json.Converters
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 	}
 }

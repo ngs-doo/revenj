@@ -67,9 +67,17 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
 		}
+		public static void DeserializeCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Dictionary<string, string>> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next), res);
+		}
 		public static List<Dictionary<string, string>> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
+		}
+		public static void DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Dictionary<string, string>> res)
+		{
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next), res);
 		}
 	}
 }

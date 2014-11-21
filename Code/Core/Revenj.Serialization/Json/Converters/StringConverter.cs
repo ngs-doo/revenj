@@ -202,6 +202,11 @@ namespace Revenj.Serialization.Json.Converters
 		public static List<string> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<string>();
+			DeserializeCollection(sr, buffer, nextToken, res);
+			return res;
+		}
+		public static void DeserializeCollection(TextReader sr, char[] buffer, int nextToken, ICollection<string> res)
+		{
 			res.Add(Deserialize(sr, buffer, nextToken));
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
@@ -213,11 +218,15 @@ namespace Revenj.Serialization.Json.Converters
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 		public static List<string> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			var res = new List<string>();
+			DeserializeNullableCollection(sr, buffer, nextToken, res);
+			return res;
+		}
+		public static void DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<string> res)
+		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
@@ -241,7 +250,6 @@ namespace Revenj.Serialization.Json.Converters
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 	}
 }

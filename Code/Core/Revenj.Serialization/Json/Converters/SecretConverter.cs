@@ -64,10 +64,17 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
 		}
-
+		public static void DeserializeCollection(TextReader sr, char[] buffer, int nextToken, ICollection<SecureString> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next), res);
+		}
 		public static List<SecureString> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
+		}
+		public static void DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<SecureString> res)
+		{
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next), res);
 		}
 	}
 }

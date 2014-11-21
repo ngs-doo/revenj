@@ -170,9 +170,19 @@ namespace Revenj.Serialization.Json.Converters
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
 		}
 
+		public static void DeserializeCollection(TextReader sr, char[] buffer, int nextToken, ICollection<byte[]> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next), res);
+		}
+
 		public static List<byte[]> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
+		}
+
+		public static void DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<byte[]> res)
+		{
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next), res);
 		}
 
 		public static Stream DeserializeStream(TextReader sr, char[] buffer, int nextToken)
@@ -236,9 +246,19 @@ namespace Revenj.Serialization.Json.Converters
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next));
 		}
 
+		public static void DeserializeStreamCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Stream> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next), res);
+		}
+
 		public static List<Stream> DeserializeStreamNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next));
+		}
+
+		public static void DeserializeStreamNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Stream> res)
+		{
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next), res);
 		}
 	}
 }

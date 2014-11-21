@@ -68,10 +68,17 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePoint(sr, buffer, next));
 		}
-
+		public static void DeserializePointCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Point> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePoint(sr, buffer, next), res);
+		}
 		public static List<Point?> DeserializePointNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePoint(sr, buffer, next));
+		}
+		public static void DeserializePointNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Point?> res)
+		{
+			JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePoint(sr, buffer, next), res);
 		}
 
 		public static void Serialize(PointF value, TextWriter sw)
@@ -135,10 +142,17 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePointF(sr, buffer, next));
 		}
-
+		public static void DeserializePointFCollection(TextReader sr, char[] buffer, int nextToken, ICollection<PointF> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePointF(sr, buffer, next), res);
+		}
 		public static List<PointF?> DeserializePointFNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePointF(sr, buffer, next));
+		}
+		public static void DeserializePointFNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<PointF?> res)
+		{
+			JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePointF(sr, buffer, next), res);
 		}
 	}
 }

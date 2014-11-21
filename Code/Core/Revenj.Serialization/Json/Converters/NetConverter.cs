@@ -47,9 +47,17 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeIP(sr, buffer, next));
 		}
+		public static void DeserializeIPCollection(TextReader sr, char[] buffer, int nextToken, ICollection<IPAddress> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeIP(sr, buffer, next), res);
+		}
 		public static List<IPAddress> DeserializeIPNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeIP(sr, buffer, next));
+		}
+		public static void DeserializeIPNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<IPAddress> res)
+		{
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeIP(sr, buffer, next), res);
 		}
 
 		public static void Serialize(Uri value, TextWriter sw)
@@ -99,9 +107,17 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeUri(sr, buffer, next));
 		}
+		public static void DeserializeUriCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Uri> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeUri(sr, buffer, next), res);
+		}
 		public static List<Uri> DeserializeUriNullableCollection(TextReader sr, char[] buffer, int nextToken)
 		{
 			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeUri(sr, buffer, next));
+		}
+		public static void DeserializeUriNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Uri> res)
+		{
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeUri(sr, buffer, next), res);
 		}
 	}
 }

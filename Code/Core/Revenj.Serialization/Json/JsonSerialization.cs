@@ -434,6 +434,11 @@ namespace Revenj.Serialization
 		public static List<T> DeserializeObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory)
 		{
 			var res = new List<T>();
+			DeserializeObjectCollection(sr, nextToken, factory, res);
+			return res;
+		}
+		public static void DeserializeObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory, ICollection<T> res)
+		{
 			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			res.Add(factory());
 			while ((nextToken = GetNextToken(sr)) == ',')
@@ -446,12 +451,16 @@ namespace Revenj.Serialization
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 
 		public static List<T> DeserializeCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
 		{
 			var res = new List<T>();
+			DeserializeCollection(sr, nextToken, factory, res);
+			return res;
+		}
+		public static void DeserializeCollection<T>(TextReader sr, int nextToken, Func<int, T> factory, ICollection<T> res)
+		{
 			res.Add(factory(nextToken));
 			while ((nextToken = GetNextToken(sr)) == ',')
 			{
@@ -463,13 +472,19 @@ namespace Revenj.Serialization
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 
 		public static List<T> DeserializeNullableObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory)
 			where T : class
 		{
 			var res = new List<T>();
+			DeserializeNullableObjectCollection(sr, nextToken, factory, res);
+			return res;
+		}
+
+		public static void DeserializeNullableObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory, ICollection<T> res)
+			where T : class
+		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
@@ -495,13 +510,19 @@ namespace Revenj.Serialization
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 
 		public static List<T> DeserializeNullableCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
 			where T : class
 		{
 			var res = new List<T>();
+			DeserializeNullableCollection(sr, nextToken, factory, res);
+			return res;
+		}
+
+		public static void DeserializeNullableCollection<T>(TextReader sr, int nextToken, Func<int, T> factory, ICollection<T> res)
+			where T : class
+		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
@@ -525,13 +546,19 @@ namespace Revenj.Serialization
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 
 		public static List<T?> DeserializeNullableStructCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
 			where T : struct
 		{
 			var res = new List<T?>();
+			DeserializeNullableStructCollection(sr, nextToken, factory, res);
+			return res;
+		}
+
+		public static void DeserializeNullableStructCollection<T>(TextReader sr, int nextToken, Func<int, T> factory, ICollection<T?> res)
+			where T : struct
+		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
@@ -555,7 +582,6 @@ namespace Revenj.Serialization
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return res;
 		}
 
 		private static int SkipString(TextReader sr)
