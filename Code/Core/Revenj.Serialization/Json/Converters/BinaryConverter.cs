@@ -260,5 +260,30 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next), res);
 		}
+
+		public static Image DeserializeImage(TextReader sr, char[] buffer, int nextToken)
+		{
+			return Image.FromStream(DeserializeStream(sr, buffer, nextToken));
+		}
+
+		public static List<Image> DeserializeImageCollection(TextReader sr, char[] buffer, int nextToken)
+		{
+			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeImage(sr, buffer, next));
+		}
+
+		public static void DeserializeImageCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Image> res)
+		{
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeImage(sr, buffer, next), res);
+		}
+
+		public static List<Image> DeserializeImageNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		{
+			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeImage(sr, buffer, next));
+		}
+
+		public static void DeserializeImageNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Image> res)
+		{
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeImage(sr, buffer, next), res);
+		}
 	}
 }
