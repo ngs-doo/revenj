@@ -68,7 +68,15 @@ namespace Revenj.Serialization.Json.Converters
 		public static void SerializePart(char[] value, int max, TextWriter sw)
 		{
 			char c;
-			for (int i = 0; i < value.Length && i < max; i++)
+			int i = 0;
+			for (; i < value.Length && i < max; i++)
+			{
+				c = value[i];
+				if (c < 32 || c == '"' || c == '\\')
+					break;
+			}
+			sw.Write(value, 0, i);
+			for (; i < value.Length && i < max; i++)
 			{
 				c = value[i];
 				switch (c)

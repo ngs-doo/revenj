@@ -10,30 +10,63 @@ namespace Revenj.Serialization.Json.Converters
 	{
 		private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
+		private readonly static string TimeZoneWithDaylightSaving;
+		private readonly static string TimeZoneWithoutDaylightSaving;
+
+		static DateTimeConverter()
+		{
+			if (TimeZoneInfo.Local.BaseUtcOffset.Hours < -10)
+				TimeZoneWithDaylightSaving = (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -10 && TimeZoneInfo.Local.BaseUtcOffset.Hours < -1)
+				TimeZoneWithDaylightSaving = "-0" + (-TimeZoneInfo.Local.BaseUtcOffset.Hours - 1).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -1 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 9)
+				TimeZoneWithDaylightSaving = "+0" + (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+			else
+				TimeZoneWithDaylightSaving = "+" + (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+
+			if (TimeZoneInfo.Local.BaseUtcOffset.Hours < -9)
+				TimeZoneWithoutDaylightSaving = TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -9 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 0)
+				TimeZoneWithoutDaylightSaving = "-0" + (-TimeZoneInfo.Local.BaseUtcOffset.Hours).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= 0 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 10)
+				TimeZoneWithoutDaylightSaving = "+0" + TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+			else
+				TimeZoneWithoutDaylightSaving = "+" + TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+		}
+
+		private static void SaveWithLocal(DateTime value, TextWriter sw, char[] buffer, int end)
+		{
+			if (value.IsDaylightSavingTime())
+			{
+				buffer[end] = TimeZoneWithDaylightSaving[0];
+				buffer[end + 1] = TimeZoneWithDaylightSaving[1];
+				buffer[end + 2] = TimeZoneWithDaylightSaving[2];
+				buffer[end + 3] = TimeZoneWithDaylightSaving[3];
+				buffer[end + 4] = TimeZoneWithDaylightSaving[4];
+				buffer[end + 5] = TimeZoneWithDaylightSaving[5];
+			}
+			else
+			{
+				buffer[end] = TimeZoneWithoutDaylightSaving[0];
+				buffer[end + 1] = TimeZoneWithoutDaylightSaving[1];
+				buffer[end + 2] = TimeZoneWithoutDaylightSaving[2];
+				buffer[end + 3] = TimeZoneWithoutDaylightSaving[3];
+				buffer[end + 4] = TimeZoneWithoutDaylightSaving[4];
+				buffer[end + 5] = TimeZoneWithoutDaylightSaving[5];
+			}
+			buffer[end + 6] = '"';
+			sw.Write(buffer, 0, end + 7);
+		}
+
 		public static void SerializeDate(DateTime value, TextWriter sw, char[] buffer)
 		{
 			buffer[0] = '"';
-			var n = value.Year;
-			var i = n % 10;
-			buffer[4] = (char)('0' + i);
-			n = n / 10;
-			i = n % 10;
-			buffer[3] = (char)('0' + i);
-			n = n / 10;
-			i = n % 10;
-			buffer[2] = (char)('0' + i);
-			n = n / 10;
-			i = n % 10;
-			buffer[1] = (char)('0' + i);
 			buffer[5] = '-';
-			n = value.Month;
-			buffer[7] = (char)('0' + n % 10);
-			buffer[6] = (char)('0' + n / 10);
 			buffer[8] = '-';
-			n = value.Day;
-			buffer[10] = (char)('0' + n % 10);
-			buffer[9] = (char)('0' + n / 10);
 			buffer[11] = '"';
+			NumberConverter.Write4(value.Year, buffer, 1);
+			NumberConverter.Write2(value.Month, buffer, 6);
+			NumberConverter.Write2(value.Day, buffer, 9);
 			sw.Write(buffer, 0, 12);
 		}
 		public static void SerializeDate(DateTime? value, TextWriter sw, char[] buffer)
@@ -45,9 +78,81 @@ namespace Revenj.Serialization.Json.Converters
 		}
 		public static void Serialize(DateTime value, TextWriter sw, char[] buffer)
 		{
-			sw.Write('"');
-			sw.Write(value.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFK"));
-			sw.Write('"');
+			buffer[0] = '"';
+			buffer[5] = '-';
+			buffer[8] = '-';
+			buffer[11] = 'T';
+			buffer[14] = ':';
+			buffer[17] = ':';
+			NumberConverter.Write4(value.Year, buffer, 1);
+			NumberConverter.Write2(value.Month, buffer, 6);
+			NumberConverter.Write2(value.Day, buffer, 9);
+			NumberConverter.Write2(value.Hour, buffer, 12);
+			NumberConverter.Write2(value.Minute, buffer, 15);
+			NumberConverter.Write2(value.Second, buffer, 18);
+			int nano = (int)(value.Ticks - new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, value.Kind).Ticks);
+			if (nano != 0)
+			{
+				buffer[20] = '.';
+				var div = nano / 100;
+				var div2 = div / 100;
+				var rem = nano - div * 100;
+				int end;
+				if (rem != 0)
+				{
+					NumberConverter.Write3(div2, buffer, 21);
+					NumberConverter.Write2(div - div2 * 100, buffer, 24);
+					NumberConverter.Write2(rem, buffer, 26);
+					end = 28;
+				}
+				else
+				{
+					var rem2 = div - div2 * 100;
+					if (rem2 != 0)
+					{
+						NumberConverter.Write3(div2, buffer, 21);
+						NumberConverter.Write2(div - div2 * 100, buffer, 24);
+						end = 26;
+					}
+					else
+					{
+						var div3 = div2 / 100;
+						if (div2 != div3 * 100)
+						{
+							NumberConverter.Write3(div2, buffer, 21);
+							end = 24;
+						}
+						else
+						{
+							buffer[21] = (char)(div3 - '0');
+							end = 22;
+						}
+					}
+				}
+				if (value.Kind == DateTimeKind.Local)
+				{
+					SaveWithLocal(value, sw, buffer, end);
+				}
+				else
+				{
+					buffer[end] = 'Z';
+					buffer[end + 1] = '"';
+					sw.Write(buffer, 0, end + 2);
+				}
+			}
+			else
+			{
+				if (value.Kind == DateTimeKind.Local)
+				{
+					SaveWithLocal(value, sw, buffer, 20);
+				}
+				else
+				{
+					buffer[20] = 'Z';
+					buffer[21] = '"';
+					sw.Write(buffer, 0, 22);
+				}
+			}
 		}
 		public static void Serialize(DateTime? value, TextWriter sw, char[] buffer)
 		{

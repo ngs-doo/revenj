@@ -9,6 +9,53 @@ namespace Revenj.Serialization.Json.Converters
 	{
 		private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
 
+		struct Pair
+		{
+			public readonly char First;
+			public readonly char Second;
+			public Pair(int number)
+			{
+				First = (char)((number / 10) + '0');
+				Second = (char)((number % 10) + '0');
+			}
+		}
+		private static readonly Pair[] Numbers;
+
+		static NumberConverter()
+		{
+			Numbers = new Pair[100];
+			for (int i = 0; i < Numbers.Length; i++)
+				Numbers[i] = new Pair(i);
+		}
+
+		internal static void Write2(int number, char[] buffer, int start)
+		{
+			var pair = Numbers[number];
+			buffer[start] = pair.First;
+			buffer[start + 1] = pair.Second;
+		}
+
+		internal static void Write3(int number, char[] buffer, int start)
+		{
+			var hi = number / 100;
+			buffer[start] = (char)(hi + '0');
+			var pair = Numbers[number - hi * 100];
+			buffer[start + 1] = pair.First;
+			buffer[start + 2] = pair.Second;
+		}
+
+		internal static void Write4(int number, char[] buffer, int start)
+		{
+			var div = number / 100;
+			var pair1 = Numbers[div];
+			buffer[start] = pair1.First;
+			buffer[start + 1] = pair1.Second;
+			var rem = number - div * 100;
+			var pair2 = Numbers[rem];
+			buffer[start + 2] = pair2.First;
+			buffer[start + 3] = pair2.Second;
+		}
+
 		public static void Serialize(decimal value, TextWriter sw)
 		{
 			sw.Write(value);
@@ -21,21 +68,71 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write(value.Value);
 		}
 
-		public static void Serialize(int value, TextWriter sw)
+		public static void Serialize(int value, TextWriter sw, char[] buffer)
 		{
-			sw.Write(value);
+			if (value == int.MinValue)
+			{
+				sw.Write("-2147483648");
+				return;
+			}
+			uint abs;
+			if (value < 0)
+			{
+				sw.Write('-');
+				abs = (uint)(-value);
+			}
+			else
+				abs = (uint)(value);
+			int pos = 10;
+			do
+			{
+				var div = abs / 100;
+				var rem = abs - div * 100;
+				var num = Numbers[rem];
+				buffer[pos--] = num.Second;
+				buffer[pos--] = num.First;
+				abs = div;
+			} while (abs != 0);
+			if (buffer[pos + 1] == '0')
+				pos++;
+			sw.Write(buffer, pos + 1, 10 - pos);
 		}
-		public static void Serialize(int? value, TextWriter sw)
+		public static void Serialize(int? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
 			else
-				sw.Write(value.Value);
+				Serialize(value.Value, sw, buffer);
 		}
 
 		public static void Serialize(long value, TextWriter sw, char[] buffer)
 		{
-			sw.Write(value);
+			if (value == long.MinValue)
+			{
+				sw.Write("-9223372036854775808");
+				return;
+			}
+			ulong abs;
+			if (value < 0)
+			{
+				sw.Write('-');
+				abs = (ulong)(-value);
+			}
+			else
+				abs = (ulong)(value);
+			int pos = 20;
+			do
+			{
+				var div = abs / 100;
+				var rem = abs - div * 100;
+				var num = Numbers[rem];
+				buffer[pos--] = num.Second;
+				buffer[pos--] = num.First;
+				abs = div;
+			} while (abs != 0);
+			if (buffer[pos + 1] == '0')
+				pos++;
+			sw.Write(buffer, pos + 1, 20 - pos);
 		}
 		public static void Serialize(long? value, TextWriter sw, char[] buffer)
 		{

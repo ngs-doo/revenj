@@ -9,14 +9,14 @@ namespace Revenj.Serialization.Json.Converters
 	{
 		public static void Serialize(Color value, TextWriter sw, char[] buffer)
 		{
-			sw.Write(value.ToArgb());
+			NumberConverter.Serialize(value.ToArgb(), sw, buffer);
 		}
 		public static void Serialize(Color? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
 			else
-				sw.Write(value.Value.ToArgb());
+				NumberConverter.Serialize(value.Value.ToArgb(), sw, buffer);
 		}
 
 		public static Color DeserializeColor(TextReader sr, char[] buffer, ref int nextToken)
