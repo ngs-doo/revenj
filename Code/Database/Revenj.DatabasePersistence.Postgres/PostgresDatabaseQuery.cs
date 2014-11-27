@@ -63,7 +63,7 @@ namespace Revenj.DatabasePersistence.Postgres
 
 		public IDbCommand NewCommand()
 		{
-			return new NpgsqlCommand();
+			return new NpgsqlCommand { CommandTimeout = Connection.CommandTimeout };
 		}
 
 		public bool InTransaction
