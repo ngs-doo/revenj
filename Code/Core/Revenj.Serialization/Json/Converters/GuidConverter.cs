@@ -8,7 +8,8 @@ namespace Revenj.Serialization.Json.Converters
 {
 	public static class GuidConverter
 	{
-		static readonly Pair[] Lookup;
+		private static readonly Pair[] Lookup;
+		private static readonly byte[] Values;
 
 		struct Pair
 		{
@@ -16,18 +17,25 @@ namespace Revenj.Serialization.Json.Converters
 			public readonly char Second;
 			public Pair(int value)
 			{
-				var hi = (value >> 4) & 0xf;
-				var lo = value & 0xf;
-				First = (char)(hi < 0xA ? '0' + hi : 'a' + hi - 10);
-				Second = (char)(lo < 0xA ? '0' + lo : 'a' + lo - 10);
+				var hi = (value >> 4) & 15;
+				var lo = value & 15;
+				First = (char)(hi < 10 ? '0' + hi : 'a' + hi - 10);
+				Second = (char)(lo < 10 ? '0' + lo : 'a' + lo - 10);
 			}
 		}
 
 		static GuidConverter()
 		{
 			Lookup = new Pair[256];
+			Values = new byte['f' + 1 - '0'];
 			for (int i = 0; i < Lookup.Length; i++)
 				Lookup[i] = new Pair(i);
+			for (char c = '0'; c <= '9'; c++)
+				Values[c - '0'] = (byte)(c - '0');
+			for (char c = 'a'; c <= 'f'; c++)
+				Values[c - '0'] = (byte)(c - 'a' + 10);
+			for (char c = 'A'; c <= 'F'; c++)
+				Values[c - '0'] = (byte)(c - 'A' + 10);
 		}
 
 		[StructLayout(LayoutKind.Explicit)]
@@ -145,13 +153,77 @@ namespace Revenj.Serialization.Json.Converters
 		public static Guid Deserialize(TextReader sr, char[] buffer, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
-			nextToken = sr.Read();
-			int i = 0;
-			//TODO: optimize
-			for (; i < buffer.Length && nextToken != '"'; i++, nextToken = sr.Read())
+			var i = sr.Read(buffer, 0, 33);
+			nextToken = buffer[i - 1];
+			for (; nextToken != '"' && i < buffer.Length; i++)
+			{
+				nextToken = sr.Read();
 				buffer[i] = (char)nextToken;
+			}
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
-			return new Guid(new string(buffer, 0, i));
+			if (i == 33)
+				return ParseGuid32(buffer);
+			else if (i == 37)
+				return ParseGuid36(buffer);
+			return new Guid(new string(buffer, 0, i - 1));
+		}
+		private static Guid ParseGuid32(char[] buffer)
+		{
+			try
+			{
+				int a = 0;
+				for (int x = 0; x < 8 && x < buffer.Length; x++)
+					a = (a << 4) + Values[buffer[x] - '0'];
+				int b = 0;
+				for (int x = 8; x < 12 && x < buffer.Length; x++)
+					b = (b << 4) + Values[buffer[x] - '0'];
+				int c = 0;
+				for (int x = 12; x < 16 && x < buffer.Length; x++)
+					c = (c << 4) + Values[buffer[x] - '0'];
+				int d = (Values[buffer[16] - '0'] << 4) + Values[buffer[17] - '0'];
+				int e = (Values[buffer[18] - '0'] << 4) + Values[buffer[19] - '0'];
+				int f = (Values[buffer[20] - '0'] << 4) + Values[buffer[21] - '0'];
+				int g = (Values[buffer[22] - '0'] << 4) + Values[buffer[23] - '0'];
+				int h = (Values[buffer[24] - '0'] << 4) + Values[buffer[25] - '0'];
+				int i = (Values[buffer[26] - '0'] << 4) + Values[buffer[27] - '0'];
+				int j = (Values[buffer[28] - '0'] << 4) + Values[buffer[29] - '0'];
+				int k = (Values[buffer[30] - '0'] << 4) + Values[buffer[31] - '0'];
+				return new Guid(a, (short)b, (short)c, (byte)d, (byte)e, (byte)f, (byte)g, (byte)h, (byte)i, (byte)j, (byte)k);
+			}
+			catch (IndexOutOfRangeException)
+			{
+				return new Guid(new string(buffer, 0, 32));
+			}
+		}
+		private static Guid ParseGuid36(char[] buffer)
+		{
+			if (buffer[8] != '-' || buffer[13] != '-' || buffer[18] != '-' || buffer[23] != '-')
+				return new Guid(new string(buffer, 0, 36));
+			try
+			{
+				int a = 0;
+				for (int x = 0; x < 8 && x < buffer.Length; x++)
+					a = (a << 4) + Values[buffer[x] - '0'];
+				int b = 0;
+				for (int x = 9; x < 13 && x < buffer.Length; x++)
+					b = (b << 4) + Values[buffer[x] - '0'];
+				int c = 0;
+				for (int x = 14; x < 18 && x < buffer.Length; x++)
+					c = (c << 4) + Values[buffer[x] - '0'];
+				int d = (Values[buffer[19] - '0'] << 4) + Values[buffer[20] - '0'];
+				int e = (Values[buffer[21] - '0'] << 4) + Values[buffer[22] - '0'];
+				int f = (Values[buffer[24] - '0'] << 4) + Values[buffer[25] - '0'];
+				int g = (Values[buffer[26] - '0'] << 4) + Values[buffer[27] - '0'];
+				int h = (Values[buffer[28] - '0'] << 4) + Values[buffer[29] - '0'];
+				int i = (Values[buffer[30] - '0'] << 4) + Values[buffer[31] - '0'];
+				int j = (Values[buffer[32] - '0'] << 4) + Values[buffer[33] - '0'];
+				int k = (Values[buffer[34] - '0'] << 4) + Values[buffer[35] - '0'];
+				return new Guid(a, (short)b, (short)c, (byte)d, (byte)e, (byte)f, (byte)g, (byte)h, (byte)i, (byte)j, (byte)k);
+			}
+			catch (IndexOutOfRangeException)
+			{
+				return new Guid(new string(buffer, 0, 32));
+			}
 		}
 		public static List<Guid> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
 		{

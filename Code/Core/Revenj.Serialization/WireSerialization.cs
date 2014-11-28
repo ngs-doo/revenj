@@ -68,6 +68,8 @@ namespace Revenj.Serialization
 			//fast path
 			if (contentType == "application/json")
 				return Json.Deserialize(source, target, context);
+			if (contentType == "application/json;minimal")
+				return Json.Deserialize(source, target, context);
 			if (contentType == "application/x-protobuf")
 				return Protobuf.Deserialize(source, target, context);
 			if (contentType == "application/xml")

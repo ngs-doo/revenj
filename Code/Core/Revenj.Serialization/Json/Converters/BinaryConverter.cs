@@ -103,14 +103,13 @@ namespace Revenj.Serialization.Json.Converters
 			nextToken = sr.Read();
 			if (nextToken == '"') return EmptyBytes;
 			char[] base64;
-			var took = Buffers.TryTake(out base64);
-			if (!took) base64 = new char[65536];
 			var res = new List<byte[]>();
 			int total = 0;
 			int i = 0;
 			var br = sr as BufferedTextReader;
 			if (br != null)
 			{
+				base64 = br.LargeTempBuffer;
 				i = 1;
 				base64[0] = (char)nextToken;
 				int len;
@@ -126,9 +125,17 @@ namespace Revenj.Serialization.Json.Converters
 					}
 				}
 				nextToken = sr.Read();
+				if (i > 0)
+				{
+					var bytes = Convert.FromBase64CharArray(base64, 0, i);
+					res.Add(bytes);
+					total += bytes.Length;
+				}
 			}
 			else
 			{
+				var took = Buffers.TryTake(out base64);
+				if (!took) base64 = new char[65536];
 				while (nextToken != '"' && nextToken != -1)
 				{
 					base64[i + 0] = (char)nextToken;
@@ -145,14 +152,14 @@ namespace Revenj.Serialization.Json.Converters
 						total += bytes.Length;
 					}
 				}
+				if (i > 0)
+				{
+					var bytes = Convert.FromBase64CharArray(base64, 0, i);
+					res.Add(bytes);
+					total += bytes.Length;
+				}
+				Buffers.Add(base64);
 			}
-			if (i > 0)
-			{
-				var bytes = Convert.FromBase64CharArray(base64, 0, i);
-				res.Add(bytes);
-				total += bytes.Length;
-			}
-			Buffers.Add(base64);
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found end of stream.");
 			var result = new byte[total];
 			var cur = 0;

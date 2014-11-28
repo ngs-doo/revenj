@@ -11,6 +11,9 @@ namespace Revenj.Utility
 		private int BufferEnd;
 		private int NextChar;
 		private int TotalBuffersRead;
+		public readonly char[] TempBuffer = new char[4096];
+		public readonly char[] LargeTempBuffer = new char[65536];
+		private readonly StringBuilder Builder = new StringBuilder(65536);
 
 		public BufferedTextReader(TextReader reader)
 		{
@@ -23,6 +26,12 @@ namespace Revenj.Utility
 			InBuffer = 0;
 			BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 			NextChar = BufferEnd > 0 ? Buffer[0] : -1;
+		}
+
+		public StringBuilder GetBuilder()
+		{
+			Builder.Length = 0;
+			return Builder;
 		}
 
 		public int Position { get { return TotalBuffersRead + InBuffer; } }
@@ -77,6 +86,13 @@ namespace Revenj.Utility
 				InBuffer = i;
 			}
 			return j - from;
+		}
+
+		public int ReadUntil(char[] target, int from, char match, out bool found)
+		{
+			var read = ReadUntil(target, from, match);
+			found = NextChar == match;
+			return read;
 		}
 
 		public override int Read(char[] buffer, int index, int count)
