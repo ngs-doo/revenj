@@ -67,8 +67,13 @@ namespace Revenj.Serialization.Json.Converters
 			else
 			{
 				sw.Write('"');
-				if (escaped != 0 && value.Length < 85000)
-					sw.Write(value.Substring(0, escaped));
+				if (escaped != 0)
+				{
+					if (value.Length < 85000 || escaped < 85000 && (value.Length - escaped) < 85000)
+						sw.Write(value.Substring(0, escaped));
+					else
+						escaped = 0;
+				}
 			}
 			char c;
 			for (int i = escaped; i < value.Length; i++)
