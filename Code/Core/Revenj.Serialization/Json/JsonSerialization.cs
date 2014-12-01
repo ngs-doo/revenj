@@ -431,6 +431,24 @@ namespace Revenj.Serialization
 			return (int)hash;
 		}
 
+		public static int CalcHash(TextReader sr, char[] buffer, int nextToken)
+		{
+			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			nextToken = sr.Read();
+			char c = (char)nextToken;
+			int i = 0;
+			var hash = 0x811C9DC5;
+			for (; i < buffer.Length && c != '"'; i++, c = (char)sr.Read())
+			{
+				buffer[i] = c;
+				hash = (hash ^ c) * 0x1000193;
+			}
+			nextToken = c;
+			if (i < buffer.Length) buffer[i] = '\0';
+			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			return (int)hash;
+		}
+
 		public static List<T> DeserializeObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory)
 		{
 			var res = new List<T>();
