@@ -71,6 +71,8 @@ Go through the tutorials:
  * [Event sourcing in Revenj](tutorials/revenj-tutorial-event-sourcing.md)
  * [Using advanced Event sourcing features in Revenj](tutorials/revenj-tutorial-aggregate-events.md)
  * [NoSQL documents in relational database](tutorials/revenj-tutorial-nosql-documents.md)
+ * [Notifications / SignalR integration](tutorials/revenj-tutorial-notifications.md)
+ * [Security basics](tutorials/revenj-tutorial-security-basics.md)
 
 ##Revenj features
 
