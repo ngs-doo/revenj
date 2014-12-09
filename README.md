@@ -73,6 +73,7 @@ Go through the tutorials:
  * [NoSQL documents in relational database](tutorials/revenj-tutorial-nosql-documents.md)
  * [Notifications / SignalR integration](tutorials/revenj-tutorial-notifications.md)
  * [Security basics](tutorials/revenj-tutorial-security-basics.md)
+ * [LINQ basics](tutorials/revenj-tutorial-linq-basics.md)
 
 ##Revenj features
 
