@@ -13,7 +13,7 @@ This allows it to provide several complex features through some simple services 
 
 On each Post insert/update or delete changes will be notified (if transaction successfully performs a commit; if rollback is performed, no event will be raised).
 
-Alternative way to use it is to request `IObservable` signature for that object, such as `IObservable<Post>`. An example of such usage can be found in default security permission manager.
+Alternative way to use it is to request `IObservable` signature for that object, such as `IObservable<Post>`. An example of such usage can be found in default security permission manager. Reasoning for using `IObservable` is that our code is sticking to only [BCL](http://en.wikipedia.org/wiki/Standard_Libraries_%28CLI%29) types (with a meaning). This is in line with the rest of DI supported vocabulary (such as `IEnumerable`, `Lazy`, `Func` and others) and removes dependencies in code from the used framework.
 
 ####Advanced configuration
 
@@ -65,6 +65,8 @@ These APIs can be used from Javascript, Android or any other SignalR client to t
         }
     });
 
+Most of the heavy work is done in SignalR, so its [tutorials](https://github.com/SignalR/SignalR/wiki/SignalR-JS-Client) should be inspected for more details on how to work with SignalR. 
+
 ####Processing streams on the server
 
 [Reactive extensions](http://msdn.microsoft.com/en-us/data/gg577609.aspx) can be utilized to consume notifications in a really convenient way. An example of this can be found in [Revenj mailer](https://github.com/ngs-doo/revenj/blob/master/Code/Features/Revenj.Features.Mailer/QueueProcessor.cs). Rx subscription is registered on `IMailMessage` interface with a buffer after which processing of all existing mails is executed. Relevant part of the code looks like:
@@ -82,3 +84,5 @@ where *ChangeNotification* is `IDataChangeNotification`, *IMailMessage* is imple
     }
 
 DSL examples can be found in [mailer project](https://github.com/ngs-doo/revenj/tree/master/Code/Features/Revenj.Features.Mailer/DSL). *Due to bugs in Mono binary serialization, special DSL exists for Mono which uses native model instead of native&lt;type&gt; concept. `Native<type>` is implemented as binary field in the database and binary serialization is used for conversion to and from the database.*
+
+Notification is raised only for aggregates and events. Since entity and values must be a part of an aggregate/event to be persisted, hooks needs to be registered for containers (aggregate roots/events) of those objects. Fortunately hooks work on interfaces, so with the help of mixins and external interfaces succinct code can still be written. 

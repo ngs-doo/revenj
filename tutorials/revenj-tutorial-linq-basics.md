@@ -110,7 +110,7 @@ If you are defining complex aggregates (consisting from several entities), DSL P
 
 It's important to know that LINQ provider doesn't convert topmost projection to SQL. Thus lazy load should be avoided in topmost selection since it will be performed after SQL query and therefore will probably invoke multiple SQL queries again. 
 
-But if lazy load is performed during filtering or in some subquery it might display "unexpected" behavior to the developer. To better understand how LINQ driver handles lazy loading and expression in SQL let's define some DSL and look into its behavior:
+But if lazy load is performed during filtering or in some subquery it might display "unexpected" behavior to the developer (if one is expecting lazy load to be converted into an explicit join). To better understand how LINQ driver handles lazy loading and expression in SQL let's define some DSL and look into its behavior:
 
     module Navigation {
       aggregate LinkedList(value) {

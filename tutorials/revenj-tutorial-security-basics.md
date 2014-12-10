@@ -2,7 +2,7 @@
 
 ####Enabling security layers for REST projects (WCF and HTTP)
 
-For convenience security is disabled by default. This is done by overriding default authentication provider and permission manager. In http-server project this is done with two lines in [App.config]
+For convenience security is disabled by default. This is done by overriding default authentication provider and permission manager. In http-server project this is done with two lines in App.config/Web.config
 
     <add key="CustomAuth" value="Revenj.Http.NoAuth"/>
 
@@ -45,7 +45,18 @@ Some permission check can still be injected into repository when defined through
         }
     }
 
-Above example is setting up authorization to Task aggregate so that only users have access to their own task (if Thread.CurrentPrincipal is populated with the authenticated user). This rule will be applied for all users which are not in Administrator role (due to `except` keyword). Roles are read from `System.Security.Principal.IPrincipal` object.
+Above example is setting up authorization to Task aggregate so that only users have access to their own task (if Thread.CurrentPrincipal is populated with the authenticated user). This rule will be applied for all users which are not in Administrator role (due to `except` keyword). *Roles are read from `System.Security.Principal.IPrincipal` object.*
+
+If we try to consume above repository (and we are not in Administrator role) for example with a query such as:
+
+    IDataContext ctx = ...
+    var myLatestTasks = ctx.Query<Task>().Take(10).ToArray();
+
+SQL query will be executed which would look something like:
+
+    SELECT t FROM "Todo"."Task_entity" WHERE t."UserID" == 'iUser' LIMIT 10
+
+if we are authenticated with a username `iUser`.  
 
 If multiple filters are applied, they will be executed as && operations when they satisfy the role condition.
 
@@ -58,12 +69,18 @@ If Revenj is used as a REST framework `CanAccess` method will be used to check a
  * `IGlobalPermission` - for setting up global permissions
  * `IRolePermission` - for setting up role based permissions
 
-Other than those, access can be changed from open by default to closed by default using `Permissions.OpenByDefault` app config value (true is default value = resulting in open access by default).
+Other than those, access can be changed from open by default to closed by default using `Permissions.OpenByDefault` app config value (true is default value = resulting in open access by default). Config should look something like:
 
-[Default security DSL](https://github.com/ngs-doo/revenj/blob/master/Code/Core/Revenj.Security/DSL/Security.dsl) can be used to set up simple tables for defining security configuration. Identifiers follow simple dot pattern for defining security access, meaning to disable globally access to Todo module we can insert { Name = 'Todo', IsAllowed = false } into GlobalPermission table.
-To grant access User role to Todo.Task aggregate we can override global configuration with an insert to { Name = 'Todo.Task', IsAllowed = true, RoleId = 'User' } RolePermission table.
+    <configuration>
+      <appSettings>
+        <add key="Permissions.OpenByDefault" value="false" />
+      </appSettings>
+    </configuration>
 
-Access to server commands can be controlled in the same way, just Name will be type name of that class (for example Name = 'Revenj.Plugins.Server.Commands.Create' represents a Crud create command found in [plugin project](https://github.com/ngs-doo/revenj/blob/master/Code/Plugins/Revenj.Plugins.Server.Commands/CRUD/Create.cs))
+[Default security DSL](https://github.com/ngs-doo/revenj/blob/master/Code/Core/Revenj.Security/DSL/Security.dsl) can be used to set up simple tables for defining security configuration. Identifiers follow simple dot pattern for defining security access, meaning to disable globally access to *Todo* module we can insert { Name = 'Todo', IsAllowed = false } into *GlobalPermission* table.
+To grant access *User* role to *Todo.Task* aggregate we can override global configuration with an insert to { Name = 'Todo.Task', IsAllowed = true, RoleId = 'User' } *RolePermission* table.
+
+Access to server commands can be controlled in the same way, just `Name` will be type name of that class (for example Name = 'Revenj.Plugins.Server.Commands.Create' represents a Crud create command found in [plugin project](https://github.com/ngs-doo/revenj/blob/master/Code/Plugins/Revenj.Plugins.Server.Commands/CRUD/Create.cs))
 
 *Since security configuration is loaded into memory and leverages notifications to invalidate itself, changing rows in the database directly will not have an effect on runtime configuration.* 
 
