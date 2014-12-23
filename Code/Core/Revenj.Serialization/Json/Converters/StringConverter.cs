@@ -208,6 +208,7 @@ namespace Revenj.Serialization.Json.Converters
 						case (int)'t': nextToken = '\t'; break;
 						case (int)'r': nextToken = '\r'; break;
 						case (int)'n': nextToken = '\n'; break;
+						case (int)'f': nextToken = '\f'; break;
 						case (int)'u':
 							if (i < buffer.Length - 4)
 							{
@@ -249,6 +250,7 @@ namespace Revenj.Serialization.Json.Converters
 						case (int)'t': nextToken = '\t'; break;
 						case (int)'r': nextToken = '\r'; break;
 						case (int)'n': nextToken = '\n'; break;
+						case (int)'f': nextToken = '\f'; break;
 						case (int)'u':
 							buffer[0] = (char)sr.Read();
 							buffer[1] = (char)sr.Read();
@@ -359,6 +361,7 @@ namespace Revenj.Serialization.Json.Converters
 				case 't': nextToken = '\t'; break;
 				case 'r': nextToken = '\r'; break;
 				case 'n': nextToken = '\n'; break;
+				case 'f': nextToken = '\f'; break;
 				case 'u':
 					if (x + 4 < i)
 					{
