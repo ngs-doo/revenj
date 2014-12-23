@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Web;
 
 namespace Revenj.Http
 {
@@ -52,9 +53,9 @@ namespace Revenj.Http
 					while (pos < query.Length && query[pos] != '=') sbName.Append(query[pos++]);
 					pos++;
 					while (pos < query.Length && query[pos] != '&') sbValue.Append(query[pos++]);
-					pos++;
-					var key = Uri.UnescapeDataString(sbName.ToString());
-					var value = Uri.UnescapeDataString(sbValue.ToString());
+					pos++;					
+					var key = HttpUtility.UrlDecode(sbName.ToString());
+					var value = HttpUtility.UrlDecode(sbValue.ToString());
 					qp.Add(key, value);
 				}
 			}
