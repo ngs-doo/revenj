@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace Revenj.Serialization.Json.Converters
 {
@@ -12,31 +13,55 @@ namespace Revenj.Serialization.Json.Converters
 
 		private readonly static string TimeZoneWithDaylightSaving;
 		private readonly static string TimeZoneWithoutDaylightSaving;
+		private readonly static TimeZoneInfo LocalZoneInfo;
+		private readonly static TimeZone CurrentZone;
 
 		static DateTimeConverter()
 		{
-			if (TimeZoneInfo.Local.BaseUtcOffset.Hours < -10)
-				TimeZoneWithDaylightSaving = (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
-			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -10 && TimeZoneInfo.Local.BaseUtcOffset.Hours < -1)
-				TimeZoneWithDaylightSaving = "-0" + (-TimeZoneInfo.Local.BaseUtcOffset.Hours - 1).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
-			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -1 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 9)
-				TimeZoneWithDaylightSaving = "+0" + (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
-			else
-				TimeZoneWithDaylightSaving = "+" + (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
-
-			if (TimeZoneInfo.Local.BaseUtcOffset.Hours < -9)
-				TimeZoneWithoutDaylightSaving = TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
-			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -9 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 0)
-				TimeZoneWithoutDaylightSaving = "-0" + (-TimeZoneInfo.Local.BaseUtcOffset.Hours).ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
-			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= 0 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 10)
-				TimeZoneWithoutDaylightSaving = "+0" + TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
-			else
-				TimeZoneWithoutDaylightSaving = "+" + TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString() + ":" + TimeZoneInfo.Local.BaseUtcOffset.Minutes.ToString("00");
+			LocalZoneInfo = TimeZoneInfo.Local;
+			CurrentZone = TimeZone.CurrentTimeZone;
+			var offset = LocalZoneInfo.BaseUtcOffset;
+			var sbWithout = new StringBuilder();
+			if (offset.TotalSeconds >= 0)
+				sbWithout.Append('+');
+			sbWithout.Append(offset.Hours.ToString("00"));
+			sbWithout.Append(':');
+			sbWithout.Append(offset.Minutes.ToString("00"));
+			//tough luck if you have seconds in timezone offset
+			TimeZoneWithoutDaylightSaving = sbWithout.ToString();
+			var rules = LocalZoneInfo.GetAdjustmentRules();
+			if (rules.Length == 1 && rules[0].DateStart == DateTime.MinValue && rules[0].DateEnd == DateTime.MinValue)
+			{
+				var sbWith = new StringBuilder();
+				var totalOffset = offset.Add(rules[0].DaylightDelta);
+				if (totalOffset.TotalSeconds >= 0)
+					sbWith.Append('+');
+				sbWith.Append(totalOffset.Hours.ToString("00"));
+				sbWith.Append(':');
+				sbWith.Append(totalOffset.Minutes.ToString("00"));
+				TimeZoneWithDaylightSaving = sbWith.ToString();
+			}
 		}
 
 		private static void SaveWithLocal(DateTime value, TextWriter sw, char[] buffer, int end)
 		{
-			if (value.IsDaylightSavingTime())
+			if (TimeZoneWithDaylightSaving == null)
+			{
+				var offset = CurrentZone.GetUtcOffset(value);
+				if (offset.Hours >= 0)
+				{
+					buffer[end] = '+';
+					NumberConverter.Write2(offset.Hours, buffer, end + 1);
+				}
+				else
+				{
+					buffer[end] = '-';
+					NumberConverter.Write2(-offset.Hours, buffer, end + 1);
+				}
+				buffer[end + 3] = ':';
+				NumberConverter.Write2(offset.Minutes, buffer, end + 4);
+			}
+			else if (LocalZoneInfo.IsDaylightSavingTime(value))
 			{
 				buffer[end] = TimeZoneWithDaylightSaving[0];
 				buffer[end + 1] = TimeZoneWithDaylightSaving[1];

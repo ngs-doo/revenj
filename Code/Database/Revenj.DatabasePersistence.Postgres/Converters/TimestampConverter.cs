@@ -18,37 +18,19 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return DateTime.Parse(value.ToString(), CultureInfo.InvariantCulture);
 		}
 
-		private readonly static string TimeZoneWithDaylightSaving;
-		private readonly static string TimeZoneWithoutDaylightSaving;
-
-		static TimestampConverter()
-		{
-			if (TimeZoneInfo.Local.BaseUtcOffset.Hours < -10)
-				TimeZoneWithDaylightSaving = (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString();
-			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -10 && TimeZoneInfo.Local.BaseUtcOffset.Hours < -1)
-				TimeZoneWithDaylightSaving = "-0" + (-TimeZoneInfo.Local.BaseUtcOffset.Hours - 1).ToString();
-			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -1 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 9)
-				TimeZoneWithDaylightSaving = "+0" + (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString();
-			else
-				TimeZoneWithDaylightSaving = "+" + (TimeZoneInfo.Local.BaseUtcOffset.Hours + 1).ToString();
-
-			if (TimeZoneInfo.Local.BaseUtcOffset.Hours < -9)
-				TimeZoneWithoutDaylightSaving = TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString();
-			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= -9 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 0)
-				TimeZoneWithoutDaylightSaving = "-0" + (-TimeZoneInfo.Local.BaseUtcOffset.Hours).ToString();
-			else if (TimeZoneInfo.Local.BaseUtcOffset.Hours >= 0 && TimeZoneInfo.Local.BaseUtcOffset.Hours < 10)
-				TimeZoneWithoutDaylightSaving = "+0" + TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString();
-			else
-				TimeZoneWithoutDaylightSaving = "+" + TimeZoneInfo.Local.BaseUtcOffset.Hours.ToString();
-		}
+		private readonly static TimeZone CurrentZone = TimeZone.CurrentTimeZone;
 
 		//TODO private
 		public static string ToDatabase(DateTime value)
 		{
-			if (value.Kind == DateTimeKind.Utc)
+			if (value.Kind != DateTimeKind.Local)
 				return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF+00");
-			return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") +
-				(value.IsDaylightSavingTime() ? TimeZoneWithDaylightSaving : TimeZoneWithoutDaylightSaving);
+			var offset = CurrentZone.GetUtcOffset(value);
+			if (offset.Minutes != 0)
+				value = value.AddMinutes(offset.Minutes);
+			if (offset.Hours >= 0)
+				return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") + "+" + offset.Hours.ToString("00");
+			return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") + offset.Hours.ToString("00");
 		}
 
 		public static ValueTuple ToTuple(DateTime value)
