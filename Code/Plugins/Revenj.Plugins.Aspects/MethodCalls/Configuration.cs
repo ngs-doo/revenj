@@ -37,8 +37,7 @@ namespace Revenj.Plugins.Aspects.MethodCalls
 			if (!TraceAll && EnabledAspects.Count == 0)
 				return;
 
-			factory.RegisterTypes(new[] { typeof(LoggingInterceptor) });
-			var logging = factory.Resolve<LoggingInterceptor>();
+			var logging = new LoggingInterceptor();
 			var registrator = factory.Resolve<IInterceptorRegistrator>();
 			if (TraceAll)
 				registrator.Intercept(t => !DisabledAspects.Contains(t), logging);

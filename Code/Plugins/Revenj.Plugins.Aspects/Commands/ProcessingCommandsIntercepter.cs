@@ -1,24 +1,31 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System.Diagnostics;
 using System.Linq;
-using Revenj.Logging;
 using Revenj.Processing;
 
 namespace Revenj.Plugins.Aspects.Commands
 {
 	public class ProcessingCommandsIntercepter
 	{
-		private readonly ILogger Logger;
-
-		public ProcessingCommandsIntercepter(ILogFactory logFactory)
-		{
-			Contract.Requires(logFactory != null);
-
-			this.Logger = logFactory.Create("Processing engine commands trace");
-		}
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Aspects");
 
 		public void LogCommands<T>(IServerCommandDescription<T>[] commandDescriptions)
 		{
-			Logger.Debug(() => "Executing command(s): " + string.Join(", ", commandDescriptions.Select(it => it.CommandType.Name)));
+			TraceSource.TraceEvent(TraceEventType.Information, 3101, "{0}", new LazyFormat<T>(commandDescriptions));
+		}
+
+		struct LazyFormat<T>
+		{
+			private readonly IServerCommandDescription<T>[] Commands;
+
+			public LazyFormat(IServerCommandDescription<T>[] commands)
+			{
+				this.Commands = commands;
+			}
+
+			public override string ToString()
+			{
+				return string.Join(", ", Commands.Select(it => it.CommandType.Name));
+			}
 		}
 	}
 }

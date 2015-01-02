@@ -7,8 +7,6 @@ using Revenj.DatabasePersistence.Postgres.Converters;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
-	//TODO: dead code. remove
-	[Obsolete("dead code")]
 	public static class PostgresRecordConverter
 	{
 		public static string[] ParseRecord(this string value)

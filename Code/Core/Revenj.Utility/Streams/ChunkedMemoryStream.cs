@@ -426,5 +426,10 @@ namespace Revenj.Utility
 				else CurrentEstimate = MemoryPool.Count;
 			}
 		}
+
+		public override string ToString()
+		{
+			return GetReader().ReadToEnd();
+		}
 	}
 }

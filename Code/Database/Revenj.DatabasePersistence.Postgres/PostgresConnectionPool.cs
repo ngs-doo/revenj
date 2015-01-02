@@ -2,8 +2,8 @@
 using System.Collections.Concurrent;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using Npgsql;
-using Revenj.Logging;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
@@ -28,9 +28,9 @@ namespace Revenj.DatabasePersistence.Postgres
 		private readonly ConnectionInfo Info;
 		private readonly int Size;
 
-		private readonly ILogger Logger;
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 
-		public PostgresConnectionPool(ConnectionInfo info, ILogFactory logFactory)
+		public PostgresConnectionPool(ConnectionInfo info)
 		{
 			this.Info = info;
 			if (!int.TryParse(ConfigurationManager.AppSettings["Database.PoolSize"], out Size))
@@ -50,7 +50,6 @@ namespace Revenj.DatabasePersistence.Postgres
 				for (int i = 0; i < Size; i++)
 					Connections.Add(info.GetConnection());
 			}
-			this.Logger = logFactory.Create("Npgsql connection manager");
 		}
 
 
@@ -79,7 +78,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				}
 				catch (Exception ex)
 				{
-					Logger.Error(ex.ToString());
+					TraceSource.TraceEvent(TraceEventType.Error, 5010, ex.ToString());
 					try { conn.Close(); }
 					catch { }
 					NpgsqlConnection.ClearAllPools();
@@ -99,7 +98,7 @@ namespace Revenj.DatabasePersistence.Postgres
 					catch (Exception ex)
 					{
 						if (valid)
-							Logger.Error("Error closing valid connection: " + ex.ToString());
+							TraceSource.TraceEvent(TraceEventType.Error, 5011, "{0}", ex);
 					}
 					break;
 				default:
@@ -113,7 +112,7 @@ namespace Revenj.DatabasePersistence.Postgres
 						catch (Exception ex)
 						{
 							if (valid)
-								Logger.Error("Error closing valid connection: " + ex.ToString());
+								TraceSource.TraceEvent(TraceEventType.Error, 5012, "{0}", ex);
 						}
 						if (Connections.Count < Size)
 							Connections.Add(Info.GetConnection());
@@ -129,12 +128,12 @@ namespace Revenj.DatabasePersistence.Postgres
 				foreach (var con in Connections)
 				{
 					try { con.Close(); }
-					catch (Exception ex) { Logger.Trace(ex.ToString()); }
+					catch (Exception ex) { TraceSource.TraceEvent(TraceEventType.Error, 5013, "{0}", ex); }
 				}
 				Connections.Dispose();
 				NpgsqlConnection.ClearAllPools();
 			}
-			catch (Exception e) { Logger.Trace(e.ToString()); }
+			catch (Exception e) { TraceSource.TraceEvent(TraceEventType.Error, 5014, "{0}", e); }
 		}
 	}
 }

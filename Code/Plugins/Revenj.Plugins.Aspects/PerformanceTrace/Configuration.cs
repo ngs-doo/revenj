@@ -4,7 +4,6 @@ using System.ComponentModel.Composition;
 using System.Configuration;
 using System.Runtime.Serialization;
 using Revenj.Extensibility;
-using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.PerformanceTrace
 {
@@ -43,12 +42,10 @@ namespace Revenj.Plugins.Aspects.PerformanceTrace
 		{
 			if (!TraceAll && EnabledAspects.Count == 0)
 				return;
-			DisabledAspects.Add(typeof(ILogger));
 			DisabledAspects.Add(typeof(ICloneable));
 			DisabledAspects.Add(typeof(ISerializable));
 
-			factory.RegisterTypes(new[] { typeof(PerformanceInterceptor) });
-			var performance = factory.Resolve<PerformanceInterceptor>();
+			var performance = new PerformanceInterceptor();
 			var registrator = factory.Resolve<IInterceptorRegistrator>();
 			if (TraceAll)
 				registrator.Intercept(t => !DisabledAspects.Contains(t), performance);

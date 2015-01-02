@@ -10,8 +10,6 @@ using Revenj.DatabasePersistence;
 using Revenj.DatabasePersistence.Postgres;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
-using Revenj.Logging;
-using Revenj.Logging.NLog;
 using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
@@ -60,8 +58,6 @@ namespace Revenj.Http
 			//builder.RegisterType<RepositoryPrincipalFactory>().As<IPrincipalFactory>();
 			//registry.Register<IPermissionManager, PermissionManager>(Reuse.Singleton);
 
-			registry.Register<ILogFactory, LogFactory>(Reuse.Singleton);
-			registry.Register<ILogger, NLogLogger>();
 			registry.Register<IProcessingEngine, ProcessingEngine>(Reuse.Singleton);
 			registry.Register<IScopePool, ScopePool>(Reuse.Singleton);
 		}

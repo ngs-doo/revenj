@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Configuration;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.IO;
 using Revenj.Api;
-using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.Commands
 {
 	public class RestCommandsIntercepter
 	{
 		private static readonly int TimerLimit;
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Aspects");
 
 		static RestCommandsIntercepter()
 		{
@@ -19,26 +17,30 @@ namespace Revenj.Plugins.Aspects.Commands
 				TimerLimit = 100;
 		}
 
-		private readonly ILogger Logger;
-
-		public RestCommandsIntercepter(ILogFactory logFactory)
-		{
-			Contract.Requires(logFactory != null);
-
-			this.Logger = logFactory.Create("REST commands trace");
-		}
-
 		private void LogMemoryUsage()
 		{
-			Logger.Debug(() => "GC memory usage: " + (GC.GetTotalMemory(false) / 1024 / 1024m).ToString("N3", CultureInfo.InvariantCulture) + "MB");
-			Logger.Debug(() => "Process memory usage: " + (Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024m).ToString("N3", CultureInfo.InvariantCulture) + "MB");
+			TraceSource.TraceEvent(
+				TraceEventType.Information,
+				3121,
+				"GC memory usage: {0:N3} MB",
+				GC.GetTotalMemory(false) / 1024 / 1024m);
+			TraceSource.TraceEvent(
+				TraceEventType.Information,
+				3122,
+				"Process memory usage: {0:N3} MB",
+				Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024m);
 		}
 
 		public Stream PassThrough(object[] args, Func<object[], object> baseCall)
 		{
 			var start = Stopwatch.GetTimestamp();
 			var ta = args[0] != null ? args[0].GetType() : typeof(object);
-			Logger.Debug(() => "Executing command with argument: " + ta.FullName + ". Request: " + ThreadContext.Request.ToString());
+			TraceSource.TraceEvent(
+				TraceEventType.Information,
+				3123,
+				"Executing command with argument: {0}. Request: {1}",
+				ta.FullName,
+				ThreadContext.Request);
 			Stream stream = null;
 			try
 			{
@@ -49,7 +51,13 @@ namespace Revenj.Plugins.Aspects.Commands
 				var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				if (elapsed > TimerLimit)
 				{
-					Logger.Debug(() => "Returning stream for pass through: " + ta.FullName + ". Duration: " + elapsed + "ms. Size: " + (stream != null && stream.CanSeek ? stream.Length.ToString() + "B" : "Unknown"));
+					TraceSource.TraceEvent(
+						TraceEventType.Information,
+						3124,
+						"Returning stream for pass through: {0}. Duration: {1} ms. Size: {2}",
+						ta.FullName,
+						elapsed,
+						stream != null && stream.CanSeek ? stream.Length.ToString() + " bytes" : "Unknown");
 					LogMemoryUsage();
 				}
 			}
@@ -60,7 +68,7 @@ namespace Revenj.Plugins.Aspects.Commands
 		{
 			var start = Stopwatch.GetTimestamp();
 			var req = ThreadContext.Request;
-			Logger.Debug(() => "Executing get command. Request: " + req.ToString());
+			TraceSource.TraceEvent(TraceEventType.Information, 3125, "Executing get command. Request: {0}", req);
 			Stream stream = null;
 			try
 			{
@@ -71,7 +79,13 @@ namespace Revenj.Plugins.Aspects.Commands
 				var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				if (elapsed > TimerLimit)
 				{
-					Logger.Debug(() => "Returning stream for get REST req: " + req.RequestUri.AbsoluteUri + ". Duration: " + elapsed + "ms. Size: " + (stream != null && stream.CanSeek ? stream.Length.ToString() + "B" : "Unknown"));
+					TraceSource.TraceEvent(
+						TraceEventType.Information,
+						3126,
+						"Returning stream for get REST req: {0}. Duration: {1} ms. Size: {2}",
+						req.RequestUri.AbsoluteUri,
+						elapsed,
+						stream != null && stream.CanSeek ? stream.Length.ToString() + " bytes" : "Unknown");
 					LogMemoryUsage();
 				}
 			}
@@ -82,7 +96,7 @@ namespace Revenj.Plugins.Aspects.Commands
 		{
 			var start = Stopwatch.GetTimestamp();
 			var req = ThreadContext.Request;
-			Logger.Debug(() => "Executing post command. Request: " + req.ToString());
+			TraceSource.TraceEvent(TraceEventType.Information, 3127, "Executing post command. Request: {0}", req);
 			Stream stream = null;
 			try
 			{
@@ -93,7 +107,13 @@ namespace Revenj.Plugins.Aspects.Commands
 				var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				if (elapsed > TimerLimit)
 				{
-					Logger.Debug(() => "Returning stream for post REST req: " + req.RequestUri.AbsoluteUri + ". Duration: " + elapsed + "ms. Size: " + (stream != null && stream.CanSeek ? stream.Length.ToString() + "B" : "Unknown"));
+					TraceSource.TraceEvent(
+						TraceEventType.Information,
+						3126,
+						"Returning stream for post REST req: {0}. Duration: {1} ms. Size: {2}",
+						req.RequestUri.AbsoluteUri,
+						elapsed,
+						stream != null && stream.CanSeek ? stream.Length.ToString() + " bytes" : "Unknown");
 					LogMemoryUsage();
 				}
 			}

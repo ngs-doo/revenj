@@ -9,8 +9,6 @@ using Revenj.DatabasePersistence;
 using Revenj.DatabasePersistence.Postgres;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
-using Revenj.Logging;
-using Revenj.Logging.NLog;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
@@ -39,9 +37,6 @@ namespace Revenj.Core
 			SetupSerialization(builder);
 
 			builder.RegisterType<PermissionManager>().As<IPermissionManager>().SingleInstance();
-
-			builder.RegisterType<LogFactory>().As<ILogFactory>().SingleInstance();
-			builder.RegisterType<NLogLogger>().As<ILogger>();
 
 			builder.RegisterType<OnContainerBuild>().As<IStartable>();
 

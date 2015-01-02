@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Runtime.Serialization;
@@ -6,33 +7,30 @@ using System.Xml;
 using System.Xml.Linq;
 using Revenj.Common;
 using Revenj.Extensibility;
-using Revenj.Logging;
 using Revenj.Utility;
 
 namespace Revenj.Serialization
 {
 	public class XmlSerialization : ISerialization<XElement>
 	{
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Serialization");
+
 		private readonly DataContractResolver GenericResolver;
 		private readonly ITypeResolver TypeResolver;
 		private readonly GenericDeserializationBinder GenericBinder;
-		private readonly ILogger Logger;
 
 		public XmlSerialization(
 			ITypeResolver typeResolver,
 			GenericDataContractResolver genericResolver,
-			GenericDeserializationBinder genericBinder,
-			ILogFactory logFactory)
+			GenericDeserializationBinder genericBinder)
 		{
 			Contract.Requires(typeResolver != null);
 			Contract.Requires(genericResolver != null);
 			Contract.Requires(genericBinder != null);
-			Contract.Requires(logFactory != null);
 
 			this.TypeResolver = typeResolver;
 			this.GenericResolver = genericResolver;
 			this.GenericBinder = genericBinder;
-			this.Logger = logFactory.Create(GetType().FullName);
 		}
 
 		public XElement Serialize<T>(T value)
@@ -71,14 +69,14 @@ namespace Revenj.Serialization
 					type = declaredType;
 				else if (atr == null)
 				{
-					Logger.Trace(() => data.ToString());
+					TraceSource.TraceEvent(TraceEventType.Verbose, 5201, "{0}", data);
 					throw new FrameworkException(@"Couldn't resolve type from provided Xml. 
 Root element should embed type attribute with class name or you should provide appropriate type T to Deserialize<T> method.
 Trying to deserialize {0}.".With(declaredType.FullName));
 				}
 				else
 				{
-					Logger.Trace(() => data.ToString());
+					TraceSource.TraceEvent(TraceEventType.Verbose, 5201, "{0}", data);
 					throw new FrameworkException(@"Can't deserialize provided Xml to {0}. 
 Type detected for Xml is {1}. Can't deserialize Xml to instance of {1}.".With(declaredType.FullName, type.FullName));
 				}
@@ -114,9 +112,8 @@ Type detected for Xml is {1}. Can't deserialize Xml to instance of {1}.".With(de
 					}
 					catch (Exception ex)
 					{
-						Logger.Trace(ex.ToString());
-						cms.Position = 0;
-						Logger.Trace(() => new StreamReader(cms).ReadToEnd());
+						TraceSource.TraceEvent(TraceEventType.Error, 5202, "{0}", ex);
+						TraceSource.TraceEvent(TraceEventType.Verbose, 5202, "{0}", cms);
 						throw;
 					}
 				}

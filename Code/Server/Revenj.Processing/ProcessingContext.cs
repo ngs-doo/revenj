@@ -10,7 +10,6 @@ using System.Security;
 using System.Threading;
 using Revenj.Common;
 using Revenj.Extensibility;
-using Revenj.Logging;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
@@ -19,22 +18,20 @@ namespace Revenj.Processing
 {
 	public class ProcessingContext : IProcessingEngine
 	{
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
+
 		private readonly IObjectFactory Scope;
 		private readonly IPermissionManager Permissions;
-		private readonly ILogFactory LogFactory;
 
 		public ProcessingContext(
 			IObjectFactory scope,
-			IPermissionManager permissions,
-			ILogFactory logFactory)
+			IPermissionManager permissions)
 		{
 			Contract.Requires(scope != null);
 			Contract.Requires(permissions != null);
-			Contract.Requires(logFactory != null);
 
 			this.Scope = scope;
 			this.Permissions = permissions;
-			this.LogFactory = logFactory;
 		}
 
 		public IProcessingResult<TOutput> Execute<TInput, TOutput>(IServerCommandDescription<TInput>[] commandDescriptions)
@@ -43,6 +40,7 @@ namespace Revenj.Processing
 
 			if (commandDescriptions == null || commandDescriptions.Length == 0)
 			{
+				TraceSource.TraceEvent(TraceEventType.Warning, 5310);
 				return
 					ProcessingResult<TOutput>.Create(
 						"There are no commands to execute.",
@@ -60,10 +58,12 @@ namespace Revenj.Processing
 				foreach (var c in commandDescriptions)
 					if (!Permissions.CanAccess(c.CommandType))
 					{
-						LogFactory.Create("Processing context").Trace(
-							() => "Access denied. User: {0}. Target: {1}.".With(
-									Thread.CurrentPrincipal.Identity.Name,
-									c.CommandType.FullName));
+						TraceSource.TraceEvent(
+							TraceEventType.Warning,
+							5311,
+							"Access denied. User: {0}. Target: {1}",
+							Thread.CurrentPrincipal.Identity.Name,
+							c.CommandType.FullName);
 						return
 							ProcessingResult<TOutput>.Create(
 								"You don't have permission to execute command: " + c.CommandType.FullName,
@@ -93,17 +93,19 @@ namespace Revenj.Processing
 				var duration = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				return
 					ProcessingResult<TOutput>.Create(
-						"Commands executed in: " + duration.ToString(CultureInfo.InvariantCulture) + " ms.",
+						"Commands executed in: " + duration.ToString(CultureInfo.InvariantCulture) + " ms",
 						HttpStatusCode.OK,
 						executedCommands,
 						start);
 			}
 			catch (SecurityException ex)
 			{
-				LogFactory.Create("Processing context").Trace(
-					() => "Security error. User: {0}. Error: {1}.".With(
-							Thread.CurrentPrincipal.Identity.Name,
-							ex.ToString()));
+				TraceSource.TraceEvent(
+					TraceEventType.Warning,
+					5312,
+					"Security error. User: {0}. Error: {1}.",
+					Thread.CurrentPrincipal.Identity.Name,
+					ex);
 				return
 					ProcessingResult<TOutput>.Create(
 						"You don't have authorization to perform requested action: {0}".With(ex.Message),
@@ -113,10 +115,12 @@ namespace Revenj.Processing
 			}
 			catch (AggregateException ex)
 			{
-				LogFactory.Create("Processing context").Trace(
-					() => "Multiple errors. User: {0}. Error: {1}.".With(
-							Thread.CurrentPrincipal.Identity.Name,
-							ex.GetDetailedExplanation()));
+				TraceSource.TraceEvent(
+					TraceEventType.Error,
+					5313,
+					"Multiple errors. User: {0}. Error: {1}.",
+					Thread.CurrentPrincipal.Identity.Name,
+					ex.GetDetailedExplanation());
 				return Exceptions.DebugMode
 					? ProcessingResult<TOutput>.Create(
 						ex.GetDetailedExplanation(),
@@ -131,7 +135,7 @@ namespace Revenj.Processing
 			}
 			catch (OutOfMemoryException ex)
 			{
-				LogFactory.Create("Processing context").Error("Out of memory error. Error: " + ex.GetDetailedExplanation());
+				TraceSource.TraceEvent(TraceEventType.Critical, 5315, ex.GetDetailedExplanation());
 				return Exceptions.DebugMode
 					? ProcessingResult<TOutput>.Create(
 						ex.GetDetailedExplanation(),
@@ -146,7 +150,7 @@ namespace Revenj.Processing
 			}
 			catch (DbException ex)
 			{
-				LogFactory.Create("Processing context").Trace("DbException: : " + ex.GetDetailedExplanation());
+				TraceSource.TraceEvent(TraceEventType.Warning, 5316, ex.GetDetailedExplanation());
 				return Exceptions.DebugMode
 					? ProcessingResult<TOutput>.Create(
 						ex.GetDetailedExplanation(),
@@ -161,10 +165,12 @@ namespace Revenj.Processing
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Processing context").Trace(
-					() => "Unexpected error. User: {0}. Error: {1}.".With(
-							Thread.CurrentPrincipal.Identity.Name,
-							ex.GetDetailedExplanation()));
+				TraceSource.TraceEvent(
+					TraceEventType.Error,
+					5317,
+					"Unexpected error. User: {0}. Error: {1}",
+					Thread.CurrentPrincipal.Identity.Name,
+					ex.GetDetailedExplanation());
 				return Exceptions.DebugMode
 					? ProcessingResult<TOutput>.Create(
 						ex.GetDetailedExplanation(),

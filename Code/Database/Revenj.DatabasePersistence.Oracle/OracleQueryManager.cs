@@ -1,35 +1,32 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Data;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using Oracle.DataAccess.Client;
 using Revenj.Common;
-using Revenj.Logging;
 
 namespace Revenj.DatabasePersistence.Oracle
 {
 	public class OracleQueryManager : IDatabaseQueryManager
 	{
-		private readonly string ConnectionString;
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 
-		private readonly ILogFactory LogFactory;
+		private readonly string ConnectionString;
 
 		private readonly ConcurrentDictionary<IDatabaseQuery, OracleTransaction> OpenTransactions = new ConcurrentDictionary<IDatabaseQuery, OracleTransaction>();
 		private readonly ConcurrentDictionary<IDatabaseQuery, OracleConnection> OpenConnections = new ConcurrentDictionary<IDatabaseQuery, OracleConnection>();
-		private readonly Func<OracleConnection, OracleTransaction, ILogFactory, IOracleDatabaseQuery> QueryFactory;
+		private readonly Func<OracleConnection, OracleTransaction, IOracleDatabaseQuery> QueryFactory;
 
 		public OracleQueryManager(
 			ConnectionInfo connectionInfo,
-			ILogFactory logFactory,
-			Func<OracleConnection, OracleTransaction, ILogFactory, IOracleDatabaseQuery> queryFactory)
+			Func<OracleConnection, OracleTransaction, IOracleDatabaseQuery> queryFactory)
 		{
 			Contract.Requires(connectionInfo != null);
 			Contract.Requires(connectionInfo.ConnectionString != null);
-			Contract.Requires(logFactory != null);
 			Contract.Requires(queryFactory != null);
 
 			this.ConnectionString = connectionInfo.ConnectionString;
-			this.LogFactory = logFactory;
 			this.QueryFactory = queryFactory;
 		}
 
@@ -45,7 +42,7 @@ namespace Revenj.DatabasePersistence.Oracle
 				}
 				catch (Exception ex)
 				{
-					LogFactory.Create("Oracle database layer - start query").Error(ex.ToString());
+					TraceSource.TraceEvent(TraceEventType.Error, 5010, "{0}", ex);
 					try { connection.Close(); }
 					catch { }
 					OracleConnection.ClearAllPools();
@@ -57,13 +54,12 @@ namespace Revenj.DatabasePersistence.Oracle
 			IDatabaseQuery query;
 			try
 			{
-				query = QueryFactory(connection, transaction, LogFactory);
+				query = QueryFactory(connection, transaction);
 			}
 			catch (Exception ex)
 			{
-				var log = LogFactory.Create("Oracle database layer - start query");
-				log.Error(ex.ToString());
-				log.Info("Transactions: {0}, connections: {1}".With(OpenTransactions.Count, OpenConnections.Count));
+				TraceSource.TraceEvent(TraceEventType.Critical, 5101, "{0}", ex);
+				TraceSource.TraceEvent(TraceEventType.Information, 5101, "Transactions: {0}, connections: {1}", OpenTransactions.Count, OpenConnections.Count);
 				throw;
 			}
 			if (withTransaction)

@@ -1,27 +1,19 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Net;
 using System.Security;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
-using Revenj.Logging;
 using Revenj.Utility;
 
 namespace Revenj.Wcf
 {
 	public class GlobalErrorHandler : IErrorHandler, IServiceBehavior
 	{
-		private readonly ILogger ErrorLogger;
-
-		public GlobalErrorHandler(ILogFactory logFactory)
-		{
-			Contract.Requires(logFactory != null);
-
-			ErrorLogger = logFactory.Create("Revenj.Wcf.Errors");
-		}
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
 
 		public bool HandleError(Exception error)
 		{
@@ -44,7 +36,7 @@ namespace Revenj.Wcf
 			var anse = error as ActionNotSupportedException;
 			if (uae != null)
 			{
-				ErrorLogger.Trace(() => uae.Message);
+				TraceSource.TraceEvent(TraceEventType.Verbose, 5501, uae.Message);
 				if (fault == null)
 				{
 					fault = CreateError(version, uae.Message, HttpStatusCode.Unauthorized);
@@ -54,25 +46,25 @@ namespace Revenj.Wcf
 			}
 			else if (se != null)
 			{
-				ErrorLogger.Trace(() => se.Message);
+				TraceSource.TraceEvent(TraceEventType.Verbose, 5502, se.Message);
 				if (fault == null)
 					fault = CreateError(version, se.Message, HttpStatusCode.Forbidden);
 			}
 			else if (fe != null)
 			{
-				ErrorLogger.Trace(() => fe.Message);
+				TraceSource.TraceEvent(TraceEventType.Verbose, 5503, fe.Message);
 				if (fault == null)
 					fault = CreateError(version, fe.Message, HttpStatusCode.BadRequest);
 			}
 			else if (anse != null)
 			{
-				ErrorLogger.Trace(() => anse.Message);
+				TraceSource.TraceEvent(TraceEventType.Verbose, 5503, anse.Message);
 				if (fault == null)
 					fault = CreateError(version, anse.Message, HttpStatusCode.NotFound);
 			}
 			else
 			{
-				ErrorLogger.Error(error.GetDetailedExplanation());
+				TraceSource.TraceEvent(TraceEventType.Error, 5504, error.GetDetailedExplanation());
 				if (fault == null)
 					fault = CreateError(version, error.Message, HttpStatusCode.InternalServerError);
 			}

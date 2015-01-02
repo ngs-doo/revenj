@@ -14,8 +14,6 @@ using Revenj.DatabasePersistence;
 using Revenj.DatabasePersistence.Postgres;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
-using Revenj.Logging;
-using Revenj.Logging.NLog;
 using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
@@ -53,9 +51,6 @@ namespace Revenj.Wcf
 			builder.RegisterType<RepositoryAuthentication>().As<IAuthentication<SecureString>, IAuthentication<string>, IAuthentication<byte[]>>();
 			builder.RegisterType<RepositoryPrincipalFactory>().As<IPrincipalFactory>();
 			builder.RegisterType<PermissionManager>().As<IPermissionManager>().SingleInstance();
-
-			builder.RegisterType<LogFactory>().As<ILogFactory>().SingleInstance();
-			builder.RegisterType<NLogLogger>().As<ILogger>();
 
 			builder.RegisterType(typeof(ProcessingEngine)).As(typeof(IProcessingEngine)).SingleInstance();
 			builder.RegisterType(typeof(ScopePool)).As(typeof(IScopePool)).SingleInstance();

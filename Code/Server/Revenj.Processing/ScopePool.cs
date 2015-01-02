@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Configuration;
+using System.Diagnostics;
 using Revenj.DatabasePersistence;
 using Revenj.Extensibility;
-using Revenj.Logging;
 
 namespace Revenj.Processing
 {
@@ -27,6 +27,8 @@ namespace Revenj.Processing
 
 	public class ScopePool : IScopePool, IDisposable
 	{
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
+
 		private readonly BlockingCollection<Scope> Scopes = new BlockingCollection<Scope>(new ConcurrentBag<Scope>());
 
 		public enum PoolMode
@@ -41,13 +43,11 @@ namespace Revenj.Processing
 
 		private readonly IObjectFactory Factory;
 		private readonly IDatabaseQueryManager Queries;
-		private readonly ILogger Logger;
 
 		public ScopePool(
 			IObjectFactory factory,
 			IDatabaseQueryManager queries,
-			IExtensibilityProvider extensibilityProvider,
-			ILogFactory logFactory)
+			IExtensibilityProvider extensibilityProvider)
 		{
 			this.Factory = factory;
 			this.Queries = queries;
@@ -70,7 +70,6 @@ namespace Revenj.Processing
 				for (int i = 0; i < Size; i++)
 					Scopes.Add(SetupReadonlyScope());
 			}
-			Logger = logFactory.Create("Scope pool");
 		}
 
 		private Scope SetupReadonlyScope()
@@ -84,7 +83,7 @@ namespace Revenj.Processing
 			}
 			catch (Exception ex)
 			{
-				Logger.Error("Error setting up readonly scope: " + ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Critical, 5301, "{0}", ex);
 				inner.Dispose();
 				throw;
 			}
@@ -103,7 +102,7 @@ namespace Revenj.Processing
 			}
 			catch (Exception ex)
 			{
-				Logger.Error("Error setting up writable scope: " + ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Critical, 5302, "{0}", ex);
 				inner.Dispose();
 				throw;
 			}
@@ -164,14 +163,14 @@ namespace Revenj.Processing
 					}
 					catch (Exception ex)
 					{
-						Logger.Error("Error cleaning up pool: " + ex.ToString());
+						TraceSource.TraceEvent(TraceEventType.Error, 5303, "{0}", ex);
 					}
 				}
 				Scopes.Dispose();
 			}
 			catch (Exception ex2)
 			{
-				Logger.Error("Error disposing pool: " + ex2.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5304, "{0}", ex2);
 			}
 		}
 	}

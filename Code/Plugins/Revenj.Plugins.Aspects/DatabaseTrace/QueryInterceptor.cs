@@ -2,29 +2,18 @@
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Text;
-using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.DatabaseTrace
 {
 	public class QueryInterceptor
 	{
 		private static readonly int TimerLimit;
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Aspects");
 
 		static QueryInterceptor()
 		{
 			if (!int.TryParse(ConfigurationManager.AppSettings["Performance.DatabaseLimit"], out TimerLimit))
 				TimerLimit = 100;
-		}
-
-		private readonly ILogger Logger;
-
-		public QueryInterceptor(ILogFactory logFactory)
-		{
-			Contract.Requires(logFactory != null);
-
-			this.Logger = logFactory.Create("Database performance trace");
 		}
 
 		public int LogExecuteNonQuery(IDbCommand command, Func<IDbCommand, int> query)
@@ -38,26 +27,13 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 			{
 				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				if (duration > TimerLimit)
-					Logger.Trace(() => "Execute non query duration: {0}ms, Sql: {1}".With(duration, command.CommandText));
-			}
-		}
-
-		public int LogExecuteNonQuery(StringBuilder builder, Func<StringBuilder, int> query)
-		{
-			var start = Stopwatch.GetTimestamp();
-			try
-			{
-				return query(builder);
-			}
-			finally
-			{
-				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
-				if (duration > TimerLimit)
 				{
-					Logger.Trace(() =>
-						"Execute non query duration: {0}ms, Sql: {1}".With(
-							duration,
-							builder.ToString(0, Math.Min(10000, builder.Length))));
+					TraceSource.TraceEvent(
+						TraceEventType.Information,
+						3141,
+						"Execute non query duration: {0} ms, SQL: {1}",
+						duration,
+						command.CommandText);
 				}
 			}
 		}
@@ -76,7 +52,14 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 			{
 				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				if (duration > TimerLimit)
-					Logger.Trace(() => "Execute data reader duration: {0}ms, Sql: {1}".With(duration, command.CommandText));
+				{
+					TraceSource.TraceEvent(
+						TraceEventType.Information,
+						3142,
+						"Execute data reader duration: {0} ms, SQL: {1}",
+						duration,
+						command.CommandText);
+				}
 			}
 		}
 
@@ -94,7 +77,14 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 			{
 				var duration = (Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				if (duration > TimerLimit)
-					Logger.Trace(() => "Fill table duration: {0}ms, Sql: {1}".With(duration, command.CommandText));
+				{
+					TraceSource.TraceEvent(
+						TraceEventType.Information,
+						3143,
+						"Fill table duration: {0} ms, SQL: {1}",
+						duration,
+						command.CommandText);
+				}
 			}
 		}
 	}

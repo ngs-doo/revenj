@@ -10,7 +10,6 @@ using System.Runtime.Serialization.Formatters;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Revenj.Logging;
 using Revenj.Utility;
 
 namespace Revenj.Serialization
@@ -18,20 +17,15 @@ namespace Revenj.Serialization
 	public class JsonSerialization : ISerialization<string>, ISerialization<TextReader>
 	{
 		private readonly GenericDeserializationBinder Binder;
-		private readonly ILogger Logger;
 		private readonly JsonSerializer SharedSerializer;
 		private static readonly StringEnumConverter EnumConverter = new StringEnumConverter();
 		private static readonly TextReaderConverter TextReaderConverter = new TextReaderConverter();
 
-		public JsonSerialization(
-			GenericDeserializationBinder binder,
-			ILogFactory logFactory)
+		public JsonSerialization(GenericDeserializationBinder binder)
 		{
 			Contract.Requires(binder != null);
-			Contract.Requires(logFactory != null);
 
 			this.Binder = binder;
-			this.Logger = logFactory.Create(GetType().FullName);
 			SharedSerializer = new JsonSerializer();
 			SharedSerializer.Converters.Add(EnumConverter);
 			SharedSerializer.Converters.Add(TextReaderConverter);

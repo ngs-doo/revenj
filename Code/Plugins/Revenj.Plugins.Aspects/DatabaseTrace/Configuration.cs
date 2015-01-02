@@ -21,8 +21,8 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 		{
 			if (!UseTrace)
 				return;
-			factory.RegisterTypes(new[] { typeof(QueryInterceptor) });
-			var interceptor = factory.Resolve<QueryInterceptor>();
+
+			var interceptor = new QueryInterceptor();
 			var aspectRegistrator = factory.Resolve<IAspectRegistrator>();
 
 			aspectRegistrator.Around<IDatabaseQuery, IDbCommand, int>(

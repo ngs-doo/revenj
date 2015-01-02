@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using Npgsql;
 using Revenj.Common;
-using Revenj.Logging;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
@@ -11,26 +11,23 @@ namespace Revenj.DatabasePersistence.Postgres
 	{
 		private static int CpuCount = Environment.ProcessorCount;
 		private static int InitialCount = Environment.ProcessorCount < 17 ? 17 : Environment.ProcessorCount * 2 - 1;
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 
 		private readonly IConnectionPool Connections;
-		private readonly ILogFactory LogFactory;
 		private readonly ConcurrentDictionary<IDatabaseQuery, NpgsqlTransaction> OpenTransactions =
 			new ConcurrentDictionary<IDatabaseQuery, NpgsqlTransaction>(CpuCount, InitialCount);
 		private readonly ConcurrentDictionary<IDatabaseQuery, NpgsqlConnection> OpenConnections =
 			new ConcurrentDictionary<IDatabaseQuery, NpgsqlConnection>(CpuCount, InitialCount);
-		private readonly Func<NpgsqlConnection, NpgsqlTransaction, ILogFactory, IPostgresDatabaseQuery> QueryFactory;
+		private readonly Func<NpgsqlConnection, NpgsqlTransaction, IPostgresDatabaseQuery> QueryFactory;
 
 		public PostgresQueryManager(
 			IConnectionPool connections,
-			ILogFactory logFactory,
-			Func<NpgsqlConnection, NpgsqlTransaction, ILogFactory, IPostgresDatabaseQuery> queryFactory)
+			Func<NpgsqlConnection, NpgsqlTransaction, IPostgresDatabaseQuery> queryFactory)
 		{
 			Contract.Requires(connections != null);
-			Contract.Requires(logFactory != null);
 			Contract.Requires(queryFactory != null);
 
 			this.Connections = connections;
-			this.LogFactory = logFactory;
 			this.QueryFactory = queryFactory;
 		}
 
@@ -43,13 +40,12 @@ namespace Revenj.DatabasePersistence.Postgres
 			IDatabaseQuery query;
 			try
 			{
-				query = QueryFactory(connection, transaction, LogFactory);
+				query = QueryFactory(connection, transaction);
 			}
 			catch (Exception ex)
 			{
-				var log = LogFactory.Create("Postgres database layer - start query");
-				log.Error(ex.ToString());
-				log.Info("Transactions: {0}, connections: {1}".With(OpenTransactions.Count, OpenConnections.Count));
+				TraceSource.TraceEvent(TraceEventType.Critical, 5101, "{0}", ex);
+				TraceSource.TraceEvent(TraceEventType.Information, 5101, "Transactions: {0}, connections: {1}", OpenTransactions.Count, OpenConnections.Count);
 				throw;
 			}
 			if (withTransaction)
@@ -104,7 +100,7 @@ namespace Revenj.DatabasePersistence.Postgres
 						}
 						catch (Exception tex)
 						{
-							LogFactory.Create("Postgres database layer - hanging transaction").Error(tex.ToString());
+							TraceSource.TraceEvent(TraceEventType.Error, 5102, "{0}", tex);
 						}
 						Connections.Release(conn, false);
 					}
@@ -113,7 +109,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Postgres database layer - dispose").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5103, "{0}", ex);
 			}
 			try
 			{
@@ -123,7 +119,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Postgres database layer - dispose").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5104, "{0}", ex);
 			}
 		}
 	}

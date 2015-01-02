@@ -1,43 +1,60 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
+using System.Diagnostics;
 using System.Linq;
 using Castle.DynamicProxy;
-using Revenj.Logging;
 
 namespace Revenj.Plugins.Aspects.MethodCalls
 {
 	public class LoggingInterceptor : IInterceptor
 	{
-		private readonly ILogFactory LogFactory;
-
-		public LoggingInterceptor(ILogFactory logFactory)
-		{
-			Contract.Requires(logFactory != null);
-
-			this.LogFactory = logFactory;
-		}
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Aspects");
 
 		public void Intercept(IInvocation invocation)
 		{
-			var logger = LogFactory.Create(invocation.TargetType.FullName);
 			try
 			{
-				logger.Trace(() => "Entering: {0}. Arguments: {1}".With(
+				TraceSource.TraceEvent(
+					TraceEventType.Information,
+					3112,
+					"Type: {0}, method: {1}, arguments: {2}",
+					invocation.TargetType.FullName,
 					invocation.Method.Name,
-					string.Join(", ", invocation.Arguments.Select(it => it ?? "<null>"))));
+					new LazyArguments(invocation.Arguments));
 
 				invocation.Proceed();
 
-				logger.Trace(() => "Exiting: {0}. Value: {1}".With(
+				TraceSource.TraceEvent(
+					TraceEventType.Information,
+					3113,
+					"Type: {0}, method: {1}, value: {2}",
+					invocation.TargetType.FullName,
 					invocation.Method.Name,
-					invocation.ReturnValue ?? "<null>"));
+					invocation.ReturnValue ?? "<null>");
 			}
 			catch (Exception ex)
 			{
-				logger.Error(() => "Error: {0}. Message: {1}".With(
+				TraceSource.TraceEvent(
+					TraceEventType.Error,
+					3114,
+					"Error: {0}. Message: {1}",
 					invocation.Method.Name,
-					ex.ToString()));
+					ex);
 				throw;
+			}
+		}
+
+		struct LazyArguments
+		{
+			private readonly object[] Arguments;
+
+			public LazyArguments(object[] arguments)
+			{
+				this.Arguments = arguments;
+			}
+
+			public override string ToString()
+			{
+				return string.Join(", ", Arguments.Select(it => it ?? "<null>"));
 			}
 		}
 	}

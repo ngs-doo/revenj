@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Reactive.Linq;
@@ -10,12 +11,13 @@ using System.Threading;
 using Npgsql;
 using Revenj.DatabasePersistence.Postgres.Converters;
 using Revenj.DomainPatterns;
-using Revenj.Logging;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
 	public class PostgresDatabaseNotification : IEagerNotification, IDisposable
 	{
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
+
 		private NpgsqlConnection Connection;
 		private readonly Subject<NotifyInfo> Subject = new Subject<NotifyInfo>();
 		private bool IsDisposed;
@@ -25,13 +27,11 @@ namespace Revenj.DatabasePersistence.Postgres
 		private readonly ConcurrentDictionary<Type, IRepository<IIdentifiable>> Repositories =
 			new ConcurrentDictionary<Type, IRepository<IIdentifiable>>(1, 17);
 		private readonly IServiceLocator Locator;
-		private readonly ILogger Logger;
 
 		public PostgresDatabaseNotification(
 			ConnectionInfo connectionInfo,
 			Lazy<IDomainModel> domainModel,
-			IServiceLocator locator,
-			ILogFactory logFactory)
+			IServiceLocator locator)
 		{
 			Contract.Requires(connectionInfo != null);
 			Contract.Requires(domainModel != null);
@@ -39,7 +39,6 @@ namespace Revenj.DatabasePersistence.Postgres
 
 			this.DomainModel = domainModel;
 			this.Locator = locator;
-			Logger = logFactory.Create("Postgres notification");
 			Notifications = Subject.AsObservable();
 			SetUpConnection(connectionInfo.ConnectionString + ";SyncNotification=true");
 			AppDomain.CurrentDomain.ProcessExit += (s, ea) => IsDisposed = true;
@@ -51,12 +50,11 @@ namespace Revenj.DatabasePersistence.Postgres
 			RetryCount++;
 			if (RetryCount > 60)
 			{
-				Logger.Fatal("Retry count exceeded setting up connection string: " + connectionString);
+				TraceSource.TraceEvent(TraceEventType.Critical, 5130, "Retry count exceeded: {0}", connectionString);
 				RetryCount = 30;
 			}
 			try
 			{
-				Logger.Trace("Setting up notification connection");
 				if (Connection != null)
 				{
 					Connection.StateChange -= Connection_StateChange;
@@ -64,12 +62,12 @@ namespace Revenj.DatabasePersistence.Postgres
 					try { Connection.Close(); }
 					catch (Exception ex)
 					{
-						Logger.Error(ex.ToString());
+						TraceSource.TraceEvent(TraceEventType.Error, 5132, "{0}", ex);
 					}
 					try { Connection.Dispose(); }
 					catch (Exception ex)
 					{
-						Logger.Error(ex.ToString());
+						TraceSource.TraceEvent(TraceEventType.Error, 5133, "{0}", ex);
 					}
 				}
 				Connection = new NpgsqlConnection(connectionString);
@@ -83,7 +81,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			}
 			catch (Exception ex)
 			{
-				Logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5134, "{0}", ex);
 				Thread.Sleep(1000 * RetryCount);
 			}
 		}
@@ -92,13 +90,12 @@ namespace Revenj.DatabasePersistence.Postgres
 		{
 			if (IsDisposed)
 				return;
-			Logger.Trace(() => "Notification state changed: " + e.CurrentState.ToString());
 			if (e.CurrentState == ConnectionState.Closed
 				|| e.CurrentState == ConnectionState.Broken)
 				SetUpConnection(Connection.ConnectionString);
 			else if (e.CurrentState != ConnectionState.Open)
 			{
-				Logger.Error("Invalid notification state: " + e.CurrentState.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5136, "Invalid notification state: {0}", e.CurrentState);
 			}
 		}
 
@@ -110,7 +107,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			{
 				if (e.Condition == "events" || e.Condition == "aggregate_roots")
 				{
-					Logger.Debug(() => "Postgres notification: " + e.Condition + " with " + e.AdditionalInformation);
+					TraceSource.TraceEvent(TraceEventType.Verbose, 5137, "Postgres notification: {0} with {1}", e.Condition, e.AdditionalInformation);
 					var firstSeparator = e.AdditionalInformation.IndexOf(':');
 					var name = e.AdditionalInformation.Substring(0, firstSeparator);
 					var secondSeparator = e.AdditionalInformation.Substring(firstSeparator + 1).IndexOf(':');
@@ -139,7 +136,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			}
 			catch (Exception ex)
 			{
-				Logger.Error(e.Condition + e.AdditionalInformation + ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5138, "{0}{1} {2}", e.Condition, e.AdditionalInformation, ex);
 			}
 		}
 
@@ -193,12 +190,12 @@ namespace Revenj.DatabasePersistence.Postgres
 			}
 			catch (Exception ex)
 			{
-				Logger.Error(ex.Message);
+				TraceSource.TraceEvent(TraceEventType.Error, 5139, "{0}", ex);
 			}
 			try { Connection.Dispose(); }
 			catch (Exception ex)
 			{
-				Logger.Error(ex.Message);
+				TraceSource.TraceEvent(TraceEventType.Error, 5140, "{0}", ex);
 			}
 			Connection = null;
 		}

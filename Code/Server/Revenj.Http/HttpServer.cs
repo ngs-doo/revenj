@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Configuration;
-using System.IO;
+using System.Diagnostics;
 using System.Net;
 using System.Security;
 using System.ServiceModel;
@@ -8,21 +8,20 @@ using System.Text;
 using System.Threading;
 using Revenj.Api;
 using Revenj.DomainPatterns;
-using Revenj.Logging;
 using Revenj.Utility;
 
 namespace Revenj.Http
 {
 	public class HttpServer
 	{
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
+
 		private readonly HttpListener Listener;
-		private readonly ILogger Logger;
 		private readonly Routes Routes;
 		private readonly HttpAuth Authentication;
 
-		public HttpServer(ILogFactory logFactory, IServiceLocator locator)
+		public HttpServer(IServiceLocator locator)
 		{
-			Logger = logFactory.Create("Http server");
 			Listener = new HttpListener();
 			Listener.IgnoreWriteExceptions = true;
 			foreach (string key in ConfigurationManager.AppSettings.Keys)
@@ -31,10 +30,7 @@ namespace Revenj.Http
 					Listener.Prefixes.Add(ConfigurationManager.AppSettings[key]);
 			}
 			if (Listener.Prefixes.Count == 0)
-			{
 				Listener.Prefixes.Add("http://*:80/");
-				Listener.Prefixes.Add("https://*:443/");
-			}
 			Routes = new Routes(locator);
 			var customAuth = ConfigurationManager.AppSettings["CustomAuth"];
 			if (!string.IsNullOrEmpty(customAuth))
@@ -52,6 +48,7 @@ namespace Revenj.Http
 			try
 			{
 				Listener.Start();
+				TraceSource.TraceEvent(TraceEventType.Start, 1002);
 				Console.WriteLine("Server running on:");
 				foreach (var url in Listener.Prefixes)
 					Console.WriteLine(url);
@@ -66,18 +63,19 @@ namespace Revenj.Http
 					catch (HttpListenerException ex)
 					{
 						Console.WriteLine(ex.ToString());
-						Logger.Error(ex.ToString());
+						TraceSource.TraceEvent(TraceEventType.Error, 5401, "{0}", ex);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex.ToString());
-				Logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5402, "{0}", ex);
 				throw;
 			}
 			finally
 			{
+				TraceSource.TraceEvent(TraceEventType.Stop, 1002);
 				Listener.Close();
 			}
 		}
@@ -135,7 +133,7 @@ namespace Revenj.Http
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex.Message);
-				Logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5403, "{0}", ex);
 				ReturnError(response, 500, ex.Message);
 			}
 			finally
@@ -148,15 +146,18 @@ namespace Revenj.Http
 		{
 			// Response is disposed before ReturnError is called when sent request is invalid.
 			// This inner try-catch prevents application crash because of that.
-			try {
+			try
+			{
 				response.StatusCode = status;
 				response.ContentType = "text/plain; charset=\"utf-8\"";
-				response.ContentLength64 = Encoding.UTF8.GetByteCount(message);
-				using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(message)))
-					ms.CopyTo(response.OutputStream);
-			} catch (Exception ex) {
+				var bytes = Encoding.UTF8.GetBytes(message);
+				response.ContentLength64 = bytes.Length;
+				response.OutputStream.Write(bytes, 0, bytes.Length);
+			}
+			catch (Exception ex)
+			{
 				Console.WriteLine(ex.Message);
-				Logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex);
 			}
 		}
 	}

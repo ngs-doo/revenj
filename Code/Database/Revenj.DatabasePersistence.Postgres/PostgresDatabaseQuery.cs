@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,6 @@ using System.Text;
 using Npgsql;
 using Revenj.Common;
 using Revenj.DomainPatterns;
-using Revenj.Logging;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
@@ -24,6 +24,7 @@ namespace Revenj.DatabasePersistence.Postgres
 	{
 		public static int MinBatchSize { get; private set; }
 		public static long MaxObjectSize { get; private set; }
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 
 		static PostgresDatabaseQuery()
 		{
@@ -44,21 +45,16 @@ namespace Revenj.DatabasePersistence.Postgres
 		private bool BrokenTransaction;
 		private bool DifferentConnection;
 
-		private readonly ILogFactory LogFactory;
-
 		private readonly object sync = new object();
 
 		public PostgresDatabaseQuery(
 			NpgsqlConnection connection,
-			NpgsqlTransaction transaction,
-			ILogFactory logFactory)
+			NpgsqlTransaction transaction)
 		{
 			Contract.Requires(connection != null);
-			Contract.Requires(logFactory != null);
 
 			this.Connection = connection;
 			this.Transaction = transaction;
-			this.LogFactory = logFactory;
 		}
 
 		public IDbCommand NewCommand()
@@ -87,6 +83,15 @@ Near: " + ex.Where, ex);
 			return new FrameworkException(ex.Message + details, ex);
 		}
 
+		private void LogError(IDbCommand command, int error, NpgsqlException ex)
+		{
+			TraceSource.TraceEvent(TraceEventType.Verbose, error, command.CommandText);
+			TraceSource.TraceEvent(TraceEventType.Information, error, "{0}:{1} - {2}", Connection.Host, Connection.Port, Connection.Database);
+			TraceSource.TraceEvent(TraceEventType.Error, error, "{0}", ex);
+			if (ex.ErrorSql != null)
+				TraceSource.TraceEvent(TraceEventType.Error, error, ex.ErrorSql);
+		}
+
 		private void PrepareCommand(IDbCommand command)
 		{
 			try
@@ -96,9 +101,8 @@ Near: " + ex.Where, ex);
 			}
 			catch (Exception ex)
 			{
-				var logger = LogFactory.Create("Postgres database layer - prepare command");
-				logger.Trace("{0}:{1} - {2}".With(Connection.Host, Connection.Port, Connection.Database));
-				logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5110, "{0}", ex);
+				TraceSource.TraceEvent(TraceEventType.Information, 5110, "{0}:{1} - {2}", Connection.Host, Connection.Port, Connection.Database);
 				try { Connection.Close(); }
 				catch { }
 				NpgsqlConnection.ClearAllPools();
@@ -124,7 +128,7 @@ Near: " + ex.Where, ex);
 				}
 				catch (Exception ex)
 				{
-					LogFactory.Create("Postgres database layer - reset connection").Error(ex.ToString());
+					TraceSource.TraceEvent(TraceEventType.Error, 5111, "{0}", ex);
 					NpgsqlConnection.ClearAllPools();
 				}
 				Connection = new NpgsqlConnection(cs);
@@ -135,7 +139,7 @@ Near: " + ex.Where, ex);
 		private static bool ShouldTryRecover(NpgsqlException ex)
 		{
 			return ex.InnerException is IOException
-				|| ex.Message.StartsWith("A timeout has occured.");
+				|| ex.Message.StartsWith("A timeout has occured.");//Explicit typo
 		}
 
 		public int Execute(IDbCommand command)
@@ -156,12 +160,7 @@ Near: " + ex.Where, ex);
 			catch (NpgsqlException ex)
 			{
 				BrokenTransaction = !tryRecover;
-				var logger = LogFactory.Create("Postgres database layer - execute non query");
-				logger.Trace("{0}:{1} - {2}".With(Connection.Host, Connection.Port, Connection.Database));
-				logger.Trace(command.CommandText);
-				logger.Error(ex.ToString());
-				if (ex.ErrorSql != null)
-					logger.Error(ex.ErrorSql);
+				LogError(command, 5112, ex);
 				if (tryRecover && ShouldTryRecover(ex))
 				{
 					ResetConnection();
@@ -176,19 +175,20 @@ Near: " + ex.Where, ex);
 			}
 			catch (PostgresException ex)
 			{
-				LogFactory.Create("Postgres database layer - execute non query").Trace(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Critical, 5113, "{0}", ex);
 				throw;
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Postgres database layer - execute non query").Error(ex.ToString());
 				if (tryRecover)
 				{
+					TraceSource.TraceEvent(TraceEventType.Error, 5114, "{0}", ex);
 					ResetConnection();
 					return ExecuteNonQuery(command, false);
 				}
 				else
 				{
+					TraceSource.TraceEvent(TraceEventType.Critical, 5114, "{0}", ex);
 					if (Transaction == null)
 						ResetConnection();
 					throw;
@@ -227,12 +227,7 @@ Near: " + ex.Where, ex);
 			catch (NpgsqlException ex)
 			{
 				BrokenTransaction = !tryRecover;
-				var logger = LogFactory.Create("Postgres database layer - execute data reader");
-				logger.Trace("{0}:{1} - {2}".With(Connection.Host, Connection.Port, Connection.Database));
-				logger.Trace(command.CommandText);
-				logger.Error(ex.ToString());
-				if (ex.ErrorSql != null)
-					logger.Error(ex.ErrorSql);
+				LogError(command, 5115, ex);
 				if (tryRecover && !hasRead && ShouldTryRecover(ex))
 				{
 					ResetConnection();
@@ -247,19 +242,20 @@ Near: " + ex.Where, ex);
 			}
 			catch (PostgresException ex)
 			{
-				LogFactory.Create("Postgres database layer - execute data reader").Trace(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5116, "{0}", ex);
 				throw;
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Postgres database layer - execute data reader").Error(ex.ToString());
 				if (tryRecover && !hasRead)
 				{
+					TraceSource.TraceEvent(TraceEventType.Error, 5117, "{0}", ex);
 					ResetConnection();
 					ExecuteDataReader(command, action, false);
 				}
 				else
 				{
+					TraceSource.TraceEvent(TraceEventType.Critical, 5117, "{0}", ex);
 					if (Transaction == null)
 						ResetConnection();
 					throw;
@@ -310,12 +306,7 @@ Near: " + ex.Where, ex);
 			catch (NpgsqlException ex)
 			{
 				BrokenTransaction = !tryRecover;
-				var logger = LogFactory.Create("Postgres database layer - fill table");
-				logger.Trace("{0}:{1} - {2}".With(Connection.Host, Connection.Port, Connection.Database));
-				logger.Trace(command.CommandText);
-				logger.Error(ex.ToString());
-				if (ex.ErrorSql != null)
-					logger.Error(ex.ErrorSql);
+				LogError(command, 5118, ex);
 				if (tryRecover && ShouldTryRecover(ex))
 				{
 					ResetConnection();
@@ -330,19 +321,20 @@ Near: " + ex.Where, ex);
 			}
 			catch (PostgresException ex)
 			{
-				LogFactory.Create("Postgres database layer - fill table").Trace(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Critical, 5119, "{0}", ex);
 				throw;
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Postgres database layer - fill table").Error(ex.ToString());
 				if (tryRecover)
 				{
+					TraceSource.TraceEvent(TraceEventType.Error, 5120, "{0}", ex);
 					ResetConnection();
 					return FillDataSet(command, ds, false);
 				}
 				else
 				{
+					TraceSource.TraceEvent(TraceEventType.Critical, 5120, "{0}", ex);
 					if (Transaction == null)
 						ResetConnection();
 					throw;
@@ -434,10 +426,7 @@ Near: " + ex.Where, ex);
 			catch (NpgsqlException ex)
 			{
 				BrokenTransaction = !tryRecover;
-				var logger = LogFactory.Create("Postgres database layer - execute scalar");
-				logger.Trace(command.CommandText);
-				logger.Error(ex.ToString());
-				logger.Error(ex.ErrorSql);
+				LogError(command, 5121, ex);
 				if (tryRecover && ShouldTryRecover(ex))
 				{
 					ResetConnection();
@@ -452,19 +441,20 @@ Near: " + ex.Where, ex);
 			}
 			catch (PostgresException ex)
 			{
-				LogFactory.Create("Postgres database layer - execute scalar").Trace(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Critical, 5122, "{0}", ex);
 				throw;
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Postgres database layer - execute scalar").Error(ex.ToString());
 				if (tryRecover)
 				{
+					TraceSource.TraceEvent(TraceEventType.Error, 5123, "{0}", ex);
 					ResetConnection();
 					return ExecuteScalar(command, false);
 				}
 				else
 				{
+					TraceSource.TraceEvent(TraceEventType.Critical, 5123, "{0}", ex);
 					if (Transaction == null)
 						ResetConnection();
 					throw;
@@ -513,7 +503,7 @@ Near: " + ex.Where, ex);
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Postgres database layer - dispose").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5124, "{0}", ex);
 			}
 		}
 	}

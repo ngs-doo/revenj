@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization;
-using Revenj.Logging;
 
 namespace Revenj.Serialization
 {
@@ -12,12 +11,10 @@ namespace Revenj.Serialization
 		private readonly ProtobufSerialization Protobuf;
 		private readonly PassThroughSerialization Pass;
 
-		public WireSerialization(
-			ILogFactory logFactory,
-			GenericDeserializationBinder binder)
+		public WireSerialization(GenericDeserializationBinder binder)
 		{
-			Xml = new XmlSerialization(null, null, binder, logFactory);
-			Json = new JsonSerialization(binder, logFactory);
+			Xml = new XmlSerialization(null, null, binder);
+			Json = new JsonSerialization(binder);
 			Protobuf = new ProtobufSerialization();
 			Pass = new PassThroughSerialization();
 		}

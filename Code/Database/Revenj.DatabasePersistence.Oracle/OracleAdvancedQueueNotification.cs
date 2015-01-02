@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive.Linq;
@@ -10,13 +11,13 @@ using System.Reactive.Subjects;
 using Oracle.DataAccess.Client;
 using Revenj.DatabasePersistence.Oracle.Converters;
 using Revenj.DomainPatterns;
-using Revenj.Logging;
 
 namespace Revenj.DatabasePersistence.Oracle
 {
 	public class OracleAdvancedQueueNotification : IEagerNotification, IDisposable
 	{
 		private static readonly string ConsumerName = ConfigurationManager.AppSettings["Oracle.QueueConsumer"] ?? "Local";
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 
 		private readonly ConnectionInfo ConnectionInfo;
 		private OracleConnection Connection;
@@ -30,13 +31,11 @@ namespace Revenj.DatabasePersistence.Oracle
 		private readonly ConcurrentDictionary<Type, IRepository<IIdentifiable>> Repositories =
 			new ConcurrentDictionary<Type, IRepository<IIdentifiable>>(1, 17);
 		private readonly IServiceLocator Locator;
-		private readonly ILogger Logger;
 
 		public OracleAdvancedQueueNotification(
 			ConnectionInfo connectionInfo,
 			Lazy<IDomainModel> domainModel,
-			IServiceLocator locator,
-			ILogFactory logFactory)
+			IServiceLocator locator)
 		{
 			Contract.Requires(connectionInfo != null);
 			Contract.Requires(domainModel != null);
@@ -45,7 +44,6 @@ namespace Revenj.DatabasePersistence.Oracle
 			this.ConnectionInfo = connectionInfo;
 			this.DomainModel = domainModel;
 			this.Locator = locator;
-			Logger = logFactory.Create("Oracle notification");
 			Notifications = Subject.AsObservable();
 			SetUpConnection();
 			AppDomain.CurrentDomain.ProcessExit += (s, ea) => IsDisposed = true;
@@ -59,7 +57,7 @@ namespace Revenj.DatabasePersistence.Oracle
 				RetryCount++;
 				if (RetryCount > 60)
 				{
-					Logger.Fatal("Retry count exceeded setting up connection string: " + ConnectionInfo.ConnectionString);
+					TraceSource.TraceEvent(TraceEventType.Critical, 5130, "Retry count exceeded: {0}", ConnectionInfo.ConnectionString);
 					RetryCount = 30;
 				}
 				if (Connection != null)
@@ -69,7 +67,7 @@ namespace Revenj.DatabasePersistence.Oracle
 					try { Connection.Dispose(); }
 					catch (Exception ex)
 					{
-						Logger.Error(ex.ToString());
+						TraceSource.TraceEvent(TraceEventType.Error, 5132, "{0}", ex);
 					}
 				}
 				Connection = new OracleConnection(ConnectionInfo.ConnectionString);
@@ -110,7 +108,7 @@ namespace Revenj.DatabasePersistence.Oracle
 				{
 					var err = ex.Errors.Count > 0 ? ex.Errors[0] : null;
 					if (err == null || err.Number != 25228)
-						Logger.Info(ex.ToString());
+						TraceSource.TraceEvent(TraceEventType.Information, 5133, "{0}", ex);
 				}
 				if (converters.Count > 0)
 					ProcessNotifyConverters(converters);
@@ -119,7 +117,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			catch (Exception ex)
 			{
 				RetryCount++;
-				Logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5134, "{0}", ex);
 			}
 		}
 
@@ -145,7 +143,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			catch (Exception ex)
 			{
-				Logger.Error(e.QueueName + ": " + e.AvailableMessages + ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5138, "{0}: {1} {2}", e.QueueName, e.AvailableMessages, ex);
 			}
 		}
 
@@ -222,12 +220,12 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			catch (Exception ex)
 			{
-				Logger.Error(ex.Message);
+				TraceSource.TraceEvent(TraceEventType.Error, 5139, "{0}", ex);
 			}
 			try { Connection.Dispose(); }
 			catch (Exception ex)
 			{
-				Logger.Error(ex.Message);
+				TraceSource.TraceEvent(TraceEventType.Error, 5140, "{0}", ex);
 			}
 			Connection = null;
 		}

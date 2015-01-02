@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
 using Oracle.DataAccess.Client;
 using Revenj.Common;
 using Revenj.DatabasePersistence.Oracle.Converters;
-using Revenj.Logging;
 
 namespace Revenj.DatabasePersistence.Oracle
 {
@@ -21,6 +21,7 @@ namespace Revenj.DatabasePersistence.Oracle
 	{
 		public static int MinBatchSize { get; private set; }
 		private static readonly OracleAQAgent[] Recipients;
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 
 		static OracleDatabaseQuery()
 		{
@@ -41,24 +42,19 @@ namespace Revenj.DatabasePersistence.Oracle
 		private OracleConnection Connection;
 		private readonly OracleTransaction Transaction;
 
-		private readonly ILogFactory LogFactory;
-
 		private readonly object sync = new object();
 		private readonly Lazy<OracleAQQueue> Queue;
 		private bool BrokenTransaction;
 
 		public OracleDatabaseQuery(
 			OracleConnection connection,
-			OracleTransaction transaction,
-			ILogFactory logFactory)
+			OracleTransaction transaction)
 		{
 			Contract.Requires(connection != null);
-			Contract.Requires(logFactory != null);
 
 			this.Connection = connection;
 			this.ConnectionString = connection.ConnectionString;
 			this.Transaction = transaction;
-			this.LogFactory = logFactory;
 			Queue =
 				new Lazy<OracleAQQueue>(() =>
 				{
@@ -100,16 +96,13 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Oracle database layer - prepare command").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5110, "{0}", ex);
 				try { Connection.Close(); }
 				catch { }
-				try
-				{
-					OracleConnection.ClearAllPools();
-				}
+				try { OracleConnection.ClearAllPools(); }
 				catch (Exception cpex)
 				{
-					LogFactory.Create("Oracle database layer - clear pools").Error(cpex.ToString());
+					TraceSource.TraceEvent(TraceEventType.Error, 5111, "{0}", cpex);
 				}
 				if (Connection.State == ConnectionState.Closed)
 				{
@@ -131,14 +124,14 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Oracle database layer - reset connection").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5112, "{0}", ex);
 				try
 				{
 					OracleConnection.ClearAllPools();
 				}
 				catch (Exception cpex)
 				{
-					LogFactory.Create("Oracle database layer - clear pools").Error(cpex.ToString());
+					TraceSource.TraceEvent(TraceEventType.Error, 5113, "{0}", cpex);
 				}
 			}
 			Connection = new OracleConnection(ConnectionString);
@@ -168,9 +161,8 @@ namespace Revenj.DatabasePersistence.Oracle
 			catch (OracleException ex)
 			{
 				BrokenTransaction = !tryRecover;
-				var logger = LogFactory.Create("Oracle database layer - execute non query");
-				logger.Trace(command.CommandText);
-				logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Verbose, 5114, command.CommandText);
+				TraceSource.TraceEvent(TraceEventType.Error, 5114, "{0}", ex);
 				if (tryRecover && ex.InnerException is IOException)
 				{
 					ResetConnection();
@@ -180,7 +172,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Oracle database layer - execute non query").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5115, "{0}", ex);
 				if (tryRecover)
 				{
 					ResetConnection();
@@ -221,9 +213,8 @@ namespace Revenj.DatabasePersistence.Oracle
 			catch (OracleException ex)
 			{
 				BrokenTransaction = !tryRecover;
-				var logger = LogFactory.Create("Oracle database layer - execute non query");
-				logger.Trace(command.CommandText);
-				logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Verbose, 5116, command.CommandText);
+				TraceSource.TraceEvent(TraceEventType.Error, 5116, "{0}", ex);
 				if (tryRecover && ex.InnerException is IOException && !hasRead)
 				{
 					ResetConnection();
@@ -233,7 +224,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Oracle database layer - execute data reader").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5117, "{0}", ex);
 				if (tryRecover && !hasRead)
 				{
 					ResetConnection();
@@ -286,9 +277,8 @@ namespace Revenj.DatabasePersistence.Oracle
 			catch (OracleException ex)
 			{
 				BrokenTransaction = !tryRecover;
-				var logger = LogFactory.Create("Oracle database layer - fill table");
-				logger.Trace(command.CommandText);
-				logger.Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Verbose, 5117, command.CommandText);
+				TraceSource.TraceEvent(TraceEventType.Error, 5117, "{0}", ex);
 				if (tryRecover && ex.InnerException is IOException)
 				{
 					ResetConnection();
@@ -298,7 +288,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Oracle database layer - fill table").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5118, "{0}", ex);
 				if (tryRecover)
 				{
 					ResetConnection();
@@ -335,7 +325,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			}
 			catch (Exception ex)
 			{
-				LogFactory.Create("Oracle database layer - dispose").Error(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5119, "{0}", ex);
 			}
 		}
 	}

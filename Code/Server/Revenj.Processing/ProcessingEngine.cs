@@ -12,7 +12,6 @@ using System.Security;
 using System.Threading;
 using Revenj.Common;
 using Revenj.Extensibility;
-using Revenj.Logging;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
@@ -21,10 +20,11 @@ namespace Revenj.Processing
 {
 	public class ProcessingEngine : IProcessingEngine
 	{
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
+
 		private readonly IObjectFactory ObjectFactory;
 		private readonly IScopePool ScopePool;
 		private readonly IPermissionManager Permissions;
-		private readonly ILogger Logger;
 		private readonly Dictionary<Type, Type> ActualCommands = new Dictionary<Type, Type>();
 		private readonly ConcurrentDictionary<Type, object> Serializators = new ConcurrentDictionary<Type, object>(1, 7);
 
@@ -32,19 +32,16 @@ namespace Revenj.Processing
 			IObjectFactory objectFactory,
 			IScopePool scopePool,
 			IPermissionManager permissions,
-			ILogFactory logFactory,
 			IExtensibilityProvider extensibilityProvider)
 		{
 			Contract.Requires(objectFactory != null);
 			Contract.Requires(scopePool != null);
 			Contract.Requires(permissions != null);
-			Contract.Requires(logFactory != null);
 			Contract.Requires(extensibilityProvider != null);
 
 			this.ObjectFactory = objectFactory.CreateInnerFactory();
 			this.ScopePool = scopePool;
 			this.Permissions = permissions;
-			this.Logger = logFactory.Create("Processing engine");
 			var commandTypes = extensibilityProvider.FindPlugins<IServerCommand>();
 
 			foreach (var ct in commandTypes)
@@ -104,6 +101,7 @@ namespace Revenj.Processing
 
 			if (commandDescriptions == null || commandDescriptions.Length == 0)
 			{
+				TraceSource.TraceEvent(TraceEventType.Warning, 5310);
 				return
 					ProcessingResult<TOutput>.Create(
 						"There are no commands to execute.",
@@ -117,10 +115,12 @@ namespace Revenj.Processing
 				var c = commandDescriptions[i];
 				if (!Permissions.CanAccess(c.CommandType))
 				{
-					Logger.Trace(
-						() => "Access denied. User: {0}. Target: {1}.".With(
-								Thread.CurrentPrincipal.Identity.Name,
-								c.CommandType.FullName));
+					TraceSource.TraceEvent(
+						TraceEventType.Warning,
+						5311,
+						"Access denied. User: {0}. Target: {1}",
+						Thread.CurrentPrincipal.Identity.Name,
+						c.CommandType.FullName);
 					return
 						ProcessingResult<TOutput>.Create(
 							"You don't have permission to execute command: " + c.CommandType.FullName,
@@ -141,10 +141,12 @@ namespace Revenj.Processing
 				useTransaction = useTransaction || !c.IsReadOnly;
 				if (c.Target == null)
 				{
-					Logger.Trace(
-						() => "Unknown target. User: {0}. Target: {1}.".With(
-								Thread.CurrentPrincipal.Identity.Name,
-								commandDescriptions[i].CommandType.FullName));
+					TraceSource.TraceEvent(
+						TraceEventType.Warning,
+						5321,
+						"Unknown target. User: {0}. Target: {1}",
+						Thread.CurrentPrincipal.Identity.Name,
+						commandDescriptions[i].CommandType.FullName);
 					return
 						ProcessingResult<TOutput>.Create(
 							"Unknown command: {0}. Check if requested command is registered in the system".With(
@@ -165,7 +167,7 @@ namespace Revenj.Processing
 				}
 				catch (Exception ex)
 				{
-					Logger.Error("Can't start query. Error: " + ex.ToString());
+					TraceSource.TraceEvent(TraceEventType.Critical, 5322, "{0}", ex);
 					return Exceptions.DebugMode
 						? ProcessingResult<TOutput>.Create(
 							ex.ToString(),
@@ -200,17 +202,19 @@ namespace Revenj.Processing
 				var duration = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
 				return
 					ProcessingResult<TOutput>.Create(
-						"Commands executed in: " + duration.ToString(CultureInfo.InvariantCulture) + " ms.",
+						"Commands executed in: " + duration.ToString(CultureInfo.InvariantCulture) + " ms",
 						HttpStatusCode.OK,
 						executedCommands,
 						start);
 			}
 			catch (SecurityException ex)
 			{
-				Logger.Trace(
-					() => "Security error. User: {0}. Error: {1}.".With(
-							Thread.CurrentPrincipal.Identity.Name,
-							ex.ToString()));
+				TraceSource.TraceEvent(
+					TraceEventType.Warning,
+					5312,
+					"Security error. User: {0}. Error: {1}.",
+					Thread.CurrentPrincipal.Identity.Name,
+					ex);
 				ScopePool.Release(scope, false);
 				return
 					ProcessingResult<TOutput>.Create(
@@ -221,10 +225,12 @@ namespace Revenj.Processing
 			}
 			catch (AggregateException ex)
 			{
-				Logger.Trace(
-					() => "Multiple errors. User: {0}. Error: {1}.".With(
-							Thread.CurrentPrincipal.Identity.Name,
-							ex.GetDetailedExplanation()));
+				TraceSource.TraceEvent(
+					TraceEventType.Error,
+					5313,
+					"Multiple errors. User: {0}. Error: {1}.",
+					Thread.CurrentPrincipal.Identity.Name,
+					ex.GetDetailedExplanation());
 				ScopePool.Release(scope, false);
 				return Exceptions.DebugMode
 					? ProcessingResult<TOutput>.Create(
@@ -240,7 +246,7 @@ namespace Revenj.Processing
 			}
 			catch (OutOfMemoryException ex)
 			{
-				Logger.Error("Out of memory error. Error: " + ex.GetDetailedExplanation());
+				TraceSource.TraceEvent(TraceEventType.Critical, 5315, ex.GetDetailedExplanation());
 				ScopePool.Release(scope, false);
 				return Exceptions.DebugMode
 					? ProcessingResult<TOutput>.Create(
@@ -256,7 +262,7 @@ namespace Revenj.Processing
 			}
 			catch (DbException ex)
 			{
-				Logger.Trace("DbException: : " + ex.GetDetailedExplanation());
+				TraceSource.TraceEvent(TraceEventType.Warning, 5316, ex.GetDetailedExplanation());
 				ScopePool.Release(scope, false);
 				return Exceptions.DebugMode
 					? ProcessingResult<TOutput>.Create(
@@ -272,10 +278,12 @@ namespace Revenj.Processing
 			}
 			catch (Exception ex)
 			{
-				Logger.Trace(
-					() => "Unexpected error. User: {0}. Error: {1}.".With(
-						Thread.CurrentPrincipal.Identity.Name,
-						ex.GetDetailedExplanation()));
+				TraceSource.TraceEvent(
+					TraceEventType.Error,
+					5317,
+					"Unexpected error. User: {0}. Error: {1}",
+					Thread.CurrentPrincipal.Identity.Name,
+					ex.GetDetailedExplanation());
 				ScopePool.Release(scope, false);
 				return Exceptions.DebugMode
 					? ProcessingResult<TOutput>.Create(

@@ -23,9 +23,9 @@ namespace Revenj.Plugins.Aspects.Commands
 		{
 			if (!LogCommands)
 				return;
-			factory.RegisterTypes(new[] { typeof(ProcessingCommandsIntercepter), typeof(RestCommandsIntercepter) });
-			var processingInterceptor = factory.Resolve<ProcessingCommandsIntercepter>();
-			var restInterceptor = factory.Resolve<RestCommandsIntercepter>();
+
+			var processingInterceptor = new ProcessingCommandsIntercepter();
+			var restInterceptor = new RestCommandsIntercepter();
 			var aspectRegistrator = factory.Resolve<IAspectRegistrator>();
 
 			var tpe = typeof(IProcessingEngine);
