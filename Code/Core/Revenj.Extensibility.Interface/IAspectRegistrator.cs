@@ -6,7 +6,7 @@ using System.Reflection;
 namespace Revenj.Extensibility
 {
 	/// <summary>
-	/// AOP managment service.
+	/// AOP management service.
 	/// Register aspects on join points.
 	/// </summary>
 	[ContractClass(typeof(AspectRegistratorContract))]
@@ -20,7 +20,7 @@ namespace Revenj.Extensibility
 		void Before(Type type, Action before);
 		/// <summary>
 		/// Register aspect which will be invoked after type construction.
-		/// Contructed instance will be provided to the advice.
+		/// Constructed instance will be provided to the advice.
 		/// </summary>
 		/// <param name="type">target class/interface</param>
 		/// <param name="after">advice which will be invoked</param>

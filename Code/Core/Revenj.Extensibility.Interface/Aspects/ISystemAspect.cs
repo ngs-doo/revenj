@@ -4,7 +4,7 @@ namespace Revenj.Extensibility
 {
 	/// <summary>
 	/// System aspects will be resolved during system startup.
-	/// Services can configure system behaviour.
+	/// Services can configure system behavior.
 	/// </summary>
 	[ContractClass(typeof(SystemAspectContract))]
 	public interface ISystemAspect

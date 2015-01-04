@@ -33,7 +33,7 @@ namespace Revenj.DomainPatterns
 		void InvalidateAll();
 	}
 	/// <summary>
-	/// Cachable domain objects.
+	/// Cacheable domain objects.
 	/// Dependencies can be tracked through relationship,
 	/// so invalidation can be detected.
 	/// </summary>
