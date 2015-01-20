@@ -87,14 +87,14 @@ namespace Revenj.Serialization
 				try
 				{
 					if (context.Context == null)
-						return SharedSerializer.Deserialize(reader, type);
-					var serializer = new JsonSerializer();
-					serializer.Converters.Add(EnumConverter);
-					serializer.Converters.Add(TextReaderConverter);
-					serializer.TypeNameHandling = TypeNameHandling.Auto;
-					serializer.Context = context;
-					serializer.Binder = Binder;
-					return serializer.Deserialize(reader, type);
+						return SharedSerializer.Deserialize(new JsonTextReader(reader), type);
+					var jsonNet = new JsonSerializer();
+					jsonNet.Converters.Add(EnumConverter);
+					jsonNet.Converters.Add(TextReaderConverter);
+					jsonNet.TypeNameHandling = TypeNameHandling.Auto;
+					jsonNet.Context = context;
+					jsonNet.Binder = Binder;
+					return jsonNet.Deserialize(new JsonTextReader(reader), type);
 				}
 				catch (TargetInvocationException tex)
 				{
@@ -127,6 +127,7 @@ namespace Revenj.Serialization
 			if (jo != null)
 			{
 				jo.Serialize(sw, minimal, SharedSerializer.Serialize);
+				sw.Flush();
 			}
 			else
 			{
@@ -150,6 +151,7 @@ namespace Revenj.Serialization
 						}
 					}
 					sw.Write(']');
+					sw.Flush();
 				}
 				else if (value is IList<IJsonObject>)
 				{
@@ -171,6 +173,7 @@ namespace Revenj.Serialization
 						}
 					}
 					sw.Write(']');
+					sw.Flush();
 				}
 				else if (value is ICollection<IJsonObject>)
 				{
@@ -197,13 +200,15 @@ namespace Revenj.Serialization
 							sw.Write("null");
 					}
 					sw.Write(']');
+					sw.Flush();
 				}
 				else
 				{
-					SharedSerializer.Serialize(sw, value);
+					var jw = new JsonTextWriter(sw);
+					SharedSerializer.Serialize(jw, value);
+					jw.Flush();
 				}
 			}
-			sw.Flush();
 		}
 
 		private static ConcurrentDictionary<Type, IDeserializer> Cache = new ConcurrentDictionary<Type, IDeserializer>(1, 17);
@@ -275,14 +280,14 @@ namespace Revenj.Serialization
 					try
 					{
 						if (context.Context == null)
-							return JsonNet.Deserialize(reader, Target);
-						var serializer = new JsonSerializer();
-						serializer.Converters.Add(EnumConverter);
-						serializer.Converters.Add(TextReaderConverter);
-						serializer.TypeNameHandling = TypeNameHandling.Auto;
-						serializer.Context = context;
-						serializer.Binder = Binder;
-						return serializer.Deserialize(reader, Target);
+							return JsonNet.Deserialize(new JsonTextReader(reader), Target);
+						var jsonNet = new JsonSerializer();
+						jsonNet.Converters.Add(EnumConverter);
+						jsonNet.Converters.Add(TextReaderConverter);
+						jsonNet.TypeNameHandling = TypeNameHandling.Auto;
+						jsonNet.Context = context;
+						jsonNet.Binder = Binder;
+						return jsonNet.Deserialize(new JsonTextReader(reader), Target);
 					}
 					catch (TargetInvocationException tex)
 					{
