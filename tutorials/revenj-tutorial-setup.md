@@ -11,8 +11,8 @@ This makes it ideal as a [REST service](http://c2.com/cgi/wiki?RestArchitectural
 - Plugin based architecture allows for easy extensions without code changes or recompilations. Signature based extensions are utilized, so even convention or configuration are not necessary, since services are picked up by their signature, not their name or explicit wiring.
 
 In this tutorial we will use it as a REST service to show off why Revenj/DSL Platform is useful. 
-To get started, we'll need a DSL Platform account, Postgres (9.1 or newer) and .NET (4.0 or newer)/Mono (3.2 or newer). 
-DSL Platform is a DSL compiler (available for free as an online service, or can be licensed for offline installation) which converts provided DSL model to target code/SQL.
+To get started, we'll need a Postgres (9.1 or newer) and .NET (4.0 or newer). 
+DSL Platform is a DSL compiler which converts provided DSL model to target code/SQL.
 
 ###DSL introduction
 
@@ -52,7 +52,7 @@ In Visual studio create a new Class Library project for .NET 4 or newer:
 
 ![Creating tutorial project](pictures/new-project.png)
 
-Now we can use right click on the solution to pull up the properties and select the *Convert to DSL Platform solution* option.
+Now we can use right click on the solution to pull up the properties and select the *DSL Platform* option.
 
 ![Adding DSL Platform info to sln file](pictures/convert-solution.png)
 
@@ -62,9 +62,9 @@ We need to insert a block to sln to enable unmanaged project compilation after w
 ![Unmanaged DSL Platform project](pictures/sln-changes.png)
 
 Basically, we need to define a `DslPlatformSolutionProperties` section with a `ConnectionString` key. 
-Afer that we can log in to DSL Platform using Visual studio plugin:
+Afer that we can either log in to DSL Platform or use an offline mode (where a local compiler is used):
 
-![Log in to DSL Platform](pictures/login-to-dsl.png)
+![DSL Platform](pictures/login-to-dsl.png)
 
 Once logged in we will get a window where we can invoke DSL compilation, but first, let's download and configure dependencies. 
 In configuration window, we can download the Full Revenj version for server library (alternatively we can download it from [Github](https://github.com/ngs-doo/revenj/releases/latest) or Nuget).

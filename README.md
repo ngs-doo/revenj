@@ -61,8 +61,7 @@ DSL compiler acts as a developer in your team which does all the boring work you
 
 ##Getting started:
 
-Register at [dsl-platform](https://dsl-platform.com/) so you can use the free online compiler. 
-You will also need a Postgres instance and a .NET/Mono.
+Setup a Postgres instance and a .NET/Mono.
 
 Go through the tutorials:
 

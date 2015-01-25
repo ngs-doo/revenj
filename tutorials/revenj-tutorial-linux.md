@@ -1,7 +1,7 @@
 ## Revenj tutorial with Mono, Postgres and DSL command line client
 
 **Revenj** is a framework which can be used on Mono with Postgres. 
-While it can be used as any other framework, it's rather small (feature wise) and it's best used as a backend for [DSL Platform](https://dsl-platform.com). This makes it ideal as a [REST service](http://c2.com/cgi/wiki?RestArchitecturalStyle) built on [DSL](http://c2.com/cgi/wiki?DomainSpecificLanguage) models, or within some other framework such as ASP.NET. 
+While it can be used as any other framework, it's rather small (feature wise) and it's best used with [DSL Platform](https://dsl-platform.com) compiler. This makes it ideal as a [REST service](http://c2.com/cgi/wiki?RestArchitecturalStyle) built on [DSL](http://c2.com/cgi/wiki?DomainSpecificLanguage) models, or within some other framework such as ASP.NET. 
 *While Revenj supports Oracle too, due to its native dependencies it only runs on Windows*. 
 
 - Revenj contains [LINQ](http://msdn.microsoft.com/en-us/library/bb397926.aspx) provider for Postgres, somewhat different from other LINQ providers since it leverages object-oriented features of Postgres. This allows for having a [NoSQL documents](http://en.wikipedia.org/wiki/Document-oriented_database) inside a relational databases.
@@ -11,8 +11,8 @@ While it can be used as any other framework, it's rather small (feature wise) an
 - Plugin based architecture allows for easy extensions without code changes or recompilations. Signature based extensions are utilized, so even convention or configuration are not necessary, since services are picked up by their signature, not their name or explicit wiring.
 
 In this tutorial we will use it as a REST service to show off why Revenj/DSL Platform is useful. 
-To get started, we'll need a DSL Platform account, Postgres (9.1 or newer) and Mono (3.2 or newer). 
-DSL Platform is a DSL compiler (available for free as an online service, or can be licensed for offline installation) which converts provided DSL model to target code/SQL.
+To get started, we'll need Postgres (9.1 or newer) and Mono (3.2 or newer). 
+DSL Platform is a DSL compiler which converts provided DSL model to target code/SQL.
 
 ###DSL introduction
 
@@ -55,9 +55,8 @@ To continue with this tutorial you'll need:
 To start, create a new .props (let's call it my.props) file and fill it with configuration values for your environment. 
 For our example we will use these values:
 
-	# DSL credentials
-	u=<your dsl platform login>
-	p=<your dsl platform password>
+	# use an offline compiler (alternative is to use an online service)
+	compiler
 	# Path for generated server model library
 	revenj=./model/ServerModel.dll
 	# Path to directory where SQL migration script will be generated
@@ -75,9 +74,9 @@ For our example we will use these values:
 
 We will use CLC to compile the DSL file(s). It will 
 
-* download sources from DSL Platform
-* download all library dependencies that are required for the project
-* compile ServerModel.dll using downloaded sources and found dependencies using Mono compiler 
+* gather sources/migration from DSL compiler
+* download all library dependencies that are required for the project (from Github or DSL Platform website)
+* compile ServerModel.dll using sources and found dependencies using Mono compiler 
 * create and run a database migration script
 
 After that we will do few configuration steps. So let's start.
@@ -96,9 +95,13 @@ Also it will download latest version of Revenj. This is all done by this command
 	
 Instead of using a my.props file, we could send arguments using command line, such as:
 
-    java -jar dsl-clc.jar -db=localhost:5432/ngsdb?user=dbUser -revenj=./model/ServerModel.dll -migration -apply
+    java -jar dsl-clc.jar -db=localhost:5432/ngsdb?user=dbUser -revenj=./model/ServerModel.dll -migration -apply -compiler
 
-But for convenience, let's stick with the .props fiile. Output will be as follows:
+But for convenience, let's stick with the .props file. Output will be as follows:
+
+    Do you wish to download compiler from the Internet? (y/N)
+
+Since we have passed in compiler argument stating that we wish to use the offline compiler it will ask to download it from the Internet. Next:
 	
 	Revenj dependencies not found in: /var/mono/wwwroot/clc/./revenj
 	Do you wish to download latest Revenj version from the Internet (y/N): y
@@ -155,12 +158,9 @@ First by compiling it and creating Mono .dll file with our model in it, then by 
 If you have an error inside your DSL, they will be shown during the beginning of this part of the process and all activities will be stopped. 
 Output from the whole process can be seen here:
 
-	Compiling DSL...
-	Calling: https://compiler.dsl-platform.com:8443/platform/Platform.svc/unmanaged/source?targets=CSharpServer
 	Compiling Revenj library...
 	Compiled Revenj library to: /var/mono/wwwroot/clc/./model/ServerModel.dll
-	Downloading SQL migration...
-	Calling: https://compiler.dsl-platform.com:8443/platform/Platform.svc/unmanaged/postgres-migration?version=
+	Creating SQL migration...
 	Migration saved to /var/mono/wwwroot/clc/./migrationDirectory/sql-migration-1406165252523.sql
 	--CREATE: Tutorial-Example
 	New object Example will be created in schema Tutorial
