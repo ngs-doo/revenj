@@ -150,7 +150,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 		// Executes a query with a collection result.
 		public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
 		{
-			var hasUnion = queryModel.ResultOperators.Any(it => it is UnionResultOperator);
+			var hasUnion = queryModel.ResultOperators.Any(it => it is UnionResultOperator || it is ConcatResultOperator);
 			if (hasUnion)
 				queryModel = queryModel.ConvertToSubQuery("sq");
 

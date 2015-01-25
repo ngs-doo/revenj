@@ -351,7 +351,7 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 				var grouping = sqe.QueryModel.ResultOperators.FirstOrDefault(it => it is GroupResultOperator) as GroupResultOperator;
 				if (grouping == null && subquery.Selects.Count == 1)
 				{
-					if (sqe.QueryModel.ResultOperators.Any(it => it is UnionResultOperator))
+					if (sqe.QueryModel.ResultOperators.Any(it => it is UnionResultOperator || it is ConcatResultOperator))
 					{
 						var ind = subquery.Selects[0].Sql.IndexOf(" AS ");
 						if (ind > 0)
@@ -553,7 +553,8 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 			ProcessSetOperators(
 				sb,
 				ResultOperators
-				.Where(it => it is ExceptResultOperator || it is IntersectResultOperator || it is UnionResultOperator)
+				.Where(it => it is ExceptResultOperator || it is IntersectResultOperator
+					|| it is UnionResultOperator || it is ConcatResultOperator)
 				.ToList());
 
 			ProcessGroupOperators(
@@ -590,6 +591,7 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 				var ero = it as ExceptResultOperator;
 				var iro = it as IntersectResultOperator;
 				var uro = it as UnionResultOperator;
+				var cro = it as ConcatResultOperator;
 				if (ero != null)
 				{
 					sb.AppendLine("EXCEPT");
@@ -602,15 +604,23 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 				}
 				else
 				{
-					//TODO missing Concat operator
-					sb.AppendLine("UNION ALL");
-					//TODO if order is used, Oracle will fail anyway
-					var sqe = uro.Source2 as SubQueryExpression;
-					ResultOperators.ForEach(ro =>
+					SubQueryExpression sqe;
+					if (uro != null)
 					{
-						if (ro is UnionResultOperator == false)
+						sb.AppendLine("UNION");
+						sqe = uro.Source2 as SubQueryExpression;
+					}
+					else
+					{
+						sb.AppendLine("UNION ALL");
+						sqe = cro.Source2 as SubQueryExpression;
+					}
+					//TODO if order is used, Oracle will fail anyway
+					foreach (var ro in ResultOperators)
+					{
+						if (ro is UnionResultOperator == false && ro is ConcatResultOperator == false)
 							sqe.QueryModel.ResultOperators.Add(ro);
-					});
+					}
 					sb.AppendLine(SqlGeneratorExpressionTreeVisitor.GetSqlExpression(sqe, this));
 				}
 			});
