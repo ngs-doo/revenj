@@ -4,6 +4,67 @@
         <name>NGS.Templater</name>
     </assembly>
     <members>
+        <member name="T:NGS.Templater.IDocumentFactoryBuilder">
+            <summary>
+            Templater document factory builder. 
+            Should be used when custom plugins are provided.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.String,System.Object})">
+            <summary>
+            Register new formatter plugin.
+            Plugin works by accepting object value and current metadata
+            and returns the same object if plugin is not applicable
+            or new value if plugin is applicable.
+            Metadata can be parsed to extract arguments from it.
+            </summary>
+            <param name="formatter">formatting plugin</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.String,System.String,NGS.Templater.ITemplater,System.Boolean})">
+            <summary>
+            Register new metadata handler.
+            Plugin works by accepting object value, current metadata, 
+            current property (path) and ITemplater instance. It should return 
+            true when it wants to stop further processing of that tag.
+            Metadata can be parsed to extract arguments from it.
+            </summary>
+            <param name="handler">handler plugin</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include``1(System.Func{System.String,NGS.Templater.ITemplater,``0,System.Boolean})">
+            <summary>
+            Register new processor plugin.
+            Plugin works by accepting current navigation prefix, ITemplater instance 
+            and current object value. It should return false if it's not applicable or
+            true if it processed the current path.
+            </summary>
+            <typeparam name="T">target type</typeparam>
+            <param name="processor">processor plugin</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Build">
+            <summary>
+            Build document factory instance using default 'templater.lic' license file.
+            </summary>
+            <returns>configured document factory</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Build(System.String)">
+            <summary>
+            Build document factory instance using provided custom license file (default is 'templater.lic').
+            File can be embedded in assembly.
+            </summary>
+            <param name="path">Path to license file</param>
+            <returns>configured document factory</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Build(System.String,System.String)">
+            <summary>
+            Build document factory instance using provided license information.
+            </summary>
+            <param name="customer">License owner</param>
+            <param name="license">License key</param>
+            <returns>configured document factory</returns>
+        </member>
         <member name="T:NGS.Templater.IDocumentFactory">
             <summary>
             Creates template document interface
@@ -104,6 +165,11 @@
             </summary>
             <param name="path">Path to license file</param>
             <returns>Document factory</returns>
+        </member>
+        <member name="P:NGS.Templater.Configuration.Builder">
+            <summary>
+            Create instance of document factory builder, so custom plugins can be provided.
+            </summary>
         </member>
         <member name="P:NGS.Templater.Configuration.Factory">
             <summary>
