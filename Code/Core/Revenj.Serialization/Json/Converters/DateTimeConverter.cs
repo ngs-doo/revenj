@@ -154,7 +154,7 @@ namespace Revenj.Serialization.Json.Converters
 						}
 					}
 				}
-				if (value.Kind == DateTimeKind.Local)
+				if (value.Kind != DateTimeKind.Utc)
 				{
 					SaveWithLocal(value, sw, buffer, end);
 				}
@@ -167,7 +167,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			else
 			{
-				if (value.Kind == DateTimeKind.Local)
+				if (value.Kind != DateTimeKind.Utc)
 				{
 					SaveWithLocal(value, sw, buffer, 20);
 				}

@@ -23,7 +23,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		//TODO private
 		public static string ToDatabase(DateTime value)
 		{
-			if (value.Kind != DateTimeKind.Local)
+			if (value.Kind == DateTimeKind.Utc)
 				return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF+00");
 			var offset = CurrentZone.GetUtcOffset(value);
 			if (offset.Minutes != 0)
