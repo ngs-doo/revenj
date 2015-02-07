@@ -21,7 +21,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			return ParseS3(reader, context, context << 1, null);
+			var s3 = ParseS3(reader, context, context << 1, null);
+			reader.Read();
+			return s3;
 		}
 
 		private static S3 ParseS3(TextReader reader, int context, int innerContext, IServiceLocator locator)
@@ -36,7 +38,6 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var metadata = HstoreConverter.Parse(reader, innerContext);
 			for (int i = 0; i < context; i++)
 				reader.Read();
-			reader.Read();
 			return new S3 { Bucket = bucket, Key = key, Length = length, Name = name, MimeType = mimeType, Metadata = metadata };
 		}
 

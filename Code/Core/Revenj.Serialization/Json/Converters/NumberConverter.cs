@@ -93,7 +93,7 @@ namespace Revenj.Serialization.Json.Converters
 				buffer[pos--] = num.First;
 				abs = div;
 			} while (abs != 0);
-			if (buffer[pos + 1] == '0')
+			if (buffer[pos + 1] == '0') // TODO: remove branch
 				pos++;
 			sw.Write(buffer, pos + 1, 10 - pos);
 		}
@@ -130,7 +130,7 @@ namespace Revenj.Serialization.Json.Converters
 				buffer[pos--] = num.First;
 				abs = div;
 			} while (abs != 0);
-			if (buffer[pos + 1] == '0')
+			if (buffer[pos + 1] == '0')//TODO: remove branch
 				pos++;
 			sw.Write(buffer, pos + 1, 20 - pos);
 		}
