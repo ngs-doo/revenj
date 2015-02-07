@@ -21,7 +21,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				for (int i = 0; i < Value.Length; i++)
 				{
 					var v = Value[i];
-					EscapeRecord = EscapeRecord || v == ',' || v == ',' || v == '\\' || v == '"' || v == '(' || v == ')' || char.IsWhiteSpace(v);
+					EscapeRecord = EscapeRecord || v == ',' || v == '\\' || v == '"' || v == '(' || v == ')' || char.IsWhiteSpace(v);
 					EscapeArray = EscapeArray || v == ',' || v == '\\' || v == '"' || v == '{' || v == '}' || char.IsWhiteSpace(v);
 					HasMarkers = HasMarkers || v == '\\' || v == '"';
 				}
@@ -88,7 +88,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						slashEscape = slashEscape ?? BuildSlashEscape(escaping.Length);
 						sw.Write(slashEscape);
 					}
-					sw.Write(c);
+					else sw.Write(c);
 				}
 			}
 		}

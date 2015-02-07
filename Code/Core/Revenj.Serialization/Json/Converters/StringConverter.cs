@@ -303,7 +303,7 @@ namespace Revenj.Serialization.Json.Converters
 			{
 				Array.Copy(buffer, 0, largeBuffer, index, safeUntil);
 				index += safeUntil;
-				for (int x = safeUntil; x < buffer.Length && x < i; x++)
+				for (int x = safeUntil; x < buffer.Length && x < i && index < max; x++)
 				{
 					var nextToken = buffer[x];
 					if (nextToken == '\\')
@@ -328,9 +328,7 @@ namespace Revenj.Serialization.Json.Converters
 				{
 					var nextToken = buffer[x];
 					if (nextToken == '\\')
-					{
 						nextToken = HandleEscape(sr, buffer, ref i, ref x);
-					}
 					sb.Append(nextToken);
 				}
 				i = sr.ReadUntil(buffer, 0, '"');
@@ -348,8 +346,14 @@ namespace Revenj.Serialization.Json.Converters
 			{
 				i = sr.ReadUntil(buffer, 0, '"');
 				if (i == 0)
-					throw new SerializationException("Invalid end of string at " + JsonSerialization.PositionInStream(sr));
-				x = 1;
+				{
+					var next = sr.Read();
+					if (next == -1)
+						throw new SerializationException("String quote not found. End of stream detected");
+					buffer[0] = (char)next;
+					i = sr.ReadUntil(buffer, 1, '"') + 1;
+				}
+				x = 0;
 				nextToken = buffer[0];
 			}
 			else nextToken = buffer[++x];
@@ -412,7 +416,7 @@ namespace Revenj.Serialization.Json.Converters
 			if (nextToken != ']')
 			{
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
-				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				else throw new SerializationException("Expecting ']' or ',' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
 		public static List<string> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
@@ -444,7 +448,7 @@ namespace Revenj.Serialization.Json.Converters
 			if (nextToken != ']')
 			{
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
-				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				else throw new SerializationException("Expecting ']' or ',' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
 	}
