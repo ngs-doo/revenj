@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
@@ -125,6 +126,39 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 			reader.Read();
 			return list;
+		}
+
+		public static IPostgresTuple ToTuple(decimal value)
+		{
+			return new DecimalTuple(value);
+		}
+
+		class DecimalTuple : IPostgresTuple
+		{
+			private readonly decimal Value;
+
+			public DecimalTuple(decimal value)
+			{
+				this.Value = value;
+			}
+
+			public bool MustEscapeRecord { get { return false; } }
+			public bool MustEscapeArray { get { return false; } }
+
+			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write(Value);
+			}
+
+			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write(Value);
+			}
+
+			public string BuildTuple(bool quote)
+			{
+				return Value.ToString();
+			}
 		}
 	}
 }

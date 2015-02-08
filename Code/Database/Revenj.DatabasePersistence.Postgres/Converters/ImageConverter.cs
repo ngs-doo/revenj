@@ -65,7 +65,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public static PostgresTuple ToTuple(Image value)
+		public static IPostgresTuple ToTuple(Image value)
 		{
 			if (value == null)
 				return null;

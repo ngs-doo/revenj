@@ -15,7 +15,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				return "NULL";
 			using (var cms = ChunkedMemoryStream.Create())
 			{
-				Func<T, PostgresTuple> toTuple = v => new ValueTuple(converter(v), false, true);
+				Func<T, IPostgresTuple> toTuple = v => new ValueTuple(converter(v), false, true);
 				var writer = cms.GetWriter();
 				ToArray(writer, data, toTuple);
 				writer.Flush();
@@ -24,14 +24,14 @@ namespace Revenj.DatabasePersistence.Postgres
 			}
 		}
 
-		public static void ToArray<T>(TextWriter sw, IEnumerable<T> data, Func<T, PostgresTuple> converter)
+		public static void ToArray<T>(TextWriter sw, IEnumerable<T> data, Func<T, IPostgresTuple> converter)
 		{
 			if (data == null)
 			{
 				sw.Write("NULL");
 				return;
 			}
-			var list = new List<PostgresTuple>();
+			var list = new List<IPostgresTuple>();
 			foreach (var item in data)
 				list.Add(converter(item));
 			sw.Write('\'');
@@ -40,14 +40,14 @@ namespace Revenj.DatabasePersistence.Postgres
 			sw.Write('\'');
 		}
 
-		public static void ToArray<T>(TextWriter sw, T[] data, Func<T, PostgresTuple> converter)
+		public static void ToArray<T>(TextWriter sw, T[] data, Func<T, IPostgresTuple> converter)
 		{
 			if (data == null)
 			{
 				sw.Write("NULL");
 				return;
 			}
-			var arr = new PostgresTuple[data.Length];
+			var arr = new IPostgresTuple[data.Length];
 			for (int i = 0; i < data.Length; i++)
 				arr[i] = converter(data[i]);
 			sw.Write('\'');

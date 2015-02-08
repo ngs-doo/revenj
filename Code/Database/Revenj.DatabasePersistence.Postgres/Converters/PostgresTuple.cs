@@ -6,14 +6,18 @@ using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
-	public abstract class PostgresTuple
+	public interface IPostgresTuple
 	{
-		public abstract bool MustEscapeRecord { get; }
-		public abstract bool MustEscapeArray { get; }
-		public abstract void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings);
-		public abstract void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings);
+		bool MustEscapeRecord { get; }
+		bool MustEscapeArray { get; }
+		void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings);
+		void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings);
+		string BuildTuple(bool quote);
+	}
 
-		public virtual string BuildTuple(bool quote)
+	public static class PostgresTuple
+	{
+		public static string BuildTuple(this IPostgresTuple tuple, bool quote)
 		{
 			using (var cms = ChunkedMemoryStream.Create())
 			{
@@ -21,10 +25,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				if (quote)
 				{
 					sw.Write('\'');
-					InsertRecord(sw, string.Empty, EscapeQuote);
+					tuple.InsertRecord(sw, string.Empty, EscapeQuote);
 					sw.Write('\'');
 				}
-				else InsertRecord(sw, string.Empty, null);
+				else tuple.InsertRecord(sw, string.Empty, null);
 				sw.Flush();
 				cms.Position = 0;
 				return cms.GetReader().ReadToEnd();
@@ -94,8 +98,20 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return result;
 		}
 
+		private static string[] Slashes = InitSlashes();
+
+		private static string[] InitSlashes()
+		{
+			var arr = new string[20];
+			for (int i = 0; i < arr.Length; i++)
+				arr[i] = new string('\\', 1 << i);
+			return arr;
+		}
+
 		public static string BuildSlashEscape(int len)
 		{
+			if (len < Slashes.Length)
+				return Slashes[len];
 			return new string('\\', 1 << len);
 		}
 	}

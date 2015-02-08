@@ -120,5 +120,40 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			reader.Read();
 			return list;
 		}
+
+		public static IPostgresTuple ToTuple(Guid value)
+		{
+			return new GuidTuple(value);
+		}
+
+		class GuidTuple : IPostgresTuple
+		{
+			private readonly Guid Value;
+
+			public GuidTuple(Guid value)
+			{
+				this.Value = value;
+			}
+
+			public bool MustEscapeRecord { get { return false; } }
+			public bool MustEscapeArray { get { return false; } }
+
+			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write(Value);
+			}
+
+			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			{
+				InsertRecord(sw, escaping, mappings);
+			}
+
+			public string BuildTuple(bool quote)
+			{
+				if (quote)
+					return "'" + Value.ToString() + "'";
+				return Value.ToString();
+			}
+		}
 	}
 }

@@ -1,10 +1,16 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
-	public class ValueTuple : PostgresTuple
+	public class ValueTuple : IPostgresTuple
 	{
+		private static char[] Whitespace = new[] { (char)9, (char)10, (char)11, (char)12, (char)13, (char)32, (char)160, (char)5760, (char)8192, (char)8193, (char)8194, (char)8195, (char)8196, (char)8197, (char)8198, (char)8199, (char)8200, (char)8201, (char)8202, (char)8232, (char)8233, (char)8239, (char)8287, (char)12288 };
+		private static char[] RecordEscapes = new[] { ',', '(', ')' }.UnionAll(Whitespace).ToArray();
+		private static char[] ArrayEscapes = new[] { ',', '{', '}' }.UnionAll(Whitespace).ToArray();
+		private static char[] EscapeMarkers = new[] { '\\', '"' };
+
 		private readonly string Value;
 		private readonly bool HasMarkers;
 
@@ -16,19 +22,15 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			this.Value = value;
 			if (value != null)
 			{
-				EscapeRecord = value.Length == 0;
-				EscapeArray = value.Length == 0 || value == "NULL";
-				for (int i = 0; i < Value.Length; i++)
-				{
-					var v = Value[i];
-					EscapeRecord = EscapeRecord || v == ',' || v == '\\' || v == '"' || v == '(' || v == ')' || char.IsWhiteSpace(v);
-					EscapeArray = EscapeArray || v == ',' || v == '\\' || v == '"' || v == '{' || v == '}' || char.IsWhiteSpace(v);
-					HasMarkers = HasMarkers || v == '\\' || v == '"';
-				}
+				HasMarkers = value.IndexOfAny(EscapeMarkers) != -1;
+				EscapeRecord = value.Length == 0 || HasMarkers || value.IndexOfAny(RecordEscapes) != -1;
+				EscapeArray = value.Length == 0 || value == "NULL" || HasMarkers || value.IndexOfAny(ArrayEscapes) != -1;
 			}
 			else
 			{
+				EscapeRecord = false;
 				EscapeArray = true;
+				HasMarkers = false;
 			}
 		}
 
@@ -40,10 +42,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			this.HasMarkers = record || array;
 		}
 
-		public override bool MustEscapeRecord { get { return EscapeRecord; } }
-		public override bool MustEscapeArray { get { return EscapeArray; } }
+		public bool MustEscapeRecord { get { return EscapeRecord; } }
+		public bool MustEscapeArray { get { return EscapeArray; } }
 
-		public override string BuildTuple(bool quote)
+		public string BuildTuple(bool quote)
 		{
 			if (Value == null)
 				return "NULL";
@@ -60,13 +62,13 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					if (c == '"')
 					{
-						quoteEscape = quoteEscape ?? BuildQuoteEscape(escaping);
+						quoteEscape = quoteEscape ?? PostgresTuple.BuildQuoteEscape(escaping);
 						foreach (var q in quoteEscape)
 							mappings(sw, q);
 					}
 					else if (c == '\\')
 					{
-						slashEscape = slashEscape ?? BuildSlashEscape(escaping.Length);
+						slashEscape = slashEscape ?? PostgresTuple.BuildSlashEscape(escaping.Length);
 						foreach (var q in slashEscape)
 							mappings(sw, q);
 					}
@@ -80,12 +82,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					var c = Value[i];
 					if (c == '"')
 					{
-						quoteEscape = quoteEscape ?? BuildQuoteEscape(escaping);
+						quoteEscape = quoteEscape ?? PostgresTuple.BuildQuoteEscape(escaping);
 						sw.Write(quoteEscape);
 					}
 					else if (c == '\\')
 					{
-						slashEscape = slashEscape ?? BuildSlashEscape(escaping.Length);
+						slashEscape = slashEscape ?? PostgresTuple.BuildSlashEscape(escaping.Length);
 						sw.Write(slashEscape);
 					}
 					else sw.Write(c);
@@ -93,7 +95,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (HasMarkers)
 				Escape(sw, escaping, mappings);
@@ -107,7 +109,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Value == null)
 				sw.Write("NULL");

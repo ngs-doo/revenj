@@ -184,19 +184,19 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static PostgresTuple ToTuple<T>(T value)
+		public static IPostgresTuple ToTuple<T>(T value)
 			where T : struct
 		{
 			return new EnumTuple(value.ToString());
 		}
 
-		public static PostgresTuple ToTuple<T>(T? value)
+		public static IPostgresTuple ToTuple<T>(T? value)
 			where T : struct
 		{
-			return value != null ? new EnumTuple(value.ToString()) : null;
+			return value != null ? new EnumTuple(value.ToString()) : default(IPostgresTuple);
 		}
 
-		class EnumTuple : PostgresTuple
+		class EnumTuple : IPostgresTuple
 		{
 			private readonly string Value;
 			private readonly bool EscapeArray;
@@ -207,10 +207,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				EscapeArray = value == "NULL";
 			}
 
-			public override bool MustEscapeRecord { get { return false; } }
-			public override bool MustEscapeArray { get { return EscapeArray; } }
+			public bool MustEscapeRecord { get { return false; } }
+			public bool MustEscapeArray { get { return EscapeArray; } }
 
-			public override string BuildTuple(bool quote)
+			public string BuildTuple(bool quote)
 			{
 				if (Value == null)
 					return "NULL";
@@ -227,12 +227,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else sw.Write(Value ?? string.Empty);
 			}
 
-			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				sw.Write(Value ?? string.Empty);
 			}
 
-			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 					sw.Write("NULL");

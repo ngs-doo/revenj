@@ -7,18 +7,18 @@ using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
-	public class ArrayTuple : PostgresTuple
+	public class ArrayTuple : IPostgresTuple
 	{
-		private readonly PostgresTuple[] Elements;
-
-		public ArrayTuple(PostgresTuple[] elements)
-		{
-			this.Elements = elements;
-		}
-
+		private readonly IPostgresTuple[] Elements;
 		private bool? EscapeRecord;
 
-		public override bool MustEscapeRecord
+		public ArrayTuple(IPostgresTuple[] elements)
+		{
+			this.Elements = elements;
+			this.EscapeRecord = null;
+		}
+
+		public bool MustEscapeRecord
 		{
 			get
 			{
@@ -29,16 +29,16 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public override bool MustEscapeArray
+		public bool MustEscapeArray
 		{
 			get { return Elements != null; }
 		}
 
-		public static ArrayTuple Create<T>(T[] elements, Func<T, PostgresTuple> converter)
+		public static IPostgresTuple Create<T>(T[] elements, Func<T, IPostgresTuple> converter)
 		{
 			if (elements != null)
 			{
-				var tuples = new PostgresTuple[elements.Length];
+				var tuples = new IPostgresTuple[elements.Length];
 				for (int i = 0; i < elements.Length; i++)
 					tuples[i] = converter(elements[i]);
 				return new ArrayTuple(tuples);
@@ -46,11 +46,11 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return null;
 		}
 
-		public static ArrayTuple Create<T>(List<T> elements, Func<T, PostgresTuple> converter)
+		public static IPostgresTuple Create<T>(List<T> elements, Func<T, IPostgresTuple> converter)
 		{
 			if (elements != null)
 			{
-				var tuples = new PostgresTuple[elements.Count];
+				var tuples = new IPostgresTuple[elements.Count];
 				for (int i = 0; i < elements.Count; i++)
 					tuples[i] = converter(elements[i]);
 				return new ArrayTuple(tuples);
@@ -58,11 +58,11 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return null;
 		}
 
-		public static ArrayTuple Create<T>(IEnumerable<T> elements, Func<T, PostgresTuple> converter)
+		public static IPostgresTuple Create<T>(IEnumerable<T> elements, Func<T, IPostgresTuple> converter)
 		{
 			if (elements != null)
 			{
-				var tuples = new PostgresTuple[elements.Count()];
+				var tuples = new IPostgresTuple[elements.Count()];
 				var i = 0;
 				foreach (var el in elements)
 					tuples[i++] = converter(el);
@@ -71,7 +71,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return null;
 		}
 
-		public override string BuildTuple(bool quote)
+		public string BuildTuple(bool quote)
 		{
 			if (Elements == null)
 				return "NULL";
@@ -81,7 +81,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				Action<TextWriter, char> mappings = null;
 				if (quote)
 				{
-					mappings = EscapeQuote;
+					mappings = PostgresTuple.EscapeQuote;
 					sw.Write('\'');
 				}
 				sw.Write('{');
@@ -143,7 +143,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return cms;
 		}
 
-		public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Elements == null)
 				return;
@@ -157,7 +157,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					if (e.MustEscapeArray)
 					{
-						quote = quote ?? BuildQuoteEscape(escaping);
+						quote = quote ?? PostgresTuple.BuildQuoteEscape(escaping);
 						if (mappings != null)
 							foreach (var q in quote)
 								mappings(sw, q);
@@ -180,7 +180,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			sw.Write('}');
 		}
 
-		public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			throw new FrameworkException("Should not happen. Insert array called on array tuple. Nested arrays are invalid construct.");
 		}

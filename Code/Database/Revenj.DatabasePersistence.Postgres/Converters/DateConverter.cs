@@ -136,5 +136,48 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			reader.Read();
 			return list;
 		}
+
+		public static IPostgresTuple ToTuple(DateTime date)
+		{
+			return new DateTuple(date);
+		}
+
+		class DateTuple : IPostgresTuple
+		{
+			private readonly DateTime Date;
+
+			public DateTuple(DateTime date)
+			{
+				this.Date = date;
+			}
+
+			public bool MustEscapeRecord { get { return false; } }
+			public bool MustEscapeArray { get { return false; } }
+
+			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write(Date.Year);
+				sw.Write('-');
+				if (Date.Month < 10)
+					sw.Write('0');
+				sw.Write(Date.Month);
+				sw.Write('-');
+				if (Date.Day < 10)
+					sw.Write('0');
+				sw.Write(Date.Day);
+			}
+
+			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			{
+				InsertRecord(sw, escaping, mappings);
+			}
+
+			public string BuildTuple(bool quote)
+			{
+				if (quote)
+					return "'" + Date.Year + "-" + Date.Month.ToString("00") + "-" + Date.Day.ToString("00") + "'";
+				return Date.Year + "-" + Date.Month.ToString("00") + "-" + Date.Day.ToString("00");
+			}
+		}
 	}
 }

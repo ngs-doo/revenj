@@ -118,16 +118,33 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			for (int i = 0; i < len; i++)
 				reader.Read();
 			cur = reader.Read();
-			var cms = ChunkedMemoryStream.Create();
-			while (cur != -1 && cur != '\\' && cur != '"')
+			var bytes = new byte[512];
+			int ind = 0;
+			while (ind < 512 && cur != '\\' && cur != '"')
 			{
-				cms.WriteByte((byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]));
+				bytes[ind++] = (byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]);
 				cur = reader.Read();
+			}
+			Stream stream;
+			if (cur == '\\' || cur == '"')
+			{
+				stream = new MemoryStream();
+				stream.Write(bytes, 0, ind);
+			}
+			else
+			{
+				stream = ChunkedMemoryStream.Create();
+				stream.Write(bytes, 0, ind);
+				while (cur != -1 && cur != '\\' && cur != '"')
+				{
+					stream.WriteByte((byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]));
+					cur = reader.Read();
+				}
 			}
 			for (int i = 0; i < context; i++)
 				reader.Read();
-			cms.Position = 0;
-			return cms;
+			stream.Position = 0;
+			return stream;
 		}
 
 		public static List<Stream> ParseStreamCollection(TextReader reader, int context, bool allowNulls)
@@ -148,6 +165,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			if (cur == '}')
 				reader.Read();
 			var emptyCol = allowNulls ? null : new MemoryStream();
+			var bytes = new byte[512];
 			while (cur != -1 && cur != '}')
 			{
 				cur = reader.Read();
@@ -163,17 +181,33 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					for (int i = 0; i < skipInner; i++)
 						reader.Read();
-					var cms = ChunkedMemoryStream.Create();
 					cur = reader.Read();
-					while (cur != -1 && cur != '"' && cur != '\\')
+					int ind = 0;
+					while (ind < 512 && cur != '\\' && cur != '"')
 					{
-						cms.WriteByte((byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]));
+						bytes[ind++] = (byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]);
 						cur = reader.Read();
+					}
+					Stream stream;
+					if (cur == '\\' || cur == '"')
+					{
+						stream = new MemoryStream();
+						stream.Write(bytes, 0, ind);
+					}
+					else
+					{
+						stream = ChunkedMemoryStream.Create();
+						stream.Write(bytes, 0, ind);
+						while (cur != -1 && cur != '\\' && cur != '"')
+						{
+							stream.WriteByte((byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]));
+							cur = reader.Read();
+						}
 					}
 					for (int i = 0; i < innerContext; i++)
 						cur = reader.Read();
-					cms.Position = 0;
-					list.Add(cms);
+					stream.Position = 0;
+					list.Add(stream);
 				}
 			}
 			if (espaced)
@@ -202,42 +236,44 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return new string(buf);
 		}
 
-		public static PostgresTuple ToTuple(byte[] value)
+		public static IPostgresTuple ToTuple(byte[] value)
 		{
-			return value != null ? new ByteTuple(value) : null;
+			return value != null ? new ByteTuple(value, value.Length) : default(IPostgresTuple);
 		}
 
-		public static PostgresTuple ToTuple(Stream stream)
+		public static IPostgresTuple ToTuple(Stream stream)
 		{
 			if (stream == null)
 				return null;
 			var cms = stream as ChunkedMemoryStream;
 			if (cms != null) return new StreamTuple(cms, false);
 			var ms = stream as MemoryStream;
-			if (ms != null) return new ByteTuple(ms.ToArray());
+			if (ms != null) return new ByteTuple(ms.GetBuffer(), (int)ms.Length);
 			return new StreamTuple(new ChunkedMemoryStream(stream), true);
 		}
 
-		public static PostgresTuple ToTuple(ChunkedMemoryStream stream, bool dispose)
+		public static IPostgresTuple ToTuple(ChunkedMemoryStream stream, bool dispose)
 		{
 			return new StreamTuple(stream, dispose);
 		}
 
-		class ByteTuple : PostgresTuple
+		class ByteTuple : IPostgresTuple
 		{
 			private readonly byte[] Value;
+			private readonly int Length;
 
-			public ByteTuple(byte[] value)
+			public ByteTuple(byte[] value, int length)
 			{
 				this.Value = value;
+				this.Length = length;
 			}
 
-			public override bool MustEscapeRecord { get { return true; } }
-			public override bool MustEscapeArray { get { return true; } }
+			public bool MustEscapeRecord { get { return true; } }
+			public bool MustEscapeArray { get { return true; } }
 
 			private void BuildArray(TextWriter sw)
 			{
-				for (int i = 0; i < Value.Length; i++)
+				for (int i = 0; i < Value.Length && i < Length; i++)
 				{
 					var b = Value[i];
 					sw.Write(CharMap[b >> 4]);
@@ -245,7 +281,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public override string BuildTuple(bool quote)
+			public string BuildTuple(bool quote)
 			{
 				using (var cms = ChunkedMemoryStream.Create())
 				{
@@ -263,9 +299,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
-				var pref = BuildSlashEscape(escaping.Length);
+				var pref = PostgresTuple.BuildSlashEscape(escaping.Length);
 				if (mappings != null)
 				{
 					foreach (var p in pref)
@@ -276,14 +312,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				BuildArray(sw);
 			}
 
-			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				//TODO this is wrong
 				InsertRecord(sw, escaping, mappings);
 			}
 		}
 
-		class StreamTuple : PostgresTuple
+		class StreamTuple : IPostgresTuple
 		{
 			private readonly ChunkedMemoryStream Value;
 			private readonly bool Dispose;
@@ -294,10 +330,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				this.Dispose = dispose;
 			}
 
-			public override bool MustEscapeRecord { get { return true; } }
-			public override bool MustEscapeArray { get { return true; } }
+			public bool MustEscapeRecord { get { return true; } }
+			public bool MustEscapeArray { get { return true; } }
 
-			public override string BuildTuple(bool quote)
+			public string BuildTuple(bool quote)
 			{
 				using (var cms = ChunkedMemoryStream.Create())
 				{
@@ -315,9 +351,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
-				var pref = BuildSlashEscape(escaping.Length);
+				var pref = PostgresTuple.BuildSlashEscape(escaping.Length);
 				if (mappings != null)
 				{
 					foreach (var p in pref)
@@ -329,7 +365,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				if (Dispose) Value.Dispose();
 			}
 
-			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				//TODO this is wrong
 				InsertRecord(sw, escaping, mappings);

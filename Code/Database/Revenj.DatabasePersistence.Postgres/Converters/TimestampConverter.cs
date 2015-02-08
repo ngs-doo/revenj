@@ -33,14 +33,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") + offset.Hours.ToString("00");
 		}
 
-		public static ValueTuple ToTuple(DateTime value)
+		public static IPostgresTuple ToTuple(DateTime value)
 		{
 			return new ValueTuple(ToDatabase(value), false, false);
 		}
 
-		public static ValueTuple ToTuple(DateTime? value)
+		public static IPostgresTuple ToTuple(DateTime? value)
 		{
-			return value != null ? new ValueTuple(ToDatabase(value.Value), false, false) : null;
+			return value != null ? new ValueTuple(ToDatabase(value.Value), false, false) : default(IPostgresTuple);
 		}
 
 		public static DateTime? ParseNullable(TextReader reader, int context)

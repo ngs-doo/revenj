@@ -106,7 +106,7 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 			return ByteaConverter.ToDatabase(ExtractBytesAndEcrypt(value));
 		}
 
-		public static PostgresTuple ToTuple(SecureString value)
+		public static IPostgresTuple ToTuple(SecureString value)
 		{
 			if (value == null)
 				return null;

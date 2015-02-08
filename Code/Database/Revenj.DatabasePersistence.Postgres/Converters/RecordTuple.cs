@@ -5,17 +5,17 @@ using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
-	public class RecordTuple : PostgresTuple
+	public class RecordTuple : IPostgresTuple
 	{
-		private readonly PostgresTuple[] Properties;
+		private readonly IPostgresTuple[] Properties;
 
-		public RecordTuple(PostgresTuple[] properties)
+		public RecordTuple(IPostgresTuple[] properties)
 		{
 			this.Properties = properties;
 		}
 
-		public override bool MustEscapeRecord { get { return Properties != null; } }
-		public override bool MustEscapeArray { get { return Properties != null; } }
+		public bool MustEscapeRecord { get { return Properties != null; } }
+		public bool MustEscapeArray { get { return Properties != null; } }
 
 		public RecordTuple Except(IEnumerable<int> indexes)
 		{
@@ -25,7 +25,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return this;
 		}
 
-		public override string BuildTuple(bool quote)
+		public string BuildTuple(bool quote)
 		{
 			if (Properties == null)
 				return "NULL";
@@ -35,7 +35,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				Action<TextWriter, char> mappings = null;
 				if (quote)
 				{
-					mappings = EscapeQuote;
+					mappings = PostgresTuple.EscapeQuote;
 					sw.Write('\'');
 				}
 				sw.Write('(');
@@ -115,7 +115,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return cms;
 		}
 
-		public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Properties == null)
 				return;
@@ -129,7 +129,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					if (p.MustEscapeRecord)
 					{
-						quote = quote ?? BuildQuoteEscape(escaping);
+						quote = quote ?? PostgresTuple.BuildQuoteEscape(escaping);
 						if (mappings != null)
 							foreach (var q in quote)
 								mappings(sw, q);
@@ -150,7 +150,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			sw.Write(')');
 		}
 
-		public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Properties == null)
 			{
@@ -167,7 +167,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					if (p.MustEscapeRecord)
 					{
-						quote = quote ?? BuildQuoteEscape(escaping);
+						quote = quote ?? PostgresTuple.BuildQuoteEscape(escaping);
 						if (mappings != null)
 							foreach (var q in quote)
 								mappings(sw, q);

@@ -35,12 +35,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return result;
 		}
 
-		public static PostgresTuple ToTuple(XElement value)
+		public static IPostgresTuple ToTuple(XElement value)
 		{
-			return value != null ? new XmlTuple(value) : null;
+			return value != null ? new XmlTuple(value) : default(IPostgresTuple);
 		}
 
-		class XmlTuple : PostgresTuple
+		class XmlTuple : IPostgresTuple
 		{
 			private readonly TextReader Reader;
 
@@ -52,10 +52,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				Reader = cms.GetReader();
 			}
 
-			public override bool MustEscapeRecord { get { return true; } }
-			public override bool MustEscapeArray { get { return true; } }
+			public bool MustEscapeRecord { get { return true; } }
+			public bool MustEscapeArray { get { return true; } }
 
-			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public string BuildTuple(bool quote) { return PostgresTuple.BuildTuple(this, quote); }
+
+			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				string quoteEscape = null;
 				string slashEscape = null;
@@ -66,13 +68,13 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					{
 						if (c == '"')
 						{
-							quoteEscape = quoteEscape ?? BuildQuoteEscape(escaping);
+							quoteEscape = quoteEscape ?? PostgresTuple.BuildQuoteEscape(escaping);
 							foreach (var q in quoteEscape)
 								mappings(sw, q);
 						}
 						else if (c == '\\')
 						{
-							slashEscape = slashEscape ?? BuildSlashEscape(escaping.Length);
+							slashEscape = slashEscape ?? PostgresTuple.BuildSlashEscape(escaping.Length);
 							foreach (var q in slashEscape)
 								mappings(sw, q);
 						}
@@ -85,20 +87,20 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					{
 						if (c == '"')
 						{
-							quoteEscape = quoteEscape ?? BuildQuoteEscape(escaping);
+							quoteEscape = quoteEscape ?? PostgresTuple.BuildQuoteEscape(escaping);
 							sw.Write(quoteEscape);
 						}
 						else if (c == '\\')
 						{
-							slashEscape = slashEscape ?? BuildSlashEscape(escaping.Length);
+							slashEscape = slashEscape ?? PostgresTuple.BuildSlashEscape(escaping.Length);
 							sw.Write(slashEscape);
 						}
-						sw.Write((char)c);
+						else sw.Write((char)c);
 					}
 				}
 			}
 
-			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				InsertRecord(sw, escaping, mappings);
 			}

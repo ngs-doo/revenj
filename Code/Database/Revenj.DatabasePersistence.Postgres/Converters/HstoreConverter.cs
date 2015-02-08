@@ -39,9 +39,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						it.Value.Replace("\\", "\\\\").Replace("\"", "\\\""))));
 		}
 
-		public static PostgresTuple ToTuple(IDictionary<string, string> value)
+		public static IPostgresTuple ToTuple(IDictionary<string, string> value)
 		{
-			return value != null ? new DictionaryTuple(value) : null;
+			return value != null ? new DictionaryTuple(value) : default(IPostgresTuple);
 		}
 
 		public static Dictionary<string, string> Parse(TextReader reader, int context)
@@ -196,7 +196,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		class DictionaryTuple : PostgresTuple
+		class DictionaryTuple : IPostgresTuple
 		{
 			private IDictionary<string, string> Value;
 
@@ -205,16 +205,18 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				this.Value = value;
 			}
 
-			public override bool MustEscapeRecord { get { return true; } }
-			public override bool MustEscapeArray { get { return Value != null; } }
+			public bool MustEscapeRecord { get { return true; } }
+			public bool MustEscapeArray { get { return Value != null; } }
 
-			public override void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public string BuildTuple(bool quote) { return PostgresTuple.BuildTuple(this, quote); }
+
+			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 					return;
-				var esc = BuildQuoteEscape(escaping);
-				var quoteEscape = new Lazy<string>(() => BuildQuoteEscape(escaping + "0"));
-				var slashEscape = new Lazy<string>(() => BuildSlashEscape(escaping.Length + 1));
+				var esc = PostgresTuple.BuildQuoteEscape(escaping);
+				var quoteEscape = new Lazy<string>(() => PostgresTuple.BuildQuoteEscape(escaping + "0"));
+				var slashEscape = new Lazy<string>(() => PostgresTuple.BuildSlashEscape(escaping.Length + 1));
 				var len = Value.Keys.Count;
 				if (mappings != null)
 				{
@@ -316,7 +318,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public override void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 				{
@@ -326,6 +328,5 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				InsertRecord(sw, escaping, mappings);
 			}
 		}
-
 	}
 }
