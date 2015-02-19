@@ -49,9 +49,6 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Npgsql">
-      <HintPath>..\..\..\Dependencies\Npgsql\Npgsql.dll</HintPath>
-    </Reference>
     <Reference Include="Remotion.Linq">
       <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>

@@ -51,8 +51,8 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Npgsql">
-      <HintPath>..\..\..\Dependencies\Npgsql\Npgsql.dll</HintPath>
+    <Reference Include="Mono.Security">
+      <HintPath>..\..\..\Dependencies\Npgsql\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="Remotion.Linq">
       <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
@@ -68,6 +68,7 @@
     <Reference Include="System.Reactive.Linq">
       <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -96,6 +97,84 @@
     <Compile Include="Converters\HstoreConverter.cs" />
     <Compile Include="Cube\PostgresOlapCubeQuery.cs" />
     <Compile Include="Attributes\RepositoryAttribute.cs" />
+    <Compile Include="NpgsqlTypes\ArrayHandling.cs" />
+    <Compile Include="NpgsqlTypes\BitString.cs" />
+    <Compile Include="NpgsqlTypes\DateDatatypes.cs" />
+    <Compile Include="NpgsqlTypes\FastPath.cs" />
+    <Compile Include="NpgsqlTypes\FastPathArg.cs" />
+    <Compile Include="NpgsqlTypes\LargeObject.cs" />
+    <Compile Include="NpgsqlTypes\LargeObjectManager.cs" />
+    <Compile Include="NpgsqlTypes\NpgsqlDbType.cs" />
+    <Compile Include="NpgsqlTypes\NpgsqlTypeConverters.cs" />
+    <Compile Include="NpgsqlTypes\NpgsqlTypes.cs" />
+    <Compile Include="NpgsqlTypes\NpgsqlTypesHelper.cs" />
+    <Compile Include="NpgsqlTypes\TypeConverter.cs" />
+    <Compile Include="Npgsql\Cache.cs" />
+    <Compile Include="Npgsql\ChunkedMemoryStream.cs" />
+    <Compile Include="Npgsql\Copy\NpgsqlCopyFormat.cs" />
+    <Compile Include="Npgsql\Copy\NpgsqlCopyIn.cs" />
+    <Compile Include="Npgsql\Copy\NpgsqlCopyInStream.cs" />
+    <Compile Include="Npgsql\Copy\NpgsqlCopyOut.cs" />
+    <Compile Include="Npgsql\Copy\NpgsqlCopyOutStream.cs" />
+    <Compile Include="Npgsql\Copy\NpgsqlCopySerializer.cs" />
+    <Compile Include="Npgsql\Message\ClientMessage.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlBind.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlCancelRequest.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlDescribe.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlExecute.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlFlush.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlMessageTypes.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlParse.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlPasswordPacket.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlQuery.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlStartupPacket.cs" />
+    <Compile Include="Npgsql\Message\NpgsqlSync.cs" />
+    <Compile Include="Npgsql\NpgsqlAsciiRow.cs" />
+    <Compile Include="Npgsql\NpgsqlBackEndKeyData.cs" />
+    <Compile Include="Npgsql\NpgsqlCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Npgsql\NpgsqlCommandBuilder.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Npgsql\NpgsqlConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Npgsql\NpgsqlConnectionStringBuilder.cs" />
+    <Compile Include="Npgsql\NpgsqlConnector.cs" />
+    <Compile Include="Npgsql\NpgsqlConnectorPool.cs" />
+    <Compile Include="Npgsql\NpgsqlDataAdapter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Npgsql\NpgsqlDataReader.cs" />
+    <Compile Include="Npgsql\NpgsqlError.cs" />
+    <Compile Include="Npgsql\NpgsqlEventLog.cs" />
+    <Compile Include="Npgsql\NpgsqlException.cs" />
+    <Compile Include="Npgsql\NpgsqlFactory.cs" />
+    <Compile Include="Npgsql\NpgsqlMediator.cs" />
+    <Compile Include="Npgsql\NpgsqlNotificationEventArgs.cs" />
+    <Compile Include="Npgsql\NpgsqlPromotableSinglePhaseNotification.cs" />
+    <Compile Include="Npgsql\NpgsqlResourceManager.cs" />
+    <Compile Include="Npgsql\NpgsqlRow.cs" />
+    <Compile Include="Npgsql\NpgsqlRowDescription.cs" />
+    <Compile Include="Npgsql\NpgsqlSchema.cs" />
+    <Compile Include="Npgsql\NpgsqlTransaction.cs" />
+    <Compile Include="Npgsql\NpgsqlTransactionCallbacks.cs" />
+    <Compile Include="Npgsql\Parameter\NpgsqlParameter.cs" />
+    <Compile Include="Npgsql\Parameter\NpgsqlParameterCollection.cs" />
+    <Compile Include="Npgsql\Parameter\NpgsqlParameterStatus.cs" />
+    <Compile Include="Npgsql\PGUtil.cs" />
+    <Compile Include="Npgsql\Security\HashAlgorithm.cs" />
+    <Compile Include="Npgsql\Security\MD5.cs" />
+    <Compile Include="Npgsql\Security\MD5CryptoServiceProvider.cs" />
+    <Compile Include="Npgsql\Security\SSPIHandler.cs" />
+    <Compile Include="Npgsql\State\NpgsqlClosedState.cs" />
+    <Compile Include="Npgsql\State\NpgsqlConnectedState.cs" />
+    <Compile Include="Npgsql\State\NpgsqlCopyInState.cs" />
+    <Compile Include="Npgsql\State\NpgsqlCopyOutState.cs" />
+    <Compile Include="Npgsql\State\NpgsqlReadyState.cs" />
+    <Compile Include="Npgsql\State\NpgsqlStartupState.cs" />
+    <Compile Include="Npgsql\State\NpgsqlState.cs" />
     <Compile Include="PostgresConnectionPool.cs" />
     <Compile Include="PostgresDatabaseNotification.cs" />
     <Compile Include="PostgresException.cs" />
@@ -169,6 +248,68 @@
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
       <Link>CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="NpgsqlTypes\NpgsqlTypesHelper.de.resx">
+      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NpgsqlTypes\NpgsqlTypesHelper.ja.resx">
+      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NpgsqlTypes\NpgsqlTypesHelper.resx">
+      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NpgsqlTypes\NpgsqlTypesHelper.zh-CN.resx">
+      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\NpgsqlCommand.resx">
+      <DependentUpon>NpgsqlCommand.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\NpgsqlCommandBuilder.resx">
+      <DependentUpon>NpgsqlCommandBuilder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\NpgsqlConnection.resx">
+      <DependentUpon>NpgsqlConnection.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\NpgsqlConnectionStringBuilder.resx">
+      <DependentUpon>NpgsqlConnectionStringBuilder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\NpgsqlEventLog.resx">
+      <DependentUpon>NpgsqlEventLog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\NpgsqlException.resx">
+      <DependentUpon>NpgsqlException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\NpgsqlRow.resx">
+      <DependentUpon>NpgsqlRow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\NpgsqlTransaction.resx">
+      <DependentUpon>NpgsqlTransaction.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\Parameter\NpgsqlParameter.resx">
+      <DependentUpon>NpgsqlParameter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\Parameter\NpgsqlParameterCollection.resx">
+      <DependentUpon>NpgsqlParameterCollection.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\PGUtil.resx">
+      <DependentUpon>PGUtil.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\State\NpgsqlClosedState.resx">
+      <DependentUpon>NpgsqlClosedState.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\State\NpgsqlConnectedState.resx">
+      <DependentUpon>NpgsqlConnectedState.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\State\NpgsqlReadyState.resx">
+      <DependentUpon>NpgsqlReadyState.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Npgsql\State\NpgsqlState.resx">
+      <DependentUpon>NpgsqlState.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Npgsql\NpgsqlMetaData.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

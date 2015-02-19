@@ -62,6 +62,11 @@ namespace Revenj.DatabasePersistence.Postgres
 			return new NpgsqlCommand { CommandTimeout = Connection.CommandTimeout };
 		}
 
+		public static IDbCommand NewCommand(Stream stream)
+		{
+			return new NpgsqlCommand(stream);//TODO: command timeout
+		}
+
 		public bool InTransaction
 		{
 			get
