@@ -31,7 +31,12 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 		public string BuildSqlString()
 		{
 			if (Selects.Count == 0)
+			{
+				var countOp = ResultOperators.FirstOrDefault(it => it is CountResultOperator || it is LongCountResultOperator);
+				if (countOp != null)
+					return BuildCountQuery(countOp);
 				throw new InvalidOperationException("A query must have a select part");
+			}
 
 			foreach (var qs in Simplifications)
 				if (qs.CanSimplify(this))
