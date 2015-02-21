@@ -32,7 +32,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// This class represents a StartupPacket message of PostgreSQL

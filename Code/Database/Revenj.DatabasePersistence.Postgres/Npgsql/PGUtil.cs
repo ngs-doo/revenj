@@ -36,7 +36,7 @@ using System.Reflection;
 using System.Resources;
 using System.Text;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	///<summary>
 	/// This class provides many util methods to handle
@@ -546,7 +546,7 @@ namespace Npgsql
 	/// </summary>
 	/// 
 	[Obsolete("Use System.Version")]
-	public sealed class ServerVersion : IEquatable<ServerVersion>, IComparable<ServerVersion>, IComparable, ICloneable
+	internal sealed class ServerVersion : IEquatable<ServerVersion>, IComparable<ServerVersion>, IComparable, ICloneable
 	{
 		[Obsolete("Use ServerVersionCode.ProtocolVersion2")]
 		public static readonly Int32 ProtocolVersion2 = 2 << 16;

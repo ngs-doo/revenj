@@ -8,9 +8,9 @@ using System.IO;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
-using Npgsql;
 using Revenj.DatabasePersistence.Postgres.Converters;
 using Revenj.DomainPatterns;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
 namespace Revenj.DatabasePersistence.Postgres
 {

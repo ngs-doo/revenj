@@ -30,7 +30,7 @@
 
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// This class represents a BackEndKeyData message received

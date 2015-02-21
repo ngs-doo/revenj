@@ -26,7 +26,7 @@
 using System;
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// This class represents the CancelRequest message sent to PostgreSQL

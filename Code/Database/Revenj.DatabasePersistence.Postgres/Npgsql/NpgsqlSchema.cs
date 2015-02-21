@@ -31,7 +31,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Provides the underlying mechanism for reading schema information.

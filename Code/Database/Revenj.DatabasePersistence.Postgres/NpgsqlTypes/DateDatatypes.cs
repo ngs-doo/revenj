@@ -28,13 +28,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Npgsql;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
 //TODO: Lots of convenience methods! There should be nothing you can do with datetime and timestamp that you can't
 //do just as well with these - and hence no reason not to choose these if they are appropriate.
 //Similarly, lots of documentation is a must.
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	/// <summary>
 	/// Represents the PostgreSQL interval datatype.

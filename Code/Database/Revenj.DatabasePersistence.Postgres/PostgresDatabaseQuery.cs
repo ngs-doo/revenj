@@ -7,8 +7,8 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Npgsql;
 using Revenj.Common;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 using Revenj.DomainPatterns;
 
 namespace Revenj.DatabasePersistence.Postgres
@@ -47,9 +47,7 @@ namespace Revenj.DatabasePersistence.Postgres
 
 		private readonly object sync = new object();
 
-		public PostgresDatabaseQuery(
-			NpgsqlConnection connection,
-			NpgsqlTransaction transaction)
+		public PostgresDatabaseQuery(NpgsqlConnection connection, NpgsqlTransaction transaction)
 		{
 			Contract.Requires(connection != null);
 
@@ -64,7 +62,7 @@ namespace Revenj.DatabasePersistence.Postgres
 
 		public static IDbCommand NewCommand(Stream stream)
 		{
-			return new NpgsqlCommand(stream);//TODO: command timeout
+			return new NpgsqlCommand(stream) { CommandTimeout = ConnectionInfo.LastCommandTimeout };
 		}
 
 		public bool InTransaction

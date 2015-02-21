@@ -28,7 +28,7 @@
 
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	///<summary>
 	/// This class is responsible for serving as bridge between the backend

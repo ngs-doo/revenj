@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	/// <summary>
 	/// <para>Implements a bit string; a collection of zero or more bits which can each be 1 or 0.</para>

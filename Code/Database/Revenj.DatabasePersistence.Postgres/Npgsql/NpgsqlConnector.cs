@@ -37,9 +37,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using Mono.Security.Protocol.Tls;
-using NpgsqlTypes;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents the method that allows the application to provide a certificate collection to be used for SSL clien authentication

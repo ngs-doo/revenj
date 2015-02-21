@@ -35,7 +35,7 @@ using System.Resources;
 using System.Text;
 using System.Threading;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents a transaction to be made in a PostgreSQL database. This class cannot be inherited.

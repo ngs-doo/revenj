@@ -30,7 +30,7 @@
 using System.IO;
 using System.Text;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// For classes representing messages sent from the client to the server.

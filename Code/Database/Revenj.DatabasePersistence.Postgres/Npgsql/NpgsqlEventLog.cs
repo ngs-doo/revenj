@@ -33,7 +33,7 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// The level of verbosity of the NpgsqlEventLog
@@ -58,7 +58,7 @@ namespace Npgsql
 	/// <summary>
 	/// This class handles all the Npgsql event and debug logging
 	/// </summary>
-	public class NpgsqlEventLog
+	internal class NpgsqlEventLog
 	{
 		// Logging related values
 		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;

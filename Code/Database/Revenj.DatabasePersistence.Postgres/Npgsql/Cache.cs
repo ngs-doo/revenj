@@ -32,7 +32,7 @@ using System;
 using System.Collections.Generic;
 //using System.Text;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	internal class Cache<TEntity> : LinkedList<KeyValuePair<string, TEntity>>
 		where TEntity : class

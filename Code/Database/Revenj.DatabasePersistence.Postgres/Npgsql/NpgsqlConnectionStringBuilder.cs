@@ -33,7 +33,7 @@ using System.Data.Common;
 using System.Reflection;
 using System.Resources;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	public sealed class NpgsqlConnectionStringBuilder : DbConnectionStringBuilder
 	{
@@ -44,6 +44,7 @@ namespace Npgsql
 
 		private const int POOL_SIZE_LIMIT = 1024;
 		private const int TIMEOUT_LIMIT = 1024;
+		internal const int DefaultCommandTimeout = 20;
 
 		static NpgsqlConnectionStringBuilder()
 		{
@@ -62,7 +63,7 @@ namespace Npgsql
 			defaults.Add(Keywords.MinPoolSize, 1);
 			defaults.Add(Keywords.MaxPoolSize, 20);
 			defaults.Add(Keywords.SyncNotification, false);
-			defaults.Add(Keywords.CommandTimeout, 20);
+			defaults.Add(Keywords.CommandTimeout, DefaultCommandTimeout);
 			defaults.Add(Keywords.Enlist, false);
 			defaults.Add(Keywords.PreloadReader, false);
 			defaults.Add(Keywords.UseExtendedTypes, false);

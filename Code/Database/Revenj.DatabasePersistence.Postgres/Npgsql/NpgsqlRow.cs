@@ -32,9 +32,9 @@ using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Text;
-using NpgsqlTypes;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// This is the abstract base class for NpgsqlAsciiRow and NpgsqlBinaryRow.

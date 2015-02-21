@@ -29,7 +29,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	/// <summary>
 	/// Handles serialisation of .NET array or IEnumeration to pg format.

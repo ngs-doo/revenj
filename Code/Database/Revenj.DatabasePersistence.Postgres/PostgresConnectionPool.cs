@@ -3,7 +3,8 @@ using System.Collections.Concurrent;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
-using Npgsql;
+using System.Data.Common;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
 namespace Revenj.DatabasePersistence.Postgres
 {

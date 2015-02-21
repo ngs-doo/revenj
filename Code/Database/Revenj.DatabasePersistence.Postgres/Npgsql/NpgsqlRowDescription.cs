@@ -30,10 +30,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Text;
-using NpgsqlTypes;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// This class represents a RowDescription message sent from
@@ -49,7 +48,7 @@ namespace Npgsql
 		private sealed class KanaWidthInsensitiveComparer : KanaWidthConverter, IEqualityComparer<string>
 		{
 			public static readonly KanaWidthInsensitiveComparer INSTANCE = new KanaWidthInsensitiveComparer();
-			private KanaWidthInsensitiveComparer(){}
+			private KanaWidthInsensitiveComparer() { }
 			public bool Equals(string x, string y)
 			{
 				return COMPARE_INFO.Compare(x, y, CompareOptions.IgnoreWidth) == 0;
@@ -62,7 +61,7 @@ namespace Npgsql
 		private sealed class KanaWidthCaseInsensitiveComparator : KanaWidthConverter, IEqualityComparer<string>
 		{
 			public static readonly KanaWidthCaseInsensitiveComparator INSTANCE = new KanaWidthCaseInsensitiveComparator();
-			private KanaWidthCaseInsensitiveComparator(){}
+			private KanaWidthCaseInsensitiveComparator() { }
 			public bool Equals(string x, string y)
 			{
 				return COMPARE_INFO.Compare(x, y, CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase) == 0;
@@ -136,40 +135,20 @@ namespace Npgsql
 		}
 
 		private readonly FieldData[] fields_data;
-		private readonly Dictionary<string, int> field_name_index_table;
-		private readonly Dictionary<string, int> caseInsensitiveNameIndexTable;
+		private Dictionary<string, int> _field_name_index_table;
+		private Dictionary<string, int> _caseInsensitiveNameIndexTable;
 		private readonly Version _compatVersion;
-		
+
 		private readonly static Version KANA_FIX_VERSION = new Version(2, 0, 2, 1);
 		private readonly static Version GET_ORDINAL_THROW_EXCEPTION = KANA_FIX_VERSION;
 
 		protected NpgsqlRowDescription(Stream stream, NpgsqlBackendTypeMapping type_mapping, Version compatVersion)
 		{
+			_compatVersion = compatVersion;
 			int num = ReadNumFields(stream);
 			fields_data = new FieldData[num];
-			if((_compatVersion = compatVersion) < KANA_FIX_VERSION)
-			{
-				field_name_index_table = new Dictionary<string, int>(num, StringComparer.InvariantCulture);
-				caseInsensitiveNameIndexTable = new Dictionary<string, int>(num, StringComparer.InvariantCultureIgnoreCase);
-			}
-			else
-			{
-				field_name_index_table = new Dictionary<string, int>(num, KanaWidthInsensitiveComparer.INSTANCE);
-				caseInsensitiveNameIndexTable = new Dictionary<string, int>(num, KanaWidthCaseInsensitiveComparator.INSTANCE);
-			}
-			for (int i = 0; i != num; ++i)
-			{
-				FieldData fd = BuildFieldData(stream, type_mapping);
-				fields_data[i] = fd;
-				if (!field_name_index_table.ContainsKey(fd.Name))
-				{
-					field_name_index_table.Add(fd.Name, i);
-					if (!caseInsensitiveNameIndexTable.ContainsKey(fd.Name))
-					{
-						caseInsensitiveNameIndexTable.Add(fd.Name, i);
-					}
-				}
-			}
+			for (int i = 0; i < fields_data.Length; i++)
+				fields_data[i] = BuildFieldData(stream, type_mapping);
 		}
 
 		protected abstract FieldData BuildFieldData(Stream stream, NpgsqlBackendTypeMapping typeMapping);
@@ -182,12 +161,36 @@ namespace Npgsql
 
 		public int NumFields
 		{
-			get { return (Int16) fields_data.Length; }
+			get { return (Int16)fields_data.Length; }
+		}
+
+		private void InitDictionary()
+		{
+			if (_field_name_index_table != null)
+				return;
+			if (_compatVersion < KANA_FIX_VERSION)
+			{
+				_field_name_index_table = new Dictionary<string, int>(fields_data.Length, StringComparer.InvariantCulture);
+				_caseInsensitiveNameIndexTable = new Dictionary<string, int>(fields_data.Length, StringComparer.InvariantCultureIgnoreCase);
+			}
+			else
+			{
+				_field_name_index_table = new Dictionary<string, int>(fields_data.Length, KanaWidthInsensitiveComparer.INSTANCE);
+				_caseInsensitiveNameIndexTable = new Dictionary<string, int>(fields_data.Length, KanaWidthCaseInsensitiveComparator.INSTANCE);
+			}
+			for (int i = 0; i < fields_data.Length; i++)
+			{
+				var fd = fields_data[i];
+				_field_name_index_table[fd.Name] = i;
+				if (!_caseInsensitiveNameIndexTable.ContainsKey(fd.Name))
+					_caseInsensitiveNameIndexTable.Add(fd.Name, i);
+			}
 		}
 
 		public bool HasOrdinal(string fieldName)
 		{
-			return caseInsensitiveNameIndexTable.ContainsKey(fieldName);
+			InitDictionary();
+			return _caseInsensitiveNameIndexTable.ContainsKey(fieldName);
 		}
 		public int TryFieldIndex(string fieldName)
 		{
@@ -195,10 +198,11 @@ namespace Npgsql
 		}
 		public int FieldIndex(String fieldName)
 		{
+			InitDictionary();
 			int ret = -1;
-			if(field_name_index_table.TryGetValue(fieldName, out ret) || caseInsensitiveNameIndexTable.TryGetValue(fieldName, out ret))
+			if (_field_name_index_table.TryGetValue(fieldName, out ret) || _caseInsensitiveNameIndexTable.TryGetValue(fieldName, out ret))
 				return ret;
-			else if(_compatVersion < GET_ORDINAL_THROW_EXCEPTION)
+			else if (_compatVersion < GET_ORDINAL_THROW_EXCEPTION)
 				return -1;
 			else
 				throw new IndexOutOfRangeException("Field not found");
@@ -246,7 +250,7 @@ namespace Npgsql
 				TypeInfo = typeMapping[TypeOID = PGUtil.ReadInt32(stream)];
 				TypeSize = PGUtil.ReadInt16(stream);
 				TypeModifier = PGUtil.ReadInt32(stream);
-				FormatCode = (FormatCode) PGUtil.ReadInt16(stream);
+				FormatCode = (FormatCode)PGUtil.ReadInt16(stream);
 			}
 		}
 

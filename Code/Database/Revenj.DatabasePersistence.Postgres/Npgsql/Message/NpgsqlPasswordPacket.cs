@@ -32,7 +32,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// This class represents a PasswordPacket message sent to backend

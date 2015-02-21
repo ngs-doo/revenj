@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// A class to handle everything associated with SSPI authentication

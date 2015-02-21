@@ -36,9 +36,9 @@ using System.ComponentModel;
 using System.Data.Common;
 using System.Reflection;
 using System.Resources;
-using NpgsqlTypes;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents a collection of parameters relevant to a <see cref="Npgsql.NpgsqlCommand">NpgsqlCommand</see>

@@ -34,9 +34,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using Npgsql;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	/*
 	 * This class implements the Fastpath api.

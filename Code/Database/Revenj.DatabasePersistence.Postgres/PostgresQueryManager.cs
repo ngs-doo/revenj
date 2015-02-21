@@ -2,8 +2,8 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using Npgsql;
 using Revenj.Common;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
 namespace Revenj.DatabasePersistence.Postgres
 {

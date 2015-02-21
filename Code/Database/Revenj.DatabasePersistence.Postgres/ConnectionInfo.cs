@@ -1,11 +1,12 @@
 ﻿using System.Diagnostics.Contracts;
-using Npgsql;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
 	public class ConnectionInfo
 	{
 		private readonly NpgsqlConnection Connection;
+		internal static int LastCommandTimeout = 20;
 
 		public ConnectionInfo(string connectionString)
 		{
@@ -13,9 +14,10 @@ namespace Revenj.DatabasePersistence.Postgres
 
 			this.ConnectionString = connectionString;
 			this.Connection = new NpgsqlConnection(connectionString);
+			LastCommandTimeout = Connection.CommandTimeout;
 		}
 
-		public string ConnectionString { get; private set; }
-		public NpgsqlConnection GetConnection() { return Connection.Clone(); }
+		internal string ConnectionString { get; private set; }
+		internal NpgsqlConnection GetConnection() { return Connection.Clone(); }
 	}
 }

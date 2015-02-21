@@ -25,7 +25,7 @@
 using System;
 using System.Data.Common;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// A factory to create instances of various Npgsql objects.

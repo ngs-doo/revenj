@@ -81,6 +81,7 @@
     <Compile Include="Converters\BoolConverter.cs" />
     <Compile Include="Converters\ByteaConverter.cs" />
     <Compile Include="Converters\EnumConverter.cs" />
+    <Compile Include="Converters\NumberConverter.cs" />
     <Compile Include="Converters\S3Converter.cs" />
     <Compile Include="Converters\XmlConverter.cs" />
     <Compile Include="Converters\GuidConverter.cs" />

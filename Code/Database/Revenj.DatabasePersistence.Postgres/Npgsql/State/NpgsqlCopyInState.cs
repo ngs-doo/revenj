@@ -28,7 +28,7 @@
 using System;
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents an ongoing COPY FROM STDIN operation.

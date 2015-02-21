@@ -30,7 +30,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// EventArgs class to send Notice parameters, which are just NpgsqlError's in a lighter context.

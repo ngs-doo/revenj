@@ -31,14 +31,14 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Resources;
 using System.Text;
 using System.Threading;
+using Revenj.DatabasePersistence.Postgres.Converters;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	///<summary> This class represents the base class for the state pattern design pattern
 	/// implementation.
@@ -1033,34 +1033,17 @@ namespace Npgsql
 	/// </summary>
 	internal class CompletedResponse : IServerResponseObject
 	{
-		private readonly int? _rowsAffected;
-		private readonly long? _lastInsertedOID;
+		public readonly int? RowsAffected;
+		public readonly long? LastInsertedOID;
 
 		public CompletedResponse(Stream stream)
 		{
+			//TODO: unnecessary split
 			string[] tokens = PGUtil.ReadString(stream).Split();
 			if (tokens.Length > 1)
-			{
-				int rowsAffected;
-				if (int.TryParse(tokens[tokens.Length - 1], out rowsAffected))
-					_rowsAffected = rowsAffected;
-				else
-					_rowsAffected = null;
-
-			}
-			_lastInsertedOID = (tokens.Length > 2 && tokens[0].Trim().ToUpperInvariant() == "INSERT")
-								   ? long.Parse(tokens[1])
-								   : (long?)null;
-		}
-
-		public long? LastInsertedOID
-		{
-			get { return _lastInsertedOID; }
-		}
-
-		public int? RowsAffected
-		{
-			get { return _rowsAffected; }
+				RowsAffected = NumberConverter.TryParsePositiveInt(tokens[tokens.Length - 1]);
+			if (tokens.Length > 2 && string.Equals(tokens[0].Trim(), "INSERT", StringComparison.OrdinalIgnoreCase))
+				LastInsertedOID = NumberConverter.ParseLong(tokens[1]);
 		}
 	}
 

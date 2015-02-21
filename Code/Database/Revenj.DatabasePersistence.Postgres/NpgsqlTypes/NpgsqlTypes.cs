@@ -32,9 +32,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
-using Npgsql;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
     /// <summary>
     /// Represents a PostgreSQL Point type

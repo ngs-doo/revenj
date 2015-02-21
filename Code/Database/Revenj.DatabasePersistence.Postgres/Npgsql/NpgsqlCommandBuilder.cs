@@ -30,9 +30,9 @@ using System.Data.Common;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
-using NpgsqlTypes;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	///<summary>
 	/// This class is responsible to create database commands for automatic insert, update and delete operations.

@@ -32,7 +32,7 @@
 
 using System;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	public class LargeObject
 	{

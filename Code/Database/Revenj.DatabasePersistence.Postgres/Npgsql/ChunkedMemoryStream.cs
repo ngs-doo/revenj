@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	//TODO: should redirect to revenj.utils cms
 	internal class ChunkedMemoryStream : Stream

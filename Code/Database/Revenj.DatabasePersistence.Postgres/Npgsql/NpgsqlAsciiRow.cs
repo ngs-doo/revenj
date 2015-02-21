@@ -30,10 +30,9 @@ using System;
 using System.Data;
 using System.IO;
 using System.Text;
-using NpgsqlTypes;
-using Revenj.Utility;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Implements <see cref="RowReader"/> for version 3 of the protocol.

@@ -1,5 +1,5 @@
 using System.Data;
-using Npgsql;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration

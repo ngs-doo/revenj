@@ -33,7 +33,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	/// <summary>
 	/// Provide event handlers to convert all native supported basic data types from their backend

@@ -29,7 +29,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Writes given objects into a stream for PostgreSQL COPY in default copy format (not CSV or BINARY).

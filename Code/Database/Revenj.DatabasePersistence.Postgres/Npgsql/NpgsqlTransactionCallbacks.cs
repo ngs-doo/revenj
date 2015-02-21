@@ -26,7 +26,7 @@ using System;
 using System.Data;
 using System.Reflection;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	internal interface INpgsqlTransactionCallbacks : IDisposable
 	{

@@ -2,13 +2,13 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Text;
-using NpgsqlTypes;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
 using Remotion.Linq.Parsing;
 using Revenj.Common;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DomainPatterns;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 {

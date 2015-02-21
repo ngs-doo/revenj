@@ -29,7 +29,7 @@
 using System;
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// EventArgs class to send Notification parameters.

@@ -33,9 +33,9 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 using System.Resources;
-using NpgsqlTypes;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	///<summary>
 	/// This class represents a parameter to a command that will be sent to server

@@ -35,9 +35,9 @@
 using System;
 using System.Data;
 using System.Text;
-using Npgsql;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	/// <summary>
 	/// Summary description for LargeObjectManager.

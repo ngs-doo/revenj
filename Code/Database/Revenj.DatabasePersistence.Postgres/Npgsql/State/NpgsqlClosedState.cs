@@ -35,7 +35,7 @@ using System.Threading;
 using Mono.Security.Protocol.Tls;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	internal class NpgsqlNetworkStream : NetworkStream
 	{

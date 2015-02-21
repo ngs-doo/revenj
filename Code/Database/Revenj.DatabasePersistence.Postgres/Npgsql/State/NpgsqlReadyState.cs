@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	internal sealed class NpgsqlReadyState : NpgsqlState
 	{

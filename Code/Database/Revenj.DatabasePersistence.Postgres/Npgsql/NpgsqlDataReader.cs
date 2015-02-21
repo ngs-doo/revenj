@@ -34,9 +34,9 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using NpgsqlTypes;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Provides a means of reading a forward-only stream of rows from a PostgreSQL backend.  This class cannot be inherited.
@@ -59,7 +59,7 @@ namespace Npgsql
 		internal CommandBehavior _behavior;
 		internal NpgsqlCommand _command;
 
-		internal Version Npgsql205 = new Version("2.0.5");
+		internal static Version Npgsql205 = new Version("2.0.5");
 
 		internal NpgsqlDataReader(NpgsqlCommand command, CommandBehavior behavior)
 		{

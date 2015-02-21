@@ -27,7 +27,7 @@
 
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Summary description for NpgsqlQuery

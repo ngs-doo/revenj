@@ -28,7 +28,7 @@
 using System;
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Stream for reading data from a table or select on a PostgreSQL version 7.4 or newer database during an active COPY TO STDOUT operation.

@@ -32,7 +32,7 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents the method that handles the <see cref="Npgsql.NpgsqlDataAdapter.RowUpdated">RowUpdated</see> events.
@@ -104,7 +104,7 @@ namespace Npgsql
 			//base.OnRowUpdated(value);
 			if ((RowUpdated != null) && (value is NpgsqlRowUpdatedEventArgs))
 			{
-				RowUpdated(this, (NpgsqlRowUpdatedEventArgs) value);
+				RowUpdated(this, (NpgsqlRowUpdatedEventArgs)value);
 			}
 		}
 
@@ -113,7 +113,7 @@ namespace Npgsql
 			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "OnRowUpdating");
 			if ((RowUpdating != null) && (value is NpgsqlRowUpdatingEventArgs))
 			{
-				RowUpdating(this, (NpgsqlRowUpdatingEventArgs) value);
+				RowUpdating(this, (NpgsqlRowUpdatingEventArgs)value);
 			}
 		}
 
@@ -162,24 +162,22 @@ namespace Npgsql
 			set { base.InsertCommand = value; }
 		}
 	}
-}
 
-public class NpgsqlRowUpdatingEventArgs : RowUpdatingEventArgs
-{
-	public NpgsqlRowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType,
-									  DataTableMapping tableMapping)
-		: base(dataRow, command, statementType, tableMapping)
-
+	public class NpgsqlRowUpdatingEventArgs : RowUpdatingEventArgs
 	{
+		public NpgsqlRowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType,
+										  DataTableMapping tableMapping)
+			: base(dataRow, command, statementType, tableMapping)
+		{
+		}
 	}
-}
 
-public class NpgsqlRowUpdatedEventArgs : RowUpdatedEventArgs
-{
-	public NpgsqlRowUpdatedEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType,
-									 DataTableMapping tableMapping)
-		: base(dataRow, command, statementType, tableMapping)
-
+	public class NpgsqlRowUpdatedEventArgs : RowUpdatedEventArgs
 	{
+		public NpgsqlRowUpdatedEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType,
+										 DataTableMapping tableMapping)
+			: base(dataRow, command, statementType, tableMapping)
+		{
+		}
 	}
 }

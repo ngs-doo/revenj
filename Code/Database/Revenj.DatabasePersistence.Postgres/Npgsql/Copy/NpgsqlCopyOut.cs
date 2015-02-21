@@ -27,7 +27,7 @@
 
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents a PostgreSQL COPY TO STDOUT operation with a corresponding SQL statement
@@ -134,7 +134,7 @@ namespace Npgsql
 				_cmd.ExecuteBlind();
 				_disposeCopyStream = _copyStream == null;
 				_copyStream = _context.Mediator.CopyStream;
-				if (_copyStream == null && ! (_context.CurrentState is NpgsqlReadyState))
+				if (_copyStream == null && !(_context.CurrentState is NpgsqlReadyState))
 				{
 					throw new NpgsqlException("Not a COPY OUT query: " + _cmd.CommandText);
 				}
@@ -150,7 +150,7 @@ namespace Npgsql
 		/// </summary>
 		public byte[] Read
 		{
-			get { return IsActive ? ((NpgsqlCopyOutStream) _copyStream).Read() : null; }
+			get { return IsActive ? ((NpgsqlCopyOutStream)_copyStream).Read() : null; }
 		}
 
 		/// <summary>

@@ -40,7 +40,7 @@
 //
 
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Common base class for all derived MD5 implementations.

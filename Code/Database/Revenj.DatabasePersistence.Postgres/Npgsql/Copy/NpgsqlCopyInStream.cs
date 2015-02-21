@@ -28,7 +28,7 @@
 using System;
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Stream for writing data to a table on a PostgreSQL version 7.4 or newer database during an active COPY FROM STDIN operation.

@@ -14,7 +14,7 @@
 
 using System;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// C# implementation of the MD5 cryptographic hash function.

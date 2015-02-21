@@ -34,7 +34,7 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.Serialization;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// The exception that is thrown when the PostgreSQL backend reports errors.

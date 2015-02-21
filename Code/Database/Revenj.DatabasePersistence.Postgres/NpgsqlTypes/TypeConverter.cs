@@ -1,7 +1,7 @@
 ﻿using System;
-using Npgsql;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	/// <summary>
 	///	Exposed type converter for outside usage.

@@ -27,7 +27,7 @@
 
 using System.IO;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	internal sealed class NpgsqlConnectedState : NpgsqlState
 	{

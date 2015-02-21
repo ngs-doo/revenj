@@ -29,7 +29,7 @@
 
 using System;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents information about COPY operation data transfer format as returned by server.

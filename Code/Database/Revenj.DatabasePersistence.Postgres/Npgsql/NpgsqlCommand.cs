@@ -37,9 +37,9 @@ using System.Reflection;
 using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
-using NpgsqlTypes;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents a SQL statement or function (stored procedure) to execute
@@ -199,7 +199,7 @@ namespace Npgsql
 				}
 
 				timeout = value;
-				NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "CommandTimeout", value);
+				//NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "CommandTimeout", value);
 
 				commandTimeoutSet = true;
 
@@ -946,8 +946,8 @@ namespace Npgsql
 			else if (type == CommandType.Text && parameters.Count == 0)
 				return new MemoryStream(Encoding.UTF8.GetBytes(text));
 
-			var cms = new ChunkedMemoryStream();
-			var sw = new StreamWriter(cms);
+			var ms = new MemoryStream();
+			var sw = new StreamWriter(ms);
 			if (type == CommandType.StoredProcedure)
 			{
 				if (Connector.SupportsPrepare)
@@ -988,7 +988,7 @@ namespace Npgsql
 					AddFunctionColumnListSupport(sw);
 
 				sw.Flush();
-				return cms;
+				return ms;
 			}
 
 			// Get parameters in query string to translate them to their actual values.
@@ -1006,8 +1006,8 @@ namespace Npgsql
 				foreach (NpgsqlParameter parameter in parameters)
 					parameterIndex[parameter.CleanName] = parameter;
 
-				cms = new ChunkedMemoryStream();
-				sw = new StreamWriter(cms);
+				ms = new MemoryStream();
+				sw = new StreamWriter(ms);
 
 				foreach (string s in parameterReplace.Split(text))
 					//foreach (String s in parameterReplace.Split(result.ToString()))
@@ -1076,7 +1076,7 @@ namespace Npgsql
 			}
 
 			sw.Flush();
-			return cms;
+			return ms;
 		}
 
 		private Boolean CheckFunctionNeedsColumnDefinitionList()
@@ -1205,8 +1205,8 @@ namespace Npgsql
 			if (parameters.Count == 0)
 				return new MemoryStream(Encoding.UTF8.GetBytes("execute " + planName));
 
-			var cms = new ChunkedMemoryStream();
-			var sw = new StreamWriter(cms);
+			var ms = new MemoryStream();
+			var sw = new StreamWriter(ms);
 			sw.Write("execute " + planName);
 			sw.Write('(');
 
@@ -1235,7 +1235,7 @@ namespace Npgsql
 			}
 			sw.Write(')');
 			sw.Flush();
-			return cms;
+			return ms;
 		}
 
 
@@ -1466,7 +1466,7 @@ namespace Npgsql
 			}
 			else
 			{
-				timeout = (int)NpgsqlConnectionStringBuilder.GetDefaultValue(Keywords.CommandTimeout);
+				timeout = NpgsqlConnectionStringBuilder.DefaultCommandTimeout;
 			}
 		}
 

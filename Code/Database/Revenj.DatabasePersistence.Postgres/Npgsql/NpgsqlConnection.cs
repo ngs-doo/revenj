@@ -38,7 +38,7 @@ using System.Transactions;
 using Mono.Security.Protocol.Tls;
 using IsolationLevel = System.Data.IsolationLevel;
 
-namespace Npgsql
+namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	/// <summary>
 	/// Represents the method that handles the <see cref="Npgsql.NpgsqlConnection.Notification">Notice</see> events.

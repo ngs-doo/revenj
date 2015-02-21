@@ -33,9 +33,9 @@
 
 using System;
 using System.IO;
-using Npgsql;
+using Revenj.DatabasePersistence.Postgres.Npgsql;
 
-namespace NpgsqlTypes
+namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 {
 	public class FastpathArg
 	{
