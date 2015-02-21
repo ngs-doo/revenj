@@ -486,14 +486,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				result.Columns.Add("IsLong", typeof(bool));
 				result.Columns.Add("IsReadOnly", typeof(bool));
 
-				if (_connector.BackendProtocolVersion == ProtocolVersion.Version2)
-				{
-					FillSchemaTable_v2(result);
-				}
-				else if (_connector.BackendProtocolVersion == ProtocolVersion.Version3)
-				{
-					FillSchemaTable_v3(result);
-				}
+				FillSchemaTable_v3(result);
 			}
 
 			return result;
@@ -1004,9 +997,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		// Logging related values
 		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
 
-		internal ForwardsOnlyDataReader(IEnumerable<IServerResponseObject> dataEnumeration, CommandBehavior behavior,
-										NpgsqlCommand command, NpgsqlConnector.NotificationThreadBlock threadBlock,
-										bool synchOnReadError)
+		internal ForwardsOnlyDataReader(
+			IEnumerable<IServerResponseObject> dataEnumeration,
+			CommandBehavior behavior,
+			NpgsqlCommand command,
+			NpgsqlConnector.NotificationThreadBlock threadBlock,
+			bool synchOnReadError)
 			: base(command, behavior)
 		{
 			_dataEnumerator = dataEnumeration.GetEnumerator();
@@ -1025,7 +1021,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private void UpdateOutputParameters()
 		{
-			if (CurrentDescription != null)
+			if (CurrentDescription != null && _command.Parameters.Count != 0)
 			{
 				NpgsqlRow row = null;
 				Queue<NpgsqlParameter> pending = new Queue<NpgsqlParameter>();
@@ -1271,7 +1267,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		protected override void Dispose(bool disposing)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Dispose");
 			base.Dispose(disposing);
 		}
 
@@ -1283,7 +1278,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "RecordsAffected");
 				return _recordsAffected ?? -1;
 			}
 		}
@@ -1394,8 +1388,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override object GetProviderSpecificValue(int ordinal)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "GetValue");
-
 			if (ordinal < 0 || ordinal >= CurrentDescription.NumFields)
 			{
 				throw new IndexOutOfRangeException("Column index out of range");

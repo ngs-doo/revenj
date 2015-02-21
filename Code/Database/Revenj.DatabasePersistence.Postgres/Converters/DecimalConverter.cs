@@ -145,12 +145,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			public bool MustEscapeRecord { get { return false; } }
 			public bool MustEscapeArray { get { return false; } }
 
-			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				sw.Write(Value);
 			}
 
-			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				sw.Write(Value);
 			}

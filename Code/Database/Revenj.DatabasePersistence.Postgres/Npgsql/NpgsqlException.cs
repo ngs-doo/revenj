@@ -30,8 +30,6 @@ using System;
 using System.Collections;
 using System.Data.Common;
 using System.IO;
-using System.Reflection;
-using System.Resources;
 using System.Runtime.Serialization;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
@@ -43,10 +41,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	public sealed class NpgsqlException : DbException
 	{
 		private readonly IList errors;
-
-		// Logging related values
-		//private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-		private static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 
 		// To allow deserialization.
 		private NpgsqlException(SerializationInfo info, StreamingContext context)
@@ -63,7 +57,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		internal NpgsqlException(IList errors)
 			: base(errors[0].ToString())
 		{
-			NpgsqlEventLog.LogMsg(resman, "Log_ExceptionOccured", LogLevel.Normal, Message);
 			this.errors = new ArrayList(errors);
 		}
 
@@ -77,7 +70,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			: base(message, innerException)
 		{
 			errors = new ArrayList();
-			errors.Add(new NpgsqlError(ProtocolVersion.Unknown, message));
+			errors.Add(new NpgsqlError(message));
 		}
 
 

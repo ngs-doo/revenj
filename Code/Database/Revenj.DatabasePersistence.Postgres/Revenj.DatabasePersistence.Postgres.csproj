@@ -110,6 +110,7 @@
     <Compile Include="NpgsqlTypes\NpgsqlTypes.cs" />
     <Compile Include="NpgsqlTypes\NpgsqlTypesHelper.cs" />
     <Compile Include="NpgsqlTypes\TypeConverter.cs" />
+    <Compile Include="Npgsql\ByteBuffer.cs" />
     <Compile Include="Npgsql\Cache.cs" />
     <Compile Include="Npgsql\ChunkedMemoryStream.cs" />
     <Compile Include="Npgsql\Copy\NpgsqlCopyFormat.cs" />
@@ -149,7 +150,6 @@
     </Compile>
     <Compile Include="Npgsql\NpgsqlDataReader.cs" />
     <Compile Include="Npgsql\NpgsqlError.cs" />
-    <Compile Include="Npgsql\NpgsqlEventLog.cs" />
     <Compile Include="Npgsql\NpgsqlException.cs" />
     <Compile Include="Npgsql\NpgsqlFactory.cs" />
     <Compile Include="Npgsql\NpgsqlMediator.cs" />
@@ -251,16 +251,7 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="NpgsqlTypes\NpgsqlTypesHelper.de.resx">
-      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="NpgsqlTypes\NpgsqlTypesHelper.ja.resx">
-      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="NpgsqlTypes\NpgsqlTypesHelper.resx">
-      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="NpgsqlTypes\NpgsqlTypesHelper.zh-CN.resx">
       <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Npgsql\NpgsqlCommand.resx">
@@ -275,9 +266,6 @@
     <EmbeddedResource Include="Npgsql\NpgsqlConnectionStringBuilder.resx">
       <DependentUpon>NpgsqlConnectionStringBuilder.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Npgsql\NpgsqlEventLog.resx">
-      <DependentUpon>NpgsqlEventLog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Npgsql\NpgsqlException.resx">
       <DependentUpon>NpgsqlException.cs</DependentUpon>
     </EmbeddedResource>
@@ -287,20 +275,8 @@
     <EmbeddedResource Include="Npgsql\NpgsqlTransaction.resx">
       <DependentUpon>NpgsqlTransaction.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Npgsql\Parameter\NpgsqlParameter.resx">
-      <DependentUpon>NpgsqlParameter.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Npgsql\Parameter\NpgsqlParameterCollection.resx">
-      <DependentUpon>NpgsqlParameterCollection.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Npgsql\PGUtil.resx">
       <DependentUpon>PGUtil.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Npgsql\State\NpgsqlClosedState.resx">
-      <DependentUpon>NpgsqlClosedState.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Npgsql\State\NpgsqlConnectedState.resx">
-      <DependentUpon>NpgsqlConnectedState.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Npgsql\State\NpgsqlReadyState.resx">
       <DependentUpon>NpgsqlReadyState.cs</DependentUpon>

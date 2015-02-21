@@ -24,6 +24,8 @@ namespace Revenj.Utility
 		private static readonly char[] CharMap;
 		private static readonly int[] CharLookup;
 
+		public readonly char[] TmpBuffer = new char[38];
+
 		static ChunkedMemoryStream()
 		{
 			for (int i = 0; i < SizeLimit; i++)

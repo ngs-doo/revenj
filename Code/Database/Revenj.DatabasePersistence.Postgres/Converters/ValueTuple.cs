@@ -52,7 +52,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return quote ? "'" + Value.Replace("'", "''") + "'" : Value;
 		}
 
-		private void Escape(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		private void Escape(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
 			string quoteEscape = null;
 			string slashEscape = null;
@@ -95,10 +95,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (HasMarkers)
-				Escape(sw, escaping, mappings);
+				Escape(sw, buf, escaping, mappings);
 			else
 			{
 				if (mappings != null)
@@ -109,12 +109,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Value == null)
 				sw.Write("NULL");
 			else if (HasMarkers)
-				Escape(sw, escaping, mappings);
+				Escape(sw, buf, escaping, mappings);
 			else
 			{
 				if (mappings != null)

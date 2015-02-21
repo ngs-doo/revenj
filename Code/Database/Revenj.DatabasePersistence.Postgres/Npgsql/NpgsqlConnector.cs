@@ -98,7 +98,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		// Mediator which will hold data generated from backend.
 		private readonly NpgsqlMediator _mediator;
 
-		private ProtocolVersion _backendProtocolVersion;
 		private Version _serverVersion;
 
 		// Values for possible CancelRequest messages.
@@ -145,6 +144,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private readonly Dictionary<string, NpgsqlParameterStatus> _serverParameters =
 			new Dictionary<string, NpgsqlParameterStatus>(StringComparer.InvariantCultureIgnoreCase);
+
+		public readonly byte[] TmpBuffer = new byte[4];
+		public readonly ByteBuffer ArrayBuffer = new ByteBuffer();
 
 #if WINDOWS && UNMANAGED
 
@@ -343,6 +345,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			return CurrentState.ExecuteEnum(this, execute);
 		}
 
+		private static int ValidCounter;
+
 		/// <summary>
 		/// This method checks if the connector is still ok.
 		/// We try to send a simple query text, select 1 as ConnectionTest;
@@ -353,10 +357,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				// Here we use a fake NpgsqlCommand, just to send the test query string.
 
-				// Get random test value.
-				String testValue = "Npgsql" + DateTime.Now.Ticks.ToString();
+				var testValue = (ValidCounter++).ToString();
 
-				//Query(new NpgsqlCommand("select 1 as ConnectionTest", this));
 				string compareValue = string.Empty;
 				using (NpgsqlCommand cmd = new NpgsqlCommand("select '" + testValue + "'", this))
 				{
@@ -524,15 +526,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 		/// <summary>
-		/// Backend protocol version in use by this connector.
-		/// </summary>
-		internal ProtocolVersion BackendProtocolVersion
-		{
-			get { return _backendProtocolVersion; }
-			set { _backendProtocolVersion = value; }
-		}
-
-		/// <summary>
 		/// The physical connection stream to the backend.
 		/// </summary>
 		internal Stream Stream
@@ -654,10 +647,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			// If Connection.ConnectionString specifies a protocol version, we will
 			// not try to fall back to version 2 on failure.
 
-			_backendProtocolVersion = (settings.Protocol == ProtocolVersion.Unknown)
-										  ? ProtocolVersion.Version3
-										  : settings.Protocol;
-
 			// Reset state to initialize new connector in pool.
 			CurrentState = NpgsqlClosedState.Instance;
 
@@ -668,37 +657,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				// Establish protocol communication and handle authentication...
 				CurrentState.Startup(this);
 			}
-			catch (NpgsqlException ne)
+			catch (NpgsqlException)
 			{
-				// Check for protocol not supported.  If we have been told what protocol to use,
-				// we will not try this step.
-				if (settings.Protocol != ProtocolVersion.Unknown)
-				{
-					throw;
-				}
-				// If we attempted protocol version 3, it may be possible to drop back to version 2.
-				if (BackendProtocolVersion != ProtocolVersion.Version3)
-				{
-					throw;
-				}
-				NpgsqlError Error0 = (NpgsqlError)ne.Errors[0];
-
-				// If NpgsqlError..ctor() encounters a version 2 error,
-				// it will set its own protocol version to version 2.  That way, we can tell
-				// easily if the error was a FATAL: protocol error.
-				if (Error0.BackendProtocolVersion != ProtocolVersion.Version2)
-				{
-					throw;
-				}
-				// Try using the 2.0 protocol.
-				_mediator.ResetResponses();
-				BackendProtocolVersion = ProtocolVersion.Version2;
-				CurrentState = NpgsqlClosedState.Instance;
-
-				// Get a raw connection, possibly SSL...
-				CurrentState.Open(this);
-				// Establish protocol communication and handle authentication...
-				CurrentState.Startup(this);
+				throw;
 			}
 
 			// Change the state of connection to open and ready.
@@ -1037,7 +998,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			 * say we don't support it.
 			 */
 
-			catch (NpgsqlException e)
+			catch (NpgsqlException)
 			{
 				return null;
 			}

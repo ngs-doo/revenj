@@ -6,23 +6,23 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class IntConverter
 	{
-		public static int? ParseNullable(TextReader reader)
+		public static int? ParseNullable(TextReader reader, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			return ParseInt(reader, ref cur);
+			return ParseInt(reader, ref cur, buf);
 		}
 
-		public static int Parse(TextReader reader)
+		public static int Parse(TextReader reader, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return 0;
-			return ParseInt(reader, ref cur);
+			return ParseInt(reader, ref cur, buf);
 		}
 
-		private static int ParseInt(TextReader reader, ref int cur)
+		private static int ParseInt(TextReader reader, ref int cur, char[] buf)
 		{
 			var neg = cur == '-';
 			if (neg)
@@ -36,7 +36,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return neg ? -res : res;
 		}
 
-		public static List<int?> ParseNullableCollection(TextReader reader, int context)
+		public static List<int?> ParseNullableCollection(TextReader reader, int context, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -64,7 +64,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseInt(reader, ref cur));
+					list.Add(ParseInt(reader, ref cur, buf));
 				}
 			}
 			if (espaced)
@@ -76,7 +76,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<int> ParseCollection(TextReader reader, int context)
+		public static List<int> ParseCollection(TextReader reader, int context, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -104,7 +104,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseInt(reader, ref cur));
+					list.Add(ParseInt(reader, ref cur, buf));
 				}
 			}
 			if (espaced)
@@ -119,8 +119,11 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		public static int ParsePositive(char[] source, int start, int end)
 		{
 			int res = 0;
-			for (int i = start; i < end; i++)
+			for (int i = start; i < source.Length; i++)
+			{
+				if (i == end) break;
 				res = res * 10 + (source[i] - 48);
+			}
 			return res;
 		}
 
@@ -141,14 +144,39 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			public bool MustEscapeRecord { get { return false; } }
 			public bool MustEscapeArray { get { return false; } }
 
-			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				sw.Write(Value);
+				if (Value == int.MinValue)
+				{
+					sw.Write("-2147483648");
+					return;
+				}
+				uint abs;
+				if (Value < 0)
+				{
+					sw.Write('-');
+					abs = (uint)(-Value);
+				}
+				else
+					abs = (uint)(Value);
+				int pos = 10;
+				do
+				{
+					var div = abs / 100;
+					var rem = abs - div * 100;
+					var num = NumberConverter.Numbers[rem];
+					buf[pos--] = num.Second;
+					buf[pos--] = num.First;
+					abs = div;
+				} while (abs != 0);
+				if (buf[pos + 1] == '0') // TODO: remove branch
+					pos++;
+				sw.Write(buf, pos + 1, 10 - pos);
 			}
 
-			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				sw.Write(Value);
+				InsertRecord(sw, buf, escaping, mappings);
 			}
 
 			public string BuildTuple(bool quote)

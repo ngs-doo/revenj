@@ -289,17 +289,17 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (quote)
 					{
 						sw.Write('\'');
-						InsertRecord(sw, string.Empty, null);
+						InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
 						sw.Write('\'');
 					}
-					else InsertRecord(sw, string.Empty, null);
+					else InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
 					sw.Flush();
 					cms.Position = 0;
 					return cms.GetReader().ReadToEnd();
 				}
 			}
 
-			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				var pref = PostgresTuple.BuildSlashEscape(escaping.Length);
 				if (mappings != null)
@@ -312,10 +312,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				BuildArray(sw);
 			}
 
-			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				//TODO this is wrong
-				InsertRecord(sw, escaping, mappings);
+				InsertRecord(sw, buf, escaping, mappings);
 			}
 		}
 
@@ -341,17 +341,17 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (quote)
 					{
 						sw.Write('\'');
-						InsertRecord(sw, string.Empty, null);
+						InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
 						sw.Write('\'');
 					}
-					else InsertRecord(sw, string.Empty, null);
+					else InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
 					sw.Flush();
 					cms.Position = 0;
 					return cms.GetReader().ReadToEnd();
 				}
 			}
 
-			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				var pref = PostgresTuple.BuildSlashEscape(escaping.Length);
 				if (mappings != null)
@@ -365,10 +365,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				if (Dispose) Value.Dispose();
 			}
 
-			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				//TODO this is wrong
-				InsertRecord(sw, escaping, mappings);
+				InsertRecord(sw, buf, escaping, mappings);
 			}
 		}
 	}

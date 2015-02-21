@@ -28,6 +28,7 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -51,11 +52,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public readonly string AdditionalInformation;
 
-		internal NpgsqlNotificationEventArgs(Stream stream, bool readAdditional)
+		internal NpgsqlNotificationEventArgs(Stream stream, bool readAdditional, byte[] buffer, ByteBuffer queue)
 		{
-			PID = PGUtil.ReadInt32(stream);
-			Condition = PGUtil.ReadString(stream);
-			AdditionalInformation = readAdditional ? PGUtil.ReadString(stream) : string.Empty;
+			PID = PGUtil.ReadInt32(stream, buffer);
+			Condition = PGUtil.ReadString(stream, queue);
+			AdditionalInformation = readAdditional ? PGUtil.ReadString(stream, queue) : string.Empty;
 		}
 	}
 }

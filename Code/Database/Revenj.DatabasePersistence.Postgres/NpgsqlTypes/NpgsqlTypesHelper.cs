@@ -208,12 +208,12 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		// Not sure what to do with this one.  I don't believe we ever ask for a binary
 		// formatting, so this shouldn't even be used right now.
 		// At some point this will need to be merged into the type converter system somehow?
-		public static Object ConvertBackendBytesToSystemType(NpgsqlBackendTypeInfo TypeInfo, Byte[] data, Int32 fieldValueSize,
-															 Int32 typeModifier)
+		public static Object ConvertBackendBytesToSystemType(
+			NpgsqlBackendTypeInfo TypeInfo,
+			byte[] data,
+			int fieldValueSize,
+			int typeModifier)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ConvertBackendBytesToStytemType");
-
-
 			// We are never guaranteed to know about every possible data type the server can send us.
 			// When we encounter an unknown type, we punt and return the data without modification.
 			if (TypeInfo == null)
@@ -239,11 +239,9 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		public static Object ConvertBackendStringToSystemType(
 			NpgsqlBackendTypeInfo TypeInfo,
 			StreamReader data,
-			Int16 typeSize,
-			Int32 typeModifier)
+			short typeSize,
+			int typeModifier)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ConvertBackendStringToSystemType");
-
 			if (TypeInfo != null)
 			{
 				return TypeInfo.ConvertToNative(data.ReadToEnd(), typeSize, typeModifier);
@@ -257,11 +255,9 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		public static Object ConvertBackendStringToSystemType(
 			NpgsqlBackendTypeInfo TypeInfo,
 			string data,
-			Int16 typeSize,
-			Int32 typeModifier)
+			short typeSize,
+			int typeModifier)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ConvertBackendStringToSystemType");
-
 			if (TypeInfo != null)
 			{
 				return TypeInfo.ConvertToNative(data, typeSize, typeModifier);
@@ -524,8 +520,6 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		/// effect another connection.</returns>
 		public static NpgsqlBackendTypeMapping CreateAndLoadInitialTypesMapping(NpgsqlConnector conn)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "LoadTypesMapping");
-
 			MappingKey key = new MappingKey(conn);
 			// Check the cache for an initial types map.
 			NpgsqlBackendTypeMapping oidToNameMapping = null;
@@ -1305,7 +1299,6 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 			Type currentType = value.GetType();
 			if (value is DBNull || currentType == expectedType)
 				return value;
-#if NET35
 			if (expectedType == typeof(DateTimeOffset))
 			{
 				if (currentType == typeof(NpgsqlDate))
@@ -1348,131 +1341,124 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 				}
 			}
 			else
-#endif
-			if (expectedType == typeof(TimeSpan))
-			{
-				if (currentType == typeof(NpgsqlDate))
+				if (expectedType == typeof(TimeSpan))
 				{
-					return new TimeSpan(((DateTime)(NpgsqlDate)value).Ticks);
-				}
-				else if (currentType == typeof(NpgsqlTime))
-				{
-					return new TimeSpan(((NpgsqlTime)value).Ticks);
-				}
-				else if (currentType == typeof(NpgsqlTimeTZ))
-				{
-					return new TimeSpan(((NpgsqlTimeTZ)value).UTCTime.Ticks);
-				}
-				else if (currentType == typeof(NpgsqlTimeStamp))
-				{
-					return new TimeSpan(((NpgsqlTimeStamp)value).Ticks);
-				}
-				else if (currentType == typeof(NpgsqlTimeStampTZ))
-				{
-					return new TimeSpan(((DateTime)(NpgsqlTimeStampTZ)value).ToUniversalTime().Ticks);
-				}
-				else if (currentType == typeof(NpgsqlInterval))
-				{
-					return (TimeSpan)(NpgsqlInterval)value;
-				}
-				else if (currentType == typeof(DateTime))
-				{
-					return new TimeSpan(((DateTime)value).ToUniversalTime().Ticks);
-				}
-				else if (currentType == typeof(DateTimeOffset))
-				{
-					return new TimeSpan(((DateTimeOffset)value).Ticks);
-				}
-				else
-				{
-#if NET40
+					if (currentType == typeof(NpgsqlDate))
+					{
+						return new TimeSpan(((DateTime)(NpgsqlDate)value).Ticks);
+					}
+					else if (currentType == typeof(NpgsqlTime))
+					{
+						return new TimeSpan(((NpgsqlTime)value).Ticks);
+					}
+					else if (currentType == typeof(NpgsqlTimeTZ))
+					{
+						return new TimeSpan(((NpgsqlTimeTZ)value).UTCTime.Ticks);
+					}
+					else if (currentType == typeof(NpgsqlTimeStamp))
+					{
+						return new TimeSpan(((NpgsqlTimeStamp)value).Ticks);
+					}
+					else if (currentType == typeof(NpgsqlTimeStampTZ))
+					{
+						return new TimeSpan(((DateTime)(NpgsqlTimeStampTZ)value).ToUniversalTime().Ticks);
+					}
+					else if (currentType == typeof(NpgsqlInterval))
+					{
+						return (TimeSpan)(NpgsqlInterval)value;
+					}
+					else if (currentType == typeof(DateTime))
+					{
+						return new TimeSpan(((DateTime)value).ToUniversalTime().Ticks);
+					}
+					else if (currentType == typeof(DateTimeOffset))
+					{
+						return new TimeSpan(((DateTimeOffset)value).Ticks);
+					}
+					else
+					{
 						return TimeSpan.Parse(value.ToString(), CultureInfo.InvariantCulture);
-#else
-					return TimeSpan.Parse(value.ToString());
-#endif
+					}
 				}
-			}
-			else if (expectedType == typeof(string))
-			{
-				return value.ToString();
-			}
-			else if (expectedType == typeof(Guid))
-			{
-				if (currentType == typeof(byte[]))
+				else if (expectedType == typeof(string))
 				{
-					return new Guid((byte[])value);
+					return value.ToString();
 				}
-				else
+				else if (expectedType == typeof(Guid))
 				{
-					return new Guid(value.ToString());
+					if (currentType == typeof(byte[]))
+					{
+						return new Guid((byte[])value);
+					}
+					else
+					{
+						return new Guid(value.ToString());
+					}
 				}
-			}
-			else if (expectedType == typeof(DateTime))
-			{
-				if (currentType == typeof(NpgsqlDate))
+				else if (expectedType == typeof(DateTime))
 				{
-					return (DateTime)(NpgsqlDate)value;
-				}
-				else if (currentType == typeof(NpgsqlTime))
-				{
-					return (DateTime)(NpgsqlTime)value;
-				}
-				else if (currentType == typeof(NpgsqlTimeTZ))
-				{
-					return (DateTime)(NpgsqlTimeTZ)value;
-				}
-				else if (currentType == typeof(NpgsqlTimeStamp))
-				{
-					return (DateTime)(NpgsqlTimeStamp)value;
-				}
-				else if (currentType == typeof(NpgsqlTimeStampTZ))
-				{
-					return (DateTime)(NpgsqlTimeStampTZ)value;
-				}
-				else if (currentType == typeof(NpgsqlInterval))
-				{
-					return new DateTime(((TimeSpan)(NpgsqlInterval)value).Ticks);
-				}
-#if NET35
+					if (currentType == typeof(NpgsqlDate))
+					{
+						return (DateTime)(NpgsqlDate)value;
+					}
+					else if (currentType == typeof(NpgsqlTime))
+					{
+						return (DateTime)(NpgsqlTime)value;
+					}
+					else if (currentType == typeof(NpgsqlTimeTZ))
+					{
+						return (DateTime)(NpgsqlTimeTZ)value;
+					}
+					else if (currentType == typeof(NpgsqlTimeStamp))
+					{
+						return (DateTime)(NpgsqlTimeStamp)value;
+					}
+					else if (currentType == typeof(NpgsqlTimeStampTZ))
+					{
+						return (DateTime)(NpgsqlTimeStampTZ)value;
+					}
+					else if (currentType == typeof(NpgsqlInterval))
+					{
+						return new DateTime(((TimeSpan)(NpgsqlInterval)value).Ticks);
+					}
 					else if (currentType == typeof(DateTimeOffset))
 					{
 						return ((DateTimeOffset)value).LocalDateTime;
 					}
-#endif
-				else if (currentType == typeof(TimeSpan))
-				{
-					return new DateTime(((TimeSpan)value).Ticks);
+					else if (currentType == typeof(TimeSpan))
+					{
+						return new DateTime(((TimeSpan)value).Ticks);
+					}
+					else
+					{
+						return DateTime.Parse(value.ToString(), CultureInfo.InvariantCulture);
+					}
 				}
-				else
+				else if (expectedType == typeof(byte[]))
 				{
-					return DateTime.Parse(value.ToString(), CultureInfo.InvariantCulture);
+					if (currentType == typeof(Guid))
+					{
+						return ((Guid)value).ToByteArray();
+					}
+					else if (value is Array)
+					{
+						Array valueArray = (Array)value;
+						int byteLength = Buffer.ByteLength(valueArray);
+						byte[] bytes = new byte[byteLength];
+						Buffer.BlockCopy(valueArray, 0, bytes, 0, byteLength);
+						return bytes;
+					}
+					else
+					{
+						// expect InvalidCastException from this call
+						return Convert.ChangeType(value, expectedType);
+					}
 				}
-			}
-			else if (expectedType == typeof(byte[]))
-			{
-				if (currentType == typeof(Guid))
+				else // long, int, short, double, float, decimal, byte, sbyte, bool, and other unspecified types
 				{
-					return ((Guid)value).ToByteArray();
-				}
-				else if (value is Array)
-				{
-					Array valueArray = (Array)value;
-					int byteLength = Buffer.ByteLength(valueArray);
-					byte[] bytes = new byte[byteLength];
-					Buffer.BlockCopy(valueArray, 0, bytes, 0, byteLength);
-					return bytes;
-				}
-				else
-				{
-					// expect InvalidCastException from this call
+					// ChangeType supports the conversions we want for above expected types
 					return Convert.ChangeType(value, expectedType);
 				}
-			}
-			else // long, int, short, double, float, decimal, byte, sbyte, bool, and other unspecified types
-			{
-				// ChangeType supports the conversions we want for above expected types
-				return Convert.ChangeType(value, expectedType);
-			}
 		}
 	}
 }

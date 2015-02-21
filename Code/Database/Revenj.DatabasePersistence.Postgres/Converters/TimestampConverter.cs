@@ -40,34 +40,33 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		public static IPostgresTuple ToTuple(DateTime? value)
 		{
-			return value != null ? new ValueTuple(ToDatabase(value.Value), false, false) : default(IPostgresTuple);
+			return value != null ? new ValueTuple(ToDatabase(value.Value), false, false) : null;
 		}
 
-		public static DateTime? ParseNullable(TextReader reader, int context)
+		public static DateTime? ParseNullable(TextReader reader, int context, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var dt = ParseTimestamp(reader, context);
+			var dt = ParseTimestamp(reader, context, buf);
 			reader.Read();
 			return dt;
 		}
 
-		public static DateTime Parse(TextReader reader, int context)
+		public static DateTime Parse(TextReader reader, int context, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return DateTime.MinValue;
-			var dt = ParseTimestamp(reader, context);
+			var dt = ParseTimestamp(reader, context, buf);
 			reader.Read();
 			return dt;
 		}
 
-		public static DateTime ParseTimestamp(TextReader reader, int context)
+		public static DateTime ParseTimestamp(TextReader reader, int context, char[] buf)
 		{
 			for (int i = 0; i < context - 1; i++)
 				reader.Read();
-			var buf = new char[40];
 			var x = reader.Read(buf, 0, 19);
 			int cur;
 			do
@@ -81,7 +80,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return DateTime.Parse(new string(buf, 0, x - 1), CultureInfo.InvariantCulture);
 		}
 
-		public static List<DateTime?> ParseNullableCollection(TextReader reader, int context)
+		public static List<DateTime?> ParseNullableCollection(TextReader reader, int context, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -109,7 +108,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseTimestamp(reader, innerContext));
+					list.Add(ParseTimestamp(reader, innerContext, buf));
 				}
 				cur = reader.Read();
 			}
@@ -122,7 +121,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<DateTime> ParseCollection(TextReader reader, int context)
+		public static List<DateTime> ParseCollection(TextReader reader, int context, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -150,7 +149,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseTimestamp(reader, innerContext));
+					list.Add(ParseTimestamp(reader, innerContext, buf));
 				}
 				cur = reader.Read();
 			}

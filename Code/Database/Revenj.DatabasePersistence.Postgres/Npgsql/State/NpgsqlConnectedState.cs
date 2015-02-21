@@ -33,6 +33,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	{
 		public static readonly NpgsqlConnectedState Instance = new NpgsqlConnectedState();
 
+		private const string Exception_AuthenticationMethodNotSupported = "Only AuthenticationClearTextPassword and AuthenticationMD5Password supported for now. Received: {0}";
+		private const string Log_AuthenticationClearTextRequest = "Server requested cleartext password authentication.";
+		private const string Log_AuthenticationMD5Request = "Server requested MD5 password authentication.";
+		private const string Log_AuthenticationOK = "AuthenticationOK received.";
+		private const string Log_CompletedResponse = "CompletedResponse message from Server: {0}.";
+		private const string Log_ErrorResponse = "ErrorResponse message from Server: {0}.";
+		private const string Log_Listen = "{0} message received from server.";
+		private const string Log_ParameterStatus = "ParameterStatus message from Server: Param = {0}, Value = {1}";
+		private const string Log_ProtocolMessage = "{0} message received from server.";
+
 		private NpgsqlConnectedState()
 		{
 		}
@@ -40,8 +50,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public override void Startup(NpgsqlConnector context)
 		{
 			NpgsqlStartupPacket startupPacket = new NpgsqlStartupPacket(296, //Not used.
-			                                                            context.BackendProtocolVersion, context.Database,
-			                                                            context.UserName, "", "", "");
+																		context.Database,
+																		context.UserName, "", "", "");
 
 			startupPacket.WriteToStream(new BufferedStream(context.Stream));
 			context.RequireReadyForQuery = false;

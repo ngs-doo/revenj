@@ -6,23 +6,23 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class LongConverter
 	{
-		public static long? ParseNullable(TextReader reader)
+		public static long? ParseNullable(TextReader reader, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			return ParseLong(reader, ref cur);
+			return ParseLong(reader, ref cur, buf);
 		}
 
-		public static long Parse(TextReader reader)
+		public static long Parse(TextReader reader, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return 0;
-			return ParseLong(reader, ref cur);
+			return ParseLong(reader, ref cur, buf);
 		}
 
-		private static long ParseLong(TextReader reader, ref int cur)
+		private static long ParseLong(TextReader reader, ref int cur, char[] buf)
 		{
 			var neg = cur == '-';
 			if (neg)
@@ -36,7 +36,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return neg ? -res : res;
 		}
 
-		public static List<long?> ParseNullableCollection(TextReader reader, int context)
+		public static List<long?> ParseNullableCollection(TextReader reader, int context, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -64,7 +64,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseLong(reader, ref cur));
+					list.Add(ParseLong(reader, ref cur, buf));
 				}
 			}
 			if (espaced)
@@ -76,7 +76,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<long> ParseCollection(TextReader reader, int context)
+		public static List<long> ParseCollection(TextReader reader, int context, char[] buf)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -104,7 +104,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseLong(reader, ref cur));
+					list.Add(ParseLong(reader, ref cur, buf));
 				}
 			}
 			if (espaced)
@@ -133,14 +133,39 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			public bool MustEscapeRecord { get { return false; } }
 			public bool MustEscapeArray { get { return false; } }
 
-			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				sw.Write(Value);
+				if (Value == long.MinValue)
+				{
+					sw.Write("-9223372036854775808");
+					return;
+				}
+				ulong abs;
+				if (Value < 0)
+				{
+					sw.Write('-');
+					abs = (ulong)(-Value);
+				}
+				else
+					abs = (ulong)(Value);
+				int pos = 20;
+				do
+				{
+					var div = abs / 100;
+					var rem = abs - div * 100;
+					var num = NumberConverter.Numbers[rem];
+					buf[pos--] = num.Second;
+					buf[pos--] = num.First;
+					abs = div;
+				} while (abs != 0);
+				if (buf[pos + 1] == '0')//TODO: remove branch
+					pos++;
+				sw.Write(buf, pos + 1, 20 - pos);
 			}
 
-			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				sw.Write(Value);
+				InsertRecord(sw, buf, escaping, mappings);
 			}
 
 			public string BuildTuple(bool quote)

@@ -227,12 +227,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else sw.Write(Value ?? string.Empty);
 			}
 
-			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				sw.Write(Value ?? string.Empty);
 			}
 
-			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 					sw.Write("NULL");

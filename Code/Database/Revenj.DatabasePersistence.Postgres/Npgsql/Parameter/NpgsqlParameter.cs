@@ -42,9 +42,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	///</summary>
 	public sealed class NpgsqlParameter : DbParameter, ICloneable
 	{
-		// Logging related values
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-
 		// Fields to implement IDbDataParameter interface.
 		private byte precision = 0;
 		private byte scale = 0;
@@ -69,12 +66,14 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private static readonly NpgsqlNativeTypeInfo defaultTypeInfo = NpgsqlTypesHelper.GetNativeTypeInfo(typeof(String));
 
+		private const string Exception_ImpossibleToCast = "Can't cast {0} into any valid DbType.";
+		private const string Exception_ParameterTypeIsOnlyArray = "Cannot set NpgsqlDbType to just Array, Binary-Or with the element type (e.g. Array of Box is NpgsqlDbType.Array | NpgsqlDbType.Box).";
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> class.
 		/// </summary>
 		public NpgsqlParameter()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME);
 		}
 
 		/// <summary>
@@ -93,8 +92,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </remarks>
 		public NpgsqlParameter(String parameterName, object value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME, parameterName, value);
-
 			this.ParameterName = parameterName;
 			this.Value = value;
 		}
@@ -144,8 +141,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param m_Name="sourceColumn">The m_Name of the source column.</param>
 		public NpgsqlParameter(String parameterName, NpgsqlDbType parameterType, Int32 size, String sourceColumn)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME, parameterName, parameterType, size, source_column);
-
 			this.ParameterName = parameterName;
 
 			NpgsqlDbType = parameterType; //Allow the setter to catch any exceptions.
@@ -228,12 +223,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "Precision");
 				return precision;
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "Precision", value);
 				precision = value;
 			}
 		}
@@ -268,12 +261,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "Scale");
 				return scale;
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "Scale", value);
 				scale = value;
 			}
 		}
@@ -288,12 +279,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "Size");
 				return size;
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "Size", value);
 				size = value;
 			}
 		}
@@ -307,8 +296,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "DbType");
-
 				if (type_info == null)
 					return defaultTypeInfo.DbType;
 				else
@@ -316,13 +303,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			} // [TODO] Validate data type.
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "DbType", value);
-
 				useCast = value != DbType.Object;
 
 				if (!NpgsqlTypesHelper.TryGetNativeTypeInfo(value, out type_info))
 				{
-					throw new InvalidCastException(String.Format(resman.GetString("Exception_ImpossibleToCast"), value));
+					throw new InvalidCastException(String.Format(Exception_ImpossibleToCast, value));
 				}
 			}
 		}
@@ -336,8 +321,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "NpgsqlDbType");
-
 				if (type_info == null)
 					return defaultTypeInfo.NpgsqlDbType;
 				else
@@ -345,15 +328,14 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			} // [TODO] Validate data type.
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "NpgsqlDbType", value);
 				useCast = true;
 				if (value == NpgsqlDbType.Array)
 				{
-					throw new ArgumentOutOfRangeException(resman.GetString("Exception_ParameterTypeIsOnlyArray"));
+					throw new ArgumentOutOfRangeException(Exception_ParameterTypeIsOnlyArray);
 				}
 				if (!NpgsqlTypesHelper.TryGetNativeTypeInfo(value, out type_info))
 				{
-					throw new InvalidCastException(String.Format(resman.GetString("Exception_ImpossibleToCast"), value));
+					throw new InvalidCastException(String.Format(Exception_ImpossibleToCast, value));
 				}
 			}
 		}
@@ -381,12 +363,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Normal, CLASSNAME, "Direction");
 				return direction;
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "Direction", value);
 				direction = value;
 			}
 		}
@@ -399,12 +379,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "IsNullable");
 				return is_nullable;
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "IsNullable", value);
 				is_nullable = value;
 			}
 		}
@@ -419,7 +397,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Normal, CLASSNAME, "ParameterName");
 				return m_Name;
 			}
 			set
@@ -432,8 +409,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				// no longer prefix with : so that the m_Name returned is the m_Name set
 
 				m_Name = m_Name.Trim();
-
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "ParameterName", m_Name);
 			}
 		}
 
@@ -465,12 +440,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Normal, CLASSNAME, "SourceColumn");
 				return source_column;
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "SourceColumn", value);
 				source_column = value;
 			}
 		}
@@ -486,12 +459,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Normal, CLASSNAME, "SourceVersion");
 				return source_version;
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "SourceVersion", value);
 				source_version = value;
 			}
 		}
@@ -510,8 +481,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			} // [TODO] Check and validate data type.
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "Value", value);
-
 				if ((value == null) || (value == DBNull.Value))
 				{
 					// don't really know what to do - leave default and do further exploration
@@ -524,11 +493,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 				if (type_info == null && !NpgsqlTypesHelper.TryGetNativeTypeInfo(value.GetType(), out type_info))
 				{
-					throw new InvalidCastException(String.Format(resman.GetString("Exception_ImpossibleToCast"), value.GetType()));
+					throw new InvalidCastException(String.Format(Exception_ImpossibleToCast, value.GetType()));
 				}
 				if (backendTypeInfo == null && !NpgsqlTypesHelper.TryGetBackendTypeInfo(type_info.Name, out backendTypeInfo))
 				{
-					throw new InvalidCastException(String.Format(resman.GetString("Exception_ImpossibleToCast"), value.GetType()));
+					throw new InvalidCastException(String.Format(Exception_ImpossibleToCast, value.GetType()));
 				}
 				else
 				{
@@ -548,12 +517,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Normal, CLASSNAME, "NpgsqlValue");
 				return npgsqlValue;
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Normal, CLASSNAME, "NpgsqlValue", value);
 				Value = value;
 			}
 		}

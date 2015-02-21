@@ -30,8 +30,6 @@
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Reflection;
-using System.Resources;
 using System.Text;
 using System.Threading;
 
@@ -42,8 +40,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// </summary>
 	public sealed class NpgsqlTransaction : DbTransaction
 	{
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-		private static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
+		private const string Exception_NoTransaction = "No transaction in progress.";
+		private const string Exception_SavePointNotSupported = "Savepoint is not supported by backend.";
+		private const string Exception_SavePointWithSemicolon = "Savepoint name cannot have semicolon.";
 
 		private NpgsqlConnection _conn = null;
 		private readonly IsolationLevel _isolation = IsolationLevel.ReadCommitted;
@@ -56,8 +55,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		internal NpgsqlTransaction(NpgsqlConnection conn, IsolationLevel isolation)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME);
-
 			_conn = conn;
 			_isolation = isolation;
 
@@ -114,7 +111,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				if (_conn == null)
 				{
-					throw new InvalidOperationException(resman.GetString("Exception_NoTransaction"));
+					throw new InvalidOperationException(Exception_NoTransaction);
 				}
 
 				return _isolation;
@@ -156,10 +153,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			if (_conn == null)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_NoTransaction"));
+				throw new InvalidOperationException(Exception_NoTransaction);
 			}
-
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Commit");
 
 			NpgsqlCommand command = new NpgsqlCommand("COMMIT", _conn.Connector);
 			command.ExecuteBlind();
@@ -176,10 +171,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			if (_conn == null)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_NoTransaction"));
+				throw new InvalidOperationException(Exception_NoTransaction);
 			}
-
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Rollback");
 
 			NpgsqlCommand command = new NpgsqlCommand("ROLLBACK", _conn.Connector);
 			command.ExecuteBlind();
@@ -195,16 +188,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			CheckDisposed();
 			if (_conn == null)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_NoTransaction"));
+				throw new InvalidOperationException(Exception_NoTransaction);
 			}
 			if (!_conn.Connector.SupportsSavepoint)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_SavePointNotSupported"));
+				throw new InvalidOperationException(Exception_SavePointNotSupported);
 			}
 
 			if (savePointName.Contains(";"))
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_SavePointWithSemicolon"));
+				throw new InvalidOperationException(Exception_SavePointWithSemicolon);
 			}
 
 			NpgsqlCommand command = new NpgsqlCommand("ROLLBACK TO SAVEPOINT " + savePointName, _conn.Connector);
@@ -219,16 +212,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			CheckDisposed();
 			if (_conn == null)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_NoTransaction"));
+				throw new InvalidOperationException(Exception_NoTransaction);
 			}
 			if (!_conn.Connector.SupportsSavepoint)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_SavePointNotSupported"));
+				throw new InvalidOperationException(Exception_SavePointNotSupported);
 			}
 
 			if (savePointName.Contains(";"))
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_SavePointWithSemicolon"));
+				throw new InvalidOperationException(Exception_SavePointWithSemicolon);
 			}
 
 			NpgsqlCommand command = new NpgsqlCommand("SAVEPOINT " + savePointName, _conn.Connector);
@@ -258,7 +251,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			if (_disposed)
 			{
-				throw new ObjectDisposedException(CLASSNAME);
+				throw new ObjectDisposedException(GetType().FullName);
 			}
 		}
 	}

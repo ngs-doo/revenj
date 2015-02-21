@@ -85,7 +85,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public void CommitTransaction()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CommitTransaction");
 			NpgsqlConnection connection = GetConnection();
 			NpgsqlCommand command = null;
 			if (_prepared)
@@ -103,7 +102,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			if (!_prepared)
 			{
-				NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "PrepareTransaction");
 				NpgsqlConnection connection = GetConnection();
 				NpgsqlCommand command = new NpgsqlCommand(string.Format("PREPARE TRANSACTION '{0}'", _txName), connection);
 				command.ExecuteBlind();
@@ -113,7 +111,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public void RollbackTransaction()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "RollbackTransaction");
 			NpgsqlConnection connection = GetConnection();
 			NpgsqlCommand command = null;
 			if (_prepared)

@@ -294,19 +294,22 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		protected sealed class ByteStreamer : Streamer<byte>
 		{
-			public ByteStreamer(Stream stream, int remainingBytes)
+			private readonly byte[] buffer;
+
+			public ByteStreamer(Stream stream, byte[] buffer, int remainingBytes)
 				: base(stream, remainingBytes)
 			{
+				this.buffer = buffer;
 			}
 
 			public override int DoRead(byte[] output, int outputIdx, int length)
 			{
-				return PGUtil.ReadEscapedBytes(_stream, output, length, ref _remainingBytes, outputIdx);
+				return PGUtil.ReadEscapedBytes(_stream, buffer, output, length, ref _remainingBytes, outputIdx);
 			}
 
 			public override int DoSkip(int length)
 			{
-				return PGUtil.SkipEscapedBytes(_stream, length, ref _remainingBytes);
+				return PGUtil.SkipEscapedBytes(_stream, buffer, length, ref _remainingBytes);
 			}
 		}
 
@@ -315,11 +318,13 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private readonly Stream _stream;
 		private Streamer _streamer;
 		private int _currentField = -1;
+		private readonly byte[] buffer;
 
-		public RowReader(NpgsqlRowDescription rowDesc, Stream stream)
+		public RowReader(NpgsqlRowDescription rowDesc, Stream stream, byte[] buffer)
 		{
 			_rowDesc = rowDesc;
 			_stream = stream;
+			this.buffer = buffer;
 		}
 
 		protected Streamer CurrentStreamer
@@ -363,7 +368,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						throw new InvalidCastException();
 					}
 					++_currentField;
-					return (CurrentStreamer = new ByteStreamer(Stream, GetNextFieldCount())) as ByteStreamer;
+					return (CurrentStreamer = new ByteStreamer(Stream, buffer, GetNextFieldCount())) as ByteStreamer;
 				}
 				else if (!(CurrentStreamer is Streamer<byte>))
 				{

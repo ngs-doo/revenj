@@ -131,10 +131,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public NpgsqlConnection()
 			: this(String.Empty) { }
 
-		private static NpgsqlConnectionStringBuilder GetBuilder(String connectionString)
+		private static NpgsqlConnectionStringBuilder GetBuilder(string connectionString)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME, "NpgsqlConnection()");
-
 			NpgsqlConnectionStringBuilder builder = cache[connectionString];
 			return builder == null
 				? new NpgsqlConnectionStringBuilder(connectionString)
@@ -153,9 +151,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private NpgsqlConnection(NpgsqlConnectionStringBuilder builder)
 		{
 			this.settings = builder;
-
-			LogConnectionString();
-
 
 			NoticeDelegate = new NoticeEventHandler(OnNotice);
 			NotificationDelegate = new NotificationEventHandler(OnNotification);
@@ -238,7 +233,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				// Connection string is used as the key to the connector.  Because of this,
 				// we cannot change it while we own a connector.
 				CheckConnectionClosed();
-				NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "ConnectionString", value);
 				NpgsqlConnectionStringBuilder builder = cache[value];
 				if (builder == null)
 				{
@@ -248,7 +242,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				{
 					settings = builder.Clone();
 				}
-				LogConnectionString();
 			}
 		}
 
@@ -411,20 +404,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 		/// <summary>
-		/// Protocol version in use.
-		/// This can only be called when there is an active connection.
-		/// </summary>
-		[Browsable(false)]
-		public ProtocolVersion BackendProtocolVersion
-		{
-			get
-			{
-				CheckConnectionOpen();
-				return connector.BackendProtocolVersion;
-			}
-		}
-
-		/// <summary>
 		/// Process id of backend server.
 		/// This can only be called when there is an active connection.
 		/// </summary>
@@ -450,8 +429,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </remarks>
 		protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "BeginDbTransaction", isolationLevel);
-
 			return BeginTransaction(isolationLevel);
 		}
 
@@ -465,7 +442,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </remarks>
 		public new NpgsqlTransaction BeginTransaction()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "BeginTransaction");
 			return this.BeginTransaction(IsolationLevel.ReadCommitted);
 		}
 
@@ -481,8 +457,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </remarks>
 		public new NpgsqlTransaction BeginTransaction(IsolationLevel level)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "BeginTransaction", level);
-
 			CheckConnectionOpen();
 
 			if (connector.Transaction != null)
@@ -500,8 +474,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public override void Open()
 		{
 			CheckConnectionClosed();
-
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Open");
 
 			// Check if there is any missing argument.
 			if (!settings.ContainsKey(Keywords.Host))
@@ -562,8 +534,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			CheckNotDisposed();
 
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ChangeDatabase", dbName);
-
 			if (dbName == null)
 			{
 				throw new ArgumentNullException("dbName");
@@ -595,8 +565,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public override void Close()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Close");
-
 			if (connector != null)
 			{
 				Promotable.Prepare();
@@ -645,7 +613,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>A <see cref="System.Data.Common.DbCommand">DbCommand</see> object.</returns>
 		protected override DbCommand CreateDbCommand()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CreateDbCommand");
 			return CreateCommand();
 		}
 
@@ -658,7 +625,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			CheckNotDisposed();
 
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CreateCommand");
 			return new NpgsqlCommand("", this);
 		}
 
@@ -674,14 +640,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				if (disposing)
 				{
-					NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Dispose");
 					Close();
 				}
 				else
 				{
 					if (FullState != ConnectionState.Closed)
 					{
-						NpgsqlEventLog.LogMsg(resman, "Log_ConnectionLeaking", LogLevel.Debug);
 						NpgsqlConnectorPool.ConnectorPoolMgr.FixPoolCountBecauseOfConnectionDisposeFalse(this);
 					}
 				}
@@ -882,20 +846,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			get { return promotable ?? (promotable = new NpgsqlPromotableSinglePhaseNotification(this)); }
 		}
 
-
-		/// <summary>
-		/// Write each key/value pair in the connection string to the log.
-		/// </summary>
-		private void LogConnectionString()
-		{
-			if (NpgsqlEventLog.Level < LogLevel.Debug)
-				return;
-			foreach (string key in settings.Keys)
-			{
-				NpgsqlEventLog.LogMsg(resman, "Log_ConnectionStringValues", LogLevel.Debug, key, settings[key]);
-			}
-		}
-
 		private void CheckConnectionOpen()
 		{
 			if (disposed)
@@ -1025,7 +975,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			Promotable.Enlist(transaction);
 		}
 
-#if NET35
 		protected override DbProviderFactory DbProviderFactory
 		{
 			get
@@ -1033,6 +982,5 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				return NpgsqlFactory.Instance;
 			}
 		}
-#endif
 	}
 }

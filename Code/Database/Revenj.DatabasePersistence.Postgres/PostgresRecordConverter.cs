@@ -300,5 +300,99 @@ namespace Revenj.DatabasePersistence.Postgres
 			sb.Length--;
 			return sb.ToString();
 		}
+
+		public static void WriteSimpleUriList(TextWriter tw, List<string> uris)
+		{
+			tw.Write('\'');
+			var uri = uris[0];
+			var ind = uri.IndexOf('\'');
+			if (ind == -1)
+				tw.Write(uri);
+			else
+			{
+				for (var i = 0; i < uri.Length; i++)
+				{
+					var c = uri[i];
+					if (c == '\'')
+						tw.Write("''");
+					else
+						tw.Write(c);
+				}
+			}
+			for (int x = 1; x < uris.Count; x++)
+			{
+				uri = uris[x];
+				tw.Write("','");
+				ind = uri.IndexOf('\'');
+				if (ind == -1)
+					tw.Write(uri);
+				else
+				{
+					for (var i = 0; i < uri.Length; i++)
+					{
+						var c = uri[i];
+						if (c == '\'')
+							tw.Write("''");
+						else
+							tw.Write(c);
+					}
+				}
+			}
+			tw.Write('\'');
+		}
+
+		private static readonly char[] EscapeUris = new char[] { '\\', '/', '\'' };
+
+		public static void WriteCompositeUriList(TextWriter tw, List<string> uris)
+		{
+			tw.Write("('");
+			var uri = uris[0];
+			var i = 0;
+			var ind = uri.IndexOfAny(EscapeUris);
+			if (ind == -1)
+				tw.Write(uri);
+			else
+			{
+				while (i < uri.Length)
+				{
+					var c = uri[i];
+					if (c == '\\')
+						tw.Write(uri[++i]);
+					else if (c == '/')
+						tw.Write("','");
+					else if (c == '\'')
+						tw.Write("''");
+					else
+						tw.Write(c);
+					i++;
+				}
+			}
+			for (int x = 1; x < uris.Count; x++)
+			{
+				tw.Write("'),('");
+				uri = uris[x];
+				ind = uri.IndexOfAny(EscapeUris);
+				if (ind == -1)
+					tw.Write(uri);
+				else
+				{
+					i = 0;
+					while (i < uri.Length)
+					{
+						var c = uri[i];
+						if (c == '\\')
+							tw.Write(uri[++i]);
+						else if (c == '/')
+							tw.Write("','");
+						else if (c == '\'')
+							tw.Write("''");
+						else
+							tw.Write(c);
+						i++;
+					}
+				}
+			}
+			tw.Write("')");
+		}
 	}
 }

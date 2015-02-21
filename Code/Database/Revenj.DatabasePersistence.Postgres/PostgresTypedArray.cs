@@ -17,14 +17,14 @@ namespace Revenj.DatabasePersistence.Postgres
 			{
 				Func<T, IPostgresTuple> toTuple = v => new ValueTuple(converter(v), false, true);
 				var writer = cms.GetWriter();
-				ToArray(writer, data, toTuple);
+				ToArray(writer, cms.TmpBuffer, data, toTuple);
 				writer.Flush();
 				cms.Position = 0;
 				return cms.GetReader().ReadToEnd();
 			}
 		}
 
-		public static void ToArray<T>(TextWriter sw, IEnumerable<T> data, Func<T, IPostgresTuple> converter)
+		public static void ToArray<T>(TextWriter sw, char[] buf, IEnumerable<T> data, Func<T, IPostgresTuple> converter)
 		{
 			if (data == null)
 			{
@@ -36,11 +36,11 @@ namespace Revenj.DatabasePersistence.Postgres
 				list.Add(converter(item));
 			sw.Write('\'');
 			var arr = new ArrayTuple(list.ToArray());
-			arr.InsertRecord(sw, string.Empty, PostgresTuple.EscapeQuote);
+			arr.InsertRecord(sw, buf, string.Empty, PostgresTuple.EscapeQuote);
 			sw.Write('\'');
 		}
 
-		public static void ToArray<T>(TextWriter sw, T[] data, Func<T, IPostgresTuple> converter)
+		public static void ToArray<T>(TextWriter sw, char[] buf, T[] data, Func<T, IPostgresTuple> converter)
 		{
 			if (data == null)
 			{
@@ -52,11 +52,11 @@ namespace Revenj.DatabasePersistence.Postgres
 				arr[i] = converter(data[i]);
 			sw.Write('\'');
 			var tuple = new ArrayTuple(arr);
-			tuple.InsertRecord(sw, string.Empty, PostgresTuple.EscapeQuote);
+			tuple.InsertRecord(sw, buf, string.Empty, PostgresTuple.EscapeQuote);
 			sw.Write('\'');
 		}
 
-		public static List<T> ParseCollection<T>(TextReader reader, int context, IServiceLocator locator, Func<TextReader, int, int, IServiceLocator, T> parseItem)
+		public static List<T> ParseCollection<T>(TextReader reader, char[] buf, int context, IServiceLocator locator, Func<TextReader, int, int, IServiceLocator, char[], T> parseItem)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -91,7 +91,7 @@ namespace Revenj.DatabasePersistence.Postgres
 						for (int i = 0; i < arrayContext; i++)
 							reader.Read();
 					}
-					list.Add(parseItem(reader, 0, recordContext, locator));
+					list.Add(parseItem(reader, 0, recordContext, locator, buf));
 					if (escaped)
 					{
 						for (int i = 0; i < arrayContext; i++)

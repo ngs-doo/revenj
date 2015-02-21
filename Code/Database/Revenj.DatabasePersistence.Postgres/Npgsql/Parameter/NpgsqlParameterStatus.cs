@@ -39,12 +39,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public readonly string Parameter;
 		public readonly string ParameterValue;
 
-		public NpgsqlParameterStatus(Stream stream)
+		public NpgsqlParameterStatus(Stream stream, ByteBuffer queue)
 		{
 			//Read message length
 			PGUtil.EatStreamBytes(stream, 4);
-			Parameter = PGUtil.ReadString(stream);
-			ParameterValue = PGUtil.ReadString(stream);
+			Parameter = PGUtil.ReadString(stream, queue);
+			ParameterValue = PGUtil.ReadString(stream, queue);
 		}
 		public NpgsqlParameterStatus(string parameter, string parameterValue)
 		{

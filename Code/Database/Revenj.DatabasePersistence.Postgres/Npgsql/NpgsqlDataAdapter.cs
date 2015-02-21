@@ -30,7 +30,6 @@
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Reflection;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -54,10 +53,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// </summary>
 	public sealed class NpgsqlDataAdapter : DbDataAdapter
 	{
-		// Log support
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-
-
 		public event NpgsqlRowUpdatedEventHandler RowUpdated;
 		public event NpgsqlRowUpdatingEventHandler RowUpdating;
 
@@ -67,7 +62,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public NpgsqlDataAdapter(NpgsqlCommand selectCommand)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME);
 			SelectCommand = selectCommand;
 		}
 
@@ -82,25 +76,26 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 
-		protected override RowUpdatedEventArgs CreateRowUpdatedEvent(DataRow dataRow, IDbCommand command,
-																	 StatementType statementType,
-																	 DataTableMapping tableMapping)
+		protected override RowUpdatedEventArgs CreateRowUpdatedEvent(
+			DataRow dataRow,
+			IDbCommand command,
+			StatementType statementType,
+			DataTableMapping tableMapping)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CreateRowUpdatedEvent");
 			return new NpgsqlRowUpdatedEventArgs(dataRow, command, statementType, tableMapping);
 		}
 
-		protected override RowUpdatingEventArgs CreateRowUpdatingEvent(DataRow dataRow, IDbCommand command,
-																	   StatementType statementType,
-																	   DataTableMapping tableMapping)
+		protected override RowUpdatingEventArgs CreateRowUpdatingEvent(
+			DataRow dataRow,
+			IDbCommand command,
+			StatementType statementType,
+			DataTableMapping tableMapping)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CreateRowUpdatingEvent");
 			return new NpgsqlRowUpdatingEventArgs(dataRow, command, statementType, tableMapping);
 		}
 
 		protected override void OnRowUpdated(RowUpdatedEventArgs value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "OnRowUpdated");
 			//base.OnRowUpdated(value);
 			if ((RowUpdated != null) && (value is NpgsqlRowUpdatedEventArgs))
 			{
@@ -110,7 +105,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		protected override void OnRowUpdating(RowUpdatingEventArgs value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "OnRowUpdating");
 			if ((RowUpdating != null) && (value is NpgsqlRowUpdatingEventArgs))
 			{
 				RowUpdating(this, (NpgsqlRowUpdatingEventArgs)value);
@@ -121,7 +115,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "NpgDataAdapter.DeleteCommand");
 				return (NpgsqlCommand)base.DeleteCommand;
 			}
 
@@ -132,7 +125,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "NpgDataAdapter.SelectCommand");
 				return (NpgsqlCommand)base.SelectCommand;
 			}
 
@@ -144,7 +136,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "NpgDataAdapter.UpdateCommand");
 				return (NpgsqlCommand)base.UpdateCommand;
 			}
 
@@ -155,7 +146,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "NpgDataAdapter.InsertCommand");
 				return (NpgsqlCommand)base.InsertCommand;
 			}
 
@@ -165,18 +155,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 	public class NpgsqlRowUpdatingEventArgs : RowUpdatingEventArgs
 	{
-		public NpgsqlRowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType,
-										  DataTableMapping tableMapping)
-			: base(dataRow, command, statementType, tableMapping)
+		public NpgsqlRowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType type, DataTableMapping mapping)
+			: base(dataRow, command, type, mapping)
 		{
 		}
 	}
 
 	public class NpgsqlRowUpdatedEventArgs : RowUpdatedEventArgs
 	{
-		public NpgsqlRowUpdatedEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType,
-										 DataTableMapping tableMapping)
-			: base(dataRow, command, statementType, tableMapping)
+		public NpgsqlRowUpdatedEventArgs(DataRow dataRow, IDbCommand command, StatementType type, DataTableMapping mapping)
+			: base(dataRow, command, type, mapping)
 		{
 		}
 	}

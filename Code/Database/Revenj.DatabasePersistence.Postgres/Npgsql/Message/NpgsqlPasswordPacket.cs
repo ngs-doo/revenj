@@ -30,7 +30,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -40,47 +39,20 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// </summary>
 	internal sealed class NpgsqlPasswordPacket : ClientMessage
 	{
-		// Logging related values
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-
 		private readonly byte[] password;
-		private readonly ProtocolVersion protocolVersion;
 
-
-		public NpgsqlPasswordPacket(byte[] password, ProtocolVersion protocolVersion)
+		public NpgsqlPasswordPacket(byte[] password)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME);
-
 			this.password = password;
-			this.protocolVersion = protocolVersion;
 		}
 
 		public override void WriteToStream(Stream outputStream)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "WriteToStream");
+			outputStream.WriteByte((Byte)'p');
+			PGUtil.WriteInt32(outputStream, 4 + password.Length + 1);
 
-			switch (protocolVersion)
-			{
-				case ProtocolVersion.Version2:
-					// Write the size of the packet.
-					// 4 + (passwordlength + 1) -> Int32 + NULL terminated string.
-					// output_stream.Write(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(4 + (password.Length + 1))), 0, 4);
-					PGUtil.WriteInt32(outputStream, 4 + password.Length + 1);
-
-					// Write String.
-					PGUtil.WriteBytes(password, outputStream);
-
-					break;
-
-				case ProtocolVersion.Version3:
-					outputStream.WriteByte((Byte) 'p');
-					PGUtil.WriteInt32(outputStream, 4 + password.Length + 1);
-
-					// Write String.
-					PGUtil.WriteBytes(password, outputStream);
-
-					break;
-			}
+			// Write String.
+			PGUtil.WriteBytes(password, outputStream);
 		}
 	}
 }

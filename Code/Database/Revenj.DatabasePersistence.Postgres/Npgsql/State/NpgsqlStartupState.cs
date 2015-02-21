@@ -35,8 +35,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	{
 		public static readonly NpgsqlStartupState Instance = new NpgsqlStartupState();
 
-		private readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-
 		private NpgsqlStartupState()
 			: base()
 		{
@@ -44,8 +42,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void Authenticate(NpgsqlConnector context, byte[] password)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Authenticate");
-			NpgsqlPasswordPacket pwpck = new NpgsqlPasswordPacket(password, context.BackendProtocolVersion);
+			NpgsqlPasswordPacket pwpck = new NpgsqlPasswordPacket(password);
 			BufferedStream stream = new BufferedStream(context.Stream);
 			pwpck.WriteToStream(stream);
 			stream.Flush();

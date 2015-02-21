@@ -29,7 +29,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Net.Sockets;
 using System.Reflection;
@@ -47,7 +46,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	internal abstract class NpgsqlState
 	{
 		protected static readonly Encoding ENCODING_UTF8 = Encoding.UTF8;
-		private readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
 		protected readonly static ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 
 		internal NpgsqlState()
@@ -147,18 +145,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public void TestConnector(NpgsqlConnector context)
 		{
-			switch (context.BackendProtocolVersion)
-			{
-				case ProtocolVersion.Version2:
-					TestNotify(context);
-					break;
-				case ProtocolVersion.Version3:
-					EmptySync(context);
-					break;
-				default:
-					throw new NotSupportedException();
-			}
+			EmptySync(context);
 		}
+
+		private static readonly int[] messageSought = new int[] { 'Z', 0, 0, 0, 5 };
 
 		public void EmptySync(NpgsqlConnector context)
 		{
@@ -166,8 +156,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			new NpgsqlSync().WriteToStream(stm);
 			stm.Flush();
 			Queue<int> buffer = new Queue<int>();
-			//byte[] compareBuffer = new byte[6];
-			int[] messageSought = new int[] { 'Z', 0, 0, 0, 5 };
+			//byte[] compareBuffer = new byte[6];			
 			int newByte;
 			for (; ; )
 			{
@@ -377,7 +366,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 								}
 							}
 						}
-						catch (Exception ex)
+						catch
 						{
 						}
 						//We should have gotten an error from CancelRequest(). Whether we did or not, what we
@@ -387,15 +376,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					}
 					throw new NpgsqlException(resman.GetString("Exception_ConnectionOrCommandTimeout"));
 				}
-				switch (context.BackendProtocolVersion)
-				{
-					case ProtocolVersion.Version2:
-						return ProcessBackendResponses_Ver_2(context);
-					case ProtocolVersion.Version3:
-						return ProcessBackendResponses_Ver_3(context);
-					default:
-						throw new NpgsqlException(resman.GetString("Exception_UnknownProtocol"));
-				}
+				return ProcessBackendResponses_Ver_3(context);
 
 			}
 
@@ -446,190 +427,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 
 			return socketPoolResponse || context.Socket.Poll(1000000 * secondsToWait, selectMode);
-		}
-
-		protected IEnumerable<IServerResponseObject> ProcessBackendResponses_Ver_2(NpgsqlConnector context)
-		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ProcessBackendResponses");
-
-			using (new ContextResetter(context))
-			{
-				Stream stream = context.Stream;
-				NpgsqlMediator mediator = context.Mediator;
-				NpgsqlRowDescription lastRowDescription = null;
-				List<NpgsqlError> errors = new List<NpgsqlError>();
-
-				for (; ; )
-				{
-					// Check the first Byte of response.
-					switch ((BackEndMessageCode)stream.ReadByte())
-					{
-						case BackEndMessageCode.ErrorResponse:
-							{
-								NpgsqlError error = new NpgsqlError(context.BackendProtocolVersion, stream);
-								error.ErrorSql = mediator.SqlSent;
-
-								errors.Add(error);
-
-								NpgsqlEventLog.LogMsg(resman, "Log_ErrorResponse", LogLevel.Debug, error.Message);
-							}
-
-							// Return imediately if it is in the startup state or connected state as
-							// there is no more messages to consume.
-							// Possible error in the NpgsqlStartupState:
-							//        Invalid password.
-							// Possible error in the NpgsqlConnectedState:
-							//        No pg_hba.conf configured.
-
-							if (!context.RequireReadyForQuery)
-							{
-								throw new NpgsqlException(errors);
-							}
-
-							break;
-
-
-						case BackEndMessageCode.AuthenticationRequest:
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "AuthenticationRequest");
-							AuthenticationRequestType authType = (AuthenticationRequestType)PGUtil.ReadInt32(stream);
-							switch (authType)
-							{
-								case AuthenticationRequestType.AuthenticationOk:
-									NpgsqlEventLog.LogMsg(resman, "Log_AuthenticationOK", LogLevel.Debug);
-									break;
-								case AuthenticationRequestType.AuthenticationClearTextPassword:
-									NpgsqlEventLog.LogMsg(resman, "Log_AuthenticationClearTextRequest", LogLevel.Debug);
-									// Send the PasswordPacket.
-									ChangeState(context, NpgsqlStartupState.Instance);
-									context.Authenticate(context.Password);
-									break;
-								case AuthenticationRequestType.AuthenticationMD5Password:
-									NpgsqlEventLog.LogMsg(resman, "Log_AuthenticationMD5Request", LogLevel.Debug);
-									// Now do the "MD5-Thing"
-									// for this the Password has to be:
-									// 1. md5-hashed with the username as salt
-									// 2. md5-hashed again with the salt we get from the backend
-
-
-									MD5 md5 = MD5.Create();
-
-
-									// 1.
-									byte[] passwd = context.Password;
-									byte[] saltUserName = ENCODING_UTF8.GetBytes(context.UserName);
-
-									byte[] crypt_buf = new byte[passwd.Length + saltUserName.Length];
-
-									passwd.CopyTo(crypt_buf, 0);
-									saltUserName.CopyTo(crypt_buf, passwd.Length);
-
-
-									StringBuilder sb = new StringBuilder();
-									byte[] hashResult = md5.ComputeHash(crypt_buf);
-									foreach (byte b in hashResult)
-									{
-										sb.Append(b.ToString("x2"));
-									}
-
-
-									String prehash = sb.ToString();
-
-									byte[] prehashbytes = ENCODING_UTF8.GetBytes(prehash);
-
-
-									byte[] saltServer = new byte[4];
-									stream.Read(saltServer, 0, 4);
-									// Send the PasswordPacket.
-									ChangeState(context, NpgsqlStartupState.Instance);
-
-
-									// 2.
-
-									crypt_buf = new byte[prehashbytes.Length + saltServer.Length];
-									prehashbytes.CopyTo(crypt_buf, 0);
-									saltServer.CopyTo(crypt_buf, prehashbytes.Length);
-
-									sb = new StringBuilder("md5"); // This is needed as the backend expects md5 result starts with "md5"
-									hashResult = md5.ComputeHash(crypt_buf);
-									foreach (byte b in hashResult)
-									{
-										sb.Append(b.ToString("x2"));
-									}
-
-									context.Authenticate(ENCODING_UTF8.GetBytes(sb.ToString()));
-
-									break;
-								default:
-									// Only AuthenticationClearTextPassword and AuthenticationMD5Password supported for now.
-									errors.Add(
-										new NpgsqlError(context.BackendProtocolVersion,
-														String.Format(resman.GetString("Exception_AuthenticationMethodNotSupported"), authType)));
-									throw new NpgsqlException(errors);
-							}
-							break;
-						case BackEndMessageCode.RowDescription:
-							yield return lastRowDescription = new NpgsqlRowDescriptionV2(stream, context.OidToNameMapping, context.CompatVersion);
-							;
-							break;
-						case BackEndMessageCode.DataRow:
-							yield return new ForwardsOnlyRow(new StringRowReaderV2(lastRowDescription, stream));
-							break;
-						case BackEndMessageCode.BinaryRow:
-							throw new NotSupportedException();
-						case BackEndMessageCode.ReadyForQuery:
-							ChangeState(context, NpgsqlReadyState.Instance);
-							if (errors.Count != 0)
-							{
-								throw new NpgsqlException(errors);
-							}
-							yield break;
-						case BackEndMessageCode.BackendKeyData:
-							context.BackEndKeyData = new NpgsqlBackEndKeyData(context.BackendProtocolVersion, stream);
-							break;
-						case BackEndMessageCode.NoticeResponse:
-							context.FireNotice(new NpgsqlError(context.BackendProtocolVersion, stream));
-							break;
-						case BackEndMessageCode.CompletedResponse:
-							yield return new CompletedResponse(stream);
-							break;
-
-						case BackEndMessageCode.CursorResponse:
-							// This is the cursor response message.
-							// It is followed by a C NULL terminated string with the name of
-							// the cursor in a FETCH case or 'blank' otherwise.
-							// In this case it should be always 'blank'.
-							// [FIXME] Get another name for this function.
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "CursorResponse");
-
-							String cursorName = PGUtil.ReadString(stream);
-							// Continue waiting for ReadyForQuery message.
-							break;
-
-						case BackEndMessageCode.EmptyQueryResponse:
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "EmptyQueryResponse");
-							PGUtil.ReadString(stream);
-							break;
-
-						case BackEndMessageCode.NotificationResponse:
-							context.FireNotification(new NpgsqlNotificationEventArgs(stream, false));
-							if (context.IsNotificationThreadRunning)
-							{
-								yield break;
-							}
-							break;
-						case BackEndMessageCode.IO_ERROR:
-							// Connection broken. Mono returns -1 instead of throw an exception as ms.net does.
-							throw new IOException();
-
-						default:
-							// This could mean a number of things
-							//   We've gotten out of sync with the backend?
-							//   We need to implement this type?
-							//   Backend has gone insane?
-							throw new DataException("Backend sent unrecognized response type");
-					}
-				}
-			}
 		}
 
 		private enum BackEndMessageCode
@@ -688,8 +485,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		protected IEnumerable<IServerResponseObject> ProcessBackendResponses_Ver_3(NpgsqlConnector context)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ProcessBackendResponses");
-
 			using (new ContextResetter(context))
 			{
 				Stream stream = context.Stream;
@@ -697,7 +492,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 				NpgsqlRowDescription lastRowDescription = null;
 
-				List<NpgsqlError> errors = new List<NpgsqlError>();
+				var buffer = context.TmpBuffer;
+				var queue = context.ArrayBuffer;
+				List<NpgsqlError> errors = new List<NpgsqlError>(0);
 
 				for (; ; )
 				{
@@ -707,12 +504,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					{
 						case BackEndMessageCode.ErrorResponse:
 
-							NpgsqlError error = new NpgsqlError(context.BackendProtocolVersion, stream);
+							NpgsqlError error = new NpgsqlError(stream, buffer, queue);
 							error.ErrorSql = mediator.SqlSent;
 
 							errors.Add(error);
-
-							NpgsqlEventLog.LogMsg(resman, "Log_ErrorResponse", LogLevel.Debug, error.Message);
 
 							// Return imediately if it is in the startup state or connected state as
 							// there is no more messages to consume.
@@ -729,20 +524,15 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							break;
 						case BackEndMessageCode.AuthenticationRequest:
 
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "AuthenticationRequest");
-
 							// Get the length in case we're getting AuthenticationGSSContinue 
-							int authDataLength = PGUtil.ReadInt32(stream) - 8;
+							int authDataLength = PGUtil.ReadInt32(stream, buffer) - 8;
 
-							AuthenticationRequestType authType = (AuthenticationRequestType)PGUtil.ReadInt32(stream);
+							AuthenticationRequestType authType = (AuthenticationRequestType)PGUtil.ReadInt32(stream, buffer);
 							switch (authType)
 							{
 								case AuthenticationRequestType.AuthenticationOk:
-									NpgsqlEventLog.LogMsg(resman, "Log_AuthenticationOK", LogLevel.Debug);
 									break;
 								case AuthenticationRequestType.AuthenticationClearTextPassword:
-									NpgsqlEventLog.LogMsg(resman, "Log_AuthenticationClearTextRequest", LogLevel.Debug);
-
 									// Send the PasswordPacket.
 
 									ChangeState(context, NpgsqlStartupState.Instance);
@@ -750,7 +540,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 									break;
 								case AuthenticationRequestType.AuthenticationMD5Password:
-									NpgsqlEventLog.LogMsg(resman, "Log_AuthenticationMD5Request", LogLevel.Debug);
 									// Now do the "MD5-Thing"
 									// for this the Password has to be:
 									// 1. md5-hashed with the username as salt
@@ -840,41 +629,38 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 								default:
 									// Only AuthenticationClearTextPassword and AuthenticationMD5Password supported for now.
 									errors.Add(
-										new NpgsqlError(context.BackendProtocolVersion,
-														String.Format(resman.GetString("Exception_AuthenticationMethodNotSupported"), authType)));
+										new NpgsqlError(String.Format(resman.GetString("Exception_AuthenticationMethodNotSupported"), authType)));
 									throw new NpgsqlException(errors);
 							}
 							break;
 						case BackEndMessageCode.RowDescription:
-							yield return lastRowDescription = new NpgsqlRowDescriptionV3(stream, context.OidToNameMapping, context.CompatVersion);
+							yield return lastRowDescription = new NpgsqlRowDescription(stream, context.OidToNameMapping, context.CompatVersion, buffer, queue);
 							break;
 						case BackEndMessageCode.ParameterDescription:
 
 							// Do nothing,for instance,  just read...
-							int length = PGUtil.ReadInt32(stream);
-							int nb_param = PGUtil.ReadInt16(stream);
+							int length = PGUtil.ReadInt32(stream, buffer);
+							int nb_param = PGUtil.ReadInt16(stream, buffer);
 							//WTF
 							for (int i = 0; i < nb_param; i++)
 							{
-								int typeoid = PGUtil.ReadInt32(stream);
+								int typeoid = PGUtil.ReadInt32(stream, buffer);
 							}
 
 							break;
 
 						case BackEndMessageCode.DataRow:
-							yield return new ForwardsOnlyRow(new StringRowReaderV3(lastRowDescription, stream));
+							yield return new ForwardsOnlyRow(new StringRowReader(lastRowDescription, stream, buffer));
 							break;
 
 						case BackEndMessageCode.ReadyForQuery:
-
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "ReadyForQuery");
 
 							// Possible status bytes returned:
 							//   I = Idle (no transaction active).
 							//   T = In transaction, ready for more.
 							//   E = Error in transaction, queries will fail until transaction aborted.
 							// Just eat the status byte, we have no use for it at this time.
-							PGUtil.ReadInt32(stream);
+							PGUtil.ReadInt32(stream, buffer);
 							stream.ReadByte();
 
 							ChangeState(context, NpgsqlReadyState.Instance);
@@ -887,10 +673,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							yield break;
 
 						case BackEndMessageCode.BackendKeyData:
-
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "BackendKeyData");
 							// BackendKeyData message.
-							NpgsqlBackEndKeyData backend_keydata = new NpgsqlBackEndKeyData(context.BackendProtocolVersion, stream);
+							NpgsqlBackEndKeyData backend_keydata = new NpgsqlBackEndKeyData(stream, buffer);
 							context.BackEndKeyData = backend_keydata;
 
 
@@ -900,42 +684,35 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						case BackEndMessageCode.NoticeResponse:
 							// Notices and errors are identical except that we
 							// just throw notices away completely ignored.
-							context.FireNotice(new NpgsqlError(context.BackendProtocolVersion, stream));
+							context.FireNotice(new NpgsqlError(stream, buffer, queue));
 							break;
 
 						case BackEndMessageCode.CompletedResponse:
-							PGUtil.ReadInt32(stream);
-							yield return new CompletedResponse(stream);
+							PGUtil.ReadInt32(stream, buffer);
+							yield return new CompletedResponse(stream, queue);
 							break;
 						case BackEndMessageCode.ParseComplete:
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "ParseComplete");
 							// Just read up the message length.
-							PGUtil.ReadInt32(stream);
+							PGUtil.ReadInt32(stream, buffer);
 							yield break;
 						case BackEndMessageCode.BindComplete:
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "BindComplete");
 							// Just read up the message length.
-							PGUtil.ReadInt32(stream);
+							PGUtil.ReadInt32(stream, buffer);
 							yield break;
 						case BackEndMessageCode.EmptyQueryResponse:
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "EmptyQueryResponse");
-							PGUtil.ReadInt32(stream);
+							PGUtil.ReadInt32(stream, buffer);
 							break;
 						case BackEndMessageCode.NotificationResponse:
 							// Eat the length
-							PGUtil.ReadInt32(stream);
-							context.FireNotification(new NpgsqlNotificationEventArgs(stream, true));
+							PGUtil.ReadInt32(stream, buffer);
+							context.FireNotification(new NpgsqlNotificationEventArgs(stream, true, buffer, queue));
 							if (context.IsNotificationThreadRunning)
 							{
 								yield break;
 							}
 							break;
 						case BackEndMessageCode.ParameterStatus:
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "ParameterStatus");
-							NpgsqlParameterStatus parameterStatus = new NpgsqlParameterStatus(stream);
-
-							NpgsqlEventLog.LogMsg(resman, "Log_ParameterStatus", LogLevel.Debug, parameterStatus.Parameter,
-												  parameterStatus.ParameterValue);
+							NpgsqlParameterStatus parameterStatus = new NpgsqlParameterStatus(stream, queue);
 
 							context.AddParameterStatus(parameterStatus);
 
@@ -961,39 +738,34 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							// This nodata message may be generated by prepare commands issued with queries which doesn't return rows
 							// for example insert, update or delete.
 							// Just eat the message.
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "ParameterStatus");
-							PGUtil.ReadInt32(stream);
+							PGUtil.ReadInt32(stream, buffer);
 							break;
 
 						case BackEndMessageCode.CopyInResponse:
 							// Enter COPY sub protocol and start pushing data to server
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "CopyInResponse");
 							ChangeState(context, NpgsqlCopyInState.Instance);
-							PGUtil.ReadInt32(stream); // length redundant
-							context.CurrentState.StartCopy(context, ReadCopyHeader(stream));
+							PGUtil.ReadInt32(stream, buffer); // length redundant
+							context.CurrentState.StartCopy(context, ReadCopyHeader(stream, buffer));
 							yield break;
 						// Either StartCopy called us again to finish the operation or control should be passed for user to feed copy data
 
 						case BackEndMessageCode.CopyOutResponse:
 							// Enter COPY sub protocol and start pulling data from server
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "CopyOutResponse");
 							ChangeState(context, NpgsqlCopyOutState.Instance);
-							PGUtil.ReadInt32(stream); // length redundant
-							context.CurrentState.StartCopy(context, ReadCopyHeader(stream));
+							PGUtil.ReadInt32(stream, buffer); // length redundant
+							context.CurrentState.StartCopy(context, ReadCopyHeader(stream, buffer));
 							yield break;
 						// Either StartCopy called us again to finish the operation or control should be passed for user to feed copy data
 
 						case BackEndMessageCode.CopyData:
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "CopyData");
-							Int32 len = PGUtil.ReadInt32(stream) - 4;
+							Int32 len = PGUtil.ReadInt32(stream, buffer) - 4;
 							byte[] buf = new byte[len];
 							PGUtil.ReadBytes(stream, buf, 0, len);
 							context.Mediator.ReceivedCopyData = buf;
 							yield break; // read data from server one chunk at a time while staying in copy operation mode
 
 						case BackEndMessageCode.CopyDone:
-							NpgsqlEventLog.LogMsg(resman, "Log_ProtocolMessage", LogLevel.Debug, "CopyDone");
-							PGUtil.ReadInt32(stream); // CopyDone can not have content so this is always 4
+							PGUtil.ReadInt32(stream, buffer); // CopyDone can not have content so this is always 4
 							// This will be followed by normal CommandComplete + ReadyForQuery so no op needed
 							break;
 
@@ -1015,14 +787,14 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 
-		private static NpgsqlCopyFormat ReadCopyHeader(Stream stream)
+		private static NpgsqlCopyFormat ReadCopyHeader(Stream stream, byte[] buffer)
 		{
 			byte copyFormat = (byte)stream.ReadByte();
-			Int16 numCopyFields = PGUtil.ReadInt16(stream);
-			Int16[] copyFieldFormats = new Int16[numCopyFields];
+			short numCopyFields = PGUtil.ReadInt16(stream, buffer);
+			short[] copyFieldFormats = new short[numCopyFields];
 			for (Int16 i = 0; i < numCopyFields; i++)
 			{
-				copyFieldFormats[i] = PGUtil.ReadInt16(stream);
+				copyFieldFormats[i] = PGUtil.ReadInt16(stream, buffer);
 			}
 			return new NpgsqlCopyFormat(copyFormat, copyFieldFormats);
 		}
@@ -1036,10 +808,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public readonly int? RowsAffected;
 		public readonly long? LastInsertedOID;
 
-		public CompletedResponse(Stream stream)
+		public CompletedResponse(Stream stream, ByteBuffer queue)
 		{
 			//TODO: unnecessary split
-			string[] tokens = PGUtil.ReadString(stream).Split();
+			string[] tokens = PGUtil.ReadString(stream, queue).Split();
 			if (tokens.Length > 1)
 				RowsAffected = NumberConverter.TryParsePositiveInt(tokens[tokens.Length - 1]);
 			if (tokens.Length > 2 && string.Equals(tokens[0].Trim(), "INSERT", StringComparison.OrdinalIgnoreCase))

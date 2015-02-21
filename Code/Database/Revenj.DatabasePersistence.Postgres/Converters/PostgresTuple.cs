@@ -10,8 +10,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 	{
 		bool MustEscapeRecord { get; }
 		bool MustEscapeArray { get; }
-		void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings);
-		void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings);
+		void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings);
+		void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings);
 		string BuildTuple(bool quote);
 	}
 
@@ -25,10 +25,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				if (quote)
 				{
 					sw.Write('\'');
-					tuple.InsertRecord(sw, string.Empty, EscapeQuote);
+					tuple.InsertRecord(sw, cms.TmpBuffer, string.Empty, EscapeQuote);
 					sw.Write('\'');
 				}
-				else tuple.InsertRecord(sw, string.Empty, null);
+				else tuple.InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
 				sw.Flush();
 				cms.Position = 0;
 				return cms.GetReader().ReadToEnd();

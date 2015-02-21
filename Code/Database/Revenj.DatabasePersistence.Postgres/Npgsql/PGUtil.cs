@@ -80,28 +80,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private static readonly string NULL_TERMINATOR_STRING = '\x00'.ToString();
 
-
-
-
-		///<summary>
-		/// This method takes a ProtocolVersion and returns an integer
-		/// version number that the Postgres backend will recognize in a
-		/// startup packet.
-		/// </summary>
-		public static Int32 ConvertProtocolVersion(ProtocolVersion Ver)
-		{
-			switch (Ver)
-			{
-				case ProtocolVersion.Version2:
-					return (int)ServerVersionCode.ProtocolVersion2;
-
-				case ProtocolVersion.Version3:
-					return (int)ServerVersionCode.ProtocolVersion3;
-			}
-
-			throw new ArgumentOutOfRangeException();
-		}
-
 		/// <summary>
 		/// This method takes a version string as returned by SELECT VERSION() and returns
 		/// a valid version string ("7.2.2" for example).
@@ -151,11 +129,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// It returns the resultant string of bytes read.
 		/// This string is sent from backend.
 		/// </summary>
-		public static String ReadString(Stream network_stream)
+		public static String ReadString(Stream network_stream, ByteBuffer buffer)
 		{
-			//NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ReadString");
-
-			List<byte> buffer = new List<byte>();
+			buffer.Reset();
 			int bRead;
 			for (bRead = network_stream.ReadByte(); bRead > 0; bRead = network_stream.ReadByte())
 			{
@@ -165,16 +141,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				throw new IOException();
 			}
-
-			//if (NpgsqlEventLog.Level >= LogLevel.Debug)
-			//NpgsqlEventLog.LogMsg(resman, "Log_StringRead", LogLevel.Debug, ENCODING_UTF8.GetString(buffer.ToArray()));
-
-			return ENCODING_UTF8.GetString(buffer.ToArray());
+			return buffer.GetUtf8String();
 		}
 
-		public static char ReadChar(Stream stream)
+		public static char ReadChar(Stream stream, byte[] buffer)
 		{
-			byte[] buffer = new byte[4]; //No character is more than 4 bytes long.
 			for (int i = 0; i != 4; ++i)
 			{
 				int byteRead = stream.ReadByte();
@@ -328,11 +299,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public static void WriteString(String the_string, Stream network_stream)
 		{
-
-			//NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "WriteString");
-
-			//NpgsqlEventLog.LogMsg(resman, "Log_StringWritten", LogLevel.Debug, the_string);
-
 			byte[] bytes = ENCODING_UTF8.GetBytes(the_string + NULL_TERMINATOR_STRING);
 
 			network_stream.Write(bytes, 0, bytes.Length);
@@ -343,9 +309,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public static void WriteBytes(byte[] the_bytes, Stream network_stream)
 		{
-			//NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "WriteBytes");
-			//NpgsqlEventLog.LogMsg(resman, "Log_BytesWritten", LogLevel.Debug, the_bytes);
-
 			network_stream.Write(the_bytes, 0, the_bytes.Length);
 			network_stream.Write(new byte[1], 0, 1);
 		}
@@ -357,8 +320,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public static void WriteLimString(String the_string, Int32 n, Stream network_stream)
 		{
-			//NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "WriteLimString");
-
 			//Note: We do not know the size in bytes until after we have converted the string.
 			byte[] bytes = ENCODING_UTF8.GetBytes(the_string);
 			if (bytes.Length > n)
@@ -377,10 +338,20 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 		}
 
-		public static void CheckedStreamRead(Stream stream, Byte[] buffer, Int32 offset, Int32 size)
+		public static void CheckedStreamReadShort(Stream stream, byte[] buffer, int offset, int size)
 		{
-			Int32 bytes_from_stream = 0;
-			Int32 total_bytes_read = 0;
+			while (size != 0)
+			{
+				var read = stream.Read(buffer, offset, size);
+				offset += read;
+				size -= read;
+			}
+		}
+
+		public static void CheckedStreamRead(Stream stream, byte[] buffer, int offset, int size)
+		{
+			int bytes_from_stream = 0;
+			int total_bytes_read = 0;
 			// need to read in chunks so the socket doesn't run out of memory in recv
 			// the network stream doesn't prevent this and downloading a large bytea
 			// will throw an IOException with an error code of 10055 (WSAENOBUFS)
@@ -395,6 +366,14 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 		}
 
+		public static void EatShortStreamBytes(Stream stream, int size)
+		{
+			while (size > 0)
+			{
+				size -= stream.Read(THRASH_CAN, 0, size);
+			}
+		}
+
 		public static void EatStreamBytes(Stream stream, int size)
 		{
 			//See comment on THRASH_CAN and THRASH_CAN_SIZE.
@@ -404,18 +383,18 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 		}
 
-		public static int ReadEscapedBytes(Stream stream, byte[] output, int maxBytes, ref int maxRead, int outputIdx)
+		public static int ReadEscapedBytes(Stream stream, byte[] buffer, byte[] output, int maxBytes, ref int maxRead, int outputIdx)
 		{
 			maxBytes = maxBytes > output.Length - outputIdx ? output.Length - outputIdx : maxBytes;
 			int i;
 			for (i = 0; i != maxBytes && maxRead > 0; ++i)
 			{
-				char c = ReadChar(stream);
+				char c = ReadChar(stream, buffer);
 				--maxRead;
 				if (c == '\\')
 				{
 					--maxRead;
-					switch (c = ReadChar(stream))
+					switch (c = ReadChar(stream, buffer))
 					{
 						case '0':
 						case '1':
@@ -430,8 +409,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							maxRead -= 2;
 							output[outputIdx++] =
 								(byte)
-								((int.Parse(c.ToString()) << 6) | (int.Parse(ReadChar(stream).ToString()) << 3) |
-								 int.Parse(ReadChar(stream).ToString()));
+								((int.Parse(c.ToString()) << 6) | (int.Parse(ReadChar(stream, buffer).ToString()) << 3) |
+								 int.Parse(ReadChar(stream, buffer).ToString()));
 							break;
 						default:
 							output[outputIdx++] = (byte)c;
@@ -446,16 +425,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			return i;
 		}
 
-		public static int SkipEscapedBytes(Stream stream, int maxBytes, ref int maxRead)
+		public static int SkipEscapedBytes(Stream stream, byte[] buffer, int maxBytes, ref int maxRead)
 		{
 			int i;
 			for (i = 0; i != maxBytes && maxRead > 0; ++i)
 			{
 				--maxRead;
-				if (ReadChar(stream) == '\\')
+				if (ReadChar(stream, buffer) == '\\')
 				{
 					--maxRead;
-					switch (ReadChar(stream))
+					switch (ReadChar(stream, buffer))
 					{
 						case '0':
 						case '1':
@@ -487,10 +466,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <summary>
 		/// Read a 32-bit integer from the given stream in the correct byte order.
 		/// </summary>
-		public static Int32 ReadInt32(Stream stream)
+		public static int ReadInt32(Stream stream, byte[] buffer)
 		{
-			byte[] buffer = new byte[4];
-			CheckedStreamRead(stream, buffer, 0, 4);
+			CheckedStreamReadShort(stream, buffer, 0, 4);
 			return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(buffer, 0));
 		}
 
@@ -505,171 +483,19 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <summary>
 		/// Read a 16-bit integer from the given stream in the correct byte order.
 		/// </summary>
-		public static Int16 ReadInt16(Stream stream)
+		public static short ReadInt16(Stream stream, byte[] buffer)
 		{
-			byte[] buffer = new byte[2];
-			CheckedStreamRead(stream, buffer, 0, 2);
-			return IPAddress.NetworkToHostOrder(BitConverter.ToInt16(buffer, 0));
+			CheckedStreamRead(stream, buffer, 2, 2);
+			return IPAddress.NetworkToHostOrder(BitConverter.ToInt16(buffer, 2));
 		}
 
 		public static int RotateShift(int val, int shift)
 		{
 			return (val << shift) | (val >> (sizeof(int) - shift));
 		}
-
-		internal static void LogStringWritten(string theString)
-		{
-			NpgsqlEventLog.LogMsg(resman, "Log_StringWritten", LogLevel.Debug, theString);
-		}
 	}
 
-	/// <summary>
-	/// Represent the frontend/backend protocol version.
-	/// </summary>
-	public enum ProtocolVersion
-	{
-		Unknown,
-		Version2,
-		Version3
-	}
-
-	public enum ServerVersionCode
-	{
-		ProtocolVersion2 = 2 << 16, // 131072
-		ProtocolVersion3 = 3 << 16 // 196608
-	}
-
-	/// <summary>
-	/// Represent the backend server version.
-	/// As this class offers no functionality beyond that offered by <see cref="System.Version"/> it has been
-	/// deprecated in favour of that class.
-	/// </summary>
-	/// 
-	[Obsolete("Use System.Version")]
-	internal sealed class ServerVersion : IEquatable<ServerVersion>, IComparable<ServerVersion>, IComparable, ICloneable
-	{
-		[Obsolete("Use ServerVersionCode.ProtocolVersion2")]
-		public static readonly Int32 ProtocolVersion2 = 2 << 16;
-		// 131072
-
-		[Obsolete("Use ServerVersionCode.ProtocolVersion3")]
-		public static readonly Int32 ProtocolVersion3 = 3 << 16;
-		// 196608
-
-		private readonly Version _version;
-
-		private ServerVersion(Version ver)
-		{
-			_version = ver;
-		}
-
-		/// <summary>
-		/// Server version major number.
-		/// </summary>
-		public Int32 Major
-		{
-			get { return _version.Major; }
-		}
-
-		/// <summary>
-		/// Server version minor number.
-		/// </summary>
-		public Int32 Minor
-		{
-			get { return _version.Minor; }
-		}
-
-		/// <summary>
-		/// Server version patch level number.
-		/// </summary>
-		public Int32 Patch
-		{
-			get { return _version.Build; }
-		}
-
-		public static implicit operator Version(ServerVersion sv)
-		{
-			return (object)sv == null ? null : sv._version;
-		}
-
-		public static implicit operator ServerVersion(Version ver)
-		{
-			return (object)ver == null ? null : new ServerVersion(ver.Clone() as Version);
-		}
-
-		public static bool operator ==(ServerVersion One, ServerVersion TheOther)
-		{
-			return ((Version)One) == ((Version)TheOther);
-		}
-
-		public static bool operator !=(ServerVersion One, ServerVersion TheOther)
-		{
-			return (Version)One != (Version)TheOther;
-		}
-
-		public static bool operator >(ServerVersion One, ServerVersion TheOther)
-		{
-			return (Version)One > (Version)TheOther;
-		}
-
-		public static bool operator >=(ServerVersion One, ServerVersion TheOther)
-		{
-			return (Version)One >= (Version)TheOther;
-		}
-
-		public static bool operator <(ServerVersion One, ServerVersion TheOther)
-		{
-			return (Version)One < (Version)TheOther;
-		}
-
-		public static bool operator <=(ServerVersion One, ServerVersion TheOther)
-		{
-			return (Version)One <= (Version)TheOther;
-		}
-
-		public bool Equals(ServerVersion other)
-		{
-			return other != null && this == other;
-		}
-
-		public int CompareTo(ServerVersion other)
-		{
-			return _version.CompareTo(other);
-		}
-
-		public int CompareTo(object obj)
-		{
-			return CompareTo(obj as ServerVersion);
-		}
-
-		public object Clone()
-		{
-			return new ServerVersion(_version.Clone() as Version);
-		}
-
-		public override bool Equals(object O)
-		{
-			return Equals(O as ServerVersion);
-		}
-
-		public override int GetHashCode()
-		{
-			//Assume Version has a decent hash code function.
-			//If this turns out not to be true do not use _Major ^ _Minor ^ _Patch, but make sure the values are spread throughout the 32bit range more to avoid false clashes.
-			return _version.GetHashCode();
-		}
-
-		/// <summary>
-		/// Returns the string representation of this version in three place dot notation (Major.Minor.Patch).
-		/// </summary>
-		public override String ToString()
-		{
-			return _version.ToString();
-		}
-	}
-
-	internal enum FormatCode :
-		short
+	internal enum FormatCode : short
 	{
 		Text = 0,
 		Binary = 1

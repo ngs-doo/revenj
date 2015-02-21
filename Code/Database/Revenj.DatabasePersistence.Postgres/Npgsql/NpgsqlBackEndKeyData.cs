@@ -36,22 +36,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// This class represents a BackEndKeyData message received
 	/// from PostgreSQL
 	/// </summary>
-	internal sealed class NpgsqlBackEndKeyData
+	internal struct NpgsqlBackEndKeyData
 	{
 		public readonly int ProcessID;
 		public readonly int SecretKey;
 
-		public NpgsqlBackEndKeyData(ProtocolVersion protocolVersion, Stream stream)
+		public NpgsqlBackEndKeyData(Stream stream, byte[] buffer)
 		{
-			// Read the BackendKeyData message contents. Two Int32 integers = 8 Bytes.
-			// For protocol version 3.0 they are three integers. The first one is just the size of message
-			// so, just read it.
-			if (protocolVersion >= ProtocolVersion.Version3)
-			{
-				PGUtil.EatStreamBytes(stream, 4);
-			}
-			ProcessID = PGUtil.ReadInt32(stream);
-			SecretKey = PGUtil.ReadInt32(stream);
+			PGUtil.EatShortStreamBytes(stream, 4);
+			ProcessID = PGUtil.ReadInt32(stream, buffer);
+			SecretKey = PGUtil.ReadInt32(stream, buffer);
 		}
 	}
 }

@@ -53,6 +53,8 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 
 		protected NpgsqlConnection conn; // our connection
 		protected Stream stream; // the network stream
+		private readonly byte[] buffer = new byte[4];
+		private readonly ByteBuffer queue = new ByteBuffer();
 
 		/*
 		 * Initialises the fastpath system
@@ -91,19 +93,11 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		 * @return null if no data, Integer if an integer result, or byte[] otherwise
 		 * @exception NpgsqlException if a database-access error occurs.
 		 */
-
 		public Object FastpathCall(Int32 fnid, Boolean resulttype, FastpathArg[] args)
 		{
 			try
 			{
-				if (conn.BackendProtocolVersion == ProtocolVersion.Version3)
-				{
-					return FastpathV3(fnid, resulttype, args);
-				}
-				else
-				{
-					return FastpathV2(fnid, resulttype, args);
-				}
+				return FastpathV3(fnid, resulttype, args);
 			}
 			catch (IOException)
 			{
@@ -161,31 +155,31 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 					switch (c)
 					{
 						case 'A': // Asynchronous Notify
-							Int32 msglen = PGUtil.ReadInt32(stream);
-							Int32 pid = PGUtil.ReadInt32(stream);
-							String msg = PGUtil.ReadString(stream);
-							PGUtil.ReadString(stream);
-							String param = PGUtil.ReadString(stream);
+							Int32 msglen = PGUtil.ReadInt32(stream, buffer);
+							Int32 pid = PGUtil.ReadInt32(stream, buffer);
+							String msg = PGUtil.ReadString(stream, queue);
+							PGUtil.ReadString(stream, queue);
+							String param = PGUtil.ReadString(stream, queue);
 
 							break;
 						//------------------------------
 						// Error message returned
 						case 'E':
-							NpgsqlError e = new NpgsqlError(conn.BackendProtocolVersion, stream);
+							NpgsqlError e = new NpgsqlError(stream, buffer, queue);
 							throw new NpgsqlException(e.ToString());
 
 						//------------------------------
 						// Notice from backend
 						case 'N':
-							Int32 l_nlen = PGUtil.ReadInt32(stream);
+							Int32 l_nlen = PGUtil.ReadInt32(stream, buffer);
 
-							conn.Connector.FireNotice(new NpgsqlError(conn.BackendProtocolVersion, stream));
+							conn.Connector.FireNotice(new NpgsqlError(stream, buffer, queue));
 
 							break;
 
 						case 'V':
-							Int32 l_msgLen = PGUtil.ReadInt32(stream);
-							Int32 l_valueLen = PGUtil.ReadInt32(stream);
+							Int32 l_msgLen = PGUtil.ReadInt32(stream, buffer);
+							Int32 l_valueLen = PGUtil.ReadInt32(stream, buffer);
 
 							if (l_valueLen == -1)
 							{
@@ -200,7 +194,7 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 								// Return an Integer if
 								if (resulttype)
 								{
-									result = PGUtil.ReadInt32(stream);
+									result = PGUtil.ReadInt32(stream, buffer);
 								}
 								else
 								{
@@ -224,7 +218,7 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 
 						case 'Z':
 							//TODO: use size better
-							if (PGUtil.ReadInt32(stream) != 5)
+							if (PGUtil.ReadInt32(stream, buffer) != 5)
 							{
 								throw new NpgsqlException("Received Z");
 							}
@@ -241,120 +235,6 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 				if (error != null)
 				{
 					throw error;
-				}
-
-				return result;
-			}
-		}
-
-		private Object FastpathV2(Int32 fnid, Boolean resulttype, FastpathArg[] args)
-		{
-			// added Oct 7 1998 to give us thread safety
-			lock (stream)
-			{
-				// send the function call
-
-				// 70 is 'F' in ASCII. Note: don't use SendChar() here as it adds padding
-				// that confuses the backend. The 0 terminates the command line.
-				stream.WriteByte(70);
-				stream.WriteByte(0);
-
-				PGUtil.WriteInt32(stream, fnid);
-				PGUtil.WriteInt32(stream, args.Length);
-
-
-				for (Int32 i = 0; i < args.Length; i++)
-				{
-					args[i].Send(stream);
-				}
-
-				// This is needed, otherwise data can be lost
-				stream.Flush();
-
-
-				// Now handle the result
-
-				// Now loop, reading the results
-				Object result = null; // our result
-				String errorMessage = "";
-				Int32 c;
-				Boolean l_endQuery = false;
-				while (!l_endQuery)
-				{
-					c = (Char)stream.ReadByte();
-
-					switch (c)
-					{
-						case 'A': // Asynchronous Notify
-							//TODO: do something with this
-							Int32 pid = PGUtil.ReadInt32(stream);
-							String msg = PGUtil.ReadString(stream);
-
-
-							break;
-
-						//------------------------------
-						// Error message returned
-						case 'E':
-							NpgsqlError e = new NpgsqlError(conn.BackendProtocolVersion, stream);
-							errorMessage += e.Message;
-							break;
-
-						//------------------------------
-						// Notice from backend
-						case 'N':
-							NpgsqlError notice = new NpgsqlError(conn.BackendProtocolVersion, stream);
-							errorMessage += notice.Message;
-							break;
-
-						case 'V':
-							Char l_nextChar = (Char)stream.ReadByte();
-							if (l_nextChar == 'G')
-							{
-								Int32 sz = PGUtil.ReadInt32(stream);
-								// Return an Integer if
-								if (resulttype)
-								{
-									result = PGUtil.ReadInt32(stream);
-								}
-								else
-								{
-									Byte[] buf = new Byte[sz];
-
-									Int32 bytes_from_stream = 0;
-									Int32 total_bytes_read = 0;
-									Int32 size = sz;
-									do
-									{
-										bytes_from_stream = stream.Read(buf, total_bytes_read, size);
-										total_bytes_read += bytes_from_stream;
-										size -= bytes_from_stream;
-									}
-									while (size > 0);
-
-									result = buf;
-								}
-								//There should be a trailing '0'
-								Int32 l_endChar = (Char)stream.ReadByte();
-							}
-							else
-							{
-								//it must have been a '0', thus no results
-							}
-							break;
-
-						case 'Z':
-							l_endQuery = true;
-							break;
-
-						default:
-							throw new NpgsqlException(string.Format("postgresql.fp.protocol {0}", c));
-					}
-				}
-
-				if (errorMessage != null)
-				{
-					throw new NpgsqlException("postgresql.fp.error" + errorMessage);
 				}
 
 				return result;
@@ -381,7 +261,6 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		 * occurs.
 		 * @see org.postgresql.largeobject.LargeObject
 		 */
-
 		public Object FastpathCall(String name, Boolean resulttype, FastpathArg[] args)
 		{
 			return FastpathCall(GetID(name), resulttype, args);

@@ -25,10 +25,8 @@
 // TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -36,30 +34,18 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	{
 		public static readonly NpgsqlReadyState Instance = new NpgsqlReadyState();
 
-
 		// Flush and Sync messages. It doesn't need to be created every time it is called.
 		private static readonly NpgsqlFlush _flushMessage = new NpgsqlFlush();
 
 		private static readonly NpgsqlSync _syncMessage = new NpgsqlSync();
 
-		private readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-
-		private NpgsqlReadyState()
-			: base()
-		{
-		}
+		private NpgsqlReadyState() : base() { }
 
 		public override IEnumerable<IServerResponseObject> QueryEnum(NpgsqlConnector context, NpgsqlCommand command)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "QueryEnum");
-
-
-			//String commandText = command.GetCommandText();
-			//NpgsqlEventLog.LogMsg(resman, "Log_QuerySent", LogLevel.Debug, commandText);
-
 			// Send the query request to backend.
 
-			NpgsqlQuery query = new NpgsqlQuery(command, context.BackendProtocolVersion);
+			NpgsqlQuery query = new NpgsqlQuery(command);
 
 			query.WriteToStream(context.Stream);
 			context.Stream.Flush();
@@ -69,8 +55,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void Parse(NpgsqlConnector context, NpgsqlParse parse)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Parse");
-
 			Stream stream = context.Stream;
 			parse.WriteToStream(stream);
 			//stream.Flush();
@@ -78,7 +62,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override IEnumerable<IServerResponseObject> SyncEnum(NpgsqlConnector context)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Sync");
 			_syncMessage.WriteToStream(context.Stream);
 			context.Stream.Flush();
 			return ProcessBackendResponsesEnum(context, false);
@@ -86,7 +69,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void Flush(NpgsqlConnector context)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Flush");
 			_flushMessage.WriteToStream(context.Stream);
 			context.Stream.Flush();
 			ProcessBackendResponses(context);
@@ -94,8 +76,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void Bind(NpgsqlConnector context, NpgsqlBind bind)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Bind");
-
 			Stream stream = context.Stream;
 
 			bind.WriteToStream(stream);
@@ -104,14 +84,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void Describe(NpgsqlConnector context, NpgsqlDescribe describe)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Describe");
 			describe.WriteToStream(context.Stream);
 			//context.Stream.Flush();
 		}
 
 		public override void Execute(NpgsqlConnector context, NpgsqlExecute execute)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Execute");
 			NpgsqlDescribe describe = new NpgsqlDescribe('P', execute.PortalName);
 			Stream stream = context.Stream;
 			describe.WriteToStream(stream);
@@ -122,7 +100,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override IEnumerable<IServerResponseObject> ExecuteEnum(NpgsqlConnector context, NpgsqlExecute execute)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Execute");
 			NpgsqlDescribe describe = new NpgsqlDescribe('P', execute.PortalName);
 			Stream stream = context.Stream;
 			describe.WriteToStream(stream);
@@ -133,15 +110,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void Close(NpgsqlConnector context)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Close");
 			Stream stream = context.Stream;
 			try
 			{
-				stream.WriteByte((byte) FrontEndMessageCode.Termination);
-				if (context.BackendProtocolVersion >= ProtocolVersion.Version3)
-				{
-					PGUtil.WriteInt32(stream, 4);
-				}
+				stream.WriteByte((byte)FrontEndMessageCode.Termination);
+				PGUtil.WriteInt32(stream, 4);
 				stream.Flush();
 			}
 			catch
@@ -149,13 +122,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				//Error writting termination message to stream, nothing we can do.
 			}
 
-			try
-			{
-				stream.Close();
-			}
-			catch
-			{
-			}
+			try { stream.Close(); }
+			catch { }
 
 			context.Stream = null;
 			ChangeState(context, NpgsqlClosedState.Instance);

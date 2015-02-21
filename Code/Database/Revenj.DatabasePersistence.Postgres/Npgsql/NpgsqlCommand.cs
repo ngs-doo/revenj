@@ -96,6 +96,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			customCommandStream = stream;
 		}
 
+		public NpgsqlCommand(Stream stream, string template)
+			: this(template, null, null)
+		{
+			customCommandStream = stream;
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Npgsql.NpgsqlCommand">NpgsqlCommand</see> class with the text of the query.
 		/// </summary>
@@ -123,8 +129,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param name="transaction">The <see cref="Npgsql.NpgsqlTransaction">NpgsqlTransaction</see> in which the <see cref="Npgsql.NpgsqlCommand">NpgsqlCommand</see> executes.</param>
 		public NpgsqlCommand(String cmdText, NpgsqlConnection connection, NpgsqlTransaction transaction)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME);
-
 			planName = String.Empty;
 			text = cmdText;
 			this.connection = connection;
@@ -143,12 +147,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <summary>
 		/// Used to execute internal commands.
 		/// </summary>
-		internal NpgsqlCommand(String cmdText, NpgsqlConnector connector)
+		internal NpgsqlCommand(string cmdText, NpgsqlConnector connector)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME);
-
-
-			planName = String.Empty;
+			planName = string.Empty;
 			text = cmdText;
 			this.m_Connector = connector;
 			type = CommandType.Text;
@@ -171,7 +172,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			set
 			{
 				// [TODO] Validate commandtext.
-				NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "CommandText", value);
 				text = value;
 				planName = String.Empty;
 				parse = null;
@@ -218,7 +218,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			set
 			{
 				type = value;
-				NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "CommandType", value);
 			}
 		}
 
@@ -229,7 +228,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			set
 			{
 				Connection = (NpgsqlConnection)value;
-				NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "DbConnection", value);
 			}
 		}
 
@@ -243,7 +241,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "Connection");
 				return connection;
 			}
 			set
@@ -273,8 +270,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				}
 
 				SetCommandTimeout();
-
-				NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "Connection", value);
 			}
 		}
 
@@ -305,7 +300,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "Parameters");
 				return parameters;
 			}
 		}
@@ -316,7 +310,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			set
 			{
 				Transaction = (NpgsqlTransaction)value;
-				NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "IDbCommand.Transaction", value);
 			}
 		}
 
@@ -330,8 +323,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "Transaction");
-
 				if (this.transaction != null && this.transaction.Connection == null)
 				{
 					this.transaction = null;
@@ -340,8 +331,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 			set
 			{
-				NpgsqlEventLog.LogPropertySet(LogLevel.Debug, CLASSNAME, "Transaction", value);
-
 				this.transaction = value;
 			}
 		}
@@ -356,8 +345,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "UpdatedRowSource");
-
 				return updateRowSource;
 			}
 			set
@@ -391,8 +378,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <remarks>This Method isn't implemented yet.</remarks>
 		public override void Cancel()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Cancel");
-
 			try
 			{
 				// get copy for thread safety of null test
@@ -450,8 +435,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>An <see cref="System.Data.Common.DbParameter">DbParameter</see> object.</returns>
 		protected override DbParameter CreateDbParameter()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CreateDbParameter");
-
 			return CreateParameter();
 		}
 
@@ -461,8 +444,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>A <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object.</returns>
 		public new NpgsqlParameter CreateParameter()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CreateParameter");
-
 			return new NpgsqlParameter();
 		}
 
@@ -483,7 +464,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			//We treat this as a simple wrapper for calling ExecuteReader() and then
 			//update the records affected count at every call to NextResult();
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ExecuteNonQuery");
 			int? ret = null;
 			using (NpgsqlDataReader rdr = GetReader(CommandBehavior.SequentialAccess))
 			{
@@ -522,8 +502,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>A <see cref="Npgsql.NpgsqlDataReader">NpgsqlDataReader</see> object.</returns>
 		public new NpgsqlDataReader ExecuteReader()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ExecuteReader");
-
 			return ExecuteReader(CommandBehavior.Default);
 		}
 
@@ -538,8 +516,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <remarks>Currently the CommandBehavior parameter is ignored.</remarks>
 		public new NpgsqlDataReader ExecuteReader(CommandBehavior cb)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "ExecuteReader", cb);
-
 			// Close connection if requested even when there is an error.
 
 			try
@@ -707,8 +683,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public override void Prepare()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Prepare");
-
 			// Check the connection state.
 			CheckConnectionState();
 
@@ -723,93 +697,83 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				return; // Do nothing.
 			}
 
-			if (m_Connector.BackendProtocolVersion == ProtocolVersion.Version2)
+			using (m_Connector.BlockNotificationThread())
 			{
-				using (NpgsqlCommand command = new NpgsqlCommand(GetPrepareCommandText(), m_Connector))
+				try
 				{
-					command.ExecuteBlind();
-				}
-			}
-			else
-			{
-				using (m_Connector.BlockNotificationThread())
-				{
-					try
+					// Use the extended query parsing...
+					planName = m_Connector.NextPlanName();
+					String portalName = m_Connector.NextPortalName();
+
+					parse = new NpgsqlParse(planName, GetParseCommandText(), new Int32[] { });
+
+					m_Connector.Parse(parse);
+
+					// We need that because Flush() doesn't cause backend to send
+					// ReadyForQuery on error. Without ReadyForQuery, we don't return 
+					// from query extended processing.
+
+					// We could have used Connector.Flush() which sends us back a
+					// ReadyForQuery, but on postgresql server below 8.1 there is an error
+					// with extended query processing which hinders us from using it.
+					m_Connector.RequireReadyForQuery = false;
+					m_Connector.Flush();
+
+
+					// Description...
+					NpgsqlDescribe describe = new NpgsqlDescribe('S', planName);
+
+
+					m_Connector.Describe(describe);
+
+					NpgsqlRowDescription returnRowDesc = m_Connector.Sync();
+
+					Int16[] resultFormatCodes;
+
+
+					if (returnRowDesc != null)
 					{
-						// Use the extended query parsing...
-						planName = m_Connector.NextPlanName();
-						String portalName = m_Connector.NextPortalName();
+						resultFormatCodes = new Int16[returnRowDesc.NumFields];
 
-						parse = new NpgsqlParse(planName, GetParseCommandText(), new Int32[] { });
-
-						m_Connector.Parse(parse);
-
-						// We need that because Flush() doesn't cause backend to send
-						// ReadyForQuery on error. Without ReadyForQuery, we don't return 
-						// from query extended processing.
-
-						// We could have used Connector.Flush() which sends us back a
-						// ReadyForQuery, but on postgresql server below 8.1 there is an error
-						// with extended query processing which hinders us from using it.
-						m_Connector.RequireReadyForQuery = false;
-						m_Connector.Flush();
-
-
-						// Description...
-						NpgsqlDescribe describe = new NpgsqlDescribe('S', planName);
-
-
-						m_Connector.Describe(describe);
-
-						NpgsqlRowDescription returnRowDesc = m_Connector.Sync();
-
-						Int16[] resultFormatCodes;
-
-
-						if (returnRowDesc != null)
+						for (int i = 0; i < returnRowDesc.NumFields; i++)
 						{
-							resultFormatCodes = new Int16[returnRowDesc.NumFields];
+							NpgsqlRowDescription.FieldData returnRowDescData = returnRowDesc[i];
 
-							for (int i = 0; i < returnRowDesc.NumFields; i++)
+
+							if (returnRowDescData.TypeInfo != null && returnRowDescData.TypeInfo.NpgsqlDbType == NpgsqlDbType.Bytea)
 							{
-								NpgsqlRowDescription.FieldData returnRowDescData = returnRowDesc[i];
-
-
-								if (returnRowDescData.TypeInfo != null && returnRowDescData.TypeInfo.NpgsqlDbType == NpgsqlDbType.Bytea)
-								{
-									// Binary format
-									resultFormatCodes[i] = (Int16)FormatCode.Binary;
-								}
-								else
-								{
-									// Text Format
-									resultFormatCodes[i] = (Int16)FormatCode.Text;
-								}
+								// Binary format
+								resultFormatCodes[i] = (Int16)FormatCode.Binary;
+							}
+							else
+							{
+								// Text Format
+								resultFormatCodes[i] = (Int16)FormatCode.Text;
 							}
 						}
-						else
-						{
-							resultFormatCodes = new Int16[] { 0 };
-						}
-
-						bind = new NpgsqlBind("", planName, new Int16[Parameters.Count], null, resultFormatCodes);
 					}
-					catch (IOException e)
+					else
 					{
-						throw ClearPoolAndCreateException(e);
+						resultFormatCodes = new Int16[] { 0 };
 					}
-					catch
-					{
-						// As per documentation:
-						// "[...] When an error is detected while processing any extended-query message,
-						// the backend issues ErrorResponse, then reads and discards messages until a
-						// Sync is reached, then issues ReadyForQuery and returns to normal message processing.[...]"
-						// So, send a sync command if we get any problems.
 
-						m_Connector.Sync();
+					bind = new NpgsqlBind("", planName, new Int16[Parameters.Count], null, resultFormatCodes);
+				}
+				catch (IOException e)
+				{
+					throw ClearPoolAndCreateException(e);
+				}
+				catch
+				{
+					// As per documentation:
+					// "[...] When an error is detected while processing any extended-query message,
+					// the backend issues ErrorResponse, then reads and discards messages until a
+					// Sync is reached, then issues ReadyForQuery and returns to normal message processing.[...]"
+					// So, send a sync command if we get any problems.
 
-						throw;
-					}
+					m_Connector.Sync();
+
+					throw;
 				}
 			}
 		}
@@ -821,8 +785,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		///</summary>
 		private void CheckConnectionState()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CheckConnectionState");
-
 			// Check the connection state.
 			if (Connector == null || Connector.State == ConnectionState.Closed)
 			{
@@ -936,11 +898,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private Stream GetClearCommandStream()
 		{
-			/*if (NpgsqlEventLog.Level == LogLevel.Debug)
-			{
-				NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "GetClearCommandText");
-			}*/
-
 			if (type == CommandType.TableDirect)
 				return new MemoryStream(Encoding.UTF8.GetBytes("select * from " + text)); // There is no parameter support on table direct.
 			else if (type == CommandType.Text && parameters.Count == 0)
@@ -1200,8 +1157,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private Stream GetPreparedCommandStream()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "GetPreparedCommandText");
-
 			if (parameters.Count == 0)
 				return new MemoryStream(Encoding.UTF8.GetBytes("execute " + planName));
 
@@ -1241,8 +1196,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private String GetParseCommandText()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "GetParseCommandText");
-
 			Boolean addProcedureParenthesis = false; // Do not add procedure parenthesis by default.
 
 			String parseCommand = text.ToString();
@@ -1315,8 +1268,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private String GetPrepareCommandText()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "GetPrepareCommandText");
-
 			Boolean addProcedureParenthesis = false; // Do not add procedure parenthesis by default.
 
 			planName = Connector.NextPlanName();

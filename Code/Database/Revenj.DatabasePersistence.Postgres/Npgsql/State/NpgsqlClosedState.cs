@@ -69,7 +69,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "Instance");
 				return _instance;
 			}
 		}
@@ -89,16 +88,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			try
 			{
-				NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Open");
-
 				IPAddress[] ips = ResolveIPHost(context.Host);
 				Socket socket = null;
 
 				// try every ip address of the given hostname, use the first reachable one
 				foreach (IPAddress ip in ips)
 				{
-					NpgsqlEventLog.LogMsg(resman, "Log_ConnectingTo", LogLevel.Debug, ip);
-
 					IPEndPoint ep = new IPEndPoint(ip, context.Port);
 					socket = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
@@ -119,7 +114,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					}
 					catch (Exception)
 					{
-						NpgsqlEventLog.LogMsg(resman, "Log_FailedConnection", LogLevel.Normal, ip);
 						socket.Close();
 					}
 				}
@@ -170,7 +164,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				context.Stream = new BufferedStream(stream);
 				context.Socket = socket;
 
-				NpgsqlEventLog.LogMsg(resman, "Log_ConnectedTo", LogLevel.Normal, context.Host, context.Port);
 				ChangeState(context, NpgsqlConnectedState.Instance);
 			}
 			//FIXME: Exceptions that come from what we are handling should be wrapped - e.g. an error connecting to

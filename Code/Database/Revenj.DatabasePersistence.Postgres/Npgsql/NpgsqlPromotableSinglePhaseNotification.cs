@@ -37,8 +37,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private INpgsqlResourceManager _rm;
 		private bool _inTransaction;
 
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-
 		public NpgsqlPromotableSinglePhaseNotification(NpgsqlConnection connection)
 		{
 			_connection = connection;
@@ -46,7 +44,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public void Enlist(Transaction tx)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Enlist");
 			if (tx != null)
 			{
 				_isolationLevel = tx.IsolationLevel;
@@ -73,7 +70,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public void Prepare()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Prepare");
 			if (_inTransaction)
 			{
 				// may not be null if Promote or Enlist is called first
@@ -97,14 +93,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public void Initialize()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Initialize");
 			_npgsqlTx = _connection.BeginTransaction(ConvertIsolationLevel(_isolationLevel));
 			_inTransaction = true;
 		}
 
 		public void Rollback(SinglePhaseEnlistment singlePhaseEnlistment)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Rollback");
 			// try to rollback the transaction with either the
 			// ADO.NET transaction or the callbacks that managed the
 			// two phase commit transaction.
@@ -134,7 +128,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public void SinglePhaseCommit(SinglePhaseEnlistment singlePhaseEnlistment)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "SinglePhaseCommit");
 			if (_npgsqlTx != null)
 			{
 				_npgsqlTx.Commit();
@@ -165,7 +158,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public byte[] Promote()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Promote");
 			_rm = CreateResourceManager();
 			// may not be null if Prepare or Enlist is called first
 			if (_callbacks == null)

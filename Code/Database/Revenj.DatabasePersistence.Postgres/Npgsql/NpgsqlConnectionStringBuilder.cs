@@ -50,7 +50,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			defaults.Add(Keywords.Host, string.Empty);
 			defaults.Add(Keywords.Port, 5432);
-			defaults.Add(Keywords.Protocol, ProtocolVersion.Version3);
 			defaults.Add(Keywords.Database, string.Empty);
 			defaults.Add(Keywords.UserName, string.Empty);
 			defaults.Add(Keywords.Password, string.Empty);
@@ -108,41 +107,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			else
 			{
 				return (SslMode)Enum.Parse(typeof(SslMode), value.ToString(), true);
-			}
-		}
-
-		private static ProtocolVersion ToProtocolVersion(object value)
-		{
-			if (value is ProtocolVersion)
-			{
-				return (ProtocolVersion)value;
-			}
-			else
-			{
-				int ver = Convert.ToInt32(value);
-
-				switch (ver)
-				{
-					case 2:
-						return ProtocolVersion.Version2;
-					case 3:
-						return ProtocolVersion.Version3;
-					default:
-						throw new InvalidCastException(value.ToString());
-				}
-			}
-		}
-
-		private static string ToString(ProtocolVersion protocolVersion)
-		{
-			switch (protocolVersion)
-			{
-				case ProtocolVersion.Version2:
-					return "2";
-				case ProtocolVersion.Version3:
-					return "3";
-				default:
-					return string.Empty;
 			}
 		}
 
@@ -237,14 +201,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get { return _port; }
 			set { SetValue(GetKeyName(Keywords.Port), value); }
-		}
-
-		private ProtocolVersion _protocol;
-
-		public ProtocolVersion Protocol
-		{
-			get { return _protocol; }
-			set { SetValue(GetKeyName(Keywords.Protocol), value); }
 		}
 
 		private string _database;
@@ -434,8 +390,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					return Keywords.Host;
 				case "PORT":
 					return Keywords.Port;
-				case "PROTOCOL":
-					return Keywords.Protocol;
 				case "DATABASE":
 				case "DB":
 					return Keywords.Database;
@@ -501,8 +455,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					return "HOST";
 				case Keywords.Port:
 					return "PORT";
-				case Keywords.Protocol:
-					return "PROTOCOL";
 				case Keywords.Database:
 					return "DATABASE";
 				case Keywords.UserName:
@@ -593,11 +545,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				Keywords key = GetKey(keyword);
 				SetValue(key, value);
-				if (key == Keywords.Protocol)
-				{
-					base[GetKeyName(key)] = ToString(this.Protocol);
-				}
-				else if (key == Keywords.Compatible)
+				if (key == Keywords.Compatible)
 				{
 					base[GetKeyName(key)] = ((Version)this.Compatible).ToString();
 				}
@@ -626,9 +574,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						break;
 					case Keywords.Port:
 						this._port = Convert.ToInt32(value);
-						break;
-					case Keywords.Protocol:
-						this._protocol = ToProtocolVersion(value);
 						break;
 					case Keywords.Database:
 						this._database = Convert.ToString(value);
@@ -714,9 +659,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					case Keywords.SyncNotification:
 						exception_template = resman.GetString("Exception_InvalidBooleanKeyVal");
 						break;
-					case Keywords.Protocol:
-						exception_template = resman.GetString("Exception_InvalidProtocolVersionKeyVal");
-						break;
 				}
 				if (!string.IsNullOrEmpty(exception_template))
 				{
@@ -743,7 +685,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	{
 		Host,
 		Port,
-		Protocol,
 		Database,
 		UserName,
 		Password,

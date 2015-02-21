@@ -35,12 +35,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	internal sealed class NpgsqlQuery : ClientMessage
 	{
 		private readonly NpgsqlCommand _command;
-		private readonly ProtocolVersion _protocolVersion;
 
-		public NpgsqlQuery(NpgsqlCommand command, ProtocolVersion protocolVersion)
+		public NpgsqlQuery(NpgsqlCommand command)
 		{
 			_command = command;
-			_protocolVersion = protocolVersion;
 		}
 
 		public override void WriteToStream(Stream outputStream)
@@ -71,11 +69,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			//Work out the encoding of the string (null-terminated) once and take the length from having done so
 			//rather than doing so repeatedly.
 
-			if (_protocolVersion == ProtocolVersion.Version3)
-			{
-				// Write message length. Int32 + string length + null terminator.
-				PGUtil.WriteInt32(outputStream, 4 + (int)commandStream.Length + 1);
-			}
+			// Write message length. Int32 + string length + null terminator.
+			PGUtil.WriteInt32(outputStream, 4 + (int)commandStream.Length + 1);
 
 			commandStream.CopyTo(outputStream);
 			outputStream.WriteByte(0);

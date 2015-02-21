@@ -47,10 +47,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						if (p.MustEscapeRecord)
 						{
 							sw.Write('"');
-							p.InsertRecord(sw, "1", mappings);
+							p.InsertRecord(sw, cms.TmpBuffer, "1", mappings);
 							sw.Write('"');
 						}
-						else p.InsertRecord(sw, string.Empty, mappings);
+						else p.InsertRecord(sw, cms.TmpBuffer, string.Empty, mappings);
 					}
 					if (i < Properties.Length - 1)
 						sw.Write(',');
@@ -81,7 +81,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					var p = Properties[i];
 					if (p != null)
-						p.InsertRecord(sw, string.Empty, mappings);
+						p.InsertRecord(sw, cms.TmpBuffer, string.Empty, mappings);
 					else
 						sw.Write("\\N");
 					if (i < Properties.Length - 1)
@@ -100,10 +100,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						{
 							sw.Write('"');
 							//TODO string.Empty !?
-							p.InsertRecord(sw, "1", null);
+							p.InsertRecord(sw, cms.TmpBuffer, "1", null);
 							sw.Write('"');
 						}
-						else p.InsertRecord(sw, string.Empty, null);
+						else p.InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
 					}
 					if (i < Properties.Length - 1)
 						sw.Write(',');
@@ -115,7 +115,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return cms;
 		}
 
-		public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Properties == null)
 				return;
@@ -135,14 +135,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 								mappings(sw, q);
 						else
 							sw.Write(quote);
-						p.InsertRecord(sw, newEscaping, mappings);
+						p.InsertRecord(sw, buf, newEscaping, mappings);
 						if (mappings != null)
 							foreach (var q in quote)
 								mappings(sw, q);
 						else
 							sw.Write(quote);
 					}
-					else p.InsertRecord(sw, escaping, mappings);
+					else p.InsertRecord(sw, buf, escaping, mappings);
 				}
 				if (i < Properties.Length - 1)
 					sw.Write(',');
@@ -150,7 +150,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			sw.Write(')');
 		}
 
-		public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Properties == null)
 			{
@@ -173,14 +173,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 								mappings(sw, q);
 						else
 							sw.Write(quote);
-						p.InsertRecord(sw, newEscaping, mappings);
+						p.InsertRecord(sw, buf, newEscaping, mappings);
 						if (mappings != null)
 							foreach (var q in quote)
 								mappings(sw, q);
 						else
 							sw.Write(quote);
 					}
-					else p.InsertRecord(sw, escaping, mappings);
+					else p.InsertRecord(sw, buf, escaping, mappings);
 				}
 				if (i < Properties.Length - 1)
 					sw.Write(',');

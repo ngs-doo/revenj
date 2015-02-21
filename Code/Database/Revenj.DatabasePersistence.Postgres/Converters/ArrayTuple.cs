@@ -93,10 +93,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						if (e.MustEscapeArray)
 						{
 							sw.Write('"');
-							e.InsertArray(sw, "0", mappings);
+							e.InsertArray(sw, cms.TmpBuffer, "0", mappings);
 							sw.Write('"');
 						}
-						else e.InsertArray(sw, string.Empty, mappings);
+						else e.InsertArray(sw, cms.TmpBuffer, string.Empty, mappings);
 					}
 					else sw.Write("NULL");
 					if (i < Elements.Length - 1)
@@ -128,10 +128,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (e.MustEscapeArray)
 					{
 						sw.Write('"');
-						e.InsertArray(sw, "0", null);
+						e.InsertArray(sw, cms.TmpBuffer, "0", null);
 						sw.Write('"');
 					}
-					else e.InsertArray(sw, string.Empty, null);
+					else e.InsertArray(sw, cms.TmpBuffer, string.Empty, null);
 				}
 				else sw.Write("NULL");
 				if (i < Elements.Length - 1)
@@ -143,7 +143,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return cms;
 		}
 
-		public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
 			if (Elements == null)
 				return;
@@ -163,14 +163,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 								mappings(sw, q);
 						else
 							sw.Write(quote);
-						e.InsertArray(sw, newEscaping, mappings);
+						e.InsertArray(sw, buf, newEscaping, mappings);
 						if (mappings != null)
 							foreach (var q in quote)
 								mappings(sw, q);
 						else
 							sw.Write(quote);
 					}
-					else e.InsertArray(sw, escaping, mappings);
+					else e.InsertArray(sw, buf, escaping, mappings);
 				}
 				else
 					sw.Write("NULL");
@@ -180,7 +180,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			sw.Write('}');
 		}
 
-		public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+		public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
 			throw new FrameworkException("Should not happen. Insert array called on array tuple. Nested arrays are invalid construct.");
 		}

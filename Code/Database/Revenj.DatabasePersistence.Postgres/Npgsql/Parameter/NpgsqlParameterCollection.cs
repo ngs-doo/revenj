@@ -34,8 +34,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
-using System.Reflection;
-using System.Resources;
 using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
@@ -47,20 +45,13 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// </summary>
 	public sealed class NpgsqlParameterCollection : DbParameterCollection, IList<NpgsqlParameter>
 	{
-		private readonly List<NpgsqlParameter> InternalList = new List<NpgsqlParameter>();
-
-		// Logging related value
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-
-		// Our resource manager
-		private static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
+		private readonly List<NpgsqlParameter> InternalList = new List<NpgsqlParameter>(0);
 
 		/// <summary>
 		/// Initializes a new instance of the NpgsqlParameterCollection class.
 		/// </summary>
 		internal NpgsqlParameterCollection()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, CLASSNAME);
 		}
 
 		#region NpgsqlParameterCollection Member
@@ -74,12 +65,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogIndexerGet(LogLevel.Debug, CLASSNAME, parameterName);
 				return this.InternalList[IndexOf(parameterName)];
 			}
 			set
 			{
-				NpgsqlEventLog.LogIndexerSet(LogLevel.Debug, CLASSNAME, parameterName, value);
 				this.InternalList[IndexOf(parameterName)] = value;
 			}
 		}
@@ -93,12 +82,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogIndexerGet(LogLevel.Debug, CLASSNAME, index);
 				return this.InternalList[index];
 			}
 			set
 			{
-				NpgsqlEventLog.LogIndexerSet(LogLevel.Debug, CLASSNAME, index, value);
 				this.InternalList[index] = value;
 			}
 		}
@@ -110,8 +97,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>The index of the new <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object.</returns>
 		public NpgsqlParameter Add(NpgsqlParameter value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Add", value);
-
 			// Do not allow parameters without name.
 
 			this.InternalList.Add(value);
@@ -126,32 +111,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			return value;
 		}
 
-		/// <summary>
-		/// Adds a <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> to the <see cref="Npgsql.NpgsqlParameterCollection">NpgsqlParameterCollection</see> given the specified parameter name and value.
-		/// </summary>
-		/// <param name="parameterName">The name of the <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see>.</param>
-		/// <param name="value">The Value of the <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> to add to the collection.</param>
-		/// <returns>The index of the new <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object.</returns>
-		/// <remarks>
-		/// Use caution when using this overload of the
-		/// <b>Add</b> method to specify integer parameter values.
-		/// Because this overload takes a <i>value</i> of type Object,
-		/// you must convert the integral value to an <b>Object</b>
-		/// type when the value is zero, as the following C# example demonstrates.
-		/// <code>parameters.Add(":pname", Convert.ToInt32(0));</code>
-		/// If you do not perform this conversion, the compiler will assume you
-		/// are attempting to call the NpgsqlParameterCollection.Add(string, DbType) overload.
-		/// </remarks>
-		[Obsolete("Do not call this method. Use AddWithValue instead.")]
-		public NpgsqlParameter Add(string parameterName, object value)
-		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Add", parameterName, value);
-			return this.AddWithValue(parameterName, value);
-		}
-
 		public NpgsqlParameter AddWithValue(string parameterName, object value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Add", parameterName, value);
 			return this.Add(new NpgsqlParameter(parameterName, value));
 		}
 
@@ -163,7 +124,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>The index of the new <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object.</returns>
 		public NpgsqlParameter Add(string parameterName, NpgsqlDbType parameterType)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Add", parameterName, parameterType);
 			return this.Add(new NpgsqlParameter(parameterName, parameterType));
 		}
 
@@ -176,7 +136,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>The index of the new <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object.</returns>
 		public NpgsqlParameter Add(string parameterName, NpgsqlDbType parameterType, int size)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Add", parameterName, parameterType, size);
 			return this.Add(new NpgsqlParameter(parameterName, parameterType, size));
 		}
 
@@ -190,7 +149,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>The index of the new <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object.</returns>
 		public NpgsqlParameter Add(string parameterName, NpgsqlDbType parameterType, int size, string sourceColumn)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Add", parameterName, parameterType, size, sourceColumn);
 			return this.Add(new NpgsqlParameter(parameterName, parameterType, size, sourceColumn));
 		}
 
@@ -204,7 +162,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param name="parameterName">The name of the <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object to retrieve.</param>
 		public override void RemoveAt(string parameterName)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "RemoveAt", parameterName);
 			this.InternalList.RemoveAt(IndexOf(parameterName));
 		}
 
@@ -215,7 +172,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns><b>true</b> if the collection contains the parameter; otherwise, <b>false</b>.</returns>
 		public override bool Contains(string parameterName)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Contains", parameterName);
 			return (IndexOf(parameterName) != -1);
 		}
 
@@ -226,8 +182,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>The zero-based location of the <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> in the collection.</returns>
 		public override int IndexOf(string parameterName)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "IndexOf", parameterName);
-
 			// Iterate values to see what is the index of parameter.
 			int index = 0;
 			int bestChoose = -1;
@@ -262,7 +216,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "IsReadOnly");
 				return false;
 			}
 		}
@@ -273,7 +226,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param name="index">The zero-based index of the parameter.</param>
 		public override void RemoveAt(int index)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "RemoveAt", index);
 			this.InternalList.RemoveAt(index);
 		}
 
@@ -284,7 +236,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param name="value">The <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> to add to the collection.</param>
 		public override void Insert(int index, object value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Insert", index, value);
 			CheckType(value);
 			this.InternalList.Insert(index, (NpgsqlParameter)value);
 		}
@@ -295,7 +246,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param name="value">The <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> to remove from the collection.</param>
 		public override void Remove(object value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Remove", value);
 			CheckType(value);
 			this.InternalList.Remove((NpgsqlParameter)value);
 		}
@@ -307,7 +257,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>true if the collection contains the <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object; otherwise, false.</returns>
 		public override bool Contains(object value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Contains", value);
 			if (!(value is NpgsqlParameter))
 			{
 				return false;
@@ -324,8 +273,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns><b>true</b> if the collection contains the parameter and param will contain the parameter; otherwise, <b>false</b>.</returns>
 		public bool TryGetValue(string parameterName, out NpgsqlParameter parameter)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "TryGetValue", parameterName);
-
 			int index = IndexOf(parameterName);
 
 			if (index != -1)
@@ -349,7 +296,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public override void Clear()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Clear");
 			this.InternalList.Clear();
 		}
 
@@ -360,7 +306,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>The zero-based index of the <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object in the collection.</returns>
 		public override int IndexOf(object value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "IndexOf", value);
 			CheckType(value);
 			return this.InternalList.IndexOf((NpgsqlParameter)value);
 		}
@@ -372,7 +317,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>The zero-based index of the new <see cref="Npgsql.NpgsqlParameter">NpgsqlParameter</see> object.</returns>
 		public override int Add(object value)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "Add", value);
 			CheckType(value);
 			this.Add((NpgsqlParameter)value);
 			return IndexOf(value);
@@ -382,7 +326,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "IsFixedSize");
 				return false;
 			}
 		}
@@ -395,7 +338,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "IsSynchronized");
 				return (InternalList as ICollection).IsSynchronized;
 			}
 		}
@@ -408,7 +350,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "Count");
 				return this.InternalList.Count;
 			}
 		}
@@ -420,7 +361,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param name="index">The starting index of the array.</param>
 		public override void CopyTo(Array array, int index)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CopyTo", array, index);
 			(InternalList as ICollection).CopyTo(array, index);
 			IRaiseItemChangedEvents x = InternalList as IRaiseItemChangedEvents;
 		}
@@ -429,7 +369,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				NpgsqlEventLog.LogPropertyGet(LogLevel.Debug, CLASSNAME, "SyncRoot");
 				return (InternalList as ICollection).SyncRoot;
 			}
 		}
@@ -444,7 +383,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns>An <see cref="System.Collections.IEnumerator">IEnumerator</see> that can be used to iterate through the collection.</returns>
 		public override IEnumerator GetEnumerator()
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "GetEnumerator");
 			return this.InternalList.GetEnumerator();
 		}
 
@@ -452,7 +390,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void AddRange(Array values)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "AddRange", values);
 			foreach (NpgsqlParameter parameter in values)
 			{
 				Add(parameter);
@@ -486,12 +423,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param name="Object">The object to verify</param>
 		private void CheckType(object Object)
 		{
-			NpgsqlEventLog.LogMethodEnter(LogLevel.Debug, CLASSNAME, "CheckType", Object);
 			if (!(Object is NpgsqlParameter))
-			{
-				throw new InvalidCastException(
-					String.Format(resman.GetString("Exception_WrongType"), Object.GetType()));
-			}
+				throw new InvalidCastException(string.Format("Can't cast {0} into NpgsqlParameter", Object.GetType()));
 		}
 
 		NpgsqlParameter IList<NpgsqlParameter>.this[int index]

@@ -210,7 +210,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public string BuildTuple(bool quote) { return PostgresTuple.BuildTuple(this, quote); }
 
-			public void InsertRecord(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 					return;
@@ -318,14 +318,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 
-			public void InsertArray(TextWriter sw, string escaping, Action<TextWriter, char> mappings)
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (Value == null)
 				{
 					sw.Write("NULL");
 					return;
 				}
-				InsertRecord(sw, escaping, mappings);
+				InsertRecord(sw, buf, escaping, mappings);
 			}
 		}
 	}

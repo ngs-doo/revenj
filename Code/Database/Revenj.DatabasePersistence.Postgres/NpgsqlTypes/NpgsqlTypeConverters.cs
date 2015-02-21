@@ -136,8 +136,7 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		/// <summary>
 		/// Convert a postgresql boolean to a System.Boolean.
 		/// </summary>
-		internal static Object ToBoolean(NpgsqlBackendTypeInfo TypeInfo, String BackendData, Int16 TypeSize,
-										 Int32 TypeModifier)
+		internal static Object ToBoolean(NpgsqlBackendTypeInfo TypeInfo, String BackendData, Int16 TypeSize, Int32 TypeModifier)
 		{
 			return BackendData.ToLower() == "t";
 		}
@@ -164,8 +163,7 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		/// <summary>
 		/// Convert a postgresql datetime to a System.DateTime.
 		/// </summary>
-		internal static Object ToDateTime(NpgsqlBackendTypeInfo TypeInfo, String BackendData, Int16 TypeSize,
-										  Int32 TypeModifier)
+		internal static Object ToDateTime(NpgsqlBackendTypeInfo TypeInfo, String BackendData, Int16 TypeSize, Int32 TypeModifier)
 		{
 			// Get the date time parsed in all expected formats for timestamp.
 
