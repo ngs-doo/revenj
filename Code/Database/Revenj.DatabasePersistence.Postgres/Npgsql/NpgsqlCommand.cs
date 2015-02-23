@@ -68,6 +68,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private NpgsqlParse parse;
 		private NpgsqlBind bind;
 
+		internal CommandBehavior ReaderBehavior = CommandBehavior.Default;
+
 		private Int64 lastInsertedOID = 0;
 
 		// locals about function support so we don`t need to check it everytime a function is called.
@@ -101,6 +103,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			text = template;
 			CommandType = System.Data.CommandType.Text;
 			timeout = 20;
+			ReaderBehavior = CommandBehavior.SequentialAccess;
 		}
 
 		/// <summary>

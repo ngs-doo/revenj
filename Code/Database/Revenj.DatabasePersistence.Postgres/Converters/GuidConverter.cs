@@ -73,6 +73,74 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
+		public static void Fill(Guid value, char[] buf)
+		{
+			var map = new GuidMapping(value);
+			var a = map.A;
+			var l = Lookup[(a >> 24) & 255];
+			buf[0] = l.First;
+			buf[1] = l.Second;
+			l = Lookup[(a >> 16) & 255];
+			buf[2] = l.First;
+			buf[3] = l.Second;
+			l = Lookup[(a >> 8) & 255];
+			buf[4] = l.First;
+			buf[5] = l.Second;
+			l = Lookup[a & 255];
+			buf[6] = l.First;
+			buf[7] = l.Second;
+			buf[8] = '-';
+			var b = map.B;
+			l = Lookup[(b >> 8) & 255];
+			buf[9] = l.First;
+			buf[10] = l.Second;
+			l = Lookup[b & 255];
+			buf[11] = l.First;
+			buf[12] = l.Second;
+			buf[13] = '-';
+			var c = map.C;
+			l = Lookup[(c >> 8) & 255];
+			buf[14] = l.First;
+			buf[15] = l.Second;
+			l = Lookup[c & 255];
+			buf[16] = l.First;
+			buf[17] = l.Second;
+			buf[18] = '-';
+			var d = map.D;
+			l = Lookup[d];
+			buf[19] = l.First;
+			buf[20] = l.Second;
+			var e = map.E;
+			l = Lookup[e];
+			buf[21] = l.First;
+			buf[22] = l.Second;
+			buf[23] = '-';
+			var f = map.F;
+			l = Lookup[f];
+			buf[24] = l.First;
+			buf[25] = l.Second;
+			var g = map.G;
+			l = Lookup[g];
+			buf[26] = l.First;
+			buf[27] = l.Second;
+			var h = map.H;
+			l = Lookup[h];
+			buf[28] = l.First;
+			buf[29] = l.Second;
+			var i = map.I;
+			l = Lookup[i];
+			buf[30] = l.First;
+			buf[31] = l.Second;
+			var j = map.J;
+			l = Lookup[j];
+			buf[32] = l.First;
+			buf[33] = l.Second;
+			var k = map.K;
+			l = Lookup[k];
+			buf[34] = l.First;
+			buf[35] = l.Second;
+		}
+
 		public static Guid? ParseNullable(TextReader reader, char[] buf)
 		{
 			var cur = reader.Read();
@@ -234,70 +302,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				var map = new GuidMapping(Value);
-				var a = map.A;
-				var l = Lookup[(a >> 24) & 255];
-				buf[0] = l.First;
-				buf[1] = l.Second;
-				l = Lookup[(a >> 16) & 255];
-				buf[2] = l.First;
-				buf[3] = l.Second;
-				l = Lookup[(a >> 8) & 255];
-				buf[4] = l.First;
-				buf[5] = l.Second;
-				l = Lookup[a & 255];
-				buf[6] = l.First;
-				buf[7] = l.Second;
-				buf[8] = '-';
-				var b = map.B;
-				l = Lookup[(b >> 8) & 255];
-				buf[9] = l.First;
-				buf[10] = l.Second;
-				l = Lookup[b & 255];
-				buf[11] = l.First;
-				buf[12] = l.Second;
-				buf[13] = '-';
-				var c = map.C;
-				l = Lookup[(c >> 8) & 255];
-				buf[14] = l.First;
-				buf[15] = l.Second;
-				l = Lookup[c & 255];
-				buf[16] = l.First;
-				buf[17] = l.Second;
-				buf[18] = '-';
-				var d = map.D;
-				l = Lookup[d];
-				buf[19] = l.First;
-				buf[20] = l.Second;
-				var e = map.E;
-				l = Lookup[e];
-				buf[21] = l.First;
-				buf[22] = l.Second;
-				buf[23] = '-';
-				var f = map.F;
-				l = Lookup[f];
-				buf[24] = l.First;
-				buf[25] = l.Second;
-				var g = map.G;
-				l = Lookup[g];
-				buf[26] = l.First;
-				buf[27] = l.Second;
-				var h = map.H;
-				l = Lookup[h];
-				buf[28] = l.First;
-				buf[29] = l.Second;
-				var i = map.I;
-				l = Lookup[i];
-				buf[30] = l.First;
-				buf[31] = l.Second;
-				var j = map.J;
-				l = Lookup[j];
-				buf[32] = l.First;
-				buf[33] = l.Second;
-				var k = map.K;
-				l = Lookup[k];
-				buf[34] = l.First;
-				buf[35] = l.Second;
+				Fill(Value, buf);
 				sw.Write(buf, 0, 36);
 			}
 
@@ -308,9 +313,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public string BuildTuple(bool quote)
 			{
+				var buf = new char[37];
+				Fill(Value, buf);
 				if (quote)
-					return "'" + Value.ToString() + "'";
-				return Value.ToString();
+				{
+					buf[36] = '\'';
+					return "'" + new string(buf, 0, buf.Length);
+				}
+				return new string(buf, 0, 36);
 			}
 		}
 	}

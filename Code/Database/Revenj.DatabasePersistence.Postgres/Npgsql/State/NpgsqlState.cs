@@ -152,7 +152,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public void EmptySync(NpgsqlConnector context)
 		{
 			Stream stm = context.Stream;
-			new NpgsqlSync().WriteToStream(stm);
+			NpgsqlSync.Send(stm);
 			stm.Flush();
 			Queue<int> buffer = new Queue<int>();
 			//byte[] compareBuffer = new byte[6];			

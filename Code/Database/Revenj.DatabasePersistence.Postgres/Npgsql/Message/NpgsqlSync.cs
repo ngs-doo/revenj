@@ -40,11 +40,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		// Logging related values
 		//private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
 
+		public static void Send(Stream stream)
+		{
+			stream.WriteByte((byte)FrontEndMessageCode.Sync);
+
+			PGUtil.WriteInt32(stream, 4);
+		}
+
 		public override void WriteToStream(Stream outputStream)
 		{
-			outputStream.WriteByte((byte) FrontEndMessageCode.Sync);
-
-			PGUtil.WriteInt32(outputStream, 4);
+			Send(outputStream);
 		}
 	}
 }

@@ -41,9 +41,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			_command = command;
 		}
 
-		public override void WriteToStream(Stream outputStream)
+		public static void Send(NpgsqlCommand command, Stream stream)
 		{
-			var commandStream = _command.GetCommandStream();
+			var commandStream = command.GetCommandStream();
 			commandStream.Position = 0;
 			// Log the string being sent.
 
@@ -57,23 +57,37 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			// Tell to mediator what command is being sent.
 			//TODO
-			_command.Connector.Mediator.SqlSent = _command.CommandText;
+			command.Connector.Mediator.SqlSent = command.CommandText;
 
 			// Workaround for seek exceptions when running under ms.net. TODO: Check why Npgsql may be letting behind data in the stream.
-			outputStream.Flush();
+			stream.Flush();
 
 			// Send the query to server.
 			// Write the byte 'Q' to identify a query message.
-			outputStream.WriteByte((byte)FrontEndMessageCode.Query);
+			stream.WriteByte((byte)FrontEndMessageCode.Query);
 
 			//Work out the encoding of the string (null-terminated) once and take the length from having done so
 			//rather than doing so repeatedly.
 
 			// Write message length. Int32 + string length + null terminator.
-			PGUtil.WriteInt32(outputStream, 4 + (int)commandStream.Length + 1);
+			PGUtil.WriteInt32(stream, 4 + (int)commandStream.Length + 1);
 
-			commandStream.CopyTo(outputStream);
-			outputStream.WriteByte(0);
+			var cms = commandStream as Revenj.Utility.ChunkedMemoryStream;
+			if (cms != null)
+			{
+				cms.CopyTo(stream);
+				stream.WriteByte(0);
+			}
+			else
+			{
+				commandStream.CopyTo(stream);
+				stream.WriteByte(0);
+			}
+		}
+
+		public override void WriteToStream(Stream outputStream)
+		{
+			Send(_command, outputStream);
 		}
 	}
 }

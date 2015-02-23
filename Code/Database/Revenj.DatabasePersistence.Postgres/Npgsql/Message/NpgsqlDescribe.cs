@@ -47,14 +47,19 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			_portalName = portalName;
 		}
 
+		public static void Send(char what, string portal, Stream outputStream)
+		{
+			outputStream.WriteByte((byte)FrontEndMessageCode.Describe);
+
+			PGUtil.WriteInt32(outputStream, 4 + 1 + UTF8Encoding.GetByteCount(portal) + 1);
+
+			outputStream.WriteByte((Byte)what);
+			PGUtil.WriteString(portal, outputStream);
+		}
+
 		public override void WriteToStream(Stream outputStream)
 		{
-			outputStream.WriteByte((byte) FrontEndMessageCode.Describe);
-
-			PGUtil.WriteInt32(outputStream, 4 + 1 + UTF8Encoding.GetByteCount(_portalName) + 1);
-
-			outputStream.WriteByte((Byte) _whatToDescribe);
-			PGUtil.WriteString(_portalName, outputStream);
+			Send(_whatToDescribe, _portalName, outputStream);
 		}
 	}
 }

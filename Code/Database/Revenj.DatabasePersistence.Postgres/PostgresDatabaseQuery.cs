@@ -219,10 +219,12 @@ Near: " + ex.Where, ex);
 			bool hasRead = false;
 			try
 			{
+				var npg = command as NpgsqlCommand;
+				var behavior = npg != null ? npg.ReaderBehavior : CommandBehavior.Default;
 				lock (Transaction ?? sync)
 				{
 					PrepareCommand(command);
-					using (var dr = command.ExecuteReader())
+					using (var dr = command.ExecuteReader(behavior))
 					{
 						while (dr.Read())
 						{

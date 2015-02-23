@@ -45,9 +45,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			// Send the query request to backend.
 
-			NpgsqlQuery query = new NpgsqlQuery(command);
-
-			query.WriteToStream(context.Stream);
+			NpgsqlQuery.Send(command, context.Stream);
 			context.Stream.Flush();
 
 			return ProcessBackendResponsesEnum(context, false);
@@ -90,9 +88,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void Execute(NpgsqlConnector context, NpgsqlExecute execute)
 		{
-			NpgsqlDescribe describe = new NpgsqlDescribe('P', execute.PortalName);
 			Stream stream = context.Stream;
-			describe.WriteToStream(stream);
+			NpgsqlDescribe.Send('P', execute.PortalName, stream);
 			execute.WriteToStream(stream);
 			//stream.Flush();
 			Sync(context);
@@ -100,9 +97,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override IEnumerable<IServerResponseObject> ExecuteEnum(NpgsqlConnector context, NpgsqlExecute execute)
 		{
-			NpgsqlDescribe describe = new NpgsqlDescribe('P', execute.PortalName);
 			Stream stream = context.Stream;
-			describe.WriteToStream(stream);
+			NpgsqlDescribe.Send('P', execute.PortalName, stream);
 			execute.WriteToStream(stream);
 			//stream.Flush();
 			return SyncEnum(context);
