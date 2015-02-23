@@ -42,7 +42,7 @@ namespace Revenj.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 		private static void IsSubset(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
 			var type = methodCall.Object.Type.GetGenericArguments()[0];
-			var name = NpgsqlTypes.TypeConverter.GetTypeName(type);
+			var name = Revenj.DatabasePersistence.Postgres.NpgsqlTypes.TypeConverter.GetTypeName(type);
 			queryBuilder.Append("(");
 			visitExpression(methodCall.Object);
 			queryBuilder.Append("::").Append(name).Append("[]");
@@ -55,7 +55,7 @@ namespace Revenj.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 		private static void IsSuperset(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
 			var type = methodCall.Object.Type.GetGenericArguments()[0];
-			var name = NpgsqlTypes.TypeConverter.GetTypeName(type);
+			var name = Revenj.DatabasePersistence.Postgres.NpgsqlTypes.TypeConverter.GetTypeName(type);
 			queryBuilder.Append("(");
 			visitExpression(methodCall.Object);
 			queryBuilder.Append("::").Append(name).Append("[]");
@@ -68,7 +68,7 @@ namespace Revenj.Plugins.DatabasePersistence.Postgres.ExpressionSupport
 		private static void Overlaps(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
 			var type = methodCall.Object.Type.GetGenericArguments()[0];
-			var name = NpgsqlTypes.TypeConverter.GetTypeName(type);
+			var name = Revenj.DatabasePersistence.Postgres.NpgsqlTypes.TypeConverter.GetTypeName(type);
 			queryBuilder.Append("(");
 			visitExpression(methodCall.Object);
 			queryBuilder.Append("::").Append(name).Append("[]");

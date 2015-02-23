@@ -88,7 +88,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			byte[] source = (byte[]) this[i];
+			byte[] source = (byte[])this[i];
 			if (buffer == null)
 			{
 				return source.Length - fieldOffset;
@@ -100,7 +100,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			string source = (string) this[i];
+			string source = (string)this[i];
 			if (buffer == null)
 			{
 				return source.Length - fieldoffset;
@@ -264,7 +264,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				{
 					throw new InvalidOperationException();
 				}
-				Skip((int) position - AlreadyRead);
+				Skip((int)position - AlreadyRead);
 			}
 		}
 
@@ -318,13 +318,15 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private readonly Stream _stream;
 		private Streamer _streamer;
 		private int _currentField = -1;
-		private readonly byte[] buffer;
+		protected readonly byte[] buffer;
+		protected readonly ByteBuffer bytes;
 
-		public RowReader(NpgsqlRowDescription rowDesc, Stream stream, byte[] buffer)
+		public RowReader(NpgsqlRowDescription rowDesc, Stream stream, byte[] buffer, ByteBuffer bytes)
 		{
 			_rowDesc = rowDesc;
 			_stream = stream;
 			this.buffer = buffer;
+			this.bytes = bytes;
 		}
 
 		protected Streamer CurrentStreamer
@@ -347,14 +349,14 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public bool CanGetByteStream(int index)
 		{
-//TODO: Add support for byte[] being read as a stream of bytes.
+			//TODO: Add support for byte[] being read as a stream of bytes.
 			return _rowDesc[index].TypeInfo.NpgsqlDbType == NpgsqlDbType.Bytea;
 		}
 
 		public bool CanGetCharStream(int index)
 		{
-//TODO: Add support for arrays of string types?
-			return _rowDesc[index].TypeInfo.Type.Equals(typeof (string));
+			//TODO: Add support for arrays of string types?
+			return _rowDesc[index].TypeInfo.Type.Equals(typeof(string));
 		}
 
 		protected Streamer<byte> CurrentByteStreamer

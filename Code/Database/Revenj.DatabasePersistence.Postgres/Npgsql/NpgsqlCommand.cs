@@ -60,7 +60,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private string text;
 		private Int32 timeout;
 		private CommandType type;
-		private readonly NpgsqlParameterCollection parameters = new NpgsqlParameterCollection();
+		private readonly NpgsqlParameterCollection parameters;
 		private String planName;
 		private Boolean designTimeVisible;
 		private Stream customCommandStream;
@@ -91,15 +91,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 		public NpgsqlCommand(Stream stream)
-			: this("execute provided stream", null, null)
+			: this(stream, "execute provided stream")
 		{
-			customCommandStream = stream;
 		}
 
 		public NpgsqlCommand(Stream stream, string template)
-			: this(template, null, null)
 		{
 			customCommandStream = stream;
+			text = template;
+			CommandType = System.Data.CommandType.Text;
+			timeout = 20;
 		}
 
 		/// <summary>
@@ -129,6 +130,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <param name="transaction">The <see cref="Npgsql.NpgsqlTransaction">NpgsqlTransaction</see> in which the <see cref="Npgsql.NpgsqlCommand">NpgsqlCommand</see> executes.</param>
 		public NpgsqlCommand(String cmdText, NpgsqlConnection connection, NpgsqlTransaction transaction)
 		{
+			parameters = new NpgsqlParameterCollection();
 			planName = String.Empty;
 			text = cmdText;
 			this.connection = connection;
@@ -149,6 +151,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		internal NpgsqlCommand(string cmdText, NpgsqlConnector connector)
 		{
+			parameters = new NpgsqlParameterCollection();
 			planName = string.Empty;
 			text = cmdText;
 			this.m_Connector = connector;

@@ -485,7 +485,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public static short ReadInt16(Stream stream, byte[] buffer)
 		{
-			CheckedStreamRead(stream, buffer, 2, 2);
+			CheckedStreamReadShort(stream, buffer, 2, 2);
 			return IPAddress.NetworkToHostOrder(BitConverter.ToInt16(buffer, 2));
 		}
 

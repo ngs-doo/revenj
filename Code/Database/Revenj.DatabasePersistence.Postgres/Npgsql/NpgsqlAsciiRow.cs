@@ -41,12 +41,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	{
 		private readonly int _messageSize;
 		private int? _nextFieldSize = null;
-		private readonly byte[] buffer;
 
-		public StringRowReader(NpgsqlRowDescription rowDesc, Stream inputStream, byte[] buffer)
-			: base(rowDesc, inputStream, buffer)
+		public StringRowReader(NpgsqlRowDescription rowDesc, Stream inputStream, byte[] buffer, ByteBuffer bytes)
+			: base(rowDesc, inputStream, buffer, bytes)
 		{
-			this.buffer = buffer;
 			_messageSize = PGUtil.ReadInt32(inputStream, buffer);
 			if (PGUtil.ReadInt16(inputStream, buffer) != rowDesc.NumFields)
 			{
@@ -71,17 +69,15 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			NpgsqlRowDescription.FieldData field_descr = FieldData;
 
-			if (fieldSize >= 85000)
+			if (fieldSize >= 65536)
 				return ReadLargeObject(field_descr, fieldSize);
-
-			byte[] buffer = new byte[fieldSize];
-			PGUtil.CheckedStreamRead(Stream, buffer, 0, fieldSize);
 
 			try
 			{
 				if (field_descr.FormatCode == FormatCode.Text)
 				{
-					var str = UTF8Encoding.GetString(buffer);
+					PGUtil.CheckedStreamRead(Stream, bytes.Large, 0, fieldSize);
+					var str = UTF8Encoding.GetString(bytes.Large, 0, fieldSize);
 					return
 						NpgsqlTypesHelper.ConvertBackendStringToSystemType(
 							field_descr.TypeInfo,
@@ -91,6 +87,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				}
 				else
 				{
+					var buffer = new byte[fieldSize];
+					PGUtil.CheckedStreamRead(Stream, buffer, 0, fieldSize);
 					return
 						NpgsqlTypesHelper.ConvertBackendBytesToSystemType(
 							field_descr.TypeInfo,
@@ -98,6 +96,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							fieldSize,
 							field_descr.TypeModifier);
 				}
+			}
+			catch (IOException)
+			{
+				throw;
 			}
 			catch (InvalidCastException ice)
 			{

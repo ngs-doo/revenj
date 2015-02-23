@@ -8,7 +8,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	internal class ChunkedMemoryStream : Stream
 	{
 		private const int BlockSize = 65536;
-		private List<byte[]> Blocks = new List<byte[]>();
+		private readonly List<byte[]> Blocks = new List<byte[]>();
 		private int CurrentPosition;
 		private int BlockRemaining;
 		private int TotalSize;

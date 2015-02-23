@@ -35,7 +35,6 @@ using System.Reflection;
 using System.Resources;
 using System.Text;
 using System.Threading;
-using Revenj.DatabasePersistence.Postgres.Converters;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -494,7 +493,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 				var buffer = context.TmpBuffer;
 				var queue = context.ArrayBuffer;
-				List<NpgsqlError> errors = new List<NpgsqlError>(0);
+				List<NpgsqlError> errors = null;
 
 				for (; ; )
 				{
@@ -507,6 +506,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							NpgsqlError error = new NpgsqlError(stream, buffer, queue);
 							error.ErrorSql = mediator.SqlSent;
 
+							if (errors == null) errors = new List<NpgsqlError>();
 							errors.Add(error);
 
 							// Return imediately if it is in the startup state or connected state as
@@ -628,6 +628,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 								default:
 									// Only AuthenticationClearTextPassword and AuthenticationMD5Password supported for now.
+									if (errors == null) errors = new List<NpgsqlError>();
 									errors.Add(
 										new NpgsqlError(String.Format(resman.GetString("Exception_AuthenticationMethodNotSupported"), authType)));
 									throw new NpgsqlException(errors);
@@ -650,7 +651,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							break;
 
 						case BackEndMessageCode.DataRow:
-							yield return new ForwardsOnlyRow(new StringRowReader(lastRowDescription, stream, buffer));
+							yield return new ForwardsOnlyRow(new StringRowReader(lastRowDescription, stream, buffer, queue));
 							break;
 
 						case BackEndMessageCode.ReadyForQuery:
@@ -665,7 +666,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 							ChangeState(context, NpgsqlReadyState.Instance);
 
-							if (errors.Count != 0)
+							if (errors != null)
 							{
 								throw new NpgsqlException(errors);
 							}
@@ -808,14 +809,32 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public readonly int? RowsAffected;
 		public readonly long? LastInsertedOID;
 
-		public CompletedResponse(Stream stream, ByteBuffer queue)
+		private static readonly byte[] INSERT = new byte[] { (byte)'I', (byte)'N', (byte)'S', (byte)'E', (byte)'R', (byte)'T' };
+
+		public CompletedResponse(Stream stream, ByteBuffer buffer)
 		{
-			//TODO: unnecessary split
-			string[] tokens = PGUtil.ReadString(stream, queue).Split();
-			if (tokens.Length > 1)
-				RowsAffected = NumberConverter.TryParsePositiveInt(tokens[tokens.Length - 1]);
-			if (tokens.Length > 2 && string.Equals(tokens[0].Trim(), "INSERT", StringComparison.OrdinalIgnoreCase))
-				LastInsertedOID = NumberConverter.ParseLong(tokens[1]);
+			int bRead;
+			buffer.Reset();
+			for (bRead = stream.ReadByte(); bRead > 0 && bRead != ' '; bRead = stream.ReadByte())
+				buffer.Add((byte)bRead);
+			if (bRead == ' ' && buffer.GetPosition() == INSERT.Length && buffer.AreSame(INSERT))
+			{
+				long lioid = 0;
+				for (bRead = stream.ReadByte(); bRead > 0 && bRead != ' '; bRead = stream.ReadByte())
+					lioid = (lioid << 3) + (lioid << 1) + bRead - 48;
+				if (bRead == ' ') LastInsertedOID = lioid;
+			}
+			while (bRead > 0)
+			{
+				buffer.Reset();
+				for (bRead = stream.ReadByte(); bRead > 0 && bRead != ' '; bRead = stream.ReadByte())
+					buffer.Add((byte)bRead);
+			}
+			if (bRead == -1)
+			{
+				throw new IOException();
+			}
+			RowsAffected = buffer.TryGetInt();
 		}
 	}
 

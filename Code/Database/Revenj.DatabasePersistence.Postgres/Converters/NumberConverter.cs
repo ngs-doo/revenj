@@ -51,11 +51,11 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		public static int? TryParsePositiveInt(string number)
 		{
-			if (number.Length == 0)
+			if (number.Length == 0 || number[0] < '0' || number[0] > '9')
 				return null;
 			int value = 0;
 			for (int i = 0; i < number.Length; i++)
-				value = (value << 3) + (value << 2) + number[i] - '0';
+				value = (value << 3) + (value << 1) + number[i] - '0';
 			return value;
 		}
 

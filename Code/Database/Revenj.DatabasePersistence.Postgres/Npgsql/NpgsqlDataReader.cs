@@ -1021,7 +1021,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private void UpdateOutputParameters()
 		{
-			if (CurrentDescription != null && _command.Parameters.Count != 0)
+			if (CurrentDescription != null && _command.Parameters != null && _command.Parameters.Count != 0)
 			{
 				NpgsqlRow row = null;
 				Queue<NpgsqlParameter> pending = new Queue<NpgsqlParameter>();

@@ -45,7 +45,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// </summary>
 	public sealed class NpgsqlParameterCollection : DbParameterCollection, IList<NpgsqlParameter>
 	{
-		private readonly List<NpgsqlParameter> InternalList = new List<NpgsqlParameter>(0);
+		private readonly List<NpgsqlParameter> InternalList = new List<NpgsqlParameter>();
 
 		/// <summary>
 		/// Initializes a new instance of the NpgsqlParameterCollection class.

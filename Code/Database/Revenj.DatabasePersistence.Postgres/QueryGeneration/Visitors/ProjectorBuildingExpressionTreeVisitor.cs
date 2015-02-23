@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -54,28 +55,37 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 
 		protected ProjectorBuildingExpressionTreeVisitor(Expression selectExpression, Type resultTypeOverride)
 		{
-			// This is the parameter of the delegat we're building. It's the ResultObjectMapping, which holds all the input data needed for the projection.
 			ResultItemParameter = Expression.Parameter(typeof(ResultObjectMapping), "resultItem");
 			this.ResultTypeOverride = resultTypeOverride;
 		}
+
+		private static readonly ConcurrentDictionary<Type, MethodInfo> ObjectMethodCache = new ConcurrentDictionary<Type, MethodInfo>(1, 117);
+		private static readonly ConcurrentDictionary<Type, MethodInfo> EvaluateMethodCache = new ConcurrentDictionary<Type, MethodInfo>(1, 117);
 
 		protected override Expression VisitQuerySourceReferenceExpression(QuerySourceReferenceExpression expression)
 		{
 			// Substitute generic parameter "T" of ResultObjectMapping.GetObject<T>() with type of query source item, then return a call to that method
 			// with the query source referenced by the expression.
-
-			return Expression.Call(
-				ResultItemParameter,
-				GetObjectMethod.MakeGenericMethod(ResultTypeOverride ?? expression.Type),
-				Expression.Constant(expression.ReferencedQuerySource));
+			var type = ResultTypeOverride ?? expression.Type;
+			MethodInfo target;
+			if (!ObjectMethodCache.TryGetValue(type, out target))
+			{
+				target = GetObjectMethod.MakeGenericMethod(ResultTypeOverride ?? expression.Type);
+				ObjectMethodCache.TryAdd(type, target);
+			}
+			return Expression.Call(ResultItemParameter, target, Expression.Constant(expression.ReferencedQuerySource));
 		}
 
 		protected override Expression VisitSubQueryExpression(SubQueryExpression expression)
 		{
-			return Expression.Call(
-				ResultItemParameter,
-				EvaluateSubqueryMethod.MakeGenericMethod(expression.QueryModel.ResultTypeOverride),
-				Expression.Constant(expression));
+			var type = expression.QueryModel.ResultTypeOverride;
+			MethodInfo target;
+			if (!EvaluateMethodCache.TryGetValue(type, out target))
+			{
+				target = EvaluateSubqueryMethod.MakeGenericMethod(type);
+				EvaluateMethodCache.TryAdd(type, target);
+			}
+			return Expression.Call(ResultItemParameter, target, Expression.Constant(expression));
 		}
 	}
 }
