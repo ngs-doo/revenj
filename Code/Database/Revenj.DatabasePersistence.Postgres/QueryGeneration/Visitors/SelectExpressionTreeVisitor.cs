@@ -40,7 +40,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			if (IsSimple)
 			{
 				var qs = expression.ReferencedQuerySource;
-				Query.AddSelectPart(qs, qs.ItemName, qs.ItemName, typeof(bool), (_, dr) => dr.GetBoolean(0));
+				Query.AddSelectPart(qs, qs.ItemName, qs.ItemName, typeof(bool), (_, __, dr) => dr.GetBoolean(0));
 			}
 			else
 				CreateSelector(expression.ReferencedQuerySource);
@@ -60,9 +60,9 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 					"\"{0}\".\"Key\" AS \"{0}.Key\", \"{0}\".\"Values\" AS \"{0}\"".With(factoryValue.Name),
 					factoryValue.Name,
 					qs.ItemType,
-					(_, dr) =>
+					(_, reader, dr) =>
 					{
-						var keyInstance = factoryKey.Instancer(dr.GetValue(index));
+						var keyInstance = factoryKey.Instancer(dr.GetValue(index), reader);
 						object[] array;
 						if (dr.IsDBNull(index + 1))
 							array = new string[0];
@@ -75,7 +75,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 							else
 								array = PostgresRecordConverter.ParseArray(obj as string);
 						};
-						var valueInstances = array.Select(it => factoryValue.Instancer(it));
+						var valueInstances = array.Select(it => factoryValue.Instancer(it, reader));
 						return Activator.CreateInstance(genericType, keyInstance, valueInstances);
 					}))
 					Query.CurrentSelectIndex++;
@@ -88,7 +88,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 					"\"{0}\"".With(factory.Name),
 					factory.Name,
 					factory.Type,
-					(_, dr) => dr.IsDBNull(index) ? null : factory.Instancer(dr.GetValue(index)));
+					(_, reader, dr) => dr.IsDBNull(index) ? null : factory.Instancer(dr.GetValue(index), reader));
 			}
 		}
 
@@ -222,12 +222,12 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 						sql),
 					"_first_or_default_" + cnt,
 					expression.QueryModel.ResultTypeOverride,
-					(rom, dr) =>
+					(rom, reader, dr) =>
 					{
 						if (dr.IsDBNull(cnt))
 							return null;
 						var tuple = new[] { dr.GetValue(cnt).ToString() };
-						var result = ssd.ProcessRow(rom, tuple);
+						var result = ssd.ProcessRow(rom, reader, tuple);
 						return projector.Eval(result);
 					});
 			}
@@ -241,7 +241,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 						sql),
 					"_subquery_" + cnt,
 					expression.QueryModel.ResultTypeOverride,
-					(rom, dr) =>
+					(rom, reader, dr) =>
 					{
 						object[] array;
 						if (dr.IsDBNull(cnt))
@@ -264,7 +264,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 						}
 						var resultItems = new List<ResultObjectMapping>();
 						foreach (var it in array)
-							resultItems.Add(ssd.ProcessRow(rom, it));
+							resultItems.Add(ssd.ProcessRow(rom, reader, it));
 						return projector.Process(resultItems);
 					});
 			}

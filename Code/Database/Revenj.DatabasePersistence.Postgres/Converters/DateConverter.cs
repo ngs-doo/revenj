@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
@@ -15,41 +16,42 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			NumberConverter.Write2(value.Day, buf, 8);
 		}
 
-		public static DateTime? ParseNullable(TextReader reader, char[] buf)
+		public static DateTime? ParseNullable(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var res = ParseDate(reader, cur, buf);
+			var res = ParseDate(reader, cur);
 			reader.Read();
 			return res;
 		}
 
-		public static DateTime Parse(TextReader reader, char[] buf)
+		public static DateTime Parse(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return DateTime.MinValue;
-			var res = ParseDate(reader, cur, buf);
+			var res = ParseDate(reader, cur);
 			reader.Read();
 			return res;
 		}
 
-		private static DateTime ParseDate(TextReader reader, int cur, char[] buf)
+		private static DateTime ParseDate(BufferedTextReader reader, int cur)
 		{
 			//TODO: BC after date for year < 0 ... not supported by .NET
 			if (cur == '\\' || cur == '"')
 				throw new NotSupportedException("Negative dates are not supported by .NET.");
+			var buf = reader.SmallBuffer;
 			buf[0] = (char)cur;
 			var read = reader.Read(buf, 1, 9);
 			for (int i = read + 1; i < 10; i++)
 				buf[i] = (char)reader.Read();
 			if (buf[4] != '-')
 				return ParseDateSlow(buf, reader);
-			return new DateTime(IntConverter.ParsePositive(buf, 0, 4), NumberConverter.Read2(buf, 5), NumberConverter.Read2(buf, 8));
+			return new DateTime(NumberConverter.Read4(buf, 0), NumberConverter.Read2(buf, 5), NumberConverter.Read2(buf, 8));
 		}
 
-		private static DateTime ParseDateSlow(char[] buf, TextReader reader)
+		private static DateTime ParseDateSlow(char[] buf, BufferedTextReader reader)
 		{
 			int foundAt = 4;
 			for (; foundAt < buf.Length; foundAt++)
@@ -58,7 +60,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			if (foundAt == buf.Length)
 				throw new NotSupportedException("Invalid date value.");
 			var year = IntConverter.ParsePositive(buf, 0, foundAt);
-			var newBuf = new char[5];
+			var newBuf = reader.TempBuffer;
 			for (int i = foundAt + 1; i < buf.Length; i++)
 				newBuf[i - foundAt - 1] = buf[i];
 			for (int i = buf.Length - foundAt - 1; i < 5; i++)
@@ -66,7 +68,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return new DateTime(year, NumberConverter.Read2(newBuf, 0), NumberConverter.Read2(newBuf, 3));
 		}
 
-		public static List<DateTime?> ParseNullableCollection(TextReader reader, int context, char[] buf)
+		public static List<DateTime?> ParseNullableCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -93,7 +95,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseDate(reader, cur, buf));
+					list.Add(ParseDate(reader, cur));
 				}
 				cur = reader.Read();
 			}
@@ -106,7 +108,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<DateTime> ParseCollection(TextReader reader, int context, char[] buf)
+		public static List<DateTime> ParseCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -133,7 +135,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseDate(reader, cur, buf));
+					list.Add(ParseDate(reader, cur));
 				}
 				cur = reader.Read();
 			}

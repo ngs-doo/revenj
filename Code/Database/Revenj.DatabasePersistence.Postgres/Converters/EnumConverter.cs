@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class EnumConverter
 	{
-		public static T? ParseNullable<T>(TextReader reader, int context)
+		public static T? ParseNullable<T>(BufferedTextReader reader, int context)
 			where T : struct
 		{
 			var cur = reader.Read();
@@ -25,7 +26,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return null;
 		}
 
-		public static T Parse<T>(TextReader reader, int context)
+		public static T Parse<T>(BufferedTextReader reader, int context)
 			where T : struct
 		{
 			var cur = reader.Read();
@@ -42,7 +43,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return value;
 		}
 
-		public static List<T?> ParseNullableCollection<T>(TextReader reader, int context)
+		public static List<T?> ParseNullableCollection<T>(BufferedTextReader reader, int context)
 			where T : struct
 		{
 			var cur = reader.Read();
@@ -115,7 +116,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<T> ParseCollection<T>(TextReader reader, int context)
+		public static List<T> ParseCollection<T>(BufferedTextReader reader, int context)
 			where T : struct
 		{
 			var cur = reader.Read();

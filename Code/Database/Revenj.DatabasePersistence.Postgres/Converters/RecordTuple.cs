@@ -12,6 +12,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		public RecordTuple(IPostgresTuple[] properties)
 		{
 			this.Properties = properties;
+			//TODO: check if properties count > 0, otherwise return ()
 		}
 
 		public bool MustEscapeRecord { get { return Properties != null; } }
@@ -69,10 +70,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return Build(false, null);
 		}
 
+		private static readonly byte[] NULL = new byte[] { (byte)'N', (byte)'U', (byte)'L', (byte)'L' };
+
 		public Stream Build(bool bulk, Action<TextWriter, char> mappings)
 		{
 			if (Properties == null)
-				return new MemoryStream(new byte[] { (byte)'N', (byte)'U', (byte)'L', (byte)'L' });
+				return new MemoryStream(NULL);
 			var cms = ChunkedMemoryStream.Create();
 			var sw = cms.GetWriter();
 			if (bulk)
@@ -129,6 +132,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					if (p.MustEscapeRecord)
 					{
+						//TODO: build quote only once and reuse it, instead of looping all the time
 						quote = quote ?? PostgresTuple.BuildQuoteEscape(escaping);
 						if (mappings != null)
 							foreach (var q in quote)

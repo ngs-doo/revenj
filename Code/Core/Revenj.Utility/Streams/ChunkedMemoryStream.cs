@@ -40,7 +40,8 @@ namespace Revenj.Utility
 		private int CurrentPosition;
 		private int TotalSize;
 		private CustomWriter Writer;
-		private BufferedTextReader Reader;
+		private StreamReader Reader;
+		private BufferedTextReader BufferedReader;
 
 		private char[] CharBuffer;
 
@@ -407,9 +408,15 @@ namespace Revenj.Utility
 		public TextReader GetReader()
 		{
 			if (Reader == null)
-				Reader = new BufferedTextReader(new StreamReader(this));
-			Reader.Initialize();
+				Reader = new StreamReader(this);
 			return Reader;
+		}
+
+		public BufferedTextReader UseBufferedReader(TextReader reader)
+		{
+			if (BufferedReader == null)
+				return BufferedReader = new BufferedTextReader(reader);
+			return BufferedReader.Reuse(reader);
 		}
 
 		bool disposed;

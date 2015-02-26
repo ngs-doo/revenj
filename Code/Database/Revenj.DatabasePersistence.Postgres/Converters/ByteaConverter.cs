@@ -33,7 +33,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return new byte[0];
 		}
 
-		public static byte[] Parse(TextReader reader, int context)
+		public static byte[] Parse(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -55,7 +55,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list.ToArray();
 		}
 
-		public static List<byte[]> ParseCollection(TextReader reader, int context, bool allowNulls)
+		public static List<byte[]> ParseCollection(BufferedTextReader reader, int context, bool allowNulls)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -109,7 +109,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static Stream ParseStream(TextReader reader, int context)
+		public static Stream ParseStream(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -147,7 +147,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return stream;
 		}
 
-		public static List<Stream> ParseStreamCollection(TextReader reader, int context, bool allowNulls)
+		public static List<Stream> ParseStreamCollection(BufferedTextReader reader, int context, bool allowNulls)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')

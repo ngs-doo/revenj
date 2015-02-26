@@ -6,6 +6,7 @@ using Remotion.Linq.Clauses.Expressions;
 using Revenj.Common;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 {
@@ -28,7 +29,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			public IQuerySource QuerySource { get; set; }
 			public string Name { get; set; }
 			public Type Type { get; set; }
-			public Func<object, object> Instancer { get; set; }
+			public Func<object, BufferedTextReader, object> Instancer { get; set; }
 		}
 
 		private static Result CreateResult(QuerySourceReferenceExpression expression, QueryParts parts)
@@ -118,21 +119,21 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			var result = new Result { QuerySource = qs, Name = name, Type = type };
 			var instanceFactory = parts.ConverterFactory.GetInstanceFactory(type);
 			if (instanceFactory != null)
-				result.Instancer = value => instanceFactory(value, parts.Locator);
+				result.Instancer = (value, reader) => instanceFactory(value, reader, parts.Locator);
 			//TODO: custom converters
 			else if (type.IsNullable())
 			{
 				var baseType = type.GetGenericArguments()[0];
-				result.Instancer = value => value != null ? Convert.ChangeType(value, baseType) : null;
+				result.Instancer = (value, _) => value != null ? Convert.ChangeType(value, baseType) : null;
 			}
-			else result.Instancer = value => Convert.ChangeType(value, type);
+			else result.Instancer = (value, _) => Convert.ChangeType(value, type);
 			return result;
 		}
 
 		//TODO Func<object, object>
-		private static Func<SubQueryExpression, QueryParts, Func<string, object>> ProjectionMethod = ProjectExpression<object>;
+		private static Func<SubQueryExpression, QueryParts, Func<string, BufferedTextReader, object>> ProjectionMethod = ProjectExpression<object>;
 
-		private static Func<string, T> ProjectExpression<T>(SubQueryExpression sqe, QueryParts parts)
+		private static Func<string, BufferedTextReader, T> ProjectExpression<T>(SubQueryExpression sqe, QueryParts parts)
 		{
 			var mqp =
 				new MainQueryParts(
@@ -150,24 +151,24 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			return ProjectMapping<T>(sqe, parts, subquery);
 		}
 
-		private static Func<string, T> ProjectMapping<T>(SubQueryExpression sqe, QueryParts parts, SubqueryParts subquery)
+		private static Func<string, BufferedTextReader, T> ProjectMapping<T>(SubQueryExpression sqe, QueryParts parts, SubqueryParts subquery)
 		{
-			Func<string, T> result;
+			Func<string, BufferedTextReader, T> result;
 			var projector = ProjectorBuildingExpressionTreeVisitor<T>.BuildProjector(sqe.QueryModel);
 			if (subquery.Selects.Count == 1)
 			{
 				var sel = subquery.Selects[0];
 				var factory = CreateResult(sel.Name, sel.ItemType, sel.QuerySource, parts);
-				result = value => (T)factory.Instancer(value);
+				result = (value, reader) => (T)factory.Instancer(value, reader);
 			}
 			else
 			{
 				var ssd = SelectSubqueryData.Create(parts, subquery);
 				//TODO TextReader/string !?
-				result = value =>
+				result = (value, reader) =>
 				{
 					var items = PostgresRecordConverter.ParseRecord(value);
-					var rom = ssd.ProcessRow(null, items);
+					var rom = ssd.ProcessRow(null, reader, items);
 					var res = projector(rom);
 					return res;
 				};
@@ -175,10 +176,10 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			return result;
 		}
 
-		private static Func<string, T> ProjectNew<T>(NewExpression nex, QueryParts parts, SubqueryParts subquery)
+		private static Func<string, BufferedTextReader, T> ProjectNew<T>(NewExpression nex, QueryParts parts, SubqueryParts subquery)
 		{
-			var results = new Dictionary<Expression, Func<object, object>>();
-			var list = new List<Func<object, object>>();
+			var results = new Dictionary<Expression, Func<object, BufferedTextReader, object>>();
+			var list = new List<Func<object, BufferedTextReader, object>>();
 			foreach (var s in subquery.Selects)
 			{
 				var factory = CreateResult(s.Name, s.ItemType, s.QuerySource, parts);
@@ -190,13 +191,13 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 
 			var arguments = new object[nex.Arguments.Count];
 
-			Func<string, T> result = value =>
+			Func<string, BufferedTextReader, T> result = (value, reader) =>
 			{
 				if (value == null)
 					return default(T);
 				var items = PostgresRecordConverter.ParseRecord(value);
 				for (int i = 0; i < items.Length; i++)
-					arguments[i] = list[i](items[i]);
+					arguments[i] = list[i](items[i], reader);
 
 				return (T)nex.Constructor.Invoke(arguments);
 			};
@@ -213,13 +214,13 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			var result = new Result { QuerySource = fromClause, Name = name, Type = fromClause.ItemType };
 			var method = ProjectionMethod.Method.GetGenericMethodDefinition().MakeGenericMethod(fromClause.ItemType);
 			var tempInst = method.Invoke(null, new object[] { sqe, parts });
-			var instancer = tempInst as Func<string, object>;
+			var instancer = tempInst as Func<string, BufferedTextReader, object>;
 			if (instancer == null)
 			{
 				var invMethod = tempInst.GetType().GetMethod("Invoke");
-				instancer = value => invMethod.Invoke(tempInst, new object[] { value });
+				instancer = (value, reader) => invMethod.Invoke(tempInst, new object[] { value, reader });
 			}
-			result.Instancer = value => instancer(value.ToString());
+			result.Instancer = (value, reader) => instancer(value.ToString(), reader);
 			return result;
 		}
 

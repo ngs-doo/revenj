@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
@@ -141,24 +142,25 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			buf[35] = l.Second;
 		}
 
-		public static Guid? ParseNullable(TextReader reader, char[] buf)
+		public static Guid? ParseNullable(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			return ParseGuid(reader, cur, buf);
+			return ParseGuid(reader, cur);
 		}
 
-		public static Guid Parse(TextReader reader, char[] buf)
+		public static Guid Parse(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return Guid.Empty;
-			return ParseGuid(reader, cur, buf);
+			return ParseGuid(reader, cur);
 		}
 
-		private static Guid ParseGuid(TextReader reader, int cur, char[] buf)
+		private static Guid ParseGuid(BufferedTextReader reader, int cur)
 		{
+			var buf = reader.SmallBuffer;
 			buf[0] = (char)cur;
 			int read = reader.Read(buf, 1, 36);
 			for (int i = read + 1; i < 37 && i < buf.Length; i++)
@@ -194,8 +196,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		private static Guid ParseCollectionGuid(TextReader reader, int cur, char[] buf)
+		private static Guid ParseCollectionGuid(BufferedTextReader reader, int cur)
 		{
+			var buf = reader.SmallBuffer;
 			buf[0] = (char)cur;
 			int read = reader.Read(buf, 1, 35);
 			for (int i = read + 1; i < 36; i++)
@@ -203,7 +206,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return ParseGuid36(buf);
 		}
 
-		public static List<Guid?> ParseNullableCollection(TextReader reader, int context, char[] buf)
+		public static List<Guid?> ParseNullableCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -230,7 +233,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseCollectionGuid(reader, cur, buf));
+					list.Add(ParseCollectionGuid(reader, cur));
 				}
 				cur = reader.Read();
 			}
@@ -243,7 +246,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<Guid> ParseCollection(TextReader reader, int context, char[] buf)
+		public static List<Guid> ParseCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -270,7 +273,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseCollectionGuid(reader, cur, buf));
+					list.Add(ParseCollectionGuid(reader, cur));
 				}
 				cur = reader.Read();
 			}

@@ -55,11 +55,11 @@ namespace Revenj.Serialization.Json.Converters
 				Serialize(value, sw, minimal);
 		}
 
-		public static XElement Deserialize(TextReader sr, char[] buffer, ref int nextToken)
+		public static XElement Deserialize(BufferedTextReader sr, ref int nextToken)
 		{
 			if (nextToken == '"')
 			{
-				var value = StringConverter.Deserialize(sr, buffer, nextToken);
+				var value = StringConverter.Deserialize(sr, nextToken);
 				nextToken = sr.Read();
 				return XElement.Parse(value);
 			}
@@ -67,7 +67,7 @@ namespace Revenj.Serialization.Json.Converters
 				return (XElement)JsonNet.Deserialize(cms.GetReader(), typeof(XElement));
 		}
 
-		public static XElement DeserializeNullable(TextReader sr, char[] buffer, ref int nextToken)
+		public static XElement DeserializeNullable(BufferedTextReader sr, ref int nextToken)
 		{
 			if (nextToken == 'n')
 			{
@@ -75,22 +75,22 @@ namespace Revenj.Serialization.Json.Converters
 					return null;
 				throw new SerializationException("Invalid null value found at " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
-			return Deserialize(sr, buffer, ref nextToken);
+			return Deserialize(sr, ref nextToken);
 		}
 
-		public static List<XElement> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<XElement> DeserializeCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<XElement>();
-			DeserializeCollection(sr, buffer, nextToken, res);
+			DeserializeCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeCollection(TextReader sr, char[] buffer, int nextToken, ICollection<XElement> res)
+		public static void DeserializeCollection(BufferedTextReader sr, int nextToken, ICollection<XElement> res)
 		{
-			res.Add(Deserialize(sr, buffer, ref nextToken));
+			res.Add(Deserialize(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(Deserialize(sr, buffer, ref nextToken));
+				res.Add(Deserialize(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -98,13 +98,13 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
-		public static List<XElement> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<XElement> DeserializeNullableCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<XElement>();
-			DeserializeNullableCollection(sr, buffer, nextToken, res);
+			DeserializeNullableCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<XElement> res)
+		public static void DeserializeNullableCollection(BufferedTextReader sr, int nextToken, ICollection<XElement> res)
 		{
 			if (nextToken == 'n')
 			{
@@ -113,7 +113,7 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for xml value. Expecting string, object or null");
 				nextToken = sr.Read();
 			}
-			else res.Add(Deserialize(sr, buffer, ref nextToken));
+			else res.Add(Deserialize(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -124,7 +124,7 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for xml value. Expecting string, object or null");
 					nextToken = sr.Read();
 				}
-				else res.Add(Deserialize(sr, buffer, ref nextToken));
+				else res.Add(Deserialize(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{

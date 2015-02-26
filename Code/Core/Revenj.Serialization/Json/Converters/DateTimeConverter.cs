@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
+using Revenj.Utility;
 
 namespace Revenj.Serialization.Json.Converters
 {
@@ -185,11 +186,12 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write("null");
 			else Serialize(value.Value, sw, buffer);
 		}
-		public static DateTime DeserializeDate(TextReader sr, int nextToken)
+		public static DateTime DeserializeDate(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			int year = 0;
+			//TODO: 6!?
 			for (int i = 0; i < 6 && (nextToken != '-'); i++, nextToken = sr.Read())
 				year = year * 10 + (nextToken - '0');
 			nextToken = sr.Read();
@@ -213,13 +215,13 @@ namespace Revenj.Serialization.Json.Converters
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			return new DateTime(year, month, day);
 		}
-		public static List<DateTime> DeserializeDateCollection(TextReader sr, int nextToken)
+		public static List<DateTime> DeserializeDateCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<DateTime>();
 			DeserializeDateCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeDateCollection(TextReader sr, int nextToken, ICollection<DateTime> res)
+		public static void DeserializeDateCollection(BufferedTextReader sr, int nextToken, ICollection<DateTime> res)
 		{
 			res.Add(DeserializeDate(sr, nextToken));
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
@@ -233,13 +235,13 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
-		public static List<DateTime?> DeserializeDateNullableCollection(TextReader sr, int nextToken)
+		public static List<DateTime?> DeserializeDateNullableCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<DateTime?>();
 			DeserializeDateNullableCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeDateNullableCollection(TextReader sr, int nextToken, ICollection<DateTime?> res)
+		public static void DeserializeDateNullableCollection(BufferedTextReader sr, int nextToken, ICollection<DateTime?> res)
 		{
 			if (nextToken == 'n')
 			{
@@ -266,10 +268,11 @@ namespace Revenj.Serialization.Json.Converters
 			}
 		}
 
-		public static DateTime DeserializeTimestamp(TextReader sr, char[] buffer, int nextToken)
+		public static DateTime DeserializeTimestamp(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			int i = 0;
+			var buffer = sr.SmallBuffer;
 			nextToken = sr.Read();
 			for (; i < buffer.Length && nextToken != '"'; i++, nextToken = sr.Read())
 				buffer[i] = (char)nextToken;
@@ -277,19 +280,19 @@ namespace Revenj.Serialization.Json.Converters
 				return DateTime.Parse(new string(buffer, 0, i), Invariant, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
 			return DateTime.Parse(new string(buffer, 0, i), Invariant);
 		}
-		public static List<DateTime> DeserializeTimestampCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<DateTime> DeserializeTimestampCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<DateTime>();
-			DeserializeTimestampCollection(sr, buffer, nextToken, res);
+			DeserializeTimestampCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeTimestampCollection(TextReader sr, char[] buffer, int nextToken, ICollection<DateTime> res)
+		public static void DeserializeTimestampCollection(BufferedTextReader sr, int nextToken, ICollection<DateTime> res)
 		{
-			res.Add(DeserializeTimestamp(sr, buffer, nextToken));
+			res.Add(DeserializeTimestamp(sr, nextToken));
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeTimestamp(sr, buffer, nextToken));
+				res.Add(DeserializeTimestamp(sr, nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -297,13 +300,13 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
-		public static List<DateTime?> DeserializeTimestampNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<DateTime?> DeserializeTimestampNullableCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<DateTime?>();
-			DeserializeTimestampNullableCollection(sr, buffer, nextToken, res);
+			DeserializeTimestampNullableCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeTimestampNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<DateTime?> res)
+		public static void DeserializeTimestampNullableCollection(BufferedTextReader sr, int nextToken, ICollection<DateTime?> res)
 		{
 			if (nextToken == 'n')
 			{
@@ -311,7 +314,7 @@ namespace Revenj.Serialization.Json.Converters
 					res.Add(null);
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for DateTime value. Expecting timestamp or null");
 			}
-			else res.Add(DeserializeTimestamp(sr, buffer, nextToken));
+			else res.Add(DeserializeTimestamp(sr, nextToken));
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -321,7 +324,7 @@ namespace Revenj.Serialization.Json.Converters
 						res.Add(null);
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for DateTime value. Expecting timestamp or null");
 				}
-				else res.Add(DeserializeTimestamp(sr, buffer, nextToken));
+				else res.Add(DeserializeTimestamp(sr, nextToken));
 			}
 			if (nextToken != ']')
 			{

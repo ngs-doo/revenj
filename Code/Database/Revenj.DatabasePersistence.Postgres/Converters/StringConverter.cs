@@ -1,83 +1,78 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using Revenj.Common;
 using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class StringConverter
 	{
-		public static void Skip(TextReader reader, int context)
+		public static void Skip(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return;
 			if (cur != '"' && cur != '\\')
 			{
-				while (cur != -1 && cur != ',' && cur != ')')
-					cur = reader.Read();
+				reader.InitBuffer();
+				reader.FillUntil(',', ')');
 			}
 			else
 			{
-				for (int i = 0; i < context; i++)
-					cur = reader.Read();
+				cur = reader.Read(context);
 				while (cur != -1)
 				{
 					if (cur == '\\' || cur == '"')
 					{
-						for (int i = 0; i < context; i++)
-							cur = reader.Read();
+						cur = reader.Read(context);
 						if (cur == ',' || cur == ')')
 							return;
-						for (int i = 0; i < context - 1; i++)
-							cur = reader.Read();
+						cur = reader.Read(context);
 					}
-					cur = reader.Read();
+					else cur = reader.Read();
 				}
-				for (int i = 0; i < context; i++)
-					reader.Read();
+				throw new FrameworkException("Unable to find end of string");
 			}
 		}
 
-		public static string Parse(TextReader reader, int context)
+		public static string Parse(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var sb = new StringBuilder();
 			if (cur != '"' && cur != '\\')
 			{
-				while (cur != -1 && cur != ',' && cur != ')')
-				{
-					sb.Append((char)cur);
-					cur = reader.Read();
-				}
+				reader.InitBuffer((char)cur);
+				reader.FillUntil(',', ')');
+				reader.Read();
+				return reader.BufferToString();
 			}
-			else
-			{
-				for (int i = 0; i < context; i++)
-					cur = reader.Read();
-				while (cur != -1)
-				{
-					if (cur == '\\' || cur == '"')
-					{
-						for (int i = 0; i < context; i++)
-							cur = reader.Read();
-						if (cur == ',' || cur == ')')
-							return sb.ToString();
-						for (int i = 0; i < context - 1; i++)
-							cur = reader.Read();
-					}
-					sb.Append((char)cur);
-					cur = reader.Read();
-				}
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			return sb.ToString();
+			return ParseEscapedString(reader, context, ref cur, ')');
 		}
 
-		public static Stream ParseStream(TextReader reader, int context)
+		private static string ParseEscapedString(BufferedTextReader reader, int context, ref int cur, char matchEnd)
+		{
+			cur = reader.Read(context);
+			reader.InitBuffer();
+			do
+			{
+				if (cur != '\\' && cur != '"')
+				{
+					reader.AddToBuffer((char)cur);
+					reader.FillUntil('\\', '"');
+					cur = reader.Read(context + 1);
+				}
+				else cur = reader.Read(context);
+				if (cur == ',' || cur == matchEnd)
+					return reader.BufferToString();
+				cur = reader.Read(context);
+				reader.AddToBuffer((char)cur);
+				cur = reader.Read();
+			} while (cur != -1);
+			throw new FrameworkException("Unable to find end of string");
+		}
+
+		public static Stream ParseStream(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -86,22 +81,17 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var sw = cms.GetWriter();
 			if (cur != '"' && cur != '\\')
 			{
-				while (cur != -1 && cur != ',' && cur != ')')
-				{
-					sw.Write((char)cur);
-					cur = reader.Read();
-				}
+				sw.Write((char)cur);
+				reader.FillUntil(sw, ',', ')');
 			}
 			else
 			{
-				for (int i = 0; i < context; i++)
-					cur = reader.Read();
+				cur = reader.Read(context);
 				while (cur != -1)
 				{
 					if (cur == '\\' || cur == '"')
 					{
-						for (int i = 0; i < context; i++)
-							cur = reader.Read();
+						cur = reader.Read(context);
 						if (cur == ',' || cur == ')')
 						{
 							sw.Flush();
@@ -114,89 +104,64 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					sw.Write((char)cur);
 					cur = reader.Read();
 				}
-				for (int i = 0; i < context; i++)
-					reader.Read();
+				reader.Read(context);
 			}
 			sw.Flush();
 			cms.Position = 0;
 			return cms;
 		}
 
-		public static List<string> ParseCollection(TextReader reader, int context, bool allowNull)
+		public static List<string> ParseCollection(BufferedTextReader reader, int context, bool allowNull)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					cur = reader.Read();
-			}
+				reader.Read(context);
 			var innerContext = context << 1;
-			var list = new List<string>();
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<string>(0);
+			}
+			var list = new List<string>();
 			var emptyCol = allowNull ? null : string.Empty;
-			while (cur != -1 && cur != '}')
+			do
 			{
 				cur = reader.Read();
-				var sb = new StringBuilder();
 				if (cur == '"' || cur == '\\')
-				{
-					for (int i = 0; i < innerContext; i++)
-						cur = reader.Read();
-					while (cur != -1)
-					{
-						if (cur == '\\' || cur == '"')
-						{
-							for (int i = 0; i < innerContext; i++)
-								cur = reader.Read();
-							if (cur == ',' || cur == '}')
-								break;
-							for (int i = 0; i < innerContext - 1; i++)
-								cur = reader.Read();
-						}
-						sb.Append((char)cur);
-						cur = reader.Read();
-					}
-					list.Add(sb.ToString());
-				}
+					list.Add(ParseEscapedString(reader, innerContext, ref cur, '}'));
 				else
 				{
-					do
-					{
-						sb.Append((char)cur);
-						cur = reader.Read();
-					} while (cur != -1 && cur != ',' && cur != '}');
-					var val = sb.ToString();
-					if (val == "NULL")
+					reader.InitBuffer((char)cur);
+					reader.FillUntil(',', '}');
+					cur = reader.Read();
+					if (reader.BufferMatches("NULL"))
 						list.Add(emptyCol);
 					else
-						list.Add(val);
+						list.Add(reader.BufferToString());
 				}
-			}
+			} while (cur == ',');
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
-		public static List<Stream> ParseStreamCollection(TextReader reader, int context, bool allowNull)
+		public static List<Stream> ParseStreamCollection(BufferedTextReader reader, int context, bool allowNull)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					cur = reader.Read();
-			}
+				cur = reader.Read(context);
 			var innerContext = context << 1;
 			var list = new List<Stream>();
 			cur = reader.Peek();
@@ -209,14 +174,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				var sw = cms.GetWriter();
 				if (cur == '"' || cur == '\\')
 				{
-					for (int i = 0; i < innerContext; i++)
-						cur = reader.Read();
+					cur = reader.Read(innerContext);
 					while (cur != -1)
 					{
 						if (cur == '\\' || cur == '"')
 						{
-							for (int i = 0; i < innerContext; i++)
-								cur = reader.Read();
+							cur = reader.Read(innerContext);
 							if (cur == ',' || cur == '}')
 								break;
 							for (int i = 0; i < innerContext - 1; i++)
@@ -239,16 +202,16 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					sw.Flush();
 					cms.Position = 0;
 					if (cms.IsNull())
+					{
 						list.Add(null);
+						cms.Dispose();
+					}
 					else
 						list.Add(cms);
 				}
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			reader.Read();
 			return list;
 		}

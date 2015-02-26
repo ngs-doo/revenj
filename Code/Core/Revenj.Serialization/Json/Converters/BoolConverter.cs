@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Serialization.Json.Converters
 {
@@ -22,10 +23,11 @@ namespace Revenj.Serialization.Json.Converters
 			else
 				sw.Write("false");
 		}
-		public static bool Deserialize(TextReader sr, int nextToken)
+		public static bool Deserialize(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken == 't')
 			{
+				//TODO: isNext !?
 				if (sr.Read() == 'r' && sr.Read() == 'u' && sr.Read() == 'e')
 					return true;
 			}
@@ -50,13 +52,13 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for boolean value. Expecting true or false");
 		}
-		public static List<bool> DeserializeCollection(TextReader sr, int nextToken)
+		public static List<bool> DeserializeCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<bool>();
 			DeserializeCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeCollection(TextReader sr, int nextToken, ICollection<bool> res)
+		public static void DeserializeCollection(BufferedTextReader sr, int nextToken, ICollection<bool> res)
 		{
 			if (nextToken == 't')
 			{
@@ -122,13 +124,13 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
-		public static List<bool?> DeserializeNullableCollection(TextReader sr, int nextToken)
+		public static List<bool?> DeserializeNullableCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<bool?>();
 			DeserializeNullableCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeNullableCollection(TextReader sr, int nextToken, ICollection<bool?> res)
+		public static void DeserializeNullableCollection(BufferedTextReader sr, int nextToken, ICollection<bool?> res)
 		{
 			if (nextToken == 't')
 			{

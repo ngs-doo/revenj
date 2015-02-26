@@ -35,11 +35,11 @@ namespace Revenj.Plugins.DatabasePersistence.Postgres.QuerySimplifications
 
 			if (co is LongCountResultOperator)
 			{
-				query.AddSelectPart(query.MainFrom, "COUNT(*)", "count", typeof(long), (_, dr) => dr.GetInt64(0));
+				query.AddSelectPart(query.MainFrom, "COUNT(*)", "count", typeof(long), (_, __, dr) => dr.GetInt64(0));
 			}
 			else
 			{
-				query.AddSelectPart(query.MainFrom, "COUNT(*)::int", "count", typeof(int), (_, dr) => dr.GetInt32(0));
+				query.AddSelectPart(query.MainFrom, "COUNT(*)::int", "count", typeof(int), (_, __, dr) => dr.GetInt32(0));
 				prefix += "::int";
 			}
 			prefix += " FROM ";

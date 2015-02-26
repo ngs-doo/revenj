@@ -9,8 +9,9 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using Revenj.DatabasePersistence.Postgres.Converters;
-using Revenj.DomainPatterns;
 using Revenj.DatabasePersistence.Postgres.Npgsql;
+using Revenj.DomainPatterns;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
@@ -27,6 +28,7 @@ namespace Revenj.DatabasePersistence.Postgres
 		private readonly ConcurrentDictionary<Type, IRepository<IIdentifiable>> Repositories =
 			new ConcurrentDictionary<Type, IRepository<IIdentifiable>>(1, 17);
 		private readonly IServiceLocator Locator;
+		private readonly BufferedTextReader Reader = new BufferedTextReader(new StringReader(string.Empty));
 
 		public PostgresDatabaseNotification(
 			ConnectionInfo connectionInfo,
@@ -115,7 +117,7 @@ namespace Revenj.DatabasePersistence.Postgres
 					var array = e.AdditionalInformation.Substring(firstSeparator + secondSeparator + 2).Trim();
 					if (array.Length > 0)
 					{
-						var uris = StringConverter.ParseCollection(new StringReader(array), 0, false).ToArray();
+						var uris = StringConverter.ParseCollection(Reader.Reuse(new StringReader(array)), 0, false).ToArray();
 						switch (op)
 						{
 							case "Update":

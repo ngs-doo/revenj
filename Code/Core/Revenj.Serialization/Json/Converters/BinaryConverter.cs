@@ -97,7 +97,7 @@ namespace Revenj.Serialization.Json.Converters
 
 		private static readonly byte[] EmptyBytes = new byte[0];
 
-		public static byte[] Deserialize(TextReader sr, char[] buffer, int nextToken)
+		public static byte[] Deserialize(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
@@ -105,60 +105,28 @@ namespace Revenj.Serialization.Json.Converters
 			char[] base64;
 			var res = new List<byte[]>();
 			int total = 0;
-			int i = 0;
-			var br = sr as BufferedTextReader;
-			if (br != null)
+			int i = 1;
+			base64 = sr.LargeTempBuffer;
+			base64[0] = (char)nextToken;
+			int len;
+			bool found = false;
+			while ((len = sr.ReadUntil(base64, i, '"', out found)) > 0 || found)
 			{
-				base64 = br.LargeTempBuffer;
-				i = 1;
-				base64[0] = (char)nextToken;
-				int len;
-				while ((len = br.ReadUntil(base64, i, '"')) > 0)
+				i += len;
+				if (i == base64.Length)
 				{
-					i += len;
-					if (i == base64.Length)
-					{
-						var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
-						res.Add(bytes);
-						i = 0;
-						total += bytes.Length;
-					}
-				}
-				nextToken = sr.Read();
-				if (i > 0)
-				{
-					var bytes = Convert.FromBase64CharArray(base64, 0, i);
+					var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
 					res.Add(bytes);
+					i = 0;
 					total += bytes.Length;
 				}
 			}
-			else
+			nextToken = sr.Read();
+			if (i > 0)
 			{
-				var took = Buffers.TryTake(out base64);
-				if (!took) base64 = new char[65536];
-				while (nextToken != '"' && nextToken != -1)
-				{
-					base64[i + 0] = (char)nextToken;
-					base64[i + 1] = (char)sr.Read();
-					base64[i + 2] = (char)sr.Read();
-					base64[i + 3] = (char)sr.Read();
-					nextToken = sr.Read();
-					i += 4;
-					if (i == base64.Length)
-					{
-						var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
-						res.Add(bytes);
-						i = 0;
-						total += bytes.Length;
-					}
-				}
-				if (i > 0)
-				{
-					var bytes = Convert.FromBase64CharArray(base64, 0, i);
-					res.Add(bytes);
-					total += bytes.Length;
-				}
-				Buffers.Add(base64);
+				var bytes = Convert.FromBase64CharArray(base64, 0, i);
+				res.Add(bytes);
+				total += bytes.Length;
 			}
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found end of stream.");
 			var result = new byte[total];
@@ -172,125 +140,100 @@ namespace Revenj.Serialization.Json.Converters
 			return result;
 		}
 
-		public static List<byte[]> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<byte[]> DeserializeCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
+			return JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, next));
 		}
 
-		public static void DeserializeCollection(TextReader sr, char[] buffer, int nextToken, ICollection<byte[]> res)
+		public static void DeserializeCollection(BufferedTextReader sr, int nextToken, ICollection<byte[]> res)
 		{
-			JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, buffer, next), res);
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => Deserialize(sr, next), res);
 		}
 
-		public static List<byte[]> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<byte[]> DeserializeNullableCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next));
+			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, next));
 		}
 
-		public static void DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<byte[]> res)
+		public static void DeserializeNullableCollection(BufferedTextReader sr, int nextToken, ICollection<byte[]> res)
 		{
-			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, buffer, next), res);
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => Deserialize(sr, next), res);
 		}
 
-		public static Stream DeserializeStream(TextReader sr, char[] buffer, int nextToken)
+		public static Stream DeserializeStream(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			if (nextToken == '"') return new MemoryStream();
 			var res = ChunkedMemoryStream.Create();
-			char[] base64;
-			var took = Buffers.TryTake(out base64);
-			if (!took) base64 = new char[65536];
-			int i = 0;
-			var br = sr as BufferedTextReader;
-			if (br != null)
+			var base64 = sr.LargeTempBuffer;
+			int i = 1;
+			base64[0] = (char)nextToken;
+			int len;
+			bool found = false;
+			while ((len = sr.ReadUntil(base64, i, '"', out found)) > 0 || found)
 			{
-				i = 1;
-				base64[0] = (char)nextToken;
-				int len;
-				while ((len = br.ReadUntil(base64, i, '"')) > 0)
+				i += len;
+				if (i == base64.Length)
 				{
-					i += len;
-					if (i == base64.Length)
-					{
-						var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
-						res.Write(bytes, 0, bytes.Length);
-						i = 0;
-					}
-				}
-				nextToken = sr.Read();
-			}
-			else
-			{
-				while (nextToken != '"' && nextToken != -1)
-				{
-					base64[i + 0] = (char)nextToken;
-					base64[i + 1] = (char)sr.Read();
-					base64[i + 2] = (char)sr.Read();
-					base64[i + 3] = (char)sr.Read();
-					nextToken = sr.Read();
-					i += 4;
-					if (i == base64.Length)
-					{
-						var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
-						res.Write(bytes, 0, bytes.Length);
-						i = 0;
-					}
+					var bytes = Convert.FromBase64CharArray(base64, 0, base64.Length);
+					res.Write(bytes, 0, bytes.Length);
+					i = 0;
 				}
 			}
+			nextToken = sr.Read();
 			if (i > 0)
 			{
 				var bytes = Convert.FromBase64CharArray(base64, 0, i);
 				res.Write(bytes, 0, bytes.Length);
 			}
-			Buffers.Add(base64);
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found end of stream.");
 			return res;
 		}
 
-		public static List<Stream> DeserializeStreamCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Stream> DeserializeStreamCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next));
+			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeStream(sr, next));
 		}
 
-		public static void DeserializeStreamCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Stream> res)
+		public static void DeserializeStreamCollection(BufferedTextReader sr, int nextToken, ICollection<Stream> res)
 		{
-			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next), res);
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeStream(sr, next), res);
 		}
 
-		public static List<Stream> DeserializeStreamNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Stream> DeserializeStreamNullableCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next));
+			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, next));
 		}
 
-		public static void DeserializeStreamNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Stream> res)
+		public static void DeserializeStreamNullableCollection(BufferedTextReader sr, int nextToken, ICollection<Stream> res)
 		{
-			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, buffer, next), res);
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, next), res);
 		}
 
-		public static Image DeserializeImage(TextReader sr, char[] buffer, int nextToken)
+		public static Image DeserializeImage(BufferedTextReader sr, int nextToken)
 		{
-			return Image.FromStream(DeserializeStream(sr, buffer, nextToken));
+			return Image.FromStream(DeserializeStream(sr, nextToken));
 		}
 
-		public static List<Image> DeserializeImageCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Image> DeserializeImageCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeImage(sr, buffer, next));
+			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeImage(sr, next));
 		}
 
-		public static void DeserializeImageCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Image> res)
+		public static void DeserializeImageCollection(BufferedTextReader sr, int nextToken, ICollection<Image> res)
 		{
-			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeImage(sr, buffer, next), res);
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializeImage(sr, next), res);
 		}
 
-		public static List<Image> DeserializeImageNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Image> DeserializeImageNullableCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeImage(sr, buffer, next));
+			return JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeImage(sr, next));
 		}
 
-		public static void DeserializeImageNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Image> res)
+		public static void DeserializeImageNullableCollection(BufferedTextReader sr, int nextToken, ICollection<Image> res)
 		{
-			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeImage(sr, buffer, next), res);
+			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeImage(sr, next), res);
 		}
 	}
 }

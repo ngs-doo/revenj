@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Serialization.Json.Converters
 {
@@ -150,9 +151,10 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write("null");
 			else Serialize(value.Value, sw, buffer);
 		}
-		public static Guid Deserialize(TextReader sr, char[] buffer, int nextToken)
+		public static Guid Deserialize(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			var buffer = sr.SmallBuffer;
 			var i = sr.Read(buffer, 0, 33);
 			nextToken = buffer[i - 1];
 			for (; nextToken != '"' && i < buffer.Length; i++)
@@ -225,19 +227,19 @@ namespace Revenj.Serialization.Json.Converters
 				return new Guid(new string(buffer, 0, 32));
 			}
 		}
-		public static List<Guid> DeserializeCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Guid> DeserializeCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<Guid>();
-			DeserializeCollection(sr, buffer, nextToken, res);
+			DeserializeCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Guid> res)
+		public static void DeserializeCollection(BufferedTextReader sr, int nextToken, ICollection<Guid> res)
 		{
-			res.Add(Deserialize(sr, buffer, nextToken));
+			res.Add(Deserialize(sr, nextToken));
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(Deserialize(sr, buffer, nextToken));
+				res.Add(Deserialize(sr, nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -245,13 +247,13 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
-		public static List<Guid?> DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Guid?> DeserializeNullableCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<Guid?>();
-			DeserializeNullableCollection(sr, buffer, nextToken, res);
+			DeserializeNullableCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Guid?> res)
+		public static void DeserializeNullableCollection(BufferedTextReader sr, int nextToken, ICollection<Guid?> res)
 		{
 			if (nextToken == 'n')
 			{
@@ -259,7 +261,7 @@ namespace Revenj.Serialization.Json.Converters
 					res.Add(null);
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for guid value. Expecting '\"' or null");
 			}
-			else res.Add(Deserialize(sr, buffer, nextToken));
+			else res.Add(Deserialize(sr, nextToken));
 			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -269,7 +271,7 @@ namespace Revenj.Serialization.Json.Converters
 						res.Add(null);
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for guid value. Expecting '\"' or null");
 				}
-				else res.Add(Deserialize(sr, buffer, nextToken));
+				else res.Add(Deserialize(sr, nextToken));
 			}
 			if (nextToken != ']')
 			{

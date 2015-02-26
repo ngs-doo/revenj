@@ -8,7 +8,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class XmlConverter
 	{
-		public static XElement Parse(TextReader reader, int context)
+		public static XElement Parse(BufferedTextReader reader, int context)
 		{
 			var stream = StringConverter.ParseStream(reader, context);
 			if (stream == null)
@@ -17,7 +17,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			finally { stream.Dispose(); }
 		}
 
-		public static List<XElement> ParseCollection(TextReader reader, int context)
+		public static List<XElement> ParseCollection(BufferedTextReader reader, int context)
 		{
 			var list = StringConverter.ParseStreamCollection(reader, context, true);
 			if (list == null)

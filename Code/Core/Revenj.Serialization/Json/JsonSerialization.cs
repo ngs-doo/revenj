@@ -29,6 +29,7 @@ namespace Revenj.Serialization
 			SharedSerializer = new JsonSerializer();
 			SharedSerializer.Converters.Add(EnumConverter);
 			SharedSerializer.Converters.Add(TextReaderConverter);
+			//TODO: register all converters
 			SharedSerializer.TypeNameHandling = TypeNameHandling.Auto;
 			SharedSerializer.TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple;
 			SharedSerializer.Binder = binder;
@@ -64,8 +65,8 @@ namespace Revenj.Serialization
 
 		public object Deserialize(Stream stream, Type type, StreamingContext context)
 		{
-			TextReader reader;
 			var cms = stream as ChunkedMemoryStream;
+			TextReader reader;
 			if (cms != null)
 				reader = cms.GetReader();
 			else
@@ -410,11 +411,12 @@ namespace Revenj.Serialization
 			return -1;
 		}
 
-		public static int FillName(TextReader sr, char[] buffer, int nextToken)
+		public static int FillName(BufferedTextReader sr, int nextToken)
 		{
-			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			char c = (char)nextToken;
+			var buffer = sr.SmallBuffer;
 			int i = 0;
 			var hash = 0x811C9DC5;
 			for (; i < buffer.Length && c != '"'; i++, c = (char)sr.Read())
@@ -424,17 +426,18 @@ namespace Revenj.Serialization
 			}
 			nextToken = c;
 			if (i < buffer.Length) buffer[i] = '\0';
-			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = GetNextToken(sr);
-			if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			return (int)hash;
 		}
 
-		public static int CalcHash(TextReader sr, char[] buffer, int nextToken)
+		public static int CalcHash(BufferedTextReader sr, int nextToken)
 		{
-			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			char c = (char)nextToken;
+			var buffer = sr.SmallBuffer;
 			int i = 0;
 			var hash = 0x811C9DC5;
 			for (; i < buffer.Length && c != '"'; i++, c = (char)sr.Read())
@@ -444,39 +447,39 @@ namespace Revenj.Serialization
 			}
 			nextToken = c;
 			if (i < buffer.Length) buffer[i] = '\0';
-			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			return (int)hash;
 		}
 
-		public static List<T> DeserializeObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory)
+		public static List<T> DeserializeObjectCollection<T>(BufferedTextReader sr, int nextToken, Func<T> factory)
 		{
 			var res = new List<T>();
 			DeserializeObjectCollection(sr, nextToken, factory, res);
 			return res;
 		}
-		public static void DeserializeObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory, ICollection<T> res)
+		public static void DeserializeObjectCollection<T>(BufferedTextReader sr, int nextToken, Func<T> factory, ICollection<T> res)
 		{
-			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			res.Add(factory());
 			while ((nextToken = GetNextToken(sr)) == ',')
 			{
-				if (GetNextToken(sr) != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				if (GetNextToken(sr) != '{') throw new SerializationException("Expecting '{' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 				res.Add(factory());
 			}
 			if (nextToken != ']')
 			{
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
-				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				else throw new SerializationException("Expecting ']' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
 
-		public static List<T> DeserializeCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
+		public static List<T> DeserializeCollection<T>(BufferedTextReader sr, int nextToken, Func<int, T> factory)
 		{
 			var res = new List<T>();
 			DeserializeCollection(sr, nextToken, factory, res);
 			return res;
 		}
-		public static void DeserializeCollection<T>(TextReader sr, int nextToken, Func<int, T> factory, ICollection<T> res)
+		public static void DeserializeCollection<T>(BufferedTextReader sr, int nextToken, Func<int, T> factory, ICollection<T> res)
 		{
 			res.Add(factory(nextToken));
 			while ((nextToken = GetNextToken(sr)) == ',')
@@ -487,11 +490,11 @@ namespace Revenj.Serialization
 			if (nextToken != ']')
 			{
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
-				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				else throw new SerializationException("Expecting ']' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
 
-		public static List<T> DeserializeNullableObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory)
+		public static List<T> DeserializeNullableObjectCollection<T>(BufferedTextReader sr, int nextToken, Func<T> factory)
 			where T : class
 		{
 			var res = new List<T>();
@@ -499,16 +502,16 @@ namespace Revenj.Serialization
 			return res;
 		}
 
-		public static void DeserializeNullableObjectCollection<T>(TextReader sr, int nextToken, Func<T> factory, ICollection<T> res)
+		public static void DeserializeNullableObjectCollection<T>(BufferedTextReader sr, int nextToken, Func<T> factory, ICollection<T> res)
 			where T : class
 		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 					res.Add(null);
-				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+				else throw new SerializationException("Invalid value found at position " + PositionInStream(sr) + " for string value. Expecting '\"' or null");
 			}
-			else if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			else if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			else res.Add(factory());
 			while ((nextToken = GetNextToken(sr)) == ',')
 			{
@@ -517,19 +520,19 @@ namespace Revenj.Serialization
 				{
 					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 						res.Add(null);
-					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+					else throw new SerializationException("Invalid value found at position " + PositionInStream(sr) + " for string value. Expecting '\"' or null");
 				}
-				else if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				else if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 				res.Add(factory());
 			}
 			if (nextToken != ']')
 			{
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
-				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				else throw new SerializationException("Expecting ']' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
 
-		public static List<T> DeserializeNullableCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
+		public static List<T> DeserializeNullableCollection<T>(BufferedTextReader sr, int nextToken, Func<int, T> factory)
 			where T : class
 		{
 			var res = new List<T>();
@@ -537,14 +540,14 @@ namespace Revenj.Serialization
 			return res;
 		}
 
-		public static void DeserializeNullableCollection<T>(TextReader sr, int nextToken, Func<int, T> factory, ICollection<T> res)
+		public static void DeserializeNullableCollection<T>(BufferedTextReader sr, int nextToken, Func<int, T> factory, ICollection<T> res)
 			where T : class
 		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 					res.Add(null);
-				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+				else throw new SerializationException("Invalid value found at position " + PositionInStream(sr) + " for string value. Expecting '\"' or null");
 			}
 			else res.Add(factory(nextToken));
 			while ((nextToken = GetNextToken(sr)) == ',')
@@ -554,7 +557,7 @@ namespace Revenj.Serialization
 				{
 					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 						res.Add(null);
-					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+					else throw new SerializationException("Invalid value found at position " + PositionInStream(sr) + " for string value. Expecting '\"' or null");
 				}
 				else res.Add(factory(nextToken));
 			}
@@ -565,7 +568,7 @@ namespace Revenj.Serialization
 			}
 		}
 
-		public static List<T?> DeserializeNullableStructCollection<T>(TextReader sr, int nextToken, Func<int, T> factory)
+		public static List<T?> DeserializeNullableStructCollection<T>(BufferedTextReader sr, int nextToken, Func<int, T> factory)
 			where T : struct
 		{
 			var res = new List<T?>();
@@ -573,14 +576,14 @@ namespace Revenj.Serialization
 			return res;
 		}
 
-		public static void DeserializeNullableStructCollection<T>(TextReader sr, int nextToken, Func<int, T> factory, ICollection<T?> res)
+		public static void DeserializeNullableStructCollection<T>(BufferedTextReader sr, int nextToken, Func<int, T> factory, ICollection<T?> res)
 			where T : struct
 		{
 			if (nextToken == 'n')
 			{
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 					res.Add(null);
-				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+				else throw new SerializationException("Invalid value found at position " + PositionInStream(sr) + " for string value. Expecting '\"' or null");
 			}
 			else res.Add(factory(nextToken));
 			while ((nextToken = GetNextToken(sr)) == ',')
@@ -590,18 +593,18 @@ namespace Revenj.Serialization
 				{
 					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 						res.Add(null);
-					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for string value. Expecting '\"' or null");
+					else throw new SerializationException("Invalid value found at position " + PositionInStream(sr) + " for string value. Expecting '\"' or null");
 				}
 				else res.Add(factory(nextToken));
 			}
 			if (nextToken != ']')
 			{
 				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
-				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				else throw new SerializationException("Expecting ']' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
 
-		private static int SkipString(TextReader sr)
+		private static int SkipString(BufferedTextReader sr)
 		{
 			var c = sr.Read();
 			var prev = c;
@@ -613,7 +616,7 @@ namespace Revenj.Serialization
 			return GetNextToken(sr);
 		}
 
-		public static int Skip(TextReader sr, int nextToken)
+		public static int Skip(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken == '"') return SkipString(sr);
 			else if (nextToken == '{')
@@ -621,20 +624,20 @@ namespace Revenj.Serialization
 				nextToken = GetNextToken(sr);
 				if (nextToken == '}') return GetNextToken(sr);
 				if (nextToken == '"') nextToken = SkipString(sr);
-				else throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
-				if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				else throw new SerializationException("Expecting '\"' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
+				if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 				nextToken = GetNextToken(sr);
 				nextToken = Skip(sr, nextToken);
 				while (nextToken == ',')
 				{
 					nextToken = GetNextToken(sr);
 					if (nextToken == '"') nextToken = SkipString(sr);
-					else throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
-					if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+					else throw new SerializationException("Expecting '\"' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
+					if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 					nextToken = GetNextToken(sr);
 					nextToken = Skip(sr, nextToken);
 				}
-				if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 				return GetNextToken(sr);
 			}
 			else if (nextToken == '[')
@@ -646,7 +649,7 @@ namespace Revenj.Serialization
 					nextToken = GetNextToken(sr);
 					nextToken = Skip(sr, nextToken);
 				}
-				if (nextToken != ']') throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+				if (nextToken != ']') throw new SerializationException("Expecting ']' at position " + PositionInStream(sr) + ". Found " + (char)nextToken);
 				return GetNextToken(sr);
 			}
 			else
@@ -657,7 +660,7 @@ namespace Revenj.Serialization
 			}
 		}
 
-		public static ChunkedMemoryStream Memorize(TextReader sr, ref int nextToken)
+		public static ChunkedMemoryStream Memorize(BufferedTextReader sr, ref int nextToken)
 		{
 			var cms = ChunkedMemoryStream.Create();
 			var writer = cms.GetWriter();
@@ -668,7 +671,7 @@ namespace Revenj.Serialization
 			return cms;
 		}
 
-		private static int MemoizeSkipString(TextReader sr, TextWriter sw)
+		private static int MemoizeSkipString(BufferedTextReader sr, TextWriter sw)
 		{
 			var c = sr.Read();
 			sw.Write((char)c);
@@ -686,7 +689,7 @@ namespace Revenj.Serialization
 			return MemoizeGetNextToken(sr, sw);
 		}
 
-		private static int MemoizeGetNextToken(TextReader sr, TextWriter sw)
+		private static int MemoizeGetNextToken(BufferedTextReader sr, TextWriter sw)
 		{
 			int c = sr.Read();
 			sw.Write((char)c);
@@ -698,7 +701,7 @@ namespace Revenj.Serialization
 			return c;
 		}
 
-		private static int Memorize(TextReader sr, int nextToken, TextWriter sw)
+		private static int Memorize(BufferedTextReader sr, int nextToken, TextWriter sw)
 		{
 			if (nextToken == '"') return MemoizeSkipString(sr, sw);
 			else if (nextToken == '{')

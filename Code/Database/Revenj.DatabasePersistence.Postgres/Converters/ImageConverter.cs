@@ -34,7 +34,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return Image.FromStream(ms);
 		}
 
-		public static Image Parse(TextReader reader, int context)
+		public static Image Parse(BufferedTextReader reader, int context)
 		{
 			var stream = ByteaConverter.ParseStream(reader, context);
 			if (stream == null)
@@ -42,7 +42,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return Image.FromStream(stream);
 		}
 
-		public static List<Image> ParseCollection(TextReader reader, int context)
+		public static List<Image> ParseCollection(BufferedTextReader reader, int context)
 		{
 			var list = ByteaConverter.ParseStreamCollection(reader, context, true);
 			if (list == null)

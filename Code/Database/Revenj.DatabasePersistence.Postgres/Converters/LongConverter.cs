@@ -1,42 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class LongConverter
 	{
-		public static long? ParseNullable(TextReader reader, char[] buf)
+		public static long? ParseNullable(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			return ParseLong(reader, ref cur, buf);
+			return ParseLong(reader, ref cur);
 		}
 
-		public static long Parse(TextReader reader, char[] buf)
+		public static long Parse(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return 0;
-			return ParseLong(reader, ref cur, buf);
+			return ParseLong(reader, ref cur);
 		}
 
-		private static long ParseLong(TextReader reader, ref int cur, char[] buf)
+		private static long ParseLong(BufferedTextReader reader, ref int cur)
 		{
-			var neg = cur == '-';
-			if (neg)
-				cur = reader.Read();
 			long res = 0;
-			do
+			if (cur == '-')
 			{
-				res = res * 10 + (cur - 48);
 				cur = reader.Read();
-			} while (cur != -1 && cur != ',' && cur != ')' && cur != '}');
-			return neg ? -res : res;
+				do
+				{
+					res = (res << 3) + (res << 1) - (cur - 48);
+					cur = reader.Read();
+				} while (cur != -1 && cur != ',' && cur != ')' && cur != '}');
+				return res;
+			}
+			else
+			{
+				do
+				{
+					res = (res << 3) + (res << 1) + (cur - 48);
+					cur = reader.Read();
+				} while (cur != -1 && cur != ',' && cur != ')' && cur != '}');
+				return res;
+			}
 		}
 
-		public static List<long?> ParseNullableCollection(TextReader reader, int context, char[] buf)
+		public static List<long?> ParseNullableCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -64,7 +75,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseLong(reader, ref cur, buf));
+					list.Add(ParseLong(reader, ref cur));
 				}
 			}
 			if (espaced)
@@ -76,7 +87,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<long> ParseCollection(TextReader reader, int context, char[] buf)
+		public static List<long> ParseCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -104,7 +115,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseLong(reader, ref cur, buf));
+					list.Add(ParseLong(reader, ref cur));
 				}
 			}
 			if (espaced)
@@ -149,7 +160,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else
 					abs = (ulong)(Value);
 				int pos = 20;
-				do
+				while (pos > 1)
 				{
 					var div = abs / 100;
 					var rem = abs - div * 100;
@@ -157,7 +168,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					buf[pos--] = num.Second;
 					buf[pos--] = num.First;
 					abs = div;
-				} while (abs != 0);
+					if (abs == 0) break;
+				}
 				if (buf[pos + 1] == '0')//TODO: remove branch
 					pos++;
 				sw.Write(buf, pos + 1, 20 - pos);

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
@@ -50,7 +51,7 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 			return ss;
 		}
 
-		public static SecureString Parse(TextReader reader, int context)
+		public static SecureString Parse(BufferedTextReader reader, int context)
 		{
 			var ss = new SecureString();
 			var bytes = ByteaConverter.Parse(reader, context);
@@ -63,7 +64,7 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 			return ss;
 		}
 
-		public static SecureString ParseNullable(TextReader reader, int context)
+		public static SecureString ParseNullable(BufferedTextReader reader, int context)
 		{
 			var bytes = ByteaConverter.Parse(reader, context);
 			if (bytes == null)
@@ -76,7 +77,7 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 			return ss;
 		}
 
-		public static List<SecureString> ParseCollection(TextReader reader, int context, bool allowNulls)
+		public static List<SecureString> ParseCollection(BufferedTextReader reader, int context, bool allowNulls)
 		{
 			var list = ByteaConverter.ParseCollection(reader, context, allowNulls);
 			if (list == null)

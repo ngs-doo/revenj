@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.IO;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class BoolConverter
 	{
-		public static bool? ParseNullable(TextReader reader)
+		public static bool? ParseNullable(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -14,7 +14,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return cur == 't';
 		}
 
-		public static bool Parse(TextReader reader)
+		public static bool Parse(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -23,7 +23,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return cur == 't';
 		}
 
-		public static List<bool?> ParseNullableCollection(TextReader reader, int context)
+		public static List<bool?> ParseNullableCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -63,7 +63,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<bool> ParseCollection(TextReader reader, int context)
+		public static List<bool> ParseCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')

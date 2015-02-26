@@ -91,6 +91,10 @@
       <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
       <Name>Revenj.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Core\Revenj.Utility\Revenj.Utility.csproj">
+      <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
+      <Name>Revenj.Utility</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Database\Revenj.DatabasePersistence.Postgres\Revenj.DatabasePersistence.Postgres.csproj">
       <Project>{6BEE583B-B4CE-489B-A5D3-6EAF071438CC}</Project>
       <Name>Revenj.DatabasePersistence.Postgres</Name>

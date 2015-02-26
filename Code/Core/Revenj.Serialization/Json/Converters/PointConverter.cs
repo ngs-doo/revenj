@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Runtime.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Serialization.Json.Converters
 {
@@ -21,15 +22,14 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write("null");
 			else
 				Serialize(value.Value, sw);
-
 		}
 
-		public static Point DeserializePoint(TextReader sr, char[] buffer, int nextToken)
+		public static Point DeserializePoint(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
 			if (nextToken == '}') return new Point();
-			var firstName = StringConverter.Deserialize(sr, buffer, nextToken);
+			var firstName = StringConverter.Deserialize(sr, nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
 			if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
@@ -46,7 +46,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			if (nextToken != ',') throw new SerializationException("Expecting ',' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
-			var secondName = StringConverter.Deserialize(sr, buffer, nextToken);
+			var secondName = StringConverter.Deserialize(sr, nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
 			if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
@@ -64,21 +64,21 @@ namespace Revenj.Serialization.Json.Converters
 			throw new SerializationException("Expecting 'X' and 'Y' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + firstName + " and " + secondName);
 		}
 
-		public static List<Point> DeserializePointCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Point> DeserializePointCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePoint(sr, buffer, next));
+			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePoint(sr, next));
 		}
-		public static void DeserializePointCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Point> res)
+		public static void DeserializePointCollection(BufferedTextReader sr, int nextToken, ICollection<Point> res)
 		{
-			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePoint(sr, buffer, next), res);
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePoint(sr, next), res);
 		}
-		public static List<Point?> DeserializePointNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Point?> DeserializePointNullableCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePoint(sr, buffer, next));
+			return JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePoint(sr, next));
 		}
-		public static void DeserializePointNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Point?> res)
+		public static void DeserializePointNullableCollection(BufferedTextReader sr, int nextToken, ICollection<Point?> res)
 		{
-			JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePoint(sr, buffer, next), res);
+			JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePoint(sr, next), res);
 		}
 
 		public static void Serialize(PointF value, TextWriter sw)
@@ -95,19 +95,18 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write("null");
 			else
 				Serialize(value.Value, sw);
-
 		}
 
-		public static PointF DeserializePointF(TextReader sr, char[] buffer, int nextToken)
+		public static PointF DeserializePointF(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
 			if (nextToken == '}') return new PointF();
-			var firstName = StringConverter.Deserialize(sr, buffer, nextToken);
+			var firstName = StringConverter.Deserialize(sr, nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
 			if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
-			var firstValue = NumberConverter.DeserializeFloat(sr, buffer, ref nextToken);
+			var firstValue = NumberConverter.DeserializeFloat(sr, ref nextToken);
 			nextToken = JsonSerialization.MoveToNextToken(sr, nextToken);
 			if (nextToken == '}')
 			{
@@ -120,11 +119,11 @@ namespace Revenj.Serialization.Json.Converters
 			}
 			if (nextToken != ',') throw new SerializationException("Expecting ',' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
-			var secondName = StringConverter.Deserialize(sr, buffer, nextToken);
+			var secondName = StringConverter.Deserialize(sr, nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
 			if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
-			var secondValue = NumberConverter.DeserializeFloat(sr, buffer, ref nextToken);
+			var secondValue = NumberConverter.DeserializeFloat(sr, ref nextToken);
 			nextToken = JsonSerialization.MoveToNextToken(sr, nextToken);
 			if (nextToken != '}')
 			{
@@ -138,21 +137,21 @@ namespace Revenj.Serialization.Json.Converters
 			throw new SerializationException("Expecting 'X' and 'Y' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + firstName + " and " + secondName);
 		}
 
-		public static List<PointF> DeserializePointFCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<PointF> DeserializePointFCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePointF(sr, buffer, next));
+			return JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePointF(sr, next));
 		}
-		public static void DeserializePointFCollection(TextReader sr, char[] buffer, int nextToken, ICollection<PointF> res)
+		public static void DeserializePointFCollection(BufferedTextReader sr, int nextToken, ICollection<PointF> res)
 		{
-			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePointF(sr, buffer, next), res);
+			JsonSerialization.DeserializeCollection(sr, nextToken, next => DeserializePointF(sr, next), res);
 		}
-		public static List<PointF?> DeserializePointFNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<PointF?> DeserializePointFNullableCollection(BufferedTextReader sr, int nextToken)
 		{
-			return JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePointF(sr, buffer, next));
+			return JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePointF(sr, next));
 		}
-		public static void DeserializePointFNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<PointF?> res)
+		public static void DeserializePointFNullableCollection(BufferedTextReader sr, int nextToken, ICollection<PointF?> res)
 		{
-			JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePointF(sr, buffer, next), res);
+			JsonSerialization.DeserializeNullableStructCollection(sr, nextToken, next => DeserializePointF(sr, next), res);
 		}
 	}
 }

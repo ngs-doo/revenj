@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
@@ -44,7 +45,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return value != null ? new DictionaryTuple(value) : default(IPostgresTuple);
 		}
 
-		public static Dictionary<string, string> Parse(TextReader reader, int context)
+		public static Dictionary<string, string> Parse(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -55,7 +56,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		}
 
 
-		private static Dictionary<string, string> ParseDictionary(TextReader reader, int context, int quoteContext, ref int cur)
+		private static Dictionary<string, string> ParseDictionary(BufferedTextReader reader, int context, int quoteContext, ref int cur)
 		{
 			var dict = new Dictionary<string, string>();
 			for (int i = 0; i < context; i++)
@@ -150,12 +151,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return dict;
 		}
 
-		public static List<Dictionary<string, string>> ParseCollection(TextReader reader, int context)
+		public static List<Dictionary<string, string>> ParseCollection(BufferedTextReader reader, int context)
 		{
 			return ParseCollection(reader, context, true);
 		}
 
-		public static List<Dictionary<string, string>> ParseCollection(TextReader reader, int context, bool allowNulls)
+		public static List<Dictionary<string, string>> ParseCollection(BufferedTextReader reader, int context, bool allowNulls)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')

@@ -49,6 +49,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return (first << 3) + (first << 1) + source[start + 1] - 48;
 		}
 
+		internal static int Read4(char[] source, int start)
+		{
+			int first = source[start] - 48;
+			var second = source[start + 1] - 48;
+			var third = source[start + 2] - 48;
+			return first * 1000 + second * 100 + (third << 3) + (third << 1) + source[start + 3] - 48;
+		}
+
 		public static int? TryParsePositiveInt(string number)
 		{
 			if (number.Length == 0 || number[0] < '0' || number[0] > '9')

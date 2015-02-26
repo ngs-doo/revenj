@@ -43,7 +43,7 @@ namespace Revenj.Plugins.DatabasePersistence.Postgres.ProjectionSimplifications
 						"ARRAY_UPPER(\"{0}\".\"Values\", 1) AS \"_count_helper_{1}\"".With(mq.ReferencedQuerySource.ItemName, cnt),
 						"_count_helper_" + cnt,
 						expression.QueryModel.ResultTypeOverride,
-						(_, dr) => dr.IsDBNull(cnt) ? 0 : Convert.ChangeType(dr.GetValue(cnt), expression.QueryModel.ResultTypeOverride));
+						(_, __, dr) => dr.IsDBNull(cnt) ? 0 : Convert.ChangeType(dr.GetValue(cnt), expression.QueryModel.ResultTypeOverride));
 					return true;
 				}
 			}
@@ -58,7 +58,7 @@ namespace Revenj.Plugins.DatabasePersistence.Postgres.ProjectionSimplifications
 					sql),
 				"_count_" + cnt,
 				expression.QueryModel.ResultTypeOverride,
-				(_, dr) => dr.IsDBNull(cnt) ? 0 : Convert.ChangeType(dr.GetValue(cnt), expression.QueryModel.ResultTypeOverride));
+				(_, __, dr) => dr.IsDBNull(cnt) ? 0 : Convert.ChangeType(dr.GetValue(cnt), expression.QueryModel.ResultTypeOverride));
 			return true;
 		}
 	}

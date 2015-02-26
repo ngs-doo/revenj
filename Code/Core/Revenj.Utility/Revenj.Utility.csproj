@@ -85,6 +85,12 @@
       <Link>CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Revenj.Common\Revenj.Common.csproj">
+      <Project>{00DAFAB8-31C5-4DC6-A4A8-AFA7B97BBFDD}</Project>
+      <Name>Revenj.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

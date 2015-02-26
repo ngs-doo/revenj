@@ -56,7 +56,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			sw.Write('\'');
 		}
 
-		public static List<T> ParseCollection<T>(TextReader reader, char[] buf, int context, IServiceLocator locator, Func<TextReader, int, int, IServiceLocator, char[], T> parseItem)
+		public static List<T> ParseCollection<T>(BufferedTextReader reader, int context, IServiceLocator locator, Func<BufferedTextReader, int, int, IServiceLocator, T> parseItem)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -91,7 +91,7 @@ namespace Revenj.DatabasePersistence.Postgres
 						for (int i = 0; i < arrayContext; i++)
 							reader.Read();
 					}
-					list.Add(parseItem(reader, 0, recordContext, locator, buf));
+					list.Add(parseItem(reader, 0, recordContext, locator));
 					if (escaped)
 					{
 						for (int i = 0; i < arrayContext; i++)

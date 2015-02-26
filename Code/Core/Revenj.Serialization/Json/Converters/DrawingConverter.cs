@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Runtime.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Serialization.Json.Converters
 {
@@ -19,11 +20,11 @@ namespace Revenj.Serialization.Json.Converters
 				NumberConverter.Serialize(value.Value.ToArgb(), sw, buffer);
 		}
 
-		public static Color DeserializeColor(TextReader sr, char[] buffer, ref int nextToken)
+		public static Color DeserializeColor(BufferedTextReader sr, ref int nextToken)
 		{
 			if (nextToken == '"')
 			{
-				var val = StringConverter.Deserialize(sr, buffer, nextToken);
+				var val = StringConverter.Deserialize(sr, nextToken);
 				nextToken = JsonSerialization.GetNextToken(sr);
 				return Color.FromName(val);
 			}
@@ -34,19 +35,19 @@ namespace Revenj.Serialization.Json.Converters
 			}
 		}
 
-		public static List<Color> DeserializeColorCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Color> DeserializeColorCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<Color>();
-			DeserializeColorCollection(sr, buffer, nextToken, res);
+			DeserializeColorCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeColorCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Color> res)
+		public static void DeserializeColorCollection(BufferedTextReader sr, int nextToken, ICollection<Color> res)
 		{
-			res.Add(DeserializeColor(sr, buffer, ref nextToken));
+			res.Add(DeserializeColor(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeColor(sr, buffer, ref nextToken));
+				res.Add(DeserializeColor(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -54,13 +55,13 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
-		public static List<Color?> DeserializeColorNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<Color?> DeserializeColorNullableCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<Color?>();
-			DeserializeColorNullableCollection(sr, buffer, nextToken, res);
+			DeserializeColorNullableCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeColorNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<Color?> res)
+		public static void DeserializeColorNullableCollection(BufferedTextReader sr, int nextToken, ICollection<Color?> res)
 		{
 			if (nextToken == 'n')
 			{
@@ -69,7 +70,7 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for Color value. Expecting number, string or null");
 				nextToken = sr.Read();
 			}
-			else res.Add(DeserializeColor(sr, buffer, ref nextToken));
+			else res.Add(DeserializeColor(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -80,7 +81,7 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for Color value. Expecting number, string or null");
 					nextToken = sr.Read();
 				}
-				else res.Add(DeserializeColor(sr, buffer, ref nextToken));
+				else res.Add(DeserializeColor(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -110,7 +111,7 @@ namespace Revenj.Serialization.Json.Converters
 				Serialize(value.Value, sw, buffer);
 		}
 
-		public static RectangleF DeserializeRectangleF(TextReader sr, char[] buffer, ref int nextToken)
+		public static RectangleF DeserializeRectangleF(BufferedTextReader sr, ref int nextToken)
 		{
 			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
@@ -118,11 +119,11 @@ namespace Revenj.Serialization.Json.Converters
 			float x = 0, y = 0, w = 0, h = 0;
 			do
 			{
-				var name = StringConverter.Deserialize(sr, buffer, nextToken);
+				var name = StringConverter.Deserialize(sr, nextToken);
 				nextToken = JsonSerialization.GetNextToken(sr);
 				if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 				nextToken = JsonSerialization.GetNextToken(sr);
-				var value = NumberConverter.DeserializeFloat(sr, buffer, ref nextToken);
+				var value = NumberConverter.DeserializeFloat(sr, ref nextToken);
 				switch (name)
 				{
 					case "X":
@@ -149,19 +150,19 @@ namespace Revenj.Serialization.Json.Converters
 			return new RectangleF(x, y, w, h);
 		}
 
-		public static List<RectangleF> DeserializeRectangleFCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<RectangleF> DeserializeRectangleFCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<RectangleF>();
-			DeserializeRectangleFCollection(sr, buffer, nextToken, res);
+			DeserializeRectangleFCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeRectangleFCollection(TextReader sr, char[] buffer, int nextToken, ICollection<RectangleF> res)
+		public static void DeserializeRectangleFCollection(BufferedTextReader sr, int nextToken, ICollection<RectangleF> res)
 		{
-			res.Add(DeserializeRectangleF(sr, buffer, ref nextToken));
+			res.Add(DeserializeRectangleF(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeRectangleF(sr, buffer, ref nextToken));
+				res.Add(DeserializeRectangleF(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -169,13 +170,13 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
-		public static List<RectangleF?> DeserializeRectangleFNullableCollection(TextReader sr, char[] buffer, int nextToken)
+		public static List<RectangleF?> DeserializeRectangleFNullableCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<RectangleF?>();
-			DeserializeRectangleFNullableCollection(sr, buffer, nextToken, res);
+			DeserializeRectangleFNullableCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeRectangleFNullableCollection(TextReader sr, char[] buffer, int nextToken, ICollection<RectangleF?> res)
+		public static void DeserializeRectangleFNullableCollection(BufferedTextReader sr, int nextToken, ICollection<RectangleF?> res)
 		{
 			if (nextToken == 'n')
 			{
@@ -184,7 +185,7 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for Color value. Expecting number, string or null");
 				nextToken = sr.Read();
 			}
-			else res.Add(DeserializeRectangleF(sr, buffer, ref nextToken));
+			else res.Add(DeserializeRectangleF(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -195,7 +196,7 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for Color value. Expecting number, string or null");
 					nextToken = sr.Read();
 				}
-				else res.Add(DeserializeRectangleF(sr, buffer, ref nextToken));
+				else res.Add(DeserializeRectangleF(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{

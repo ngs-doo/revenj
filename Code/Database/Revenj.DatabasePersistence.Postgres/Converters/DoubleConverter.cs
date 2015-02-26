@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class DoubleConverter
 	{
-		public static double? ParseNullable(TextReader reader)
+		public static double? ParseNullable(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -14,7 +14,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return ParseDouble(reader, ref cur);
 		}
 
-		public static double Parse(TextReader reader)
+		public static double Parse(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -22,7 +22,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return ParseDouble(reader, ref cur);
 		}
 
-		private static double ParseDouble(TextReader reader, ref int cur)
+		private static double ParseDouble(BufferedTextReader reader, ref int cur)
 		{
 			var buf = new char[24];
 			var ind = 0;
@@ -34,7 +34,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return double.Parse(new string(buf, 0, ind), NumberStyles.Float, CultureInfo.InvariantCulture);
 		}
 
-		public static List<double?> ParseNullableCollection(TextReader reader, int context)
+		public static List<double?> ParseNullableCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
@@ -82,7 +82,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<double> ParseCollection(TextReader reader, int context)
+		public static List<double> ParseCollection(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')

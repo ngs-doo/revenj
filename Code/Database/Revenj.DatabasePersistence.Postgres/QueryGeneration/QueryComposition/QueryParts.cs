@@ -11,6 +11,7 @@ using Remotion.Linq.Clauses.ResultOperators;
 using Revenj.Common;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 using Revenj.DomainPatterns;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 {
@@ -61,10 +62,10 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			public string Sql { get; set; }
 			public string Name { get; set; }
 			public Type ItemType { get; set; }
-			public Func<ResultObjectMapping, IDataReader, object> Instancer { get; set; }
+			public Func<ResultObjectMapping, BufferedTextReader, IDataReader, object> Instancer { get; set; }
 		}
 
-		public bool AddSelectPart(IQuerySource qs, string sql, string name, Type type, Func<ResultObjectMapping, IDataReader, object> instancer)
+		public bool AddSelectPart(IQuerySource qs, string sql, string name, Type type, Func<ResultObjectMapping, BufferedTextReader, IDataReader, object> instancer)
 		{
 			if (Selects.Any(kv => kv.Name == name))
 				return false;
@@ -804,7 +805,7 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 
 			Selects.Clear();
 			CurrentSelectIndex = 0;
-			AddSelectPart(MainFrom, sb.ToString(), "sq", typeof(bool), (_, dr) => dr.GetBoolean(0));
+			AddSelectPart(MainFrom, sb.ToString(), "sq", typeof(bool), (_, __, dr) => dr.GetBoolean(0));
 		}
 
 		protected string BuildCountQuery(ResultOperatorBase countOperator)
@@ -816,12 +817,12 @@ Add {1} attribute or {2} or {3} or {4} interface".With(
 			sb.Append("SELECT ");
 			if (countOperator is LongCountResultOperator)
 			{
-				AddSelectPart(MainFrom, "COUNT(*)", "count", typeof(long), (_, dr) => dr.GetInt64(0));
+				AddSelectPart(MainFrom, "COUNT(*)", "count", typeof(long), (_, __, dr) => dr.GetInt64(0));
 				sb.AppendLine("COUNT(*)");
 			}
 			else
 			{
-				AddSelectPart(MainFrom, "COUNT(*)::int", "count", typeof(int), (_, dr) => dr.GetInt32(0));
+				AddSelectPart(MainFrom, "COUNT(*)::int", "count", typeof(int), (_, __, dr) => dr.GetInt32(0));
 				sb.AppendLine("COUNT(*)::int");
 			}
 			sb.Append(GetFromPart());

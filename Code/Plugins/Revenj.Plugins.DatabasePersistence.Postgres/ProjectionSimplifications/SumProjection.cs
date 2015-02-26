@@ -50,7 +50,7 @@ namespace Revenj.Plugins.DatabasePersistence.Postgres.ProjectionSimplifications
 					selector.Member.Name),
 				"_sum_" + cnt,
 				expression.QueryModel.ResultTypeOverride,
-				(_, dr) => dr.IsDBNull(cnt) ? 0 : Convert.ChangeType(dr.GetValue(cnt), type));
+				(_, __, dr) => dr.IsDBNull(cnt) ? 0 : Convert.ChangeType(dr.GetValue(cnt), type));
 			return true;
 		}
 	}

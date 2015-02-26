@@ -70,6 +70,15 @@ namespace Revenj.DatabasePersistence.Postgres
 			return new NpgsqlCommand(stream, template) { CommandTimeout = ConnectionInfo.LastCommandTimeout };
 		}
 
+		public static IDbCommand NewCommand(Stream stream, string template, bool sequential)
+		{
+			return new NpgsqlCommand(stream, template)
+			{
+				CommandTimeout = ConnectionInfo.LastCommandTimeout,
+				ReaderBehavior = sequential ? CommandBehavior.SequentialAccess : CommandBehavior.Default
+			};
+		}
+
 		public bool InTransaction
 		{
 			get
