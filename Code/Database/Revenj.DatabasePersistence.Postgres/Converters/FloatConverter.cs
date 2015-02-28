@@ -11,7 +11,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			return ParseFloat(reader, ref cur);
+			return ParseFloat(reader, ref cur, ')');
 		}
 
 		public static float Parse(BufferedTextReader reader)
@@ -19,19 +19,16 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return 0;
-			return ParseFloat(reader, ref  cur);
+			return ParseFloat(reader, ref  cur, ')');
 		}
 
-		private static float ParseFloat(BufferedTextReader reader, ref int cur)
+		private static float ParseFloat(BufferedTextReader reader, ref int cur, char matchEnd)
 		{
-			var buf = new char[16];
-			var ind = 0;
-			do
-			{
-				buf[ind++] = (char)cur;
-				cur = reader.Read();
-			} while (cur != -1 && ind < 16 && cur != ',' && cur != ')' && cur != '}');
-			return float.Parse(new string(buf, 0, ind), NumberStyles.Float, CultureInfo.InvariantCulture);
+			reader.InitBuffer((char)cur);
+			reader.FillUntil(',', matchEnd);
+			cur = reader.Read();
+			//TODO: optimize
+			return float.Parse(reader.BufferToString(), NumberStyles.Float, CultureInfo.InvariantCulture);
 		}
 
 		public static List<float?> ParseNullableCollection(BufferedTextReader reader, int context)
@@ -41,10 +38,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var list = new List<float?>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -57,28 +51,24 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 					if (cur == 'U')
 					{
-						reader.Read();
-						reader.Read();
+						cur = reader.Read(3);
 						list.Add(null);
 					}
 					else
 					{
 						list.Add(float.NaN);
-						reader.Read();
+						cur = reader.Read(2);
 					}
-					cur = reader.Read();
 				}
 				else
 				{
-					list.Add(ParseFloat(reader, ref cur));
+					list.Add(ParseFloat(reader, ref cur, '}'));
 				}
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -89,10 +79,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var list = new List<float>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -105,28 +92,24 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 					if (cur == 'U')
 					{
-						reader.Read();
-						reader.Read();
+						cur = reader.Read(3);
 						list.Add(0);
 					}
 					else
 					{
 						list.Add(float.NaN);
-						reader.Read();
+						cur = reader.Read(2);
 					}
-					cur = reader.Read();
 				}
 				else
 				{
-					list.Add(ParseFloat(reader, ref cur));
+					list.Add(ParseFloat(reader, ref cur, '}'));
 				}
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 	}

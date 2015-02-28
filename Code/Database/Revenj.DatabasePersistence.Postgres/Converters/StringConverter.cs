@@ -211,8 +211,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 			if (espaced)
-				reader.Read(context);
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 	}

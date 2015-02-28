@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
@@ -30,10 +32,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var list = new List<bool?>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -47,19 +46,15 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					list.Add(false);
 				else
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					reader.Read(3);
 					list.Add(null);
 				}
 				cur = reader.Read();
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -70,10 +65,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					cur = reader.Read();
-			}
+				reader.Read(context);
 			var list = new List<bool>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -87,20 +79,47 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					list.Add(false);
 				else
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					reader.Read(3);
 					list.Add(false);
 				}
 				cur = reader.Read();
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
+		}
+
+		public static IPostgresTuple ToTuple(bool value)
+		{
+			return new BoolTuple(value);
+		}
+
+		class BoolTuple : IPostgresTuple
+		{
+			private readonly char Value;
+
+			public BoolTuple(bool value)
+			{
+				Value = value ? 't' : 'f';
+			}
+
+			public bool MustEscapeRecord { get { return false; } }
+			public bool MustEscapeArray { get { return false; } }
+
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write(Value);
+			}
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write(Value);
+			}
+			public string BuildTuple(bool quote)
+			{
+				return quote ? "'" + Value + "'" : Value.ToString();
+			}
 		}
 	}
 }

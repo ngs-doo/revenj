@@ -8,19 +8,6 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class DecimalConverter
 	{
-		private static readonly decimal[] Decimals;
-
-		static DecimalConverter()
-		{
-			Decimals = new decimal[28];
-			var pow = 1m;
-			for (int i = 0; i < Decimals.Length; i++)
-			{
-				pow = pow / 10;
-				Decimals[i] = pow;
-			}
-		}
-
 		public static decimal? ParseNullable(BufferedTextReader reader)
 		{
 			var cur = reader.Read();
@@ -79,9 +66,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			cur = reader.Peek();
 			if (cur == '}')
 			{
-				reader.Read(2);
 				if (espaced)
-					reader.Read(context);
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
 				return new List<decimal?>(0);
 			}
 			var list = new List<decimal?>();
@@ -96,8 +84,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else list.Add(ParseDecimal(reader, ref cur, '}'));
 			} while (cur == ',');
 			if (espaced)
-				reader.Read(context);
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -112,9 +101,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			cur = reader.Peek();
 			if (cur == '}')
 			{
-				reader.Read(2);
 				if (espaced)
-					reader.Read(context);
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
 				return new List<decimal>(0);
 			}
 			var list = new List<decimal>();
@@ -129,8 +119,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else list.Add(ParseDecimal(reader, ref cur, '}'));
 			} while (cur == ',');
 			if (espaced)
-				reader.Read(context);
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 

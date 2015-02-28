@@ -75,10 +75,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur == '"' || cur == '\\';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					cur = reader.Read();
-			}
+				reader.Read(context);
 			var list = new List<DateTime?>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -88,23 +85,19 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(null);
 				}
 				else
 				{
 					list.Add(ParseDate(reader, cur));
+					cur = reader.Read();
 				}
-				cur = reader.Read();
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -115,10 +108,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur == '"' || cur == '\\';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					cur = reader.Read();
-			}
+				reader.Read(context);
 			var list = new List<DateTime>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -128,23 +118,19 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(DateTime.MinValue);
 				}
 				else
 				{
 					list.Add(ParseDate(reader, cur));
+					cur = reader.Read();
 				}
-				cur = reader.Read();
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 

@@ -12,7 +12,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			return ParseInt(reader, ref cur);
+			return ParseInt(reader, ref cur, ')');
 		}
 
 		public static int Parse(BufferedTextReader reader)
@@ -20,10 +20,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return 0;
-			return ParseInt(reader, ref cur);
+			return ParseInt(reader, ref cur, ')');
 		}
 
-		private static int ParseInt(BufferedTextReader reader, ref int cur)
+		private static int ParseInt(BufferedTextReader reader, ref int cur, char matchEnd)
 		{
 			int res = 0;
 			if (cur == '-')
@@ -33,7 +33,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					res = (res << 3) + (res << 1) - (cur - 48);
 					cur = reader.Read();
-				} while (cur != -1 && cur != ',' && cur != ')' && cur != '}');
+				} while (cur != -1 && cur != ',' && cur != matchEnd);
 			}
 			else
 			{
@@ -41,7 +41,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					res = (res << 3) + (res << 1) + (cur - 48);
 					cur = reader.Read();
-				} while (cur != -1 && cur != ',' && cur != ')' && cur != '}');
+				} while (cur != -1 && cur != ',' && cur != matchEnd);
 			}
 			return res;
 		}
@@ -53,36 +53,34 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			var list = new List<int?>();
+				reader.Read(context);
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
-			while (cur != -1 && cur != '}')
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<int?>(0);
+			}
+			var list = new List<int?>();
+			do
 			{
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
 					list.Add(null);
-					cur = reader.Read();
+					cur = reader.Read(4);
 				}
 				else
 				{
-					list.Add(ParseInt(reader, ref cur));
+					list.Add(ParseInt(reader, ref cur, '}'));
 				}
-			}
+			} while (cur == ',');
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -93,36 +91,34 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			var list = new List<int>();
+				reader.Read(context);
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
-			while (cur != -1 && cur != '}')
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<int>(0);
+			}
+			var list = new List<int>();
+			do
 			{
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
 					list.Add(0);
-					cur = reader.Read();
+					cur = reader.Read(4);
 				}
 				else
 				{
-					list.Add(ParseInt(reader, ref cur));
+					list.Add(ParseInt(reader, ref cur, '}'));
 				}
-			}
+			} while (cur == ',');
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 

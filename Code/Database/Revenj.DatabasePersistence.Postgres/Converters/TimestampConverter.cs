@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using Revenj.Utility;
@@ -9,6 +10,13 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 	public static class TimestampConverter
 	{
 		private readonly static TimeZone CurrentZone = TimeZone.CurrentTimeZone;
+		private static bool UseUtcValues = ConfigurationManager.AppSettings["Revenj.UseUtc"] == "true";
+		public static bool AsUTC
+		{
+			get { return UseUtcValues; }
+			set { UseUtcValues = value; }
+		}
+
 		private readonly static int[] TimestampReminder = new int[]{
 			1000000,
 			100000,
@@ -102,13 +110,11 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		public static DateTime ParseTimestamp(BufferedTextReader reader, int context)
 		{
-			for (int i = 0; i < context - 1; i++)
-				reader.Read();
+			var cur = reader.Read(context);
 			var buf = reader.SmallBuffer;
-			var len = reader.ReadUntil(buf, 0, '\\', '"');
-			reader.Read();
-			for (int i = 0; i < context - 1; i++)
-				reader.Read();
+			buf[0] = (char)cur;
+			var len = reader.ReadUntil(buf, 1, '\\', '"') + 1;
+			reader.Read(context);
 			if (buf[10] != ' ')
 				return DateTime.Parse(new string(buf, 0, len), CultureInfo.InvariantCulture);
 			var year = NumberConverter.Read4(buf, 0);
@@ -125,18 +131,37 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					nano += TimestampReminder[r] * (buf[i] - 48);
 				var pos = buf[len - 3] == '+';
 				var offset = NumberConverter.Read2(buf, len - 2);
-				var dt = offset != 0
-					? new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset).ToLocalTime()
-					: new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).ToLocalTime();
-				return new DateTime(dt.Ticks + nano, DateTimeKind.Local);
+				if (UseUtcValues)
+				{
+					var dt = offset != 0
+						? new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset)
+						: new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
+					return new DateTime(dt.Ticks + nano, DateTimeKind.Utc);
+				}
+				else
+				{
+					var dt = offset != 0
+						? new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset).ToLocalTime()
+						: new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).ToLocalTime();
+					return new DateTime(dt.Ticks + nano, DateTimeKind.Local);
+				}
 			}
 			else
 			{
 				var pos = buf[len - 3] == '+';
 				var offset = NumberConverter.Read2(buf, len - 2);
-				if (offset != 0)
-					return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset).ToLocalTime();
-				return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).ToLocalTime();
+				if (UseUtcValues)
+				{
+					if (offset != 0)
+						return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset);
+					return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
+				}
+				else
+				{
+					if (offset != 0)
+						return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset).ToLocalTime();
+					return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).ToLocalTime();
+				}
 			}
 		}
 
@@ -147,37 +172,36 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var innerContext = context << 1;
-			var list = new List<DateTime?>();
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
-			while (cur != -1 && cur != '}')
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<DateTime?>(0);
+			}
+			var list = new List<DateTime?>();
+			do
 			{
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(null);
 				}
 				else
 				{
 					list.Add(ParseTimestamp(reader, innerContext));
+					cur = reader.Read();
 				}
-				cur = reader.Read();
-			}
+			} while (cur == ',');
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -188,37 +212,36 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var innerContext = context << 1;
-			var list = new List<DateTime>();
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
-			while (cur != -1 && cur != '}')
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<DateTime>(0);
+			}
+			var list = new List<DateTime>();
+			do
 			{
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(DateTime.MinValue);
 				}
 				else
 				{
 					list.Add(ParseTimestamp(reader, innerContext));
+					cur = reader.Read();
 				}
-				cur = reader.Read();
-			}
+			} while (cur == ',');
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 

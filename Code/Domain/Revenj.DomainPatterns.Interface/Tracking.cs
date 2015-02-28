@@ -11,7 +11,11 @@ namespace Revenj.DomainPatterns
 	public interface IChangeTracking<T> : IEquatable<T>
 	{
 		/// <summary>
-		/// Get original value of tracked object.
+		/// Change tracking state for this instance
+		/// </summary>
+		bool TrackChanges { get; set; }
+		/// <summary>
+		/// Get original value of a tracked object.
 		/// Original value is initial value after reconstruction.
 		/// </summary>
 		/// <returns>original value</returns>

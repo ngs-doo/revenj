@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Revenj.Common;
+using Revenj.DatabasePersistence.Postgres.Converters;
 using Revenj.DatabasePersistence.Postgres.Npgsql;
 using Revenj.DomainPatterns;
 
@@ -15,7 +16,7 @@ namespace Revenj.DatabasePersistence.Postgres
 {
 	public interface IPostgresDatabaseQuery : IDatabaseQuery
 	{
-		void BulkInsert(string table, IEnumerable<Stream> data);
+		void BulkInsert(string table, IEnumerable<IPostgresTuple[]> data);
 		T[] Search<T>(ISpecification<T> filter, int? limit, int? offset, IEnumerable<KeyValuePair<string, bool>> order, Func<IDataReader, T> converter);
 		long Count<T>(ISpecification<T> filter);
 	}
@@ -366,17 +367,37 @@ Near: " + ex.Where, ex);
 			}
 		}
 
-		public void BulkInsert(string table, IEnumerable<Stream> data)
+		public void BulkInsert(string table, IEnumerable<IPostgresTuple[]> data)
 		{
-			var copy = new NpgsqlCopyIn("COPY " + table + " FROM STDIN DELIMITER '\t'", Connection);
-			copy.Start();
-			foreach (var it in data)
+			using (var cms = Revenj.Utility.ChunkedMemoryStream.Create())
 			{
-				it.CopyTo(copy.CopyStream);
-				copy.CopyStream.WriteByte((byte)'\n');
-				it.Dispose();
+				var sw = cms.GetWriter();
+				var buf = cms.TmpBuffer;
+				foreach (var it in data)
+				{
+					var p = it[0];
+					if (p != null)
+						p.InsertRecord(sw, buf, string.Empty, PostgresTuple.EscapeBulkCopy);
+					else
+						sw.Write("\\N");
+					for (int i = 1; i < it.Length; i++)
+					{
+						sw.Write('\t');
+						p = it[i];
+						if (p != null)
+							p.InsertRecord(sw, buf, string.Empty, PostgresTuple.EscapeBulkCopy);
+						else
+							sw.Write("\\N");
+					}
+					sw.Write('\n');
+				}
+				sw.Flush();
+				cms.Position = 0;
+				var copy = new NpgsqlCopyIn("COPY " + table + " FROM STDIN DELIMITER '\t'", Connection);
+				copy.Start();
+				cms.CopyTo(copy.CopyStream);
+				copy.End();
 			}
-			copy.End();
 		}
 
 		private NpgsqlCommand AddSource<T>(string select, ISpecification<T> filter)

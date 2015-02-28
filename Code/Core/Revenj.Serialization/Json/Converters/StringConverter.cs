@@ -189,136 +189,37 @@ namespace Revenj.Serialization.Json.Converters
 		public static string Deserialize(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
-			var buffer = sr.TempBuffer;
-			bool end;
-			int i = sr.ReadUntil(buffer, 0, '"', out end);
-			int safeUntil;
-			if (i == 0 && end)
+			sr.InitBuffer();
+			nextToken = sr.FillUntil('"', '\\');
+			if (nextToken == '"')
 			{
 				sr.Read();
-				return string.Empty;
+				return sr.BufferToString();
 			}
-			else if (i < buffer.Length && end)
-			{
-				safeUntil = CleanUntil(buffer, i);
-				if (safeUntil == i)
-				{
-					sr.Read();
-					return new string(buffer, 0, i);
-				}
-			}
-			else safeUntil = CleanUntil(buffer, i);
-			var largeBuffer = sr.LargeTempBuffer;
-			int index = 0;
-			var max = largeBuffer.Length - buffer.Length * 2;
-			bool found;
-			while (i != 0 && index < max)
-			{
-				Array.Copy(buffer, 0, largeBuffer, index, safeUntil);
-				index += safeUntil;
-				for (int x = safeUntil; x < buffer.Length && x < i && index < max; x++)
-				{
-					var cur = buffer[x];
-					if (cur == '\\')
-						cur = HandleEscape(sr, buffer, ref i, ref x);
-					largeBuffer[index++] = cur;
-				}
-				i = sr.ReadUntil(buffer, 0, '"', out found);
-				safeUntil = found ? i : CleanUntil(buffer, i);
-			};
-
-			if (i == 0)
-			{
-				if (sr.Read() != '"') throw new SerializationException("Expecting '\"' at then end of string at:" + JsonSerialization.PositionInStream(sr));
-				return new string(largeBuffer, 0, index);
-			}
-			var sb = sr.GetBuilder();
-			sb.Append(largeBuffer, 0, index);
+			var tmp = sr.SmallBuffer;
 			do
 			{
-				sb.Append(buffer, 0, safeUntil);
-				for (int x = safeUntil; x < buffer.Length && x < i; x++)
+				nextToken = sr.Read(2);
+				switch (nextToken)
 				{
-					var cur = buffer[x];
-					if (cur == '\\')
-						cur = HandleEscape(sr, buffer, ref i, ref x);
-					sb.Append(cur);
+					case 'b': sr.AddToBuffer('\b'); break;
+					case 't': sr.AddToBuffer('\t'); break;
+					case 'r': sr.AddToBuffer('\r'); break;
+					case 'n': sr.AddToBuffer('\n'); break;
+					case 'f': sr.AddToBuffer('\f'); break;
+					case 'u':
+						var len = sr.Read(tmp, 0, 4);
+						if (len < 4) sr.Read(tmp, len, 4 - len);//the second one must succeed
+						sr.AddToBuffer((char)Convert.ToInt32(new string(tmp, 0, 4), 16));//TODO: optimize to no allocation
+						break;
+					default:
+						sr.AddToBuffer((char)nextToken);
+						break;
 				}
-				i = sr.ReadUntil(buffer, 0, '"', out found);
-				safeUntil = found ? i : CleanUntil(buffer, i);
-			} while (i != 0);
-
-			if (sr.Read() != '"') throw new SerializationException("Expecting '\"' at then end of string at:" + JsonSerialization.PositionInStream(sr));
-			return sb.ToString();
-		}
-		private static int CleanUntil(char[] buffer, int len)
-		{
-			for (int i = 0; i < buffer.Length && i < len; i++)
-				if (buffer[i] == '\\')
-					return i;
-			return len;
-		}
-
-		private static char HandleEscape(BufferedTextReader sr, char[] buffer, ref int i, ref int x)
-		{
-			char nextToken;
-			bool found;
-			if (x == i - 1)
-			{
-				i = sr.ReadUntil(buffer, 0, '"', out found);
-				if (i == 0)
-				{
-					var next = sr.Read();
-					if (next == -1)
-						throw new SerializationException("String quote not found. End of stream detected");
-					buffer[0] = (char)next;
-					i = sr.ReadUntil(buffer, 1, '"', out found) + 1;
-				}
-				x = 0;
-				nextToken = buffer[0];
-			}
-			else nextToken = buffer[++x];
-			switch (nextToken)
-			{
-				case '\\': break;
-				case '"': break;
-				case 'b': nextToken = '\b'; break;
-				case 't': nextToken = '\t'; break;
-				case 'r': nextToken = '\r'; break;
-				case 'n': nextToken = '\n'; break;
-				case 'f': nextToken = '\f'; break;
-				case 'u':
-					if (x + 4 < i)
-					{
-						nextToken = (char)Convert.ToInt32(new string(buffer, x + 1, 4), 16);
-						x += 4;
-					}
-					else
-					{
-						var diff = i - x - 1;
-						Array.Copy(buffer, x + 1, buffer, 0, diff);
-						i = sr.ReadUntil(buffer, diff, '"', out found);
-						if (i + diff > 3)
-						{
-							nextToken = (char)Convert.ToInt32(new string(buffer, 0, 4), 16);
-							i = i + diff;
-						}
-						else
-						{
-							var j = sr.ReadUntil(buffer, i + diff, '"', out found);
-							if (i + j + diff > 3)
-								nextToken = (char)Convert.ToInt32(new string(buffer, 0, 4), 16);
-							else
-								throw new SerializationException("Unable to read json string");
-							i = i + j + diff;
-						}
-						x = 3;
-					}
-					break;
-				default:
-					throw new SerializationException("Invalid char found: " + (char)nextToken);
-			}
-			return nextToken;
+				nextToken = sr.FillUntil('"', '\\');
+			} while (nextToken == '\\');
+			sr.Read();
+			return sr.BufferToString();
 		}
 		public static List<string> DeserializeCollection(BufferedTextReader sr, int nextToken)
 		{

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Revenj.DatabasePersistence.Postgres.Converters;
 using Revenj.DomainPatterns;
 using Revenj.Utility;
@@ -31,11 +32,13 @@ namespace Revenj.DatabasePersistence.Postgres
 				sw.Write("NULL");
 				return;
 			}
-			var list = new List<IPostgresTuple>();
+			var count = data.Count();
+			var tuples = new IPostgresTuple[count];
+			int i = 0;
 			foreach (var item in data)
-				list.Add(converter(item));
+				tuples[i++] = converter(item);
 			sw.Write('\'');
-			var arr = new ArrayTuple(list.ToArray());
+			var arr = ArrayTuple.From(tuples);
 			arr.InsertRecord(sw, buf, string.Empty, PostgresTuple.EscapeQuote);
 			sw.Write('\'');
 		}
@@ -51,7 +54,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			for (int i = 0; i < data.Length; i++)
 				arr[i] = converter(data[i]);
 			sw.Write('\'');
-			var tuple = new ArrayTuple(arr);
+			var tuple = ArrayTuple.From(arr);
 			tuple.InsertRecord(sw, buf, string.Empty, PostgresTuple.EscapeQuote);
 			sw.Write('\'');
 		}
@@ -63,14 +66,17 @@ namespace Revenj.DatabasePersistence.Postgres
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			var list = new List<T>();
+				reader.Read(context);
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<T>(0);
+			}
+			var list = new List<T>();
 			var arrayContext = Math.Max(context << 1, 1);
 			var recordContext = arrayContext << 1;
 			while (cur != -1 && cur != '}')
@@ -78,34 +84,25 @@ namespace Revenj.DatabasePersistence.Postgres
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(default(T));
 				}
 				else
 				{
 					var escaped = cur != '(';
 					if (escaped)
-					{
-						for (int i = 0; i < arrayContext; i++)
-							reader.Read();
-					}
+						reader.Read(arrayContext);
 					list.Add(parseItem(reader, 0, recordContext, locator));
 					if (escaped)
-					{
-						for (int i = 0; i < arrayContext; i++)
-							reader.Read();
-					}
+						cur = reader.Read(arrayContext + 1);
+					else
+						cur = reader.Read();
 				}
-				cur = reader.Read();
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 	}

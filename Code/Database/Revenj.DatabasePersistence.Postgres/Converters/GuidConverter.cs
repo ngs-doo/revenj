@@ -213,36 +213,35 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			var list = new List<Guid?>();
+				reader.Read(context);
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
-			while (cur != -1 && cur != '}')
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<Guid?>(0);
+			}
+			var list = new List<Guid?>();
+			do
 			{
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(null);
 				}
 				else
 				{
 					list.Add(ParseCollectionGuid(reader, cur));
+					cur = reader.Read();
 				}
-				cur = reader.Read();
-			}
+			} while (cur == ',');
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -253,36 +252,35 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			var list = new List<Guid>();
+				reader.Read(context);
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
-			while (cur != -1 && cur != '}')
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<Guid>(0);
+			}
+			var list = new List<Guid>();
+			do
 			{
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(Guid.Empty);
 				}
 				else
 				{
 					list.Add(ParseCollectionGuid(reader, cur));
+					cur = reader.Read();
 				}
-				cur = reader.Read();
-			}
+			} while (cur == ',');
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 

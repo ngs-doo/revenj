@@ -245,7 +245,8 @@ namespace Revenj.DomainPatterns
 		{
 			Contract.Requires(repository != null);
 
-			repository.Update(new[] { data });
+			var ct = data as IChangeTracking<TRoot>;
+			repository.Persist(null, new[] { new KeyValuePair<TRoot, TRoot>(ct != null ? ct.GetOriginalValue() : default(TRoot), data) }, null);
 		}
 		/// <summary>
 		/// Update changed aggregate root.

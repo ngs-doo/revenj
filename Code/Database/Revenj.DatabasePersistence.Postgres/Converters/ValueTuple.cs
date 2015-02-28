@@ -23,6 +23,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			if (value != null)
 			{
 				HasMarkers = value.IndexOfAny(EscapeMarkers) != -1;
+				//TODO: postgres can actually cope with whitespace... think about changing this
 				EscapeRecord = value.Length == 0 || HasMarkers || value.IndexOfAny(RecordEscapes) != -1;
 				EscapeArray = value.Length == 0 || value == "NULL" || HasMarkers || value.IndexOfAny(ArrayEscapes) != -1;
 			}

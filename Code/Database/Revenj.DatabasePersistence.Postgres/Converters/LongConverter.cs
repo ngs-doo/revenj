@@ -54,10 +54,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var list = new List<long?>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -67,11 +64,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(null);
-					cur = reader.Read();
 				}
 				else
 				{
@@ -79,11 +73,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -94,10 +86,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var list = new List<long>();
 			cur = reader.Peek();
 			if (cur == '}')
@@ -107,11 +96,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(0);
-					cur = reader.Read();
 				}
 				else
 				{
@@ -119,11 +105,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 

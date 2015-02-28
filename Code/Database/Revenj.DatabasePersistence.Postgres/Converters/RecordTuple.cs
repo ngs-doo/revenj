@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using Revenj.Utility;
 
@@ -7,29 +6,63 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public class RecordTuple : IPostgresTuple
 	{
+		public static readonly IPostgresTuple Empty;
+		public static readonly IPostgresTuple Null;
+
+		static RecordTuple()
+		{
+			Empty = new EmptyRecordTuple();
+			Null = new NullTuple();
+		}
+
 		private readonly IPostgresTuple[] Properties;
 
-		public RecordTuple(IPostgresTuple[] properties)
+		internal RecordTuple(IPostgresTuple[] properties)
 		{
 			this.Properties = properties;
-			//TODO: check if properties count > 0, otherwise return ()
 		}
 
-		public bool MustEscapeRecord { get { return Properties != null; } }
-		public bool MustEscapeArray { get { return Properties != null; } }
-
-		public RecordTuple Except(IEnumerable<int> indexes)
+		public static IPostgresTuple From(IPostgresTuple[] properties)
 		{
-			if (indexes != null)
-				foreach (var item in indexes)
-					Properties[item] = null;
-			return this;
+			if (properties == null)
+				return Null;
+			if (properties.Length == 0)
+				return Empty;
+			return new RecordTuple(properties);
 		}
+
+		class EmptyRecordTuple : IPostgresTuple
+		{
+			public bool MustEscapeRecord { get { return true; } }
+			public bool MustEscapeArray { get { return false; } }
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write("()");
+			}
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write("()");
+			}
+			public string BuildTuple(bool quote) { return quote ? "'()'" : "()"; }
+		}
+
+		class NullTuple : IPostgresTuple
+		{
+			public bool MustEscapeRecord { get { return false; } }
+			public bool MustEscapeArray { get { return false; } }
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings) { }
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write("NULL");
+			}
+			public string BuildTuple(bool quote) { return "NULL"; }
+		}
+
+		public bool MustEscapeRecord { get { return true; } }
+		public bool MustEscapeArray { get { return true; } }
 
 		public string BuildTuple(bool quote)
 		{
-			if (Properties == null)
-				return "NULL";
 			using (var cms = ChunkedMemoryStream.Create())
 			{
 				var sw = cms.GetWriter();
@@ -40,9 +73,21 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					sw.Write('\'');
 				}
 				sw.Write('(');
-				for (int i = 0; i < Properties.Length; i++)
+				var p = Properties[0];
+				if (p != null)
 				{
-					var p = Properties[i];
+					if (p.MustEscapeRecord)
+					{
+						sw.Write('"');
+						p.InsertRecord(sw, cms.TmpBuffer, "1", mappings);
+						sw.Write('"');
+					}
+					else p.InsertRecord(sw, cms.TmpBuffer, string.Empty, mappings);
+				}
+				for (int i = 1; i < Properties.Length; i++)
+				{
+					sw.Write(',');
+					p = Properties[i];
 					if (p != null)
 					{
 						if (p.MustEscapeRecord)
@@ -53,8 +98,6 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						}
 						else p.InsertRecord(sw, cms.TmpBuffer, string.Empty, mappings);
 					}
-					if (i < Properties.Length - 1)
-						sw.Write(',');
 				}
 				sw.Write(')');
 				if (quote)
@@ -65,69 +108,43 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public Stream Build()
-		{
-			return Build(false, null);
-		}
-
 		private static readonly byte[] NULL = new byte[] { (byte)'N', (byte)'U', (byte)'L', (byte)'L' };
-
-		public Stream Build(bool bulk, Action<TextWriter, char> mappings)
-		{
-			if (Properties == null)
-				return new MemoryStream(NULL);
-			var cms = ChunkedMemoryStream.Create();
-			var sw = cms.GetWriter();
-			if (bulk)
-			{
-				for (int i = 0; i < Properties.Length; i++)
-				{
-					var p = Properties[i];
-					if (p != null)
-						p.InsertRecord(sw, cms.TmpBuffer, string.Empty, mappings);
-					else
-						sw.Write("\\N");
-					if (i < Properties.Length - 1)
-						sw.Write('\t');
-				}
-			}
-			else
-			{
-				sw.Write('(');
-				for (int i = 0; i < Properties.Length; i++)
-				{
-					var p = Properties[i];
-					if (p != null)
-					{
-						if (p.MustEscapeRecord)
-						{
-							sw.Write('"');
-							//TODO string.Empty !?
-							p.InsertRecord(sw, cms.TmpBuffer, "1", null);
-							sw.Write('"');
-						}
-						else p.InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
-					}
-					if (i < Properties.Length - 1)
-						sw.Write(',');
-				}
-				sw.Write(')');
-			}
-			sw.Flush();
-			cms.Position = 0;
-			return cms;
-		}
 
 		public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
-			if (Properties == null)
-				return;
+			InsertRecord(Properties, sw, buf, escaping, mappings);
+		}
+
+		internal static void InsertRecord(IPostgresTuple[] properties, TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
+		{
 			sw.Write('(');
 			var newEscaping = escaping + '1';
 			string quote = null;
-			for (int i = 0; i < Properties.Length; i++)
+			var p = properties[0];
+			if (p != null)
 			{
-				var p = Properties[i];
+				if (p.MustEscapeRecord)
+				{
+					//TODO: build quote only once and reuse it, instead of looping all the time
+					quote = quote ?? PostgresTuple.BuildQuoteEscape(escaping);
+					if (mappings != null)
+						foreach (var q in quote)
+							mappings(sw, q);
+					else
+						sw.Write(quote);
+					p.InsertRecord(sw, buf, newEscaping, mappings);
+					if (mappings != null)
+						foreach (var q in quote)
+							mappings(sw, q);
+					else
+						sw.Write(quote);
+				}
+				else p.InsertRecord(sw, buf, escaping, mappings);
+			}
+			for (int i = 1; i < properties.Length; i++)
+			{
+				sw.Write(',');
+				p = properties[i];
 				if (p != null)
 				{
 					if (p.MustEscapeRecord)
@@ -148,8 +165,6 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					}
 					else p.InsertRecord(sw, buf, escaping, mappings);
 				}
-				if (i < Properties.Length - 1)
-					sw.Write(',');
 			}
 			sw.Write(')');
 		}

@@ -136,74 +136,9 @@ namespace Revenj.DatabasePersistence.Postgres
 			return list;
 		}
 
-		public static List<StringBuilder> ParseList(StringBuilder value)
-		{
-			if (value == null || value.Length == 0)
-				return null;
-
-			var list = new List<StringBuilder>();
-			if (value.Length > 0 && value[0] == '{' && value[value.Length - 1] == '}')
-			{
-				if (value.Length == 2)
-					return list;
-				int cur = 1;
-				int len = value.Length - 1;
-				var sb = new StringBuilder(value.Length / 2);
-				while (cur <= len)
-				{
-					char current = value[cur];
-					if (current == ',' || current == '}')
-					{
-						list.Add(sb.Length == 4 && sb.ToString() == "NULL" ? null : sb);
-						sb = new StringBuilder(value.Length - cur);
-					}
-					else if (current == '"')
-					{
-						if (sb.Length > 0)
-							throw new FrameworkException("Error in array format. {0}".With(value));
-						cur++;
-						while (cur < len)
-						{
-							current = value[cur];
-							if (current == '\\')
-							{
-								cur++;
-								sb.Append(value[cur]);
-							}
-							else if (current == '"')
-							{
-								cur++;
-								current = value[cur];
-								if (current == '"')
-									sb.Append(current);
-								else
-								{
-									list.Add(sb);
-									sb = new StringBuilder(value.Length - cur);
-									break;
-								}
-							}
-							else sb.Append(current);
-							cur++;
-						}
-					}
-					else sb.Append(current);
-					cur++;
-				}
-				if (sb.Length > 0)
-					throw new FrameworkException("Error in array format. {0}".With(value));
-			}
-			return list;
-		}
-
 		public static string CreateRecord(this IPostgresTypeConverter converter, object instance)
 		{
 			return converter.ToTuple(instance).BuildTuple(false);
-		}
-
-		public static Stream CreateCopy(RecordTuple tuple)
-		{
-			return tuple.Build(true, PostgresTuple.EscapeBulkCopy);
 		}
 
 		public static string BuildURI(string[] parts)

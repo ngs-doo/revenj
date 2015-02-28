@@ -131,13 +131,14 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="context">data context</param>
 		/// <param name="aggregates">aggregate root instances</param>
-		public static void Update<T>(this IDataContext context, T[] aggregates) where T : IAggregateRoot
+		public static void Update<T>(this IDataContext context, IEnumerable<T> aggregates) where T : IAggregateRoot
 		{
-			var pairs = new KeyValuePair<T, T>[aggregates.Length];
-			for (int i = 0; i < aggregates.Length; i++)
+			var pairs = new KeyValuePair<T, T>[aggregates.Count()];
+			int i = 0;
+			foreach (var agg in aggregates)
 			{
-				var ct = aggregates[i] as IChangeTracking<T>;
-				pairs[i] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), aggregates[i]);
+				var ct = agg as IChangeTracking<T>;
+				pairs[i++] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), agg);
 			}
 			context.Update(pairs);
 		}

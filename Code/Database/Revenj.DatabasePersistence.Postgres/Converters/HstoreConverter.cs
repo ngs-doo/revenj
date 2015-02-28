@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
@@ -42,112 +41,92 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		public static IPostgresTuple ToTuple(IDictionary<string, string> value)
 		{
-			return value != null ? new DictionaryTuple(value) : default(IPostgresTuple);
+			//TODO: empty dictionary
+			return value != null ? new DictionaryTuple(value) : null;
 		}
 
 		public static Dictionary<string, string> Parse(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
-			{
 				return null;
-			}
-			return ParseDictionary(reader, context, context > 0 ? context << 1 : 1, ref cur);
+			return ParseDictionary(reader, context, context > 0 ? context << 1 : 1, ref cur, ')');
 		}
 
 
-		private static Dictionary<string, string> ParseDictionary(BufferedTextReader reader, int context, int quoteContext, ref int cur)
+		private static Dictionary<string, string> ParseDictionary(BufferedTextReader reader, int context, int quoteContext, ref int cur, char matchEnd)
 		{
+			cur = reader.Read(quoteContext);
+			if (cur == ',' || cur == matchEnd)
+				return new Dictionary<string, string>(0);
 			var dict = new Dictionary<string, string>();
 			for (int i = 0; i < context; i++)
 				cur = reader.Read();
-			var loop = true;
-			var first = true;
+			reader.InitBuffer();
 			do
 			{
-				if (first)
-				{
-					for (int i = 0; i < quoteContext - context; i++)
-						cur = reader.Read();
-					if (cur == ',' || cur == ')' || cur == '}')
-						return dict;
-					for (int i = 0; i < context; i++)
-						cur = reader.Read();
-					first = false;
-				}
-				else
-				{
-					for (int i = 0; i < quoteContext; i++)
-						cur = reader.Read();
-				}
-				var name = new StringBuilder();
 				do
 				{
 					if (cur == '\\' || cur == '"')
 					{
-						for (int i = 0; i < quoteContext; i++)
-							cur = reader.Read();
+						cur = reader.Read(quoteContext);
 						if (cur == '=')
 							break;
 						for (int i = 0; i < quoteContext - 1; i++)
 							cur = reader.Read();
 					}
-					name.Append((char)cur);
+					reader.AddToBuffer((char)cur);
+					reader.FillUntil('\\', '"');
 					cur = reader.Read();
 				} while (cur != -1);
-				reader.Read();
-				cur = reader.Read();
+				var name = reader.BufferToString();
+				cur = reader.Read(2);
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
-					dict[name.ToString()] = null;
-					cur = reader.Read();
-					loop = cur == ',';
-					if (loop)
+					dict.Add(name, null);
+					cur = reader.Read(4);
+					if (cur == '\\' || cur == '"')
 					{
-						while (reader.Read() == ' ') ;
+						reader.Read(context);
+						return dict;
 					}
-					else
-					{
-						for (int i = 0; i < context; i++)
-							reader.Read();
-					}
+					if (cur == ',' && reader.Peek() != ' ')
+						return dict;
+					do { cur = reader.Read(); }
+					while (cur == ' ');
 				}
 				else
 				{
-					var value = new StringBuilder();
-					for (int i = 0; i < quoteContext; i++)
-						cur = reader.Read();
+					cur = reader.Read(quoteContext);
 					do
 					{
 						if (cur == '\\' || cur == '"')
 						{
-							for (int i = 0; i < quoteContext; i++)
-								cur = reader.Read();
-							if (cur == ',' || cur == -1)
+							cur = reader.Read(quoteContext);
+							if (cur == ',')
 							{
-								loop = reader.Read() == ' ';
-								while (loop && reader.Read() == ' ') ;
+								dict.Add(name, reader.BufferToString());
+								do { cur = reader.Read(); }
+								while (cur == ' ');
+								cur = reader.Read(quoteContext);
 								break;
 							}
 							for (int i = 0; i < context; i++)
 								cur = reader.Read();
-							if (cur == ',' || cur == ')' || cur == '}')
+							if (cur == ',' || cur == -1 || cur == matchEnd)
 							{
-								loop = false;
-								break;
+								dict.Add(name, reader.BufferToString());
+								return dict;
 							}
 							for (int i = 0; i < context - 1; i++)
 								cur = reader.Read();
 						}
-						value.Append((char)cur);
+						reader.AddToBuffer((char)cur);
+						reader.FillUntil('\\', '"');
 						cur = reader.Read();
 					} while (cur != -1);
-					dict[name.ToString()] = value.ToString();
 				}
-			} while (loop && cur != -1);
+			} while (cur != -1);
 			return dict;
 		}
 
@@ -163,10 +142,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var innerContext = context << 1;
 			var list = new List<Dictionary<string, string>>();
 			cur = reader.Peek();
@@ -177,23 +153,18 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
+					cur = reader.Read(4);
 					list.Add(allowNulls ? null : new Dictionary<string, string>());
-					cur = reader.Read();
 				}
 				else
 				{
-					list.Add(ParseDictionary(reader, innerContext, innerContext << 1, ref cur));
+					list.Add(ParseDictionary(reader, innerContext, innerContext << 1, ref cur, '}'));
 				}
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -207,14 +178,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 
 			public bool MustEscapeRecord { get { return true; } }
-			public bool MustEscapeArray { get { return Value != null; } }
+			public bool MustEscapeArray { get { return true; } }
 
 			public string BuildTuple(bool quote) { return PostgresTuple.BuildTuple(this, quote); }
 
 			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				if (Value == null)
-					return;
 				var esc = PostgresTuple.BuildQuoteEscape(escaping);
 				var quoteEscape = new Lazy<string>(() => PostgresTuple.BuildQuoteEscape(escaping + "0"));
 				var slashEscape = new Lazy<string>(() => PostgresTuple.BuildSlashEscape(escaping.Length + 1));
@@ -242,12 +211,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						}
 						foreach (var c in esc)
 							mappings(sw, c);
-						mappings(sw, '=');
-						mappings(sw, '>');
+						sw.Write("=>");
 						if (kv.Value == null)
 						{
-							foreach (var c in "NULL")
-								mappings(sw, c);
+							sw.Write("NULL");
 						}
 						else
 						{
@@ -271,7 +238,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 								mappings(sw, c);
 						}
 						if (len > 0)
-							sw.Write(',');
+							sw.Write(", ");
 					}
 				}
 				else
@@ -283,14 +250,11 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						foreach (var c in kv.Key)
 						{
 							if (c == '"')
-							{
 								sw.Write(quoteEscape.Value);
-							}
 							else if (c == '\\')
-							{
 								sw.Write(slashEscape.Value);
-							}
-							else sw.Write(c);
+							else
+								sw.Write(c);
 						}
 						sw.Write(esc);
 						sw.Write("=>");
@@ -302,30 +266,22 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 							foreach (var c in kv.Value)
 							{
 								if (c == '"')
-								{
 									sw.Write(quoteEscape.Value);
-								}
 								else if (c == '\\')
-								{
 									sw.Write(slashEscape.Value);
-								}
-								else sw.Write(c);
+								else
+									sw.Write(c);
 							}
 							sw.Write(esc);
 						}
 						if (len > 0)
-							sw.Write(',');
+							sw.Write(", ");
 					}
 				}
 			}
 
 			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				if (Value == null)
-				{
-					sw.Write("NULL");
-					return;
-				}
 				InsertRecord(sw, buf, escaping, mappings);
 			}
 		}

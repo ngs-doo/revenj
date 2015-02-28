@@ -16,7 +16,6 @@ namespace Revenj.Utility
 		public readonly char[] SmallBuffer = new char[64];
 		public readonly char[] TempBuffer = new char[4096];
 		public readonly char[] LargeTempBuffer = new char[65536];
-		private readonly StringBuilder Builder = new StringBuilder(65536);
 		private char[] WorkingBuffer = new char[4096];
 		private int WorkingPosition;
 
@@ -39,12 +38,6 @@ namespace Revenj.Utility
 			InBuffer = 0;
 			BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 			NextChar = BufferEnd > 0 ? Buffer[0] : -1;
-		}
-
-		public StringBuilder GetBuilder()
-		{
-			Builder.Length = 0;
-			return Builder;
 		}
 
 		public int Position { get { return TotalBuffersRead + InBuffer; } }
@@ -74,7 +67,7 @@ namespace Revenj.Utility
 		{
 			var result = NextChar;
 			if (total == 0)
-				return Builder[InBuffer];
+				return 0;//dont use this value
 			InBuffer += total;
 			if (InBuffer >= BufferEnd)
 			{
@@ -89,6 +82,9 @@ namespace Revenj.Utility
 					BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				} while (InBuffer >= BufferEnd && BufferEnd != 0);
 				NextChar = BufferEnd > InBuffer ? Buffer[InBuffer] : -1;
+				if (InBuffer == 0)
+					return result;
+				return InBuffer >= BufferEnd ? -1 : Buffer[InBuffer - 1];
 			}
 			else if (NextChar != -1)
 				NextChar = Buffer[InBuffer];
@@ -130,7 +126,7 @@ namespace Revenj.Utility
 					{
 						InBuffer = i;
 						WorkingPosition = j;
-						return WorkingPosition;
+						return NextChar = ch;
 					}
 					WorkingBuffer[j] = ch;
 				}

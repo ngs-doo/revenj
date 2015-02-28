@@ -109,8 +109,7 @@ namespace Revenj.Serialization.Json.Converters
 			base64 = sr.LargeTempBuffer;
 			base64[0] = (char)nextToken;
 			int len;
-			bool found = false;
-			while ((len = sr.ReadUntil(base64, i, '"', out found)) > 0 || found)
+			while ((len = sr.ReadUntil(base64, i, '"')) > 0)
 			{
 				i += len;
 				if (i == base64.Length)
@@ -170,8 +169,7 @@ namespace Revenj.Serialization.Json.Converters
 			int i = 1;
 			base64[0] = (char)nextToken;
 			int len;
-			bool found = false;
-			while ((len = sr.ReadUntil(base64, i, '"', out found)) > 0 || found)
+			while ((len = sr.ReadUntil(base64, i, '"')) > 0)
 			{
 				i += len;
 				if (i == base64.Length)
