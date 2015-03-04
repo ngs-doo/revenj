@@ -42,7 +42,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		struct GuidMapping
 		{
 			[FieldOffset(0)]
-			private Guid Reference;
+			private readonly Guid Reference;
 
 			[FieldOffset(0)]
 			public readonly int A;
@@ -74,72 +74,72 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		public static void Fill(Guid value, char[] buf)
+		public static void Serialize(Guid value, char[] buf, int start)
 		{
 			var map = new GuidMapping(value);
 			var a = map.A;
 			var l = Lookup[(a >> 24) & 255];
-			buf[0] = l.First;
-			buf[1] = l.Second;
+			buf[start] = l.First;
+			buf[start + 1] = l.Second;
 			l = Lookup[(a >> 16) & 255];
-			buf[2] = l.First;
-			buf[3] = l.Second;
+			buf[start + 2] = l.First;
+			buf[start + 3] = l.Second;
 			l = Lookup[(a >> 8) & 255];
-			buf[4] = l.First;
-			buf[5] = l.Second;
+			buf[start + 4] = l.First;
+			buf[start + 5] = l.Second;
 			l = Lookup[a & 255];
-			buf[6] = l.First;
-			buf[7] = l.Second;
-			buf[8] = '-';
+			buf[start + 6] = l.First;
+			buf[start + 7] = l.Second;
+			buf[start + 8] = '-';
 			var b = map.B;
 			l = Lookup[(b >> 8) & 255];
-			buf[9] = l.First;
-			buf[10] = l.Second;
+			buf[start + 9] = l.First;
+			buf[start + 10] = l.Second;
 			l = Lookup[b & 255];
-			buf[11] = l.First;
-			buf[12] = l.Second;
-			buf[13] = '-';
+			buf[start + 11] = l.First;
+			buf[start + 12] = l.Second;
+			buf[start + 13] = '-';
 			var c = map.C;
 			l = Lookup[(c >> 8) & 255];
-			buf[14] = l.First;
-			buf[15] = l.Second;
+			buf[start + 14] = l.First;
+			buf[start + 15] = l.Second;
 			l = Lookup[c & 255];
-			buf[16] = l.First;
-			buf[17] = l.Second;
-			buf[18] = '-';
+			buf[start + 16] = l.First;
+			buf[start + 17] = l.Second;
+			buf[start + 18] = '-';
 			var d = map.D;
 			l = Lookup[d];
-			buf[19] = l.First;
-			buf[20] = l.Second;
+			buf[start + 19] = l.First;
+			buf[start + 20] = l.Second;
 			var e = map.E;
 			l = Lookup[e];
-			buf[21] = l.First;
-			buf[22] = l.Second;
-			buf[23] = '-';
+			buf[start + 21] = l.First;
+			buf[start + 22] = l.Second;
+			buf[start + 23] = '-';
 			var f = map.F;
 			l = Lookup[f];
-			buf[24] = l.First;
-			buf[25] = l.Second;
+			buf[start + 24] = l.First;
+			buf[start + 25] = l.Second;
 			var g = map.G;
 			l = Lookup[g];
-			buf[26] = l.First;
-			buf[27] = l.Second;
+			buf[start + 26] = l.First;
+			buf[start + 27] = l.Second;
 			var h = map.H;
 			l = Lookup[h];
-			buf[28] = l.First;
-			buf[29] = l.Second;
+			buf[start + 28] = l.First;
+			buf[start + 29] = l.Second;
 			var i = map.I;
 			l = Lookup[i];
-			buf[30] = l.First;
-			buf[31] = l.Second;
+			buf[start + 30] = l.First;
+			buf[start + 31] = l.Second;
 			var j = map.J;
 			l = Lookup[j];
-			buf[32] = l.First;
-			buf[33] = l.Second;
+			buf[start + 32] = l.First;
+			buf[start + 33] = l.Second;
 			var k = map.K;
 			l = Lookup[k];
-			buf[34] = l.First;
-			buf[35] = l.Second;
+			buf[start + 34] = l.First;
+			buf[start + 35] = l.Second;
 		}
 
 		public static Guid? ParseNullable(BufferedTextReader reader)
@@ -303,7 +303,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				Fill(Value, buf);
+				Serialize(Value, buf, 0);
 				sw.Write(buf, 0, 36);
 			}
 
@@ -314,14 +314,20 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public string BuildTuple(bool quote)
 			{
-				var buf = new char[37];
-				Fill(Value, buf);
 				if (quote)
 				{
-					buf[36] = '\'';
-					return "'" + new string(buf, 0, buf.Length);
+					var buf = new char[38];
+					buf[0] = '\'';
+					Serialize(Value, buf, 1);
+					buf[37] = '\'';
+					return new string(buf, 0, buf.Length);
 				}
-				return new string(buf, 0, 36);
+				else
+				{
+					var buf = new char[36];
+					Serialize(Value, buf, 0);
+					return new string(buf, 0, buf.Length);
+				}
 			}
 		}
 	}

@@ -153,8 +153,6 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		private static MemoryStream NullStream = new MemoryStream(new byte[] { (byte)'N', (byte)'U', (byte)'L', (byte)'L' });
-
 		public Stream Build()
 		{
 			var cms = ChunkedMemoryStream.Create();

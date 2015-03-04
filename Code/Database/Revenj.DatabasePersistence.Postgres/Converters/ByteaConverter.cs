@@ -18,6 +18,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				CharLookup[CharMap[i]] = i;
 		}
 
+		private static readonly byte[] EmptyBytes = new byte[0];
+
 		public static byte[] FromDatabase(string value)
 		{
 			if (value == null)
@@ -30,7 +32,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					data[i] = (byte)((CharLookup[value[pos++]] << 4) + CharLookup[value[pos++]]);
 				return data;
 			}
-			return new byte[0];
+			return EmptyBytes;
 		}
 
 		public static byte[] Parse(BufferedTextReader reader, int context)
@@ -41,17 +43,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var len = context + (context << 1);
 			if (len == 0)
 				len = 1;
-			for (int i = 0; i < len; i++)
-				reader.Read();
-			cur = reader.Read();
+			cur = reader.Read(len + 1);
 			var list = new List<byte>(1024);
 			while (cur != -1 && cur != '\\' && cur != '"')
 			{
 				list.Add((byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]));
 				cur = reader.Read();
 			}
-			for (int i = 0; i < context; i++)
-				reader.Read();
+			reader.Read(context);
 			return list.ToArray();
 		}
 
@@ -62,10 +61,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var innerContext = context << 1;
 			var skipInner = innerContext + (innerContext << 1);
 			var list = new List<byte[]>();
@@ -78,16 +74,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
 					list.Add(emptyColl);
-					cur = reader.Read();
+					cur = reader.Read(4);
 				}
 				else
 				{
-					for (int i = 0; i < skipInner; i++)
-						reader.Read();
+					reader.Read(skipInner);
 					var item = new List<byte>(1024);
 					cur = reader.Read();
 					while (cur != -1 && cur != '"' && cur != '\\')
@@ -95,17 +87,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						item.Add((byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]));
 						cur = reader.Read();
 					}
-					for (int i = 0; i < innerContext; i++)
-						cur = reader.Read();
+					cur = reader.Read(innerContext);
 					list.Add(item.ToArray());
 				}
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
@@ -114,13 +103,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var len = context + (context << 1);
-			for (int i = 0; i < len; i++)
-				reader.Read();
-			cur = reader.Read();
-			var bytes = new byte[512];
+			cur = reader.Read(context + (context << 1) + 1);
+			var bytes = reader.ByteBuffer;
 			int ind = 0;
-			while (ind < 512 && cur != '\\' && cur != '"')
+			while (ind < bytes.Length && cur != '\\' && cur != '"')
 			{
 				bytes[ind++] = (byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]);
 				cur = reader.Read();
@@ -141,8 +127,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 				}
 			}
-			for (int i = 0; i < context; i++)
-				reader.Read();
+			reader.Read(context);
 			stream.Position = 0;
 			return stream;
 		}
@@ -154,10 +139,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				return null;
 			var espaced = cur != '{';
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
+				reader.Read(context);
 			var innerContext = context << 1;
 			var skipInner = innerContext + (innerContext << 1);
 			var list = new List<Stream>();
@@ -165,25 +147,20 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			if (cur == '}')
 				reader.Read();
 			var emptyCol = allowNulls ? null : new MemoryStream();
-			var bytes = new byte[512];
+			var bytes = reader.ByteBuffer;
 			while (cur != -1 && cur != '}')
 			{
 				cur = reader.Read();
 				if (cur == 'N')
 				{
-					reader.Read();
-					reader.Read();
-					reader.Read();
 					list.Add(emptyCol);
-					cur = reader.Read();
+					cur = reader.Read(4);
 				}
 				else
 				{
-					for (int i = 0; i < skipInner; i++)
-						reader.Read();
-					cur = reader.Read();
+					cur = reader.Read(skipInner + 1);
 					int ind = 0;
-					while (ind < 512 && cur != '\\' && cur != '"')
+					while (ind < bytes.Length && cur != '\\' && cur != '"')
 					{
 						bytes[ind++] = (byte)((CharLookup[cur] << 4) + CharLookup[reader.Read()]);
 						cur = reader.Read();
@@ -204,36 +181,31 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 							cur = reader.Read();
 						}
 					}
-					for (int i = 0; i < innerContext; i++)
-						cur = reader.Read();
+					cur = reader.Read(innerContext);
 					stream.Position = 0;
 					list.Add(stream);
 				}
 			}
 			if (espaced)
-			{
-				for (int i = 0; i < context; i++)
-					reader.Read();
-			}
-			reader.Read();
+				reader.Read(context + 1);
+			else
+				reader.Read();
 			return list;
 		}
 
-		public static string ToDatabase(byte[] value)
+		public static int Serialize(byte[] value, char[] buf, int pos)
 		{
-			if (value == null)
-				return null;
-			var buf = new char[2 + value.Length * 2];
-			buf[0] = '\\';
-			buf[1] = 'x';
+			buf[pos] = '\\';
+			buf[pos + 1] = 'x';
 			var cnt = 2;
+			//TODO: buf array index check
 			for (int i = 0; i < value.Length; i++)
 			{
 				var b = value[i];
 				buf[cnt++] = CharMap[b >> 4];
 				buf[cnt++] = CharMap[b & 0xf];
 			}
-			return new string(buf);
+			return pos + 2 + value.Length * 2;
 		}
 
 		public static IPostgresTuple ToTuple(byte[] value)

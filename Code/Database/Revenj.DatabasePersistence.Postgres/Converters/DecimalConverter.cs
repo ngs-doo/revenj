@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using Revenj.Common;
 using Revenj.Utility;
 
@@ -125,9 +127,61 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
+		private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
+
+		public static int Serialize(decimal value, char[] buf, int pos)
+		{
+			var str = value.ToString(Invariant);
+			str.CopyTo(0, buf, pos, str.Length);
+			return pos + str.Length;
+		}
+
+		public static int Serialize(decimal value, char[] buf, int pos, int scale)
+		{
+			var str = value.ToString("F" + scale, Invariant);
+			str.CopyTo(0, buf, pos, str.Length);
+			return pos + str.Length;
+		}
+
+		public static int Serialize2(decimal value, char[] buf, int pos)
+		{
+			var str = value.ToString("F2", Invariant);
+			str.CopyTo(0, buf, pos, str.Length);
+			return pos + str.Length;
+		}
+
 		public static IPostgresTuple ToTuple(decimal value)
 		{
 			return new DecimalTuple(value);
+		}
+
+		//TODO: Mono
+		[StructLayout(LayoutKind.Explicit)]
+		struct DecimalMapping
+		{
+			[FieldOffset(0)]
+			private decimal Reference;
+
+			[FieldOffset(0)]
+			public readonly int flags;
+			[FieldOffset(4)]
+			public readonly int hi;
+			[FieldOffset(8)]
+			public readonly int lo;
+			[FieldOffset(12)]
+			public readonly int mid;
+
+			public DecimalMapping(decimal reference)
+				: this()
+			{
+				this.Reference = reference;
+			}
+		}
+
+		public static IPostgresTuple ToTuple(decimal value, int scale)
+		{
+			//TODO: optimize
+			return new ValueTuple(value.ToString("F" + scale, Invariant), false, false);
 		}
 
 		class DecimalTuple : IPostgresTuple

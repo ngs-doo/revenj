@@ -53,15 +53,13 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return result;
 		}
 
-		public static string ToDatabase(Image value)
+		public static int Serialize(Image value, char[] buf, int pos)
 		{
-			if (value == null)
-				return null;
 			using (var ms = new MemoryStream())
 			{
 				SaveImage(value, ms);
 				ms.Position = 0;
-				return ByteaConverter.ToDatabase(ms.ToArray());
+				return ByteaConverter.Serialize(ms.ToArray(), buf, pos);
 			}
 		}
 

@@ -133,6 +133,99 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return res;
 		}
 
+		public static string ToString(char[] buf, int value)
+		{
+			if (value == int.MinValue)
+				return "-2147483648";
+			if (value < 0)
+			{
+				int pos = 11;
+				var abs = (uint)(-value);
+				while (pos > 2)
+				{
+					var div = abs / 100;
+					var rem = abs - div * 100;
+					var num = NumberConverter.Numbers[rem];
+					buf[pos--] = num.Second;
+					buf[pos--] = num.First;
+					abs = div;
+					if (abs == 0) break;
+				}
+				if (buf[pos + 1] == '0') // TODO: remove branch
+					pos++;
+				buf[pos + 1] = '-';
+				return new string(buf, pos + 1, 11 - pos);
+			}
+			else
+			{
+				int pos = 10;
+				var abs = (uint)(value);
+				while (pos > 1)
+				{
+					var div = abs / 100;
+					var rem = abs - div * 100;
+					var num = NumberConverter.Numbers[rem];
+					buf[pos--] = num.Second;
+					buf[pos--] = num.First;
+					abs = div;
+					if (abs == 0) break;
+				}
+				if (buf[pos + 1] == '0') // TODO: remove branch
+					pos++;
+				return new string(buf, pos + 1, 10 - pos);
+			}
+		}
+
+		public static int Serialize(int value, char[] buf, int start)
+		{
+			if (value == int.MinValue)
+			{
+				"-2147483648".CopyTo(0, buf, start, 11);
+				return start + 11;
+			}
+			int len;
+			int pos;
+			if (value < 0)
+			{
+				pos = start + 11;
+				var abs = (uint)(-value);
+				do
+				{
+					var div = abs / 100;
+					var rem = abs - div * 100;
+					var num = NumberConverter.Numbers[rem];
+					buf[pos--] = num.Second;
+					buf[pos--] = num.First;
+					abs = div;
+				} while (abs != 0);
+				if (buf[pos + 1] == '0') // TODO: remove branch
+					pos++;
+				buf[pos + 1] = '-';
+				len = start + 11 - pos;
+			}
+			else
+			{
+				pos = start + 10;
+				var abs = (uint)(value);
+				do
+				{
+					var div = abs / 100;
+					var rem = abs - div * 100;
+					var num = NumberConverter.Numbers[rem];
+					buf[pos--] = num.Second;
+					buf[pos--] = num.First;
+					abs = div;
+				} while (abs != 0);
+				if (buf[pos + 1] == '0') // TODO: remove branch
+					pos++;
+				len = start + 10 - pos;
+			}
+			pos = pos + 1 - start;
+			for (int i = start; i < start + len; i++)
+				buf[i] = buf[i + pos];
+			return start + len;
+		}
+
 		public static IPostgresTuple ToTuple(int value)
 		{
 			return new IntTuple(value);

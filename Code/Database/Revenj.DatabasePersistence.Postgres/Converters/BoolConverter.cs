@@ -91,6 +91,24 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
+		public static int SerializeURI(bool value, char[] buf, int pos)
+		{
+			if (value)
+			{
+				buf[pos] = 't';
+				buf[pos + 1] = 'r';
+				buf[pos + 2] = 'u';
+				buf[pos + 3] = 'e';
+				return pos + 4;
+			}
+			buf[pos] = 'f';
+			buf[pos + 1] = 'a';
+			buf[pos + 2] = 'l';
+			buf[pos + 3] = 's';
+			buf[pos + 4] = 'e';
+			return pos + 5;
+		}
+
 		public static IPostgresTuple ToTuple(bool value)
 		{
 			return new BoolTuple(value);

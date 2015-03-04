@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.Contracts;
-using System.IO;
 using System.Linq;
 using Remotion.Linq;
 using Remotion.Linq.Clauses.ResultOperators;
@@ -164,8 +163,6 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 				yield return projector(item);
 		}
 
-		private static readonly StringReader StringReader = new StringReader(string.Empty);
-
 		private List<ResultObjectMapping> LoadData(QueryModel queryModel)
 		{
 			var sqlCommand =
@@ -178,7 +175,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			var resultItems = new List<ResultObjectMapping>();
 			using (var cms = ChunkedMemoryStream.Create())
 			{
-				var reader = cms.UseBufferedReader(StringReader);
+				var reader = cms.UseBufferedReader(string.Empty);
 				DatabaseQuery.Execute(sqlCommand.CreateQuery(cms), dr => resultItems.Add(sqlCommand.ProcessRow(dr, reader)));
 			}
 			if (queryModel.ResultOperators.Any(it => it is LastResultOperator) && resultItems.Count > 1)

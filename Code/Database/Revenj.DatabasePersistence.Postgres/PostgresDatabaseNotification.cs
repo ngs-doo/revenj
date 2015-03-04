@@ -117,7 +117,7 @@ namespace Revenj.DatabasePersistence.Postgres
 					var array = e.AdditionalInformation.Substring(firstSeparator + secondSeparator + 2).Trim();
 					if (array.Length > 0)
 					{
-						var uris = StringConverter.ParseCollection(Reader.Reuse(new StringReader(array)), 0, false).ToArray();
+						var uris = StringConverter.ParseCollection(Reader.Reuse(array), 0, false).ToArray();
 						switch (op)
 						{
 							case "Update":

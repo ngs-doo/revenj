@@ -69,7 +69,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			NpgsqlRowDescription.FieldData field_descr = FieldData;
 
-			if (fieldSize >= 65536)
+			if (fieldSize >= 32768)
 				return ReadLargeObject(field_descr, fieldSize);
 
 			try
@@ -113,7 +113,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private object ReadLargeObject(NpgsqlRowDescription.FieldData field_descr, int field_value_size)
 		{
-			var cms = new ChunkedMemoryStream(Stream, field_value_size);
+			var cms = new LargeMemoryStream(Stream, field_value_size);
 			try
 			{
 				return

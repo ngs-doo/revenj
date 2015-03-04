@@ -4,8 +4,7 @@ using System.IO;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
-	//TODO: should redirect to revenj.utils cms
-	internal class ChunkedMemoryStream : Stream
+	internal class LargeMemoryStream : Stream
 	{
 		private const int BlockSize = 65536;
 		private readonly List<byte[]> Blocks = new List<byte[]>();
@@ -13,12 +12,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private int BlockRemaining;
 		private int TotalSize;
 
-		public ChunkedMemoryStream()
-		{
-			Position = 0;
-		}
-
-		public ChunkedMemoryStream(Stream another, int size)
+		public LargeMemoryStream(Stream another, int size)
 		{
 			Position = 0;
 			var buf = new byte[BlockSize];

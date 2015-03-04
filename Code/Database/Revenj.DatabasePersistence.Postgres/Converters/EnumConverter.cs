@@ -7,36 +7,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class EnumConverter
 	{
-		public static T? ParseNullable<T>(BufferedTextReader reader, int context)
-			where T : struct
-		{
-			var cur = reader.Read();
-			if (cur == ',' || cur == ')')
-				return null;
-			reader.InitBuffer();
-			reader.FillUntil(',', ')');
-			reader.Read();
-			T value;
-			if (Enum.TryParse<T>(reader.BufferToString(), out value))
-				return value;
-			return null;
-		}
-
-		public static T Parse<T>(BufferedTextReader reader, int context)
-			where T : struct
-		{
-			var cur = reader.Read();
-			if (cur == ',' || cur == ')')
-				return default(T);
-			reader.InitBuffer();
-			reader.FillUntil(',', ')');
-			reader.Read();
-			T value;
-			Enum.TryParse<T>(reader.BufferToString(), out value);
-			return value;
-		}
-
-		public static List<T?> ParseNullableCollection<T>(BufferedTextReader reader, int context)
+		public static List<T?> ParseNullableCollection<T>(BufferedTextReader reader, int context, Func<BufferedTextReader, T> factory)
 			where T : struct
 		{
 			var cur = reader.Read();
@@ -45,51 +16,39 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var espaced = cur != '{';
 			if (espaced)
 				reader.Read(context);
-			var innerContext = context << 1;
-			var list = new List<T?>();
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
-			T value;
-			while (cur != -1 && cur != '}')
+			{
+				if (espaced)
+					reader.Read(context);
+				else
+					reader.Read(2);
+				return new List<T?>(0);
+			}
+			var innerContext = context == 0 ? 1 : context << 1;
+			var list = new List<T?>();
+			do
 			{
 				cur = reader.Read();
-				reader.InitBuffer();
 				if (cur == '"' || cur == '\\')
 				{
 					cur = reader.Read(innerContext);
-					while (cur != -1)
-					{
-						if (cur == '\\' || cur == '"')
-						{
-							cur = reader.Read(innerContext);
-							if (cur == ',' || cur == '}')
-								break;
-							cur = reader.Read(innerContext - 1);
-						}
-						reader.AddToBuffer((char)cur);
-						cur = reader.Read();
-					}
-					if (Enum.TryParse<T>(reader.BufferToString(), out value))
-						list.Add(value);
-					else
-						list.Add(null);
+					reader.InitBuffer((char)cur);
+					reader.FillUntil(',', '}');
+					list.Add(factory(reader));
+					cur = reader.Read(innerContext);
 				}
 				else
 				{
+					reader.InitBuffer((char)cur);
 					reader.FillUntil(',', '}');
 					cur = reader.Read();
 					if (reader.BufferMatches("NULL"))
 						list.Add(null);
 					else
-					{
-						if (Enum.TryParse<T>(reader.BufferToString(), out value))
-							list.Add(value);
-						else
-							list.Add(null);
-					}
+						list.Add(factory(reader));
 				}
-			}
+			} while (cur == ',');
 			if (espaced)
 				reader.Read(context + 1);
 			else
@@ -97,7 +56,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
-		public static List<T> ParseCollection<T>(BufferedTextReader reader, int context)
+		public static List<T> ParseCollection<T>(BufferedTextReader reader, int context, Func<BufferedTextReader, T> factory)
 			where T : struct
 		{
 			var cur = reader.Read();
@@ -106,33 +65,27 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var espaced = cur != '{';
 			if (espaced)
 				reader.Read(context);
-			var innerContext = context << 1;
-			var list = new List<T>();
 			cur = reader.Peek();
 			if (cur == '}')
-				reader.Read();
-			T value;
-			while (cur != -1 && cur != '}')
+			{
+				if (espaced)
+					reader.Read(context);
+				else
+					reader.Read(2);
+				return new List<T>(0);
+			}
+			var innerContext = context == 0 ? 1 : context << 1;
+			var list = new List<T>();
+			do
 			{
 				cur = reader.Read();
 				reader.InitBuffer();
 				if (cur == '"' || cur == '\\')
 				{
 					cur = reader.Read(innerContext);
-					while (cur != -1)
-					{
-						if (cur == '\\' || cur == '"')
-						{
-							cur = reader.Read(innerContext);
-							if (cur == ',' || cur == '}')
-								break;
-							cur = reader.Read(innerContext - 1);
-						}
-						reader.AddToBuffer((char)cur);
-						cur = reader.Read();
-					}
-					Enum.TryParse<T>(reader.BufferToString(), out value);
-					list.Add(value);
+					reader.FillUntil(',', '}');
+					list.Add(factory(reader));
+					cur = reader.Read(innerContext);
 				}
 				else
 				{
@@ -141,12 +94,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (reader.BufferMatches("NULL"))
 						list.Add(default(T));
 					else
-					{
-						Enum.TryParse<T>(reader.BufferToString(), out value);
-						list.Add(value);
-					}
+						list.Add(factory(reader));
 				}
-			}
+			} while (cur == ',');
 			if (espaced)
 				reader.Read(context + 1);
 			else
@@ -203,7 +153,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
 				if (mappings != null)
-					foreach (var c in Value ?? string.Empty)
+					foreach (var c in Value)
 						mappings(sw, c);
 				else
 					sw.Write(Value);

@@ -419,6 +419,13 @@ namespace Revenj.Utility
 			return BufferedReader.Reuse(reader);
 		}
 
+		public BufferedTextReader UseBufferedReader(string value)
+		{
+			if (BufferedReader == null)
+				return BufferedReader = new BufferedTextReader(value);
+			return BufferedReader.Reuse(value);
+		}
+
 		bool disposed;
 
 		protected override void Dispose(bool disposing)
@@ -440,7 +447,10 @@ namespace Revenj.Utility
 
 		public override string ToString()
 		{
-			return GetReader().ReadToEnd();
+			var cp = CurrentPosition;
+			var result = GetReader().ReadToEnd();
+			CurrentPosition = cp;
+			return result;
 		}
 	}
 }

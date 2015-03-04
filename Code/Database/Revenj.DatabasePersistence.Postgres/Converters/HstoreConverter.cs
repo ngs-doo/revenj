@@ -29,14 +29,26 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		public static string ToDatabase(IDictionary<string, string> value)
 		{
-			if (value == null)
-				return null;
-			return
-				string.Join(
+			return string.Join(
 					", ",
 					value.Where(it => it.Value != null).Select(it => "\"{0}\"=>\"{1}\"".With(
 						it.Key.Replace("\\", "\\\\").Replace("\"", "\\\""),
 						it.Value.Replace("\\", "\\\\").Replace("\"", "\\\""))));
+		}
+
+		public static int SerializeURI(IDictionary<string, string> value, char[] buf, int pos)
+		{
+			//TODO: optimize
+			var str = ToDatabase(value);
+			str.CopyTo(0, buf, pos, str.Length);
+			return pos + str.Length;
+		}
+
+		public static int SerializeCompositeURI(IDictionary<string, string> value, char[] buf, int pos)
+		{
+			//TODO: optimize
+			var str = ToDatabase(value);
+			return StringConverter.SerializeCompositeURI(str, buf, pos);
 		}
 
 		public static IPostgresTuple ToTuple(IDictionary<string, string> value)
@@ -53,8 +65,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return ParseDictionary(reader, context, context > 0 ? context << 1 : 1, ref cur, ')');
 		}
 
-
-		private static Dictionary<string, string> ParseDictionary(BufferedTextReader reader, int context, int quoteContext, ref int cur, char matchEnd)
+		private static Dictionary<string, string> ParseDictionary(
+			BufferedTextReader reader,
+			int context,
+			int quoteContext,
+			ref int cur,
+			char matchEnd)
 		{
 			cur = reader.Read(quoteContext);
 			if (cur == ',' || cur == matchEnd)

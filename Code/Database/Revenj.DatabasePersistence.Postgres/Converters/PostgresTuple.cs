@@ -10,6 +10,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 	{
 		bool MustEscapeRecord { get; }
 		bool MustEscapeArray { get; }
+		//TODO: change API to improve performance
 		void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings);
 		void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings);
 		string BuildTuple(bool quote);

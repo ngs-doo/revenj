@@ -43,29 +43,29 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") + offset.Hours.ToString("00");
 		}
 
-		private static int Serialize(DateTime value, char[] buffer, int hours)
+		public static int Serialize(DateTime value, char[] buffer, int pos, int hours)
 		{
-			buffer[4] = '-';
-			buffer[7] = '-';
-			buffer[10] = ' ';
-			buffer[13] = ':';
-			buffer[16] = ':';
-			NumberConverter.Write4(value.Year, buffer, 0);
-			NumberConverter.Write2(value.Month, buffer, 5);
-			NumberConverter.Write2(value.Day, buffer, 8);
-			NumberConverter.Write2(value.Hour, buffer, 11);
-			NumberConverter.Write2(value.Minute, buffer, 14);
-			NumberConverter.Write2(value.Second, buffer, 17);
+			buffer[pos + 4] = '-';
+			buffer[pos + 7] = '-';
+			buffer[pos + 10] = ' ';
+			buffer[pos + 13] = ':';
+			buffer[pos + 16] = ':';
+			NumberConverter.Write4(value.Year, buffer, pos);
+			NumberConverter.Write2(value.Month, buffer, pos + 5);
+			NumberConverter.Write2(value.Day, buffer, pos + 8);
+			NumberConverter.Write2(value.Hour, buffer, pos + 11);
+			NumberConverter.Write2(value.Minute, buffer, pos + 14);
+			NumberConverter.Write2(value.Second, buffer, pos + 17);
 			int micro = (int)(value.Ticks - new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, value.Kind).Ticks) / 10;
-			int end = 19;
+			int end = pos + 19;
 			if (micro != 0)
 			{
-				buffer[19] = '.';
+				buffer[pos + 19] = '.';
 				var div = micro / 100;
 				var rem = micro - div * 100;
 				NumberConverter.Write4(div, buffer, 20);
 				NumberConverter.Write2(rem, buffer, 24);
-				end = 25;
+				end = pos + 25;
 				while (buffer[end] == '0')
 					end--;
 				end++;
@@ -81,11 +81,6 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		public static IPostgresTuple ToTuple(DateTime value)
 		{
 			return new TimestampTuple(value);
-		}
-
-		public static IPostgresTuple ToTuple(DateTime? value)
-		{
-			return value != null ? new TimestampTuple(value.Value) : null;
 		}
 
 		public static DateTime? ParseNullable(BufferedTextReader reader, int context)
@@ -273,26 +268,31 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				var len = Serialize(Value, buf, HoursOffset);
+				var len = Serialize(Value, buf, 0, HoursOffset);
 				sw.Write(buf, 0, len);
 			}
 
 			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				var len = Serialize(Value, buf, HoursOffset);
+				var len = Serialize(Value, buf, 0, HoursOffset);
 				sw.Write(buf, 0, len);
 			}
 
 			public string BuildTuple(bool quote)
 			{
 				var buf = new char[32];
-				var len = Serialize(Value, buf, HoursOffset);
 				if (quote)
 				{
+					buf[0] = '\'';
+					var len = Serialize(Value, buf, 1, HoursOffset);
 					buf[len] = '\'';
-					return "'" + new string(buf, 0, len + 1);
+					return new string(buf, 0, len + 1);
 				}
-				return new string(buf, 0, len);
+				else
+				{
+					var len = Serialize(Value, buf, 0, HoursOffset);
+					return new string(buf, 0, len);
+				}
 			}
 		}
 	}

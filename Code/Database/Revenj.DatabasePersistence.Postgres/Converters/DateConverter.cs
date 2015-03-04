@@ -7,13 +7,13 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	public static class DateConverter
 	{
-		public static void Fill(DateTime value, char[] buf)
+		public static void Serialize(DateTime value, char[] buf, int start)
 		{
-			NumberConverter.Write4(value.Year, buf, 0);
-			buf[4] = '-';
-			NumberConverter.Write2(value.Month, buf, 5);
-			buf[7] = '-';
-			NumberConverter.Write2(value.Day, buf, 8);
+			NumberConverter.Write4(value.Year, buf, start);
+			buf[start + 4] = '-';
+			NumberConverter.Write2(value.Month, buf, start + 5);
+			buf[start + 7] = '-';
+			NumberConverter.Write2(value.Day, buf, start + 8);
 		}
 
 		public static DateTime? ParseNullable(BufferedTextReader reader)
@@ -153,7 +153,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 			{
-				Fill(Date, buf);
+				Serialize(Date, buf, 0);
 				sw.Write(buf, 0, 10);
 			}
 
@@ -164,11 +164,20 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public string BuildTuple(bool quote)
 			{
-				var buf = new char[11];
-				Fill(Date, buf);
 				if (quote)
-					return "'" + new string(buf, 0, buf.Length);
-				return new string(buf, 0, 10);
+				{
+					var buf = new char[12];
+					buf[0] = '\'';
+					Serialize(Date, buf, 1);
+					buf[11] = '\'';
+					return new string(buf, 0, 12);
+				}
+				else
+				{
+					var buf = new char[10];
+					Serialize(Date, buf, 0);
+					return new string(buf, 0, 10);
+				}
 			}
 		}
 	}

@@ -56,17 +56,16 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			reader.InitBuffer();
 			do
 			{
-				if (cur != '\\' && cur != '"')
+				if (cur == '\\' || cur == '"')
 				{
-					reader.AddToBuffer((char)cur);
-					reader.FillUntil('\\', '"');
-					cur = reader.Read(context + 1);
+					cur = reader.Read(context);
+					if (cur == ',' || cur == matchEnd)
+						return reader.BufferToString();
+					for (int i = 0; i < context - 1; i++)
+						cur = reader.Read();
 				}
-				else cur = reader.Read(context);
-				if (cur == ',' || cur == matchEnd)
-					return reader.BufferToString();
-				cur = reader.Read(context);
 				reader.AddToBuffer((char)cur);
+				reader.FillUntil('\\', '"');
 				cur = reader.Read();
 			} while (cur != -1);
 			throw new FrameworkException("Unable to find end of string");
@@ -215,6 +214,17 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			else
 				reader.Read();
 			return list;
+		}
+
+		public static int SerializeCompositeURI(string value, char[] buf, int pos)
+		{
+			foreach (var c in value)
+			{
+				if (c == '\\' || c == '/')
+					buf[pos++] = '\\';
+				buf[pos++] = c;
+			}
+			return pos;
 		}
 	}
 }

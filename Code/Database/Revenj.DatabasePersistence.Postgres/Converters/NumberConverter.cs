@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+
 namespace Revenj.DatabasePersistence.Postgres.Converters
 {
 	internal static class NumberConverter

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
@@ -111,6 +113,48 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			else
 				reader.Read();
 			return list;
+		}
+
+		private static readonly CultureInfo Invairant = CultureInfo.InvariantCulture;
+
+		public static int Serialize(float value, char[] buf, int pos)
+		{
+			var str = value.ToString(Invairant);
+			str.CopyTo(0, buf, pos, str.Length);
+			return pos + str.Length;
+		}
+
+		public static IPostgresTuple ToTuple(float value)
+		{
+			return new FloatTuple(value);
+		}
+
+		class FloatTuple : IPostgresTuple
+		{
+			private readonly float Value;
+
+			public FloatTuple(float value)
+			{
+				this.Value = value;
+			}
+
+			public bool MustEscapeRecord { get { return false; } }
+			public bool MustEscapeArray { get { return false; } }
+
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write(Value);
+			}
+
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
+			{
+				sw.Write(Value);
+			}
+
+			public string BuildTuple(bool quote)
+			{
+				return Value.ToString(Invairant);
+			}
 		}
 	}
 }

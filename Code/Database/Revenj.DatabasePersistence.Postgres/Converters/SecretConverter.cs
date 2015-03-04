@@ -100,11 +100,9 @@ To use secret data type valid EncryptionConfiguration file must be specified");
 			return result;
 		}
 
-		public static string ToDatabase(SecureString value)
+		public static int Serialize(SecureString value, char[] buf, int pos)
 		{
-			if (value == null)
-				return null;
-			return ByteaConverter.ToDatabase(ExtractBytesAndEcrypt(value));
+			return ByteaConverter.Serialize(ExtractBytesAndEcrypt(value), buf, pos);
 		}
 
 		public static IPostgresTuple ToTuple(SecureString value)

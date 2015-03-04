@@ -111,6 +111,56 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
+		public static int Serialize(long value, char[] buf, int start)
+		{
+			if (value == long.MinValue)
+			{
+				"-9223372036854775808".CopyTo(0, buf, start, 20);
+				return start + 20;
+			}
+			int len;
+			int pos;
+			if (value < 0)
+			{
+				pos = start + 21;
+				var abs = (ulong)(-value);
+				do
+				{
+					var div = abs / 100;
+					var rem = abs - div * 100;
+					var num = NumberConverter.Numbers[rem];
+					buf[pos--] = num.Second;
+					buf[pos--] = num.First;
+					abs = div;
+				} while (abs != 0);
+				if (buf[pos + 1] == '0') // TODO: remove branch
+					pos++;
+				buf[pos + 1] = '-';
+				len = start + 21 - pos;
+			}
+			else
+			{
+				pos = 20;
+				var abs = (ulong)(value);
+				do
+				{
+					var div = abs / 100;
+					var rem = abs - div * 100;
+					var num = NumberConverter.Numbers[rem];
+					buf[pos--] = num.Second;
+					buf[pos--] = num.First;
+					abs = div;
+				} while (abs != 0);
+				if (buf[pos + 1] == '0') // TODO: remove branch
+					pos++;
+				len = start + 20 - pos;
+			}
+			pos = pos + 1 - start;
+			for (int i = start; i < start + len; i++)
+				buf[i] = buf[i + pos];
+			return start + len;
+		}
+
 		public static IPostgresTuple ToTuple(long value)
 		{
 			return new LongTuple(value);

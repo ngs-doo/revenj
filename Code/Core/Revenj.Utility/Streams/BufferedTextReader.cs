@@ -8,27 +8,47 @@ namespace Revenj.Utility
 	public class BufferedTextReader : TextReader
 	{
 		private TextReader Reader;
-		private char[] Buffer = new char[4096];
+		private readonly char[] Buffer = new char[4096];
 		private int InBuffer;
 		private int BufferEnd;
 		private int NextChar;
 		private int TotalBuffersRead;
 		public readonly char[] SmallBuffer = new char[64];
 		public readonly char[] TempBuffer = new char[4096];
+		public readonly byte[] ByteBuffer = new byte[1024];
 		public readonly char[] LargeTempBuffer = new char[65536];
 		private char[] WorkingBuffer = new char[4096];
 		private int WorkingPosition;
 
 		public BufferedTextReader(TextReader reader)
 		{
-			this.Reader = reader;
-			Initialize();
+			Reuse(reader);
+		}
+
+		public BufferedTextReader(string value)
+		{
+			Reuse(value);
 		}
 
 		public BufferedTextReader Reuse(TextReader reader)
 		{
 			this.Reader = reader;
 			Initialize();
+			return this;
+		}
+
+		private static readonly TextReader EmptyReader = new StringReader(string.Empty);
+
+		public BufferedTextReader Reuse(string value)
+		{
+			if (value.Length > Buffer.Length)
+				return Reuse(new StringReader(value));
+			TotalBuffersRead = 0;
+			InBuffer = 0;
+			value.CopyTo(0, Buffer, 0, value.Length);
+			this.Reader = EmptyReader;
+			BufferEnd = value.Length;
+			NextChar = BufferEnd > 0 ? Buffer[0] : -1;
 			return this;
 		}
 
@@ -260,6 +280,15 @@ namespace Revenj.Utility
 				if (WorkingBuffer[i] != reference[i])
 					return false;
 			return true;
+		}
+
+		public int BufferHash()
+		{
+			var len = WorkingPosition;
+			var hash = 0x811C9DC5;
+			for (int i = 0; i < len && i < WorkingBuffer.Length; i++)
+				hash = (hash ^ WorkingBuffer[i]) * 0x1000193;
+			return (int)hash;
 		}
 
 		public string BufferToString()

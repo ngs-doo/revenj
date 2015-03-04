@@ -11,6 +11,13 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		private static char[] ArrayEscapes = new[] { ',', '{', '}' }.UnionAll(Whitespace).ToArray();
 		private static char[] EscapeMarkers = new[] { '\\', '"' };
 
+		public static readonly IPostgresTuple Empty;
+
+		static ValueTuple()
+		{
+			Empty = new EmptyValueTuple();
+		}
+
 		private readonly string Value;
 		private readonly bool HasMarkers;
 
@@ -33,6 +40,15 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				EscapeArray = true;
 				HasMarkers = false;
 			}
+		}
+
+		public static IPostgresTuple From(string value)
+		{
+			if (value == null)
+				return null;
+			if (value.Length == 0)
+				return Empty;
+			return new ValueTuple(value);
 		}
 
 		public ValueTuple(string value, bool record, bool array)
@@ -124,6 +140,15 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else
 					sw.Write(Value);
 			}
+		}
+
+		class EmptyValueTuple : IPostgresTuple
+		{
+			public bool MustEscapeRecord { get { return true; } }
+			public bool MustEscapeArray { get { return true; } }
+			public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings) { }
+			public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings) { }
+			public string BuildTuple(bool quote) { return quote ? "'\"\"'" : "\"\""; }
 		}
 	}
 }

@@ -80,6 +80,7 @@
     <Compile Include="ConnectionInfo.cs" />
     <Compile Include="Converters\BoolConverter.cs" />
     <Compile Include="Converters\ByteaConverter.cs" />
+    <Compile Include="Converters\DrawingConverter.cs" />
     <Compile Include="Converters\EnumConverter.cs" />
     <Compile Include="Converters\NumberConverter.cs" />
     <Compile Include="Converters\S3Converter.cs" />
@@ -112,7 +113,7 @@
     <Compile Include="NpgsqlTypes\TypeConverter.cs" />
     <Compile Include="Npgsql\ByteBuffer.cs" />
     <Compile Include="Npgsql\Cache.cs" />
-    <Compile Include="Npgsql\ChunkedMemoryStream.cs" />
+    <Compile Include="Npgsql\LargeMemoryStream.cs" />
     <Compile Include="Npgsql\Copy\NpgsqlCopyFormat.cs" />
     <Compile Include="Npgsql\Copy\NpgsqlCopyIn.cs" />
     <Compile Include="Npgsql\Copy\NpgsqlCopyInStream.cs" />
