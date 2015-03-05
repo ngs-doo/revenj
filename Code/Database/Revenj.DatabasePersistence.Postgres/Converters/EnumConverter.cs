@@ -34,9 +34,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				{
 					cur = reader.Read(innerContext);
 					reader.InitBuffer((char)cur);
-					reader.FillUntil(',', '}');
+					reader.FillUntil('\\', '"');
 					list.Add(factory(reader));
-					cur = reader.Read(innerContext);
+					cur = reader.Read(innerContext + 1);
 				}
 				else
 				{
@@ -79,16 +79,17 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			do
 			{
 				cur = reader.Read();
-				reader.InitBuffer();
 				if (cur == '"' || cur == '\\')
 				{
 					cur = reader.Read(innerContext);
-					reader.FillUntil(',', '}');
+					reader.InitBuffer((char)cur);
+					reader.FillUntil('\\', '"');
 					list.Add(factory(reader));
-					cur = reader.Read(innerContext);
+					cur = reader.Read(innerContext + 1);
 				}
 				else
 				{
+					reader.InitBuffer((char)cur);
 					reader.FillUntil(',', '}');
 					cur = reader.Read();
 					if (reader.BufferMatches("NULL"))
