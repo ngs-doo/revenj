@@ -60,7 +60,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			if (foundAt == buf.Length)
 				throw new NotSupportedException("Invalid date value.");
 			var year = IntConverter.ParsePositive(buf, 0, foundAt);
-			var newBuf = reader.TempBuffer;
+			var newBuf = reader.CharBuffer;
 			for (int i = foundAt + 1; i < buf.Length; i++)
 				newBuf[i - foundAt - 1] = buf[i];
 			for (int i = buf.Length - foundAt - 1; i < 5; i++)

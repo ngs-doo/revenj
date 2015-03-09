@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using System.IO;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -28,7 +27,7 @@ namespace Revenj.DatabasePersistence.Postgres
 		private readonly ConcurrentDictionary<Type, IRepository<IIdentifiable>> Repositories =
 			new ConcurrentDictionary<Type, IRepository<IIdentifiable>>(1, 17);
 		private readonly IServiceLocator Locator;
-		private readonly BufferedTextReader Reader = new BufferedTextReader(new StringReader(string.Empty));
+		private readonly BufferedTextReader Reader = new BufferedTextReader(string.Empty, new char[64], new char[8192]);
 
 		public PostgresDatabaseNotification(
 			ConnectionInfo connectionInfo,

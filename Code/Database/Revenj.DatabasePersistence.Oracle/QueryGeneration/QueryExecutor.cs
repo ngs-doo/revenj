@@ -43,6 +43,9 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 		// Executes a query with a scalar result, i.e. a query that ends with a result operator such as Count, Sum, or Average.
 		public T ExecuteScalar<T>(QueryModel queryModel)
 		{
+			var count = queryModel.ResultOperators.LastOrDefault(it => it is CountResultOperator || it is LongCountResultOperator);
+			if (count != null)
+				return ExecuteCount<T>(queryModel);
 			var seedAggregate = queryModel.ResultOperators.LastOrDefault(it => it is AggregateFromSeedResultOperator) as AggregateFromSeedResultOperator;
 			if (seedAggregate != null)
 				return ExecuteSeedAggregate<T>(queryModel, seedAggregate);
@@ -96,6 +99,14 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 					return (TResult)((object)resultItems.Cast<float?>().Average());
 				throw new NotSupportedException("Unknown type for sum. Supported types: decimal, long, int, double, float");
 			}
+		}
+
+		private T ExecuteCount<T>(QueryModel queryModel)
+		{
+			var resultItems = LoadData(queryModel);
+			if (resultItems.Count == 1)
+				return resultItems[0].GetObject<T>(queryModel.MainFromClause);
+			return default(T);
 		}
 
 		private T ExecuteSum<T>(QueryModel queryModel)

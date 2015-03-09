@@ -122,10 +122,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (e.MustEscapeArray)
 					{
 						sw.Write('"');
-						e.InsertArray(sw, cms.TmpBuffer, "0", mappings);
+						e.InsertArray(sw, cms.SmallBuffer, "0", mappings);
 						sw.Write('"');
 					}
-					else e.InsertArray(sw, cms.TmpBuffer, string.Empty, mappings);
+					else e.InsertArray(sw, cms.SmallBuffer, string.Empty, mappings);
 				}
 				else sw.Write("NULL");
 				for (int i = 1; i < Elements.Length; i++)
@@ -137,10 +137,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						if (e.MustEscapeArray)
 						{
 							sw.Write('"');
-							e.InsertArray(sw, cms.TmpBuffer, "0", mappings);
+							e.InsertArray(sw, cms.SmallBuffer, "0", mappings);
 							sw.Write('"');
 						}
-						else e.InsertArray(sw, cms.TmpBuffer, string.Empty, mappings);
+						else e.InsertArray(sw, cms.SmallBuffer, string.Empty, mappings);
 					}
 					else sw.Write("NULL");
 				}
@@ -164,10 +164,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				if (e.MustEscapeArray)
 				{
 					sw.Write('"');
-					e.InsertArray(sw, cms.TmpBuffer, "0", null);
+					e.InsertArray(sw, cms.SmallBuffer, "0", null);
 					sw.Write('"');
 				}
-				else e.InsertArray(sw, cms.TmpBuffer, string.Empty, null);
+				else e.InsertArray(sw, cms.SmallBuffer, string.Empty, null);
 			}
 			else sw.Write("NULL");
 			for (int i = 1; i < Elements.Length; i++)
@@ -179,10 +179,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (e.MustEscapeArray)
 					{
 						sw.Write('"');
-						e.InsertArray(sw, cms.TmpBuffer, "0", null);
+						e.InsertArray(sw, cms.SmallBuffer, "0", null);
 						sw.Write('"');
 					}
-					else e.InsertArray(sw, cms.TmpBuffer, string.Empty, null);
+					else e.InsertArray(sw, cms.SmallBuffer, string.Empty, null);
 				}
 				else sw.Write("NULL");
 			}

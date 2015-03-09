@@ -88,7 +88,7 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
-			var buffer = sr.TempBuffer;
+			var buffer = sr.CharBuffer;
 			int i = 0;
 			for (; nextToken != '"' && i < buffer.Length; i++, nextToken = sr.Read())
 				buffer[i] = (char)nextToken;

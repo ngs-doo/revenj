@@ -13,9 +13,14 @@ namespace Revenj.Utility
 	{
 		/// <summary>
 		/// Check if application is running in debug mode.
-		/// Set in application config as ApplicationMode=Debug
+		/// Set in application config (configuration/appSettings) as &lt;add key="ApplicationMode" value="Debug"/&gt;
 		/// </summary>
-		public static readonly bool DebugMode = "Debug".Equals(ConfigurationManager.AppSettings["ApplicationMode"], StringComparison.InvariantCultureIgnoreCase);
+		public static readonly bool DebugMode;
+
+		static Exceptions()
+		{
+			DebugMode = "Debug".Equals(ConfigurationManager.AppSettings["ApplicationMode"], StringComparison.InvariantCultureIgnoreCase);
+		}
 		/// <summary>
 		/// Get messages for this exception.
 		/// Unroll exception stack to single message. 

@@ -79,10 +79,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (p.MustEscapeRecord)
 					{
 						sw.Write('"');
-						p.InsertRecord(sw, cms.TmpBuffer, "1", mappings);
+						p.InsertRecord(sw, cms.SmallBuffer, "1", mappings);
 						sw.Write('"');
 					}
-					else p.InsertRecord(sw, cms.TmpBuffer, string.Empty, mappings);
+					else p.InsertRecord(sw, cms.SmallBuffer, string.Empty, mappings);
 				}
 				for (int i = 1; i < Properties.Length; i++)
 				{
@@ -93,10 +93,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						if (p.MustEscapeRecord)
 						{
 							sw.Write('"');
-							p.InsertRecord(sw, cms.TmpBuffer, "1", mappings);
+							p.InsertRecord(sw, cms.SmallBuffer, "1", mappings);
 							sw.Write('"');
 						}
-						else p.InsertRecord(sw, cms.TmpBuffer, string.Empty, mappings);
+						else p.InsertRecord(sw, cms.SmallBuffer, string.Empty, mappings);
 					}
 				}
 				sw.Write(')');

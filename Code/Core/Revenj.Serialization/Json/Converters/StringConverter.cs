@@ -68,6 +68,7 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write('"');
 				if (escaped != 0)
 				{
+					//TODO: use smaller value!? this might cause LOH issue!?
 					if (value.Length < 85000 || escaped < 85000 && (value.Length - escaped) < 85000)
 						sw.Write(value.Substring(0, escaped));
 					else

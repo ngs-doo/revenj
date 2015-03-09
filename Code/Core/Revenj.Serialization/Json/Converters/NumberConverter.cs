@@ -410,9 +410,10 @@ namespace Revenj.Serialization.Json.Converters
 			}
 		}
 
-		public static double DeserializeDouble(BufferedTextReader sr, char[] buffer, ref int nextToken)
+		public static double DeserializeDouble(BufferedTextReader sr, ref int nextToken)
 		{
 			var ind = 0;
+			var buffer = sr.SmallBuffer;
 			do
 			{
 				buffer[ind++] = (char)nextToken;
@@ -420,19 +421,19 @@ namespace Revenj.Serialization.Json.Converters
 			} while (ind < buffer.Length && nextToken != ',' && nextToken != '}' && nextToken != ']');
 			return double.Parse(new string(buffer, 0, ind), NumberStyles.Float, Invariant);
 		}
-		public static List<double> DeserializeDoubleCollection(BufferedTextReader sr, char[] buffer, int nextToken)
+		public static List<double> DeserializeDoubleCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<double>();
-			DeserializeDoubleCollection(sr, buffer, nextToken, res);
+			DeserializeDoubleCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeDoubleCollection(BufferedTextReader sr, char[] buffer, int nextToken, ICollection<double> res)
+		public static void DeserializeDoubleCollection(BufferedTextReader sr, int nextToken, ICollection<double> res)
 		{
-			res.Add(DeserializeDouble(sr, buffer, ref nextToken));
+			res.Add(DeserializeDouble(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeDouble(sr, buffer, ref nextToken));
+				res.Add(DeserializeDouble(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -440,13 +441,13 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
-		public static List<double?> DeserializeDoubleNullableCollection(BufferedTextReader sr, char[] buffer, int nextToken)
+		public static List<double?> DeserializeDoubleNullableCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<double?>();
-			DeserializeDoubleNullableCollection(sr, buffer, nextToken, res);
+			DeserializeDoubleNullableCollection(sr, nextToken, res);
 			return res;
 		}
-		public static void DeserializeDoubleNullableCollection(BufferedTextReader sr, char[] buffer, int nextToken, ICollection<double?> res)
+		public static void DeserializeDoubleNullableCollection(BufferedTextReader sr, int nextToken, ICollection<double?> res)
 		{
 			if (nextToken == 'n')
 			{
@@ -455,7 +456,7 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for double value. Expecting number or null");
 				nextToken = sr.Read();
 			}
-			else res.Add(DeserializeDouble(sr, buffer, ref nextToken));
+			else res.Add(DeserializeDouble(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -466,7 +467,7 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for double value. Expecting number or null");
 					nextToken = sr.Read();
 				}
-				else res.Add(DeserializeDouble(sr, buffer, ref nextToken));
+				else res.Add(DeserializeDouble(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{

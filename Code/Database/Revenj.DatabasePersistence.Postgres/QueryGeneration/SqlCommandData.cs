@@ -7,7 +7,6 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 	public class SqlCommandData
 	{
 		private readonly MainQueryParts Query;
-		private readonly bool Reordered;
 
 		public SqlCommandData(MainQueryParts query)
 		{
@@ -19,7 +18,6 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 				var main = query.Selects[mainIndex];
 				query.Selects.RemoveAt(mainIndex);
 				query.Selects.Insert(0, main);
-				Reordered = true;
 			}
 		}
 
@@ -31,7 +29,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			writer.Write(Statement);
 			writer.Flush();
 			cms.Position = 0;
-			return PostgresDatabaseQuery.NewCommand(cms, Statement, !Reordered);
+			return PostgresDatabaseQuery.NewCommand(cms, Statement, Query.Selects.Count == 1);
 		}
 
 		public ResultObjectMapping ProcessRow(IDataReader dr, BufferedTextReader reader)

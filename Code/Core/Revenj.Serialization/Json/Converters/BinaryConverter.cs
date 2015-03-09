@@ -21,7 +21,7 @@ namespace Revenj.Serialization.Json.Converters
 			foreach (var enc in ImageCodecInfo.GetImageEncoders())
 				Codecs.Add(enc.FormatID);
 			for (int i = 0; i < Environment.ProcessorCount / 2 + 1; i++)
-				Buffers.Add(new char[65536]);
+				Buffers.Add(new char[65536]);//TODO: use 65536/2 instead!?
 		}
 
 		public static void Serialize(byte[] value, TextWriter sw)
@@ -102,11 +102,10 @@ namespace Revenj.Serialization.Json.Converters
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			if (nextToken == '"') return EmptyBytes;
-			char[] base64;
+			var base64 = sr.LargeTempBuffer;
 			var res = new List<byte[]>();
 			int total = 0;
 			int i = 1;
-			base64 = sr.LargeTempBuffer;
 			base64[0] = (char)nextToken;
 			int len;
 			while ((len = sr.ReadUntil(base64, i, '"')) > 0)
@@ -164,7 +163,8 @@ namespace Revenj.Serialization.Json.Converters
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = sr.Read();
 			if (nextToken == '"') return new MemoryStream();
-			var res = ChunkedMemoryStream.Create();
+			//TODO: lazy init stream (more lightweight!?)
+			var res = new ChunkedMemoryStream();
 			var base64 = sr.LargeTempBuffer;
 			int i = 1;
 			base64[0] = (char)nextToken;

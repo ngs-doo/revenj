@@ -1,11 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
 
 namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 {
-	public class ResultObjectMapping : IEnumerable<KeyValuePair<IQuerySource, object>>
+	public class ResultObjectMapping
 	{
 		private readonly Dictionary<IQuerySource, object> ResultObjectsBySource = new Dictionary<IQuerySource, object>();
 
@@ -29,16 +28,6 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 		public T EvaluateSubquery<T>(SubQueryExpression source)
 		{
 			return (T)ResultObjectsBySource[source.QueryModel.MainFromClause];
-		}
-
-		public IEnumerator<KeyValuePair<IQuerySource, object>> GetEnumerator()
-		{
-			return ResultObjectsBySource.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
 		}
 	}
 }

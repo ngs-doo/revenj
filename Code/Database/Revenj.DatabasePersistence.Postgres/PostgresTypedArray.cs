@@ -18,7 +18,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			{
 				Func<T, IPostgresTuple> toTuple = v => new ValueTuple(converter(v), false, true);
 				var writer = cms.GetWriter();
-				ToArray(writer, cms.TmpBuffer, data, toTuple);
+				ToArray(writer, cms.SmallBuffer, data, toTuple);
 				writer.Flush();
 				cms.Position = 0;
 				return cms.GetReader().ReadToEnd();

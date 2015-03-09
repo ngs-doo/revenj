@@ -26,10 +26,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				if (quote)
 				{
 					sw.Write('\'');
-					tuple.InsertRecord(sw, cms.TmpBuffer, string.Empty, EscapeQuote);
+					tuple.InsertRecord(sw, cms.SmallBuffer, string.Empty, EscapeQuote);
 					sw.Write('\'');
 				}
-				else tuple.InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
+				else tuple.InsertRecord(sw, cms.SmallBuffer, string.Empty, null);
 				sw.Flush();
 				cms.Position = 0;
 				return cms.GetReader().ReadToEnd();

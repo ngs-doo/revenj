@@ -372,7 +372,7 @@ Near: " + ex.Where, ex);
 			using (var cms = Revenj.Utility.ChunkedMemoryStream.Create())
 			{
 				var sw = cms.GetWriter();
-				var buf = cms.TmpBuffer;
+				var buf = cms.SmallBuffer;
 				foreach (var it in data)
 				{
 					var p = it[0];

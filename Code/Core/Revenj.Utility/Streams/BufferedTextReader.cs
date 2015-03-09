@@ -13,20 +13,24 @@ namespace Revenj.Utility
 		private int BufferEnd;
 		private int NextChar;
 		private int TotalBuffersRead;
-		public readonly char[] SmallBuffer = new char[64];
-		public readonly char[] TempBuffer = new char[4096];
+		public readonly char[] SmallBuffer;
+		public readonly char[] CharBuffer;
 		public readonly byte[] ByteBuffer = new byte[1024];
-		public readonly char[] LargeTempBuffer = new char[65536];
+		public readonly char[] LargeTempBuffer = new char[32768];
 		private char[] WorkingBuffer = new char[4096];
 		private int WorkingPosition;
 
-		public BufferedTextReader(TextReader reader)
+		public BufferedTextReader(TextReader reader, char[] smallBuffer, char[] tempBuffer)
 		{
+			this.SmallBuffer = smallBuffer;
+			this.CharBuffer = tempBuffer;
 			Reuse(reader);
 		}
 
-		public BufferedTextReader(string value)
+		public BufferedTextReader(string value, char[] smallBuffer, char[] tempBuffer)
 		{
+			this.SmallBuffer = smallBuffer;
+			this.CharBuffer = tempBuffer;
 			Reuse(value);
 		}
 
@@ -169,7 +173,7 @@ namespace Revenj.Utility
 					WorkingBuffer = tmp;
 				}
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input");
+			throw new FrameworkException("At the end of input. Unable to match: " + match);
 		}
 
 		public int FillUntil(char match1, char match2)
@@ -217,7 +221,7 @@ namespace Revenj.Utility
 					WorkingBuffer = tmp;
 				}
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input");
+			throw new FrameworkException("At the end of input. Unable to match: " + match1 + " or " + match2);
 		}
 
 		public int FillUntil(TextWriter writer, char match1, char match2)
@@ -258,7 +262,7 @@ namespace Revenj.Utility
 					InBuffer = i;
 				}
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input");
+			throw new FrameworkException("At the end of input. Unable to match: " + match1 + " or " + match2);
 		}
 
 		public void AddToBuffer(char ch)
@@ -341,7 +345,7 @@ namespace Revenj.Utility
 				if (j == target.Length)
 					return j - from;
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input");
+			throw new FrameworkException("At the end of input. Unable to match: " + match);
 		}
 
 		public int ReadUntil(char[] target, int from, char match1, char match2)
@@ -385,7 +389,7 @@ namespace Revenj.Utility
 				if (j == target.Length)
 					return j - from;
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input");
+			throw new FrameworkException("At the end of input. Unable to match: " + match1 + " or " + match2);
 		}
 
 		public override int Read(char[] buffer, int index, int count)

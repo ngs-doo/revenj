@@ -24,7 +24,8 @@ namespace Revenj.Utility
 		private static readonly char[] CharMap;
 		private static readonly int[] CharLookup;
 
-		public readonly char[] TmpBuffer = new char[38];
+		public readonly char[] SmallBuffer = new char[64];
+		public readonly char[] CharBuffer = new char[BlockSize * 4 / 3 + 2];
 
 		static ChunkedMemoryStream()
 		{
@@ -42,8 +43,6 @@ namespace Revenj.Utility
 		private CustomWriter Writer;
 		private StreamReader Reader;
 		private BufferedTextReader BufferedReader;
-
-		private char[] CharBuffer;
 
 		/// <summary>
 		/// Create or get a new instance of memory stream
@@ -323,8 +322,6 @@ namespace Revenj.Utility
 			if (TotalSize == 0)
 				return;
 			var tmpBuf = new byte[3];
-			if (CharBuffer == null)
-				CharBuffer = new char[BlockSize * 4 / 3 + 2];
 			var base64 = CharBuffer;
 			var total = TotalSize >> BlockShift;
 			var remaining = TotalSize & BlockAnd;
@@ -415,14 +412,14 @@ namespace Revenj.Utility
 		public BufferedTextReader UseBufferedReader(TextReader reader)
 		{
 			if (BufferedReader == null)
-				return BufferedReader = new BufferedTextReader(reader);
+				return BufferedReader = new BufferedTextReader(reader, SmallBuffer, CharBuffer);
 			return BufferedReader.Reuse(reader);
 		}
 
 		public BufferedTextReader UseBufferedReader(string value)
 		{
 			if (BufferedReader == null)
-				return BufferedReader = new BufferedTextReader(value);
+				return BufferedReader = new BufferedTextReader(value, SmallBuffer, CharBuffer);
 			return BufferedReader.Reuse(value);
 		}
 

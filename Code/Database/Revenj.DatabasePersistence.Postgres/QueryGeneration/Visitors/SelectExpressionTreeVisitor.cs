@@ -262,9 +262,9 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 									array = PostgresRecordConverter.ParseArray(obj as string);
 							}
 						}
-						var resultItems = new List<ResultObjectMapping>();
-						foreach (var it in array)
-							resultItems.Add(ssd.ProcessRow(rom, reader, it));
+						var resultItems = new ResultObjectMapping[array.Length];
+						for (int i = 0; i < array.Length; i++)
+							resultItems[i] = ssd.ProcessRow(rom, reader, array[i]);
 						return projector.Process(resultItems);
 					});
 			}
@@ -280,9 +280,12 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				Func = ProjectorBuildingExpressionTreeVisitor<TOut>.BuildProjector(model);
 			}
 
-			public IQueryable Process(IEnumerable<ResultObjectMapping> items)
+			public IQueryable Process(ResultObjectMapping[] items)
 			{
-				return items.Select(it => Func(it)).ToList().AsQueryable();
+				var result = new TOut[items.Length];
+				for (int i = 0; i < items.Length; i++)
+					result[i] = Func(items[i]);
+				return Queryable.AsQueryable(result);
 			}
 
 			public object Eval(ResultObjectMapping item)
@@ -293,7 +296,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 
 		interface IExecuteFunc
 		{
-			IQueryable Process(IEnumerable<ResultObjectMapping> items);
+			IQueryable Process(ResultObjectMapping[] items);
 			object Eval(ResultObjectMapping item);
 		}
 

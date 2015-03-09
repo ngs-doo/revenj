@@ -1,11 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 {
-	public class ResultObjectMapping : IEnumerable<KeyValuePair<IQuerySource, object>>
+	public class ResultObjectMapping
 	{
 		private readonly Dictionary<IQuerySource, object> ResultObjectsBySource = new Dictionary<IQuerySource, object>();
 
@@ -34,11 +33,6 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 		public IEnumerator<KeyValuePair<IQuerySource, object>> GetEnumerator()
 		{
 			return ResultObjectsBySource.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
 		}
 	}
 }

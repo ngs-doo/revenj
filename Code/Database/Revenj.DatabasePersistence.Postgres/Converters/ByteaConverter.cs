@@ -261,10 +261,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (quote)
 					{
 						sw.Write('\'');
-						InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
+						InsertRecord(sw, cms.SmallBuffer, string.Empty, null);
 						sw.Write('\'');
 					}
-					else InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
+					else InsertRecord(sw, cms.SmallBuffer, string.Empty, null);
 					sw.Flush();
 					cms.Position = 0;
 					return cms.GetReader().ReadToEnd();
@@ -313,10 +313,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					if (quote)
 					{
 						sw.Write('\'');
-						InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
+						InsertRecord(sw, cms.SmallBuffer, string.Empty, null);
 						sw.Write('\'');
 					}
-					else InsertRecord(sw, cms.TmpBuffer, string.Empty, null);
+					else InsertRecord(sw, cms.SmallBuffer, string.Empty, null);
 					sw.Flush();
 					cms.Position = 0;
 					return cms.GetReader().ReadToEnd();
