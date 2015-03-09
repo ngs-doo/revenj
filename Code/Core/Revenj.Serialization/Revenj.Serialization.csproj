@@ -91,7 +91,6 @@
     <Compile Include="GenericDeserializationBinder.cs" />
     <Compile Include="Json\JsonSerialization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Json\StringBuilderReader.cs" />
     <Compile Include="WireSerialization.cs" />
     <Compile Include="XmlSerialization.cs" />
   </ItemGroup>

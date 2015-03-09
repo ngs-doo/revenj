@@ -302,8 +302,10 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 			{
 				return "-infinity";
 			}
-			//TODO: hack to detect dates!?
 			var dt = (DateTime)NativeData;
+			//HACK: detect dates
+			if (dt.Date == dt)
+				return dt.ToString("yyyy-MM-dd", DateTimeFormatInfo.InvariantInfo);
 			return dt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss.FFFFFF+00", DateTimeFormatInfo.InvariantInfo);
 		}
 
