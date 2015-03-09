@@ -80,6 +80,8 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public OracleParameter ToParameter(object value)
 		{
+			if (value is Guid)
+				return new OracleParameter { OracleDbType = OracleDbType.Raw, Value = ((Guid)value).ToByteArray() };
 			return new OracleParameter { OracleDbType = OracleDbType.Raw, Value = value };
 		}
 

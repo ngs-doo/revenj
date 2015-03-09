@@ -377,11 +377,21 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 				var queryable = ce.Value as IQueryable;
 				if (queryable != null)
 					return GetQueryableExpression(name, queryable);
-				if (Context.CanUseParams)
+				var ien = ce.Value as IEnumerable;
+				var array = ien != null ? ien.Cast<object>().ToArray() : null;
+				var firstElem = array != null ? array.FirstOrDefault(it => it != null) : null;
+				var elementType = firstElem != null ? firstElem.GetType()
+					: ce.Type.IsArray ? ce.Type.GetElementType()
+					: ce.Type.IsGenericType ? ce.Type.GetGenericArguments()[0]
+					: null;
+				if (Context.CanUseParams && elementType != null)
 				{
-					var factory = ConverterFactory.GetVarrayParameterFactory(ce.Type);
+					var factory = ConverterFactory.GetVarrayParameterFactory(elementType);
 					if (factory != null)
-						return Parameters.Add(factory(ce.Value as IEnumerable));
+					{
+						var p = Parameters.Add(factory(ce.Value as IEnumerable));
+						return @"(SELECT sq$.OBJECT_VALUE as ""{1}"" FROM TABLE({0}) sq$)".With(p, name);
+					}
 				}
 				if (ce.Type.IsArray || ce.Value is Array)
 					return FormatStringArray(ce.Value, name, ce.Type);
