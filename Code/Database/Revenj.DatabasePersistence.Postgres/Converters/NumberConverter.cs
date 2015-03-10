@@ -10,10 +10,12 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		{
 			public readonly char First;
 			public readonly char Second;
+			public readonly byte Offset;
 			public Pair(int number)
 			{
 				First = (char)((number / 10) + '0');
 				Second = (char)((number % 10) + '0');
+				Offset = number < 10 ? (byte)1 : (byte)0;
 			}
 		}
 		internal static readonly Pair[] Numbers;

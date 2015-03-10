@@ -124,19 +124,21 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			{
 				pos = start + 21;
 				var abs = (ulong)(-value);
+				NumberConverter.Pair num;
 				do
 				{
 					var div = abs / 100;
 					var rem = abs - div * 100;
-					var num = NumberConverter.Numbers[rem];
+					num = NumberConverter.Numbers[rem];
 					buf[pos--] = num.Second;
 					buf[pos--] = num.First;
 					abs = div;
-				} while (abs != 0);
-				if (buf[pos + 1] == '0') // TODO: remove branch
-					pos++;
-				buf[pos + 1] = '-';
-				len = start + 21 - pos;
+					if (abs == 0) break;
+				} while (pos > 1);
+				pos += num.Offset;
+				buf[pos] = '-';
+				len = start + 22 - pos;
+				pos = pos - start;
 			}
 			else
 			{
@@ -154,8 +156,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				if (buf[pos + 1] == '0') // TODO: remove branch
 					pos++;
 				len = start + 20 - pos;
+				pos = pos + 1 - start;
 			}
-			pos = pos + 1 - start;
 			for (int i = start; i < start + len; i++)
 				buf[i] = buf[i + pos];
 			return start + len;
@@ -194,18 +196,18 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				else
 					abs = (ulong)(Value);
 				int pos = 20;
-				while (pos > 1)
+				NumberConverter.Pair num;
+				do
 				{
 					var div = abs / 100;
 					var rem = abs - div * 100;
-					var num = NumberConverter.Numbers[rem];
+					num = NumberConverter.Numbers[rem];
 					buf[pos--] = num.Second;
 					buf[pos--] = num.First;
 					abs = div;
 					if (abs == 0) break;
-				}
-				if (buf[pos + 1] == '0')//TODO: remove branch
-					pos++;
+				} while (pos > 1);
+				pos += num.Offset;
 				sw.Write(buf, pos + 1, 20 - pos);
 			}
 

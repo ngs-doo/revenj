@@ -40,8 +40,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			if (size > 18)
 			{
 				if (neg)
-					return -decimal.Parse(new string(buf, 0, size));
-				return decimal.Parse(new string(buf, 0, size));
+					return -decimal.Parse(new string(buf, 0, size), Invariant);
+				return decimal.Parse(new string(buf, 0, size), Invariant);
 			}
 			long value = 0;
 			int scale = 0;
