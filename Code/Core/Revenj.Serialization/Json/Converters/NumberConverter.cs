@@ -9,16 +9,17 @@ namespace Revenj.Serialization.Json.Converters
 	public static class NumberConverter
 	{
 		private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
-		private static readonly decimal[] Decimals;
 
 		struct Pair
 		{
 			public readonly char First;
 			public readonly char Second;
+			public readonly byte Offset;
 			public Pair(int number)
 			{
 				First = (char)((number / 10) + '0');
 				Second = (char)((number % 10) + '0');
+				Offset = number < 10 ? (byte)1 : (byte)0;
 			}
 		}
 		private static readonly Pair[] Numbers;
@@ -28,13 +29,6 @@ namespace Revenj.Serialization.Json.Converters
 			Numbers = new Pair[100];
 			for (int i = 0; i < Numbers.Length; i++)
 				Numbers[i] = new Pair(i);
-			Decimals = new decimal[28];
-			var pow = 1m;
-			for (int i = 0; i < Decimals.Length; i++)
-			{
-				pow = pow / 10;
-				Decimals[i] = pow;
-			}
 		}
 
 		internal static void Write2(int number, char[] buffer, int start)
@@ -93,17 +87,18 @@ namespace Revenj.Serialization.Json.Converters
 			else
 				abs = (uint)(value);
 			int pos = 10;
+			Pair num;
 			do
 			{
 				var div = abs / 100;
 				var rem = abs - div * 100;
-				var num = Numbers[rem];
+				num = Numbers[rem];
 				buffer[pos--] = num.Second;
 				buffer[pos--] = num.First;
 				abs = div;
-			} while (abs != 0);
-			if (buffer[pos + 1] == '0') // TODO: remove branch
-				pos++;
+				if (abs == 0) break;
+			} while (pos > 1);
+			pos += num.Offset;
 			sw.Write(buffer, pos + 1, 10 - pos);
 		}
 		public static void Serialize(int? value, TextWriter sw, char[] buffer)
@@ -130,17 +125,18 @@ namespace Revenj.Serialization.Json.Converters
 			else
 				abs = (ulong)(value);
 			int pos = 20;
+			Pair num;
 			do
 			{
 				var div = abs / 100;
 				var rem = abs - div * 100;
-				var num = Numbers[rem];
+				num = Numbers[rem];
 				buffer[pos--] = num.Second;
 				buffer[pos--] = num.First;
 				abs = div;
-			} while (abs != 0);
-			if (buffer[pos + 1] == '0')//TODO: remove branch
-				pos++;
+				if (abs == 0) break;
+			} while (pos > 1);
+			pos += num.Offset;
 			sw.Write(buffer, pos + 1, 20 - pos);
 		}
 		public static void Serialize(long? value, TextWriter sw, char[] buffer)
@@ -177,38 +173,48 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static decimal DeserializeDecimal(BufferedTextReader sr, ref int nextToken)
 		{
-			var negative = nextToken == '-';
-			if (negative) nextToken = sr.Read();
+			var neg = nextToken == '-';
+			if (neg)
+				nextToken = sr.Read();
+			var buf = sr.SmallBuffer;
+			buf[0] = (char)nextToken;
+			var size = sr.ReadNumber(buf, 1) + 1;
+			nextToken = sr.Read();
+			if (nextToken >= '0' && nextToken <= '9' || nextToken == '.')
+				throw new SerializationException("Too long decimal number: " + new string(buf, 0, size) + ". At position" + JsonSerialization.PositionInStream(sr));
+			if (size > 18)
+			{
+				if (neg)
+					return -decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+				return decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+			}
 			long value = 0;
-			for (int i = 0; i < 18; i++)
+			int scale = 0;
+			char ch;
+			int num;
+			for (int i = 0; i < size && i < buf.Length; i++)
 			{
-				if (nextToken == '.')
-					break;
-				if (nextToken < '0' || nextToken > '9')
-					return negative ? -value : value;
-				value = (value << 3) + (value << 1) + nextToken - 48;
-				nextToken = sr.Read();
-			}
-			decimal res = value;
-			while (nextToken >= '0' && nextToken <= '9')
-			{
-				res = res * 10 + (nextToken - 48);
-				nextToken = sr.Read();
-			}
-			if (nextToken == '.')
-			{
-				nextToken = sr.Read();
-				for (int i = 0; i < Decimals.Length; i++)
+				ch = buf[i];
+				if (ch == '.')
 				{
-					if (nextToken < '0' || nextToken > '9')
-						return negative ? -res : res;
-					res += Decimals[i] * (nextToken - 48);
-					nextToken = sr.Read();
+					if (scale != 0)
+						throw new SerializationException("Multiple '.' found in decimal value: " + new string(buf, 0, size) + ". At position" + JsonSerialization.PositionInStream(sr));
+					scale = size - i - 1;
 				}
-				if (nextToken >= '0' && nextToken <= '9')
-					throw new SerializationException("Decimal number contains too many decimal at position: " + JsonSerialization.PositionInStream(sr));
+				else
+				{
+					num = ch - 48;
+					if (num >= 0 && num <= 9)
+						value = (value << 3) + (value << 1) + num;
+					else
+					{
+						if (neg)
+							return -decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+						return decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+					}
+				}
 			}
-			return negative ? -res : res;
+			return new decimal((int)value, (int)(value >> 32), 0, neg, (byte)scale);
 		}
 
 		public static List<decimal> DeserializeDecimalCollection(BufferedTextReader sr, int nextToken)
@@ -268,21 +274,41 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static int DeserializeInt(BufferedTextReader sr, ref int nextToken)
 		{
+			var buf = sr.SmallBuffer;
 			int value = 0;
-			int sign = 1;
-			var negative = nextToken == '-';
-			if (negative)
+			int num;
+			if (nextToken == '-')
 			{
 				nextToken = sr.Read();
-				sign = -1;
-			}
-			while (nextToken >= '0' && nextToken <= '9')
-			{
-				value = value * 10 + (nextToken - '0');
+				buf[0] = (char)nextToken;
+				var size = sr.ReadNumber(buf, 1) + 1;
 				nextToken = sr.Read();
+				for (int i = 0; i < size && i < buf.Length; i++)
+				{
+					num = buf[i] - '0';
+					if (num >= 0 && num <= 9)
+						value = (value << 3) + (value << 1) - num;
+					else
+						return -int.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+				}
 			}
-			return sign * value;
+			else
+			{
+				buf[0] = (char)nextToken;
+				var size = sr.ReadNumber(buf, 1) + 1;
+				nextToken = sr.Read();
+				for (int i = 0; i < size && i < buf.Length; i++)
+				{
+					num = buf[i] - '0';
+					if (num >= 0 && num <= 9)
+						value = (value << 3) + (value << 1) + num;
+					else
+						return int.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+				}
+			}
+			return value;
 		}
+
 		public static List<int> DeserializeIntCollection(BufferedTextReader sr, int nextToken)
 		{
 			var res = new List<int>();
@@ -341,19 +367,38 @@ namespace Revenj.Serialization.Json.Converters
 		public static long DeserializeLong(BufferedTextReader sr, ref int nextToken)
 		{
 			long value = 0;
-			int sign = 1;
-			var negative = nextToken == '-';
-			if (negative)
+			var buf = sr.SmallBuffer;
+			int num;
+			if (nextToken == '-')
 			{
 				nextToken = sr.Read();
-				sign = -1;
-			}
-			while (nextToken >= '0' && nextToken <= '9')
-			{
-				value = value * 10 + (nextToken - '0');
+				buf[0] = (char)nextToken;
+				var size = sr.ReadNumber(buf, 1) + 1;
 				nextToken = sr.Read();
+				for (int i = 0; i < size && i < buf.Length; i++)
+				{
+					num = buf[i] - '0';
+					if (num >= 0 && num <= 9)
+						value = (value << 3) + (value << 1) - num;
+					else
+						return -long.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+				}
 			}
-			return sign * value;
+			else
+			{
+				buf[0] = (char)nextToken;
+				var size = sr.ReadNumber(buf, 1) + 1;
+				nextToken = sr.Read();
+				for (int i = 0; i < size && i < buf.Length; i++)
+				{
+					num = buf[i] - '0';
+					if (num >= 0 && num <= 9)
+						value = (value << 3) + (value << 1) + num;
+					else
+						return long.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+				}
+			}
+			return value;
 		}
 		public static List<long> DeserializeLongCollection(BufferedTextReader sr, int nextToken)
 		{
@@ -412,14 +457,11 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static double DeserializeDouble(BufferedTextReader sr, ref int nextToken)
 		{
-			var ind = 0;
-			var buffer = sr.SmallBuffer;
-			do
-			{
-				buffer[ind++] = (char)nextToken;
-				nextToken = sr.Read();
-			} while (ind < buffer.Length && nextToken != ',' && nextToken != '}' && nextToken != ']');
-			return double.Parse(new string(buffer, 0, ind), NumberStyles.Float, Invariant);
+			var buf = sr.SmallBuffer;
+			buf[0] = (char)nextToken;
+			var size = sr.ReadNumber(buf, 1) + 1;
+			nextToken = sr.Read();
+			return double.Parse(new string(buf, 0, size), NumberStyles.Float, Invariant);
 		}
 		public static List<double> DeserializeDoubleCollection(BufferedTextReader sr, int nextToken)
 		{
@@ -478,14 +520,11 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static float DeserializeFloat(BufferedTextReader sr, ref int nextToken)
 		{
-			var ind = 0;
-			var buffer = sr.SmallBuffer;
-			do
-			{
-				buffer[ind++] = (char)nextToken;
-				nextToken = sr.Read();
-			} while (ind < buffer.Length && nextToken != ',' && nextToken != '}' && nextToken != ']');
-			return float.Parse(new string(buffer, 0, ind), NumberStyles.Float, Invariant);
+			var buf = sr.SmallBuffer;
+			buf[0] = (char)nextToken;
+			var size = sr.ReadNumber(buf, 1) + 1;
+			nextToken = sr.Read();
+			return float.Parse(new string(buf, 0, size), NumberStyles.Float, Invariant);
 		}
 		public static List<float> DeserializeFloatCollection(BufferedTextReader sr, int nextToken)
 		{

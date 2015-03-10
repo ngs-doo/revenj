@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
-using Revenj.Common;
 
 namespace Revenj.Utility
 {
@@ -136,7 +136,7 @@ namespace Revenj.Utility
 				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				InBuffer = 0;
 				if (BufferEnd == 0)
-					throw new FrameworkException("At the end of input");
+					throw new SerializationException("At the end of input");
 			}
 			var j = WorkingPosition;
 			do
@@ -173,7 +173,7 @@ namespace Revenj.Utility
 					WorkingBuffer = tmp;
 				}
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input. Unable to match: " + match);
+			throw new SerializationException("At the end of input. Unable to match: " + match);
 		}
 
 		public int FillUntil(char match1, char match2)
@@ -184,7 +184,7 @@ namespace Revenj.Utility
 				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				InBuffer = 0;
 				if (BufferEnd == 0)
-					throw new FrameworkException("At the end of input");
+					throw new SerializationException("At the end of input");
 			}
 			var j = WorkingPosition;
 			do
@@ -221,7 +221,7 @@ namespace Revenj.Utility
 					WorkingBuffer = tmp;
 				}
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input. Unable to match: " + match1 + " or " + match2);
+			throw new SerializationException("At the end of input. Unable to match: " + match1 + " or " + match2);
 		}
 
 		public int FillUntil(TextWriter writer, char match1, char match2)
@@ -232,7 +232,7 @@ namespace Revenj.Utility
 				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				InBuffer = 0;
 				if (BufferEnd == 0)
-					throw new FrameworkException("At the end of input");
+					throw new SerializationException("At the end of input");
 			}
 			do
 			{
@@ -262,7 +262,7 @@ namespace Revenj.Utility
 					InBuffer = i;
 				}
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input. Unable to match: " + match1 + " or " + match2);
+			throw new SerializationException("At the end of input. Unable to match: " + match1 + " or " + match2);
 		}
 
 		public void AddToBuffer(char ch)
@@ -312,7 +312,7 @@ namespace Revenj.Utility
 				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				InBuffer = 0;
 				if (BufferEnd == 0)
-					throw new FrameworkException("At the end of input");
+					throw new SerializationException("At the end of input");
 			}
 			var j = from;
 			do
@@ -345,7 +345,7 @@ namespace Revenj.Utility
 				if (j == target.Length)
 					return j - from;
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input. Unable to match: " + match);
+			throw new SerializationException("At the end of input. Unable to match: " + match);
 		}
 
 		public int ReadUntil(char[] target, int from, char match1, char match2)
@@ -356,7 +356,7 @@ namespace Revenj.Utility
 				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
 				InBuffer = 0;
 				if (BufferEnd == 0)
-					throw new FrameworkException("At the end of input");
+					throw new SerializationException("At the end of input");
 			}
 			var j = from;
 			do
@@ -389,7 +389,49 @@ namespace Revenj.Utility
 				if (j == target.Length)
 					return j - from;
 			} while (NextChar != -1);
-			throw new FrameworkException("At the end of input. Unable to match: " + match1 + " or " + match2);
+			throw new SerializationException("At the end of input. Unable to match: " + match1 + " or " + match2);
+		}
+
+		public int ReadNumber(char[] target, int from)
+		{
+			if (InBuffer >= BufferEnd)
+			{
+				TotalBuffersRead += BufferEnd;
+				BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
+				InBuffer = 0;
+				if (BufferEnd == 0)
+					throw new SerializationException("At the end of input");
+			}
+			var j = from;
+			do
+			{
+				var i = InBuffer;
+				char ch;
+				for (; i < BufferEnd && i < Buffer.Length && j < target.Length; i++, j++)
+				{
+					ch = target[j] = Buffer[i];
+					if (ch >= '0' && ch <= '9' || ch == '.' || ch == '+' || ch == '-' || ch == 'e' || ch == 'E')
+						continue;
+					NextChar = ch;
+					InBuffer = i;
+					return j - from;
+				}
+				if (i == BufferEnd)
+				{
+					TotalBuffersRead += BufferEnd;
+					BufferEnd = Reader.Read(Buffer, 0, Buffer.Length);
+					InBuffer = 0;
+					NextChar = BufferEnd > 0 ? Buffer[0] : -1;
+				}
+				else
+				{
+					NextChar = Buffer[i];
+					InBuffer = i;
+				}
+				if (j == target.Length)
+					return j - from;
+			} while (NextChar != -1);
+			throw new SerializationException("At the end of input. Unable read number.");
 		}
 
 		public override int Read(char[] buffer, int index, int count)
