@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Autofac.Core;
+using Revenj.Extensibility.Autofac.Core;
 using Castle.DynamicProxy;
 using Revenj.Utility;
 

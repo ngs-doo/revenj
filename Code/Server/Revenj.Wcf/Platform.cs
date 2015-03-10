@@ -1,6 +1,6 @@
 ﻿using System;
-using Autofac;
-using Autofac.Configuration;
+using Revenj.Extensibility.Autofac;
+using Revenj.Extensibility.Autofac.Configuration;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Wcf;

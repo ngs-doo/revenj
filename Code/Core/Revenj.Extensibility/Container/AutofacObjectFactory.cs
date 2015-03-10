@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Autofac;
-using Autofac.Core;
+using Revenj.Extensibility.Autofac;
+using Revenj.Extensibility.Autofac.Core;
 
 namespace Revenj.Extensibility
 {

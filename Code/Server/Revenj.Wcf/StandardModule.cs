@@ -6,9 +6,9 @@ using System.Reflection;
 using System.Security;
 using System.ServiceModel;
 using System.Xml.Linq;
-using Autofac;
-using Autofac.Builder;
-using Autofac.Core;
+using Revenj.Extensibility.Autofac;
+using Revenj.Extensibility.Autofac.Builder;
+using Revenj.Extensibility.Autofac.Core;
 using Revenj.Api;
 using Revenj.DatabasePersistence;
 using Revenj.DatabasePersistence.Postgres;
@@ -25,7 +25,7 @@ namespace Revenj.Wcf
 		public StandardModuleNoDatabase() : base(false) { }
 	}
 
-	public class StandardModule : Autofac.Module
+	public class StandardModule : Revenj.Extensibility.Autofac.Module
 	{
 		private readonly bool WithDatabase;
 
@@ -35,7 +35,7 @@ namespace Revenj.Wcf
 			this.WithDatabase = withDatabase;
 		}
 
-		protected override void Load(Autofac.ContainerBuilder builder)
+		protected override void Load(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
 			//TODO: register applications as implementation only
 			builder.RegisterType<RestApplication>().As<RestApplication, IRestApplication>();
@@ -60,7 +60,7 @@ namespace Revenj.Wcf
 			base.Load(builder);
 		}
 
-		class AspectsModule : Autofac.Module
+		class AspectsModule : Revenj.Extensibility.Autofac.Module
 		{
 			private readonly AspectRepository Repository;
 
@@ -82,7 +82,7 @@ namespace Revenj.Wcf
 			}
 		}
 
-		private static void SetupExtensibility(Autofac.ContainerBuilder builder)
+		private static void SetupExtensibility(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
 			var dynamicProxy = new CastleDynamicProxyProvider();
 			var aopRepository = new AspectRepository(dynamicProxy);
@@ -109,7 +109,7 @@ namespace Revenj.Wcf
 				builder.RegisterModule(new AspectsModule(aopRepository));
 		}
 
-		private static void SetupPatterns(Autofac.ContainerBuilder builder)
+		private static void SetupPatterns(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
 			var serverModels =
 				(from key in ConfigurationManager.AppSettings.AllKeys
@@ -154,7 +154,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			throw new ConfigurationErrorsException("Can't find assembly " + name + ". Check your configuration");
 		}
 
-		private static void SetupPostgres(Autofac.ContainerBuilder builder)
+		private static void SetupPostgres(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
 			var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
 			if (string.IsNullOrEmpty(cs))
@@ -175,7 +175,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 
 		/*
 		//TODO: Oracle has ugly dependencies. Use it only when necessary
-		private static void SetupOracle(Autofac.ContainerBuilder builder)
+		private static void SetupOracle(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
 			var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
 			if (string.IsNullOrEmpty(cs))
@@ -193,7 +193,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 			builder.RegisterType<Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
 		}*/
 
-		private static void SetupSerialization(Autofac.ContainerBuilder builder)
+		private static void SetupSerialization(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
 			builder.RegisterType<GenericDataContractResolver>().SingleInstance();
 			builder.RegisterType<XmlSerialization>().As<ISerialization<XElement>>().SingleInstance();
@@ -205,7 +205,7 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 			builder.RegisterType<WireSerialization>().As<IWireSerialization>().SingleInstance();
 		}
 
-		class OnContainerBuild : Autofac.IStartable
+		class OnContainerBuild : Revenj.Extensibility.Autofac.IStartable
 		{
 			private readonly IObjectFactory Factory;
 

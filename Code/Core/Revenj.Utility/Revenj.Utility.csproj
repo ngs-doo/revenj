@@ -70,7 +70,6 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="PdfConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Streams\StreamOperations.cs" />
     <Compile Include="TemporaryResources.cs" />
     <Compile Include="TopologicalSort.cs" />
     <Compile Include="Reflection\TypeUtility.cs" />

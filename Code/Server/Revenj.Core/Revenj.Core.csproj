@@ -37,9 +37,6 @@
     <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac">
-      <HintPath>..\..\..\Dependencies\Autofac\Autofac.dll</HintPath>
-    </Reference>
     <Reference Include="Remotion.Linq">
       <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>

@@ -156,22 +156,41 @@ namespace Revenj.Wcf
 					return result.Result as Stream;
 				else if (result.Result is StreamReader)
 					return (result.Result as StreamReader).BaseStream;
-				//Warning LOH leak
 				else if (result.Result is StringBuilder)
-					return (result.Result as StringBuilder).ToStream();
-				//Warning LOH leak
+				{
+					var sb = result.Result as StringBuilder;
+					var cms = ChunkedMemoryStream.Create();
+					var sw = cms.GetWriter();
+					for (int i = 0; i < sb.Length; )
+					{
+						var min = Math.Min(sb.Length - i, cms.CharBuffer.Length);
+						sb.CopyTo(i, cms.CharBuffer, 0, min);
+						i += min;
+						sw.Write(cms.CharBuffer, 0, min);
+					}
+					sw.Flush();
+					cms.Position = 0;
+					return cms;
+				}
 				else if (result.Result is byte[])
 					return new MemoryStream(result.Result as byte[]);
-				//Warning LOH leak
 				else if (result.Result is string)
-					return new StringBuilder(result.Result as string).ToStream();
-				//Warning LOH leak
+				{
+					var cms = ChunkedMemoryStream.Create();
+					var sw = cms.GetWriter();
+					sw.Write(result.Result as string);
+					sw.Flush();
+					cms.Position = 0;
+					return cms;
+				}
 				else if (result.Result is char[])
 				{
-					var ch = result.Result as char[];
-					var sb = new StringBuilder(ch.Length);
-					sb.Append(ch);
-					return sb.ToStream();
+					var cms = ChunkedMemoryStream.Create();
+					var sw = cms.GetWriter();
+					sw.Write(result.Result as char[]);
+					sw.Flush();
+					cms.Position = 0;
+					return cms;
 				}
 				return Utility.ReturnError(
 					"Unexpected command result. Can't convert "
@@ -184,22 +203,55 @@ namespace Revenj.Wcf
 				if (result.Result is Stream)
 				{
 					var stream = result.Result as Stream;
-					try { return stream.ToBase64Stream(); }
+					try
+					{
+						var cms = stream as ChunkedMemoryStream;
+						if (cms != null)
+							return cms.ToBase64Stream();
+						else
+						{
+							cms = new ChunkedMemoryStream(stream);
+							try { return cms.ToBase64Stream(); }
+							finally { cms.Dispose(); }
+						}
+					}
 					finally { stream.Dispose(); }
 				}
 				else if (result.Result is StreamReader)
 				{
 					var sr = result.Result as StreamReader;
-					try { return sr.BaseStream.ToBase64Stream(); }
+					try
+					{
+						var cms = sr.BaseStream as ChunkedMemoryStream;
+						if (cms != null)
+							return cms.ToBase64Stream();
+						else
+						{
+							cms = new ChunkedMemoryStream(sr.BaseStream);
+							try { return cms.ToBase64Stream(); }
+							finally { cms.Dispose(); }
+						}
+					}
 					finally { sr.Dispose(); }
 				}
-				//Warning LOH leak
 				else if (result.Result is StringBuilder)
 				{
 					var sb = result.Result as StringBuilder;
-					return sb.ToBase64Stream();
+					using (var cms = ChunkedMemoryStream.Create())
+					{
+						var sw = cms.GetWriter();
+						for (int i = 0; i < sb.Length; )
+						{
+							var min = Math.Min(sb.Length - i, cms.CharBuffer.Length);
+							sb.CopyTo(i, cms.CharBuffer, 0, min);
+							i += min;
+							sw.Write(cms.CharBuffer, 0, min);
+						}
+						sw.Flush();
+						cms.Position = 0;
+						return cms.ToBase64Stream();
+					}
 				}
-				//Warning LOH leak
 				else if (result.Result is byte[])
 				{
 					var bytes = result.Result as byte[];
@@ -210,19 +262,27 @@ namespace Revenj.Wcf
 						return cms.ToBase64Stream();
 					}
 				}
-				//Warning LOH leak
 				else if (result.Result is string)
 				{
-					var sb = new StringBuilder(result.Result as string);
-					return sb.ToBase64Stream();
+					using (var cms = ChunkedMemoryStream.Create())
+					{
+						var sw = cms.GetWriter();
+						sw.Write(result.Result as string);
+						sw.Flush();
+						cms.Position = 0;
+						return cms.ToBase64Stream();
+					}
 				}
-				//Warning LOH leak
 				else if (result.Result is char[])
 				{
-					var ch = result.Result as char[];
-					var sb = new StringBuilder(ch.Length);
-					sb.Append(ch);
-					return sb.ToBase64Stream();
+					using (var cms = ChunkedMemoryStream.Create())
+					{
+						var sw = cms.GetWriter();
+						sw.Write(result.Result as char[]);
+						sw.Flush();
+						cms.Position = 0;
+						return cms.ToBase64Stream();
+					}
 				}
 				return Utility.ReturnError("Unexpected command result. Can't convert to base64.", HttpStatusCode.BadRequest);
 			}

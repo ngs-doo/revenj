@@ -2,13 +2,13 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Autofac;
-using Autofac.Builder;
-using Autofac.Core;
 using Revenj.DatabasePersistence;
 using Revenj.DatabasePersistence.Postgres;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
+using Revenj.Extensibility.Autofac;
+using Revenj.Extensibility.Autofac.Builder;
+using Revenj.Extensibility.Autofac.Core;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
@@ -46,7 +46,7 @@ namespace Revenj.Core
 			return factory.Resolve<IServiceLocator>();
 		}
 
-		class OnContainerBuild : Autofac.IStartable
+		class OnContainerBuild : Revenj.Extensibility.Autofac.IStartable
 		{
 			private readonly IObjectFactory Factory;
 
@@ -64,7 +64,7 @@ namespace Revenj.Core
 			}
 		}
 
-		class AspectsModule : Autofac.Module
+		class AspectsModule : Revenj.Extensibility.Autofac.Module
 		{
 			private readonly AspectRepository Repository;
 
@@ -84,7 +84,7 @@ namespace Revenj.Core
 			}
 		}
 
-		private static void SetupExtensibility(Autofac.ContainerBuilder builder, bool withAspects)
+		private static void SetupExtensibility(Revenj.Extensibility.Autofac.ContainerBuilder builder, bool withAspects)
 		{
 			var dynamicProxy = new CastleDynamicProxyProvider();
 			var aopRepository = new AspectRepository(dynamicProxy);
@@ -104,14 +104,14 @@ namespace Revenj.Core
 			{
 				foreach (var m in AssemblyScanner.GetAllTypes())
 				{
-					if (m.IsPublic && typeof(Autofac.Module).IsAssignableFrom(m) && m.GetConstructor(new Type[0]) != null)
-						builder.RegisterModule((Autofac.Module)Activator.CreateInstance(m));
+					if (m.IsPublic && typeof(Revenj.Extensibility.Autofac.Module).IsAssignableFrom(m) && m.GetConstructor(new Type[0]) != null)
+						builder.RegisterModule((Revenj.Extensibility.Autofac.Module)Activator.CreateInstance(m));
 				}
 				builder.RegisterModule(new AspectsModule(aopRepository));
 			}
 		}
 
-		private static void SetupPatterns(Autofac.ContainerBuilder builder)
+		private static void SetupPatterns(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
 			var serverModels =
 				(from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
@@ -133,7 +133,7 @@ namespace Revenj.Core
 			builder.RegisterType<DataContext>().As<IDataContext>().InstancePerLifetimeScope();
 		}
 
-		private static void SetupPostgres(Autofac.ContainerBuilder builder, string cs)
+		private static void SetupPostgres(Revenj.Extensibility.Autofac.ContainerBuilder builder, string cs)
 		{
 			builder.RegisterInstance(new Revenj.DatabasePersistence.Postgres.ConnectionInfo(cs));
 			builder.RegisterType<PostgresConnectionPool>().As<IConnectionPool>().SingleInstance();
@@ -147,7 +147,7 @@ namespace Revenj.Core
 			builder.RegisterType<Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryExecutor>();
 		}
 		/*
-		private static void SetupOracle(Autofac.ContainerBuilder builder, string cs)
+		private static void SetupOracle(Revenj.Extensibility.Autofac.ContainerBuilder builder, string cs)
 		{
 			builder.RegisterInstance(new Revenj.DatabasePersistence.Oracle.ConnectionInfo(cs));
 			builder.RegisterType<OracleQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
@@ -160,7 +160,7 @@ namespace Revenj.Core
 			builder.RegisterType<Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
 		}
 		*/
-		private static void SetupSerialization(Autofac.ContainerBuilder builder)
+		private static void SetupSerialization(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
 			builder.RegisterType<GenericDataContractResolver>().SingleInstance();
 			builder.RegisterType<XmlSerialization>().As<ISerialization<XElement>>().SingleInstance();

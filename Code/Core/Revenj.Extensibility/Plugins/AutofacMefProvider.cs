@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.Linq;
-using Autofac;
-using Autofac.Core;
-using Autofac.Integration.Mef;
+using Revenj.Extensibility.Autofac;
+using Revenj.Extensibility.Autofac.Core;
+using Revenj.Extensibility.Autofac.Integration.Mef;
 using Revenj.Common;
 
 namespace Revenj.Extensibility

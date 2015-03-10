@@ -7,15 +7,6 @@ using System.Linq;
 namespace Revenj.Extensibility
 {
 	/// <summary>
-	/// Factory for creating extension instances.
-	/// </summary>
-	/// <typeparam name="TInstance">instance result type</typeparam>
-	/// <param name="type">instance type</param>
-	/// <param name="args">constructor arguments</param>
-	/// <returns>created instance</returns>
-	public delegate TInstance InstanceFactory<TInstance>(Type type, object[] args);
-
-	/// <summary>
 	/// MEF plugins are resolved from extensibility provider.
 	/// Plugins are decorated with Export attribute.
 	/// </summary>
@@ -46,7 +37,7 @@ namespace Revenj.Extensibility
 		/// </summary>
 		/// <typeparam name="TImplementation">extension must export provided interface</typeparam>
 		/// <returns>found extensions</returns>
-		Dictionary<Type, InstanceFactory<TImplementation>> FindExtensions<TImplementation>();
+		Dictionary<Type, Func<Type, object[], TImplementation>> FindExtensions<TImplementation>();
 	}
 
 	internal sealed class ExtensibilityProviderContract : IExtensibilityProvider
@@ -63,9 +54,9 @@ namespace Revenj.Extensibility
 
 			return null;
 		}
-		public Dictionary<Type, InstanceFactory<TImplementation>> FindExtensions<TImplementation>()
+		public Dictionary<Type, Func<Type, object[], TImplementation>> FindExtensions<TImplementation>()
 		{
-			Contract.Ensures(Contract.Result<Dictionary<Type, InstanceFactory<TImplementation>>>() != null);
+			Contract.Ensures(Contract.Result<Dictionary<Type, Func<Type, object[], TImplementation>>>() != null);
 
 			return null;
 		}

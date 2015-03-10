@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Autofac.Core;
 using Revenj.Common;
+using Revenj.Extensibility.Autofac.Core;
 using Revenj.Utility;
 
 namespace Revenj.Extensibility
@@ -118,7 +118,7 @@ namespace Revenj.Extensibility
 			return newList;
 		}
 
-		public Dictionary<Type, InstanceFactory<TImplementation>> FindExtensions<TImplementation>()
+		public Dictionary<Type, Func<Type, object[], TImplementation>> FindExtensions<TImplementation>()
 		{
 			var implementations = Container.Resolve<TImplementation>();
 
@@ -126,34 +126,21 @@ namespace Revenj.Extensibility
 			foreach (var impl in implementations)
 				list.Add(new ConceptImplementation<TImplementation>(impl));
 
-			var coreImpl =
-				from item in list
-				where item.ExtendsType == null
-				select new
-				{
-					CoreConcept = item.Type,
-					Extensions =
-					(from ext in list
-					 where ext.ExtendsType != null && ext.ExtendsType.IsAssignableFrom(item.Type)
-					 select ext.Type)
-					 .ToList()
-				};
-
-			var dict = new Dictionary<Type, InstanceFactory<TImplementation>>();
-			foreach (var item in coreImpl.Select(ci => new
+			var dict = new Dictionary<Type, Func<Type, object[], TImplementation>>(list.Count);
+			foreach (var item in list)
 			{
-				Type = ci.CoreConcept,
-				Factory = (InstanceFactory<TImplementation>)(
-					(type, args) =>
-					(TImplementation)MixinProvider.Create(
+				if (item.ExtendsType != null)
+					continue;
+				var extensions = list.FindAll(it => it.ExtendsType != null && it.ExtendsType.IsAssignableFrom(item.Type));
+				dict.Add(
+					item.Type,
+					(type, args) => (TImplementation)MixinProvider.Create(
 						type,
 						args,
-						from extType in ci.Extensions
+						from ext in extensions
 						//TODO consider factory.Resolve
-						select Activator.CreateInstance(extType)))
-			}))
-				dict.Add(item.Type, item.Factory);
-
+						select Activator.CreateInstance(ext.Type)));
+			}
 			return dict;
 		}
 
