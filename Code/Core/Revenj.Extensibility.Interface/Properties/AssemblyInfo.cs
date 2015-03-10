@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("DSL Platform")]
 [assembly: AssemblyProduct("Revenj infrastructure components")]
-[assembly: AssemblyCopyright("Copyright © DSL Platform 2014")]
+[assembly: AssemblyCopyright("Copyright © DSL Platform 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
