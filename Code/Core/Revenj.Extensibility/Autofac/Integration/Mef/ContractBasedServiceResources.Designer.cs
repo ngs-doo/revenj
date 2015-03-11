@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Revenj.Extensibility.Autofac.Features.OpenGenerics {
+namespace Revenj.Extensibility.Autofac.Integration.Mef {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Revenj.Extensibility.Autofac.Features.OpenGenerics {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class OpenGenericDecoratorActivatorDataResources {
+    internal class ContractBasedServiceResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal OpenGenericDecoratorActivatorDataResources() {
+        internal ContractBasedServiceResources() {
         }
         
         /// <summary>
@@ -39,8 +39,7 @@ namespace Revenj.Extensibility.Autofac.Features.OpenGenerics {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Revenj.Extensibility.Autofac.Features.OpenGenerics.OpenGenericDecoratorActivatorD" +
-                            "ataResources", typeof(OpenGenericDecoratorActivatorDataResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Revenj.Extensibility.Autofac.Integration.Mef.ContractBasedServiceResources", typeof(ContractBasedServiceResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -62,11 +61,11 @@ namespace Revenj.Extensibility.Autofac.Features.OpenGenerics {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The service &apos;{0}&apos; is not an open generic type..
+        ///   Looks up a localized string similar to ContractName={0}.
         /// </summary>
-        internal static string DecoratedServiceIsNotOpenGeneric {
+        internal static string DescriptionFormat {
             get {
-                return ResourceManager.GetString("DecoratedServiceIsNotOpenGeneric", resourceCulture);
+                return ResourceManager.GetString("DescriptionFormat", resourceCulture);
             }
         }
     }

@@ -335,7 +335,7 @@ namespace Revenj.Extensibility.Autofac.Integration.Mef
 			{
 				var cbid = import as ContractBasedImportDefinition;
 				if (cbid == null)
-					throw new NotSupportedException(string.Format(RegistrationExtensionsResources.ContractBasedOnly, import));
+					throw new NotSupportedException(string.Format(Revenj.Extensibility.Autofac.Integration.Mef.RegistrationExtensionsResources.ContractBasedOnly, import));
 
 				var exportsForContract = context.ResolveExports(cbid);
 				composablePart.SetImport(import, exportsForContract);
