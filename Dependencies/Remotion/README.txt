@@ -1,0 +1,1 @@
+This version of Relinq library was modified by Rikard Pavelic

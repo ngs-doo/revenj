@@ -1,0 +1,1 @@
+This version of Protobuf.NET library was modified by Rikard Pavelic

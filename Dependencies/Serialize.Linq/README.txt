@@ -1,0 +1,1 @@
+This version of Serialize.Linq library was modified by Rikard Pavelic
