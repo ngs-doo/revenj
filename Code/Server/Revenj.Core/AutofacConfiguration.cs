@@ -100,11 +100,14 @@ namespace Revenj.Core
 			builder.RegisterInstance(aopRepository).As<IAspectRegistrator, IAspectComposer, IInterceptorRegistrator>();
 			builder.RegisterInstance(dynamicProxy).As<IMixinProvider, IDynamicProxyProvider>();
 
+			var types = AssemblyScanner.GetAllTypes();//TODO: force load everything
 			if (withAspects)
 			{
-				foreach (var m in AssemblyScanner.GetAllTypes())
+				foreach (var m in types)
 				{
-					if (m.IsPublic && typeof(Revenj.Extensibility.Autofac.Module).IsAssignableFrom(m) && m.GetConstructor(new Type[0]) != null)
+					if (m.Assembly.FullName.StartsWith("Revenj."))
+						continue;
+					if (m.IsPublic && !m.IsAbstract && typeof(Revenj.Extensibility.Autofac.Module).IsAssignableFrom(m) && m.GetConstructor(new Type[0]) != null)
 						builder.RegisterModule((Revenj.Extensibility.Autofac.Module)Activator.CreateInstance(m));
 				}
 				builder.RegisterModule(new AspectsModule(aopRepository));
