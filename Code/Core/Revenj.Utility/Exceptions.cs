@@ -15,7 +15,7 @@ namespace Revenj.Utility
 		/// Check if application is running in debug mode.
 		/// Set in application config (configuration/appSettings) as &lt;add key="ApplicationMode" value="Debug"/&gt;
 		/// </summary>
-		public static readonly bool DebugMode;
+		public static bool DebugMode { get; set; }
 
 		static Exceptions()
 		{

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
+using System.IO;
 using System.Linq;
+using System.Text;
+using Revenj.Common;
 using Revenj.Extensibility.Autofac;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Integration.Mef;
-using Revenj.Common;
 
 namespace Revenj.Extensibility
 {
@@ -38,10 +40,18 @@ namespace Revenj.Extensibility
 					}
 					catch (System.Reflection.ReflectionTypeLoadException ex)
 					{
-						var firstFive = string.Join(Environment.NewLine, ex.LoaderExceptions.Take(5).Select(it => it.Message));
+						var sb = new StringBuilder();
+						foreach (var le in ex.LoaderExceptions.Take(5))
+						{
+							sb.AppendLine(le.Message);
+							var fle = le as FileLoadException;
+							if (fle != null && fle.FusionLog != null)
+								sb.AppendLine(fle.FusionLog);
+						}
 						System.Diagnostics.Debug.WriteLine(ex.ToString());
+						var firstFive = sb.ToString();
 						System.Diagnostics.Debug.WriteLine(firstFive);
-						throw new FrameworkException("Error loading plugins. Can't load plugins. {0}".With(firstFive), ex);
+						throw new FrameworkException("Error loading plugins. Can't load plugins. " + firstFive, ex);
 					}
 					catch (Exception ex)
 					{
