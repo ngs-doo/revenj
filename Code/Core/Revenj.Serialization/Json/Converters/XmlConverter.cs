@@ -61,7 +61,14 @@ namespace Revenj.Serialization.Json.Converters
 			{
 				var value = StringConverter.Deserialize(sr, nextToken);
 				nextToken = sr.Read();
-				return XElement.Parse(value);
+				try
+				{
+					return XElement.Parse(value);
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing XML at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+				}
 			}
 			using (var cms = JsonSerialization.Memorize(sr, ref nextToken))
 				return (XElement)JsonNet.Deserialize(cms.GetReader(), typeof(XElement));

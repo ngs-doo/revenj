@@ -41,7 +41,16 @@ namespace Revenj.Serialization.Json.Converters
 			for (; nextToken != '"' && i < buffer.Length; i++, nextToken = sr.Read())
 				buffer[i] = (char)nextToken;
 			if (nextToken == '"')
-				return IPAddress.Parse(new string(buffer, 0, i));
+			{
+				try
+				{
+					return IPAddress.Parse(new string(buffer, 0, i));
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing IP address at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+				}
+			}
 			throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for ip value. Expecting \"");
 		}
 		public static List<IPAddress> DeserializeIPCollection(BufferedTextReader sr, int nextToken)

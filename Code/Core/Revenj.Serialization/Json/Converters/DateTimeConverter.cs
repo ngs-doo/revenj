@@ -150,7 +150,7 @@ namespace Revenj.Serialization.Json.Converters
 						}
 						else
 						{
-							buffer[21] = (char)(div3 - '0');
+							buffer[21] = (char)(div3 + '0');
 							end = 22;
 						}
 					}
@@ -276,9 +276,16 @@ namespace Revenj.Serialization.Json.Converters
 			nextToken = sr.Read();
 			for (; i < buffer.Length && nextToken != '"'; i++, nextToken = sr.Read())
 				buffer[i] = (char)nextToken;
-			if (i > 0 && buffer[i - 1] == 'Z')
-				return DateTime.Parse(new string(buffer, 0, i), Invariant, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
-			return DateTime.Parse(new string(buffer, 0, i), Invariant);
+			try
+			{
+				if (i > 0 && buffer[i - 1] == 'Z')
+					return DateTime.Parse(new string(buffer, 0, i), Invariant, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+				return DateTime.Parse(new string(buffer, 0, i), Invariant);
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Error parsing timestamp at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+			}
 		}
 		public static List<DateTime> DeserializeTimestampCollection(BufferedTextReader sr, int nextToken)
 		{

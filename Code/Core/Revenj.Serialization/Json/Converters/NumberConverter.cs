@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
@@ -149,30 +150,62 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static void Serialize(double value, TextWriter sw, char[] buffer)
 		{
-			sw.Write(value);
+			if (double.IsNaN(value))
+				sw.Write("\"NaN\"");
+			else if (double.IsInfinity(value))
+			{
+				if (double.IsPositiveInfinity(value))
+					sw.Write("\"Infinity\"");
+				else
+					sw.Write("\"-Infinity\"");
+			}
+			else sw.Write(value);
 		}
 		public static void Serialize(double? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
 			else
-				sw.Write(value.Value);
+				Serialize(value.Value, sw, buffer);
 		}
 
 		public static void Serialize(float value, TextWriter sw, char[] buffer)
 		{
-			sw.Write(value);
+			if (float.IsNaN(value))
+				sw.Write("\"NaN\"");
+			else if (float.IsInfinity(value))
+			{
+				if (float.IsPositiveInfinity(value))
+					sw.Write("\"Infinity\"");
+				else
+					sw.Write("\"-Infinity\"");
+			}
+			else sw.Write(value);
 		}
 		public static void Serialize(float? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
 			else
-				sw.Write(value.Value);
+				Serialize(value.Value, sw, buffer);
 		}
 
 		public static decimal DeserializeDecimal(BufferedTextReader sr, ref int nextToken)
 		{
+			if (nextToken == '"')
+			{
+				sr.InitBuffer();
+				sr.FillUntil('"');
+				nextToken = sr.Read(2);
+				try
+				{
+					return decimal.Parse(sr.BufferToString(), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing decimal at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+				}
+			}
 			var neg = nextToken == '-';
 			if (neg)
 				nextToken = sr.Read();
@@ -184,9 +217,16 @@ namespace Revenj.Serialization.Json.Converters
 				throw new SerializationException("Too long decimal number: " + new string(buf, 0, size) + ". At position" + JsonSerialization.PositionInStream(sr));
 			if (size > 18)
 			{
-				if (neg)
-					return -decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
-				return decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+				try
+				{
+					if (neg)
+						return -decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+					return decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing decimal at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+				}
 			}
 			long value = 0;
 			int scale = 0;
@@ -208,9 +248,16 @@ namespace Revenj.Serialization.Json.Converters
 						value = (value << 3) + (value << 1) + num;
 					else
 					{
-						if (neg)
-							return -decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
-						return decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+						try
+						{
+							if (neg)
+								return -decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+							return decimal.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, Invariant);
+						}
+						catch (Exception ex)
+						{
+							throw new SerializationException("Error parsing decimal at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+						}
 					}
 				}
 			}
@@ -289,7 +336,30 @@ namespace Revenj.Serialization.Json.Converters
 					if (num >= 0 && num <= 9)
 						value = (value << 3) + (value << 1) - num;
 					else
-						return -int.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+					{
+						try
+						{
+							return -int.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+						}
+						catch (Exception ex)
+						{
+							throw new SerializationException("Error parsing integer at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+						}
+					}
+				}
+			}
+			else if (nextToken == '"')
+			{
+				sr.InitBuffer();
+				sr.FillUntil('"');
+				nextToken = sr.Read(2);
+				try
+				{
+					return int.Parse(sr.BufferToString(), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing long at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
 				}
 			}
 			else
@@ -303,7 +373,16 @@ namespace Revenj.Serialization.Json.Converters
 					if (num >= 0 && num <= 9)
 						value = (value << 3) + (value << 1) + num;
 					else
-						return int.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+					{
+						try
+						{
+							return int.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+						}
+						catch (Exception ex)
+						{
+							throw new SerializationException("Error integer decimal at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+						}
+					}
 				}
 			}
 			return value;
@@ -381,7 +460,30 @@ namespace Revenj.Serialization.Json.Converters
 					if (num >= 0 && num <= 9)
 						value = (value << 3) + (value << 1) - num;
 					else
-						return -long.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+					{
+						try
+						{
+							return -long.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+						}
+						catch (Exception ex)
+						{
+							throw new SerializationException("Error parsing long at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+						}
+					}
+				}
+			}
+			else if (nextToken == '"')
+			{
+				sr.InitBuffer();
+				sr.FillUntil('"');
+				nextToken = sr.Read(2);
+				try
+				{
+					return long.Parse(sr.BufferToString(), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing long at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
 				}
 			}
 			else
@@ -395,7 +497,16 @@ namespace Revenj.Serialization.Json.Converters
 					if (num >= 0 && num <= 9)
 						value = (value << 3) + (value << 1) + num;
 					else
-						return long.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+					{
+						try
+						{
+							return long.Parse(new string(buf, 0, size), NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint, Invariant);
+						}
+						catch (Exception ex)
+						{
+							throw new SerializationException("Error parsing long at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+						}
+					}
 				}
 			}
 			return value;
@@ -457,25 +568,32 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static double DeserializeDouble(BufferedTextReader sr, ref int nextToken)
 		{
-			return DeserializeDouble(sr, ref nextToken, '}');
-		}
-
-		private static double DeserializeDouble(BufferedTextReader sr, ref int nextToken, char matchEnd)
-		{
+			if (nextToken == '"')
+			{
+				sr.InitBuffer();
+				sr.FillUntil('"');
+				nextToken = sr.Read(2);
+				try
+				{
+					return double.Parse(sr.BufferToString(), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing double at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+				}
+			}
 			var buf = sr.SmallBuffer;
 			buf[0] = (char)nextToken;
 			var size = sr.ReadNumber(buf, 1) + 1;
-			if (size == 1)
-			{
-				if (nextToken == '-' || nextToken == '+' || char.IsLetter((char)nextToken))
-				{
-					size = sr.ReadUntil(buf, size, ',', matchEnd) + size;
-					nextToken = sr.Read();
-					return double.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingWhite, Invariant);
-				}
-			}
 			nextToken = sr.Read();
-			return double.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+			try
+			{
+				return double.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Error parsing double at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+			}
 		}
 		public static List<double> DeserializeDoubleCollection(BufferedTextReader sr, int nextToken)
 		{
@@ -485,11 +603,11 @@ namespace Revenj.Serialization.Json.Converters
 		}
 		public static void DeserializeDoubleCollection(BufferedTextReader sr, int nextToken, ICollection<double> res)
 		{
-			res.Add(DeserializeDouble(sr, ref nextToken, ']'));
+			res.Add(DeserializeDouble(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeDouble(sr, ref nextToken, ']'));
+				res.Add(DeserializeDouble(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -512,7 +630,7 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for double value. Expecting number or null");
 				nextToken = sr.Read();
 			}
-			else res.Add(DeserializeDouble(sr, ref nextToken, ']'));
+			else res.Add(DeserializeDouble(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -523,7 +641,7 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for double value. Expecting number or null");
 					nextToken = sr.Read();
 				}
-				else res.Add(DeserializeDouble(sr, ref nextToken, ']'));
+				else res.Add(DeserializeDouble(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -534,25 +652,32 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static float DeserializeFloat(BufferedTextReader sr, ref int nextToken)
 		{
-			return DeserializeFloat(sr, ref nextToken, '}');
-		}
-
-		private static float DeserializeFloat(BufferedTextReader sr, ref int nextToken, char matchEnd)
-		{
+			if (nextToken == '"')
+			{
+				sr.InitBuffer();
+				sr.FillUntil('"');
+				nextToken = sr.Read(2);
+				try
+				{
+					return float.Parse(sr.BufferToString(), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing float at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+				}
+			}
 			var buf = sr.SmallBuffer;
 			buf[0] = (char)nextToken;
 			var size = sr.ReadNumber(buf, 1) + 1;
-			if (size == 1)
-			{
-				if (nextToken == '-' || nextToken == '+' || char.IsLetter((char)nextToken))
-				{
-					size = sr.ReadUntil(buf, size, ',', matchEnd) + size;
-					nextToken = sr.Read();
-					return float.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingWhite, Invariant);
-				}
-			}
 			nextToken = sr.Read();
-			return float.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+			try
+			{
+				return float.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Error parsing float at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+			}
 		}
 		public static List<float> DeserializeFloatCollection(BufferedTextReader sr, int nextToken)
 		{
@@ -562,11 +687,11 @@ namespace Revenj.Serialization.Json.Converters
 		}
 		public static void DeserializeFloatCollection(BufferedTextReader sr, int nextToken, ICollection<float> res)
 		{
-			res.Add(DeserializeFloat(sr, ref nextToken, ']'));
+			res.Add(DeserializeFloat(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeFloat(sr, ref nextToken, ']'));
+				res.Add(DeserializeFloat(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
@@ -589,7 +714,7 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for float value. Expecting number or null");
 				nextToken = sr.Read();
 			}
-			else res.Add(DeserializeFloat(sr, ref nextToken, ']'));
+			else res.Add(DeserializeFloat(sr, ref nextToken));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -600,7 +725,7 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for float value. Expecting number or null");
 					nextToken = sr.Read();
 				}
-				else res.Add(DeserializeFloat(sr, ref nextToken, ']'));
+				else res.Add(DeserializeFloat(sr, ref nextToken));
 			}
 			if (nextToken != ']')
 			{
