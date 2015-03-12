@@ -457,11 +457,25 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static double DeserializeDouble(BufferedTextReader sr, ref int nextToken)
 		{
+			return DeserializeDouble(sr, ref nextToken, '}');
+		}
+
+		private static double DeserializeDouble(BufferedTextReader sr, ref int nextToken, char matchEnd)
+		{
 			var buf = sr.SmallBuffer;
 			buf[0] = (char)nextToken;
 			var size = sr.ReadNumber(buf, 1) + 1;
+			if (size == 1)
+			{
+				if (nextToken == '-' || nextToken == '+' || char.IsLetter((char)nextToken))
+				{
+					size = sr.ReadUntil(buf, size, ',', matchEnd) + size;
+					nextToken = sr.Read();
+					return double.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingWhite, Invariant);
+				}
+			}
 			nextToken = sr.Read();
-			return double.Parse(new string(buf, 0, size), NumberStyles.Float, Invariant);
+			return double.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
 		}
 		public static List<double> DeserializeDoubleCollection(BufferedTextReader sr, int nextToken)
 		{
@@ -471,11 +485,11 @@ namespace Revenj.Serialization.Json.Converters
 		}
 		public static void DeserializeDoubleCollection(BufferedTextReader sr, int nextToken, ICollection<double> res)
 		{
-			res.Add(DeserializeDouble(sr, ref nextToken));
+			res.Add(DeserializeDouble(sr, ref nextToken, ']'));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeDouble(sr, ref nextToken));
+				res.Add(DeserializeDouble(sr, ref nextToken, ']'));
 			}
 			if (nextToken != ']')
 			{
@@ -498,7 +512,7 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for double value. Expecting number or null");
 				nextToken = sr.Read();
 			}
-			else res.Add(DeserializeDouble(sr, ref nextToken));
+			else res.Add(DeserializeDouble(sr, ref nextToken, ']'));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -509,7 +523,7 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for double value. Expecting number or null");
 					nextToken = sr.Read();
 				}
-				else res.Add(DeserializeDouble(sr, ref nextToken));
+				else res.Add(DeserializeDouble(sr, ref nextToken, ']'));
 			}
 			if (nextToken != ']')
 			{
@@ -520,11 +534,25 @@ namespace Revenj.Serialization.Json.Converters
 
 		public static float DeserializeFloat(BufferedTextReader sr, ref int nextToken)
 		{
+			return DeserializeFloat(sr, ref nextToken, '}');
+		}
+
+		private static float DeserializeFloat(BufferedTextReader sr, ref int nextToken, char matchEnd)
+		{
 			var buf = sr.SmallBuffer;
 			buf[0] = (char)nextToken;
 			var size = sr.ReadNumber(buf, 1) + 1;
+			if (size == 1)
+			{
+				if (nextToken == '-' || nextToken == '+' || char.IsLetter((char)nextToken))
+				{
+					size = sr.ReadUntil(buf, size, ',', matchEnd) + size;
+					nextToken = sr.Read();
+					return float.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingWhite, Invariant);
+				}
+			}
 			nextToken = sr.Read();
-			return float.Parse(new string(buf, 0, size), NumberStyles.Float, Invariant);
+			return float.Parse(new string(buf, 0, size), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
 		}
 		public static List<float> DeserializeFloatCollection(BufferedTextReader sr, int nextToken)
 		{
@@ -534,11 +562,11 @@ namespace Revenj.Serialization.Json.Converters
 		}
 		public static void DeserializeFloatCollection(BufferedTextReader sr, int nextToken, ICollection<float> res)
 		{
-			res.Add(DeserializeFloat(sr, ref nextToken));
+			res.Add(DeserializeFloat(sr, ref nextToken, ']'));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeFloat(sr, ref nextToken));
+				res.Add(DeserializeFloat(sr, ref nextToken, ']'));
 			}
 			if (nextToken != ']')
 			{
@@ -561,7 +589,7 @@ namespace Revenj.Serialization.Json.Converters
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for float value. Expecting number or null");
 				nextToken = sr.Read();
 			}
-			else res.Add(DeserializeFloat(sr, ref nextToken));
+			else res.Add(DeserializeFloat(sr, ref nextToken, ']'));
 			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -572,7 +600,7 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for float value. Expecting number or null");
 					nextToken = sr.Read();
 				}
-				else res.Add(DeserializeFloat(sr, ref nextToken));
+				else res.Add(DeserializeFloat(sr, ref nextToken, ']'));
 			}
 			if (nextToken != ']')
 			{
