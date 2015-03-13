@@ -2,14 +2,14 @@
 {
 	guid root MailMessage
 	{
-		native<'Revenj.Features.Mailer.Serialization.SerializableMailMessage, Revenj.Features.Mailer'> NativeMessage;
+		native<'Revenj.Features.Mailer.Serialization.SerializableMailMessage'> NativeMessage;
 		
 		timestamp? SentAt;
 		int Attempts;
 		int RetriesAllowed;
 		string[] Errors;
 
-		implements server 'Revenj.Features.Mailer.IMailMessage, Revenj.Features.Mailer';
+		implements server 'Revenj.Features.Mailer.IMailMessage';
 	}
 }
 

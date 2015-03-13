@@ -9,7 +9,7 @@
 		int RetriesAllowed;
 		string[] Errors;
 
-		implements server 'Revenj.Features.Mailer.IMailMessage, Revenj.Features.Mailer';
+		implements server 'Revenj.Features.Mailer.IMailMessage';
 	}
 
 	value SerializableMailAddress

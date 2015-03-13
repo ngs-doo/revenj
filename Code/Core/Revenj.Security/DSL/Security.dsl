@@ -6,7 +6,7 @@ module Security
 		Role(Name) *Role;
 		binary PasswordHash;
 		bool IsAllowed;
-		implements server 'Revenj.Security.IUser, Revenj.Security';
+		implements server 'Revenj.Security.IUser';
 	}
 
 	root Role(Name)
@@ -20,7 +20,7 @@ module Security
 		string(100) ParentName;
 		Role(Name) *Role;
 		Role(ParentName) *ParentRole;
-		implements server 'Revenj.Security.IUserRoles, Revenj.Security';
+		implements server 'Revenj.Security.IUserRoles';
 	}
 
 	role Administrator;
@@ -29,7 +29,7 @@ module Security
 	{
 		string(200) Name;
 		bool IsAllowed;
-		implements server 'Revenj.Security.IGlobalPermission, Revenj.Security';
+		implements server 'Revenj.Security.IGlobalPermission';
 	}
 
 	root RolePermission(Name, RoleID)
@@ -37,7 +37,7 @@ module Security
 		string(200) Name;
 		Role *Role;
 		bool IsAllowed;
-		implements server 'Revenj.Security.IRolePermission, Revenj.Security';
+		implements server 'Revenj.Security.IRolePermission';
 	}
 }
 
