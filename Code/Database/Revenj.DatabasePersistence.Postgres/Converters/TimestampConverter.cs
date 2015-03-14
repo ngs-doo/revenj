@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Globalization;
 using System.IO;
 using Revenj.Utility;
@@ -10,12 +9,6 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 	public static class TimestampConverter
 	{
 		private readonly static TimeZone CurrentZone = TimeZone.CurrentTimeZone;
-		private static bool UseUtcValues = ConfigurationManager.AppSettings["Revenj.UseUtc"] == "true";
-		public static bool AsUTC
-		{
-			get { return UseUtcValues; }
-			set { UseUtcValues = value; }
-		}
 
 		private readonly static int[] TimestampReminder = new int[]{
 			1000000,
@@ -83,14 +76,19 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return new TimestampTuple(value);
 		}
 
+		public static IPostgresTuple ToTupleUtc(DateTime value)
+		{
+			return new TimestampTuple(value.ToUniversalTime(), 0);
+		}
+
 		public static DateTime? ParseNullable(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var dt = ParseTimestamp(reader, context);
+			var dt = ParseTimestampUtc(reader, context);
 			reader.Read();
-			return dt;
+			return dt.ToLocalTime();
 		}
 
 		public static DateTime Parse(BufferedTextReader reader, int context)
@@ -98,12 +96,34 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return DateTime.MinValue;
-			var dt = ParseTimestamp(reader, context);
+			var dt = ParseTimestampUtc(reader, context);
+			reader.Read();
+			return dt.ToLocalTime();
+		}
+
+		public static DateTime? ParseNullableUtc(BufferedTextReader reader, int context)
+		{
+			var cur = reader.Read();
+			if (cur == ',' || cur == ')')
+				return null;
+			var dt = ParseTimestampUtc(reader, context);
 			reader.Read();
 			return dt;
 		}
 
-		public static DateTime ParseTimestamp(BufferedTextReader reader, int context)
+		private static readonly DateTime MinUtc = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
+
+		public static DateTime ParseUtc(BufferedTextReader reader, int context)
+		{
+			var cur = reader.Read();
+			if (cur == ',' || cur == ')')
+				return MinUtc;
+			var dt = ParseTimestampUtc(reader, context);
+			reader.Read();
+			return dt;
+		}
+
+		private static DateTime ParseTimestampUtc(BufferedTextReader reader, int context)
 		{
 			var cur = reader.Read(context);
 			var buf = reader.SmallBuffer;
@@ -126,37 +146,18 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					nano += TimestampReminder[r] * (buf[i] - 48);
 				var pos = buf[len - 3] == '+';
 				var offset = NumberConverter.Read2(buf, len - 2);
-				if (UseUtcValues)
-				{
-					var dt = offset != 0
-						? new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset)
-						: new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
-					return new DateTime(dt.Ticks + nano, DateTimeKind.Utc);
-				}
-				else
-				{
-					var dt = offset != 0
-						? new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset).ToLocalTime()
-						: new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).ToLocalTime();
-					return new DateTime(dt.Ticks + nano, DateTimeKind.Local);
-				}
+				var dt = offset != 0
+					? new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset)
+					: new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
+				return new DateTime(dt.Ticks + nano, DateTimeKind.Utc);
 			}
 			else
 			{
 				var pos = buf[len - 3] == '+';
 				var offset = NumberConverter.Read2(buf, len - 2);
-				if (UseUtcValues)
-				{
-					if (offset != 0)
-						return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset);
-					return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
-				}
-				else
-				{
-					if (offset != 0)
-						return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset).ToLocalTime();
-					return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).ToLocalTime();
-				}
+				if (offset != 0)
+					return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset);
+				return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
 			}
 		}
 
@@ -189,7 +190,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseTimestamp(reader, innerContext));
+					list.Add(ParseTimestampUtc(reader, innerContext).ToLocalTime());
 					cur = reader.Read();
 				}
 			} while (cur == ',');
@@ -229,7 +230,87 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else
 				{
-					list.Add(ParseTimestamp(reader, innerContext));
+					list.Add(ParseTimestampUtc(reader, innerContext).ToLocalTime());
+					cur = reader.Read();
+				}
+			} while (cur == ',');
+			if (espaced)
+				reader.Read(context + 1);
+			else
+				reader.Read();
+			return list;
+		}
+
+		public static List<DateTime?> ParseNullableCollectionUtc(BufferedTextReader reader, int context)
+		{
+			var cur = reader.Read();
+			if (cur == ',' || cur == ')')
+				return null;
+			var espaced = cur != '{';
+			if (espaced)
+				reader.Read(context);
+			var innerContext = context << 1;
+			cur = reader.Peek();
+			if (cur == '}')
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<DateTime?>(0);
+			}
+			var list = new List<DateTime?>();
+			do
+			{
+				cur = reader.Read();
+				if (cur == 'N')
+				{
+					cur = reader.Read(4);
+					list.Add(null);
+				}
+				else
+				{
+					list.Add(ParseTimestampUtc(reader, innerContext));
+					cur = reader.Read();
+				}
+			} while (cur == ',');
+			if (espaced)
+				reader.Read(context + 1);
+			else
+				reader.Read();
+			return list;
+		}
+
+		public static List<DateTime> ParseCollectionUtc(BufferedTextReader reader, int context)
+		{
+			var cur = reader.Read();
+			if (cur == ',' || cur == ')')
+				return null;
+			var espaced = cur != '{';
+			if (espaced)
+				reader.Read(context);
+			var innerContext = context << 1;
+			cur = reader.Peek();
+			if (cur == '}')
+			{
+				if (espaced)
+					reader.Read(context + 2);
+				else
+					reader.Read(2);
+				return new List<DateTime>(0);
+			}
+			var list = new List<DateTime>();
+			do
+			{
+				cur = reader.Read();
+				if (cur == 'N')
+				{
+					cur = reader.Read(4);
+					list.Add(MinUtc);
+				}
+				else
+				{
+					list.Add(ParseTimestampUtc(reader, innerContext));
 					cur = reader.Read();
 				}
 			} while (cur == ',');
@@ -247,20 +328,20 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 			public TimestampTuple(DateTime value)
 			{
-				if (value.Kind == DateTimeKind.Utc)
-				{
-					this.Value = value;
-					HoursOffset = 0;
-				}
+				if (value.Kind != DateTimeKind.Local)
+					value = value.ToLocalTime();
+				var offset = CurrentZone.GetUtcOffset(value);
+				if (offset.Minutes != 0)
+					this.Value = value.AddMinutes(offset.Minutes);
 				else
-				{
-					var offset = CurrentZone.GetUtcOffset(value);
-					if (offset.Minutes != 0)
-						this.Value = value.AddMinutes(offset.Minutes);
-					else
-						this.Value = value;
-					HoursOffset = offset.Hours;
-				}
+					this.Value = value;
+				HoursOffset = offset.Hours;
+			}
+
+			public TimestampTuple(DateTime value, int offset)
+			{
+				this.Value = value;
+				HoursOffset = offset;
 			}
 
 			public bool MustEscapeRecord { get { return true; } }
