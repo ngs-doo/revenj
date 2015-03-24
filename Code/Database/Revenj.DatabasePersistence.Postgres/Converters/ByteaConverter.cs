@@ -220,7 +220,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cms = stream as ChunkedMemoryStream;
 			if (cms != null) return new StreamTuple(cms, false);
 			var ms = stream as MemoryStream;
-			if (ms != null) return new ByteTuple(ms.GetBuffer(), (int)ms.Length);
+			if (ms != null) return new ByteTuple(ms.ToArray(), (int)ms.Length);
 			return new StreamTuple(new ChunkedMemoryStream(stream), true);
 		}
 
