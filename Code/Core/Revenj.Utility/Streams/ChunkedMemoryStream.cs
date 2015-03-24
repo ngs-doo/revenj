@@ -37,7 +37,7 @@ namespace Revenj.Utility
 				CharLookup[CharMap[i]] = i;
 		}
 
-		private List<byte[]> Blocks = new List<byte[]>();
+		private readonly List<byte[]> Blocks = new List<byte[]>();
 		private int CurrentPosition;
 		private int TotalSize;
 		private CustomWriter Writer;
@@ -431,6 +431,10 @@ namespace Revenj.Utility
 			if (disposing && !disposed)
 			{
 				disposed = true;
+				if (Writer != null)
+					Writer.Flush();
+				if (Reader != null)
+					Reader.DiscardBufferedData();
 				CurrentPosition = 0;
 				TotalSize = 0;
 				if (CurrentEstimate < SizeLimit || Blocks.Count > 10000)
