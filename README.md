@@ -1,7 +1,7 @@
 Revenj
 ======
 
-Revenj is a *lightweight* framework for .NET/Mono with advanced LINQ support for Postgres and Oracle databases. 
+Revenj is a *fast* framework for .NET/Mono with advanced LINQ support for Postgres and Oracle databases. 
 It's ideal to use a REST-like service, but can also be used as a library from other frameworks such as ASP.NET. 
 
 DSL Platform will use Invasive software composition to integrate with Revenj, so 
@@ -58,6 +58,18 @@ but also a SQL migration file which tries to preserve data if possible.
 SQL migration is created by the compiler analyzing differences between models, so you don't need to write manual migration scripts.
 
 DSL compiler acts as a developer in your team which does all the boring work you would need to do, while providing high quality and high performance parts of the system.
+
+##Why to use it?
+
+There are mostly two reasons to use it:
+
+ * **ease of development** - but this is hard to explain since you need to experience it for yourself
+ * **performance** - DSL Platform will provide libraries for Revenj which is faster than anything you could write by hand or by picking some other libraries/frameworks
+
+Benchmarks:
+
+ * [Data access layer benchmark](https://github.com/ngs-doo/dal-benchmark)
+ * [JSON benchmark](https://github.com/ngs-doo/json-benchmark)
 
 ##Getting started:
 
