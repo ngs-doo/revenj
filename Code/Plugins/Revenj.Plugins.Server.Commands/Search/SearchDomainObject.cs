@@ -218,7 +218,11 @@ Example argument:
 				var repository = GetRepository<TDomainObject>(locator);
 				IQueryable<TDomainObject> result;
 				if (data == null)
+				{
+					if (order == null || order.Count == 0)
+						return repository.Search<TDomainObject>(null, limit, offset);
 					result = repository.Query<TDomainObject>(null);
+				}
 				else
 				{
 					dynamic specification;
@@ -236,15 +240,32 @@ Example argument:
 						throw new ArgumentException(
 							"Specification could not be deserialized.",
 							new FrameworkException("Please provide specification name."));
-					try
+					if (order == null || order.Count == 0)
 					{
-						result = repository.Query(specification);
+						try
+						{
+							return repository.Search(specification, limit, offset);
+						}
+						catch (Exception ex)
+						{
+							throw new ArgumentException(
+								"Error while executing query: {0}.".With(ex.Message),
+								new FrameworkException(@"Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
+						}
 					}
-					catch (Exception ex)
+					else
 					{
-						throw new ArgumentException(
-							"Error while executing query: {0}. ".With(ex.Message),
-							new FrameworkException(@"Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
+						try
+						{
+							result = repository.Query(specification);
+						}
+						catch (Exception ex)
+						{
+							throw new ArgumentException(
+								"Error while executing query: {0}.".With(ex.Message),
+								new FrameworkException(@"Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
+						}
+						return QueryWithConditions(offset, limit, order, result);
 					}
 				}
 				return QueryWithConditions<TDomainObject>(offset, limit, order, result);
@@ -305,18 +326,34 @@ Example argument:
 				}
 				if (specification == null)
 					throw new ArgumentException("Specification could not be deserialized.");
-				IQueryable<TDomainObject> result;
-				try
+				if (order == null || order.Count == 0)
 				{
-					result = repository.Query(specification);
+					try
+					{
+						return repository.Search(specification, limit, offset);
+					}
+					catch (Exception ex)
+					{
+						throw new ArgumentException(
+							"Error while executing query: {0}.".With(ex.Message),
+							new FrameworkException(@"Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
+					}
 				}
-				catch (Exception ex)
+				else
 				{
-					throw new ArgumentException(
-						"Error while executing query: {0}.".With(ex.Message),
-						new FrameworkException(@"Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
+					IQueryable<TDomainObject> result;
+					try
+					{
+						result = repository.Query(specification);
+					}
+					catch (Exception ex)
+					{
+						throw new ArgumentException(
+							"Error while executing query: {0}.".With(ex.Message),
+							new FrameworkException(@"Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
+					}
+					return QueryWithConditions(offset, limit, order, result);
 				}
-				return QueryWithConditions(offset, limit, order, result);
 			}
 		}
 	}
