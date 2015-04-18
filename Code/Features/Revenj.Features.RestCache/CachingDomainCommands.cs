@@ -119,6 +119,11 @@ namespace Revenj.Features.RestCache
 			return DomainCommands.SubmitEvent(domainEvent, result, body);
 		}
 
+		public Stream QueueEvent(string domainEvent, Stream body)
+		{
+			return DomainCommands.QueueEvent(domainEvent, body);
+		}
+
 		public Stream SubmitAggregateEvent(string aggregate, string domainEvent, string uri, Stream body)
 		{
 			return DomainCommands.SubmitAggregateEvent(aggregate, domainEvent, uri, body);
@@ -127,6 +132,16 @@ namespace Revenj.Features.RestCache
 		public Stream SubmitAggregateEventQuery(string aggregate, string domainEvent, string uri, Stream body)
 		{
 			return DomainCommands.SubmitAggregateEventQuery(aggregate, domainEvent, uri, body);
+		}
+
+		public Stream QueueAggregateEvent(string aggregate, string domainEvent, string uri, Stream body)
+		{
+			return DomainCommands.QueueAggregateEvent(aggregate, domainEvent, uri, body);
+		}
+
+		public Stream QueueAggregateEventQuery(string aggregate, string domainEvent, string uri, Stream body)
+		{
+			return DomainCommands.QueueAggregateEventQuery(aggregate, domainEvent, uri, body);
 		}
 
 		public Stream ExistsWithSpecification(string domainObject, string specification, Stream body)

@@ -124,13 +124,28 @@ namespace Revenj.Plugins.Rest.Commands
 		Stream SubmitEvent(string domainEvent, string result, Stream body);
 
 		[OperationContract]
+		[WebInvoke(Method = "POST", UriTemplate = "/queue/{domainEvent}")]
+		[Description("Queue domain event")]
+		Stream QueueEvent(string domainEvent, Stream body);
+
+		[OperationContract]
 		[WebInvoke(Method = "POST", UriTemplate = "/submit/{aggregate}/{domainEvent}/{*uri}")]
-		[Description("Submit domain event")]
+		[Description("Submit aggregate domain event")]
 		Stream SubmitAggregateEvent(string aggregate, string domainEvent, string uri, Stream body);
 
 		[OperationContract]
 		[WebInvoke(Method = "POST", UriTemplate = "/submit/{aggregate}/{domainEvent}?uri={uri}")]
-		[Description("Submit domain event")]
+		[Description("Submit aggregate domain event")]
 		Stream SubmitAggregateEventQuery(string aggregate, string domainEvent, string uri, Stream body);
+
+		[OperationContract]
+		[WebInvoke(Method = "POST", UriTemplate = "/queue/{aggregate}/{domainEvent}/{*uri}")]
+		[Description("Queue aggregate domain event")]
+		Stream QueueAggregateEvent(string aggregate, string domainEvent, string uri, Stream body);
+
+		[OperationContract]
+		[WebInvoke(Method = "POST", UriTemplate = "/queue/{aggregate}/{domainEvent}?uri={uri}")]
+		[Description("Queue aggregate domain event")]
+		Stream QueueAggregateEventQuery(string aggregate, string domainEvent, string uri, Stream body);
 	}
 }

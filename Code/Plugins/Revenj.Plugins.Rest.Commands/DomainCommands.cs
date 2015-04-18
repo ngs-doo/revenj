@@ -372,6 +372,20 @@ namespace Revenj.Plugins.Rest.Commands
 					});
 		}
 
+		public Stream QueueEvent(string domainEvent, Stream body)
+		{
+			var domainType = Utility.CheckDomainEvent(DomainModel, domainEvent);
+			var validatedObject = Utility.ParseObject(Serialization, domainType, body, true, Locator);
+			if (validatedObject.IsFailure) return validatedObject.Error;
+			return
+				Converter.PassThrough<QueueEvent, QueueEvent.Argument<object>>(
+					new QueueEvent.Argument<object>
+					{
+						Name = domainType.Result.FullName,
+						Data = validatedObject.Result
+					});
+		}
+
 		public Stream SubmitAggregateEvent(string aggregate, string domainEvent, string uri, Stream body)
 		{
 			var aggregateType = Utility.CheckAggregateRoot(DomainModel, aggregate);
@@ -392,6 +406,28 @@ namespace Revenj.Plugins.Rest.Commands
 		public Stream SubmitAggregateEventQuery(string aggregate, string domainEvent, string uri, Stream body)
 		{
 			return SubmitAggregateEvent(aggregate, domainEvent, uri, body);
+		}
+
+		public Stream QueueAggregateEvent(string aggregate, string domainEvent, string uri, Stream body)
+		{
+			var aggregateType = Utility.CheckAggregateRoot(DomainModel, aggregate);
+			if (aggregateType.IsFailure) return aggregateType.Error;
+			var domainType = Utility.CheckDomainEvent(DomainModel, aggregateType.Result.FullName + "+" + domainEvent);
+			var validatedObject = Utility.ParseObject(Serialization, domainType, body, true, Locator);
+			if (validatedObject.IsFailure) return validatedObject.Error;
+			return
+				Converter.PassThrough<QueueAggregateEvent, QueueAggregateEvent.Argument<object>>(
+					new QueueAggregateEvent.Argument<object>
+					{
+						Name = domainType.Result.FullName,
+						Uri = uri,
+						Data = validatedObject.Result
+					});
+		}
+
+		public Stream QueueAggregateEventQuery(string aggregate, string domainEvent, string uri, Stream body)
+		{
+			return QueueAggregateEvent(aggregate, domainEvent, uri, body);
 		}
 	}
 }

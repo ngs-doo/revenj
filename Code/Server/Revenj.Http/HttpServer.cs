@@ -106,11 +106,16 @@ namespace Revenj.Http
 								response.ContentLength64 = cms.Length;
 								cms.CopyTo(response.OutputStream);
 							}
-							else
+							else if (stream != null)
 							{
 								if (stream.CanSeek)
 									response.ContentLength64 = stream.Length;
 								stream.CopyTo(response.OutputStream);
+							}
+							else
+							{
+								response.ContentType = null;
+								response.ContentLength64 = 0;
 							}
 						}
 					}

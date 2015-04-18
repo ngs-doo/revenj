@@ -68,6 +68,8 @@
     </Compile>
     <Compile Include="CommandResult.cs" />
     <Compile Include="CheckDomainObject.cs" />
+    <Compile Include="QueueAggregateEvent.cs" />
+    <Compile Include="QueueEvent.cs" />
     <Compile Include="DomainObjectExists.cs" />
     <Compile Include="Search\GenericSearchFilter.cs" />
     <Compile Include="Search\GenericSpecification.cs" />

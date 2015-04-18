@@ -7,13 +7,16 @@ namespace Revenj.DomainPatterns
 	public class DomainEventStore : IDomainEventStore
 	{
 		private readonly IServiceLocator Locator;
+		private readonly GlobalEventStore GlobalStore;
 		private readonly ConcurrentDictionary<Type, Func<object, string>> EventStores = new ConcurrentDictionary<Type, Func<object, string>>(1, 17);
 
-		public DomainEventStore(IServiceLocator locator)
+		public DomainEventStore(IServiceLocator locator, GlobalEventStore globalStore)
 		{
 			Contract.Requires(locator != null);
+			Contract.Requires(globalStore != null);
 
 			this.Locator = locator;
+			this.GlobalStore = globalStore;
 		}
 
 		public string Submit<TEvent>(TEvent domainEvent)
@@ -36,6 +39,11 @@ Is {0} a domain event and does it have registered store", typeof(TEvent).FullNam
 				EventStores.TryAdd(typeof(TEvent), store);
 			}
 			return store(domainEvent);
+		}
+
+		public void Queue<TEvent>(TEvent domainEvent) where TEvent : IDomainEvent
+		{
+			GlobalStore.Queue(domainEvent);
 		}
 	}
 }

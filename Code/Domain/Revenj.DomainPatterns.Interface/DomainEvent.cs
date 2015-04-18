@@ -102,6 +102,15 @@ namespace Revenj.DomainPatterns
 		/// <returns>event identifier</returns>
 		string Submit<TEvent>(TEvent domainEvent)
 			where TEvent : IDomainEvent;
+		/// <summary>
+		/// Queue domain event for out-of-transaction submission to the store
+		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
+		/// If current transaction is rolled back, event will still be persisted
+		/// </summary>
+		/// <typeparam name="TEvent">domain event type</typeparam>
+		/// <param name="domainEvent">domain event</param>
+		void Queue<TEvent>(TEvent domainEvent)
+			where TEvent : IDomainEvent;
 	}
 	/// <summary>
 	/// Handle domain event.

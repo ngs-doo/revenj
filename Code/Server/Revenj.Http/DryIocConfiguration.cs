@@ -119,6 +119,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			registry.Register(typeof(WeakCache<>), typeof(WeakCache<>), Reuse.InCurrentScope);
 			registry.Register<IDomainEventSource, DomainEventSource>(Reuse.InCurrentScope);
 			registry.Register<IDomainEventStore, DomainEventStore>(Reuse.InCurrentScope);
+			registry.Register<GlobalEventStore>(Reuse.Singleton);
 			registry.Register(typeof(IDomainEventSource<>), typeof(SingleDomainEventSource<>), Reuse.InCurrentScope);
 			registry.Register(typeof(IObservable<>), typeof(RegisterChangeNotifications<>), Reuse.Singleton);
 			registry.Register<IDataContext, DataContext>(Reuse.InCurrentScope);
