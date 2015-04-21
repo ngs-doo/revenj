@@ -61,6 +61,7 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="ExpressionSupport\ArrayMethods.cs" />
     <Compile Include="ExpressionSupport\SetMethods.cs" />
     <Compile Include="ExpressionSupport\DatabaseSpecificationFunctions.cs" />
     <Compile Include="ExpressionSupport\LinqMethods.cs" />
