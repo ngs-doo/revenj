@@ -96,6 +96,8 @@ namespace Revenj.DomainPatterns
 						bulk.Add(info.Event);
 					}
 					lastType = info.Type;
+					if (lastType == null)
+						break;
 					int i = 0;
 					while (i++ < 1000 && EventQueue.Count > 0)
 					{
@@ -123,12 +125,11 @@ namespace Revenj.DomainPatterns
 
 		public void Dispose()
 		{
-			if (IsDisposed)
-				return;
 			IsDisposed = true;
 			try
 			{
-				Loop.Abort();
+				if (Loop.IsAlive)
+					Loop.Abort();
 			}
 			catch (Exception ex)
 			{
