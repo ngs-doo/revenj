@@ -69,6 +69,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private NpgsqlBind bind;
 
 		internal CommandBehavior ReaderBehavior = CommandBehavior.Default;
+		//TODO: this is duplication, but code is horrible anyway
+		private readonly string PreparedQuery;
+		private readonly string PreparedParams;
 
 		private Int64 lastInsertedOID = 0;
 
@@ -97,13 +100,24 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 		}
 
-		public NpgsqlCommand(Stream stream, string template)
+		internal NpgsqlCommand(Stream stream, string template)
 		{
 			customCommandStream = stream;
 			text = template;
 			CommandType = System.Data.CommandType.Text;
 			timeout = 20;
 			ReaderBehavior = CommandBehavior.SequentialAccess;
+		}
+
+		internal NpgsqlCommand(Stream stream, string template, string preparedQuery, string preparedParams)
+		{
+			customCommandStream = stream;
+			text = template;
+			CommandType = System.Data.CommandType.Text;
+			timeout = 20;
+			ReaderBehavior = CommandBehavior.SequentialAccess;
+			this.PreparedQuery = preparedQuery;
+			this.PreparedParams = preparedParams;
 		}
 
 		/// <summary>
@@ -554,20 +568,25 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				CheckConnectionState();
 
+				var connector = Connector;
+
+				if (PreparedQuery != null)
+					connector.PrepareOrAdd(PreparedQuery, PreparedParams, text);
+
 				// reset any responses just before getting new ones
-				Connector.Mediator.ResetResponses();
+				connector.Mediator.ResetResponses();
 
 				// Set command timeout.
-				m_Connector.Mediator.CommandTimeout = CommandTimeout;
+				connector.Mediator.CommandTimeout = CommandTimeout;
 
 
-				using (m_Connector.BlockNotificationThread())
+				using (connector.BlockNotificationThread())
 				{
 					ForwardsOnlyDataReader reader;
 					if (parse == null)
 					{
-						reader = new ForwardsOnlyDataReader(m_Connector.QueryEnum(this), cb, this,
-															m_Connector.BlockNotificationThread(), false);
+						reader = new ForwardsOnlyDataReader(connector.QueryEnum(this), cb, this,
+															connector.BlockNotificationThread(), false);
 						if (type == CommandType.StoredProcedure
 							&& reader.FieldCount == 1
 							&& reader.GetDataTypeName(0) == "refcursor")
@@ -597,8 +616,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					else
 					{
 						BindParameters();
-						reader = new ForwardsOnlyDataReader(m_Connector.ExecuteEnum(new NpgsqlExecute(bind.PortalName, 0)), cb, this,
-															m_Connector.BlockNotificationThread(), true);
+						reader = new ForwardsOnlyDataReader(connector.ExecuteEnum(new NpgsqlExecute(bind.PortalName, 0)), cb, this,
+															connector.BlockNotificationThread(), true);
 					}
 					return reader;
 				}

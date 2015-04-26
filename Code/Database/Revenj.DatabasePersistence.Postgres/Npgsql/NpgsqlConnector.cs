@@ -90,6 +90,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private ConnectionState _connection_state;
 
+		private readonly HashSet<string> CachedPlans = new HashSet<string>();
+
 		// The physical network connection to the backend.
 		private Stream _stream;
 
@@ -286,6 +288,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			CurrentState.Query(this, queryCommand);
 		}
 
+		internal void PrepareOrAdd(string planName, string types, string query)
+		{
+			if (!CachedPlans.Contains(planName))
+			{
+				using (NpgsqlCommand cmd = new NpgsqlCommand("PREPARE \"" + planName + "\"(" + types + ") AS " + query, this))
+					Query(cmd);
+				CachedPlans.Add(planName);
+			}
+		}
+
 		internal IEnumerable<IServerResponseObject> QueryEnum(NpgsqlCommand queryCommand)
 		{
 			if (CurrentReader != null)
@@ -422,10 +434,22 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					}
 
 					// Ignore any error which may occur when releasing portals as this portal name may not be valid anymore. i.e.: the portal name was used on a prepared query which had errors.
-					catch (Exception) { }
+					catch { }
 				}
 			}
+			foreach (var cp in CachedPlans)
+			{
+				try
+				{
+					using (NpgsqlCommand cmd = new NpgsqlCommand("deallocate \"" + cp + "\";", this))
+						Query(cmd);
+				}
 
+				// Ignore any error which may occur when releasing portals as this portal name may not be valid anymore. i.e.: the portal name was used on a prepared query which had errors.
+				catch { }
+			}
+
+			CachedPlans.Clear();
 			_portalIndex = 0;
 			_planIndex = 0;
 		}
