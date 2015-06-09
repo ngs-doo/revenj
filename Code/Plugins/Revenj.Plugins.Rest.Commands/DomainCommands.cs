@@ -177,7 +177,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var doType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var specType = Utility.CheckDomainObject(DomainModel, doType, specification);
-			var spec = Utility.SpecificationFromQuery(specType);
+			var spec = Utility.ObjectFromQuery(specType);
 			return Search(doType, limit, offset, order, spec, count);
 		}
 
@@ -248,7 +248,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var domainType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var specType = Utility.CheckDomainObject(DomainModel, domainType, specification);
-			var spec = Utility.SpecificationFromQuery(specType);
+			var spec = Utility.ObjectFromQuery(specType);
 			return Count(domainType, spec);
 		}
 
@@ -319,7 +319,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var domainType = Utility.CheckDomainObject(DomainModel, domainObject);
 			var specType = Utility.CheckDomainObject(DomainModel, domainType, specification);
-			var spec = Utility.SpecificationFromQuery(specType);
+			var spec = Utility.ObjectFromQuery(specType);
 			return Exists(domainType, spec);
 		}
 

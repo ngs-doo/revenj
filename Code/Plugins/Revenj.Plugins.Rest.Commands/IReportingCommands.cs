@@ -9,6 +9,11 @@ namespace Revenj.Plugins.Rest.Commands
 	public interface IReportingCommands
 	{
 		[OperationContract]
+		[WebGet(UriTemplate = "/report/{report}")]
+		[Description("Populate predefined report")]
+		Stream PopulateReportQuery(string report);
+
+		[OperationContract]
 		[WebInvoke(Method = "PUT", UriTemplate = "/report/{report}")]
 		[Description("Populate predefined report")]
 		Stream PopulateReport(string report, Stream body);

@@ -151,7 +151,7 @@ Error: {0}".With(ex.Message);
 			}
 		}
 
-		public static Either<object> SpecificationFromQuery(Either<Type> specType)
+		public static Either<object> ObjectFromQuery(Either<Type> specType)
 		{
 			if (specType.IsFailure) return specType.Error;
 			var type = specType.Result;

@@ -183,7 +183,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var cubeType = Utility.CheckDomainObject(DomainModel, cube);
 			var specType = Utility.CheckDomainObject(DomainModel, cubeType, specification);
-			var spec = Utility.SpecificationFromQuery(specType);
+			var spec = Utility.ObjectFromQuery(specType);
 			return OlapCube(cubeType, dimensions, facts, order, spec, limit, offset);
 		}
 

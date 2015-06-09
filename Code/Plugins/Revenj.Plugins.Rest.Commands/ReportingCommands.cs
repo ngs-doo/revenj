@@ -28,6 +28,19 @@ namespace Revenj.Plugins.Rest.Commands
 			this.Serialization = serialization;
 		}
 
+		public Stream PopulateReportQuery(string report)
+		{
+			var reportType = Utility.CheckDomainObject(DomainModel, report);
+			var reportData = Utility.ObjectFromQuery(reportType);
+			if (reportData.IsFailure) return reportData.Error;
+			return Converter.PassThrough<PopulateReport, PopulateReport.Argument<object>>(
+				new PopulateReport.Argument<object>
+				{
+					ReportName = reportType.Result.FullName,
+					Data = reportData.Result
+				});
+		}
+
 		public Stream PopulateReport(string report, Stream body)
 		{
 			var reportType = Utility.CheckDomainObject(DomainModel, report);
@@ -172,7 +185,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var cubeType = Utility.CheckDomainObject(DomainModel, cube);
 			var specType = Utility.CheckDomainObject(DomainModel, cubeType, specification);
-			var spec = Utility.SpecificationFromQuery(specType);
+			var spec = Utility.ObjectFromQuery(specType);
 			return OlapCube(cubeType, templater, dimensions, facts, order, spec, limit, offset);
 		}
 
@@ -328,7 +341,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var type = Utility.CheckDomainObject(DomainModel, domainObject);
 			var specType = Utility.CheckDomainObject(DomainModel, type, specification);
-			var spec = Utility.SpecificationFromQuery(specType);
+			var spec = Utility.ObjectFromQuery(specType);
 			if (specType.IsFailure || spec.IsFailure) return specType.Error ?? spec.Error;
 			return SearchTemplater(file, domainObject, spec);
 		}
