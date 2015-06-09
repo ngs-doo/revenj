@@ -47,26 +47,24 @@ namespace Revenj.Utility
 			{
 				return AllTypes;
 			}
-			else
+
+			try
 			{
-				try
+				AllTypes = new List<Type>();
+				foreach (var assembly in GetAllAssemblies())
 				{
-					AllTypes = new List<Type>();
-					foreach (var assembly in GetAllAssemblies())
+					foreach (var type in assembly.GetTypes().Where(it => it.IsClass || it.IsInterface))
 					{
-						foreach (var type in assembly.GetTypes().Where(it => it.IsClass || it.IsInterface))
-						{
-							AllTypes.Add(type);
-						}
+						AllTypes.Add(type);
 					}
-					return AllTypes;
 				}
-				catch (ReflectionTypeLoadException ex)
-				{
-					AllTypes = null;
-					var first = (ex.LoaderExceptions ?? new Exception[0]).Take(5).ToList();
-					throw new ApplicationException(string.Format("Can't load types:{0}{1}", Environment.NewLine, string.Join(Environment.NewLine, first.Select(it => it.Message))), ex);
-				}
+				return AllTypes;
+			}
+			catch (ReflectionTypeLoadException ex)
+			{
+				AllTypes = null;
+				var first = (ex.LoaderExceptions ?? new Exception[0]).Take(5).ToList();
+				throw new ApplicationException(string.Format("Can't load types:{0}{1}", Environment.NewLine, string.Join(Environment.NewLine, first.Select(it => it.Message))), ex);
 			}
 		}
 
@@ -81,16 +79,14 @@ namespace Revenj.Utility
 			{
 				return AllAssemblies;
 			}
-			else
+
+			var loadedAssemblies = GetLoadedAssemblies();
+			foreach (var assembly in loadedAssemblies)
 			{
-				var loadedAssemblies = GetLoadedAssemblies();
-				foreach (var assembly in loadedAssemblies)
-				{
-					LoadReferencedAssembiles(assembly);
-				}
-				AllAssemblies = GetLoadedAssemblies().ToList();
-				return AllAssemblies;
+				LoadReferencedAssembiles(assembly);
 			}
+			AllAssemblies = GetLoadedAssemblies().ToList();
+			return AllAssemblies;
 		}
 
 		/// <summary>
