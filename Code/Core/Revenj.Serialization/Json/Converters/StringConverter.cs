@@ -16,64 +16,36 @@ namespace Revenj.Serialization.Json.Converters
 				Serialize(value, sw);
 		}
 
-		private static char[] EscapeChars = new[] {
-			'\u0000',
-			'\u0001',
-			'\u0002',
-			'\u0003',
-			'\u0004',
-			'\u0005',
-			'\u0006',
-			'\u0007',
-			'\u0008',
-			'\u0009',
-			'\u000A',
-			'\u000B',
-			'\u000C',
-			'\u000D',
-			'\u000E',
-			'\u000F',
-			'\u0010',
-			'\u0011',
-			'\u0012',
-			'\u0013',
-			'\u0014',
-			'\u0015',
-			'\u0016',
-			'\u0017',
-			'\u0018',
-			'\u0019',
-			'\u001A',
-			'\u001B',
-			'\u001C',
-			'\u001D',
-			'\u001E',
-			'\u001F',
-			'"',
-			'\\'
-		};
-
 		public static void Serialize(string value, TextWriter sw)
 		{
-			var escaped = value.IndexOfAny(EscapeChars);
-			if (escaped == -1)
+			for (int i = 0; i < value.Length; i++)
 			{
-				sw.Write('"');
-				sw.Write(value);
-				sw.Write('"');
-				return;
-			}
-			else
-			{
-				sw.Write('"');
-				if (escaped != 0)
+				var ch = value[i];
+				if (ch < 32 || ch == '"' || ch == '\\')
 				{
-					//TODO: use smaller value!? this might cause LOH issue!?
-					if (value.Length < 85000 || escaped < 85000 && (value.Length - escaped) < 85000)
-						sw.Write(value.Substring(0, escaped));
-					else
-						escaped = 0;
+					SerializeEscaped(i, value, sw);
+					return;
 				}
+			}
+			sw.Write('"');
+			sw.Write(value);
+			sw.Write('"');
+		}
+
+		private static void SerializeEscaped(int escaped, string value, TextWriter sw)
+		{
+			sw.Write('"');
+			if (escaped != 0)
+			{
+				var cnt = escaped / 32768;
+				var ind = 0;
+				for (int i = 0; i < cnt; i++)
+				{
+					var next = ind + 32768;
+					sw.Write(value.Substring(ind, next));
+					ind = next;
+				}
+				sw.Write(value.Substring(ind, escaped));
 			}
 			char c;
 			for (int i = escaped; i < value.Length; i++)
