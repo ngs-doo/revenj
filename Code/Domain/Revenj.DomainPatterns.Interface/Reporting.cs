@@ -60,12 +60,14 @@ namespace Revenj.DomainPatterns
 		/// <param name="facts">fact subset</param>
 		/// <param name="order">custom order</param>
 		/// <param name="filter">predicate filter</param>
+		/// <param name="limit">maximum number of rows</param>
+		/// <param name="offset">how many initial rows to skip</param>
 		/// <returns>result from created query</returns>
-		DataTable Analyze<TFilter>(
+		DataTable Analyze<TSource>(
 			IEnumerable<string> dimensions,
 			IEnumerable<string> facts,
 			IEnumerable<KeyValuePair<string, bool>> order,
-			ISpecification<TFilter> filter,
+			ISpecification<TSource> filter,
 			int? limit,
 			int? offset);
 	}
@@ -80,9 +82,12 @@ namespace Revenj.DomainPatterns
 		/// Aggregation will be run on specified facts.
 		/// Data will be returned in specified order.
 		/// </summary>
+		/// <param name="query">cube query</param>
 		/// <param name="dimensions">dimension subset</param>
 		/// <param name="facts">fact subset</param>
 		/// <param name="order">custom order</param>
+		/// <param name="limit">maximum number of row</param>
+		/// <param name="offset">how many initial rows to skip</param>
 		/// <returns>result from created query</returns>
 		public static DataTable Analyze(
 			this IOlapCubeQuery query,
@@ -144,13 +149,13 @@ namespace Revenj.DomainPatterns
 			return this;
 		}
 		/// <summary>
-		/// Order result ascendingly using dimension or fact.
+		/// Use ascending order for specific dimension or fact.
 		/// </summary>
 		/// <param name="result">sort column</param>
 		/// <returns>itself</returns>
 		public OlapCubeQueryBuilder Ascending(string result) { return OrderBy(result, true); }
 		/// <summary>
-		/// Order result descendingly using dimension or fact.
+		/// Use descending order for specific dimension or fact.
 		/// </summary>
 		/// <param name="result">sort column</param>
 		/// <returns>itself</returns>

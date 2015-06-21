@@ -45,6 +45,7 @@
       <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reactive.Core">
@@ -98,6 +99,11 @@
     <Compile Include="OracleAdvancedQueueNotification.cs" />
     <Compile Include="OracleObjectFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\LikeStringComparison.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\LinqMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\StringMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\MemberSupport\CommonMembers.cs" />
+    <Compile Include="QueryGeneration\Plugins\MemberSupport\EnumerableMembers.cs" />
     <Compile Include="QueryGeneration\ParameterAggregator.cs" />
     <Compile Include="QueryGeneration\Queryable.cs" />
     <Compile Include="QueryGeneration\QueryComposition\IQuerySimplification.cs" />

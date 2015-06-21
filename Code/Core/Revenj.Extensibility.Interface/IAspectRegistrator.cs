@@ -963,7 +963,7 @@ namespace Revenj.Extensibility
 		/// <typeparam name="TResult">function result type</typeparam>
 		/// <param name="repository">aspect management service</param>
 		/// <param name="expression">join point</param>
-		/// <param name="func">advice which will be applied</param>
+		/// <param name="action">advice which will be applied</param>
 		public static void After<TWhere, TArg, TResult>(
 			this IAspectRegistrator repository,
 			Expression<Action<TWhere>> expression,

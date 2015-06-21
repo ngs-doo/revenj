@@ -119,13 +119,13 @@ namespace Revenj.DomainPatterns
 	/// If Event[] is used, collection of events can be processed at once.
 	/// </summary>
 	/// <typeparam name="TEvent">domain event type</typeparam>
-	public interface IDomainEventHandler<THandle>
+	public interface IDomainEventHandler<TEvent>
 	{
 		/// <summary>
 		/// Handle domain event submission.
 		/// </summary>
 		/// <param name="input">processing domain event(s)</param>
-		void Handle(THandle input);
+		void Handle(TEvent input);
 	}
 
 	/// <summary>

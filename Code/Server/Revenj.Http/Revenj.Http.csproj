@@ -200,8 +200,7 @@
     <PreBuildEvent>del *.dll /q</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>copy ..\..\..\..\Plugins\Revenj.Plugins.DatabasePersistence.Postgres\bin\$(ConfigurationName)\Revenj.Plugins.DatabasePersistence.Postgres.dll .
-copy ..\..\..\..\Plugins\Revenj.Plugins.Aspects\bin\$(ConfigurationName)\Revenj.Plugins.Aspects.dll .
+    <PostBuildEvent>copy ..\..\..\..\Plugins\Revenj.Plugins.Aspects\bin\$(ConfigurationName)\Revenj.Plugins.Aspects.dll .
 copy ..\..\..\..\Plugins\Revenj.Plugins.Server.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Server.Commands.dll .
 copy ..\..\..\..\Plugins\Revenj.Plugins.Rest.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Rest.Commands.dll .
 copy ..\..\..\..\Features\Revenj.Features.RestCache\bin\$(ConfigurationName)\Revenj.Features.RestCache.dll .

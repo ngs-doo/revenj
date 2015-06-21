@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -8,6 +9,7 @@ using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Extensibility.Autofac;
 using Revenj.Extensibility.Autofac.Builder;
+using Revenj.Extensibility.Autofac.Configuration;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Security;
 using Revenj.Serialization;
@@ -17,18 +19,12 @@ namespace Revenj.Core
 {
 	internal static class AutofacConfiguration
 	{
-		static AutofacConfiguration()
-		{
-			//TODO force plugin initialization
-			new Revenj.Plugins.DatabasePersistence.Postgres.ExpressionSupport.CommonMembers();
-		}
-
-		public static IServiceLocator Configure(Database database, string connectionString, bool withAspects)
+		public static IServiceLocator Configure(Database database, string connectionString, bool withAspects, bool externalConfiguration)
 		{
 			var state = new SystemState();
 			var builder = new ContainerBuilder();
 			builder.RegisterInstance(state).As<ISystemState>();
-			SetupExtensibility(builder, withAspects);
+			SetupExtensibility(builder, withAspects, externalConfiguration);
 			if (database == Core.Database.Postgres)
 				SetupPostgres(builder, connectionString);
 			//else
@@ -39,6 +35,9 @@ namespace Revenj.Core
 			builder.RegisterType<PermissionManager>().As<IPermissionManager>().SingleInstance();
 
 			builder.RegisterType<OnContainerBuild>().As<IStartable>();
+
+			if (externalConfiguration)
+				builder.RegisterModule(new ConfigurationSettingsReader("autofacConfiguration"));
 
 			var factory = builder.Build().Resolve<IObjectFactory>();
 			state.IsBooting = false;
@@ -84,13 +83,22 @@ namespace Revenj.Core
 			}
 		}
 
-		private static void SetupExtensibility(Revenj.Extensibility.Autofac.ContainerBuilder builder, bool withAspects)
+		private static void SetupExtensibility(Revenj.Extensibility.Autofac.ContainerBuilder builder, bool withAspects, bool externalConfiguration)
 		{
 			var dynamicProxy = new CastleDynamicProxyProvider();
 			var aopRepository = new AspectRepository(dynamicProxy);
 
+			var dllPlugins = externalConfiguration == false ? new string[0] :
+				(from key in ConfigurationManager.AppSettings.AllKeys
+				 where key.StartsWith("PluginsPath", StringComparison.OrdinalIgnoreCase)
+				 let path = ConfigurationManager.AppSettings[key]
+				 let pathRelative = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path)
+				 let chosenPath = Directory.Exists(pathRelative) ? pathRelative : path
+				 select chosenPath)
+				.ToArray();
+
 			var assemblies = Revenj.Utility.AssemblyScanner.GetAssemblies().Where(it => it.FullName.StartsWith("Revenj."));
-			builder.RegisterInstance(new PluginsConfiguration { Assemblies = assemblies });
+			builder.RegisterInstance(new PluginsConfiguration { Assemblies = assemblies, Directories = dllPlugins });
 
 			builder.RegisterType<SystemInitialization>();
 			builder.RegisterType<AutofacObjectFactory>().As<IObjectFactory>().SingleInstance();

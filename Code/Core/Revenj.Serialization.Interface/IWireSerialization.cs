@@ -48,10 +48,10 @@ namespace Revenj.Serialization
 		/// .NET objects or value objects don't require context so they can be deserialized
 		/// without IServiceLocator in context.
 		/// </summary>
-		/// <typeparam name="TFormat">serialization format</typeparam>
 		/// <typeparam name="T">object type</typeparam>
 		/// <param name="serialization">serialization service</param>
-		/// <param name="data">serialized object in specified format</param>
+		/// <param name="source">serialized object in specified format</param>
+		/// <param name="contentType">MIME type specifying the format</param>
 		/// <returns>deserialized object</returns>
 		public static T Deserialize<T>(
 			this IWireSerialization serialization,

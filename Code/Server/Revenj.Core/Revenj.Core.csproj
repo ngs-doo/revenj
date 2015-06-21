@@ -41,6 +41,7 @@
       <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
@@ -114,19 +115,15 @@
       <Project>{FB2B66D2-AA50-4552-9F0E-56F51369E651}</Project>
       <Name>Revenj.DomainPatterns</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Plugins\Revenj.Plugins.DatabasePersistence.Postgres\Revenj.Plugins.DatabasePersistence.Postgres.csproj">
-      <Project>{8E943C88-AF40-4836-A8F6-681668514C83}</Project>
-      <Name>Revenj.Plugins.DatabasePersistence.Postgres</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>del *.dll /q</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>copy ..\..\..\..\Plugins\Revenj.Plugins.DatabasePersistence.Postgres\bin\$(ConfigurationName)\Revenj.Plugins.DatabasePersistence.Postgres.dll .
-REM copy ..\..\..\..\Plugins\Revenj.Plugins.DatabasePersistence.Oracle\bin\$(ConfigurationName)\Revenj.Plugins.DatabasePersistence.Oracle.dll .
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

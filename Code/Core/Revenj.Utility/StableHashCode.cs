@@ -2,6 +2,10 @@
 
 namespace Revenj.Utility
 {
+	/// <summary>
+	/// Hash code utility.
+	/// Stable hash code across versions and architectures
+	/// </summary>
 	public static class StableHashCode
 	{
 		/// <summary>

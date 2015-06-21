@@ -5,6 +5,10 @@ using System.Text;
 
 namespace Revenj.Utility
 {
+	/// <summary>
+	/// Performant text reader.
+	/// Should be reused whenever possible.
+	/// </summary>
 	public class BufferedTextReader : TextReader
 	{
 		private TextReader Reader;
@@ -13,13 +17,31 @@ namespace Revenj.Utility
 		private int BufferEnd;
 		private int NextChar;
 		private int TotalBuffersRead;
+		/// <summary>
+		/// Temporary small char buffer for reuse
+		/// </summary>
 		public readonly char[] SmallBuffer;
+		/// <summary>
+		/// Temporary char buffer for reuse
+		/// </summary>
 		public readonly char[] CharBuffer;
+		/// <summary>
+		/// Temporary byte buffer for reuse (1024 bytes total)
+		/// </summary>
 		public readonly byte[] ByteBuffer = new byte[1024];
+		/// <summary>
+		/// Temporary large temp buffer for reuse (32768 chars total)
+		/// </summary>
 		public readonly char[] LargeTempBuffer = new char[32768];
 		private char[] WorkingBuffer = new char[4096];
 		private int WorkingPosition;
 
+		/// <summary>
+		/// Allocate reader by reusing part of the buffers and providing original reader object.
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <param name="smallBuffer"></param>
+		/// <param name="tempBuffer"></param>
 		public BufferedTextReader(TextReader reader, char[] smallBuffer, char[] tempBuffer)
 		{
 			this.SmallBuffer = smallBuffer;
@@ -27,6 +49,12 @@ namespace Revenj.Utility
 			Reuse(reader);
 		}
 
+		/// <summary>
+		/// Allocate reader by reusing part of the buffers and providing original string object
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="smallBuffer"></param>
+		/// <param name="tempBuffer"></param>
 		public BufferedTextReader(string value, char[] smallBuffer, char[] tempBuffer)
 		{
 			this.SmallBuffer = smallBuffer;
@@ -34,6 +62,11 @@ namespace Revenj.Utility
 			Reuse(value);
 		}
 
+		/// <summary>
+		/// Reuse existing instance with a new reader
+		/// </summary>
+		/// <param name="reader">new reader to process</param>
+		/// <returns>itself</returns>
 		public BufferedTextReader Reuse(TextReader reader)
 		{
 			this.Reader = reader;
@@ -43,6 +76,11 @@ namespace Revenj.Utility
 
 		private static readonly TextReader EmptyReader = new StringReader(string.Empty);
 
+		/// <summary>
+		/// Reuse existing instance with a new string
+		/// </summary>
+		/// <param name="value">new string to process</param>
+		/// <returns>itself</returns>
 		public BufferedTextReader Reuse(string value)
 		{
 			if (value.Length > Buffer.Length)
@@ -64,13 +102,27 @@ namespace Revenj.Utility
 			NextChar = BufferEnd > 0 ? Buffer[0] : -1;
 		}
 
+		/// <summary>
+		/// Current position.
+		/// Sum of total processed buffers and position in the current buffer.
+		/// </summary>
 		public int Position { get { return TotalBuffersRead + InBuffer; } }
 
+		/// <summary>
+		/// Read next char without changing position.
+		/// Will return -1 on end of input
+		/// </summary>
+		/// <returns>next char</returns>
 		public override int Peek()
 		{
 			return NextChar;
 		}
 
+		/// <summary>
+		/// Read next char and move a single position
+		/// Will return -1 on end of input
+		/// </summary>
+		/// <returns>next char</returns>
 		public override int Read()
 		{
 			var result = NextChar;
@@ -87,11 +139,18 @@ namespace Revenj.Utility
 			return result;
 		}
 
+		/// <summary>
+		/// Skip several chars and read only the last one.
+		/// Don't use return value if total == 0
+		/// Moves position by specified argument
+		/// </summary>
+		/// <param name="total">total chars to read</param>
+		/// <returns>last char read</returns>
 		public int Read(int total)
 		{
 			var result = NextChar;
 			if (total == 0)
-				return 0;//dont use this value
+				return 0;
 			InBuffer += total;
 			if (InBuffer >= BufferEnd)
 			{
@@ -117,17 +176,32 @@ namespace Revenj.Utility
 			return Buffer[InBuffer - 1];
 		}
 
+		/// <summary>
+		/// Reset buffer to starting position. 
+		/// Buffer should be used to fill in small values which will be reconstructed after
+		/// </summary>
 		public void InitBuffer()
 		{
 			WorkingPosition = 0;
 		}
 
+		/// <summary>
+		/// Reset buffer to starting position and specify initial value.
+		/// Buffer should be used to fill in small values which will be reconstructed after
+		/// </summary>
+		/// <param name="c"></param>
 		public void InitBuffer(char c)
 		{
 			WorkingPosition = 1;
 			WorkingBuffer[0] = c;
 		}
 
+		/// <summary>
+		/// Fill buffer until specified char is found.
+		/// If end of input is detected, but char is not found, SerializationException will be thrown.
+		/// </summary>
+		/// <param name="match">char to found</param>
+		/// <returns>how many chars were processed</returns>
 		public int FillUntil(char match)
 		{
 			if (InBuffer >= BufferEnd)
@@ -176,6 +250,13 @@ namespace Revenj.Utility
 			throw new SerializationException("At the end of input. Unable to match: " + match);
 		}
 
+		/// <summary>
+		/// Fill buffer until any of the specified chars is found.
+		/// If end of input is detected, but chars are not found, SerializationException will be thrown.
+		/// </summary>
+		/// <param name="match1">char to found</param>
+		/// <param name="match2">char to found</param>
+		/// <returns>how many chars were processed</returns>
 		public int FillUntil(char match1, char match2)
 		{
 			if (InBuffer >= BufferEnd)
@@ -224,6 +305,14 @@ namespace Revenj.Utility
 			throw new SerializationException("At the end of input. Unable to match: " + match1 + " or " + match2);
 		}
 
+		/// <summary>
+		/// Fill provided writer until any of the specified chars is found.
+		/// If end of input is detected, but chars are not found, SerializationException will be thrown.
+		/// </summary>
+		/// <param name="writer">text writer to populate</param>
+		/// <param name="match1">char to found</param>
+		/// <param name="match2">char to found</param>
+		/// <returns>how many chars were processed</returns>
 		public int FillUntil(TextWriter writer, char match1, char match2)
 		{
 			if (InBuffer >= BufferEnd)
@@ -265,6 +354,10 @@ namespace Revenj.Utility
 			throw new SerializationException("At the end of input. Unable to match: " + match1 + " or " + match2);
 		}
 
+		/// <summary>
+		/// Append char to internal buffer.
+		/// </summary>
+		/// <param name="ch">char to add</param>
 		public void AddToBuffer(char ch)
 		{
 			if (WorkingPosition == WorkingBuffer.Length)
@@ -276,6 +369,12 @@ namespace Revenj.Utility
 			WorkingBuffer[WorkingPosition++] = ch;
 		}
 
+		/// <summary>
+		/// Check if buffer matches provided string.
+		/// Used as string comparison without new string allocation.
+		/// </summary>
+		/// <param name="reference">compare to</param>
+		/// <returns>buffer matches string</returns>
 		public bool BufferMatches(string reference)
 		{
 			if (reference.Length != WorkingPosition)
@@ -286,6 +385,12 @@ namespace Revenj.Utility
 			return true;
 		}
 
+		/// <summary>
+		/// Current buffer hash.
+		/// Used as string hashcode without allocating new string.
+		/// Doesn't match string hashcode algorithm.
+		/// </summary>
+		/// <returns></returns>
 		public int BufferHash()
 		{
 			var len = WorkingPosition;
@@ -295,6 +400,10 @@ namespace Revenj.Utility
 			return (int)hash;
 		}
 
+		/// <summary>
+		/// Convert buffer to new string
+		/// </summary>
+		/// <returns>new string from populated buffer</returns>
 		public string BufferToString()
 		{
 			var len = WorkingPosition;
@@ -304,6 +413,14 @@ namespace Revenj.Utility
 			return new string(WorkingBuffer, 0, len);
 		}
 
+		/// <summary>
+		/// Fill target char[] until specified char is found.
+		/// If end of input is detected, but char is not found, SerializationException will be thrown.
+		/// </summary>
+		/// <param name="target">target array to fill</param>
+		/// <param name="from">fill target array starting from specified position</param>
+		/// <param name="match">char to found</param>
+		/// <returns>how many chars were processed</returns>
 		public int ReadUntil(char[] target, int from, char match)
 		{
 			if (InBuffer >= BufferEnd)
@@ -348,6 +465,15 @@ namespace Revenj.Utility
 			throw new SerializationException("At the end of input. Unable to match: " + match);
 		}
 
+		/// <summary>
+		/// Fill target char[] until any of the specified chars is found.
+		/// If end of input is detected, but chars are not found, SerializationException will be thrown.
+		/// </summary>
+		/// <param name="target">target array to fill</param>
+		/// <param name="from">fill target array starting from specified position</param>
+		/// <param name="match1">char to found</param>
+		/// <param name="match2">char to found</param>
+		/// <returns>how many chars were processed</returns>
 		public int ReadUntil(char[] target, int from, char match1, char match2)
 		{
 			if (InBuffer >= BufferEnd)
@@ -392,6 +518,13 @@ namespace Revenj.Utility
 			throw new SerializationException("At the end of input. Unable to match: " + match1 + " or " + match2);
 		}
 
+		/// <summary>
+		/// Fill target char[] while number chars are found.
+		/// If end of input is detected, but chars are not found, SerializationException will be thrown.
+		/// </summary>
+		/// <param name="target">target array to fill</param>
+		/// <param name="from">fill target array starting from specified position</param>
+		/// <returns>how many chars were processed</returns>
 		public int ReadNumber(char[] target, int from)
 		{
 			if (InBuffer >= BufferEnd)
@@ -434,6 +567,15 @@ namespace Revenj.Utility
 			throw new SerializationException("At the end of input. Unable read number.");
 		}
 
+		/// <summary>
+		/// Fill target char[] starting at specified index and up to specified count.
+		/// Returns how many chars were copied or -1 on end of input.
+		/// Method is allowed to stop early if current buffer end is encountered.
+		/// </summary>
+		/// <param name="buffer">target array to fill</param>
+		/// <param name="index">fill target array starting from specified position</param>
+		/// <param name="count">maximum number</param>
+		/// <returns>how many chars were copied or -1 for immediate end of input</returns>
 		public override int Read(char[] buffer, int index, int count)
 		{
 			if (InBuffer >= BufferEnd)
@@ -463,6 +605,16 @@ namespace Revenj.Utility
 			return j - index;
 		}
 
+		/// <summary>
+		/// Fill target char[] starting at specified index and up to specified count.
+		/// Returns how many chars were copied or -1 on end of input.
+		/// Method is not allowed to stop early if current buffer end is encountered.
+		/// Must read all available chars up to specified count
+		/// </summary>
+		/// <param name="buffer">target array to fill</param>
+		/// <param name="index">fill target array starting from specified position</param>
+		/// <param name="count">maximum number</param>
+		/// <returns>how many chars were copied or -1 for immediate end of input</returns>
 		public override int ReadBlock(char[] buffer, int index, int count)
 		{
 			for (int i = 0, result = Read(); result != -1 && i < count; i++, result = Read())
@@ -470,6 +622,9 @@ namespace Revenj.Utility
 			return count;
 		}
 
+		/// <summary>
+		/// Read a single line from input.
+		/// </summary>
 		public override string ReadLine()
 		{
 			var sb = new StringBuilder();
@@ -484,16 +639,26 @@ namespace Revenj.Utility
 			return sb.ToString();
 		}
 
+		/// <summary>
+		/// Read input to end and convert to string
+		/// </summary>
 		public override string ReadToEnd()
 		{
 			return new string(Buffer, InBuffer, BufferEnd) + Reader.ReadToEnd();
 		}
 
+		/// <summary>
+		/// Close provided reader
+		/// </summary>
 		public override void Close()
 		{
 			Reader.Close();
 		}
 
+		/// <summary>
+		/// Dispose provided reader
+		/// </summary>
+		/// <param name="disposing"></param>
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing)

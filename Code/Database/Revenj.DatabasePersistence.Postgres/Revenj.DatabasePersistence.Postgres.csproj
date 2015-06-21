@@ -58,6 +58,7 @@
       <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -188,6 +189,30 @@
     <Compile Include="Converters\IPostgresTypeConverter.cs" />
     <Compile Include="PostgresObjectFactory.cs" />
     <Compile Include="PostgresVersionInfo.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\ArrayMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\DatabaseSpecificationFunctions.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\DateTimeMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\DecimalMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\DictionaryMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\ExpressionShortCircuiting.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\LikeStringComparison.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\LinqMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\MathMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\NullValuesImpedanceMismatch.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\SetMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\StringMethods.cs" />
+    <Compile Include="QueryGeneration\Plugins\MemberSupport\CommonMembers.cs" />
+    <Compile Include="QueryGeneration\Plugins\MemberSupport\DateTimeMembers.cs" />
+    <Compile Include="QueryGeneration\Plugins\MemberSupport\DictionaryMembers.cs" />
+    <Compile Include="QueryGeneration\Plugins\MemberSupport\EnumerableMembers.cs" />
+    <Compile Include="QueryGeneration\Plugins\ProjectionSimplifications\CountProjection.cs" />
+    <Compile Include="QueryGeneration\Plugins\ProjectionSimplifications\SumProjection.cs" />
+    <Compile Include="QueryGeneration\Plugins\QuerySimplifications\ArraySizeSubquery.cs" />
+    <Compile Include="QueryGeneration\Plugins\QuerySimplifications\ContainsSubquery.cs" />
+    <Compile Include="QueryGeneration\Plugins\QuerySimplifications\ExistsSubquery.cs" />
+    <Compile Include="QueryGeneration\Plugins\QuerySimplifications\FastCountWithoutPredicate.cs" />
+    <Compile Include="QueryGeneration\Plugins\QuerySimplifications\InverseExistsSubquery.cs" />
+    <Compile Include="QueryGeneration\Plugins\Utility.cs" />
     <Compile Include="QueryGeneration\QuerySourceConverterFactory.cs" />
     <Compile Include="QueryGeneration\SelectSubqueryData.cs" />
     <Compile Include="QueryGeneration\QueryComposition\IQuerySimplification.cs" />

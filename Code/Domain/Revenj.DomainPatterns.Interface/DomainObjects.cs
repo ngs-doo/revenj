@@ -19,6 +19,9 @@ namespace Revenj.DomainPatterns
 	/// </summary>
 	public interface IIdentifiable : IDataSource
 	{
+		/// <summary>
+		/// String representation of object identity
+		/// </summary>
 		string URI { get; }
 	}
 	/// <summary>

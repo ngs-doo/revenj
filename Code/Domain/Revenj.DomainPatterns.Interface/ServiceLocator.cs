@@ -14,7 +14,6 @@ namespace Revenj.DomainPatterns
 		/// Interfaces can be resolved only if registered into the container.
 		/// </summary>
 		/// <param name="type">service class/interface</param>
-		/// <param name="args">service class arguments</param>
 		/// <returns>resolved service</returns>
 		object Resolve(Type type);
 	}

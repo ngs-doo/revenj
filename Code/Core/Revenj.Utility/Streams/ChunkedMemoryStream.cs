@@ -24,7 +24,13 @@ namespace Revenj.Utility
 		private static readonly char[] CharMap;
 		private static readonly int[] CharLookup;
 
+		/// <summary>
+		/// Temporary small char buffer for reuse (64 chars)
+		/// </summary>
 		public readonly char[] SmallBuffer = new char[64];
+		/// <summary>
+		/// Temporary char buffer for reuse (8192*4/3 + 2 chars)
+		/// </summary>
 		public readonly char[] CharBuffer = new char[BlockSize * 4 / 3 + 2];
 
 		static ChunkedMemoryStream()
@@ -409,6 +415,13 @@ namespace Revenj.Utility
 			return Reader;
 		}
 
+		/// <summary>
+		/// Reuse buffered text reader associated with this stream.
+		/// Provide input text reader as data source.
+		/// Buffered text reader will be initialized with provided input
+		/// </summary>
+		/// <param name="reader">input for processing</param>
+		/// <returns>initialized buffered text reader</returns>
 		public BufferedTextReader UseBufferedReader(TextReader reader)
 		{
 			if (BufferedReader == null)
@@ -416,6 +429,13 @@ namespace Revenj.Utility
 			return BufferedReader.Reuse(reader);
 		}
 
+		/// <summary>
+		/// Reuse buffered text reader associated with this stream.
+		/// Provide input string as data source.
+		/// Buffered text reader will be initialized with provided input
+		/// </summary>
+		/// <param name="value">input for processing</param>
+		/// <returns>initialized buffered text reader</returns>
 		public BufferedTextReader UseBufferedReader(string value)
 		{
 			if (BufferedReader == null)
@@ -425,6 +445,12 @@ namespace Revenj.Utility
 
 		bool disposed;
 
+		/// <summary>
+		/// Dispose current stream.
+		/// Stream will be added to pool if required.
+		/// Used to reset position and length. Doesn't release allocated buffers
+		/// </summary>
+		/// <param name="disposing"></param>
 		protected override void Dispose(bool disposing)
 		{
 			base.Dispose(disposing);
@@ -446,6 +472,10 @@ namespace Revenj.Utility
 			}
 		}
 
+		/// <summary>
+		/// Show content of the stream as string
+		/// </summary>
+		/// <returns></returns>
 		public override string ToString()
 		{
 			var cp = CurrentPosition;

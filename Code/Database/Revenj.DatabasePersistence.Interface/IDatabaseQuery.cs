@@ -40,9 +40,9 @@ namespace Revenj.DatabasePersistence
 		/// Execute query on the database and fill DataSet with the result.
 		/// Connection and transaction information will be appended to the provided command.
 		/// </summary>
-		/// <param name="command"></param>
-		/// <param name="table"></param>
-		/// <returns></returns>
+		/// <param name="command">command to execute</param>
+		/// <param name="ds">data set to fill</param>
+		/// <returns>how many rows were changed</returns>
 		int Fill(IDbCommand command, DataSet ds);
 	}
 	/// <summary>
@@ -191,7 +191,6 @@ namespace Revenj.DatabasePersistence
 		/// </summary>
 		/// <param name="query">ADO.NET driver</param>
 		/// <param name="command">command to execute</param>
-		/// <param name="parameters">sql additional parameters</param>
 		/// <returns>populated table</returns>
 		public static DataTable Fill(
 			this IDatabaseQuery query,
