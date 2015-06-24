@@ -3,6 +3,7 @@ using System.Diagnostics.Contracts;
 
 namespace Revenj.DomainPatterns
 {
+	//TODO: replace with IServiceProvider
 	/// <summary>
 	/// Service for resolving other services.
 	/// Unregistered services will be resolved too.

@@ -74,7 +74,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		private static ConcurrentDictionary<string, string> QuoteEscape = new ConcurrentDictionary<string, string>(1, 17);
+		private static readonly ConcurrentDictionary<string, string> QuoteEscape = new ConcurrentDictionary<string, string>(1, 17);
 
 		public static string BuildQuoteEscape(string escaping)
 		{
@@ -99,7 +99,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return result;
 		}
 
-		private static string[] Slashes = InitSlashes();
+		private static readonly string[] Slashes = InitSlashes();
 
 		private static string[] InitSlashes()
 		{

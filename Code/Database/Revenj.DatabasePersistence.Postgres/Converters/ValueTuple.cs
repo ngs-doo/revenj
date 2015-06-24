@@ -135,7 +135,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			else
 			{
 				if (mappings != null)
-					foreach (var c in Value ?? string.Empty)
+					foreach (var c in Value)
 						mappings(sw, c);
 				else
 					sw.Write(Value);

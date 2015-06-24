@@ -112,21 +112,15 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		public void InsertRecord(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
-			InsertRecord(Properties, sw, buf, escaping, mappings);
-		}
-
-		internal static void InsertRecord(IPostgresTuple[] properties, TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
-		{
 			sw.Write('(');
 			var newEscaping = escaping + '1';
 			string quote = null;
-			var p = properties[0];
+			var p = Properties[0];
 			if (p != null)
 			{
 				if (p.MustEscapeRecord)
 				{
-					//TODO: build quote only once and reuse it, instead of looping all the time
-					quote = quote ?? PostgresTuple.BuildQuoteEscape(escaping);
+					quote = PostgresTuple.BuildQuoteEscape(escaping);
 					if (mappings != null)
 						foreach (var q in quote)
 							mappings(sw, q);
@@ -141,10 +135,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				}
 				else p.InsertRecord(sw, buf, escaping, mappings);
 			}
-			for (int i = 1; i < properties.Length; i++)
+			for (int i = 1; i < Properties.Length; i++)
 			{
 				sw.Write(',');
-				p = properties[i];
+				p = Properties[i];
 				if (p != null)
 				{
 					if (p.MustEscapeRecord)
@@ -171,40 +165,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		public void InsertArray(TextWriter sw, char[] buf, string escaping, Action<TextWriter, char> mappings)
 		{
-			if (Properties == null)
-			{
-				sw.Write("NULL");
-				return;
-			}
-			sw.Write('(');
-			var newEscaping = escaping + '1';
-			string quote = null;
-			for (int i = 0; i < Properties.Length; i++)
-			{
-				var p = Properties[i];
-				if (p != null)
-				{
-					if (p.MustEscapeRecord)
-					{
-						quote = quote ?? PostgresTuple.BuildQuoteEscape(escaping);
-						if (mappings != null)
-							foreach (var q in quote)
-								mappings(sw, q);
-						else
-							sw.Write(quote);
-						p.InsertRecord(sw, buf, newEscaping, mappings);
-						if (mappings != null)
-							foreach (var q in quote)
-								mappings(sw, q);
-						else
-							sw.Write(quote);
-					}
-					else p.InsertRecord(sw, buf, escaping, mappings);
-				}
-				if (i < Properties.Length - 1)
-					sw.Write(',');
-			}
-			sw.Write(')');
+			InsertRecord(sw, buf, escaping, mappings);
 		}
 	}
 }
