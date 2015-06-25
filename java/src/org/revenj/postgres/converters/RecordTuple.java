@@ -5,7 +5,6 @@ import org.revenj.postgres.PostgresWriter;
 public class RecordTuple extends PostgresTuple {
 	public static final PostgresTuple EMPTY;
 	public static final PostgresTuple NULL;
-	private static final byte[] NullBytes = new byte[]{(byte) 'N', (byte) 'U', (byte) 'L', (byte) 'L'};
 
 	static {
 		EMPTY = new EmptyRecordTuple();

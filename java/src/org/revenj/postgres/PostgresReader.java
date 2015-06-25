@@ -1,5 +1,7 @@
 package org.revenj.postgres;
 
+import org.revenj.patterns.ServiceLocator;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -10,9 +12,17 @@ public class PostgresReader {
 	private int last;
 	private char[] buffer;
 	private int positionInBuffer;
+	public final ServiceLocator locator;
+	public final char[] tmp;
 
 	public PostgresReader() {
-		buffer = new char[64];
+		this(null);
+	}
+
+	public PostgresReader(ServiceLocator locator) {
+		this.buffer = new char[64];
+		this.tmp = new char[48];
+		this.locator = locator;
 	}
 
 	public void process(String input) {
@@ -80,6 +90,14 @@ public class PostgresReader {
 		if (positionInInput == input.length()) {
 			throw new IOException("End of input detected");
 		}
+	}
+
+	public void fillTotal(char[] target, int offset, int count) throws IOException {
+		//TODO: better exceptions
+		for(int i = 0; i < count; i++) {
+			target[i + offset] = input.charAt(positionInInput + i);
+		}
+		positionInInput += count;
 	}
 
 	public String bufferToString() {

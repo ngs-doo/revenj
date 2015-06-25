@@ -1,11 +1,14 @@
 package org.revenj.postgres;
 
-import org.revenj.patterns.ServiceLocator;
 import org.revenj.postgres.converters.PostgresTuple;
 
 import java.io.IOException;
 
 public interface ObjectConverter<T> {
-	T from(PostgresReader reader, ServiceLocator locator) throws IOException;
+	T from(PostgresReader reader) throws IOException;
 	PostgresTuple to(T instance);
+
+	interface Reader<T> {
+		void read(T instance, PostgresReader reader, int context) throws IOException;
+	}
 }
