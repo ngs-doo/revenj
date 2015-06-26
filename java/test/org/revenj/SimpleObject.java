@@ -11,34 +11,37 @@ public class SimpleObject {
 	private int number;
 	private String text;
 
-	public int getNumber() { return number; }
-	public void setNumber(int value) { number = value; }
+	public int getNumber() {
+		return number;
+	}
 
-	public String getText() { return text; }
-	public void setText(String value) { text = value; }
+	public void setNumber(int value) {
+		number = value;
+	}
 
-	public SimpleObject() { }
+	public String getText() {
+		return text;
+	}
 
-	public SimpleObject(PostgresReader reader, int context, int[] readerOrder) throws IOException {
-		if (readerOrder == null) {
-			number = IntConverter.parse(reader);
-			text = StringConverter.parse(reader, context);
-		} else {
-			for (int i : readerOrder) {
-				__READERS[i].read(this, reader, context);
-			}
+	public void setText(String value) {
+		text = value;
+	}
+
+	public SimpleObject() {
+	}
+
+	public SimpleObject(PostgresReader reader, int context, ObjectConverter.Reader<SimpleObject>[] readers) throws IOException {
+		for (ObjectConverter.Reader<SimpleObject> rdr : readers) {
+			rdr.read(this, reader, context);
 		}
 	}
 
-	private static final ObjectConverter.Reader<SimpleObject> __NumberReader = (instance, reader, context) -> {
-		instance.number = IntConverter.parse(reader);
-	};
-	private static final ObjectConverter.Reader<SimpleObject> __StringReader = (instance, reader, context) -> {
-		instance.text = StringConverter.parse(reader, context);
-	};
-
-	private static final ObjectConverter.Reader<SimpleObject>[] __READERS = new ObjectConverter.Reader[] {
-			__NumberReader,
-			__StringReader
-	};
+	public static void configureConverter(ObjectConverter.Reader<SimpleObject>[] readers) {
+		readers[0] = (instance, reader, context) -> {
+			instance.number = IntConverter.parse(reader);
+		};
+		readers[1] = (instance, reader, context) -> {
+			instance.text = StringConverter.parse(reader, context);
+		};
+	}
 }
