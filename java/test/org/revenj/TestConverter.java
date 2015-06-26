@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import org.postgresql.util.PGobject;
-import org.revenj.patterns.ServiceLocator;
 import org.revenj.postgres.ObjectConverter;
 import org.revenj.postgres.PostgresReader;
 
@@ -13,11 +12,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class TestConverter {
 
-	private final List<ObjectConverter.ColumnInfo> columns = Arrays.asList(
+	private static final List<ObjectConverter.ColumnInfo> columns = Arrays.asList(
 			new ObjectConverter.ColumnInfo("test", "Simple", "number", "pg_catalog", "int4", (short) 1, false, true),
 			new ObjectConverter.ColumnInfo("test", "Simple", "text", "pg_catalog", "varchar", (short) 2, false, true),
 			new ObjectConverter.ColumnInfo("test", "Composite", "id", "pg_catalog", "uuid", (short) 1, false, true),
@@ -83,24 +81,13 @@ public class TestConverter {
 		}
 	}
 
-	static class MapServiceLocator implements ServiceLocator {
-
-		public final Map<String, Object> container = new HashMap<>();
-
-		@Override
-		public Optional<Object> lookup(String name) {
-			return Optional.ofNullable(container.get(name));
-		}
-	}
-
 	@Test
-	public void compositeConversion() throws IOException {
+	public void compositeConversion() throws IOException, SQLException {
 		String input = "(6a07867f-1b23-416d-893a-6e493157e268,\"(1,abc)\")";
 		PostgresReader reader = new PostgresReader();
 		reader.process(input);
-		MapServiceLocator locator = new MapServiceLocator();
-		locator.container.put(SimpleConverter.class.getName(), new SimpleConverter(locator, columns));
-		CompositeConverter converter = new CompositeConverter(locator, columns);
+		MapServiceLocator locator = new MapServiceLocator(columns);
+		CompositeConverter converter = locator.resolve(CompositeConverter.class);
 		CompositeObject instance = converter.from(reader);
 		Assert.assertEquals(UUID.fromString("6a07867f-1b23-416d-893a-6e493157e268"), instance.getID());
 		Assert.assertEquals(1, instance.getSimple().getNumber());

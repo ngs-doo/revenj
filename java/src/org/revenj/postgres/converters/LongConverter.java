@@ -115,14 +115,19 @@ public abstract class LongConverter {
 		return list;
 	}
 
-	public static PostgresTuple toTuple(int value) {
+	private static final PostgresTuple MAX_TUPLE = new ValueTuple("-9223372036854775808", false, false);
+
+	public static PostgresTuple toTuple(long value) {
+		if (value == Long.MIN_VALUE) {
+			return MAX_TUPLE;
+		}
 		return new LongTuple(value);
 	}
 
 	static class LongTuple extends PostgresTuple {
 		private final long value;
 
-		public LongTuple(int value) {
+		public LongTuple(long value) {
 			this.value = value;
 		}
 
@@ -135,8 +140,8 @@ public abstract class LongConverter {
 		}
 
 		public void insertRecord(PostgresWriter sw, String escaping, Mapping mappings) {
-			int len = NumberConverter.serialize(value, sw.tmp, 0);
-			sw.writeBuffer(len);
+			int offset = NumberConverter.serialize(value, sw.tmp, 0);
+			sw.write(sw.tmp, offset, 21);
 		}
 
 		public String buildTuple(boolean quote) {

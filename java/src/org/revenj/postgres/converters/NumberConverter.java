@@ -65,23 +65,19 @@ public abstract class NumberConverter {
 		return value;
 	}
 
+	/**
+	 * Should not be used for Integer.MIN_VALUE
+	 * @param value
+	 * @param buf
+	 * @param start
+	 * @return
+	 */
 	public static int serialize(int value, char[] buf, int start) {
-		if (value == Integer.MIN_VALUE) {
-			"-2147483648".getChars(0, 11, buf, start);
-			return start + 11;
-		}
 		int q, r;
-		int charPos = 10;
-		int i;
-		if (value < 0) {
-			i = -value;
-			buf[start] = '-';
-			start += 1;
-		} else {
-			i = value;
-		}
+		int charPos = 10 + start;
+		int i = value < 0 ? -value : value;
 		int v = 0;
-		while (charPos > 1) {
+		while (charPos > start) {
 			q = i / 100;
 			r = i - ((q << 6) + (q << 5) + (q << 2));
 			i = q;
@@ -90,32 +86,25 @@ public abstract class NumberConverter {
 			buf[charPos--] = (char) (v >> 8);
 			if (i == 0) break;
 		}
-		int len = charPos + 1 + (v >> 16);
-		for (int x = start; x < start + 11 - len; x++) {
-			buf[x] = buf[x + charPos];
-		}
-		return start + 11 - len;
+		buf[charPos] = '-';
+		return charPos - start + 1 + (v >> 24);
 	}
 
+	/**
+	 * Should not be used for LONG.MIN_VALUE
+	 * @param value
+	 * @param buf
+	 * @param start
+	 * @return
+	 */
 	public static int serialize(long value, char[] buf, int start) {
-		if (value == Long.MIN_VALUE) {
-			"-9223372036854775808".getChars(0, 21, buf, start);
-			return start + 11;
-		}
 		long q;
 		int r;
-		int charPos = 20;
-		long i;
-		if (value < 0) {
-			i = -value;
-			buf[start] = '-';
-			start += 1;
-		} else {
-			i = value;
-		}
+		int charPos = start + 20;
+		long i = value < 0 ? -value : value;
 
 		int v = 0;
-		while (charPos > 1) {
+		while (charPos > start) {
 			q = i / 100;
 			r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
 			i = q;
@@ -124,10 +113,7 @@ public abstract class NumberConverter {
 			buf[charPos--] = (char) (v >> 8);
 			if (i == 0) break;
 		}
-		int len = charPos + 1 + (v >> 16);
-		for (int x = start; x < start + 11 - len; x++) {
-			buf[x] = buf[x + charPos];
-		}
-		return start + 11 - len;
+		buf[charPos] = '-';
+		return charPos - start + 1 + (v >> 24);
 	}
 }

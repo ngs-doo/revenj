@@ -1,5 +1,6 @@
 package org.revenj;
 
+import org.revenj.patterns.AggregateRoot;
 import org.revenj.postgres.ObjectConverter;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.converters.UuidConverter;
@@ -7,7 +8,12 @@ import org.revenj.postgres.converters.UuidConverter;
 import java.io.IOException;
 import java.util.UUID;
 
-public class CompositeObject {
+public class CompositeObject implements AggregateRoot {
+
+	public String getURI() {
+		return id.toString();
+	}
+
 	private UUID id;
 	private SimpleObject simple;
 

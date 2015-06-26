@@ -10,12 +10,17 @@ public class PostgresWriter {
 	public PostgresWriter() {
 		buffer = new char[64];
 		tmp = new char[64];
+		position = 0;
+	}
+
+	public void reset() {
+		position = 0;
 	}
 
 	public void write(String input) {
 		int len = input.length();
-		if (position + len < buffer.length) {
-			buffer = Arrays.copyOf(buffer, buffer.length * 2 + input.length());
+		if (position + len >= buffer.length) {
+			buffer = Arrays.copyOf(buffer, buffer.length * 2 + len);
 		}
 		input.getChars(0, len, buffer, position);
 		position += len;
@@ -29,7 +34,7 @@ public class PostgresWriter {
 	}
 
 	public void write(char[] buf, int len) {
-		if (position + len < buffer.length) {
+		if (position + len >= buffer.length) {
 			buffer = Arrays.copyOf(buffer, buffer.length * 2 + len);
 		}
 		for (int i = 0; i < len; i++) {
@@ -39,7 +44,7 @@ public class PostgresWriter {
 	}
 
 	public void write(char[] buf, int off, int end) {
-		if (position + end < buffer.length) {
+		if (position + end >= buffer.length) {
 			buffer = Arrays.copyOf(buffer, buffer.length * 2 + end);
 		}
 		for (int i = off; i < end; i++) {
@@ -49,7 +54,7 @@ public class PostgresWriter {
 	}
 
 	public void writeBuffer(int len) {
-		if (position + len < buffer.length) {
+		if (position + len >= buffer.length) {
 			buffer = Arrays.copyOf(buffer, buffer.length * 2 + len);
 		}
 		for (int i = 0; i < len; i++) {

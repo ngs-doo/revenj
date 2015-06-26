@@ -115,7 +115,12 @@ public abstract class IntConverter {
 		return list;
 	}
 
+	private static final PostgresTuple MAX_TUPLE = new ValueTuple("-2147483648", false, false);
+
 	public static PostgresTuple toTuple(int value) {
+		if (value == Integer.MIN_VALUE) {
+			return MAX_TUPLE;
+		}
 		return new IntTuple(value);
 	}
 
@@ -135,8 +140,8 @@ public abstract class IntConverter {
 		}
 
 		public void insertRecord(PostgresWriter sw, String escaping, Mapping mappings) {
-			int len = NumberConverter.serialize(value, sw.tmp, 0);
-			sw.writeBuffer(len);
+			int offset = NumberConverter.serialize(value, sw.tmp, 0);
+			sw.write(sw.tmp, offset, 11);
 		}
 
 		public String buildTuple(boolean quote) {

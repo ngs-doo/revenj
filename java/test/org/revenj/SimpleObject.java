@@ -1,5 +1,6 @@
 package org.revenj;
 
+import org.revenj.patterns.AggregateRoot;
 import org.revenj.postgres.ObjectConverter;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.converters.IntConverter;
@@ -7,9 +8,13 @@ import org.revenj.postgres.converters.StringConverter;
 
 import java.io.IOException;
 
-public class SimpleObject {
+public class SimpleObject implements AggregateRoot {
 	private int number;
 	private String text;
+
+	public String getURI() {
+		return Integer.toString(number);
+	}
 
 	public int getNumber() {
 		return number;

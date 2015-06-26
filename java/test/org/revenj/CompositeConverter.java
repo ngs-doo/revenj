@@ -36,7 +36,7 @@ public class CompositeConverter implements ObjectConverter<CompositeObject> {
 		if (!__column2.isPresent()) throw new RuntimeException("Unable to find 'simple' column in test Composite. Check if DB is in sync");
 		__index__simple = (int)__column2.get().order - 1;
 
-		simpleConverter = locator.lookup(SimpleConverter.class).get();
+		simpleConverter = locator.resolve(SimpleConverter.class);
 		CompositeObject.configureConverter(readers, simpleConverter);
 		ObjectConverter.swap(readers, 0, __index__id);
 		ObjectConverter.swap(readers, 1, __index__simple);
