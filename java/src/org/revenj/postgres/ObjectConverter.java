@@ -5,7 +5,12 @@ import org.revenj.postgres.converters.PostgresTuple;
 import java.io.IOException;
 
 public interface ObjectConverter<T> {
-	T from(PostgresReader reader) throws IOException;
+	T from(PostgresReader reader, int context) throws IOException;
+
+	default T from(PostgresReader reader) throws IOException {
+		return from(reader, 0);
+	}
+
 	PostgresTuple to(T instance);
 
 	interface Reader<T> {

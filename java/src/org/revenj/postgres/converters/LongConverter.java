@@ -3,10 +3,24 @@ package org.revenj.postgres.converters;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class LongConverter {
+
+	public static int serializeURI(char[] buf, int pos, long value) throws IOException {
+		int offset = NumberConverter.serialize(value, buf, pos);
+		for (int i = 0; i < 21 - offset; i++) {
+			buf[pos + i] = buf[pos + offset + i];
+		}
+		return pos + 21 - offset;
+	}
+
+	public static int serializeURI(char[] buf, int pos, Long value) throws IOException {
+		if (value == null) return pos;
+		return serializeURI(buf, pos, value.longValue());
+	}
 
 	public static Long parseNullable(PostgresReader reader) {
 		int cur = reader.read();

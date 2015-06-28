@@ -1,37 +1,25 @@
 package org.revenj;
 
+import gen.model.Boot;
 import gen.model.test.Composite;
 import gen.model.test.Simple;
+import gen.model.test.repositories.CompositeRepository;
 import org.junit.Assert;
 import org.junit.Test;
-import org.postgresql.util.PGobject;
-import org.revenj.patterns.ServiceLocator;
-import org.revenj.postgres.ObjectConverter;
-import org.revenj.postgres.PostgresReader;
+import org.revenj.patterns.Container;
+import org.revenj.patterns.GenericType;
+import org.revenj.patterns.PersistableRepository;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
 public class TestRepository {
 
-	private static final List<ObjectConverter.ColumnInfo> columns = Arrays.asList(
-			new ObjectConverter.ColumnInfo("test", "Simple", "number", "pg_catalog", "int4", (short) 1, false, true),
-			new ObjectConverter.ColumnInfo("test", "Simple", "text", "pg_catalog", "varchar", (short) 2, false, true),
-			new ObjectConverter.ColumnInfo("test", "-ngs_Simple_type-", "number", "pg_catalog", "int4", (short) 1, false, true),
-			new ObjectConverter.ColumnInfo("test", "-ngs_Simple_type-", "text", "pg_catalog", "varchar", (short) 2, false, true),
-			new ObjectConverter.ColumnInfo("test", "Composite_entity", "id", "pg_catalog", "uuid", (short) 1, false, true),
-			new ObjectConverter.ColumnInfo("test", "Composite_entity", "simple", "test", "Simple", (short) 2, false, true),
-			new ObjectConverter.ColumnInfo("test", "-ngs_Composite_type-", "id", "pg_catalog", "uuid", (short) 1, false, true),
-			new ObjectConverter.ColumnInfo("test", "-ngs_Composite_type-", "simple", "test", "Simple", (short) 2, false, true)
-	);
-
 	@Test
 	public void repositoryTest() throws IOException, SQLException {
-		MapServiceLocator locator = new MapServiceLocator(columns);
-		CompositeRepository repository = new CompositeRepository(locator);
+		Container locator = Boot.start("jdbc:postgresql://localhost:5432/revenj");
+		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
 		Composite co = new Composite();
 		UUID id = UUID.randomUUID();
 		co.setId(id);

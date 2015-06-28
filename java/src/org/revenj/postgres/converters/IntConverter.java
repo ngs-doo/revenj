@@ -9,12 +9,17 @@ import java.util.List;
 
 public abstract class IntConverter {
 
-	public static int toURI(char[] buf, int pos, int value) throws IOException {
-		return pos;
+	public static int serializeURI(char[] buf, int pos, int value) throws IOException {
+		int offset = NumberConverter.serialize(value, buf, pos);
+		for (int i = 0; i < 11 - offset; i++) {
+			buf[pos + i] = buf[pos + offset + i];
+		}
+		return pos + 11 - offset;
 	}
 
-	public static int toURI(char[] buf, int pos, Integer value) throws IOException {
-		return pos;
+	public static int serializeURI(char[] buf, int pos, Integer value) throws IOException {
+		if (value == null) return pos;
+		return serializeURI(buf, pos, value.intValue());
 	}
 
 	public static Integer parseNullable(PostgresReader reader) {

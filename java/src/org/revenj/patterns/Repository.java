@@ -1,11 +1,14 @@
 package org.revenj.patterns;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public interface Repository<T/* extends Identifiable*/> {
 	List<T> find(String[] uris);
+
+	default List<T> find(List<String> uris) {
+		return find(uris.toArray(new String[uris.size()]));
+	}
 
 	default Optional<T> find(String uri) {
 		List<T> result = find(new String[] { uri });

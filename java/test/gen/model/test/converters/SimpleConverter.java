@@ -1,4 +1,4 @@
-package gen.model._DatabaseCommon.Factorytest;
+package gen.model.test.converters;
 
 
 
@@ -90,10 +90,10 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 	}
 
 	
-		
+	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Simple>[] readers;
-		
+	
 	public gen.model.test.Simple from(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
@@ -101,10 +101,10 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		reader.read();
 		return instance;
 	}
-		
+	
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.test.Simple>[] readersExtended;
-		
+	
 	public gen.model.test.Simple fromExtended(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
@@ -112,8 +112,8 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		reader.read();
 		return instance;
 	}
-		private final int __index___number;
-		private final int __index__extended_number;
-		private final int __index___text;
-		private final int __index__extended_text;
+	private final int __index___number;
+	private final int __index__extended_number;
+	private final int __index___text;
+	private final int __index__extended_text;
 }

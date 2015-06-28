@@ -1,7 +1,6 @@
 package org.revenj;
 
 import org.revenj.patterns.Container;
-import org.revenj.patterns.ServiceLocator;
 
 import java.io.File;
 import java.io.FileReader;
@@ -20,7 +19,7 @@ public abstract class Revenj {
 		void configure(Container container) throws IOException;
 	}
 
-	public static ServiceLocator setup(String connectionString) throws IOException {
+	public static Container setup(String jdbcUrl) throws IOException {
 		Properties properties = new Properties();
 		File revProps = new File("revenj.properties");
 		if (revProps.exists() && revProps.isFile()) {
@@ -28,7 +27,7 @@ public abstract class Revenj {
 		}
 		Container.Factory<Connection> factory = c -> {
 			try {
-				return DriverManager.getConnection(connectionString, properties);
+				return DriverManager.getConnection(jdbcUrl, properties);
 			} catch (SQLException ignore) {
 				return null;
 			}
@@ -36,7 +35,7 @@ public abstract class Revenj {
 		return setup(factory, new File("."), properties, Optional.<ClassLoader>empty());
 	}
 
-	public static ServiceLocator setup(
+	public static Container setup(
 			Container.Factory<Connection> connectionFactory,
 			File pluginsPath,
 			Properties properties,
@@ -54,13 +53,21 @@ public abstract class Revenj {
 				? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader.get())
 				: new URLClassLoader(urls.toArray(new URL[urls.size()]));
 		ServiceLoader<SystemAspect> plugins = ServiceLoader.load(SystemAspect.class, ucl);
+		Container container = setup(connectionFactory, properties, plugins.iterator());
+		ucl.close();
+		return container;
+	}
+
+	public static Container setup(
+			Container.Factory<Connection> connectionFactory,
+			Properties properties,
+			Iterator<SystemAspect> aspects) throws IOException {
 		SimpleContainer container = new SimpleContainer();
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
-		for (SystemAspect aspect : plugins) {
-			aspect.configure(container);
+		while (aspects.hasNext()) {
+			aspects.next().configure(container);
 		}
-		ucl.close();
 		return container;
 	}
 }

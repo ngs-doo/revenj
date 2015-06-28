@@ -14,12 +14,4 @@ public interface ServiceLocator {
 		}
 		return (T) found.get();
 	}
-
-	default <T> T resolve(GenericType<T> genericType) {
-		Optional<Object> found = tryResolve(genericType.type);
-		if (!found.isPresent()) {
-			throw new NoSuchElementException(genericType.type.getTypeName());
-		}
-		return (T) found.get();
-	}
 }

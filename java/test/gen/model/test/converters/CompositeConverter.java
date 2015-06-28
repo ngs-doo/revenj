@@ -1,4 +1,4 @@
-package gen.model._DatabaseCommon.Factorytest;
+package gen.model.test.converters;
 
 
 
@@ -51,7 +51,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
-		__converter_simple = locator.resolve(gen.model._DatabaseCommon.Factorytest.SimpleConverter.class);
+		__converter_simple = locator.resolve(gen.model.test.converters.SimpleConverter.class);
 		
 			
 		gen.model.test.Composite.configureConverter(readers, __index___id, __converter_simple, __index___simple);
@@ -76,7 +76,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		if (instance == null) return null;
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
-		items[__index___id] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getId());
+		items[__index___id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
 		items[__index___simple] = __converter_simple.to(instance.getSimple());
 		return RecordTuple.from(items);
 	}
@@ -85,16 +85,16 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		if (instance == null) return null;
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
-		items[__index__extended_id] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getId());
+		items[__index__extended_id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
 		items[__index__extended_simple] = __converter_simple.toExtended(instance.getSimple());
 		return RecordTuple.from(items);
 	}
 
 	
-		
+	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Composite>[] readers;
-		
+	
 	public gen.model.test.Composite from(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
@@ -102,10 +102,10 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		reader.read();
 		return instance;
 	}
-		
+	
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.test.Composite>[] readersExtended;
-		
+	
 	public gen.model.test.Composite fromExtended(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
@@ -113,9 +113,16 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		reader.read();
 		return instance;
 	}
-		private final int __index___id;
-		private final int __index__extended_id;
-	private gen.model._DatabaseCommon.Factorytest.SimpleConverter __converter_simple;
-		private final int __index___simple;
-		private final int __index__extended_simple;
+	
+	public static String buildURI(char[] _buf, java.util.UUID id) throws java.io.IOException {
+		int _len = 0;
+		String _tmp;
+		_len = org.revenj.postgres.converters.UuidConverter.serializeURI(_buf, _len, id);
+		return new String(_buf, 0, _len);
+	}
+	private final int __index___id;
+	private final int __index__extended_id;
+	private gen.model.test.converters.SimpleConverter __converter_simple;
+	private final int __index___simple;
+	private final int __index__extended_simple;
 }

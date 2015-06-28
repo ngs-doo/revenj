@@ -110,12 +110,10 @@ public abstract class UuidConverter {
 		buf[start + 35] = (char) (byte) l;
 	}
 
-	public static int toURI(char[] buf, int pos, UUID value) throws IOException {
-		return pos;
-	}
-
-	public static int toURINullable(char[] buf, int pos, UUID value) throws IOException {
-		return pos;
+	public static int serializeURI(char[] buf, int pos, UUID value) throws IOException {
+		if (value == null) return pos;
+		serialize(value, buf, pos);
+		return pos + 36;
 	}
 
 	public static UUID parse(PostgresReader reader, boolean nullable) throws IOException {

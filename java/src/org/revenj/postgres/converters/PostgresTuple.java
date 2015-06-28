@@ -30,13 +30,17 @@ public abstract class PostgresTuple {
 		void map(PostgresWriter writer, char arg);
 	}
 
-	public String buildTuple(boolean quote) {
-		PostgresWriter sw = new PostgresWriter();
+	public void buildTuple(PostgresWriter sw, boolean quote) {
 		if (quote) {
 			sw.write('\'');
 			insertRecord(sw, "", PostgresTuple::escapeQuote);
 			sw.write('\'');
 		} else insertRecord(sw, "", null);
+	}
+
+	public String buildTuple(boolean quote) {
+		PostgresWriter sw = new PostgresWriter();
+		buildTuple(sw, quote);
 		return sw.toString();
 	}
 

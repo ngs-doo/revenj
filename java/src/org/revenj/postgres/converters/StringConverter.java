@@ -8,19 +8,14 @@ import java.util.List;
 
 public abstract class StringConverter {
 
-	public static int toURINullable(char[] buf, int pos, String value) {
-		return pos;
+	public static int serializeURI(char[] buf, int pos, String value) throws IOException {
+		if (value == null) return pos;
+		value.getChars(0, value.length(), buf, pos);
+		return pos + value.length();
 	}
 
-	public static int toURI(char[] buf, int pos, String value) {
-		return pos;
-	}
-
-	public static int toCompositeURINullable(char[] buf, int pos, String value) {
-		return pos;
-	}
-
-	public static int toCompositeURI(char[] buf, int pos, String value) {
+	public static int serializeCompositeURI(char[] buf, int pos, String value) throws IOException {
+		if (value == null) return pos;
 		for (int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
 			if (c == '\\' || c == '/') {

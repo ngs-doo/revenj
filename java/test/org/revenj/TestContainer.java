@@ -9,8 +9,6 @@ import org.revenj.patterns.ServiceLocator;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class TestContainer {
@@ -34,6 +32,7 @@ public class TestContainer {
 
 	static class B {
 		public static int counter;
+
 		public B() {
 			counter++;
 		}
@@ -62,7 +61,8 @@ public class TestContainer {
 		}
 	}
 
-	static class D {}
+	static class D {
+	}
 
 
 	@Test
@@ -81,6 +81,7 @@ public class TestContainer {
 
 	static class G<T> {
 		public final T instance;
+
 		public G(T instance) {
 			this.instance = instance;
 		}
@@ -91,7 +92,7 @@ public class TestContainer {
 		B.counter = 0;
 		Container container = new SimpleContainer();
 		container.register(A.class, B.class, G.class);
-		G<A> g = container.resolve(new GenericType<G<A>>() {});
+		G<A> g = new GenericType<G<A>>() { }.resolve(container);
 		Assert.assertNotNull(g);
 		Assert.assertEquals(1, B.counter);
 		Assert.assertTrue(g.instance instanceof A);
@@ -101,6 +102,7 @@ public class TestContainer {
 	static class ComplexGenerics<T1, T2> {
 		public final T1 instance1;
 		public final T2 instance2;
+
 		public ComplexGenerics(T2 instance2, T1 instance1) {
 			this.instance1 = instance1;
 			this.instance2 = instance2;
@@ -112,7 +114,7 @@ public class TestContainer {
 		B.counter = 0;
 		Container container = new SimpleContainer();
 		container.register(A.class, B.class, ComplexGenerics.class);
-		ComplexGenerics<A, B> cg = container.resolve(new GenericType<ComplexGenerics<A, B>>() {});
+		ComplexGenerics<A, B> cg = new GenericType<ComplexGenerics<A, B>>() { }.resolve(container);
 		Assert.assertNotNull(cg);
 		Assert.assertEquals(2, B.counter);
 		Assert.assertTrue(cg.instance1 instanceof A);
@@ -121,7 +123,7 @@ public class TestContainer {
 		Assert.assertEquals(B.class, cg.instance2.getClass());
 	}
 
-	static class CtorRawGenerics{
+	static class CtorRawGenerics {
 		public final ComplexGenerics<A, B> generics;
 
 		public CtorRawGenerics(ComplexGenerics<A, B> generics) {
@@ -143,7 +145,7 @@ public class TestContainer {
 		Assert.assertEquals(B.class, cg.generics.instance2.getClass());
 	}
 
-	static class CtorGenerics<T>{
+	static class CtorGenerics<T> {
 		public final ComplexGenerics<T, B> generics;
 
 		public CtorGenerics(ComplexGenerics<T, B> generics) {
@@ -156,7 +158,7 @@ public class TestContainer {
 		B.counter = 0;
 		Container container = new SimpleContainer();
 		container.register(A.class, B.class, ComplexGenerics.class, CtorGenerics.class);
-		CtorGenerics<A> cg = container.resolve(new GenericType<CtorGenerics<A>>() { });
+		CtorGenerics<A> cg = new GenericType<CtorGenerics<A>>() { } .resolve(container);
 		Assert.assertNotNull(cg);
 		Assert.assertEquals(2, B.counter);
 		Assert.assertTrue(cg.generics.instance1 instanceof A);

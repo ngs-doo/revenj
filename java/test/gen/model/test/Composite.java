@@ -118,15 +118,15 @@ public class Composite   implements java.io.Serializable {
 		}
 	}
 
-	public static void configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, gen.model._DatabaseCommon.Factorytest.SimpleConverter __converter_simple, int __index___simple) {
+	public static void configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, gen.model.test.converters.SimpleConverter __converter_simple, int __index___simple) {
 		
-		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
+		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index___simple] = (item, reader, context) -> { item.simple = __converter_simple.from(reader, context); };
 	}
 	
-	public static void configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index__extended_id, final gen.model._DatabaseCommon.Factorytest.SimpleConverter __converter_simple, int __index__extended_simple) {
+	public static void configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index__extended_id, final gen.model.test.converters.SimpleConverter __converter_simple, int __index__extended_simple) {
 		
-		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
+		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_simple] = (item, reader, context) -> { item.simple = __converter_simple.fromExtended(reader, context); };
 	}
 }
