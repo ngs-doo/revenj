@@ -33,17 +33,16 @@ public abstract class Revenj {
 				return null;
 			}
 		};
-		return setup(factory, ".", properties, Optional.<ClassLoader>empty());
+		return setup(factory, new File("."), properties, Optional.<ClassLoader>empty());
 	}
 
 	public static ServiceLocator setup(
 			Container.Factory<Connection> connectionFactory,
-			String pluginsPath,
+			File pluginsPath,
 			Properties properties,
 			Optional<ClassLoader> classLoader) throws IOException {
-		File loc = new File(pluginsPath);
-		File[] jars = loc.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar"));
-		List<URL> urls = new ArrayList<URL>(jars.length);
+		File[] jars = pluginsPath.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar"));
+		List<URL> urls = new ArrayList<>(jars.length);
 		for (File j : jars) {
 			try {
 				urls.add(j.toURI().toURL());
@@ -57,7 +56,7 @@ public abstract class Revenj {
 		ServiceLoader<SystemAspect> plugins = ServiceLoader.load(SystemAspect.class, ucl);
 		SimpleContainer container = new SimpleContainer();
 		container.register(properties);
-		container.register(Connection.class, false, connectionFactory);
+		container.register(Connection.class, connectionFactory);
 		for (SystemAspect aspect : plugins) {
 			aspect.configure(container);
 		}
