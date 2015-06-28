@@ -110,6 +110,14 @@ public abstract class UuidConverter {
 		buf[start + 35] = (char) (byte) l;
 	}
 
+	public static int toURI(char[] buf, int pos, UUID value) throws IOException {
+		return pos;
+	}
+
+	public static int toURINullable(char[] buf, int pos, UUID value) throws IOException {
+		return pos;
+	}
+
 	public static UUID parse(PostgresReader reader, boolean nullable) throws IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') {
@@ -177,6 +185,10 @@ public abstract class UuidConverter {
 			reader.read();
 		}
 		return list;
+	}
+
+	public static PostgresTuple toTupleNullable(UUID value) {
+		return value == null ? null : new UuidTuple(value);
 	}
 
 	public static PostgresTuple toTuple(UUID value) {

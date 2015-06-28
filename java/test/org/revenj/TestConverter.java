@@ -1,5 +1,9 @@
 package org.revenj;
 
+import gen.model._DatabaseCommon.Factorytest.CompositeConverter;
+import gen.model._DatabaseCommon.Factorytest.SimpleConverter;
+import gen.model.test.Composite;
+import gen.model.test.Simple;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,8 +22,12 @@ public class TestConverter {
 	private static final List<ObjectConverter.ColumnInfo> columns = Arrays.asList(
 			new ObjectConverter.ColumnInfo("test", "Simple", "number", "pg_catalog", "int4", (short) 1, false, true),
 			new ObjectConverter.ColumnInfo("test", "Simple", "text", "pg_catalog", "varchar", (short) 2, false, true),
-			new ObjectConverter.ColumnInfo("test", "Composite", "id", "pg_catalog", "uuid", (short) 1, false, true),
-			new ObjectConverter.ColumnInfo("test", "Composite", "simple", "test", "Simple", (short) 2, false, true)
+			new ObjectConverter.ColumnInfo("test", "-ngs_Simple_type-", "number", "pg_catalog", "int4", (short) 1, false, true),
+			new ObjectConverter.ColumnInfo("test", "-ngs_Simple_type-", "text", "pg_catalog", "varchar", (short) 2, false, true),
+			new ObjectConverter.ColumnInfo("test", "Composite_entity", "id", "pg_catalog", "uuid", (short) 1, false, true),
+			new ObjectConverter.ColumnInfo("test", "Composite_entity", "simple", "test", "Simple", (short) 2, false, true),
+			new ObjectConverter.ColumnInfo("test", "-ngs_Composite_type-", "id", "pg_catalog", "uuid", (short) 1, false, true),
+			new ObjectConverter.ColumnInfo("test", "-ngs_Composite_type-", "simple", "test", "Simple", (short) 2, false, true)
 	);
 
 	@Test
@@ -27,8 +35,9 @@ public class TestConverter {
 		String input = "(1,abc)";
 		PostgresReader reader = new PostgresReader();
 		reader.process(input);
-		SimpleConverter converter = new SimpleConverter(null, columns);
-		SimpleObject instance = converter.from(reader);
+		SimpleConverter converter = new SimpleConverter(columns);
+		converter.configure(null);
+		Simple instance = converter.from(reader);
 		Assert.assertEquals(1, instance.getNumber());
 		Assert.assertEquals("abc", instance.getText());
 	}
@@ -46,8 +55,9 @@ public class TestConverter {
 			PGobject obj = (PGobject) rs.getObject(1);
 			PostgresReader reader = new PostgresReader();
 			reader.process(obj.getValue());
-			SimpleConverter converter = new SimpleConverter(null, columns);
-			SimpleObject instance = converter.from(reader);
+			SimpleConverter converter = new SimpleConverter(columns);
+			converter.configure(null);
+			Simple instance = converter.from(reader);
 			connection.rollback();
 			Assert.assertEquals(1, instance.getNumber());
 			Assert.assertEquals("abc", instance.getText());
@@ -66,8 +76,9 @@ public class TestConverter {
 			rs.next();
 			Object[] arr = (Object[]) rs.getArray(1).getArray();
 			PostgresReader reader = new PostgresReader();
-			SimpleObject[] result = new SimpleObject[arr.length];
-			SimpleConverter converter = new SimpleConverter(null, columns);
+			Simple[] result = new Simple[arr.length];
+			SimpleConverter converter = new SimpleConverter(columns);
+			converter.configure(null);
 			for (int i = 0; i < arr.length; i++) {
 				reader.process(((PGobject) arr[i]).getValue());
 				result[i] = converter.from(reader);
@@ -88,8 +99,8 @@ public class TestConverter {
 		reader.process(input);
 		MapServiceLocator locator = new MapServiceLocator(columns);
 		CompositeConverter converter = locator.resolve(CompositeConverter.class);
-		CompositeObject instance = converter.from(reader);
-		Assert.assertEquals(UUID.fromString("6a07867f-1b23-416d-893a-6e493157e268"), instance.getID());
+		Composite instance = converter.from(reader);
+		Assert.assertEquals(UUID.fromString("6a07867f-1b23-416d-893a-6e493157e268"), instance.getId());
 		Assert.assertEquals(1, instance.getSimple().getNumber());
 		Assert.assertEquals("abc", instance.getSimple().getText());
 	}

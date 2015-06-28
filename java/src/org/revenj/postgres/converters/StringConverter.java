@@ -7,6 +7,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class StringConverter {
+
+	public static int toURINullable(char[] buf, int pos, String value) {
+		return pos;
+	}
+
+	public static int toURI(char[] buf, int pos, String value) {
+		return pos;
+	}
+
+	public static int toCompositeURINullable(char[] buf, int pos, String value) {
+		return pos;
+	}
+
+	public static int toCompositeURI(char[] buf, int pos, String value) {
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if (c == '\\' || c == '/') {
+				buf[pos++] = '\\';
+			}
+			buf[pos++] = c;
+		}
+		return pos;
+	}
+
 	public static void skip(PostgresReader reader, int context) throws IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') {
@@ -109,14 +133,8 @@ public abstract class StringConverter {
 		return list;
 	}
 
-	public static int serializeCompositeURI(String value, char[] buf, int pos) {
-		for (int i = 0; i < value.length(); i++) {
-			char c = value.charAt(i);
-			if (c == '\\' || c == '/') {
-				buf[pos++] = '\\';
-			}
-			buf[pos++] = c;
-		}
-		return pos;
+	public static PostgresTuple toTuple(String value) {
+		return ValueTuple.from(value);
 	}
+
 }

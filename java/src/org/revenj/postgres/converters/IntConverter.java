@@ -3,10 +3,19 @@ package org.revenj.postgres.converters;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class IntConverter {
+
+	public static int toURI(char[] buf, int pos, int value) throws IOException {
+		return pos;
+	}
+
+	public static int toURI(char[] buf, int pos, Integer value) throws IOException {
+		return pos;
+	}
 
 	public static Integer parseNullable(PostgresReader reader) {
 		int cur = reader.read();
@@ -116,6 +125,11 @@ public abstract class IntConverter {
 	}
 
 	private static final PostgresTuple MAX_TUPLE = new ValueTuple("-2147483648", false, false);
+
+	public static PostgresTuple toTuple(Integer value) {
+		if (value == null) return null;
+		return toTuple(value.intValue());
+	}
 
 	public static PostgresTuple toTuple(int value) {
 		if (value == Integer.MIN_VALUE) {

@@ -1,5 +1,7 @@
 package org.revenj;
 
+import gen.model._DatabaseCommon.Factorytest.CompositeConverter;
+import gen.model.test.Composite;
 import org.postgresql.util.PGobject;
 import org.revenj.patterns.PersistableRepository;
 import org.revenj.patterns.ServiceLocator;
@@ -11,7 +13,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-public class CompositeRepository implements PersistableRepository<CompositeObject> {
+public class CompositeRepository implements PersistableRepository<Composite> {
 
 	private final Connection connection;
 	private final CompositeConverter converter;
@@ -25,9 +27,9 @@ public class CompositeRepository implements PersistableRepository<CompositeObjec
 
 	@Override
 	public List<String> persist(
-			List<CompositeObject> insert,
-			List<Map.Entry<CompositeObject, CompositeObject>> update,
-			List<CompositeObject> delete) throws SQLException {
+			List<Composite> insert,
+			List<Map.Entry<Composite, Composite>> update,
+			List<Composite> delete) throws SQLException {
 		try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM test.\"persist_Composite\"(?, ?, ?, ?)")) {
 			List<String> result;
 			if (insert != null && !insert.isEmpty()) {
@@ -38,16 +40,16 @@ public class CompositeRepository implements PersistableRepository<CompositeObjec
 				pgo.setValue(tuple.buildTuple(false));
 				statement.setObject(1, pgo);
 				for(int i = 0; i < insert.size();i++) {
-					result.add(insert.get(0).getURI());
+					result.add(insert.get(0).getId().toString());
 				}
 			} else {
 				statement.setArray(1, null);
 				result = new ArrayList<>(0);
 			}
 			if (update != null && !update.isEmpty()) {
-				List<CompositeObject> oldUpdate = new ArrayList<>(update.size());
-				List<CompositeObject> newUpdate = new ArrayList<>(update.size());
-				for(Map.Entry<CompositeObject, CompositeObject> it : update) {
+				List<Composite> oldUpdate = new ArrayList<>(update.size());
+				List<Composite> newUpdate = new ArrayList<>(update.size());
+				for(Map.Entry<Composite, Composite> it : update) {
 					oldUpdate.add(it.getKey());
 					newUpdate.add(it.getValue());
 				}
@@ -85,7 +87,7 @@ public class CompositeRepository implements PersistableRepository<CompositeObjec
 	}
 
 	@Override
-	public List<CompositeObject> find(String[] uris) {
+	public List<Composite> find(String[] uris) {
 		try (PreparedStatement statement = connection.prepareStatement("SELECT r from test.\"Composite_entity\" r WHERE r.id = ANY(?)")) {
 			UUID[] uuids = new UUID[uris.length];
 			for (int i = 0; i < uuids.length; i++) {
@@ -93,8 +95,8 @@ public class CompositeRepository implements PersistableRepository<CompositeObjec
 			}
 			Array ids = connection.createArrayOf("uuid", uuids);
 			statement.setArray(1, ids);
-			ArrayList<CompositeObject> result = new ArrayList<>(uris.length);
-			PostgresReader reader = new PostgresReader(locator);
+			ArrayList<Composite> result = new ArrayList<>(uris.length);
+			PostgresReader reader = new PostgresReader(locator::resolve);
 			try(ResultSet rs = statement.executeQuery()) {
 				while (rs.next()) {
 					PGobject pgo = (PGobject) rs.getObject(1);

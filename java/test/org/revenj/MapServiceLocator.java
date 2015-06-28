@@ -1,5 +1,7 @@
 package org.revenj;
 
+import gen.model._DatabaseCommon.Factorytest.CompositeConverter;
+import gen.model._DatabaseCommon.Factorytest.SimpleConverter;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.postgres.ObjectConverter;
 
@@ -20,8 +22,12 @@ class MapServiceLocator implements ServiceLocator {
 		props.load(new FileReader(new File("test.properties")));
 		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/revenj", props);
 		container.put(Connection.class.getName(), connection);
-		container.put(SimpleConverter.class.getName(), new SimpleConverter(this, columns));
-		container.put(CompositeConverter.class.getName(), new CompositeConverter(this, columns));
+		SimpleConverter sc = new SimpleConverter(columns);
+		container.put(SimpleConverter.class.getName(), sc);
+		CompositeConverter cc = new CompositeConverter(columns);
+		container.put(CompositeConverter.class.getName(), cc);
+		sc.configure(this);
+		cc.configure(this);
 	}
 
 	@Override

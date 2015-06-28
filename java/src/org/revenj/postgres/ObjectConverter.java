@@ -12,12 +12,6 @@ public interface ObjectConverter<T> {
 		void read(T instance, PostgresReader reader, int context) throws IOException;
 	}
 
-	static <T> void swap(Reader<T>[] readers, int left, int right) {
-		Reader<T> tmp = readers[left];
-		readers[left] = readers[right];
-		readers[right] = tmp;
-	}
-
 	class ColumnInfo {
 		public final String typeSchema;
 		public final String typeName;
