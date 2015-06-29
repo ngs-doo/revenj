@@ -7,7 +7,6 @@ import gen.model.test.repositories.CompositeRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.Container;
-import org.revenj.patterns.GenericType;
 import org.revenj.patterns.PersistableRepository;
 
 import java.io.IOException;

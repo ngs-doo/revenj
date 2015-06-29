@@ -3,10 +3,11 @@ package org.revenj;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.Container;
-import org.revenj.patterns.GenericType;
+import org.revenj.patterns.Generic;
 import org.revenj.patterns.ServiceLocator;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class TestContainer {
 		B.counter = 0;
 		Container container = new SimpleContainer();
 		container.register(A.class);
-		Optional<Object> aopt = container.tryResolve(A.class);
+		Optional<A> aopt = container.tryResolve(A.class);
 		Assert.assertFalse(aopt.isPresent());
 		container.register(B.class);
 		A a = container.resolve(A.class);
@@ -92,7 +93,8 @@ public class TestContainer {
 		B.counter = 0;
 		Container container = new SimpleContainer();
 		container.register(A.class, B.class, G.class);
-		G<A> g = new GenericType<G<A>>() { }.resolve(container);
+		G<A> g = new Generic<G<A>>() {
+		}.resolve(container);
 		Assert.assertNotNull(g);
 		Assert.assertEquals(1, B.counter);
 		Assert.assertTrue(g.instance instanceof A);
@@ -114,7 +116,8 @@ public class TestContainer {
 		B.counter = 0;
 		Container container = new SimpleContainer();
 		container.register(A.class, B.class, ComplexGenerics.class);
-		ComplexGenerics<A, B> cg = new GenericType<ComplexGenerics<A, B>>() { }.resolve(container);
+		ComplexGenerics<A, B> cg = new Generic<ComplexGenerics<A, B>>() {
+		}.resolve(container);
 		Assert.assertNotNull(cg);
 		Assert.assertEquals(2, B.counter);
 		Assert.assertTrue(cg.instance1 instanceof A);
@@ -158,12 +161,27 @@ public class TestContainer {
 		B.counter = 0;
 		Container container = new SimpleContainer();
 		container.register(A.class, B.class, ComplexGenerics.class, CtorGenerics.class);
-		CtorGenerics<A> cg = new GenericType<CtorGenerics<A>>() { } .resolve(container);
+		CtorGenerics<A> cg = new Generic<CtorGenerics<A>>() {
+		}.resolve(container);
 		Assert.assertNotNull(cg);
 		Assert.assertEquals(2, B.counter);
 		Assert.assertTrue(cg.generics.instance1 instanceof A);
 		Assert.assertEquals(A.class, cg.generics.instance1.getClass());
 		Assert.assertTrue(cg.generics.instance2 instanceof B);
 		Assert.assertEquals(B.class, cg.generics.instance2.getClass());
+	}
+
+	@Test
+	public void passExceptions() {
+		Container container = new SimpleContainer();
+		container.register(TestContainer.class, c -> {
+			throw new RuntimeException("test me now");
+		});
+		try {
+			container.resolve(TestContainer.class);
+			Assert.fail("Expecting ReflectiveOperationException");
+		} catch (Exception e) {
+			Assert.assertTrue(e.getMessage().contains("test me now"));
+		}
 	}
 }

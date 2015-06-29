@@ -1,17 +1,25 @@
 package org.revenj.patterns;
 
 import java.lang.reflect.Type;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public interface ServiceLocator {
-	Optional<Object> tryResolve(Type type);
+	Object resolve(Type type) throws ReflectiveOperationException;
+
+	default <T> Optional<T> tryResolve(Class<T> manifest) {
+		try {
+			Object instance = resolve((Type)manifest);
+			return Optional.ofNullable((T)instance);
+		} catch (ReflectiveOperationException e) {
+			return Optional.empty();
+		}
+	}
 
 	default <T> T resolve(Class<T> manifest) {
-		Optional<Object> found = tryResolve(manifest);
-		if (!found.isPresent()) {
-			throw new NoSuchElementException(manifest.getName());
+		try {
+			return (T)resolve((Type)manifest);
+		} catch (ReflectiveOperationException e) {
+			throw new RuntimeException(e);
 		}
-		return (T) found.get();
 	}
 }

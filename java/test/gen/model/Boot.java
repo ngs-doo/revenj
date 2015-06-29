@@ -1,27 +1,36 @@
 package gen.model;
 
 
+import gen.model.test.Composite;
+import gen.model.test.Simple;
+import org.revenj.patterns.Generic;
+import org.revenj.patterns.PersistableRepository;
+import org.revenj.patterns.Repository;
+import org.revenj.postgres.ObjectConverter;
+
+import java.sql.SQLException;
+
 public class Boot implements org.revenj.Revenj.SystemAspect {
 
-	public static org.revenj.patterns.Container start(String jdbcUrl) throws java.io.IOException {{
+	public static org.revenj.patterns.Container configure(String jdbcUrl) throws java.io.IOException {
 		java.util.Properties properties = new java.util.Properties();
 		java.io.File revProps = new java.io.File("revenj.properties");
-		if (revProps.exists() && revProps.isFile()) {{
+		if (revProps.exists() && revProps.isFile()) {
 			properties.load(new java.io.FileReader(revProps));
-		}}
-		return start(jdbcUrl, properties);
-	}}
+		}
+		return configure(jdbcUrl, properties);
+	}
 
-	public static org.revenj.patterns.Container start(String jdbcUrl, java.util.Properties properties) throws java.io.IOException {{
-		org.revenj.patterns.Container.Factory<java.sql.Connection> factory = c -> {{
-			try {{
+	public static org.revenj.patterns.Container configure(String jdbcUrl, java.util.Properties properties) throws java.io.IOException {
+		org.revenj.patterns.Container.Factory<java.sql.Connection> factory = c -> {
+			try {
 				return java.sql.DriverManager.getConnection(jdbcUrl, properties);
-			}} catch (java.sql.SQLException ignore) {{
-				return null;
-			}}
-		}};
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
 		return org.revenj.Revenj.setup(factory, properties, java.util.Collections.singletonList((org.revenj.Revenj.SystemAspect) new Boot()).iterator());
-	}}
+	}
 
 	public void configure(org.revenj.patterns.Container container) throws java.io.IOException {
 		java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> columns = new java.util.ArrayList<>();
@@ -51,17 +60,17 @@ public class Boot implements org.revenj.Revenj.SystemAspect {
 		
 		gen.model.test.converters.SimpleConverter test$converter$SimpleConverter = new gen.model.test.converters.SimpleConverter(columns);
 		container.register(test$converter$SimpleConverter);
-		container.registerInstance(new org.revenj.patterns.GenericType<org.revenj.postgres.ObjectConverter<gen.model.test.Simple>>(){}.type, test$converter$SimpleConverter, false);
+		container.registerInstance(new Generic<ObjectConverter<Simple>>(){}.type, test$converter$SimpleConverter, false);
 		
 		gen.model.test.converters.CompositeConverter test$converter$CompositeConverter = new gen.model.test.converters.CompositeConverter(columns);
 		container.register(test$converter$CompositeConverter);
-		container.registerInstance(new org.revenj.patterns.GenericType<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.type, test$converter$CompositeConverter, false);
+		container.registerInstance(new Generic<ObjectConverter<Composite>>(){}.type, test$converter$CompositeConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		test$converter$CompositeConverter.configure(container);
 		
 		container.register(gen.model.test.repositories.CompositeRepository.class);
-		container.registerFactory(new org.revenj.patterns.GenericType<org.revenj.patterns.Repository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
+		container.registerFactory(new Generic<Repository<Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 		
-		container.registerFactory(new org.revenj.patterns.GenericType<org.revenj.patterns.PersistableRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
+		container.registerFactory(new Generic<PersistableRepository<Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 	}
 }

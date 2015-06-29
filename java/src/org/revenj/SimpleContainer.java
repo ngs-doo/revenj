@@ -25,7 +25,10 @@ class SimpleContainer implements Container {
 			this.singleton = singleton;
 		}
 
+		boolean promoted;
+
 		void promoteToSingleton(Object instance) {
+			promoted = true;
 			this.instance = (T) instance;
 		}
 	}
@@ -74,6 +77,36 @@ class SimpleContainer implements Container {
 		}
 	}
 
+	private static final class Either<T> {
+		final T value;
+		final Throwable error;
+
+		private Either(T value, Throwable error) {
+			this.value = value;
+			this.error = error;
+		}
+
+		boolean hasError() {
+			return error != null;
+		}
+
+		boolean isPresent() {
+			return error == null;
+		}
+
+		static <T> Either<T> success(final T value) {
+			return new Either<T>(value, null);
+		}
+
+		static <T> Either<T> fail(final Throwable error) {
+			return new Either<T>(null, error);
+		}
+
+		static <T> Either<T> fail(final String error) {
+			return new Either<T>(null, new ReflectiveOperationException(error));
+		}
+	}
+
 	private final Map<Type, List<Registration<?>>> container;
 
 	private final CopyOnWriteArrayList<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
@@ -86,7 +119,8 @@ class SimpleContainer implements Container {
 		this.container = new HashMap<>(parent);
 	}
 
-	private Optional<Object> tryResolveClass(Class<?> manifest) {
+	private Either<Object> tryResolveClass(Class<?> manifest) {
+		Throwable error = null;
 		CtorInfo[] constructors = classCache.get(manifest);
 		if (constructors == null) {
 			Constructor<?>[] ctors = manifest.getConstructors();
@@ -102,41 +136,54 @@ class SimpleContainer implements Container {
 			boolean success = true;
 			for (int i = 0; i < genTypes.length; i++) {
 				Type p = genTypes[i];
-				final Optional<Object> arg = tryResolve(p);
-				if (!arg.isPresent()) {
+				Either<Object> arg = tryResolve(p);
+				if (arg.hasError()) {
 					success = false;
+					if (error == null) {
+						error = arg.error;
+					} else {
+						error.addSuppressed(arg.error);
+					}
 					break;
 				}
-				args[i] = arg.get();
+				args[i] = arg.value;
 			}
-
 			if (success) {
 				try {
-					final Object instance = info.ctor.newInstance(args);
-					return Optional.of(instance);
-				} catch (final Exception ignored) {
+					Object instance = info.ctor.newInstance(args);
+					return Either.success(instance);
+				} catch (Exception e) {
+					if (error == null) {
+						error = e;
+					} else {
+						error.addSuppressed(e);
+					}
 				}
 			}
 		}
-		return Optional.empty();
+		return error == null
+				? Either.fail("Unable to find constructors for: " + manifest)
+				: Either.fail(error);
 	}
 
-	private Optional<Object> tryResolveType(ParameterizedType type) {
+	private Either<Object> tryResolveType(ParameterizedType type) {
 		TypeInfo typeInfo = typeCache.get(type);
 		if (typeInfo == null) {
 			typeInfo = new TypeInfo(type);
 			typeCache.putIfAbsent(type, typeInfo);
 		}
 		if (typeInfo.rawClass == null) {
-			return Optional.empty();
+			return Either.fail(type + " is not an instance of Class<?> and cannot be resolved");
 		} else if (typeInfo.rawClass == Optional.class) {
-			return Optional.of(tryResolve(typeInfo.genericArguments[0]));
+			Either<Object> content = tryResolve(typeInfo.genericArguments[0]);
+			return Either.success(Optional.ofNullable(content.value));
 		}
 		Map<Type, Type> mappings = typeInfo.mappings;
 		return tryResolveTypeFrom(typeInfo, mappings);
 	}
 
-	private Optional<Object> tryResolveTypeFrom(TypeInfo typeInfo, Map<Type, Type> mappings) {
+	private Either<Object> tryResolveTypeFrom(TypeInfo typeInfo, Map<Type, Type> mappings) {
+		Throwable error = null;
 		for (CtorInfo info : typeInfo.constructors) {
 			Type[] genTypes = info.genTypes;
 			Object[] args = new Object[genTypes.length];
@@ -152,6 +199,12 @@ class SimpleContainer implements Container {
 					}
 					if (nestedInfo.rawClass == null) {
 						success = false;
+						ReflectiveOperationException roe = new ReflectiveOperationException("Nested parametrized type: " + nestedType + " is not an instance of Class<?>. Error while resolving constructor: " + info.ctor);
+						if (error == null) {
+							error = roe;
+						} else {
+							error.addSuppressed(roe);
+						}
 						break;
 					} else if (nestedInfo.rawClass == Optional.class) {
 						args[i] = tryResolve(nestedInfo.genericArguments[0]);
@@ -161,12 +214,17 @@ class SimpleContainer implements Container {
 							Type parentValue = nestedMappings.get(entry.getValue());
 							nestedMappings.put(entry.getKey(), parentValue != null ? parentValue : entry.getValue());
 						}
-						final Optional<Object> arg = tryResolveTypeFrom(nestedInfo, nestedMappings);
-						if (!arg.isPresent()) {
+						Either<Object> arg = tryResolveTypeFrom(nestedInfo, nestedMappings);
+						if (arg.hasError()) {
 							success = false;
+							if (error == null) {
+								error = arg.error;
+							} else {
+								error.addSuppressed(arg.error);
+							}
 							break;
 						}
-						args[i] = arg.get();
+						args[i] = arg.value;
 					}
 
 				} else {
@@ -177,24 +235,36 @@ class SimpleContainer implements Container {
 							break;
 						}
 					}
-					final Optional<Object> arg = tryResolve(p);
-					if (!arg.isPresent()) {
+					Either<Object> arg = tryResolve(p);
+					if (arg.hasError()) {
 						success = false;
+						if (error == null) {
+							error = arg.error;
+						} else {
+							error.addSuppressed(arg.error);
+						}
 						break;
 					}
-					args[i] = arg.get();
+					args[i] = arg.value;
 				}
 			}
 
 			if (success) {
 				try {
-					final Object instance = info.ctor.newInstance(args);
-					return Optional.of(instance);
-				} catch (final Exception ignored) {
+					Object instance = info.ctor.newInstance(args);
+					return Either.success(instance);
+				} catch (final Exception e) {
+					if (error == null) {
+						error = e;
+					} else {
+						error.addSuppressed(e);
+					}
 				}
 			}
 		}
-		return Optional.empty();
+		return error == null
+				? Either.fail("Unable to find constructors for: " + typeInfo.rawClass)
+				: Either.fail(error);
 	}
 
 	private Registration<?> getRegistration(Type type) {
@@ -206,61 +276,92 @@ class SimpleContainer implements Container {
 	}
 
 	@Override
-	public Optional<Object> tryResolve(Type type) {
+	public Object resolve(Type type) throws ReflectiveOperationException {
+		Either<Object> found = tryResolve(type);
+		if (found.hasError()) {
+			if (found.error instanceof ReflectiveOperationException) {
+				throw (ReflectiveOperationException) found.error;
+			}
+			throw new ReflectiveOperationException("Unable to resolve: " + type + ". Reason: " + found.error.getMessage(), found.error);
+		}
+		return found.value;
+	}
+
+	public Either<Object> tryResolve(Type type) {
 		Registration<?> registration = getRegistration(type);
 		if (registration == null) {
 			if (type instanceof ParameterizedType) {
 				return tryResolveType((ParameterizedType) type);
 			}
 			if (type instanceof Class<?> == false) {
-				return Optional.empty();
+				return Either.fail(type + " is not an instance of Class<?> and cannot be resolved since it's not registered in the container.");
 			}
 			Class<?> target = (Class<?>) type;
 			if (target.isArray()) {
 				Class<?> element = target.getComponentType();
 				List<Registration<?>> registrations = container.get(element);
 				if (registrations == null || registrations.isEmpty()) {
-					return Optional.of(Array.newInstance(element, 0));
+					return Either.success(Array.newInstance(element, 0));
 				}
 				List<Object> result = new ArrayList<>(registrations.size());
 				for (int i = 0; i < registrations.size(); i++) {
-					Optional<Object> item = resolveRegistration(registrations.get(i));
+					Either<Object> item = resolveRegistration(registrations.get(i));
 					if (item.isPresent()) {
-						result.add(item.get());
+						result.add(item.value);
 					}
 				}
 				Object[] instance = (Object[]) Array.newInstance(element, result.size());
 				for (int i = 0; i < instance.length; i++) {
 					instance[i] = result.get(i);
 				}
-				return Optional.of(instance);
+				return Either.success(instance);
 			}
-			return Optional.empty();
+			return Either.fail(type + " is not registered in the container");
 		}
 		return resolveRegistration(registration);
 	}
 
-	private Optional<Object> resolveRegistration(Registration<?> registration) {
+	private Either<Object> resolveRegistration(Registration<?> registration) {
 		if (registration.instance != null) {
-			return Optional.of(registration.instance);
+			return Either.success(registration.instance);
 		} else if (registration.factory != null) {
-			Object instance = registration.factory.create(this);
-			if (registration.singleton && instance != null) {
-				if (instance instanceof AutoCloseable) {
-					closeables.add((AutoCloseable) instance);
+			try {
+				Object instance;
+				if (registration.singleton) {
+					synchronized (this) {
+						if (registration.promoted) {
+							return Either.success(registration.instance);
+						}
+						instance = registration.factory.create(this);
+						if (instance instanceof AutoCloseable) {
+							closeables.add((AutoCloseable) instance);
+						}
+						registration.promoteToSingleton(instance);
+					}
+				} else {
+					instance = registration.factory.create(this);
 				}
-				registration.promoteToSingleton(instance);
+				return Either.success(instance);
+			} catch (Throwable ex) {
+				return Either.fail(ex);
 			}
-			return Optional.ofNullable(instance);
 		}
-		Optional<Object> tryInstance = tryResolveClass(registration.manifest);
-		if (registration.singleton && tryInstance.isPresent()) {
-			if (tryInstance.get() instanceof AutoCloseable) {
-				closeables.add((AutoCloseable) tryInstance.get());
+		if (registration.singleton) {
+			synchronized (this) {
+				if (registration.promoted) {
+					return Either.success(registration.instance);
+				}
+				Either<Object> tryInstance = tryResolveClass(registration.manifest);
+				if (tryInstance.isPresent()) {
+					if (tryInstance.value instanceof AutoCloseable) {
+						closeables.add((AutoCloseable) tryInstance.value);
+					}
+					registration.promoteToSingleton(tryInstance.value);
+				}
+				return tryInstance;
 			}
-			registration.promoteToSingleton(tryInstance.get());
 		}
-		return tryInstance;
+		return tryResolveClass(registration.manifest);
 	}
 
 	private synchronized void addToRegistry(Type type, Registration registration) {
@@ -299,9 +400,9 @@ class SimpleContainer implements Container {
 
 	@Override
 	public void close() throws Exception {
+		container.clear();
 		for (AutoCloseable closable : closeables) {
 			closable.close();
 		}
-		container.clear();
 	}
 }

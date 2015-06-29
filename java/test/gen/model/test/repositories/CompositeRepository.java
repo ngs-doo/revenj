@@ -1,6 +1,9 @@
 package gen.model.test.repositories;
 
 
+import gen.model.test.Composite;
+import org.revenj.patterns.Generic;
+import org.revenj.postgres.ObjectConverter;
 
 public class CompositeRepository   implements org.revenj.patterns.Repository<gen.model.test.Composite>, org.revenj.patterns.PersistableRepository<gen.model.test.Composite> {
 	
@@ -24,7 +27,7 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public CompositeRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), new org.revenj.patterns.GenericType<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), new Generic<ObjectConverter<Composite>>(){}.resolve(locator), locator);
 	}
 	
 	@Override

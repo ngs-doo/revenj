@@ -28,8 +28,8 @@ public abstract class Revenj {
 		Container.Factory<Connection> factory = c -> {
 			try {
 				return DriverManager.getConnection(jdbcUrl, properties);
-			} catch (SQLException ignore) {
-				return null;
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
 			}
 		};
 		return setup(factory, new File("."), properties, Optional.<ClassLoader>empty());

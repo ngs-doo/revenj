@@ -2,14 +2,12 @@ package org.revenj.patterns;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
-public abstract class GenericType<T> {
+public abstract class Generic<T> {
 
 	public final Type type;
 
-	protected GenericType() {
+	protected Generic() {
 		Type superclass = getClass().getGenericSuperclass();
 		if (superclass instanceof Class) {
 			throw new RuntimeException("Missing type parameter.");
@@ -18,10 +16,10 @@ public abstract class GenericType<T> {
 	}
 
 	public <T> T resolve(ServiceLocator locator) {
-		Optional<Object> found = locator.tryResolve(type);
-		if (!found.isPresent()) {
-			throw new NoSuchElementException(type.getTypeName());
+		try {
+			return (T) locator.resolve(type);
+		} catch (ReflectiveOperationException e) {
+			throw new RuntimeException(e);
 		}
-		return (T)found.get();
 	}
 }
