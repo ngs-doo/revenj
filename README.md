@@ -64,7 +64,7 @@ DSL compiler acts as a developer in your team which does all the boring work you
 There are mostly two reasons to use it:
 
  * **ease of development** - but this is hard to explain since you need to experience it for yourself
- * **performance** - DSL Platform will provide libraries for Revenj which is faster than anything you could write by hand or by picking some other libraries/frameworks
+ * **performance** - DSL Platform will provide libraries for Revenj which are faster than anything you could write by hand or by picking some other libraries/frameworks
 
 Benchmarks:
 
