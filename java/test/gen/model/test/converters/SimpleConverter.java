@@ -10,6 +10,7 @@ import org.revenj.postgres.converters.*;
 
 public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 
+	@SuppressWarnings("unchecked")
 	public SimpleConverter(List<ObjectConverter.ColumnInfo> allColumns) throws java.io.IOException {
 		Optional<ObjectConverter.ColumnInfo> column;
 		

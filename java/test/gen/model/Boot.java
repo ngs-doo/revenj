@@ -1,15 +1,6 @@
 package gen.model;
 
 
-import gen.model.test.Composite;
-import gen.model.test.Simple;
-import org.revenj.patterns.Generic;
-import org.revenj.patterns.PersistableRepository;
-import org.revenj.patterns.Repository;
-import org.revenj.postgres.ObjectConverter;
-
-import java.sql.SQLException;
-
 public class Boot implements org.revenj.Revenj.SystemAspect {
 
 	public static org.revenj.patterns.Container configure(String jdbcUrl) throws java.io.IOException {
@@ -60,17 +51,17 @@ public class Boot implements org.revenj.Revenj.SystemAspect {
 		
 		gen.model.test.converters.SimpleConverter test$converter$SimpleConverter = new gen.model.test.converters.SimpleConverter(columns);
 		container.register(test$converter$SimpleConverter);
-		container.registerInstance(new Generic<ObjectConverter<Simple>>(){}.type, test$converter$SimpleConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Simple>>(){}.type, test$converter$SimpleConverter, false);
 		
 		gen.model.test.converters.CompositeConverter test$converter$CompositeConverter = new gen.model.test.converters.CompositeConverter(columns);
 		container.register(test$converter$CompositeConverter);
-		container.registerInstance(new Generic<ObjectConverter<Composite>>(){}.type, test$converter$CompositeConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.type, test$converter$CompositeConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		test$converter$CompositeConverter.configure(container);
 		
 		container.register(gen.model.test.repositories.CompositeRepository.class);
-		container.registerFactory(new Generic<Repository<Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 		
-		container.registerFactory(new Generic<PersistableRepository<Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 	}
 }

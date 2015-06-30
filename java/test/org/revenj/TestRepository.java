@@ -17,7 +17,7 @@ public class TestRepository {
 
 	@Test
 	public void repositoryTest() throws IOException, SQLException {
-		Container locator = Boot.start("jdbc:postgresql://localhost:5432/revenj");
+		Container locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
 		Composite co = new Composite();
 		UUID id = UUID.randomUUID();

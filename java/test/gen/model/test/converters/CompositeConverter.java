@@ -10,6 +10,7 @@ import org.revenj.postgres.converters.*;
 
 public class CompositeConverter implements ObjectConverter<gen.model.test.Composite> {
 
+	@SuppressWarnings("unchecked")
 	public CompositeConverter(List<ObjectConverter.ColumnInfo> allColumns) throws java.io.IOException {
 		Optional<ObjectConverter.ColumnInfo> column;
 		
