@@ -124,8 +124,7 @@ public class ArrayTuple extends PostgresTuple {
 		return new ArrayTuple(tuples);
 	}
 
-	public String buildTuple(boolean quote) {
-		PostgresWriter sw = new PostgresWriter();
+	public void buildTuple(PostgresWriter sw, boolean quote) {
 		Mapping mappings = null;
 		if (quote) {
 			mappings = PostgresTuple::escapeQuote;
@@ -155,7 +154,6 @@ public class ArrayTuple extends PostgresTuple {
 		if (quote) {
 			sw.write('\'');
 		}
-		return sw.toString();
 	}
 
 	public void insertRecord(PostgresWriter sw, String escaping, Mapping mappings) {

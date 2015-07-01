@@ -67,6 +67,7 @@ public abstract class NumberConverter {
 
 	/**
 	 * Should not be used for Integer.MIN_VALUE
+	 *
 	 * @param value
 	 * @param buf
 	 * @param start
@@ -82,7 +83,7 @@ public abstract class NumberConverter {
 			r = i - ((q << 6) + (q << 5) + (q << 2));
 			i = q;
 			v = NUMBERS[r];
-			buf[charPos--] = (char)(byte) v;
+			buf[charPos--] = (char) (byte) v;
 			buf[charPos--] = (char) (v >> 8);
 			if (i == 0) break;
 		}
@@ -92,6 +93,7 @@ public abstract class NumberConverter {
 
 	/**
 	 * Should not be used for LONG.MIN_VALUE
+	 *
 	 * @param value
 	 * @param buf
 	 * @param start
@@ -109,11 +111,21 @@ public abstract class NumberConverter {
 			r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
 			i = q;
 			v = NUMBERS[r];
-			buf[charPos--] = (char)(byte) v;
+			buf[charPos--] = (char) (byte) v;
 			buf[charPos--] = (char) (v >> 8);
 			if (i == 0) break;
 		}
 		buf[charPos] = '-';
 		return charPos - start + 1 + (v >> 24);
+	}
+
+
+	public static int parsePositive(char[] source, int start, int end) {
+		int res = 0;
+		for (int i = start; i < source.length; i++) {
+			if (i == end) break;
+			res = res * 10 + (source[i] - 48);
+		}
+		return res;
 	}
 }

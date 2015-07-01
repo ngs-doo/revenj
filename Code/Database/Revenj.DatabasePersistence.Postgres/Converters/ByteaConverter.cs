@@ -68,7 +68,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			cur = reader.Peek();
 			if (cur == '}')
 				reader.Read();
-			var emptyColl = allowNulls ? null : new byte[0];
+			var emptyColl = allowNulls ? null : EmptyBytes;
 			while (cur != -1 && cur != '}')
 			{
 				cur = reader.Read();
@@ -210,7 +210,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		public static IPostgresTuple ToTuple(byte[] value)
 		{
-			return value != null ? new ByteTuple(value, value.Length) : default(IPostgresTuple);
+			if (value == null) return null;
+			return new ByteTuple(value, value.Length);
 		}
 
 		public static IPostgresTuple ToTuple(Stream stream)
