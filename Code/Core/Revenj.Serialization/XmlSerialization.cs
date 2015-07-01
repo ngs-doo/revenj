@@ -37,10 +37,10 @@ namespace Revenj.Serialization
 		{
 			var declaredType = typeof(T);
 			var type = value != null ? value.GetType() : declaredType;
-			var cms = ChunkedMemoryStream.Create();
 			var settings = new XmlWriterSettings();
 			settings.CheckCharacters = false;
 			settings.NewLineHandling = NewLineHandling.Entitize;
+			using (var cms = ChunkedMemoryStream.Create())
 			using (var xw = XmlWriter.Create(cms, settings))
 			using (var dw = XmlDictionaryWriter.CreateDictionaryWriter(xw))
 			{
@@ -48,13 +48,11 @@ namespace Revenj.Serialization
 				serializer.WriteObject(dw, value, GenericResolver);
 				dw.Flush();
 				cms.Position = 0;
-				using (var sr = new StreamReader(cms))
-				{
-					var doc = XElement.Load(sr);
-					if (type != declaredType || !(declaredType.IsClass || declaredType.IsValueType))
-						doc.Add(new XAttribute("type", type.FullName));
-					return doc;
-				}
+				var sr = cms.GetReader();
+				var doc = XElement.Load(sr);
+				if (type != declaredType || !(declaredType.IsClass || declaredType.IsValueType))
+					doc.Add(new XAttribute("type", type.FullName));
+				return doc;
 			}
 		}
 

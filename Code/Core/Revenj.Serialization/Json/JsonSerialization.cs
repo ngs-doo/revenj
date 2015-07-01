@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -60,28 +59,28 @@ namespace Revenj.Serialization
 
 		public T Deserialize<T>(TextReader data, StreamingContext context)
 		{
-			return (T)DeserializeReader(data, typeof(T), context);
+			return (T)DeserializeReader(null, data, typeof(T), context);
 		}
+
+		private static readonly byte[] NULL = new byte[] { (byte)'n', (byte)'u', (byte)'l', (byte)'l' };
 
 		public object Deserialize(Stream stream, Type type, StreamingContext context)
 		{
 			var cms = stream as ChunkedMemoryStream;
 			TextReader reader;
 			if (cms != null)
+			{
+				if (cms.Matches(NULL))
+					return null;
 				reader = cms.GetReader();
+			}
 			else
 				reader = new StreamReader(stream, Encoding.UTF8);
-			return DeserializeReader(reader, type, context);
+			return DeserializeReader(cms, reader, type, context);
 		}
 
-		private object DeserializeReader(TextReader reader, Type type, StreamingContext context)
+		private object DeserializeReader(ChunkedMemoryStream cms, TextReader reader, Type type, StreamingContext context)
 		{
-			if (MoveToFirstToken(reader) == 'n')
-			{
-				if (reader.Read() == 'n' && reader.Read() == 'u' && reader.Read() == 'l' && reader.Read() == 'l')
-					return null;
-				throw new SerializationException("Expecting null, but found: " + (char)reader.Peek() + " at " + PositionInStream(reader));
-			}
 			var deserializer = GetDeserializer(type);
 			if (deserializer == null)
 			{
@@ -104,6 +103,8 @@ namespace Revenj.Serialization
 					throw;
 				}
 			}
+			if (cms != null)
+				return deserializer.Deserialize(cms.UseBufferedReader(reader), context);
 			return deserializer.Deserialize(reader, context);
 		}
 
@@ -212,7 +213,7 @@ namespace Revenj.Serialization
 			}
 		}
 
-		private static ConcurrentDictionary<Type, IDeserializer> Cache = new ConcurrentDictionary<Type, IDeserializer>(1, 17);
+		private static Dictionary<Type, IDeserializer> Cache = new Dictionary<Type, IDeserializer>(17);
 		private IDeserializer GetDeserializer(Type target)
 		{
 			IDeserializer des = null;
@@ -230,7 +231,9 @@ namespace Revenj.Serialization
 				var desType = typeof(Deserializer<>).MakeGenericType(type);
 				des = (IDeserializer)Activator.CreateInstance(desType, new object[] { target, SharedSerializer, Binder });
 			}
-			Cache.TryAdd(target, des);
+			var newCache = new Dictionary<Type, IDeserializer>(Cache);
+			newCache[target] = des;
+			Cache = newCache;
 			return des;
 		}
 
@@ -354,7 +357,7 @@ namespace Revenj.Serialization
 			}
 		}
 
-		public static int GetNextToken(TextReader sr)
+		public static int GetNextToken(BufferedTextReader sr)
 		{
 			int c = sr.Read();
 			while (IsWhiteSpace(c))
@@ -362,18 +365,7 @@ namespace Revenj.Serialization
 			return c;
 		}
 
-		public static int MoveToFirstToken(TextReader sr)
-		{
-			int c = sr.Peek();
-			while (IsWhiteSpace(c))
-			{
-				sr.Read();
-				c = sr.Peek();
-			}
-			return c;
-		}
-
-		public static int MoveToNextToken(TextReader sr, int nextToken)
+		public static int MoveToNextToken(BufferedTextReader sr, int nextToken)
 		{
 			int c = nextToken;
 			while (IsWhiteSpace(c))

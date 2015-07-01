@@ -153,6 +153,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return list;
 		}
 
+		private static readonly byte[] NULL = new byte[] { (byte)'N', (byte)'U', (byte)'L', (byte)'L' };
+
 		public static List<Stream> ParseStreamCollection(BufferedTextReader reader, int context, bool allowNull)
 		{
 			var cur = reader.Read();
@@ -200,7 +202,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					} while (cur != -1 && cur != ',' && cur != '}');
 					sw.Flush();
 					cms.Position = 0;
-					if (cms.IsNull())
+					if (cms.Matches(NULL))
 					{
 						list.Add(null);
 						cms.Dispose();

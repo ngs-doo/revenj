@@ -11,7 +11,7 @@ namespace Revenj.Utility
 	/// Since .NET places objects larger that 85000 bytes into LOH, 
 	/// avoid it as much as possible by using list of smaller blocks.
 	/// </summary>
-	public class ChunkedMemoryStream : Stream
+	public sealed class ChunkedMemoryStream : Stream
 	{
 		private const int BlockSize = 8192;
 		private const int BlockShift = 13;
@@ -223,15 +223,19 @@ namespace Revenj.Utility
 				CurrentPosition = TotalSize;
 		}
 		/// <summary>
-		/// Check if stream is of length 4 with bytes = NULL.
+		/// Check if stream starts with provided byte[] and matches it's length
+		/// Provided byte[] must be smaller than 8192 bytes
 		/// </summary>
-		/// <returns>is stream content { 'N','U','L','L' }</returns>
-		public bool IsNull()
+		/// <returns>stream matches provided byte[]</returns>
+		public bool Matches(byte[] compare)
 		{
-			if (Length != 4)
+			if (Length != compare.Length)
 				return false;
 			var block = Blocks[0];
-			return block[0] == 'N' && block[1] == 'U' && block[2] == 'L' && block[3] == 'L';
+			for (int i = 0; i < compare.Length; i++)
+				if (block[i] != compare[i])
+					return false;
+			return true;
 		}
 		/// <summary>
 		/// Write byte to stream.

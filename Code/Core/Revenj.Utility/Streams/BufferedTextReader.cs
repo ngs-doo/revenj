@@ -9,7 +9,7 @@ namespace Revenj.Utility
 	/// Performant text reader.
 	/// Should be reused whenever possible.
 	/// </summary>
-	public class BufferedTextReader : TextReader
+	public sealed class BufferedTextReader : TextReader
 	{
 		private TextReader Reader;
 		private readonly char[] Buffer = new char[4096];

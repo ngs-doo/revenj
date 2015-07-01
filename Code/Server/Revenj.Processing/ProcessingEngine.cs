@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Data.Common;
@@ -26,7 +25,7 @@ namespace Revenj.Processing
 		private readonly IScopePool ScopePool;
 		private readonly IPermissionManager Permissions;
 		private readonly Dictionary<Type, Type> ActualCommands = new Dictionary<Type, Type>();
-		private readonly ConcurrentDictionary<Type, object> Serializators = new ConcurrentDictionary<Type, object>(1, 7);
+		private Dictionary<Type, object> Serializators = new Dictionary<Type, object>(7);
 
 		public ProcessingEngine(
 			IObjectFactory objectFactory,
@@ -69,7 +68,9 @@ namespace Revenj.Processing
 			if (!Serializators.TryGetValue(typeof(TFormat), out serializer))
 			{
 				serializer = ObjectFactory.Resolve<ISerialization<TFormat>>();
-				Serializators.TryAdd(typeof(TFormat), serializer);
+				var newDict = new Dictionary<Type, object>(Serializators);
+				newDict[typeof(TFormat)] = serializer;
+				Serializators = newDict;
 			}
 			return (ISerialization<TFormat>)serializer;
 		}

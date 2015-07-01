@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
@@ -14,14 +13,6 @@ namespace Revenj.Serialization.Json.Converters
 		public static bool StringFormat;
 		private static readonly JsonSerializer JsonNet = new JsonSerializer();
 
-		private static readonly ConcurrentBag<char[]> Buffers = new ConcurrentBag<char[]>();
-
-		static XmlConverter()
-		{
-			for (int i = 0; i < Environment.ProcessorCount / 2 + 1; i++)
-				Buffers.Add(new char[4096]);
-		}
-
 		public static void Serialize(XElement value, TextWriter sw, bool minimal)
 		{
 			if (StringFormat || minimal)
@@ -33,15 +24,12 @@ namespace Revenj.Serialization.Json.Converters
 					writer.Flush();
 					cms.Position = 0;
 					var reader = cms.GetReader();
-					char[] buf;
-					var took = Buffers.TryTake(out buf);
-					if (!took) buf = new char[4096];
+					var buf = cms.CharBuffer;
 					int len;
 					sw.Write('"');
 					while ((len = reader.Read(buf, 0, 4096)) > 0)
 						StringConverter.SerializePart(buf, len, sw);
 					sw.Write('"');
-					Buffers.Add(buf);
 				}
 			}
 			else
