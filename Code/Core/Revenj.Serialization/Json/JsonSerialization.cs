@@ -103,9 +103,7 @@ namespace Revenj.Serialization
 					throw;
 				}
 			}
-			if (cms != null)
-				return deserializer.Deserialize(cms.UseBufferedReader(reader), context);
-			return deserializer.Deserialize(reader, context);
+			return deserializer.Deserialize(cms, reader, context);
 		}
 
 		class InvariantWriter : StreamWriter
@@ -239,7 +237,7 @@ namespace Revenj.Serialization
 
 		interface IDeserializer
 		{
-			object Deserialize(TextReader reader, StreamingContext context);
+			object Deserialize(ChunkedMemoryStream cms, TextReader reader, StreamingContext context);
 		}
 		class Deserializer<T> : IDeserializer
 			where T : IJsonObject
@@ -277,7 +275,7 @@ namespace Revenj.Serialization
 				catch { }
 			}
 
-			public object Deserialize(TextReader reader, StreamingContext context)
+			public object Deserialize(ChunkedMemoryStream cms, TextReader reader, StreamingContext context)
 			{
 				if (Converter == null)
 				{
@@ -300,7 +298,17 @@ namespace Revenj.Serialization
 						throw;
 					}
 				}
-				var result = Converter.Deserialize(reader, context, JsonNet.Deserialize);
+				object result;
+				var btr = reader as BufferedTextReader;
+				if (btr != null)
+					result = Converter.Deserialize(btr, context, JsonNet.Deserialize);
+				else if (cms != null)
+					result = Converter.Deserialize(cms.UseBufferedReader(reader), context, JsonNet.Deserialize);
+				else
+				{
+					using (var cms2 = ChunkedMemoryStream.Create())
+						result = Converter.Deserialize(cms2.UseBufferedReader(reader), context, JsonNet.Deserialize);
+				}
 				if (IsSimple)
 					return result;
 				if (IsArray)
