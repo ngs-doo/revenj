@@ -414,6 +414,30 @@ namespace Revenj.Utility
 		}
 
 		/// <summary>
+		/// Convert buffer to an instance
+		/// </summary>
+		/// <param name="factory">converter</param>
+		/// <returns>instance</returns>
+		public T BufferToValue<T>(Func<char[], int, T> factory)
+		{
+			var len = WorkingPosition;
+			WorkingPosition = 0;
+			return factory(WorkingBuffer, len);
+		}
+
+		/// <summary>
+		/// Convert buffer to an instance
+		/// </summary>
+		/// <param name="factory">converter</param>
+		/// <returns>instance</returns>
+		public T BufferToValue<T>(Func<char[], int, BufferedTextReader, T> factory)
+		{
+			var len = WorkingPosition;
+			WorkingPosition = 0;
+			return factory(WorkingBuffer, len, this);
+		}
+
+		/// <summary>
 		/// Fill target char[] until specified char is found.
 		/// If end of input is detected, but char is not found, SerializationException will be thrown.
 		/// </summary>
