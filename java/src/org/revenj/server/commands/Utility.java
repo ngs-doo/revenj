@@ -1,6 +1,5 @@
 package org.revenj.server.commands;
 
-import org.revenj.patterns.Generic;
 import org.revenj.patterns.PersistableRepository;
 import org.revenj.patterns.Repository;
 import org.revenj.patterns.ServiceLocator;
@@ -8,7 +7,7 @@ import org.revenj.patterns.ServiceLocator;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-abstract class Utility {
+public abstract class Utility {
 
 	private static class GenericType implements ParameterizedType {
 

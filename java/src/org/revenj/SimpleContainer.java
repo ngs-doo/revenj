@@ -97,15 +97,15 @@ class SimpleContainer implements Container {
 		}
 
 		static <T> Either<T> success(final T value) {
-			return new Either<T>(value, null);
+			return new Either<>(value, null);
 		}
 
 		static <T> Either<T> fail(final Throwable error) {
-			return new Either<T>(null, error);
+			return new Either<>(null, error);
 		}
 
 		static <T> Either<T> fail(final String error) {
-			return new Either<T>(null, new ReflectiveOperationException(error));
+			return new Either<>(null, new ReflectiveOperationException(error));
 		}
 	}
 
@@ -302,33 +302,41 @@ class SimpleContainer implements Container {
 		if (registration == null) {
 			if (type instanceof ParameterizedType) {
 				return tryResolveType((ParameterizedType) type);
+			} else if (type instanceof GenericArrayType) {
+				GenericArrayType gat = (GenericArrayType) type;
+				if (gat.getGenericComponentType() instanceof Class<?>) {
+					return tryResolveCollection((Class<?>) gat.getGenericComponentType());
+				}
 			}
 			if (type instanceof Class<?> == false) {
 				return Either.fail(type + " is not an instance of Class<?> and cannot be resolved since it's not registered in the container.");
 			}
 			Class<?> target = (Class<?>) type;
 			if (target.isArray()) {
-				Class<?> element = target.getComponentType();
-				List<Registration<?>> registrations = container.get(element);
-				if (registrations == null || registrations.isEmpty()) {
-					return Either.success(Array.newInstance(element, 0));
-				}
-				List<Object> result = new ArrayList<>(registrations.size());
-				for (int i = 0; i < registrations.size(); i++) {
-					Either<Object> item = resolveRegistration(registrations.get(i));
-					if (item.isPresent()) {
-						result.add(item.value);
-					}
-				}
-				Object[] instance = (Object[]) Array.newInstance(element, result.size());
-				for (int i = 0; i < instance.length; i++) {
-					instance[i] = result.get(i);
-				}
-				return Either.success(instance);
+				return tryResolveCollection(target.getComponentType());
 			}
 			return Either.fail(type + " is not registered in the container");
 		}
 		return resolveRegistration(registration);
+	}
+
+	private Either<Object> tryResolveCollection(Class<?> element) {
+		List<Registration<?>> registrations = container.get(element);
+		if (registrations == null || registrations.isEmpty()) {
+			return Either.success(Array.newInstance(element, 0));
+		}
+		List<Object> result = new ArrayList<>(registrations.size());
+		for (int i = 0; i < registrations.size(); i++) {
+			Either<Object> item = resolveRegistration(registrations.get(i));
+			if (item.isPresent()) {
+				result.add(item.value);
+			}
+		}
+		Object[] instance = (Object[]) Array.newInstance(element, result.size());
+		for (int i = 0; i < instance.length; i++) {
+			instance[i] = result.get(i);
+		}
+		return Either.success(instance);
 	}
 
 	private Either<Object> resolveRegistration(Registration<?> registration) {

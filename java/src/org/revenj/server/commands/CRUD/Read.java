@@ -1,4 +1,4 @@
-package org.revenj.server.commands;
+package org.revenj.server.commands.CRUD;
 
 import org.revenj.patterns.DomainModel;
 import org.revenj.patterns.Repository;
@@ -6,15 +6,16 @@ import org.revenj.patterns.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
+import org.revenj.server.commands.Utility;
 
 import java.io.IOException;
 import java.util.Optional;
 
-public final class ReadCommand implements ServerCommand {
+public final class Read implements ServerCommand {
 
 	private final DomainModel domainModel;
 
-	public ReadCommand(DomainModel domainModel) {
+	public Read(DomainModel domainModel) {
 		this.domainModel = domainModel;
 	}
 

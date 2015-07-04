@@ -1,18 +1,20 @@
 package org.revenj.server;
 
+import org.revenj.extensibility.PluginLoader;
 import org.revenj.patterns.Container;
 import org.revenj.patterns.DomainModel;
+import org.revenj.patterns.Generic;
 import org.revenj.patterns.Serialization;
 import org.revenj.serialization.JsonSerialization;
 import org.revenj.serialization.PassThroughSerialization;
-import org.revenj.server.commands.CreateCommand;
-import org.revenj.server.commands.ReadCommand;
+import org.revenj.server.commands.CRUD.Create;
+import org.revenj.server.commands.CRUD.Delete;
+import org.revenj.server.commands.CRUD.Read;
+import org.revenj.server.commands.CRUD.Update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ProcessingEngine {
 
@@ -20,11 +22,31 @@ public class ProcessingEngine {
 	private final Map<Class<?>, ServerCommand> serverCommands = new HashMap<>();
 	private final Map<Class<?>, Serialization> serializers = new HashMap<>();
 
-	public ProcessingEngine(Container container) {
+	public ProcessingEngine(Container container) throws Exception {
+		this(container,
+				new Generic<Optional<PluginLoader>>() {
+				}.resolve(container),
+				new Generic<Optional<ClassLoader>>() {
+				}.resolve(container));
+	}
+
+	public ProcessingEngine(
+			Container container,
+			Optional<PluginLoader> extensibility,
+			Optional<ClassLoader> classLoader) throws Exception {
 		this.container = container;
-		DomainModel model = container.resolve(DomainModel.class);
-		serverCommands.put(CreateCommand.class, new CreateCommand(model));
-		serverCommands.put(ReadCommand.class, new ReadCommand(model));
+		if (extensibility.isPresent()) {
+			for (ServerCommand com : extensibility.get().resolve(container, ServerCommand.class)) {
+				serverCommands.put(com.getClass(), com);
+			}
+		} else {
+			ServiceLoader<ServerCommand> plugins = classLoader.isPresent()
+					? ServiceLoader.load(ServerCommand.class, classLoader.get())
+					: ServiceLoader.load(ServerCommand.class);
+			for (ServerCommand com : plugins) {
+				serverCommands.put(com.getClass(), com);
+			}
+		}
 		serializers.put(String.class, new JsonSerialization());
 		serializers.put(Object.class, new PassThroughSerialization());
 	}

@@ -1,29 +1,33 @@
-package org.revenj.server.commands;
+package org.revenj.server.commands.CRUD;
 
-import org.revenj.patterns.*;
+import org.revenj.patterns.DomainModel;
+import org.revenj.patterns.PersistableRepository;
+import org.revenj.patterns.Serialization;
+import org.revenj.patterns.ServiceLocator;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
+import org.revenj.server.commands.Utility;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.Optional;
 
-public final class CreateCommand implements ServerCommand {
+public final class Delete implements ServerCommand {
 
 	private final DomainModel domainModel;
 
-	public CreateCommand(DomainModel domainModel) {
+	public Delete(DomainModel domainModel) {
 		this.domainModel = domainModel;
 	}
 
-	public static final class Argument<TFormat> {
+	public static final class Argument {
 		public String Name;
-		public TFormat Data;
+		public String Uri;
 
-		public Argument(String name, TFormat data) {
+		public Argument(String name, String uri) {
 			this.Name = name;
-			this.Data = data;
+			this.Uri = uri;
 		}
 
 		private Argument() {
@@ -43,12 +47,6 @@ public final class CreateCommand implements ServerCommand {
 		if (!manifest.isPresent()) {
 			return CommandResult.badRequest("Unable to find specified domain object: " + arg.Name);
 		}
-		Object instance;
-		try {
-			instance = input.deserialize(manifest.get(), (TInput) arg.Data, locator);
-		} catch (IOException e) {
-			return CommandResult.badRequest("Error deserializing provided input for: " + arg.Name + ". Reason: " + e.getMessage());
-		}
 		PersistableRepository repository;
 		try {
 			repository = Utility.resolvePersistableRepository(locator, manifest.get());
@@ -56,8 +54,12 @@ public final class CreateCommand implements ServerCommand {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
 		try {
-			String uri = repository.insert(instance);
-			return new CommandResult<>(output.serializeTo(uri), "Object created", 201);
+			Optional<Object> found = repository.find(arg.Uri);
+			if (!found.isPresent()) {
+				return CommandResult.badRequest("Can't find " + arg.Name + " with uri: " + arg.Uri);
+			}
+			repository.delete(found.get());
+			return new CommandResult<>(output.serializeTo(found.get()), "Object deleted", 201);
 		} catch (SQLException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}

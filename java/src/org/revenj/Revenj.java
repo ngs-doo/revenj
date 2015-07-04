@@ -1,7 +1,9 @@
 package org.revenj;
 
+import org.revenj.extensibility.PluginLoader;
 import org.revenj.patterns.Container;
 import org.revenj.patterns.DomainModel;
+import org.revenj.server.ServerCommand;
 
 import java.io.File;
 import java.io.FileReader;
@@ -33,30 +35,33 @@ public abstract class Revenj {
 				throw new RuntimeException(e);
 			}
 		};
-		return setup(factory, new File("."), properties, Optional.<ClassLoader>empty());
+		return setup(factory, properties, Optional.<File>empty(), Optional.<ClassLoader>empty());
 	}
 
 	public static Container setup(
 			Container.Factory<Connection> connectionFactory,
-			File pluginsPath,
 			Properties properties,
+			Optional<File> pluginsPath,
 			Optional<ClassLoader> classLoader) throws IOException {
-		File[] jars = pluginsPath.listFiles(f -> f.getPath().toLowerCase().endsWith(".jar"));
-		List<URL> urls = new ArrayList<>(jars.length);
-		for (File j : jars) {
-			try {
-				urls.add(j.toURI().toURL());
-			} catch (MalformedURLException ex) {
-				throw new IOException(ex);
+		ClassLoader loader;
+		if (pluginsPath.isPresent()) {
+			File[] jars = pluginsPath.get().listFiles(f -> f.getPath().toLowerCase().endsWith(".jar"));
+			List<URL> urls = new ArrayList<>(jars.length);
+			for (File j : jars) {
+				try {
+					urls.add(j.toURI().toURL());
+				} catch (MalformedURLException ex) {
+					throw new IOException(ex);
+				}
 			}
+			loader = classLoader.isPresent()
+					? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader.get())
+					: new URLClassLoader(urls.toArray(new URL[urls.size()]));
+		} else {
+			loader = ClassLoader.getSystemClassLoader();
 		}
-		URLClassLoader ucl = classLoader.isPresent()
-				? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader.get())
-				: new URLClassLoader(urls.toArray(new URL[urls.size()]));
-		ServiceLoader<SystemAspect> plugins = ServiceLoader.load(SystemAspect.class, ucl);
-		Container container = setup(connectionFactory, properties, plugins.iterator());
-		ucl.close();
-		return container;
+		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class, loader);
+		return setup(connectionFactory, properties, Optional.of(loader), aspects.iterator());
 	}
 
 	private static class SimpleDomainModel implements DomainModel {
@@ -80,13 +85,20 @@ public abstract class Revenj {
 	public static Container setup(
 			Container.Factory<Connection> connectionFactory,
 			Properties properties,
+			Optional<ClassLoader> classLoader,
 			Iterator<SystemAspect> aspects) throws IOException {
 		SimpleContainer container = new SimpleContainer();
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
 		container.registerInstance(DomainModel.class, new SimpleDomainModel(properties.getProperty("namespace")), false);
-		while (aspects.hasNext()) {
-			aspects.next().configure(container);
+		container.register(new PluginLoader(classLoader.orElse(null)));
+		if (classLoader.isPresent()) {
+			container.registerInstance(ClassLoader.class, classLoader.get(), false);
+		}
+		if (aspects != null) {
+			while (aspects.hasNext()) {
+				aspects.next().configure(container);
+			}
 		}
 		return container;
 	}

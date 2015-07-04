@@ -6,39 +6,32 @@ import gen.model.test.Simple;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.Container;
-import org.revenj.patterns.Generic;
-import org.revenj.patterns.ServiceLocator;
 import org.revenj.serialization.JsonSerialization;
 import org.revenj.server.CommandResultDescription;
 import org.revenj.server.ProcessingEngine;
 import org.revenj.server.ProcessingResult;
 import org.revenj.server.ServerCommandDescription;
-import org.revenj.server.commands.CreateCommand;
-import org.revenj.server.commands.ReadCommand;
+import org.revenj.server.commands.CRUD.Create;
+import org.revenj.server.commands.CRUD.Read;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.UUID;
 
 public class TestProcessingEngine {
 
 	@Test
-	public void passThroughEngine() throws IOException, SQLException {
+	public void passThroughEngine() throws Exception {
 		Container container = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		ProcessingEngine engine = new ProcessingEngine(container);
 		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
 		ServerCommandDescription cd = new ServerCommandDescription<>(
 				null,
-				CreateCommand.class,
-				new CreateCommand.Argument<>("test.Composite", composite));
+				Create.class,
+				new Create.Argument<>("test.Composite", composite));
 		ProcessingResult<Object> result =
 				engine.execute(
 						Object.class,
 						Object.class,
-						new ServerCommandDescription[] { cd });
+						new ServerCommandDescription[]{cd});
 		Assert.assertEquals(200, result.status);
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		CommandResultDescription description = result.executedCommandResults[0];
@@ -47,12 +40,13 @@ public class TestProcessingEngine {
 		Assert.assertEquals(composite.getId().toString(), uri);
 		cd = new ServerCommandDescription<>(
 				null,
-				ReadCommand.class,
-				new ReadCommand.Argument("test.Composite", uri));
-		result = engine.execute(
+				Read.class,
+				new Read.Argument("test.Composite", uri));
+		result =
+				engine.execute(
 						Object.class,
 						Object.class,
-						new ServerCommandDescription[] { cd });
+						new ServerCommandDescription[]{cd});
 		Assert.assertEquals(200, result.status);
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		description = result.executedCommandResults[0];
@@ -64,20 +58,20 @@ public class TestProcessingEngine {
 	}
 
 	@Test
-	public void jsonThroughEngine() throws IOException, SQLException {
+	public void jsonThroughEngine() throws Exception {
 		Container container = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		ProcessingEngine engine = new ProcessingEngine(container);
 		JsonSerialization json = new JsonSerialization();
 		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
 		ServerCommandDescription cd = new ServerCommandDescription<>(
 				null,
-				CreateCommand.class,
-				json.serializeTo(new CreateCommand.Argument<>("test.Composite", json.serializeTo(composite))));
+				Create.class,
+				json.serializeTo(new Create.Argument<>("test.Composite", json.serializeTo(composite))));
 		ProcessingResult<String> result =
 				engine.execute(
 						String.class,
 						String.class,
-						new ServerCommandDescription[] { cd });
+						new ServerCommandDescription[]{cd});
 		Assert.assertEquals(200, result.status);
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		CommandResultDescription<String> description = result.executedCommandResults[0];
@@ -86,12 +80,13 @@ public class TestProcessingEngine {
 		Assert.assertEquals(composite.getId().toString(), uri);
 		cd = new ServerCommandDescription<>(
 				null,
-				ReadCommand.class,
-				json.serializeTo(new ReadCommand.Argument("test.Composite", uri)));
-		result = engine.execute(
-				String.class,
-				String.class,
-				new ServerCommandDescription[] { cd });
+				Read.class,
+				json.serializeTo(new Read.Argument("test.Composite", uri)));
+		result =
+				engine.execute(
+						String.class,
+						String.class,
+						new ServerCommandDescription[]{cd});
 		Assert.assertEquals(200, result.status);
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		description = result.executedCommandResults[0];
