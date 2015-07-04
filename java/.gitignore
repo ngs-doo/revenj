@@ -3,3 +3,6 @@
 out/
 *.properties
 *.class
+target/
+out/
+*.iml

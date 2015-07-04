@@ -21,7 +21,7 @@ public class TestProcessingEngine {
 	@Test
 	public void passThroughEngine() throws Exception {
 		Container container = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
-		ProcessingEngine engine = new ProcessingEngine(container);
+		ProcessingEngine engine = container.resolve(ProcessingEngine.class);
 		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
 		ServerCommandDescription cd = new ServerCommandDescription<>(
 				null,
@@ -60,7 +60,7 @@ public class TestProcessingEngine {
 	@Test
 	public void jsonThroughEngine() throws Exception {
 		Container container = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
-		ProcessingEngine engine = new ProcessingEngine(container);
+		ProcessingEngine engine = container.resolve(ProcessingEngine.class);
 		JsonSerialization json = new JsonSerialization();
 		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
 		ServerCommandDescription cd = new ServerCommandDescription<>(

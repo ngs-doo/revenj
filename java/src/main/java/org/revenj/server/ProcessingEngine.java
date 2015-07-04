@@ -2,15 +2,9 @@ package org.revenj.server;
 
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.patterns.Container;
-import org.revenj.patterns.DomainModel;
-import org.revenj.patterns.Generic;
 import org.revenj.patterns.Serialization;
 import org.revenj.serialization.JsonSerialization;
 import org.revenj.serialization.PassThroughSerialization;
-import org.revenj.server.commands.CRUD.Create;
-import org.revenj.server.commands.CRUD.Delete;
-import org.revenj.server.commands.CRUD.Read;
-import org.revenj.server.commands.CRUD.Update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,14 +15,6 @@ public class ProcessingEngine {
 	private final Container container;
 	private final Map<Class<?>, ServerCommand> serverCommands = new HashMap<>();
 	private final Map<Class<?>, Serialization> serializers = new HashMap<>();
-
-	public ProcessingEngine(Container container) throws Exception {
-		this(container,
-				new Generic<Optional<PluginLoader>>() {
-				}.resolve(container),
-				new Generic<Optional<ClassLoader>>() {
-				}.resolve(container));
-	}
 
 	public ProcessingEngine(
 			Container container,

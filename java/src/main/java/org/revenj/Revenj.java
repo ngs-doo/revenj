@@ -3,6 +3,7 @@ package org.revenj;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.patterns.Container;
 import org.revenj.patterns.DomainModel;
+import org.revenj.server.ProcessingEngine;
 import org.revenj.server.ServerCommand;
 
 import java.io.File;
@@ -91,7 +92,13 @@ public abstract class Revenj {
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
 		container.registerInstance(DomainModel.class, new SimpleDomainModel(properties.getProperty("namespace")), false);
-		container.register(new PluginLoader(classLoader.orElse(null)));
+		PluginLoader plugins = new PluginLoader(classLoader.orElse(null));
+		container.register(plugins);
+		try {
+			container.register(new ProcessingEngine(container, Optional.of(plugins), classLoader));
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 		if (classLoader.isPresent()) {
 			container.registerInstance(ClassLoader.class, classLoader.get(), false);
 		}
