@@ -34,15 +34,16 @@ class SimpleContainer implements Container {
 	}
 
 	private static final ConcurrentMap<Class<?>, CtorInfo[]> classCache = new ConcurrentHashMap<>();
-	private static final ConcurrentMap<ParameterizedType, TypeInfo> typeCache = new ConcurrentHashMap<>();
+	private static final ConcurrentMap<Type, TypeInfo> typeCache = new ConcurrentHashMap<>();
 
 	private static class TypeInfo {
 		final CtorInfo[] constructors;
 		final Class<?> rawClass;
 		final Map<Type, Type> mappings = new HashMap<>();
 		final Type[] genericArguments;
+		final Type mappedType;
 
-		public TypeInfo(ParameterizedType type) {
+		public TypeInfo(ParameterizedType type, Map<String, Type> typeNameMappings) {
 			Type rawType = type.getRawType();
 			if (rawType instanceof Class<?>) {
 				rawClass = (Class<?>) rawType;
@@ -61,6 +62,7 @@ class SimpleContainer implements Container {
 				rawClass = null;
 				genericArguments = null;
 			}
+			mappedType = typeNameMappings.get(type.toString());
 		}
 	}
 
@@ -108,15 +110,21 @@ class SimpleContainer implements Container {
 	}
 
 	private final Map<Type, List<Registration<?>>> container;
+	private final Map<String, Type> typeNameMappings;
+	private final SimpleContainer parent;
 
 	private final CopyOnWriteArrayList<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
 
 	SimpleContainer() {
 		container = new HashMap<>();
+		typeNameMappings = new HashMap<>();
+		parent = null;
 	}
 
-	private SimpleContainer(Map<Type, List<Registration<?>>> parent) {
-		this.container = new HashMap<>(parent);
+	private SimpleContainer(SimpleContainer parent) {
+		this.container = new HashMap<>(parent.container);
+		this.typeNameMappings = new HashMap<>(parent.typeNameMappings);
+		this.parent = parent;
 	}
 
 	private Either<Object> tryResolveClass(Class<?> manifest) {
@@ -169,7 +177,7 @@ class SimpleContainer implements Container {
 	private Either<Object> tryResolveType(ParameterizedType type) {
 		TypeInfo typeInfo = typeCache.get(type);
 		if (typeInfo == null) {
-			typeInfo = new TypeInfo(type);
+			typeInfo = new TypeInfo(type, typeNameMappings);
 			typeCache.putIfAbsent(type, typeInfo);
 		}
 		if (typeInfo.rawClass == null) {
@@ -177,6 +185,8 @@ class SimpleContainer implements Container {
 		} else if (typeInfo.rawClass == Optional.class) {
 			Either<Object> content = tryResolve(typeInfo.genericArguments[0]);
 			return Either.success(Optional.ofNullable(content.value));
+		} else if (typeInfo.constructors.length == 0 && typeInfo.mappedType != null) {
+			return tryResolve(typeInfo.mappedType);
 		}
 		Map<Type, Type> mappings = typeInfo.mappings;
 		return tryResolveTypeFrom(typeInfo, mappings);
@@ -194,7 +204,7 @@ class SimpleContainer implements Container {
 					ParameterizedType nestedType = (ParameterizedType) p;
 					TypeInfo nestedInfo = typeCache.get(nestedType);
 					if (nestedInfo == null) {
-						nestedInfo = new TypeInfo(nestedType);
+						nestedInfo = new TypeInfo(nestedType, typeNameMappings);
 						typeCache.putIfAbsent(nestedType, nestedInfo);
 					}
 					if (nestedInfo.rawClass == null) {
@@ -366,6 +376,7 @@ class SimpleContainer implements Container {
 
 	private synchronized void addToRegistry(Type type, Registration registration) {
 		List<Registration<?>> registrations = container.get(type);
+		typeNameMappings.put(type.toString(), type);
 		if (registrations == null) {
 			registrations = new CopyOnWriteArrayList<>();
 			registrations.add(registration);
@@ -395,7 +406,7 @@ class SimpleContainer implements Container {
 
 	@Override
 	public Container createScope() {
-		return new SimpleContainer(this.container);
+		return new SimpleContainer(this);
 	}
 
 	@Override

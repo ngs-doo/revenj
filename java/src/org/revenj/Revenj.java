@@ -1,6 +1,7 @@
 package org.revenj;
 
 import org.revenj.patterns.Container;
+import org.revenj.patterns.DomainModel;
 
 import java.io.File;
 import java.io.FileReader;
@@ -58,6 +59,24 @@ public abstract class Revenj {
 		return container;
 	}
 
+	private static class SimpleDomainModel implements DomainModel {
+
+		private final String namespace;
+
+		public SimpleDomainModel(String namespace) {
+			this.namespace = namespace != null && namespace.length() > 0 ? namespace + "." : "";
+		}
+
+		@Override
+		public Optional<Class<?>> find(String name) {
+			try {
+				return Optional.of(Class.forName(namespace + name));
+			} catch (ClassNotFoundException ignore) {
+				return Optional.empty();
+			}
+		}
+	}
+
 	public static Container setup(
 			Container.Factory<Connection> connectionFactory,
 			Properties properties,
@@ -65,6 +84,7 @@ public abstract class Revenj {
 		SimpleContainer container = new SimpleContainer();
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
+		container.registerInstance(DomainModel.class, new SimpleDomainModel(properties.getProperty("namespace")), false);
 		while (aspects.hasNext()) {
 			aspects.next().configure(container);
 		}
