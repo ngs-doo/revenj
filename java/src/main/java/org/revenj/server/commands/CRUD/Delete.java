@@ -39,7 +39,7 @@ public final class Delete implements ServerCommand {
 		Argument arg;
 		try {
 			Type genericType = Utility.makeGenericType(Argument.class, data.getClass());
-			arg = (Argument) input.deserialize(genericType, data, locator);
+			arg = (Argument) input.deserialize(genericType, data);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
@@ -59,7 +59,7 @@ public final class Delete implements ServerCommand {
 				return CommandResult.badRequest("Can't find " + arg.Name + " with uri: " + arg.Uri);
 			}
 			repository.delete(found.get());
-			return new CommandResult<>(output.serializeTo(found.get()), "Object deleted", 201);
+			return new CommandResult<>(output.serialize(found.get()), "Object deleted", 201);
 		} catch (SQLException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}

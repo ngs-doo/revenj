@@ -94,6 +94,23 @@ public class PostgresReader {
 		}
 	}
 
+	public int fillUntil(char[] target, int offset, char c1, char c2) throws IOException {
+		int i;
+		int start = offset;
+		for (i = positionInInput; i < input.length(); i++) {
+			char c = input.charAt(i);
+			if (c == c1 || c == c2) {
+				break;
+			}
+			target[offset++] = c;
+		}
+		positionInInput = i;
+		if (positionInInput == input.length()) {
+			throw new IOException("End of input detected");
+		}
+		return offset - start;
+	}
+
 	public void fillTotal(char[] target, int offset, int count) throws IOException {
 		//TODO: better exceptions
 		for(int i = 0; i < count; i++) {
@@ -104,6 +121,14 @@ public class PostgresReader {
 
 	public String bufferToString() {
 		return new String(buffer, 0, positionInBuffer);
+	}
+
+	public interface ConvertToValue<T> {
+		T to(char[] buffer, int offset, int len);
+	}
+
+	public <T> T bufferToValue(ConvertToValue<T> converter) {
+		return converter.to(buffer, 0, positionInBuffer);
 	}
 
 	public boolean bufferMatches(String compare) {

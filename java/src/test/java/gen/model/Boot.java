@@ -1,17 +1,11 @@
 package gen.model;
 
 
-import org.revenj.Revenj;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 public class Boot implements org.revenj.Revenj.SystemAspect {
 
 	public static org.revenj.patterns.Container configure(String jdbcUrl) throws java.io.IOException {
 		java.util.Properties properties = new java.util.Properties();
+		properties.setProperty("namespace", "gen.model");
 		java.io.File revProps = new java.io.File("revenj.properties");
 		if (revProps.exists() && revProps.isFile()) {
 			properties.load(new java.io.FileReader(revProps));
@@ -20,32 +14,38 @@ public class Boot implements org.revenj.Revenj.SystemAspect {
 	}
 
 	public static org.revenj.patterns.Container configure(String jdbcUrl, java.util.Properties properties) throws java.io.IOException {
-		org.revenj.patterns.Container.Factory<java.sql.Connection> factory = c -> {
+		java.util.function.Function<org.revenj.patterns.Container, java.sql.Connection> factory = c -> {
 			try {
 				return java.sql.DriverManager.getConnection(jdbcUrl, properties);
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
 		};
-		return org.revenj.Revenj.setup(factory, properties, Optional.<ClassLoader>empty(), Collections.singletonList((Revenj.SystemAspect) new Boot()).iterator());
+		return org.revenj.Revenj.setup(factory, properties, java.util.Optional.<ClassLoader>empty(), java.util.Collections.singletonList((org.revenj.Revenj.SystemAspect) new Boot()).iterator());
 	}
 
 	public void configure(org.revenj.patterns.Container container) throws java.io.IOException {
 		java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> columns = new java.util.ArrayList<>();
+		java.util.Properties properties = container.resolve(java.util.Properties.class);
+		String prevNamespace = properties.getProperty("namespace");
+		if (prevNamespace != null && !"gen.model".equals(prevNamespace)) {
+				throw new java.io.IOException("Different namespace already defined in Properties file. Trying to add namespace=gen.model. Found: " + prevNamespace);
+		}
+		properties.setProperty("namespace", "gen.model");
 		try (java.sql.Connection connection = container.resolve(java.sql.Connection.class);
-			 java.sql.PreparedStatement statement = connection.prepareStatement("SELECT * FROM \"-NGS-\".load_type_info()");
-			 java.sql.ResultSet rs = statement.executeQuery()) {
+				java.sql.PreparedStatement statement = connection.prepareStatement("SELECT * FROM \"-NGS-\".load_type_info()");
+				java.sql.ResultSet rs = statement.executeQuery()) {
 			while (rs.next()) {
 				columns.add(
 						new org.revenj.postgres.ObjectConverter.ColumnInfo(
-								rs.getString(1),
-								rs.getString(2),
-								rs.getString(3),
-								rs.getString(4),
-								rs.getString(5),
-								rs.getShort(6),
-								rs.getBoolean(7),
-								rs.getBoolean(8)
+								rs.getString("type_schema"),
+								rs.getString("type_name"),
+								rs.getString("column_name"),
+								rs.getString("column_schema"),
+								rs.getString("column_type"),
+								rs.getShort("column_index"),
+								rs.getBoolean("is_not_null"),
+								rs.getBoolean("is_ngs_generated")
 						)
 				);
 
@@ -54,25 +54,30 @@ public class Boot implements org.revenj.Revenj.SystemAspect {
 			throw new java.io.IOException(e);
 		}
 		container.registerInstance(org.revenj.patterns.ServiceLocator.class, container, false);
-
-
+		
+		
 		gen.model.test.converters.SimpleConverter test$converter$SimpleConverter = new gen.model.test.converters.SimpleConverter(columns);
 		container.register(test$converter$SimpleConverter);
-		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Simple>>() {
-		}.type, test$converter$SimpleConverter, false);
-
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Simple>>(){}.type, test$converter$SimpleConverter, false);
+		
 		gen.model.test.converters.CompositeConverter test$converter$CompositeConverter = new gen.model.test.converters.CompositeConverter(columns);
 		container.register(test$converter$CompositeConverter);
-		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>() {
-		}.type, test$converter$CompositeConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.type, test$converter$CompositeConverter, false);
+		
+		gen.model.test.converters.ClickedConverter test$converter$ClickedConverter = new gen.model.test.converters.ClickedConverter(columns);
+		container.register(test$converter$ClickedConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Clicked>>(){}.type, test$converter$ClickedConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		test$converter$CompositeConverter.configure(container);
-
+		
 		container.register(gen.model.test.repositories.CompositeRepository.class);
-		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Composite>>() {
-		}.type, gen.model.test.repositories.CompositeRepository::new, false);
-
-		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.Composite>>() {
-		}.type, gen.model.test.repositories.CompositeRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
+		test$converter$ClickedConverter.configure(container);
+		
+		container.register(gen.model.test.repositories.ClickedRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventStore<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 	}
 }

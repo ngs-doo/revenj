@@ -6,7 +6,8 @@ import gen.model.test.Simple;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.Container;
-import org.revenj.serialization.JsonSerialization;
+import org.revenj.patterns.Serialization;
+import org.revenj.patterns.WireSerialization;
 import org.revenj.server.CommandResultDescription;
 import org.revenj.server.ProcessingEngine;
 import org.revenj.server.ProcessingResult;
@@ -61,12 +62,13 @@ public class TestProcessingEngine {
 	public void jsonThroughEngine() throws Exception {
 		Container container = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		ProcessingEngine engine = container.resolve(ProcessingEngine.class);
-		JsonSerialization json = new JsonSerialization();
+		WireSerialization serialization = container.resolve(WireSerialization.class);
+		Serialization<String> json = serialization.find(String.class).get();
 		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
 		ServerCommandDescription cd = new ServerCommandDescription<>(
 				null,
 				Create.class,
-				json.serializeTo(new Create.Argument<>("test.Composite", json.serializeTo(composite))));
+				json.serialize(new Create.Argument<>("test.Composite", json.serialize(composite))));
 		ProcessingResult<String> result =
 				engine.execute(
 						String.class,
@@ -81,7 +83,7 @@ public class TestProcessingEngine {
 		cd = new ServerCommandDescription<>(
 				null,
 				Read.class,
-				json.serializeTo(new Read.Argument("test.Composite", uri)));
+				json.serialize(new Read.Argument("test.Composite", uri)));
 		result =
 				engine.execute(
 						String.class,

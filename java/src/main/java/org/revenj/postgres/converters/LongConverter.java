@@ -55,36 +55,37 @@ public abstract class LongConverter {
 		return res;
 	}
 
-	public static List<Long> parseNullableCollection(PostgresReader reader, int context) {
+	public static List<Long> parseCollection(PostgresReader reader, int context, boolean allowNulls) {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur != '{';
-		if (espaced) {
+		boolean escaped = cur != '{';
+		if (escaped) {
 			reader.read(context);
 		}
 		cur = reader.peek();
 		if (cur == '}') {
-			if (espaced) {
+			if (escaped) {
 				reader.read(context + 2);
 			} else {
 				reader.read(2);
 			}
 			return new ArrayList<>(0);
 		}
+		Long defaultValue = allowNulls ? null : 0L;
 		List<Long> list = new ArrayList<>();
 		do {
 			cur = reader.read();
 			if (cur == 'N') {
-				list.add(null);
+				list.add(defaultValue);
 				cur = reader.read(4);
 			} else {
 				list.add(parseLong(reader, cur, '}'));
 				cur = reader.last();
 			}
 		} while (cur == ',');
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();
@@ -92,48 +93,11 @@ public abstract class LongConverter {
 		return list;
 	}
 
-	public static List<Long> parseCollection(PostgresReader reader, int context) {
-		int cur = reader.read();
-		if (cur == ',' || cur == ')') {
-			return null;
-		}
-		boolean espaced = cur != '{';
-		if (espaced) {
-			reader.read(context);
-		}
-		cur = reader.peek();
-		if (cur == '}') {
-			if (espaced) {
-				reader.read(context + 2);
-			} else {
-				reader.read(2);
-			}
-			return new ArrayList<>(0);
-		}
-		List<Long> list = new ArrayList<>();
-		do {
-			cur = reader.read();
-			if (cur == 'N') {
-				list.add(0L);
-				cur = reader.read(4);
-			} else {
-				list.add(parseLong(reader, cur, '}'));
-				cur = reader.last();
-			}
-		} while (cur == ',');
-		if (espaced) {
-			reader.read(context + 1);
-		} else {
-			reader.read();
-		}
-		return list;
-	}
-
-	private static final PostgresTuple MAX_TUPLE = new ValueTuple("-9223372036854775808", false, false);
+	private static final PostgresTuple MIN_TUPLE = new ValueTuple("-9223372036854775808", false, false);
 
 	public static PostgresTuple toTuple(long value) {
 		if (value == Long.MIN_VALUE) {
-			return MAX_TUPLE;
+			return MIN_TUPLE;
 		}
 		return new LongTuple(value);
 	}

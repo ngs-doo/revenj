@@ -16,19 +16,19 @@ public abstract class NumberConverter {
 
 	static void write2(int number, char[] buffer, int start) {
 		int pair = NUMBERS[number];
-		buffer[start] = (char) (byte) (pair);
-		buffer[start + 1] = (char) (pair >> 8);
+		buffer[start] = (char) (pair >> 8);
+		buffer[start + 1] = (char) (byte) (pair);
 	}
 
 	static void write4(int number, char[] buffer, int start) {
 		int div = number / 100;
 		int pair1 = NUMBERS[div];
-		buffer[start] = (char) (byte) (pair1);
-		buffer[start + 1] = (char) (pair1 >> 8);
+		buffer[start] = (char) (pair1 >> 8);
+		buffer[start + 1] = (char) (byte) (pair1);
 		int rem = number - div * 100;
 		int pair2 = NUMBERS[rem];
-		buffer[start + 2] = (char) (byte) (pair2);
-		buffer[start + 3] = (char) (pair2 >> 8);
+		buffer[start + 2] = (char) (pair2 >> 8);
+		buffer[start + 3] = (char) (byte) (pair2);
 	}
 
 	static int read2(char[] source, int start) {

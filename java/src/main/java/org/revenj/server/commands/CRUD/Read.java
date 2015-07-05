@@ -36,7 +36,7 @@ public final class Read implements ServerCommand {
 	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
 		Argument arg;
 		try {
-			arg = input.deserialize(Argument.class, data, locator);
+			arg = input.deserialize(Argument.class, data);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
@@ -54,6 +54,6 @@ public final class Read implements ServerCommand {
 		if (!found.isPresent()) {
 			return CommandResult.success("Object not found", null);
 		}
-		return CommandResult.success("Object found", output.serializeTo(found.get()));
+		return CommandResult.success("Object found", output.serialize(found.get()));
 	}
 }

@@ -39,9 +39,9 @@ public class TestContainer {
 	}
 
 	@Test
-	public void typeTest() throws IOException {
+		 public void typeTest() throws IOException {
 		B.counter = 0;
-		Container container = new SimpleContainer();
+		Container container = new SimpleContainer(false);
 		container.register(A.class);
 		Optional<A> aopt = container.tryResolve(A.class);
 		Assert.assertFalse(aopt.isPresent());
@@ -68,7 +68,7 @@ public class TestContainer {
 	@Test
 	public void optionalTest() throws IOException {
 		B.counter = 0;
-		Container container = new SimpleContainer();
+		Container container = new SimpleContainer(false);
 		container.register(A.class, B.class, C.class);
 		C c = container.resolve(C.class);
 		Assert.assertNotNull(c);
@@ -90,7 +90,7 @@ public class TestContainer {
 	@Test
 	public void genericsTest() throws IOException {
 		B.counter = 0;
-		Container container = new SimpleContainer();
+		Container container = new SimpleContainer(false);
 		container.register(A.class, B.class, G.class);
 		G<A> g = new Generic<G<A>>() {
 		}.resolve(container);
@@ -113,7 +113,7 @@ public class TestContainer {
 	@Test
 	public void complexGenericsTest() throws IOException {
 		B.counter = 0;
-		Container container = new SimpleContainer();
+		Container container = new SimpleContainer(false);
 		container.register(A.class, B.class, ComplexGenerics.class);
 		ComplexGenerics<A, B> cg = new Generic<ComplexGenerics<A, B>>() {
 		}.resolve(container);
@@ -136,7 +136,7 @@ public class TestContainer {
 	@Test
 	public void complexCtorRawGenericsTest() throws IOException {
 		B.counter = 0;
-		Container container = new SimpleContainer();
+		Container container = new SimpleContainer(false);
 		container.register(A.class, B.class, ComplexGenerics.class, CtorRawGenerics.class);
 		CtorRawGenerics cg = container.resolve(CtorRawGenerics.class);
 		Assert.assertNotNull(cg);
@@ -158,7 +158,7 @@ public class TestContainer {
 	@Test
 	public void complexCtorGenericsTest() throws IOException {
 		B.counter = 0;
-		Container container = new SimpleContainer();
+		Container container = new SimpleContainer(false);
 		container.register(A.class, B.class, ComplexGenerics.class, CtorGenerics.class);
 		CtorGenerics<A> cg = new Generic<CtorGenerics<A>>() {
 		}.resolve(container);
@@ -172,7 +172,7 @@ public class TestContainer {
 
 	@Test
 	public void passExceptions() {
-		Container container = new SimpleContainer();
+		Container container = new SimpleContainer(false);
 		container.register(TestContainer.class, c -> {
 			throw new RuntimeException("test me now");
 		});
@@ -182,5 +182,28 @@ public class TestContainer {
 		} catch (Exception e) {
 			Assert.assertTrue(e.getMessage().contains("test me now"));
 		}
+	}
+
+	@Test
+	public void resolveUnknown() throws IOException {
+		B.counter = 0;
+		Container container = new SimpleContainer(true);
+		A a = container.resolve(A.class);
+		Assert.assertNotNull(a);
+		Assert.assertEquals(1, B.counter);
+	}
+
+	@Test
+	public void complexCtorGenericsUnknown() throws IOException {
+		B.counter = 0;
+		Container container = new SimpleContainer(true);
+		CtorGenerics<A> cg = new Generic<CtorGenerics<A>>() {
+		}.resolve(container);
+		Assert.assertNotNull(cg);
+		Assert.assertEquals(2, B.counter);
+		Assert.assertTrue(cg.generics.instance1 instanceof A);
+		Assert.assertEquals(A.class, cg.generics.instance1.getClass());
+		Assert.assertTrue(cg.generics.instance2 instanceof B);
+		Assert.assertEquals(B.class, cg.generics.instance2.getClass());
 	}
 }

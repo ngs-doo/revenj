@@ -112,10 +112,13 @@ public class Composite   implements java.io.Serializable {
 	}
 
 	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
+		URI = gen.model.test.converters.CompositeConverter.buildURI(reader.tmp, id);
 	}
 
 	public static void configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, gen.model.test.converters.SimpleConverter __converter_simple, int __index___simple) {

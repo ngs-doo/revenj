@@ -41,7 +41,7 @@ public final class Update implements ServerCommand {
 		Argument arg;
 		try {
 			Type genericType = Utility.makeGenericType(Argument.class, data.getClass());
-			arg = (Argument) input.deserialize(genericType, data, locator);
+			arg = (Argument) input.deserialize(genericType, data);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
@@ -56,7 +56,7 @@ public final class Update implements ServerCommand {
 		}
 		Object instance;
 		try {
-			instance = input.deserialize(manifest.get(), (TInput) arg.Data, locator);
+			instance = input.deserialize(manifest.get(), (TInput) arg.Data);
 		} catch (IOException e) {
 			return CommandResult.badRequest("Error deserializing provided input for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
@@ -72,7 +72,7 @@ public final class Update implements ServerCommand {
 				return CommandResult.badRequest("Can't find " + arg.Name + " with uri: " + arg.Uri);
 			}
 			repository.update(found.get(), instance);
-			return new CommandResult<>(output.serializeTo(instance), "Object changed", 200);
+			return new CommandResult<>(output.serialize(instance), "Object changed", 200);
 		} catch (SQLException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}

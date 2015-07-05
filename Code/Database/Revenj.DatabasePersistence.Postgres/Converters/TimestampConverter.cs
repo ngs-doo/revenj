@@ -166,14 +166,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var espaced = cur != '{';
-			if (espaced)
+			var escaped = cur != '{';
+			if (escaped)
 				reader.Read(context);
 			var innerContext = context << 1;
 			cur = reader.Peek();
 			if (cur == '}')
 			{
-				if (espaced)
+				if (escaped)
 					reader.Read(context + 2);
 				else
 					reader.Read(2);
@@ -194,7 +194,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 				}
 			} while (cur == ',');
-			if (espaced)
+			if (escaped)
 				reader.Read(context + 1);
 			else
 				reader.Read();
@@ -206,14 +206,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var espaced = cur != '{';
-			if (espaced)
+			var escaped = cur != '{';
+			if (escaped)
 				reader.Read(context);
 			var innerContext = context << 1;
 			cur = reader.Peek();
 			if (cur == '}')
 			{
-				if (espaced)
+				if (escaped)
 					reader.Read(context + 2);
 				else
 					reader.Read(2);
@@ -234,7 +234,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 				}
 			} while (cur == ',');
-			if (espaced)
+			if (escaped)
 				reader.Read(context + 1);
 			else
 				reader.Read();
@@ -246,14 +246,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var espaced = cur != '{';
-			if (espaced)
+			var escaped = cur != '{';
+			if (escaped)
 				reader.Read(context);
 			var innerContext = context << 1;
 			cur = reader.Peek();
 			if (cur == '}')
 			{
-				if (espaced)
+				if (escaped)
 					reader.Read(context + 2);
 				else
 					reader.Read(2);
@@ -274,7 +274,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 				}
 			} while (cur == ',');
-			if (espaced)
+			if (escaped)
 				reader.Read(context + 1);
 			else
 				reader.Read();
@@ -286,14 +286,14 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var espaced = cur != '{';
-			if (espaced)
+			var escaped = cur != '{';
+			if (escaped)
 				reader.Read(context);
 			var innerContext = context << 1;
 			cur = reader.Peek();
 			if (cur == '}')
 			{
-				if (espaced)
+				if (escaped)
 					reader.Read(context + 2);
 				else
 					reader.Read(2);
@@ -314,7 +314,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 				}
 			} while (cur == ',');
-			if (espaced)
+			if (escaped)
 				reader.Read(context + 1);
 			else
 				reader.Read();

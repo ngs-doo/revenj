@@ -3,8 +3,7 @@ package org.revenj.server;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.patterns.Container;
 import org.revenj.patterns.Serialization;
-import org.revenj.serialization.JsonSerialization;
-import org.revenj.serialization.PassThroughSerialization;
+import org.revenj.patterns.WireSerialization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,13 +13,15 @@ public class ProcessingEngine {
 
 	private final Container container;
 	private final Map<Class<?>, ServerCommand> serverCommands = new HashMap<>();
-	private final Map<Class<?>, Serialization> serializers = new HashMap<>();
+	private final WireSerialization serialization;
 
 	public ProcessingEngine(
 			Container container,
+			WireSerialization serialization,
 			Optional<PluginLoader> extensibility,
 			Optional<ClassLoader> classLoader) throws Exception {
 		this.container = container;
+		this.serialization = serialization;
 		if (extensibility.isPresent()) {
 			for (ServerCommand com : extensibility.get().resolve(container, ServerCommand.class)) {
 				serverCommands.put(com.getClass(), com);
@@ -33,8 +34,34 @@ public class ProcessingEngine {
 				serverCommands.put(com.getClass(), com);
 			}
 		}
-		serializers.put(String.class, new JsonSerialization());
-		serializers.put(Object.class, new PassThroughSerialization());
+	}
+
+	public CommandResult<String> executeJson(Class<?> command, Object argument) {
+		try {
+			ServerCommandDescription[] scd = new ServerCommandDescription[]{
+					new ServerCommandDescription<>(null, command, argument)
+			};
+			ProcessingResult<String> result = execute(Object.class,String.class, scd);
+			return result.executedCommandResults[0].result;
+		} catch (SQLException e) {
+			return new CommandResult(null, e.getMessage(), 409);
+		} catch (Exception e) {
+			return new CommandResult(null, e.getMessage(), 500);
+		}
+	}
+
+	public CommandResult<Object> passThrough(Class<?> command, Object argument) {
+		try {
+			ServerCommandDescription[] scd = new ServerCommandDescription[]{
+					new ServerCommandDescription<>(null, command, argument)
+			};
+			ProcessingResult<Object> result = execute(Object.class, Object.class, scd);
+			return result.executedCommandResults[0].result;
+		} catch (SQLException e) {
+			return new CommandResult(null, e.getMessage(), 409);
+		} catch (Exception e) {
+			return new CommandResult(null, e.getMessage(), 500);
+		}
 	}
 
 	public <TInput, TOutput> ProcessingResult<TOutput> execute(
@@ -47,8 +74,12 @@ public class ProcessingEngine {
 			return ProcessingResult.badRequest("There are no commands to execute.", startProcessing);
 		}
 
-		Serialization<TInput> inputSerializer = serializers.get(input);
-		Serialization<TOutput> outputSerializer = serializers.get(output);
+		Serialization<TInput> inputSerializer = serialization.find(input).orElseGet(() -> {
+			throw new RuntimeException("Invalid serialization format: " + input);
+		});
+		Serialization<TOutput> outputSerializer = serialization.find(output).orElseGet(() -> {
+			throw new RuntimeException("Invalid serialization format: " + output);
+		});
 
 		ArrayList<CommandResultDescription<TOutput>> executedCommands = new ArrayList<>(commandDescriptions.length);
 		Connection connection = container.resolve(Connection.class);

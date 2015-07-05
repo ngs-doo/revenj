@@ -55,73 +55,37 @@ public abstract class IntConverter {
 		return res;
 	}
 
-	public static List<Integer> parseNullableCollection(PostgresReader reader, int context) {
+	public static List<Integer> parseCollection(PostgresReader reader, int context, boolean allowNulls) {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur != '{';
-		if (espaced) {
+		boolean escaped = cur != '{';
+		if (escaped) {
 			reader.read(context);
 		}
 		cur = reader.peek();
 		if (cur == '}') {
-			if (espaced) {
+			if (escaped) {
 				reader.read(context + 2);
 			} else {
 				reader.read(2);
 			}
 			return new ArrayList<>(0);
 		}
+		Integer defaultValue = allowNulls ? null : 0;
 		List<Integer> list = new ArrayList<>();
 		do {
 			cur = reader.read();
 			if (cur == 'N') {
-				list.add(null);
+				list.add(defaultValue);
 				cur = reader.read(4);
 			} else {
 				list.add(parseInt(reader, cur, '}'));
 				cur = reader.last();
 			}
 		} while (cur == ',');
-		if (espaced) {
-			reader.read(context + 1);
-		} else {
-			reader.read();
-		}
-		return list;
-	}
-
-	public static List<Integer> parseCollection(PostgresReader reader, int context) {
-		int cur = reader.read();
-		if (cur == ',' || cur == ')') {
-			return null;
-		}
-		boolean espaced = cur != '{';
-		if (espaced) {
-			reader.read(context);
-		}
-		cur = reader.peek();
-		if (cur == '}') {
-			if (espaced) {
-				reader.read(context + 2);
-			} else {
-				reader.read(2);
-			}
-			return new ArrayList<>(0);
-		}
-		List<Integer> list = new ArrayList<>();
-		do {
-			cur = reader.read();
-			if (cur == 'N') {
-				list.add(0);
-				cur = reader.read(4);
-			} else {
-				list.add(parseInt(reader, cur, '}'));
-				cur = reader.last();
-			}
-		} while (cur == ',');
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();

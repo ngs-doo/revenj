@@ -70,8 +70,8 @@ public abstract class DateConverter {
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur == '"' || cur == '\\';
-		if (espaced) {
+		boolean escaped = cur == '"' || cur == '\\';
+		if (escaped) {
 			reader.read(context);
 		}
 		List<LocalDate> list = new ArrayList<>();
@@ -90,7 +90,7 @@ public abstract class DateConverter {
 				cur = reader.read();
 			}
 		}
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();

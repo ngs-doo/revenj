@@ -73,8 +73,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var espaced = cur == '"' || cur == '\\';
-			if (espaced)
+			var escaped = cur == '"' || cur == '\\';
+			if (escaped)
 				reader.Read(context);
 			var list = new List<DateTime?>();
 			cur = reader.Peek();
@@ -94,7 +94,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 				}
 			}
-			if (espaced)
+			if (escaped)
 				reader.Read(context + 1);
 			else
 				reader.Read();
@@ -106,8 +106,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var espaced = cur == '"' || cur == '\\';
-			if (espaced)
+			var escaped = cur == '"' || cur == '\\';
+			if (escaped)
 				reader.Read(context);
 			var list = new List<DateTime>();
 			cur = reader.Peek();
@@ -127,7 +127,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					cur = reader.Read();
 				}
 			}
-			if (espaced)
+			if (escaped)
 				reader.Read(context + 1);
 			else
 				reader.Read();

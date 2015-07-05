@@ -2,18 +2,15 @@ package org.revenj.patterns;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.Function;
 
 public interface Container extends ServiceLocator, AutoCloseable {
-
-	interface Factory<T> {
-		T create(Container scope);
-	}
 
 	void registerClass(Type type, Class<?> manifest, boolean singleton);
 
 	void registerInstance(Type type, Object service, boolean handleClose);
 
-	void registerFactory(Type type, Factory<?> factory, boolean singleton);
+	void registerFactory(Type type, Function<Container, ?> factory, boolean singleton);
 
 	default <T> void register(Class<T> manifest, boolean singleton) {
 		registerClass(manifest, manifest, singleton);
@@ -41,7 +38,7 @@ public interface Container extends ServiceLocator, AutoCloseable {
 		registerInstance(as, service, service instanceof AutoCloseable);
 	}
 
-	default <T> void register(Class<T> manifest, Factory<T> service) {
+	default <T> void register(Class<T> manifest, Function<Container, T> service) {
 		registerFactory(manifest, service, false);
 	}
 

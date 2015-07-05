@@ -26,14 +26,10 @@ public abstract class DecimalConverter {
 	}
 
 	private static BigDecimal parseDecimal(PostgresReader reader, int cur, char matchEnd) throws IOException {
-		boolean neg = cur == '-';
-		if (neg) {
-			cur = reader.read();
-		}
 		reader.initBuffer((char) cur);
 		reader.fillUntil(',', matchEnd);
-		//TODO: BigDecimal without to String
-		return new BigDecimal(reader.bufferToString());
+		reader.read();
+		return reader.bufferToValue(BigDecimal::new);
 	}
 
 	public static List<BigDecimal> parseCollection(PostgresReader reader, int context, boolean allowNulls) throws IOException {

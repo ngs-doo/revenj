@@ -44,7 +44,6 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 			}
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}
@@ -54,7 +53,7 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 			java.util.List<gen.model.test.Composite> insert,
 			java.util.List<java.util.Map.Entry<gen.model.test.Composite, gen.model.test.Composite>> update,
 			java.util.List<gen.model.test.Composite> delete) throws java.sql.SQLException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT * FROM \"test\".\"persist_Composite\"(?, ?, ?, ?)")) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"test\".\"persist_Composite\"(?, ?, ?, ?)")) {
 			java.util.List<String> result;
 			org.revenj.postgres.PostgresWriter sw = new org.revenj.postgres.PostgresWriter();
 			if (insert != null && !insert.isEmpty()) {

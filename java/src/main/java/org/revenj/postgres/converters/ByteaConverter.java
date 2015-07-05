@@ -65,8 +65,8 @@ public abstract class ByteaConverter {
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur != '{';
-		if (espaced) {
+		boolean escaped = cur != '{';
+		if (escaped) {
 			reader.read(context);
 		}
 		int innerContext = context << 1;
@@ -94,7 +94,7 @@ public abstract class ByteaConverter {
 				list.add(toArray(item));
 			}
 		}
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();

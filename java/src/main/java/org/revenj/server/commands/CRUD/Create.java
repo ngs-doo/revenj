@@ -36,7 +36,7 @@ public final class Create implements ServerCommand {
 		Argument arg;
 		try {
 			Type genericType = Utility.makeGenericType(Argument.class, data.getClass());
-			arg = (Argument) input.deserialize(genericType, data, locator);
+			arg = (Argument) input.deserialize(genericType, data);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
@@ -49,7 +49,7 @@ public final class Create implements ServerCommand {
 		}
 		Object instance;
 		try {
-			instance = input.deserialize(manifest.get(), (TInput) arg.Data, locator);
+			instance = input.deserialize(manifest.get(), (TInput) arg.Data);
 		} catch (IOException e) {
 			return CommandResult.badRequest("Error deserializing provided input for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
@@ -61,7 +61,7 @@ public final class Create implements ServerCommand {
 		}
 		try {
 			String uri = repository.insert(instance);
-			return new CommandResult<>(output.serializeTo(uri), "Object created", 201);
+			return new CommandResult<>(output.serialize(uri), "Object created", 201);
 		} catch (SQLException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
