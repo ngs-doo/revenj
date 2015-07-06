@@ -203,7 +203,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				var esc = PostgresTuple.BuildQuoteEscape(escaping);
 				var quoteEscape = new Lazy<string>(() => PostgresTuple.BuildQuoteEscape(escaping + "0"));
 				var slashEscape = new Lazy<string>(() => PostgresTuple.BuildSlashEscape(escaping.Length + 1));
-				var len = Value.Keys.Count;
+				var len = Value.Count;
 				if (mappings != null)
 				{
 					foreach (var kv in Value)

@@ -1,37 +1,50 @@
 package org.revenj.server.servlet;
 
 import org.revenj.Revenj;
-import org.revenj.patterns.Container;
 import org.revenj.patterns.ServiceLocator;
-import org.revenj.server.ProcessingEngine;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
-@WebListener
-public class Application implements ServletContextListener {
+//@WebListener
+public abstract class Application /*implements ServletContextListener*/ {
 
-	private final Container container;
+	/*private final ServiceLocator locator;
 
 	public Application() throws IOException {
-		container = Revenj.setup();
+		locator = Revenj.setup();
+		Properties properties = locator.resolve(Properties.class);
+		if ("0".equals(properties.getProperty("aspects-count"))) {
+			String pluginsPath = properties.getProperty("pluginsPath");
+			if (pluginsPath == null) {
+				throw new IOException("System aspects not configured. Probably an error in configuration.\n" +
+						"Specify pluginsPath in Properties file (currently not set).");
+			} else if (!new File(pluginsPath).isDirectory()) {
+				throw new IOException("System aspects not configured. Probably an error in configuration.\n" +
+						"Specified pluginsPath: " + pluginsPath + " is not an directory.");
+			}
+			throw new IOException("System aspects not configured. Probably an error in configuration.\n" +
+					"Check if pluginsPath (" + pluginsPath + ") is correctly set in Properties file.");
+		}
 	}
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		ServletContext context = sce.getServletContext();
-		configure(context, container);
+		configure(context, locator);
 	}
-
+*/
 	public static void configure(ServletContext context, ServiceLocator locator) {
 		context.addServlet("crud", new CrudServlet(locator)).addMapping("/Crud.svc/*");
 		context.addServlet("domain", new DomainServlet(locator)).addMapping("/Domain.svc/*");
 	}
-
+/*
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
-	}
+	}*/
 }

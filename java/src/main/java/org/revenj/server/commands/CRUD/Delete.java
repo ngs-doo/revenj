@@ -1,9 +1,6 @@
 package org.revenj.server.commands.CRUD;
 
-import org.revenj.patterns.DomainModel;
-import org.revenj.patterns.PersistableRepository;
-import org.revenj.patterns.Serialization;
-import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
 import org.revenj.server.commands.Utility;
@@ -54,7 +51,7 @@ public final class Delete implements ServerCommand {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
 		try {
-			Optional<Object> found = repository.find(arg.Uri);
+			Optional<AggregateRoot> found = repository.find(arg.Uri);
 			if (!found.isPresent()) {
 				return CommandResult.badRequest("Can't find " + arg.Name + " with uri: " + arg.Uri);
 			}

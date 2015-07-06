@@ -2,4 +2,3 @@ org.revenj.server.commands.CRUD.Create
 org.revenj.server.commands.CRUD.Read
 org.revenj.server.commands.CRUD.Update
 org.revenj.server.commands.CRUD.Delete
-

@@ -1,9 +1,13 @@
 package org.revenj.server;
 
 import org.revenj.extensibility.PluginLoader;
-import org.revenj.patterns.Container;
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.Serialization;
 import org.revenj.patterns.WireSerialization;
+import org.revenj.server.commands.CRUD.Create;
+import org.revenj.server.commands.CRUD.Delete;
+import org.revenj.server.commands.CRUD.Read;
+import org.revenj.server.commands.CRUD.Update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -22,9 +26,20 @@ public class ProcessingEngine {
 			Optional<ClassLoader> classLoader) throws Exception {
 		this.container = container;
 		this.serialization = serialization;
+		//TODO:...fix service loader in containers
 		if (extensibility.isPresent()) {
 			for (ServerCommand com : extensibility.get().resolve(container, ServerCommand.class)) {
 				serverCommands.put(com.getClass(), com);
+			}
+			if(serverCommands.size() == 0) {
+				//TODO: forced add just for now
+				Container scope = container.createScope();
+				scope.register(Create.class, Read.class, Update.class, Delete.class);
+				serverCommands.put(Create.class, scope.resolve(Create.class));
+				serverCommands.put(Read.class, scope.resolve(Read.class));
+				serverCommands.put(Update.class, scope.resolve(Update.class));
+				serverCommands.put(Delete.class, scope.resolve(Delete.class));
+				scope.close();
 			}
 		} else {
 			ServiceLoader<ServerCommand> plugins = classLoader.isPresent()

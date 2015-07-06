@@ -3,7 +3,7 @@ package org.revenj.patterns;
 import java.util.Collections;
 import java.util.List;
 
-public interface DomainEventStore<TEvent /*extends DomainEvent*/> extends Repository<TEvent> {
+public interface DomainEventStore<TEvent extends DomainEvent> extends Repository<TEvent> {
 	String[] submit(List<TEvent> domainEvents);
 
 	default String submit(TEvent domainEvent) {

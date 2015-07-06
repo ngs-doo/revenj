@@ -2,12 +2,11 @@ package org.revenj;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.revenj.patterns.Container;
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.Generic;
 import org.revenj.patterns.ServiceLocator;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;

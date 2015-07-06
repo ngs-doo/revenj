@@ -59,9 +59,15 @@ public class CrudServlet extends HttpServlet {
 
 	private void execute(HttpServletResponse res, Class<?> command, Object argument) {
 		CommandResult<String> result = engine.executeJson(command, argument);
-		res.setContentType("application/json");
 		res.setStatus(result.status);
-		if (result.message != null) {
+		if (result.data != null) {
+			res.setContentType("application/json");
+			try {
+				res.getOutputStream().write(result.data.getBytes(UTF8));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else if (result.message != null) {
 			try {
 				res.getOutputStream().write(result.message.getBytes(UTF8));
 			} catch (IOException e) {

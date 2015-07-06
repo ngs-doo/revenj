@@ -9,10 +9,11 @@ import gen.model.test.repositories.ClickedRepository;
 import gen.model.test.repositories.CompositeRepository;
 import org.junit.Assert;
 import org.junit.Test;
-import org.revenj.patterns.Container;
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.DomainEventStore;
 import org.revenj.patterns.Generic;
 import org.revenj.patterns.PersistableRepository;
+import org.revenj.patterns.ServiceLocator;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -24,7 +25,7 @@ public class TestRepository {
 
 	@Test
 	public void repositoryTest() throws IOException, SQLException {
-		Container locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
 		Composite co = new Composite();
 		UUID id = UUID.randomUUID();
@@ -56,7 +57,7 @@ public class TestRepository {
 
 	@Test
 	public void eventTest() throws IOException, SQLException {
-		Container locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
 		Clicked cl = new Clicked().setBigint(Long.MAX_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
 		String uri = store.submit(cl);
@@ -71,7 +72,7 @@ public class TestRepository {
 
 	@Test
 	public void sequenceTest() throws IOException, SQLException {
-		Container locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
 		}.resolve(locator);
 		Next next = new Next();

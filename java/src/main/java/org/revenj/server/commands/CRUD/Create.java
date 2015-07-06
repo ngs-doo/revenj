@@ -47,9 +47,9 @@ public final class Create implements ServerCommand {
 		if (arg.Data == null) {
 			return CommandResult.badRequest("Data to create not specified.");
 		}
-		Object instance;
+		AggregateRoot instance;
 		try {
-			instance = input.deserialize(manifest.get(), (TInput) arg.Data);
+			instance = (AggregateRoot)input.deserialize(manifest.get(), (TInput) arg.Data);
 		} catch (IOException e) {
 			return CommandResult.badRequest("Error deserializing provided input for: " + arg.Name + ". Reason: " + e.getMessage());
 		}

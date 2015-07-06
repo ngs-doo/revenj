@@ -1,9 +1,9 @@
 package gen.model;
 
 
-public class Boot implements org.revenj.Revenj.SystemAspect {
+public class Boot implements org.revenj.extensibility.SystemAspect {
 
-	public static org.revenj.patterns.Container configure(String jdbcUrl) throws java.io.IOException {
+	public static org.revenj.patterns.ServiceLocator configure(String jdbcUrl) throws java.io.IOException {
 		java.util.Properties properties = new java.util.Properties();
 		properties.setProperty("namespace", "gen.model");
 		java.io.File revProps = new java.io.File("revenj.properties");
@@ -13,18 +13,18 @@ public class Boot implements org.revenj.Revenj.SystemAspect {
 		return configure(jdbcUrl, properties);
 	}
 
-	public static org.revenj.patterns.Container configure(String jdbcUrl, java.util.Properties properties) throws java.io.IOException {
-		java.util.function.Function<org.revenj.patterns.Container, java.sql.Connection> factory = c -> {
+	public static org.revenj.patterns.ServiceLocator configure(String jdbcUrl, java.util.Properties properties) throws java.io.IOException {
+		java.util.function.Function<org.revenj.patterns.ServiceLocator, java.sql.Connection> factory = c -> {
 			try {
 				return java.sql.DriverManager.getConnection(jdbcUrl, properties);
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
 		};
-		return org.revenj.Revenj.setup(factory, properties, java.util.Optional.<ClassLoader>empty(), java.util.Collections.singletonList((org.revenj.Revenj.SystemAspect) new Boot()).iterator());
+		return org.revenj.Revenj.setup(factory, properties, java.util.Optional.<ClassLoader>empty(), java.util.Collections.singletonList((org.revenj.extensibility.SystemAspect) new Boot()).iterator());
 	}
 
-	public void configure(org.revenj.patterns.Container container) throws java.io.IOException {
+	public void configure(org.revenj.extensibility.Container container) throws java.io.IOException {
 		java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> columns = new java.util.ArrayList<>();
 		java.util.Properties properties = container.resolve(java.util.Properties.class);
 		String prevNamespace = properties.getProperty("namespace");

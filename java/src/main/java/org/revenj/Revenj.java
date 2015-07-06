@@ -1,8 +1,9 @@
 package org.revenj;
 
 import org.revenj.extensibility.PluginLoader;
-import org.revenj.patterns.Container;
+import org.revenj.extensibility.SystemAspect;
 import org.revenj.patterns.DomainModel;
+import org.revenj.patterns.ServiceLocator;
 import org.revenj.patterns.WireSerialization;
 import org.revenj.serialization.RevenjSerialization;
 import org.revenj.server.ProcessingEngine;
@@ -23,11 +24,7 @@ import java.util.function.Function;
 
 public abstract class Revenj {
 
-	public interface SystemAspect {
-		void configure(Container container) throws IOException;
-	}
-
-	public static Container setup() throws IOException {
+	public static ServiceLocator setup() throws IOException {
 		Properties properties = new Properties();
 		File revProps = new File("revenj.properties");
 		if (revProps.exists() && revProps.isFile()) {
@@ -55,7 +52,7 @@ public abstract class Revenj {
 			File pp = new File(plugins);
 			pluginsPath = pp.isDirectory() ? pp : null;
 		}
-		Function<Container, Connection> factory = c -> {
+		Function<ServiceLocator, Connection> factory = c -> {
 			try {
 				return DriverManager.getConnection(jdbcUrl, properties);
 			} catch (SQLException e) {
@@ -65,13 +62,13 @@ public abstract class Revenj {
 		return Revenj.setup(factory, properties, Optional.ofNullable(pluginsPath), Optional.<ClassLoader>empty());
 	}
 
-	public static Container setup(String jdbcUrl) throws IOException {
+	public static ServiceLocator setup(String jdbcUrl) throws IOException {
 		Properties properties = new Properties();
 		File revProps = new File("revenj.properties");
 		if (revProps.exists() && revProps.isFile()) {
 			properties.load(new FileReader(revProps));
 		}
-		Function<Container, Connection> factory = c -> {
+		Function<ServiceLocator, Connection> factory = locator -> {
 			try {
 				return DriverManager.getConnection(jdbcUrl, properties);
 			} catch (SQLException e) {
@@ -81,8 +78,8 @@ public abstract class Revenj {
 		return setup(factory, properties, Optional.<File>empty(), Optional.<ClassLoader>empty());
 	}
 
-	public static Container setup(
-			Function<Container, Connection> connectionFactory,
+	public static ServiceLocator setup(
+			Function<ServiceLocator, Connection> connectionFactory,
 			Properties properties,
 			Optional<File> pluginsPath,
 			Optional<ClassLoader> classLoader) throws IOException {
@@ -104,7 +101,7 @@ public abstract class Revenj {
 			loader = ClassLoader.getSystemClassLoader();
 		}
 		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class, loader);
-		return setup(connectionFactory, properties, Optional.of(loader), aspects.iterator());
+		return setup(connectionFactory, properties, classLoader, aspects.iterator());
 	}
 
 	private static class SimpleDomainModel implements DomainModel {
@@ -132,8 +129,8 @@ public abstract class Revenj {
 		}
 	}
 
-	public static Container setup(
-			Function<Container, Connection> connectionFactory,
+	public static ServiceLocator setup(
+			Function<ServiceLocator, Connection> connectionFactory,
 			Properties properties,
 			Optional<ClassLoader> classLoader,
 			Iterator<SystemAspect> aspects) throws IOException {
@@ -141,8 +138,8 @@ public abstract class Revenj {
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
 		container.registerInstance(DomainModel.class, new SimpleDomainModel(properties.getProperty("namespace")), false);
-		PluginLoader plugins = new PluginLoader(classLoader.orElse(null));
-		container.register(plugins);
+		PluginLoader plugins = new SimplePluginLoader(classLoader.orElse(null));
+		container.registerInstance(PluginLoader.class, plugins, false);
 		WireSerialization serialization = new RevenjSerialization(container);
 		container.registerInstance(WireSerialization.class, serialization, false);
 		try {
@@ -153,11 +150,15 @@ public abstract class Revenj {
 		if (classLoader.isPresent()) {
 			container.registerInstance(ClassLoader.class, classLoader.get(), false);
 		}
-		if (aspects != null) {
-			while (aspects.hasNext()) {
-				aspects.next().configure(container);
-			}
+		if (aspects == null) {
+			throw new IOException("aspects not provided");
 		}
+		int total = 0;
+		while (aspects.hasNext()) {
+			aspects.next().configure(container);
+			total++;
+		}
+		properties.setProperty("aspects-count", Integer.toString(total));
 		return container;
 	}
 }

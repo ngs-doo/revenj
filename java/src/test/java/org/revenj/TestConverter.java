@@ -9,7 +9,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import org.postgresql.util.PGobject;
-import org.revenj.patterns.Container;
+import org.revenj.extensibility.Container;
+import org.revenj.patterns.ServiceLocator;
 import org.revenj.postgres.ObjectConverter;
 import org.revenj.postgres.PostgresReader;
 
@@ -37,7 +38,6 @@ public class TestConverter {
 		String input = "(1,abc)";
 		PostgresReader reader = new PostgresReader();
 		reader.process(input);
-		Container container = Revenj.setup("jdbc:postgresql://localhost:5432/revenj");
 		SimpleConverter converter = new SimpleConverter(columns);
 		converter.configure(null);
 		Simple instance = converter.from(reader);
@@ -100,7 +100,7 @@ public class TestConverter {
 		String input = "(6a07867f-1b23-416d-893a-6e493157e268,\"(1,abc)\")";
 		PostgresReader reader = new PostgresReader();
 		reader.process(input);
-		Container locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		CompositeConverter converter = locator.resolve(CompositeConverter.class);
 		Composite instance = converter.from(reader);
 		Assert.assertEquals(UUID.fromString("6a07867f-1b23-416d-893a-6e493157e268"), instance.getId());

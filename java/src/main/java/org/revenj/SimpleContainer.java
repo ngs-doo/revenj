@@ -1,6 +1,7 @@
 package org.revenj;
 
-import org.revenj.patterns.Container;
+import org.revenj.extensibility.Container;
+import org.revenj.patterns.ServiceLocator;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -15,10 +16,10 @@ class SimpleContainer implements Container {
 		public final SimpleContainer owner;
 		public final Class<T> manifest;
 		public T instance;
-		public final Function<Container, T> factory;
+		public final Function<ServiceLocator, T> factory;
 		public final boolean singleton;
 
-		private Registration(SimpleContainer owner, Class<T> manifest, T instance, Function<Container, T> factory, boolean singleton) {
+		private Registration(SimpleContainer owner, Class<T> manifest, T instance, Function<ServiceLocator, T> factory, boolean singleton) {
 			this.owner = owner;
 			this.manifest = manifest;
 			this.instance = instance;
@@ -34,7 +35,7 @@ class SimpleContainer implements Container {
 			return new Registration<>(owner, null, instance, null, true);
 		}
 
-		static <T> Registration<T> register(SimpleContainer owner, Function<Container, T> factory, boolean singleton) {
+		static <T> Registration<T> register(SimpleContainer owner, Function<ServiceLocator, T> factory, boolean singleton) {
 			return new Registration<>(owner, null, null, factory, singleton);
 		}
 
@@ -446,7 +447,7 @@ class SimpleContainer implements Container {
 	}
 
 	@Override
-	public void registerFactory(Type type, Function<Container, ?> factory, boolean singleton) {
+	public void registerFactory(Type type, Function<ServiceLocator, ?> factory, boolean singleton) {
 		addToRegistry(type, Registration.register(this, factory, singleton));
 	}
 

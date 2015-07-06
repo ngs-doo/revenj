@@ -3,7 +3,7 @@ package org.revenj.patterns;
 import java.sql.SQLException;
 import java.util.*;
 
-public interface PersistableRepository<T/* extends AggregateRoot*/> extends Repository<T> {
+public interface PersistableRepository<T extends AggregateRoot> extends Repository<T> {
 
 	List<String> persist(List<T> insert, List<Map.Entry<T, T>> update, List<T> delete) throws SQLException;
 
