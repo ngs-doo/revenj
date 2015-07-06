@@ -2,10 +2,7 @@ package org.revenj.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.InjectableValues;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import org.revenj.patterns.Serialization;
@@ -26,7 +23,8 @@ class JsonSerialization implements Serialization<String> {
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 				.setInjectableValues(new InjectableValues.Std().addValue("__locator", locator))
 				.registerModule(new Jdk8Module())
-				.registerModule(new JSR310Module());
+				.registerModule(new JSR310Module())
+				.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 	}
 
 	byte[] serializeToBytes(Object value) throws IOException {
