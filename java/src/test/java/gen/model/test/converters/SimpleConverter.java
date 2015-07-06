@@ -54,9 +54,9 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		
 		
 			
-		gen.model.test.Simple.configureConverter(readers, __index___number, __index___text);
+		gen.model.test.Simple.__configureConverter(readers, __index___number, __index___text);
 			
-		gen.model.test.Simple.configureConverterExtended(readersExtended, __index__extended_number, __index__extended_text);
+		gen.model.test.Simple.__configureConverterExtended(readersExtended, __index__extended_number, __index__extended_text);
 	}
 
 	@Override

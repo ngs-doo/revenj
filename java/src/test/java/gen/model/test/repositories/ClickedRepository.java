@@ -55,7 +55,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"URI\" FROM \"test\".\"submit_Clicked\"(?)")) {
 			String[] result = new String[domainEvents.size()];
 			org.revenj.postgres.PostgresWriter sw = new org.revenj.postgres.PostgresWriter();
-			org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(domainEvents, converter);
+			org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(domainEvents, converter::to);
 			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 			pgo.setType("\"test\".\"Clicked_event\"[]");
 			tuple.buildTuple(sw, false);

@@ -1,14 +1,14 @@
-package gen.model.test.repositories;
+package gen.model.Seq.repositories;
 
 
 
-public class CompositeRepository   implements org.revenj.patterns.Repository<gen.model.test.Composite>, org.revenj.patterns.PersistableRepository<gen.model.test.Composite> {
+public class NextRepository   implements org.revenj.patterns.Repository<gen.model.Seq.Next>, org.revenj.patterns.PersistableRepository<gen.model.Seq.Next> {
 	
 	
 	
-	public CompositeRepository(
+	public NextRepository(
 			 final java.sql.Connection connection,
-			 final org.revenj.postgres.ObjectConverter<gen.model.test.Composite> converter,
+			 final org.revenj.postgres.ObjectConverter<gen.model.Seq.Next> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
 		
@@ -20,19 +20,19 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 	}
 
 	private final java.sql.Connection connection;
-	private final org.revenj.postgres.ObjectConverter<gen.model.test.Composite> converter;
+	private final org.revenj.postgres.ObjectConverter<gen.model.Seq.Next> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
-	public CompositeRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.resolve(locator), locator);
+	public NextRepository(org.revenj.patterns.ServiceLocator locator) {
+		this(locator.resolve(java.sql.Connection.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.Seq.Next>>(){}.resolve(locator), locator);
 	}
 	
 	@Override
-	public java.util.List<gen.model.test.Composite> find(String[] uris) {
+	public java.util.List<gen.model.Seq.Next> find(String[] uris) {
 		try (java.sql.Statement statement = connection.createStatement()) {
-			java.util.ArrayList<gen.model.test.Composite> result = new java.util.ArrayList<>(uris.length);
+			java.util.ArrayList<gen.model.Seq.Next> result = new java.util.ArrayList<>(uris.length);
 			org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator::resolve);
-			StringBuilder sb = new StringBuilder("SELECT r FROM \"test\".\"Composite_entity\" r WHERE r.\"id\" IN (");
+			StringBuilder sb = new StringBuilder("SELECT r FROM \"Seq\".\"Next_entity\" r WHERE r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
@@ -50,23 +50,26 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 	
 	@Override
 	public java.util.List<String> persist(
-			java.util.List<gen.model.test.Composite> insert,
-			java.util.List<java.util.Map.Entry<gen.model.test.Composite, gen.model.test.Composite>> update,
-			java.util.List<gen.model.test.Composite> delete) throws java.sql.SQLException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"test\".\"persist_Composite\"(?, ?, ?, ?)")) {
+			java.util.List<gen.model.Seq.Next> insert,
+			java.util.List<java.util.Map.Entry<gen.model.Seq.Next, gen.model.Seq.Next>> update,
+			java.util.List<gen.model.Seq.Next> delete) throws java.sql.SQLException {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"Seq\".\"persist_Next\"(?, ?, ?, ?)")) {
 			java.util.List<String> result;
 			org.revenj.postgres.PostgresWriter sw = new org.revenj.postgres.PostgresWriter();
 			if (insert != null && !insert.isEmpty()) {
+		
+				if (assignSequenceID == null) throw new RuntimeException("Next repository has not been properly set up. Static __setupSequenceID method not called");
+				assignSequenceID.accept(insert, connection);
 				result = new java.util.ArrayList<>(insert.size());
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
-				pgo.setType("\"test\".\"Composite_entity\"[]");
+				pgo.setType("\"Seq\".\"Next_entity\"[]");
 				tuple.buildTuple(sw, false);
 				pgo.setValue(sw.toString());
 				sw.reset();
 				statement.setObject(1, pgo);
-				for (gen.model.test.Composite it : insert) {
-					String uri = gen.model.test.converters.CompositeConverter.buildURI(sw.tmp, it.getId());
+				for (gen.model.Seq.Next it : insert) {
+					String uri = gen.model.Seq.converters.NextConverter.buildURI(sw.tmp, it.getID());
 					result.add(uri);
 				}
 			} else {
@@ -74,11 +77,11 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 				result = new java.util.ArrayList<>(0);
 			}
 			if (update != null && !update.isEmpty()) {
-				java.util.List<gen.model.test.Composite> oldUpdate = new java.util.ArrayList<>(update.size());
-				java.util.List<gen.model.test.Composite> newUpdate = new java.util.ArrayList<>(update.size());
+				java.util.List<gen.model.Seq.Next> oldUpdate = new java.util.ArrayList<>(update.size());
+				java.util.List<gen.model.Seq.Next> newUpdate = new java.util.ArrayList<>(update.size());
 				java.util.Map<String, Integer> missing = new java.util.HashMap<>();
 				int cnt = 0;
-				for (java.util.Map.Entry<gen.model.test.Composite, gen.model.test.Composite> it : update) {
+				for (java.util.Map.Entry<gen.model.Seq.Next, gen.model.Seq.Next> it : update) {
 					oldUpdate.add(it.getKey());
 					if (it.getKey() == null) {
 						missing.put(it.getValue().getURI(), cnt);
@@ -87,8 +90,8 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 					cnt++;
 				}
 				if (!missing.isEmpty()) {
-					java.util.List<gen.model.test.Composite> found = find(missing.keySet().toArray(new String[missing.size()]));
-					for (gen.model.test.Composite it : found) {
+					java.util.List<gen.model.Seq.Next> found = find(missing.keySet().toArray(new String[missing.size()]));
+					for (gen.model.Seq.Next it : found) {
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
@@ -96,8 +99,8 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
 				org.postgresql.util.PGobject pgNew = new org.postgresql.util.PGobject();
-				pgOld.setType("\"test\".\"Composite_entity\"[]");
-				pgNew.setType("\"test\".\"Composite_entity\"[]");
+				pgOld.setType("\"Seq\".\"Next_entity\"[]");
+				pgNew.setType("\"Seq\".\"Next_entity\"[]");
 				tupleOld.buildTuple(sw, false);
 				pgOld.setValue(sw.toString());
 				sw.reset();
@@ -113,7 +116,7 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 			if (delete != null && !delete.isEmpty()) {
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(delete, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
-				pgo.setType("\"test\".\"Composite_entity\"[]");
+				pgo.setType("\"Seq\".\"Next_entity\"[]");
 				tuple.buildTuple(sw, false);
 				pgo.setValue(sw.toString());
 				statement.setObject(4, pgo);
@@ -131,4 +134,10 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 		}
 	}
 
+	
+	public static void __setupSequenceID(java.util.function.BiConsumer<java.util.List<gen.model.Seq.Next>, java.sql.Connection> sequence) {
+		assignSequenceID = sequence;
+	}
+
+	private static java.util.function.BiConsumer<java.util.List<gen.model.Seq.Next>, java.sql.Connection> assignSequenceID;
 }

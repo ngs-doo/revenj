@@ -2,6 +2,7 @@ package org.revenj.server.servlet;
 
 import org.revenj.Revenj;
 import org.revenj.patterns.Container;
+import org.revenj.patterns.ServiceLocator;
 import org.revenj.server.ProcessingEngine;
 
 import javax.servlet.ServletContext;
@@ -22,8 +23,12 @@ public class Application implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		ServletContext context = sce.getServletContext();
-		context.addServlet("crud", new CrudServlet(container)).addMapping("/Crud.svc/*");
-		context.addServlet("domain", new DomainServlet(container)).addMapping("/Domain.svc/*");
+		configure(context, container);
+	}
+
+	public static void configure(ServletContext context, ServiceLocator locator) {
+		context.addServlet("crud", new CrudServlet(locator)).addMapping("/Crud.svc/*");
+		context.addServlet("domain", new DomainServlet(locator)).addMapping("/Domain.svc/*");
 	}
 
 	@Override

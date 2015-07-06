@@ -57,11 +57,22 @@ public final class Simple   implements java.io.Serializable {
 		return "Simple(" + number + ',' + text + ')';
 	}
 	
+	@com.fasterxml.jackson.annotation.JsonCreator private Simple(
+			@com.fasterxml.jackson.annotation.JsonProperty("_helper") final boolean _helper ,
+			@com.fasterxml.jackson.annotation.JsonProperty("number") final int number,
+			@com.fasterxml.jackson.annotation.JsonProperty("text") final String text) {
+		
+		this.number = number;
+		this.text = text == null ? "" : text;
+	}
+
+	
 	private static final long serialVersionUID = 0x0097000a;
 	
 	private int number;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("number")
 	public int getNumber()  {
 		
 		return number;
@@ -79,6 +90,7 @@ public final class Simple   implements java.io.Serializable {
 	private String text;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("text")
 	public String getText()  {
 		
 		return text;
@@ -100,15 +112,15 @@ public final class Simple   implements java.io.Serializable {
 		}
 	}
 
-	public static void configureConverter(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index___number, int __index___text) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index___number, int __index___text) {
 		
 		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.IntConverter.parse(reader); };
-		readers[__index___text] = (item, reader, context) -> { item.text = org.revenj.postgres.converters.StringConverter.parse(reader, context); };
+		readers[__index___text] = (item, reader, context) -> { item.text = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 	}
 	
-	public static void configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index__extended_number, int __index__extended_text) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index__extended_number, int __index__extended_text) {
 		
 		readers[__index__extended_number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.IntConverter.parse(reader); };
-		readers[__index__extended_text] = (item, reader, context) -> { item.text = org.revenj.postgres.converters.StringConverter.parse(reader, context); };
+		readers[__index__extended_text] = (item, reader, context) -> { item.text = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 	}
 }

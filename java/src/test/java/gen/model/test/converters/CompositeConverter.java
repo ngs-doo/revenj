@@ -48,16 +48,25 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		column = columnsExtended.stream().filter(it -> "simple".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'simple' column in test Composite. Check if DB is in sync");
 		__index__extended_simple = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "entities".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entities' column in test Composite_entity. Check if DB is in sync");
+		__index___entities = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "entities".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entities' column in test Composite. Check if DB is in sync");
+		__index__extended_entities = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		__converter_simple = locator.resolve(gen.model.test.converters.SimpleConverter.class);
+		__converter_entities = locator.resolve(gen.model.test.converters.EntityConverter.class);
 		
 			
-		gen.model.test.Composite.configureConverter(readers, __index___id, __converter_simple, __index___simple);
+		gen.model.test.Composite.__configureConverter(readers, __index___id, __converter_simple, __index___simple, __converter_entities, __index___entities);
 			
-		gen.model.test.Composite.configureConverterExtended(readersExtended, __index__extended_id, __converter_simple, __index__extended_simple);
+		gen.model.test.Composite.__configureConverterExtended(readersExtended, __index__extended_id, __converter_simple, __index__extended_simple, __converter_entities, __index__extended_entities);
 	}
 
 	@Override
@@ -79,6 +88,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		
 		items[__index___id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
 		items[__index___simple] = __converter_simple.to(instance.getSimple());
+		items[__index___entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
 		return RecordTuple.from(items);
 	}
 
@@ -88,6 +98,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		
 		items[__index__extended_id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
 		items[__index__extended_simple] = __converter_simple.toExtended(instance.getSimple());
+		items[__index__extended_entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
 		return RecordTuple.from(items);
 	}
 
@@ -126,4 +137,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 	private gen.model.test.converters.SimpleConverter __converter_simple;
 	private final int __index___simple;
 	private final int __index__extended_simple;
+	private gen.model.test.converters.EntityConverter __converter_entities;
+	private final int __index___entities;
+	private final int __index__extended_entities;
 }

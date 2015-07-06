@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public final class Clicked   implements java.io.Serializable {
+public final class Clicked   implements java.io.Serializable, org.revenj.patterns.DomainEvent {
 	
 	
 	
@@ -32,6 +32,7 @@ public final class Clicked   implements java.io.Serializable {
 	private String URI;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("URI")
 	public String getURI()  {
 		
 		return this.URI;
@@ -41,6 +42,7 @@ public final class Clicked   implements java.io.Serializable {
 	private java.time.LocalDateTime ProcessedAt;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("ProcessedAt")
 	public java.time.LocalDateTime getProcessedAt()  {
 		
 		return this.ProcessedAt;
@@ -50,6 +52,7 @@ public final class Clicked   implements java.io.Serializable {
 	private java.time.LocalDateTime QueuedAt;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("QueuedAt")
 	public java.time.LocalDateTime getQueuedAt()  {
 		
 		return this.QueuedAt;
@@ -85,6 +88,7 @@ public final class Clicked   implements java.io.Serializable {
 	private java.time.LocalDate date;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("date")
 	public java.time.LocalDate getDate()  {
 		
 		return date;
@@ -102,6 +106,7 @@ public final class Clicked   implements java.io.Serializable {
 	private java.math.BigDecimal number;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("number")
 	public java.math.BigDecimal getNumber()  {
 		
 		return number;
@@ -120,6 +125,7 @@ public final class Clicked   implements java.io.Serializable {
 	private Long bigint;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("bigint")
 	public Long getBigint()  {
 		
 		return bigint;
@@ -137,6 +143,7 @@ public final class Clicked   implements java.io.Serializable {
 	private java.util.Set<Boolean> bool;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("bool")
 	public java.util.Set<Boolean> getBool()  {
 		
 		return bool;
@@ -153,19 +160,38 @@ public final class Clicked   implements java.io.Serializable {
 	}
 
 	
+	@com.fasterxml.jackson.annotation.JsonCreator private Clicked(
+			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
+			@com.fasterxml.jackson.annotation.JsonProperty("ProcessedAt") final java.time.LocalDateTime ProcessedAt,
+			@com.fasterxml.jackson.annotation.JsonProperty("QueuedAt") final java.time.LocalDateTime QueuedAt,
+			@com.fasterxml.jackson.annotation.JsonProperty("date") final java.time.LocalDate date,
+			@com.fasterxml.jackson.annotation.JsonProperty("number") final java.math.BigDecimal number,
+			@com.fasterxml.jackson.annotation.JsonProperty("bigint") final Long bigint,
+			@com.fasterxml.jackson.annotation.JsonProperty("bool") final java.util.Set<Boolean> bool) {
+		this.URI = URI != null ? URI : "new " + new java.util.UUID(0L, 0L).toString();
+		this.ProcessedAt = ProcessedAt == null ? null : ProcessedAt;
+		this.QueuedAt = QueuedAt == null ? null : QueuedAt;
+		this.date = date;
+		this.number = number == null ? java.math.BigDecimal.ZERO : number;
+		this.bigint = bigint;
+		this.bool = bool == null ? new java.util.HashSet<Boolean>(4) : bool;
+	}
+
+	
 	public Clicked(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Clicked> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 	}
 
-	public static void configureConverter(org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers, int __index____event_id, int __index___QueuedAt, int __index___ProcessedAt, int __index___date, int __index___number, int __index___bigint) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers, int __index____event_id, int __index___QueuedAt, int __index___ProcessedAt, int __index___date, int __index___number, int __index___bigint, int __index___bool) {
 		
-		readers[__index____event_id] = (item, reader, context) -> { item.URI = org.revenj.postgres.converters.StringConverter.parse(reader, context); };
+		readers[__index____event_id] = (item, reader, context) -> { item.URI = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index___QueuedAt] = (item, reader, context) -> { item.QueuedAt = org.revenj.postgres.converters.TimestampConverter.parse(reader, context, false); };
 		readers[__index___ProcessedAt] = (item, reader, context) -> { item.ProcessedAt = org.revenj.postgres.converters.TimestampConverter.parse(reader, context, true); };
 		readers[__index___date] = (item, reader, context) -> { item.date = org.revenj.postgres.converters.DateConverter.parse(reader, true); };
 		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
 		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };
+		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) item.bool = new java.util.HashSet<Boolean>(__list); else item.bool = new java.util.HashSet<Boolean>(4); }; };
 	}
 }

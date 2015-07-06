@@ -64,13 +64,13 @@ namespace Revenj.DatabasePersistence.Postgres
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var espaced = cur != '{';
-			if (espaced)
+			var escaped = cur != '{';
+			if (escaped)
 				reader.Read(context);
 			cur = reader.Peek();
 			if (cur == '}')
 			{
-				if (espaced)
+				if (escaped)
 					reader.Read(context + 2);
 				else
 					reader.Read(2);
@@ -89,7 +89,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				}
 				else
 				{
-					var escaped = cur != '(';
+					escaped = cur != '(';
 					if (escaped)
 						reader.Read(arrayContext);
 					list.Add(parseItem(reader, 0, recordContext, locator));
@@ -99,7 +99,7 @@ namespace Revenj.DatabasePersistence.Postgres
 						cur = reader.Read();
 				}
 			}
-			if (espaced)
+			if (escaped)
 				reader.Read(context + 1);
 			else
 				reader.Read();

@@ -1,6 +1,7 @@
 package org.revenj;
 
 import gen.model.Boot;
+import gen.model.Seq.Next;
 import gen.model.test.Clicked;
 import gen.model.test.Composite;
 import gen.model.test.Simple;
@@ -10,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.Container;
 import org.revenj.patterns.DomainEventStore;
+import org.revenj.patterns.Generic;
 import org.revenj.patterns.PersistableRepository;
 
 import java.io.IOException;
@@ -65,5 +67,19 @@ public class TestRepository {
 		Assert.assertEquals(cl.getBigint(), cl2.getBigint());
 		Assert.assertEquals(cl.getDate(), cl2.getDate());
 		Assert.assertEquals(cl.getNumber(), cl2.getNumber());
+	}
+
+	@Test
+	public void sequenceTest() throws IOException, SQLException {
+		Container locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
+		}.resolve(locator);
+		Next next = new Next();
+		int id = next.getID();
+		String uri = repository.insert(next);
+		Assert.assertNotEquals(id, next.getID());
+		Optional<Next> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals(next.getID(), found.get().getID());
 	}
 }

@@ -1,10 +1,13 @@
 package org.revenj.postgres.converters;
 
-import org.revenj.postgres.ObjectConverter;
+import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 public class ArrayTuple extends PostgresTuple {
 	public static final PostgresTuple EMPTY;
@@ -83,7 +86,7 @@ public class ArrayTuple extends PostgresTuple {
 		return true;
 	}
 
-	public static <T> PostgresTuple create(T[] elements, ObjectConverter<T> converter) {
+	public static <T> PostgresTuple create(T[] elements, Function<T, PostgresTuple> converter) {
 		if (elements == null) {
 			return null;
 		} else if (elements.length == 0) {
@@ -91,12 +94,12 @@ public class ArrayTuple extends PostgresTuple {
 		}
 		PostgresTuple[] tuples = new PostgresTuple[elements.length];
 		for (int i = 0; i < elements.length; i++) {
-			tuples[i] = converter.to(elements[i]);
+			tuples[i] = converter.apply(elements[i]);
 		}
 		return new ArrayTuple(tuples);
 	}
 
-	public static <T> PostgresTuple create(List<T> elements, ObjectConverter<T> converter) {
+	public static <T> PostgresTuple create(List<T> elements, Function<T, PostgresTuple> converter) {
 		if (elements == null) {
 			return null;
 		} else if (elements.isEmpty()) {
@@ -104,12 +107,12 @@ public class ArrayTuple extends PostgresTuple {
 		}
 		PostgresTuple[] tuples = new PostgresTuple[elements.size()];
 		for (int i = 0; i < elements.size(); i++) {
-			tuples[i] = converter.to(elements.get(i));
+			tuples[i] = converter.apply(elements.get(i));
 		}
 		return new ArrayTuple(tuples);
 	}
 
-	public static <T> PostgresTuple create(Collection<T> elements, ObjectConverter<T> converter) {
+	public static <T> PostgresTuple create(Collection<T> elements, Function<T, PostgresTuple> converter) {
 		if (elements == null) {
 			return null;
 		}
@@ -119,9 +122,60 @@ public class ArrayTuple extends PostgresTuple {
 		PostgresTuple[] tuples = new PostgresTuple[elements.size()];
 		int i = 0;
 		for (T t : elements) {
-			tuples[i++] = converter.to(t);
+			tuples[i++] = converter.apply(t);
 		}
 		return new ArrayTuple(tuples);
+	}
+
+	public interface RecordParser<T> {
+		T parse(PostgresReader reader, int context) throws IOException;
+	}
+
+	public static <T> List<T> parse(PostgresReader reader, int context, RecordParser<T> converter) throws IOException {
+		int cur = reader.read();
+		if (cur == ',' || cur == ')') {
+			return null;
+		}
+		boolean escaped = cur != '{';
+		if (escaped) {
+			reader.read(context);
+		}
+		cur = reader.peek();
+		if (cur == '}') {
+			if (escaped) {
+				reader.read(context + 2);
+			} else {
+				reader.read(2);
+			}
+			return new ArrayList<>(0);
+		}
+		List<T> list = new ArrayList<>();
+		int arrayContext = Math.max(context << 1, 1);
+		//int recordContext = arrayContext << 1;
+		while (cur != -1 && cur != '}') {
+			cur = reader.read();
+			if (cur == 'N') {
+				cur = reader.read(4);
+				list.add(null);
+			} else {
+				escaped = cur != '(';
+				if (escaped) {
+					reader.read(arrayContext);
+				}
+				list.add(converter.parse(reader, arrayContext));
+				if (escaped) {
+					cur = reader.read(arrayContext + 1);
+				} else {
+					cur = reader.read();
+				}
+			}
+		}
+		if (escaped) {
+			reader.read(context + 1);
+		} else {
+			reader.read();
+		}
+		return list;
 	}
 
 	public void buildTuple(PostgresWriter sw, boolean quote) {

@@ -47,13 +47,17 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 		column = columns.stream().filter(it -> "bigint".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'bigint' column in test Clicked_event. Check if DB is in sync");
 		__index___bigint = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "bool".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'bool' column in test Clicked_event. Check if DB is in sync");
+		__index___bool = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		
 			
-		gen.model.test.Clicked.configureConverter(readers, __index____event_id, __index___QueuedAt, __index___ProcessedAt, __index___date, __index___number, __index___bigint);
+		gen.model.test.Clicked.__configureConverter(readers, __index____event_id, __index___QueuedAt, __index___ProcessedAt, __index___date, __index___number, __index___bigint, __index___bool);
 	}
 
 	@Override
@@ -78,6 +82,7 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 		items[__index___date] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getDate());
 		items[__index___number] = org.revenj.postgres.converters.DecimalConverter.toTuple(instance.getNumber());
 		items[__index___bigint] = org.revenj.postgres.converters.LongConverter.toTuple(instance.getBigint());
+		items[__index___bool] = org.revenj.postgres.converters.ArrayTuple.create(instance.getBool(), it -> org.revenj.postgres.converters.BoolConverter.toTuple(it));
 		return RecordTuple.from(items);
 	}
 
@@ -106,4 +111,5 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 	private final int __index___date;
 	private final int __index___number;
 	private final int __index___bigint;
+	private final int __index___bool;
 }

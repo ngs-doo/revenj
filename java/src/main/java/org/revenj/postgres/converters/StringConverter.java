@@ -49,10 +49,10 @@ public abstract class StringConverter {
 		}
 	}
 
-	public static String parse(PostgresReader reader, int context) throws IOException {
+	public static String parse(PostgresReader reader, int context, boolean allowNulls) throws IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') {
-			return null;
+			return allowNulls ? null : "";
 		}
 		if (cur != '"' && cur != '\\') {
 			reader.initBuffer((char) cur);
