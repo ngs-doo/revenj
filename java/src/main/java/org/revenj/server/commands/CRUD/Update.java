@@ -29,13 +29,14 @@ public final class Update implements ServerCommand {
 			this.Data = data;
 		}
 
+		@SuppressWarnings("unused")
 		private Argument() {
 		}
 	}
 
 	@Override
 	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
-		Argument arg;
+		Argument<TInput> arg;
 		try {
 			Type genericType = Utility.makeGenericType(Argument.class, data.getClass());
 			arg = (Argument) input.deserialize(genericType, data);
@@ -53,7 +54,7 @@ public final class Update implements ServerCommand {
 		}
 		AggregateRoot instance;
 		try {
-			instance = (AggregateRoot) input.deserialize(manifest.get(), (TInput) arg.Data);
+			instance = (AggregateRoot) input.deserialize(manifest.get(), arg.Data);
 		} catch (IOException e) {
 			return CommandResult.badRequest("Error deserializing provided input for: " + arg.Name + ". Reason: " + e.getMessage());
 		}

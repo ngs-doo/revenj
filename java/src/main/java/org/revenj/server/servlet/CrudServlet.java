@@ -3,7 +3,6 @@ package org.revenj.server.servlet;
 import org.revenj.patterns.DomainModel;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.patterns.WireSerialization;
-import org.revenj.server.CommandResult;
 import org.revenj.server.ProcessingEngine;
 import org.revenj.server.commands.CRUD.Create;
 import org.revenj.server.commands.CRUD.Delete;
@@ -15,13 +14,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class CrudServlet extends HttpServlet {
-
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private final DomainModel model;
 	private final ProcessingEngine engine;
@@ -57,28 +53,9 @@ public class CrudServlet extends HttpServlet {
 		return Optional.of(call.apply(name, uri));
 	}
 
-	private void execute(HttpServletResponse res, Class<?> command, Object argument) {
-		CommandResult<String> result = engine.executeJson(command, argument);
-		res.setStatus(result.status);
-		if (result.data != null) {
-			res.setContentType("application/json");
-			try {
-				res.getOutputStream().write(result.data.getBytes(UTF8));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else if (result.message != null) {
-			try {
-				res.getOutputStream().write(result.message.getBytes(UTF8));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		check(req, res, Read.Argument::new).ifPresent(arg -> execute(res, Read.class, arg));
+		check(req, res, Read.Argument::new).ifPresent(arg -> Utility.executeJson(engine, res, Read.class, arg));
 	}
 
 	@Override
@@ -95,7 +72,7 @@ public class CrudServlet extends HttpServlet {
 			return;
 		}
 		Object instance = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
-		execute(res, Create.class, new Create.Argument<>(name, instance));
+		Utility.executeJson(engine, res, Create.class, new Create.Argument<>(name, instance));
 	}
 
 	@Override
@@ -117,11 +94,11 @@ public class CrudServlet extends HttpServlet {
 			return;
 		}
 		Object instance = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
-		execute(res, Update.class, new Update.Argument<>(name, uri, instance));
+		Utility.executeJson(engine, res, Update.class, new Update.Argument<>(name, uri, instance));
 	}
 
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		check(req, res, Delete.Argument::new).ifPresent(arg -> execute(res, Delete.class, arg));
+		check(req, res, Delete.Argument::new).ifPresent(arg -> Utility.executeJson(engine, res, Delete.class, arg));
 	}
 }

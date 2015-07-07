@@ -27,6 +27,90 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 		this(locator.resolve(java.sql.Connection.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.Seq.Next>>(){}.resolve(locator), locator);
 	}
 	
+	//@Override
+	private java.util.stream.Stream<gen.model.Seq.Next> stream(java.util.Optional<org.revenj.patterns.Specification<gen.model.Seq.Next>> filter) {
+		throw new UnsupportedOperationException();
+	}
+
+	private java.util.ArrayList<gen.model.Seq.Next> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.Seq.Next> result) throws java.sql.SQLException, java.io.IOException {
+		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator::resolve);
+		try (java.sql.ResultSet rs = statement.executeQuery()) {
+			while (rs.next()) {
+				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
+				reader.process(pgo.getValue());
+				result.add(converter.from(reader));
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public java.util.List<gen.model.Seq.Next> search(java.util.Optional<org.revenj.patterns.Specification<gen.model.Seq.Next>> filter, java.util.Optional<Integer> limit, java.util.Optional<Integer> offset) {
+		String sql = null;
+		if (filter == null || !filter.isPresent() || filter.get() == null) {
+			sql = "SELECT r FROM \"Seq\".\"Next_entity\" r";
+			if (limit != null && limit.isPresent() && limit.get() != null) {
+				sql += " LIMIT " + Integer.toString(limit.get());
+			}
+			if (offset != null && offset.isPresent() && offset.get() != null) {
+				sql += " OFFSET " + Integer.toString(offset.get());
+			}
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				return readFromDb(statement, new java.util.ArrayList<>());
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		org.revenj.patterns.Specification<gen.model.Seq.Next> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		org.revenj.postgres.PostgresWriter pgWriter = new org.revenj.postgres.PostgresWriter();
+		
+		
+		if (specification instanceof gen.model.Seq.Next.BetweenIds) {
+			gen.model.Seq.Next.BetweenIds spec = (gen.model.Seq.Next.BetweenIds)specification;
+			sql = "SELECT it FROM \"Seq\".\"Next.BetweenIds\"(?, ?) it";
+			
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					if (spec.getMin() == null) ps.setNull(1, java.sql.Types.INTEGER); 
+					else ps.setInt(1, spec.getMin());
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					ps.setInt(2, spec.getMax());
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+		if (sql != null) {
+			if (limit != null && limit.isPresent() && limit.get() != null) {
+				sql += " LIMIT " + Integer.toString(limit.get());
+			}
+			if (offset != null && offset.isPresent() && offset.get() != null) {
+				sql += " OFFSET " + Integer.toString(offset.get());
+			}
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				applyFilters.accept(statement);
+				return readFromDb(statement, new java.util.ArrayList<>());
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		java.util.stream.Stream<gen.model.Seq.Next> stream = stream(filter);
+		if (offset != null && offset.isPresent() && offset.get() != null) {
+			stream = stream.skip(offset.get());
+		}
+		if (limit != null && limit.isPresent() && limit.get() != null) {
+			stream = stream.limit(limit.get());
+		}
+		return stream.collect(java.util.stream.Collectors.toList());
+	}
+
+	
 	@Override
 	public java.util.List<gen.model.Seq.Next> find(String[] uris) {
 		try (java.sql.Statement statement = connection.createStatement()) {

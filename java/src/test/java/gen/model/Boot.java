@@ -5,7 +5,6 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 
 	public static org.revenj.patterns.ServiceLocator configure(String jdbcUrl) throws java.io.IOException {
 		java.util.Properties properties = new java.util.Properties();
-		properties.setProperty("namespace", "gen.model");
 		java.io.File revProps = new java.io.File("revenj.properties");
 		if (revProps.exists() && revProps.isFile()) {
 			properties.load(new java.io.FileReader(revProps));
@@ -14,6 +13,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 	}
 
 	public static org.revenj.patterns.ServiceLocator configure(String jdbcUrl, java.util.Properties properties) throws java.io.IOException {
+		properties.setProperty("namespace", "gen.model");
 		java.util.function.Function<org.revenj.patterns.ServiceLocator, java.sql.Connection> factory = c -> {
 			try {
 				return java.sql.DriverManager.getConnection(jdbcUrl, properties);
@@ -79,17 +79,23 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		test$converter$CompositeConverter.configure(container);
 		
 		container.register(gen.model.test.repositories.CompositeRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
+		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 		test$converter$EntityConverter.configure(container);
 		test$converter$ClickedConverter.configure(container);
 		
 		container.register(gen.model.test.repositories.ClickedRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
+		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventStore<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
 		Seq$converter$NextConverter.configure(container);
 		gen.model.Seq.Next.__setupSequenceID();
 		
 		container.register(gen.model.Seq.repositories.NextRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
+		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);

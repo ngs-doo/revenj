@@ -97,11 +97,13 @@ public abstract class Revenj {
 			loader = classLoader.isPresent()
 					? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader.get())
 					: new URLClassLoader(urls.toArray(new URL[urls.size()]));
+		} else if (classLoader.isPresent()) {
+			loader = classLoader.get();
 		} else {
 			loader = ClassLoader.getSystemClassLoader();
 		}
 		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class, loader);
-		return setup(connectionFactory, properties, classLoader, aspects.iterator());
+		return setup(connectionFactory, properties, Optional.of(loader), aspects.iterator());
 	}
 
 	private static class SimpleDomainModel implements DomainModel {

@@ -10,10 +10,7 @@ import gen.model.test.repositories.CompositeRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.patterns.DomainEventStore;
-import org.revenj.patterns.Generic;
-import org.revenj.patterns.PersistableRepository;
-import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -82,5 +79,54 @@ public class TestRepository {
 		Optional<Next> found = repository.find(uri);
 		Assert.assertTrue(found.isPresent());
 		Assert.assertEquals(next.getID(), found.get().getID());
+	}
+
+	@Test
+	public void simpleRootSearch() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
+		}.resolve(locator);
+		Next next = new Next();
+		int id = next.getID();
+		String uri = repository.insert(next);
+		List<Next> found = repository.search(1);
+		Assert.assertEquals(1, found.size());
+	}
+
+	@Test
+	public void simpleEventSearch() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
+		Clicked cl1 = new Clicked().setBigint(Long.MIN_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
+		Clicked cl2 = new Clicked().setBigint(Long.MAX_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
+		String[] uris = store.submit(Arrays.asList(cl1, cl2));
+		Assert.assertEquals(2, uris.length);
+		List<Clicked> found = store.search(2);
+		Assert.assertEquals(2, found.size());
+	}
+
+	@Test
+	public void specificationRootSearch() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
+		}.resolve(locator);
+		String uri = repository.insert(new Next());
+		int id = Integer.parseInt(uri);
+		List<Next> found = repository.search(new Next.BetweenIds(id, id));
+		Assert.assertEquals(1, found.size());
+	}
+
+	@Test
+	public void specificationEventSearch() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
+		Random rnd = new Random();
+		Long rndLong = rnd.nextLong();
+		BigDecimal rndDecimal = BigDecimal.valueOf(rnd.nextDouble());
+		Clicked cl = new Clicked().setBigint(rndLong).setDate(LocalDate.now()).setNumber(rndDecimal);
+		String[] uris = store.submit(Arrays.asList(cl));
+		Assert.assertEquals(1, uris.length);
+		List<Clicked> found = store.search(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal)));
+		Assert.assertEquals(1, found.size());
 	}
 }

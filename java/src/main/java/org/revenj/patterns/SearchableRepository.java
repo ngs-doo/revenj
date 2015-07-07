@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface StreamRepository<TSource> {
-	Stream<TSource> stream(Optional<Specification<TSource>> specification);
+public interface SearchableRepository<TSource> {
+	//TODO: soon
+	/*Stream<TSource> stream(Optional<Specification<TSource>> specification);
 
 	default Stream<TSource> stream() {
 		return stream(Optional.<Specification<TSource>>empty());
-	}
+	}*/
 
 	List<TSource> search(
 			Optional<Specification<TSource>> specification,

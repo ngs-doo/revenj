@@ -1,8 +1,6 @@
 package org.revenj.server.commands;
 
-import org.revenj.patterns.PersistableRepository;
-import org.revenj.patterns.Repository;
-import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.*;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -48,7 +46,15 @@ public abstract class Utility {
 		return (Repository) locator.resolve(new GenericType(Repository.class, manifest));
 	}
 
+	public static SearchableRepository resolveSearchRepository(ServiceLocator locator, Class<?> manifest) throws ReflectiveOperationException {
+		return (SearchableRepository) locator.resolve(new GenericType(SearchableRepository.class, manifest));
+	}
+
 	public static PersistableRepository resolvePersistableRepository(ServiceLocator locator, Class<?> manifest) throws ReflectiveOperationException {
 		return (PersistableRepository) locator.resolve(new GenericType(PersistableRepository.class, manifest));
+	}
+
+	public static DomainEventStore resolveEventStore(ServiceLocator locator, Class<?> manifest) throws ReflectiveOperationException {
+		return (DomainEventStore) locator.resolve(new GenericType(DomainEventStore.class, manifest));
 	}
 }

@@ -7,6 +7,9 @@ module test {
 		uuid id;
 		Simple simple;
 		List<Entity> entities;
+		specification ForSimple 'it => it.simple.number == simple.number' {
+			Simple simple;
+		}
 	}
 	entity Entity {
 		money money;
@@ -18,8 +21,18 @@ module test {
 		decimal number;
 		long? bigint;
 		Set<bool> bool;
+
+		specification BetweenNumbers 'it => it.number >= min && inSet.Contains(it.number)' {
+			decimal min;
+			Set<decimal> inSet;
+		}
 	}
 }
 module Seq {
-	root Next;
+	root Next {
+		specification BetweenIds 'it => min == null || it.ID >= min.Value && it.ID <= max' {
+			int? min;
+			int max;
+		}
+	}
 }

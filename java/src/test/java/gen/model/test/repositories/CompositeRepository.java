@@ -27,6 +27,89 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 		this(locator.resolve(java.sql.Connection.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.resolve(locator), locator);
 	}
 	
+	//@Override
+	private java.util.stream.Stream<gen.model.test.Composite> stream(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.Composite>> filter) {
+		throw new UnsupportedOperationException();
+	}
+
+	private java.util.ArrayList<gen.model.test.Composite> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.Composite> result) throws java.sql.SQLException, java.io.IOException {
+		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator::resolve);
+		try (java.sql.ResultSet rs = statement.executeQuery()) {
+			while (rs.next()) {
+				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
+				reader.process(pgo.getValue());
+				result.add(converter.from(reader));
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public java.util.List<gen.model.test.Composite> search(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.Composite>> filter, java.util.Optional<Integer> limit, java.util.Optional<Integer> offset) {
+		String sql = null;
+		if (filter == null || !filter.isPresent() || filter.get() == null) {
+			sql = "SELECT r FROM \"test\".\"Composite_entity\" r";
+			if (limit != null && limit.isPresent() && limit.get() != null) {
+				sql += " LIMIT " + Integer.toString(limit.get());
+			}
+			if (offset != null && offset.isPresent() && offset.get() != null) {
+				sql += " OFFSET " + Integer.toString(offset.get());
+			}
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				return readFromDb(statement, new java.util.ArrayList<>());
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		org.revenj.patterns.Specification<gen.model.test.Composite> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		org.revenj.postgres.PostgresWriter pgWriter = new org.revenj.postgres.PostgresWriter();
+		
+		
+		if (specification instanceof gen.model.test.Composite.ForSimple) {
+			gen.model.test.Composite.ForSimple spec = (gen.model.test.Composite.ForSimple)specification;
+			sql = "SELECT it FROM \"test\".\"Composite.ForSimple\"(?) it";
+			
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					
+				gen.model.test.converters.SimpleConverter __converter = locator.resolve(gen.model.test.converters.SimpleConverter.class);
+				org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+				__pgo.setType("\"test\".\"Simple\"");
+				pgWriter.reset();
+				__converter.to(spec.getSimple()).buildTuple(pgWriter, false);
+				__pgo.setValue(pgWriter.toString());
+				ps.setObject(1, __pgo);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+		if (sql != null) {
+			if (limit != null && limit.isPresent() && limit.get() != null) {
+				sql += " LIMIT " + Integer.toString(limit.get());
+			}
+			if (offset != null && offset.isPresent() && offset.get() != null) {
+				sql += " OFFSET " + Integer.toString(offset.get());
+			}
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				applyFilters.accept(statement);
+				return readFromDb(statement, new java.util.ArrayList<>());
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		java.util.stream.Stream<gen.model.test.Composite> stream = stream(filter);
+		if (offset != null && offset.isPresent() && offset.get() != null) {
+			stream = stream.skip(offset.get());
+		}
+		if (limit != null && limit.isPresent() && limit.get() != null) {
+			stream = stream.limit(limit.get());
+		}
+		return stream.collect(java.util.stream.Collectors.toList());
+	}
+
+	
 	@Override
 	public java.util.List<gen.model.test.Composite> find(String[] uris) {
 		try (java.sql.Statement statement = connection.createStatement()) {

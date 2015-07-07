@@ -1,30 +1,30 @@
-package org.revenj.server.commands.CRUD;
+package org.revenj.server.commands;
 
 import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
-import org.revenj.server.commands.Utility;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.sql.SQLException;
 import java.util.Optional;
 
-public final class Create implements ServerCommand {
+public class SubmitEvent implements ServerCommand {
 
 	private final DomainModel domainModel;
 
-	public Create(DomainModel domainModel) {
+	public SubmitEvent(DomainModel domainModel) {
 		this.domainModel = domainModel;
 	}
 
 	public static final class Argument<TFormat> {
 		public String Name;
 		public TFormat Data;
+		public Boolean ReturnInstance;
 
-		public Argument(String name, TFormat data) {
+		public Argument(String name, TFormat data, Boolean returnInstance) {
 			this.Name = name;
 			this.Data = data;
+			this.ReturnInstance = returnInstance;
 		}
 
 		@SuppressWarnings("unused")
@@ -46,25 +46,21 @@ public final class Create implements ServerCommand {
 			return CommandResult.badRequest("Unable to find specified domain object: " + arg.Name);
 		}
 		if (arg.Data == null) {
-			return CommandResult.badRequest("Data to create not specified.");
+			return CommandResult.badRequest("Data to submit not specified.");
 		}
-		AggregateRoot instance;
+		DomainEvent instance;
 		try {
-			instance = (AggregateRoot)input.deserialize(manifest.get(), arg.Data);
+			instance = (DomainEvent) input.deserialize(manifest.get(), arg.Data);
 		} catch (IOException e) {
 			return CommandResult.badRequest("Error deserializing provided input for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
-		PersistableRepository repository;
+		DomainEventStore store;
 		try {
-			repository = Utility.resolvePersistableRepository(locator, manifest.get());
+			store = Utility.resolveEventStore(locator, manifest.get());
 		} catch (ReflectiveOperationException e) {
-			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
+			return CommandResult.badRequest("Error resolving event store for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
-		try {
-			String uri = repository.insert(instance);
-			return new CommandResult<>(output.serialize(uri), "Object created", 201);
-		} catch (SQLException e) {
-			return CommandResult.badRequest(e.getMessage());
-		}
+		String uri = store.submit(instance);
+		return new CommandResult<>(Boolean.TRUE.equals(arg.ReturnInstance) ? output.serialize(store) : output.serialize(uri), "Event stored", 201);
 	}
 }

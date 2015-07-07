@@ -28,6 +28,7 @@ public final class Read implements ServerCommand {
 			this.Uri = uri;
 		}
 
+		@SuppressWarnings("unused")
 		private Argument() {
 		}
 	}

@@ -3,7 +3,7 @@ package org.revenj.patterns;
 import java.util.List;
 import java.util.Optional;
 
-public interface Repository<T extends Identifiable> {
+public interface Repository<T extends Identifiable> extends SearchableRepository<T> {
 	List<T> find(String[] uris);
 
 	default List<T> find(List<String> uris) {

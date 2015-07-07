@@ -15,5 +15,13 @@ public interface WireSerialization {
 
 	Object deserialize(Type type, InputStream stream, String accept) throws IOException;
 
+	default <T> T deserialize(Class<T> manifest, Bytes data, String accept) throws IOException {
+		return (T) deserialize((Type)manifest, data, accept);
+	}
+
+	default <T> T deserialize(Class<T> manifest, InputStream stream, String accept) throws IOException {
+		return (T) deserialize((Type)manifest, stream, accept);
+	}
+
 	<TFormat> Optional<Serialization<TFormat>> find(Class<TFormat> format);
 }

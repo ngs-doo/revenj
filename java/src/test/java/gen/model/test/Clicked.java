@@ -160,6 +160,70 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	}
 
 	
+
+public static class BetweenNumbers   implements java.io.Serializable, org.revenj.patterns.Specification<Clicked> {
+	
+	
+	
+	public BetweenNumbers(
+			 final java.math.BigDecimal min,
+			 final java.util.Set<java.math.BigDecimal> inSet) {
+			
+		setMin(min);
+		setInSet(inSet);
+	}
+
+	
+	
+	public BetweenNumbers() {
+			
+		this.min = java.math.BigDecimal.ZERO;
+		this.inSet = new java.util.HashSet<java.math.BigDecimal>(4);
+	}
+
+	private static final long serialVersionUID = 0x0097000a;
+	
+	private java.math.BigDecimal min;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("min")
+	public java.math.BigDecimal getMin()  {
+		
+		return min;
+	}
+
+	
+	public BetweenNumbers setMin(final java.math.BigDecimal value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"min\" cannot be null!");
+		this.min = value;
+		
+		return this;
+	}
+
+	
+	private java.util.Set<java.math.BigDecimal> inSet;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("inSet")
+	public java.util.Set<java.math.BigDecimal> getInSet()  {
+		
+		return inSet;
+	}
+
+	
+	public BetweenNumbers setInSet(final java.util.Set<java.math.BigDecimal> value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"inSet\" cannot be null!");
+		org.revenj.Guards.checkNulls(value);
+		this.inSet = value;
+		
+		return this;
+	}
+
+}
+
+	
 	@com.fasterxml.jackson.annotation.JsonCreator private Clicked(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JsonProperty("ProcessedAt") final java.time.LocalDateTime ProcessedAt,

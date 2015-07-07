@@ -8,6 +8,7 @@ public interface Serialization<TFormat> {
 
 	Object deserialize(Type type, TFormat data) throws IOException;
 
+	@SuppressWarnings("unchecked")
 	default <T> T deserialize(Class<T> manifest, TFormat data) throws IOException {
 		return (T) deserialize((Type) manifest, data);
 	}

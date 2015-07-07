@@ -110,6 +110,66 @@ public class Next   implements java.io.Serializable, org.revenj.patterns.Aggrega
 		gen.model.Seq.repositories.NextRepository.__setupSequenceID(assignSequence);
 	}
 	
+
+public static class BetweenIds   implements java.io.Serializable, org.revenj.patterns.Specification<Next> {
+	
+	
+	
+	public BetweenIds(
+			 final Integer min,
+			 final int max) {
+			
+		setMin(min);
+		setMax(max);
+	}
+
+	
+	
+	public BetweenIds() {
+			
+		this.max = 0;
+	}
+
+	private static final long serialVersionUID = 0x0097000a;
+	
+	private Integer min;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("min")
+	public Integer getMin()  {
+		
+		return min;
+	}
+
+	
+	public BetweenIds setMin(final Integer value) {
+		
+		this.min = value;
+		
+		return this;
+	}
+
+	
+	private int max;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("max")
+	public int getMax()  {
+		
+		return max;
+	}
+
+	
+	public BetweenIds setMax(final int value) {
+		
+		this.max = value;
+		
+		return this;
+	}
+
+}
+
+	
 	public Next(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Next>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Next> rdr : readers) {
 			rdr.read(this, reader, context);

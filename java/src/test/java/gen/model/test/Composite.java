@@ -154,6 +154,47 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 	}
 
 	
+
+public static class ForSimple   implements java.io.Serializable, org.revenj.patterns.Specification<Composite> {
+	
+	
+	
+	public ForSimple(
+			 final gen.model.test.Simple simple) {
+			
+		setSimple(simple);
+	}
+
+	
+	
+	public ForSimple() {
+			
+		this.simple = new gen.model.test.Simple();
+	}
+
+	private static final long serialVersionUID = 0x0097000a;
+	
+	private gen.model.test.Simple simple;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("simple")
+	public gen.model.test.Simple getSimple()  {
+		
+		return simple;
+	}
+
+	
+	public ForSimple setSimple(final gen.model.test.Simple value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"simple\" cannot be null!");
+		this.simple = value;
+		
+		return this;
+	}
+
+}
+
+	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
