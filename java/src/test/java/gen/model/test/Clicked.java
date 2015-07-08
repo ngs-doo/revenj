@@ -10,7 +10,8 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 			 final java.time.LocalDate date,
 			 final java.math.BigDecimal number,
 			 final Long bigint,
-			 final java.util.Set<Boolean> bool) {
+			 final java.util.Set<Boolean> bool,
+			 final gen.model.test.En en) {
 			
 		setDate(date);
 		setNumber(number);
@@ -18,6 +19,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 		setBigint(bigint);
 		setBool(bool);
 		this.bool = new java.util.HashSet<Boolean>(4);
+		setEn(en);
 	}
 
 	
@@ -160,6 +162,24 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	}
 
 	
+	private gen.model.test.En en;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("en")
+	public gen.model.test.En getEn()  {
+		
+		return en;
+	}
+
+	
+	public Clicked setEn(final gen.model.test.En value) {
+		
+		this.en = value;
+		
+		return this;
+	}
+
+	
 
 public static class BetweenNumbers   implements java.io.Serializable, org.revenj.patterns.Specification<Clicked> {
 	
@@ -167,10 +187,12 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 	
 	public BetweenNumbers(
 			 final java.math.BigDecimal min,
-			 final java.util.Set<java.math.BigDecimal> inSet) {
+			 final java.util.Set<java.math.BigDecimal> inSet,
+			 final gen.model.test.En en) {
 			
 		setMin(min);
 		setInSet(inSet);
+		setEn(en);
 	}
 
 	
@@ -221,6 +243,24 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		return this;
 	}
 
+	
+	private gen.model.test.En en;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("en")
+	public gen.model.test.En getEn()  {
+		
+		return en;
+	}
+
+	
+	public BetweenNumbers setEn(final gen.model.test.En value) {
+		
+		this.en = value;
+		
+		return this;
+	}
+
 }
 
 	
@@ -231,7 +271,8 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 			@com.fasterxml.jackson.annotation.JsonProperty("date") final java.time.LocalDate date,
 			@com.fasterxml.jackson.annotation.JsonProperty("number") final java.math.BigDecimal number,
 			@com.fasterxml.jackson.annotation.JsonProperty("bigint") final Long bigint,
-			@com.fasterxml.jackson.annotation.JsonProperty("bool") final java.util.Set<Boolean> bool) {
+			@com.fasterxml.jackson.annotation.JsonProperty("bool") final java.util.Set<Boolean> bool,
+			@com.fasterxml.jackson.annotation.JsonProperty("en") final gen.model.test.En en) {
 		this.URI = URI != null ? URI : "new " + new java.util.UUID(0L, 0L).toString();
 		this.ProcessedAt = ProcessedAt == null ? null : ProcessedAt;
 		this.QueuedAt = QueuedAt == null ? null : QueuedAt;
@@ -239,6 +280,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.number = number == null ? java.math.BigDecimal.ZERO : number;
 		this.bigint = bigint;
 		this.bool = bool == null ? new java.util.HashSet<Boolean>(4) : bool;
+		this.en = en;
 	}
 
 	
@@ -248,7 +290,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		}
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers, int __index____event_id, int __index___QueuedAt, int __index___ProcessedAt, int __index___date, int __index___number, int __index___bigint, int __index___bool) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers, int __index____event_id, int __index___QueuedAt, int __index___ProcessedAt, int __index___date, int __index___number, int __index___bigint, int __index___bool, int __index___en) {
 		
 		readers[__index____event_id] = (item, reader, context) -> { item.URI = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index___QueuedAt] = (item, reader, context) -> { item.QueuedAt = org.revenj.postgres.converters.TimestampConverter.parse(reader, context, false); };
@@ -257,5 +299,6 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
 		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };
 		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) item.bool = new java.util.HashSet<Boolean>(__list); else item.bool = new java.util.HashSet<Boolean>(4); }; };
+		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 	}
 }

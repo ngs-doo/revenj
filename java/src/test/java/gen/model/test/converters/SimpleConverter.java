@@ -48,15 +48,31 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		column = columnsExtended.stream().filter(it -> "text".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'text' column in test Simple. Check if DB is in sync");
 		__index__extended_text = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "en".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'en' column in test Simple. Check if DB is in sync");
+		__index___en = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "en".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'en' column in test Simple. Check if DB is in sync");
+		__index__extended_en = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "en2".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'en2' column in test Simple. Check if DB is in sync");
+		__index___en2 = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "en2".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'en2' column in test Simple. Check if DB is in sync");
+		__index__extended_en2 = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		
 			
-		gen.model.test.Simple.__configureConverter(readers, __index___number, __index___text);
+		gen.model.test.Simple.__configureConverter(readers, __index___number, __index___text, __index___en, __index___en2);
 			
-		gen.model.test.Simple.__configureConverterExtended(readersExtended, __index__extended_number, __index__extended_text);
+		gen.model.test.Simple.__configureConverterExtended(readersExtended, __index__extended_number, __index__extended_text, __index__extended_en, __index__extended_en2);
 	}
 
 	@Override
@@ -78,6 +94,8 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		
 		items[__index___number] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getNumber());
 		items[__index___text] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getText());
+		items[__index___en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
+		items[__index___en2] = gen.model.test.converters.EnConverter.toTuple(instance.getEn2());
 		return RecordTuple.from(items);
 	}
 
@@ -87,6 +105,8 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		
 		items[__index__extended_number] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getNumber());
 		items[__index__extended_text] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getText());
+		items[__index__extended_en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
+		items[__index__extended_en2] = gen.model.test.converters.EnConverter.toTuple(instance.getEn2());
 		return RecordTuple.from(items);
 	}
 
@@ -117,4 +137,8 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 	private final int __index__extended_number;
 	private final int __index___text;
 	private final int __index__extended_text;
+	private final int __index___en;
+	private final int __index__extended_en;
+	private final int __index___en2;
+	private final int __index__extended_en2;
 }

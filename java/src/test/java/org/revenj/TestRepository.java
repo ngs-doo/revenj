@@ -4,12 +4,12 @@ import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.test.Clicked;
 import gen.model.test.Composite;
+import gen.model.test.En;
 import gen.model.test.Simple;
 import gen.model.test.repositories.ClickedRepository;
 import gen.model.test.repositories.CompositeRepository;
 import org.junit.Assert;
 import org.junit.Test;
-import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 
 import java.io.IOException;
@@ -87,8 +87,7 @@ public class TestRepository {
 		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
 		}.resolve(locator);
 		Next next = new Next();
-		int id = next.getID();
-		String uri = repository.insert(next);
+		repository.insert(next);
 		List<Next> found = repository.search(1);
 		Assert.assertEquals(1, found.size());
 	}
@@ -123,10 +122,10 @@ public class TestRepository {
 		Random rnd = new Random();
 		Long rndLong = rnd.nextLong();
 		BigDecimal rndDecimal = BigDecimal.valueOf(rnd.nextDouble());
-		Clicked cl = new Clicked().setBigint(rndLong).setDate(LocalDate.now()).setNumber(rndDecimal);
-		String[] uris = store.submit(Arrays.asList(cl));
+		Clicked cl = new Clicked().setBigint(rndLong).setDate(LocalDate.now()).setNumber(rndDecimal).setEn(En.B);
+		String[] uris = store.submit(Collections.singletonList(cl));
 		Assert.assertEquals(1, uris.length);
-		List<Clicked> found = store.search(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal)));
+		List<Clicked> found = store.search(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal), En.B));
 		Assert.assertEquals(1, found.size());
 	}
 }

@@ -2,9 +2,13 @@ module test {
 	value Simple {
 		int number;
 		text text;
+		En? en;
+		En en2;
 	}
+	enum En { A; B; }
 	root Composite(id) {
 		uuid id;
+		En[] enn;
 		Simple simple;
 		List<Entity> entities;
 		specification ForSimple 'it => it.simple.number == simple.number' {
@@ -21,10 +25,12 @@ module test {
 		decimal number;
 		long? bigint;
 		Set<bool> bool;
+		En? en;
 
-		specification BetweenNumbers 'it => it.number >= min && inSet.Contains(it.number)' {
+		specification BetweenNumbers 'it => it.number >= min && inSet.Contains(it.number) && it.en == en' {
 			decimal min;
 			Set<decimal> inSet;
+			En? en;
 		}
 	}
 }

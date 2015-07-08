@@ -68,7 +68,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 		
 		if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
 			gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
-			sql = "SELECT it FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?) it";
+			sql = "SELECT it FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
 			
 			applyFilters = applyFilters.andThen(ps -> {
 				try {
@@ -84,6 +84,19 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 					int __ind = 0;
 					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
 					ps.setArray(2, connection.createArrayOf("numeric", __arr));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
+				else {
+					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+					__pgo.setType("\"test\".\"En\"");
+					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
+					ps.setObject(3, __pgo);
+				}
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}

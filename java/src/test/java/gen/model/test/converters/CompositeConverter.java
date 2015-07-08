@@ -41,6 +41,14 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'id' column in test Composite. Check if DB is in sync");
 		__index__extended_id = (int)column.get().order - 1;
 			
+		column = columns.stream().filter(it -> "enn".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'enn' column in test Composite_entity. Check if DB is in sync");
+		__index___enn = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "enn".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'enn' column in test Composite. Check if DB is in sync");
+		__index__extended_enn = (int)column.get().order - 1;
+			
 		column = columns.stream().filter(it -> "simple".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'simple' column in test Composite_entity. Check if DB is in sync");
 		__index___simple = (int)column.get().order - 1;
@@ -64,9 +72,9 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		__converter_entities = locator.resolve(gen.model.test.converters.EntityConverter.class);
 		
 			
-		gen.model.test.Composite.__configureConverter(readers, __index___id, __converter_simple, __index___simple, __converter_entities, __index___entities);
+		gen.model.test.Composite.__configureConverter(readers, __index___id, __index___enn, __converter_simple, __index___simple, __converter_entities, __index___entities);
 			
-		gen.model.test.Composite.__configureConverterExtended(readersExtended, __index__extended_id, __converter_simple, __index__extended_simple, __converter_entities, __index__extended_entities);
+		gen.model.test.Composite.__configureConverterExtended(readersExtended, __index__extended_id, __index__extended_enn, __converter_simple, __index__extended_simple, __converter_entities, __index__extended_entities);
 	}
 
 	@Override
@@ -87,6 +95,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
 		items[__index___id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
+		items[__index___enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), it -> gen.model.test.converters.EnConverter.toTuple(it));
 		items[__index___simple] = __converter_simple.to(instance.getSimple());
 		items[__index___entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
 		return RecordTuple.from(items);
@@ -97,6 +106,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
 		items[__index__extended_id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
+		items[__index__extended_enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), it -> gen.model.test.converters.EnConverter.toTuple(it));
 		items[__index__extended_simple] = __converter_simple.toExtended(instance.getSimple());
 		items[__index__extended_entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
 		return RecordTuple.from(items);
@@ -134,6 +144,8 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 	}
 	private final int __index___id;
 	private final int __index__extended_id;
+	private final int __index___enn;
+	private final int __index__extended_enn;
 	private gen.model.test.converters.SimpleConverter __converter_simple;
 	private final int __index___simple;
 	private final int __index__extended_simple;

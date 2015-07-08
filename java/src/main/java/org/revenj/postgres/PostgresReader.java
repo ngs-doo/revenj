@@ -142,4 +142,12 @@ public class PostgresReader {
 		}
 		return true;
 	}
+
+	public int bufferHash() {
+		int len = positionInBuffer;
+		long hash = 0x811C9DC5;
+		for (int i = 0; i < len && i < buffer.length; i++)
+			hash = (hash ^ buffer[i]) * 0x1000193;
+		return (int)hash;
+	}
 }
