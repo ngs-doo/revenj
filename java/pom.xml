@@ -6,7 +6,7 @@
 	<artifactId>revenj</artifactId>
 	<name>Revenj</name>
 	<packaging>jar</packaging>
-	<version>0.1.3-BUILD-SNAPSHOT</version>
+	<version>0.1.4-BUILD-SNAPSHOT</version>
 	<properties>
 		<java-version>1.8</java-version>
 	</properties>

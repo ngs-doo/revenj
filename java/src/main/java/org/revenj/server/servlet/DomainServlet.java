@@ -1,12 +1,10 @@
 package org.revenj.server.servlet;
 
-import org.revenj.patterns.DomainEvent;
-import org.revenj.patterns.DomainModel;
-import org.revenj.patterns.ServiceLocator;
-import org.revenj.patterns.WireSerialization;
+import org.revenj.patterns.*;
 import org.revenj.server.ProcessingEngine;
 import org.revenj.server.commands.GetDomainObject;
 import org.revenj.server.commands.SubmitEvent;
+import org.revenj.server.commands.search.SearchDomainObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -37,7 +35,23 @@ public class DomainServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		res.setContentType("application/json");
+		String path = req.getPathInfo();
+		if (path.startsWith("/search/")) {
+			Optional<String> name = findType(path, "/search/", res);
+			if (name.isPresent()) {
+				String spec = req.getParameter("specification");
+				if (spec != null) {
+					res.sendError(405, "Parsing specification from URL argument not yet supported. Use PUT method instead");
+				} else {
+					Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
+					Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
+					SearchDomainObject.Argument arg = new SearchDomainObject.Argument(name.get(), null, null, offset, limit, null);
+					Utility.executeJson(engine, res, SearchDomainObject.class, arg);
+				}
+			}
+		} else {
+			res.sendError(405, "Unknown URL path: " + path);
+		}
 	}
 
 	@Override
@@ -57,12 +71,30 @@ public class DomainServlet extends HttpServlet {
 		} else if (path.startsWith("/search/")) {
 			Optional<String> name = findType(path, "/search/", res);
 			if (name.isPresent()) {
+				Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
+				Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
 				String spec = req.getParameter("specification");
+				SearchDomainObject.Argument arg;
 				if (spec != null) {
-
+					Optional<Class<?>> specType = model.find(name.get() + "$" + spec);
+					if (!specType.isPresent()) {
+						specType = model.find(spec);
+					}
+					if (!specType.isPresent()) {
+						res.sendError(400, "Couldn't find specification: " + spec);
+						return;
+					}
+					try {
+						Specification specification = (Specification) serialization.deserialize(specType.get(), req.getInputStream(), req.getContentType());
+						arg = new SearchDomainObject.Argument(name.get(), null, specification, offset, limit, null);
+					} catch (IOException e) {
+						res.sendError(400, "Error deserializing specification. " + e.getMessage());
+						return;
+					}
 				} else {
-
+					arg = new SearchDomainObject.Argument(name.get(), null, null, offset, limit, null);
 				}
+				Utility.executeJson(engine, res, SearchDomainObject.class, arg);
 			}
 		} else if (path.startsWith("/count/")) {
 			Optional<String> name = findType(path, "/count/", res);

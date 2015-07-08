@@ -8,6 +8,9 @@ import org.revenj.server.commands.CRUD.Create;
 import org.revenj.server.commands.CRUD.Delete;
 import org.revenj.server.commands.CRUD.Read;
 import org.revenj.server.commands.CRUD.Update;
+import org.revenj.server.commands.GetDomainObject;
+import org.revenj.server.commands.SubmitEvent;
+import org.revenj.server.commands.search.SearchDomainObject;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -35,10 +38,14 @@ public class ProcessingEngine {
 				//TODO: forced add just for now
 				Container scope = container.createScope();
 				scope.register(Create.class, Read.class, Update.class, Delete.class);
+				scope.register(SearchDomainObject.class, GetDomainObject.class, SubmitEvent.class);
 				serverCommands.put(Create.class, scope.resolve(Create.class));
 				serverCommands.put(Read.class, scope.resolve(Read.class));
 				serverCommands.put(Update.class, scope.resolve(Update.class));
 				serverCommands.put(Delete.class, scope.resolve(Delete.class));
+				serverCommands.put(SearchDomainObject.class, scope.resolve(SearchDomainObject.class));
+				serverCommands.put(GetDomainObject.class, scope.resolve(GetDomainObject.class));
+				serverCommands.put(SubmitEvent.class, scope.resolve(SubmitEvent.class));
 				scope.close();
 			}
 		} else {
