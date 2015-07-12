@@ -48,11 +48,13 @@ namespace Revenj.Serialization
 				serializer.WriteObject(dw, value, GenericResolver);
 				dw.Flush();
 				cms.Position = 0;
-				var sr = cms.GetReader();
-				var doc = XElement.Load(sr);
-				if (type != declaredType || !(declaredType.IsClass || declaredType.IsValueType))
-					doc.Add(new XAttribute("type", type.FullName));
-				return doc;
+				using (var sr = new StreamReader(cms))
+				{
+					var doc = XElement.Load(sr);
+					if (type != declaredType || !(declaredType.IsClass || declaredType.IsValueType))
+						doc.Add(new XAttribute("type", type.FullName));
+					return doc;
+				}
 			}
 		}
 
