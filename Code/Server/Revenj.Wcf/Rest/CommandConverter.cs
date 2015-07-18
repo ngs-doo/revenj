@@ -57,7 +57,7 @@ namespace Revenj.Wcf
 			}
 			var stream = RestApplication.ExecuteCommands<object>(engine, Serialization, commands, accept);
 			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
-			ThreadContext.Response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
+			ThreadContext.Response.AddHeader("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
 			return stream;
 		}
 

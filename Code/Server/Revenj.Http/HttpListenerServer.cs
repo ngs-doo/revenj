@@ -12,15 +12,16 @@ using Revenj.Utility;
 
 namespace Revenj.Http
 {
-	public class HttpServer
+	internal sealed class HttpListenerServer
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
+		private static readonly string MissingBasicAuth = "Basic realm=\"" + Environment.MachineName + "\"";
 
 		private readonly HttpListener Listener;
 		private readonly Routes Routes;
 		private readonly HttpAuth Authentication;
 
-		public HttpServer(IServiceLocator locator)
+		public HttpListenerServer(IServiceLocator locator)
 		{
 			Listener = new HttpListener();
 			Listener.IgnoreWriteExceptions = true;
@@ -30,7 +31,7 @@ namespace Revenj.Http
 					Listener.Prefixes.Add(ConfigurationManager.AppSettings[key]);
 			}
 			if (Listener.Prefixes.Count == 0)
-				Listener.Prefixes.Add("http://*:80/");
+				Listener.Prefixes.Add("http://*:8999/");
 			Routes = new Routes(locator);
 			var customAuth = ConfigurationManager.AppSettings["CustomAuth"];
 			if (!string.IsNullOrEmpty(customAuth))
@@ -88,17 +89,17 @@ namespace Revenj.Http
 			try
 			{
 				RouteMatch match;
-				var route = Routes.Find(request, out match);
+				var route = Routes.Find(request.HttpMethod, request.RawUrl, request.Url.AbsolutePath, out match);
 				if (route != null)
 				{
-					var auth = Authentication.TryAuthorize(context, route);
+					var auth = Authentication.TryAuthorize(context.Request.Headers["Authorization"], context.Request.RawUrl, route);
 					if (auth.Principal != null)
 					{
-						var ctx = new HttpThreadContex(request, response, match);
+						var ctx = new HttpListenerContex(request, response, match, auth.Principal);
 						ThreadContext.Request = ctx;
 						ThreadContext.Response = ctx;
 						Thread.CurrentPrincipal = auth.Principal;
-						using (var stream = route.Handle(match.BoundVars, context))
+						using (var stream = route.Handle(match.BoundVars, context.Request.InputStream))
 						{
 							var cms = stream as ChunkedMemoryStream;
 							if (cms != null)
@@ -118,6 +119,11 @@ namespace Revenj.Http
 								response.ContentLength64 = 0;
 							}
 						}
+					}
+					else if (auth.SendAuthenticate)
+					{
+						context.Response.AddHeader("WWW-Authenticate", MissingBasicAuth);
+						ReturnError(response, (int)auth.ResponseCode, auth.Error);
 					}
 					else ReturnError(response, (int)auth.ResponseCode, auth.Error);
 				}

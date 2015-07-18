@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Security.Principal;
 using System.ServiceModel;
 using System.ServiceModel.Web;
+using System.Threading;
 using Revenj.Api;
 
 namespace Revenj.Wcf
@@ -23,6 +25,8 @@ namespace Revenj.Wcf
 		{
 			get { return OperationContext.Current.RequestContext.RequestMessage.Headers.To; }
 		}
+
+		public IPrincipal Principal { get { return Thread.CurrentPrincipal; } }
 
 		public override string ToString()
 		{

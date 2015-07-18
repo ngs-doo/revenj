@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 
 namespace Revenj.Utility
 {
@@ -49,6 +52,9 @@ namespace Revenj.Utility
 		private CustomWriter Writer;
 		private StreamReader Reader;
 		private BufferedTextReader BufferedReader;
+		private readonly bool IsShared;
+
+		private int BoundToThread;
 
 		/// <summary>
 		/// Create or get a new instance of memory stream
@@ -60,6 +66,9 @@ namespace Revenj.Utility
 			if (MemoryPool.TryPop(out stream))
 			{
 				CurrentEstimate--;
+				stream.CurrentPosition = 0;
+				stream.TotalSize = 0;
+				stream.BoundToThread = Thread.CurrentThread.ManagedThreadId;
 				stream.disposed = false;
 				return stream;
 			}
@@ -67,12 +76,29 @@ namespace Revenj.Utility
 			return new ChunkedMemoryStream();
 		}
 
+		public static ChunkedMemoryStream Static()
+		{
+			var cms = new ChunkedMemoryStream(new byte[BlockSize]);
+			cms.GetReader();
+			cms.GetWriter();
+			cms.UseBufferedReader(string.Empty);
+			return cms;
+		}
+
 		/// <summary>
 		/// Create new empty stream
 		/// </summary>
 		public ChunkedMemoryStream()
 		{
+			BoundToThread = Thread.CurrentThread.ManagedThreadId;
+			IsShared = false;
 			Blocks.Add(new byte[BlockSize]);
+		}
+
+		private ChunkedMemoryStream(byte[] block)
+		{
+			IsShared = true;
+			Blocks.Add(block);
 		}
 
 		class CustomWriter : StreamWriter
@@ -154,8 +180,7 @@ namespace Revenj.Utility
 				var block = Blocks[CurrentPosition >> BlockShift];
 				return block[CurrentPosition++ & BlockAnd];
 			}
-			else
-				return -1;
+			return -1;
 		}
 
 		/// <summary>
@@ -397,6 +422,15 @@ namespace Revenj.Utility
 			stream.Write(Blocks[total], 0, remaining);
 		}
 
+		public void Send(Socket socket)
+		{
+			var total = TotalSize >> BlockShift;
+			var remaining = TotalSize & BlockAnd;
+			for (int i = 0; i < total; i++)
+				socket.Send(Blocks[i]);
+			socket.Send(Blocks[total], remaining, SocketFlags.None);
+		}
+
 		/// <summary>
 		/// Reuse same text writer on this stream.
 		/// </summary>
@@ -450,23 +484,26 @@ namespace Revenj.Utility
 		bool disposed;
 
 		/// <summary>
-		/// Dispose current stream.
+		/// Close current stream.
 		/// Stream will be added to pool if required.
-		/// Used to reset position and length. Doesn't release allocated buffers
+		/// Doesn't release allocated buffers
 		/// </summary>
 		/// <param name="disposing"></param>
-		protected override void Dispose(bool disposing)
+		public override void Close()
 		{
-			base.Dispose(disposing);
-			if (disposing && !disposed)
+			if (disposed) return;
+			if (IsShared)
+			{
+				Writer.Flush();
+				Reader.DiscardBufferedData();
+			}
+			else if (BoundToThread == Thread.CurrentThread.ManagedThreadId)
 			{
 				disposed = true;
 				if (Writer != null)
 					Writer.Flush();
 				if (Reader != null)
 					Reader.DiscardBufferedData();
-				CurrentPosition = 0;
-				TotalSize = 0;
 				if (CurrentEstimate < SizeLimit || Blocks.Count > 10000)
 				{
 					MemoryPool.Push(this);
@@ -477,15 +514,26 @@ namespace Revenj.Utility
 		}
 
 		/// <summary>
+		/// Dispose current stream.
+		/// Stream will be added to pool if required.
+		/// Used to reset position and length. Doesn't release allocated buffers
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void Dispose(bool disposing) { }
+
+		/// <summary>
 		/// Show content of the stream as string
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString()
 		{
-			var cp = CurrentPosition;
-			var result = GetReader().ReadToEnd();
-			CurrentPosition = cp;
-			return result;
+			var sb = new StringBuilder(TotalSize);
+			var total = TotalSize >> BlockShift;
+			var remaining = TotalSize & BlockAnd;
+			for (int i = 0; i < total; i++)
+				sb.Append(Encoding.UTF8.GetString(Blocks[i]));
+			sb.Append(Encoding.UTF8.GetString(Blocks[total], 0, remaining));
+			return sb.ToString();
 		}
 	}
 }

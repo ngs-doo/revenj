@@ -23,7 +23,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var type = domainModel.Find(name);
 			if (type == null)
-				return "Can't find domain object: {0}".With(name);
+				return "Can't find domain object: " + name;
 			return type;
 		}
 
@@ -33,7 +33,7 @@ namespace Revenj.Plugins.Rest.Commands
 			if (name == null) return Either<Type>.Empty;
 			var type = name.Contains("+") ? domainModel.Find(name) : domainModel.Find(parentType.Result.FullName + "+" + name);
 			if (type == null)
-				return "Can't find domain object: {0}".With(name);
+				return "Can't find domain object: " + name;
 			return type;
 		}
 
@@ -41,9 +41,9 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var type = domainModel.Find(name);
 			if (type == null)
-				return "Can't find olap cube: {0}".With(name);
+				return "Can't find olap cube: " + name;
 			if (!typeof(IOlapCubeQuery).IsAssignableFrom(type))
-				return "{0} is not an olap cube.".With(name);
+				return name + " is not an olap cube.";
 			//TODO ugly hack. fix later
 			var prop = type.GetProperty("DataSource");
 			var source = prop != null ? (Type)prop.GetValue(null, null) : null;
@@ -56,7 +56,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var type = CheckDomainObject(domainModel, name);
 			if (type.IsSuccess && !typeof(IAggregateRoot).IsAssignableFrom(type.Result))
-				return "{0} is not an aggregate root".With(name);
+				return name + " is not an aggregate root";
 			return type;
 		}
 
@@ -64,7 +64,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var type = CheckDomainObject(domainModel, name);
 			if (type.IsSuccess && !typeof(IIdentifiable).IsAssignableFrom(type.Result))
-				return "{0} doesn't have URI".With(name);
+				return name + " doesn't have URI";
 			return type;
 		}
 
@@ -72,7 +72,7 @@ namespace Revenj.Plugins.Rest.Commands
 		{
 			var type = CheckDomainObject(domainModel, name);
 			if (type.IsSuccess && !typeof(IDomainEvent).IsAssignableFrom(type.Result))
-				return "{0} is not a domain event".With(name);
+				return name + " is not a domain event";
 			return type;
 		}
 
@@ -88,7 +88,7 @@ namespace Revenj.Plugins.Rest.Commands
 			{
 				return @"Sent data is not a valid Xml. 
 Set Content-type header to correct format or fix sent data.
-Error: {0}".With(ex.Message);
+Error: " + ex.Message;
 			}
 		}
 

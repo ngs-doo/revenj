@@ -73,7 +73,7 @@ namespace Revenj.Wcf
 				return new ExecuteResult { Error = Utility.ReturnError(first.Result.Message, first.Result.Status) };
 
 			foreach (var ar in result.ExecutedCommandResults.Skip(1))
-				ThreadContext.Response.Headers[ar.RequestID] = ar.Result.Data.ToString();
+				ThreadContext.Response.AddHeader(ar.RequestID, ar.Result.Data.ToString());
 
 			return new ExecuteResult { Result = first.Result.Data };
 		}
@@ -131,7 +131,7 @@ namespace Revenj.Wcf
 					break;
 			}
 			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
-			ThreadContext.Response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
+			ThreadContext.Response.AddHeader("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
 			return stream;
 		}
 

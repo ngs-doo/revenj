@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Web;
 
 namespace Revenj.Http
@@ -9,19 +8,19 @@ namespace Revenj.Http
 	{
 		internal readonly Dictionary<string, string> BoundVars;
 		private readonly Dictionary<string, string> QueryParams;
-		private readonly Uri Uri;
+		private readonly string RawUrl;
 
-		public RouteMatch(Dictionary<string, string> boundVars, Uri uri)
+		public RouteMatch(Dictionary<string, string> boundVars, string rawUrl)
 		{
 			this.BoundVars = boundVars;
-			this.Uri = uri;
+			this.RawUrl = rawUrl;
 		}
 
-		public RouteMatch(Dictionary<string, string> boundVars, Dictionary<string, string> queryParams, Uri uri)
+		public RouteMatch(Dictionary<string, string> boundVars, Dictionary<string, string> queryParams, string rawUrl)
 		{
 			this.BoundVars = boundVars;
 			this.QueryParams = queryParams;
-			this.Uri = uri;
+			this.RawUrl = rawUrl;
 		}
 
 		internal UriTemplateMatch CreateTemplateMatch()
@@ -31,31 +30,39 @@ namespace Revenj.Http
 			foreach (var kv in BoundVars)
 				bv.Add(kv.Key, kv.Value);
 			var rs = result.RelativePathSegments;
-			var segments = Uri.Segments;
-			for (int i = 2; i < segments.Length; i++)
-				rs.Add(segments[i]);
+			int pos = RawUrl.IndexOf('?');
+			var maxLen = pos != -1 ? pos : RawUrl.Length;
+			var nextSeg = RawUrl.IndexOf('/', 1);
+			while (nextSeg != -1)
+			{
+				var lastSeg = nextSeg;
+				nextSeg = RawUrl.IndexOf('/', nextSeg + 1);
+				if (nextSeg != -1 && nextSeg < maxLen)
+					rs.Add(RawUrl.Substring(lastSeg, nextSeg));
+				else
+					rs.Add(RawUrl.Substring(lastSeg, maxLen));
+			}
 			var qp = result.QueryParameters;
-			int pos = 1;
 			if (QueryParams != null)
 			{
 				foreach (var kv in QueryParams)
 					qp.Add(kv.Key, kv.Value);
+				return result;
 			}
-			else
+			if (pos != -1)
 			{
-				var query = Uri.Query;
-				var sbName = new StringBuilder();
-				var sbValue = new StringBuilder();
+				var query = RawUrl;
+				pos++;
 				while (pos < query.Length)
 				{
-					sbName.Length = 0;
-					sbValue.Length = 0;
-					while (pos < query.Length && query[pos] != '=') sbName.Append(query[pos++]);
+					int start = pos;
+					while (pos < query.Length && query[pos] != '=') pos++;
+					var key = HttpUtility.UrlDecode(query.Substring(start, pos - start));
 					pos++;
-					while (pos < query.Length && query[pos] != '&') sbValue.Append(query[pos++]);
-					pos++;					
-					var key = HttpUtility.UrlDecode(sbName.ToString());
-					var value = HttpUtility.UrlDecode(sbValue.ToString());
+					start = pos;
+					while (pos < query.Length && query[pos] != '&') pos++;
+					var value = HttpUtility.UrlDecode(query.Substring(start, pos - start));
+					pos++;
 					qp.Add(key, value);
 				}
 			}

@@ -75,14 +75,16 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="HttpServer.cs" />
+    <Compile Include="HttpListenerServer.cs" />
     <Compile Include="HttpService.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="HttpService.Designer.cs">
       <DependentUpon>HttpService.cs</DependentUpon>
     </Compile>
-    <Compile Include="HttpThreadContex.cs" />
+    <Compile Include="HttpSocketContext.cs" />
+    <Compile Include="HttpSocketServer.cs" />
+    <Compile Include="HttpListenerContex.cs" />
     <Compile Include="NoAuth.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="Program.cs" />

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -31,43 +29,45 @@ namespace Revenj.Http
 			Groups = TemplatePattern.GetGroupNumbers().Length;
 		}
 
-		public RouteMatch Match(string url, Uri uri)
+		public RouteMatch Match(string url, int offset)
 		{
-			if (!TemplatePattern.IsMatch(url))
+			if (!TemplatePattern.IsMatch(url, offset))
 				return null;
-			return ExtractMatch(url, uri);
+			return ExtractMatch(url, offset);
 		}
 
-		public RouteMatch ExtractMatch(string url, Uri uri)
+		private static Dictionary<string, string> Empty = new Dictionary<string, string>(0);
+
+		public RouteMatch ExtractMatch(string url, int offset)
 		{
-			var match = TemplatePattern.Match(url);
+			var match = TemplatePattern.Match(url, offset);
 			var boundVars = new Dictionary<string, string>(TokensCount);
 			var groups = match.Groups;
 			for (int i = 1; i < groups.Count; i++)
 				boundVars.Add(Tokens[i - 1], groups[i].Value);
 			if (groups.Count == TokensCount + 1)
-				return new RouteMatch(boundVars, uri);
-			int pos = 1;
-			var query = uri.Query;
-			var sbName = new StringBuilder();
-			var sbValue = new StringBuilder();
+				return new RouteMatch(boundVars, url);
+			int pos = url.IndexOf('?');
+			if (pos == -1)
+				return new RouteMatch(boundVars, Empty, url);
 			var queryParams = new Dictionary<string, string>();
-			while (pos < query.Length)
+			pos++;
+			while (pos < url.Length)
 			{
-				sbName.Length = 0;
-				sbValue.Length = 0;
-				while (pos < query.Length && query[pos] != '=') sbName.Append(query[pos++]);
+				int start = pos;
+				while (pos < url.Length && url[pos] != '=') pos++;
+				var key = HttpUtility.UrlDecode(url.Substring(start, pos - start));
 				pos++;
-				while (pos < query.Length && query[pos] != '&') sbValue.Append(query[pos++]);
+				start = pos;
+				while (pos < url.Length && url[pos] != '&') pos++;
+				var value = HttpUtility.UrlDecode(url.Substring(start, pos - start));
 				pos++;
-				var key = HttpUtility.UrlDecode(sbName.ToString());
-				var value = HttpUtility.UrlDecode(sbValue.ToString());
 				var upper = key.ToUpperInvariant();
 				if (TokenSet.Contains(upper))
 					boundVars.Add(upper, value);
 				queryParams.Add(key, value);
 			}
-			return new RouteMatch(boundVars, queryParams, uri);
+			return new RouteMatch(boundVars, queryParams, url);
 		}
 
 		private string BuildRegex(string template)

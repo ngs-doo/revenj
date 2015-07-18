@@ -18,9 +18,18 @@ namespace Revenj.Http
 					ConfigurationManager.AppSettings[name] = value;
 				}
 			}
-			var server = Platform.Start<HttpServer>();
+			var httpServer = ConfigurationManager.AppSettings["Revenj.HttpServer"];
 			Console.WriteLine("Starting server");
-			server.Run();
+			if (httpServer == "Socket")
+			{
+				var server = Platform.Start<HttpSocketServer>();
+				server.Run();
+			}
+			else
+			{
+				var server = Platform.Start<HttpListenerServer>();
+				server.Run();
+			}
 		}
 	}
 }

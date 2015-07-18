@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using System.Net;
 using System.ServiceModel.Web;
 using System.Xml.Linq;
 using Revenj.DomainPatterns;
@@ -83,27 +82,23 @@ namespace Revenj.Http
 				list.Add(handler);
 		}
 
-		public RouteHandler Find(HttpListenerRequest request, out RouteMatch routeMatch)
+		public RouteHandler Find(string httpMethod, string rawUrl, string absolutePath, out RouteMatch routeMatch)
 		{
-			var url = request.Url;
-			var rawUrl = request.RawUrl;
-			var reqId = request.HttpMethod + ":" + url.AbsolutePath;
+			var reqId = httpMethod + ":" + absolutePath;
 			RouteHandler handler;
-			string argUrl;
 			if (Cache.TryGetValue(reqId, out handler))
 			{
-				argUrl = rawUrl.Substring(handler.Service.Length);
-				routeMatch = handler.Pattern.ExtractMatch(argUrl, url);
+				routeMatch = handler.Pattern.ExtractMatch(rawUrl, handler.Service.Length);
 				return handler;
 			}
 			routeMatch = null;
 			Dictionary<string, List<RouteHandler>> handlers;
-			if (!MethodRoutes.TryGetValue(request.HttpMethod, out handlers))
+			if (!MethodRoutes.TryGetValue(httpMethod, out handlers))
 				return null;
-			if (request.Url.Segments.Length < 2)
+			if (rawUrl.IndexOf('/') == rawUrl.LastIndexOf('/'))
 				return null;
 			string service;
-			int pos = request.RawUrl.IndexOf('/', 1);
+			int pos = rawUrl.IndexOf('/', 1);
 			if (pos == -1)
 				service = rawUrl.ToLowerInvariant();
 			else
@@ -111,10 +106,9 @@ namespace Revenj.Http
 			List<RouteHandler> routes;
 			if (!handlers.TryGetValue(service, out routes))
 				return null;
-			argUrl = rawUrl.Substring(service.Length);
 			foreach (var h in routes)
 			{
-				var match = h.Pattern.Match(argUrl, url);
+				var match = h.Pattern.Match(rawUrl, service.Length);
 				if (match != null)
 				{
 					routeMatch = match;

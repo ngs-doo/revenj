@@ -28,7 +28,7 @@ namespace Revenj.Http
 
 		private void RunListener()
 		{
-			var server = Locator.Resolve<HttpServer>();
+			var server = Locator.Resolve<HttpListenerServer>();
 			server.Run();
 		}
 

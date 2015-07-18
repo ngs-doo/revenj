@@ -44,6 +44,7 @@ namespace Revenj.Plugins.Rest.Commands
 		}
 		public static Either<T> BadRequest(string message)
 		{
+			//TODO: throw exception instead!?
 			ThreadContext.Response.StatusCode = HttpStatusCode.BadRequest;
 			ThreadContext.Response.ContentType = "text/plain; charset=\"utf-8\"";
 			return new Either<T>(default(T), new MemoryStream(Encoding.UTF8.GetBytes(message)));

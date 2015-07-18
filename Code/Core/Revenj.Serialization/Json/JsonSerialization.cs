@@ -127,7 +127,6 @@ namespace Revenj.Serialization
 			if (jo != null)
 			{
 				jo.Serialize(sw, minimal, SharedSerializer.Serialize);
-				sw.Flush();
 			}
 			else
 			{
@@ -151,7 +150,6 @@ namespace Revenj.Serialization
 						}
 					}
 					sw.Write(']');
-					sw.Flush();
 				}
 				else if (value is IList<IJsonObject>)
 				{
@@ -173,7 +171,6 @@ namespace Revenj.Serialization
 						}
 					}
 					sw.Write(']');
-					sw.Flush();
 				}
 				else if (value is ICollection<IJsonObject>)
 				{
@@ -200,7 +197,6 @@ namespace Revenj.Serialization
 							sw.Write("null");
 					}
 					sw.Write(']');
-					sw.Flush();
 				}
 				else
 				{
@@ -209,6 +205,7 @@ namespace Revenj.Serialization
 					jw.Flush();
 				}
 			}
+			sw.Flush();
 		}
 
 		private static Dictionary<Type, IDeserializer> Cache = new Dictionary<Type, IDeserializer>(17);

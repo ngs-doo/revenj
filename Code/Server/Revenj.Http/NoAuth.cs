@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Security.Principal;
 using Revenj.Security;
 
@@ -13,7 +12,7 @@ namespace Revenj.Http
 
 		public NoAuth() : base(null, null, null) { }
 
-		public override AuthorizeOrError TryAuthorize(HttpListenerContext context, RouteHandler route)
+		public override AuthorizeOrError TryAuthorize(string authorization, string url, RouteHandler route)
 		{
 			return AuthorizeOrError.Success(Guest);
 		}

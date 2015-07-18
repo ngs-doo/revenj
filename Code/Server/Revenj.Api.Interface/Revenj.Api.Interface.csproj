@@ -61,6 +61,8 @@
     <Reference Include="System.ServiceModel.Web" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IResponseContext.cs" />
+    <Compile Include="IRequestContext.cs" />
     <Compile Include="ThreadContext.cs" />
     <Compile Include="Rest\ICommandConverter.cs" />
     <Compile Include="Rest\IRestApplication.cs" />

@@ -42,13 +42,13 @@ namespace Revenj.Http
 			Invocation = lambda.Compile();
 		}
 
-		public Stream Handle(Dictionary<string, string> boundVars, HttpListenerContext listener)
+		public Stream Handle(Dictionary<string, string> boundVars, Stream stream)
 		{
 			var args = new string[TotalParams];
 			foreach (var kv in boundVars)
 				args[ArgumentOrder[kv.Key]] = kv.Value;
 
-			return Invocation(args, listener.Request.InputStream);
+			return Invocation(args, stream);
 		}
 	}
 }

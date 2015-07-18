@@ -16,7 +16,6 @@ namespace Revenj.Http
 		protected readonly IAuthentication<byte[]> HashAuthentication;
 		protected static readonly HashSet<string> PublicUrl = new HashSet<string>();
 		protected static readonly HashSet<string> PublicTemplate = new HashSet<string>();
-		private static readonly string MissingBasicAuth = "Basic realm=\"" + Environment.MachineName + "\"";
 
 		static HttpAuth()
 		{
@@ -62,43 +61,45 @@ namespace Revenj.Http
 			public readonly IPrincipal Principal;
 			public readonly string Error;
 			public readonly HttpStatusCode ResponseCode;
+			public readonly bool SendAuthenticate;
 
-			private AuthorizeOrError(IPrincipal principal, string error, HttpStatusCode responseCode)
+			private AuthorizeOrError(IPrincipal principal, string error, HttpStatusCode responseCode, bool sendAuthenticate)
 			{
 				this.Principal = principal;
 				this.Error = error;
 				this.ResponseCode = responseCode;
+				this.SendAuthenticate = sendAuthenticate;
 			}
 
 			public static AuthorizeOrError Success(IPrincipal principal)
 			{
-				return new AuthorizeOrError(principal, null, HttpStatusCode.OK);
+				return new AuthorizeOrError(principal, null, HttpStatusCode.OK, false);
+			}
+
+			public static AuthorizeOrError Unauthorized(string error, bool sendAuthenticate)
+			{
+				return new AuthorizeOrError(null, error, HttpStatusCode.Unauthorized, sendAuthenticate);
 			}
 
 			public static AuthorizeOrError Fail(string error, HttpStatusCode response)
 			{
-				return new AuthorizeOrError(null, error, response);
+				return new AuthorizeOrError(null, error, response, false);
 			}
 		}
 
-		public virtual AuthorizeOrError TryAuthorize(HttpListenerContext context, RouteHandler route)
+		public virtual AuthorizeOrError TryAuthorize(string authorization, string url, RouteHandler route)
 		{
-			var request = context.Request;
-			var authorization = request.Headers["Authorization"] ?? DefaultAuthorization;
 			if (authorization == null)
-			{
-				context.Response.AddHeader("WWW-Authenticate", MissingBasicAuth);
-				return AuthorizeOrError.Fail("Authorization header not provided.", HttpStatusCode.Unauthorized);
-			}
+				return AuthorizeOrError.Unauthorized("Authorization header not provided.", true);
 
 			var splt = authorization.Split(' ');
 			var authType = splt[0];
 			if (splt.Length != 2)
-				return AuthorizeOrError.Fail("Invalid authorization header.", HttpStatusCode.Unauthorized);
+				return AuthorizeOrError.Unauthorized("Invalid authorization header.", false);
 
 			var cred = Encoding.UTF8.GetString(Convert.FromBase64String(splt[1])).Split(':');
 			if (cred.Length != 2)
-				return AuthorizeOrError.Fail("Invalid authorization header content.", HttpStatusCode.Unauthorized);
+				return AuthorizeOrError.Unauthorized("Invalid authorization header content.", false);
 
 			var user = cred[0];
 
@@ -112,7 +113,7 @@ namespace Revenj.Http
 			var identity = new RestIdentity(authType, isAuthenticated, user);
 			if (!identity.IsAuthenticated)
 			{
-				if ((PublicUrl.Contains(request.RawUrl)
+				if ((PublicUrl.Contains(url)
 					|| PublicTemplate.Contains(route.Template)))
 					return AuthorizeOrError.Success(PrincipalFactory.Create(identity));
 				return AuthorizeOrError.Fail("User {0} was not authenticated.".With(user), HttpStatusCode.Forbidden);
