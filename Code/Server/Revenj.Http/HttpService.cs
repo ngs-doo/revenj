@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 using System.ServiceProcess;
 using System.Threading;
 using DSL;
@@ -12,7 +13,7 @@ namespace Revenj.Http
 	partial class HttpService : ServiceBase
 	{
 		private Thread HttpThread;
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 
 		public HttpService()
 		{

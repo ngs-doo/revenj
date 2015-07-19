@@ -16,14 +16,14 @@ namespace Revenj.DatabasePersistence.Postgres
 {
 	public abstract class PostgresOlapCubeQuery<TSource> : IOlapCubeQuery
 	{
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly IDatabaseQuery DatabaseQuery;
 
 		protected abstract string Source { get; }
 		protected readonly Dictionary<string, Func<string, string>> CubeDimensions = new Dictionary<string, Func<string, string>>();
 		protected readonly Dictionary<string, Func<string, string>> CubeFacts = new Dictionary<string, Func<string, string>>();
 
-		protected PostgresOlapCubeQuery(IServiceLocator locator)
+		protected PostgresOlapCubeQuery(IServiceProvider locator)
 		{
 			Contract.Requires(locator != null);
 

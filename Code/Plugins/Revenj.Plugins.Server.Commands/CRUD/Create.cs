@@ -20,20 +20,16 @@ namespace Revenj.Plugins.Server.Commands
 	{
 		private static ConcurrentDictionary<Type, ICreateCommand> Cache = new ConcurrentDictionary<Type, ICreateCommand>(1, 127);
 
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public Create(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -71,7 +67,11 @@ namespace Revenj.Plugins.Server.Commands
 			}
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -110,7 +110,7 @@ Please check your arguments.".With(argument.Name), null);
 					command = Activator.CreateInstance(commandType) as ICreateCommand;
 					Cache.TryAdd(rootType, command);
 				}
-				var result = command.Create(input, output, Locator, argument.Data);
+				var result = command.Create(input, output, locator, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Created, result, "Object created");
 			}
@@ -129,7 +129,7 @@ Example argument:
 			TOutput Create<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TInput data);
 		}
 
@@ -139,7 +139,7 @@ Example argument:
 			public TOutput Create<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TInput data)
 			{
 				TRoot root;

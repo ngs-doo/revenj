@@ -1,10 +1,10 @@
+using System;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors;
-using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 
 namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
@@ -13,7 +13,7 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 	{
 		public static SqlCommandData GenerateSqlQuery(
 			QueryModel queryModel,
-			IServiceLocator locator,
+			IServiceProvider locator,
 			IOracleConverterFactory converterFactory,
 			IExtensibilityProvider extensibilityProvider)
 		{

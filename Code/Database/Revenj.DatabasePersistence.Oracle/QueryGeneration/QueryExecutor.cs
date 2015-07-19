@@ -14,18 +14,18 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 	public class QueryExecutor : IQueryExecutor
 	{
 		private readonly IDatabaseQuery DatabaseQuery;
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly IOracleConverterFactory ConverterFactory;
 		private readonly IExtensibilityProvider ExtensibilityProvider;
 
-		public QueryExecutor(IDatabaseQuery databaseQuery, IServiceLocator locator)
+		public QueryExecutor(IDatabaseQuery databaseQuery, IServiceProvider locator)
 			: this(databaseQuery, locator, locator.Resolve<IOracleConverterFactory>(), locator.Resolve<IExtensibilityProvider>())
 		{
 		}
 
 		public QueryExecutor(
 			IDatabaseQuery databaseQuery,
-			IServiceLocator locator,
+			IServiceProvider locator,
 			IOracleConverterFactory converterFactory,
 			IExtensibilityProvider extensibilityProvider)
 		{

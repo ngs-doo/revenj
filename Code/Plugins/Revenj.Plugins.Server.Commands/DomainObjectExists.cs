@@ -20,20 +20,16 @@ namespace Revenj.Plugins.Server.Commands
 	{
 		private static ConcurrentDictionary<Type, IExistsCommand> Cache = new ConcurrentDictionary<Type, IExistsCommand>(1, 127);
 
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public DomainObjectExists(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -60,7 +56,11 @@ namespace Revenj.Plugins.Server.Commands
 					});
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -69,7 +69,7 @@ namespace Revenj.Plugins.Server.Commands
 			try
 			{
 				var command = PrepareCommand(either.Argument.Name, either.Argument.SpecificationName);
-				var exists = command.CheckExists(input, Locator, either.Argument.Specification);
+				var exists = command.CheckExists(input, locator, either.Argument.Specification);
 				return CommandResult<TOutput>.Success(output.Serialize(exists), exists.ToString());
 			}
 			catch (ArgumentException ex)
@@ -111,11 +111,11 @@ Example argument:
 
 		private interface IExistsCommand
 		{
-			bool CheckExists<TInput>(ISerialization<TInput> input, IServiceLocator locator, TInput data);
-			bool CheckExists<TSpecification>(IServiceLocator locator, TSpecification specification);
+			bool CheckExists<TInput>(ISerialization<TInput> input, IServiceProvider locator, TInput data);
+			bool CheckExists<TSpecification>(IServiceProvider locator, TSpecification specification);
 		}
 
-		private static IQueryableRepository<T> GetRepository<T>(IServiceLocator locator)
+		private static IQueryableRepository<T> GetRepository<T>(IServiceProvider locator)
 			where T : IDataSource
 		{
 			try
@@ -133,7 +133,7 @@ Example argument:
 		{
 			public virtual bool CheckExists<TFormat>(
 				ISerialization<TFormat> serializer,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TFormat data)
 			{
 				var repository = GetRepository<TDomainObject>(locator);
@@ -168,7 +168,7 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 				return result.Any();
 			}
 
-			public bool CheckExists<TSpecification>(IServiceLocator locator, TSpecification specification)
+			public bool CheckExists<TSpecification>(IServiceProvider locator, TSpecification specification)
 			{
 				var repository = GetRepository<TDomainObject>(locator);
 				IQueryable<TDomainObject> result;
@@ -185,7 +185,7 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 		{
 			public override bool CheckExists<TFormat>(
 				ISerialization<TFormat> serializer,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TFormat data)
 			{
 				var repository = GetRepository<TDomainObject>(locator);

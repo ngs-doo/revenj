@@ -3,26 +3,10 @@ using System.Diagnostics.Contracts;
 
 namespace Revenj.DomainPatterns
 {
-	//TODO: replace with IServiceProvider
-	/// <summary>
-	/// Service for resolving other services.
-	/// Unregistered services will be resolved too.
-	/// </summary>
-	public interface IServiceLocator
-	{
-		/// <summary>
-		/// Resolve service registered as type using provided arguments.
-		/// Interfaces can be resolved only if registered into the container.
-		/// </summary>
-		/// <param name="type">service class/interface</param>
-		/// <returns>resolved service</returns>
-		object Resolve(Type type);
-	}
-
 	/// <summary>
 	/// Utility for service locator resolution
 	/// </summary>
-	public static class ServiceLocatorHelper
+	public static class ServiceProviderHelper
 	{
 		/// <summary>
 		/// Resolve service using provided type.
@@ -30,11 +14,16 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="T">service type</typeparam>
 		/// <param name="locator">service locator</param>
 		/// <returns>resolved service</returns>
-		public static T Resolve<T>(this IServiceLocator locator)
+		public static T Resolve<T>(this IServiceProvider provider)
 		{
-			Contract.Requires(locator != null);
+			Contract.Requires(provider != null);
 
-			return (T)locator.Resolve(typeof(T));
+			var instance = provider.GetService(typeof(T));
+			if (instance == null) throw new NotSupportedException(@"Requested type not found in services: " + typeof(T).FullName + @"
+Use GetService API to avoid this exception and get null value instead.
+Check if service should be registered or it's dependencies satisfied");
+
+			return (T)instance;
 		}
 		/// <summary>
 		/// Resolve service using provided type and cast it to appropriate result.
@@ -43,11 +32,16 @@ namespace Revenj.DomainPatterns
 		/// <param name="locator">service locator</param>
 		/// <param name="type">service type</param>
 		/// <returns>casted resolved service</returns>
-		public static T Resolve<T>(this IServiceLocator locator, Type type)
+		public static T Resolve<T>(this IServiceProvider provider, Type type)
 		{
-			Contract.Requires(locator != null);
+			Contract.Requires(provider != null);
 
-			return (T)locator.Resolve(type);
+			var instance = provider.GetService(type);
+			if (instance == null) throw new NotSupportedException(@"Requested type not found in services: " + type.FullName + @"
+Use GetService API to avoid this exception and get null value instead.
+Check if service should be registered or it's dependencies satisfied");
+
+			return (T)instance;
 		}
 	}
 }

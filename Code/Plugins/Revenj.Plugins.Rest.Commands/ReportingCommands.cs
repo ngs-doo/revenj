@@ -11,13 +11,13 @@ namespace Revenj.Plugins.Rest.Commands
 	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
 	public class ReportingCommands : IReportingCommands
 	{
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly ICommandConverter Converter;
 		private readonly IDomainModel DomainModel;
 		private readonly IWireSerialization Serialization;
 
 		public ReportingCommands(
-			IServiceLocator locator,
+			IServiceProvider locator,
 			ICommandConverter converter,
 			IDomainModel domainModel,
 			IWireSerialization serialization)

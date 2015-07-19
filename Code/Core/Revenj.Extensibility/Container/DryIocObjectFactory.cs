@@ -43,7 +43,7 @@ namespace Revenj.Extensibility
 			this.Cleanup = cleanup;
 		}
 
-		private Func<object[], object> BuildWithAspects(Type type)
+		private Func<object[], object> BuildWithAspects(Type type, bool canBeNull)
 		{
 			var services = new[] { type }.Union(type.GetInterfaces()).ToArray();
 			return args =>
@@ -54,10 +54,20 @@ namespace Revenj.Extensibility
 				}
 				catch (MissingMethodException mme)
 				{
+					if (canBeNull) return null;
 					throw new MissingMethodException(@"Can't create instance of an type {0}. 
 Check if type should be registered in the container or if correct arguments are passed.".With(type.FullName), mme);
 				}
 			};
+		}
+
+		public object GetService(Type type)
+		{
+			UpdateScopeIfRequired();
+
+			if (CurrentScope.IsRegistered(type))
+				return CurrentScope.Resolve(type);
+			return BuildWithAspects(type, true)(null);
 		}
 
 		public object Resolve(Type type, object[] args)
@@ -69,7 +79,7 @@ Check if type should be registered in the container or if correct arguments are 
 				if (CurrentScope.IsRegistered(type))
 					return CurrentScope.Resolve(type);
 			}
-			return BuildWithAspects(type)(args);
+			return BuildWithAspects(type, false)(args);
 		}
 
 		public bool IsRegistered(Type type)

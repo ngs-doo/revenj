@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Revenj.DatabasePersistence.Postgres.Converters;
-using Revenj.DomainPatterns;
 using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres
@@ -59,7 +58,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			sw.Write('\'');
 		}
 
-		public static List<T> ParseCollection<T>(BufferedTextReader reader, int context, IServiceLocator locator, Func<BufferedTextReader, int, int, IServiceLocator, T> parseItem)
+		public static List<T> ParseCollection<T>(BufferedTextReader reader, int context, IServiceProvider locator, Func<BufferedTextReader, int, int, IServiceProvider, T> parseItem)
 		{
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')

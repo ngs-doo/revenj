@@ -19,7 +19,7 @@ namespace Revenj.Core
 {
 	internal static class AutofacConfiguration
 	{
-		public static IServiceLocator Configure(Database database, string connectionString, bool withAspects, bool externalConfiguration)
+		public static IServiceProvider Configure(Database database, string connectionString, bool withAspects, bool externalConfiguration)
 		{
 			var state = new SystemState();
 			var builder = new ContainerBuilder();
@@ -42,7 +42,7 @@ namespace Revenj.Core
 			var factory = builder.Build().Resolve<IObjectFactory>();
 			state.IsBooting = false;
 			state.Started(factory);
-			return factory.Resolve<IServiceLocator>();
+			return factory.Resolve<IServiceProvider>();
 		}
 
 		class OnContainerBuild : Revenj.Extensibility.Autofac.IStartable
@@ -135,7 +135,7 @@ namespace Revenj.Core
 			builder.RegisterType<Revenj.DomainPatterns.DomainModel>();
 			builder.Register(c => c.Resolve<Revenj.DomainPatterns.DomainModel.Factory>()(serverModels)).As<IDomainModel>().SingleInstance();
 			builder.RegisterType<DomainTypeResolver>().As<ITypeResolver>().SingleInstance();
-			builder.RegisterType<ServiceLocator>().As<IServiceLocator, IServiceProvider>().InstancePerLifetimeScope();
+			builder.RegisterType<ServiceLocator>().As<IServiceProvider>().InstancePerLifetimeScope();
 			builder.RegisterGeneric(typeof(WeakCache<>)).As(typeof(WeakCache<>), typeof(IDataCache<>)).InstancePerLifetimeScope();
 			builder.RegisterType<DomainEventSource>().As<IDomainEventSource>().InstancePerLifetimeScope();
 			builder.RegisterType<DomainEventStore>().As<IDomainEventStore>().InstancePerLifetimeScope();

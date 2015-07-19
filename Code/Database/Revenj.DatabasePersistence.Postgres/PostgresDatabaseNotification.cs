@@ -26,13 +26,13 @@ namespace Revenj.DatabasePersistence.Postgres
 		private int RetryCount;
 		private readonly ConcurrentDictionary<Type, IRepository<IIdentifiable>> Repositories =
 			new ConcurrentDictionary<Type, IRepository<IIdentifiable>>(1, 17);
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly BufferedTextReader Reader = new BufferedTextReader(string.Empty, new char[64], new char[8192]);
 
 		public PostgresDatabaseNotification(
 			ConnectionInfo connectionInfo,
 			Lazy<IDomainModel> domainModel,
-			IServiceLocator locator)
+			IServiceProvider locator)
 		{
 			Contract.Requires(connectionInfo != null);
 			Contract.Requires(domainModel != null);

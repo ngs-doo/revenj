@@ -30,12 +30,12 @@ namespace Revenj.DatabasePersistence.Oracle
 		private int RetryCount;
 		private readonly ConcurrentDictionary<Type, IRepository<IIdentifiable>> Repositories =
 			new ConcurrentDictionary<Type, IRepository<IIdentifiable>>(1, 17);
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 
 		public OracleAdvancedQueueNotification(
 			ConnectionInfo connectionInfo,
 			Lazy<IDomainModel> domainModel,
-			IServiceLocator locator)
+			IServiceProvider locator)
 		{
 			Contract.Requires(connectionInfo != null);
 			Contract.Requires(domainModel != null);

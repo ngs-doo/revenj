@@ -19,20 +19,16 @@ namespace Revenj.Plugins.Server.Commands
 	{
 		private static ConcurrentDictionary<Type, IFindCommand> Cache = new ConcurrentDictionary<Type, IFindCommand>(1, 127);
 
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public Read(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -56,7 +52,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument { Name = objectType.FullName, Uri = "1001" });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -90,7 +90,7 @@ namespace Revenj.Plugins.Server.Commands
 					command = Activator.CreateInstance(commandType) as IFindCommand;
 					Cache.TryAdd(objectType, command);
 				}
-				var result = command.Find(output, Locator, Permissions, argument.Uri);
+				var result = command.Find(output, locator, Permissions, argument.Uri);
 
 				return result != null
 					? CommandResult<TOutput>.Success(result, "Object found")
@@ -113,7 +113,7 @@ Example argument:
 		{
 			TOutput Find<TOutput>(
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				IPermissionManager permissions,
 				string uri);
 		}
@@ -123,7 +123,7 @@ Example argument:
 		{
 			public TOutput Find<TOutput>(
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				IPermissionManager permissions,
 				string uri)
 			{

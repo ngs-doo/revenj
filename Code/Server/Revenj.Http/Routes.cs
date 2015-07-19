@@ -5,7 +5,6 @@ using System.Configuration;
 using System.Linq;
 using System.ServiceModel.Web;
 using System.Xml.Linq;
-using Revenj.DomainPatterns;
 
 namespace Revenj.Http
 {
@@ -14,7 +13,7 @@ namespace Revenj.Http
 		private readonly Dictionary<string, Dictionary<string, List<RouteHandler>>> MethodRoutes = new Dictionary<string, Dictionary<string, List<RouteHandler>>>();
 		private readonly ConcurrentDictionary<string, RouteHandler> Cache = new ConcurrentDictionary<string, RouteHandler>(1, 127);
 
-		public Routes(IServiceLocator locator)
+		public Routes(IServiceProvider locator)
 		{
 			var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 			var xml = XElement.Load(config.FilePath, LoadOptions.None);
@@ -34,7 +33,7 @@ namespace Revenj.Http
 				ConfigureService(s, locator);
 		}
 
-		private void ConfigureService(XElement service, IServiceLocator locator)
+		private void ConfigureService(XElement service, IServiceProvider locator)
 		{
 			var attributes = service.Attributes().ToList();
 			var ra = attributes.FirstOrDefault(it => "relativeAddress".Equals(it.Name.LocalName, StringComparison.InvariantCultureIgnoreCase));
@@ -46,7 +45,7 @@ namespace Revenj.Http
 			var type = Type.GetType(serv.Value);
 			if (type == null)
 				throw new ConfigurationErrorsException("Invalid service defined in " + ra.Value + ". Type " + serv.Value + " not found.");
-			var instance = locator.Resolve(type);
+			var instance = locator.GetService(type);
 			foreach (var i in new[] { type }.Union(type.GetInterfaces()))
 			{
 				foreach (var m in i.GetMethods())

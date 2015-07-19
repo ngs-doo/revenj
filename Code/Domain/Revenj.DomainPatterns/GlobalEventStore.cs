@@ -12,7 +12,7 @@ namespace Revenj.DomainPatterns
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
 
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly ConcurrentDictionary<Type, Action<List<IDomainEvent>>> EventStores =
 			new ConcurrentDictionary<Type, Action<List<IDomainEvent>>>(1, 17);
 		private BlockingCollection<EventInfo> EventQueue = new BlockingCollection<EventInfo>(new ConcurrentQueue<EventInfo>());
@@ -31,7 +31,7 @@ namespace Revenj.DomainPatterns
 			}
 		}
 
-		public GlobalEventStore(IServiceLocator locator)
+		public GlobalEventStore(IServiceProvider locator)
 		{
 			Contract.Requires(locator != null);
 
@@ -47,9 +47,9 @@ namespace Revenj.DomainPatterns
 			EventQueue.Add(new EventInfo(typeof(TEvent), domainEvent));
 		}
 
-		private static Func<IServiceLocator, Action<List<IDomainEvent>>> ResolveMethod = ResolveAndSetupStore<IDomainEvent>;
+		private static Func<IServiceProvider, Action<List<IDomainEvent>>> ResolveMethod = ResolveAndSetupStore<IDomainEvent>;
 
-		private static Action<List<IDomainEvent>> ResolveAndSetupStore<TEvent>(IServiceLocator locator)
+		private static Action<List<IDomainEvent>> ResolveAndSetupStore<TEvent>(IServiceProvider locator)
 			where TEvent : IDomainEvent
 		{
 			try

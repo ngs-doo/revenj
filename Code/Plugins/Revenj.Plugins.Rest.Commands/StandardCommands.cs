@@ -15,13 +15,13 @@ namespace Revenj.Plugins.Rest.Commands
 	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
 	public class StandardCommands : IStandardCommands
 	{
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly ICommandConverter Converter;
 		private readonly IDomainModel DomainModel;
 		private readonly IWireSerialization Serialization;
 
 		public StandardCommands(
-			IServiceLocator locator,
+			IServiceProvider locator,
 			ICommandConverter converter,
 			IDomainModel domainModel,
 			IWireSerialization serialization)

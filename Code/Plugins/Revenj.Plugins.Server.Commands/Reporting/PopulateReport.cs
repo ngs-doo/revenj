@@ -17,20 +17,16 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(PopulateReport))]
 	public class PopulateReport : IReadOnlyServerCommand
 	{
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public PopulateReport(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -49,7 +45,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument<TFormat> { ReportName = "Module.Report" });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -80,7 +80,7 @@ Please check your arguments.".With(argument.ReportName), null);
 			{
 				var commandType = typeof(PopulateReportCommand<,>).MakeGenericType(reportType, ri.GetGenericArguments()[0]);
 				var command = Activator.CreateInstance(commandType) as IPopulateReport;
-				var result = command.Populate(input, output, Locator, argument.Data);
+				var result = command.Populate(input, output, locator, argument.Data);
 
 				return CommandResult<TOutput>.Success(result, "Report populated");
 			}
@@ -99,7 +99,7 @@ Example argument:
 			TOutput Populate<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TInput data);
 		}
 
@@ -109,7 +109,7 @@ Example argument:
 			public TOutput Populate<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TInput data)
 			{
 				TReport report;

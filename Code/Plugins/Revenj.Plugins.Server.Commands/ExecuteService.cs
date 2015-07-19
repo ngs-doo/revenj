@@ -22,20 +22,16 @@ namespace Revenj.Plugins.Server.Commands
 	{
 		private static ConcurrentDictionary<Type, IExecuteCommand> Cache = new ConcurrentDictionary<Type, IExecuteCommand>(1, 127);
 
-		private readonly IServiceLocator Locator;
 		private readonly ITypeResolver TypeResolver;
 		private readonly IPermissionManager Permissions;
 
 		public ExecuteService(
-			IServiceLocator locator,
 			ITypeResolver typeResolver,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(typeResolver != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.TypeResolver = typeResolver;
 			this.Permissions = permissions;
 		}
@@ -54,7 +50,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument<TFormat> { Name = "CheckInfo" });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -95,7 +95,7 @@ namespace Revenj.Plugins.Server.Commands
 					command = Activator.CreateInstance(commandType) as IExecuteCommand;
 					Cache.TryAdd(serviceType, command);
 				}
-				var result = command.Execute(input, output, Locator, serviceType, argument.Data);
+				var result = command.Execute(input, output, locator, serviceType, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Created, result, "Service executed");
 			}
@@ -114,7 +114,7 @@ Example argument:
 			TOutput Execute<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				Type serviceType,
 				TInput data);
 		}
@@ -124,7 +124,7 @@ Example argument:
 			public TOutput Execute<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				Type serviceType,
 				TInput data)
 			{

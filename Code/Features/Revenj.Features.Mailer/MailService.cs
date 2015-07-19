@@ -35,7 +35,7 @@ namespace Revenj.Features.Mailer
 
 		protected readonly Func<string, IMailMessage> Lookup;
 
-		public MailService(IServiceLocator locator)
+		public MailService(IServiceProvider locator)
 		{
 			Contract.Requires(locator != null);
 

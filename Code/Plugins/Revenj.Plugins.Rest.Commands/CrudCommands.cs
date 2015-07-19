@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.ServiceModel;
 using Revenj.Api;
 using Revenj.DomainPatterns;
@@ -10,13 +11,13 @@ namespace Revenj.Plugins.Rest.Commands
 	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
 	public class CrudCommands : ICrudCommands
 	{
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly ICommandConverter Converter;
 		private readonly IDomainModel DomainModel;
 		private readonly IWireSerialization Serialization;
 
 		public CrudCommands(
-			IServiceLocator locator,
+			IServiceProvider locator,
 			ICommandConverter converter,
 			IDomainModel domainModel,
 			IWireSerialization serialization)

@@ -13,7 +13,7 @@ namespace Revenj.DatabasePersistence.Oracle
 
 	public interface IOracleConverterFactory
 	{
-		//Func<object, IServiceLocator, object> GetInstanceFactory(Type type);
+		//Func<object, IServiceProvider, object> GetInstanceFactory(Type type);
 		Func<object, string> GetStringFactory(Type type);
 		Func<IEnumerable, string> GetVarrayStringFactory(Type type);
 		Func<object, OracleParameter> GetParameterFactory(Type type);
@@ -43,7 +43,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			TypeConverters[type] = new KeyValuePair<IOracleTypeConverter, IOracleVarrayConverter>(converter, arrayConverter);
 		}
 
-		/*public Func<object, IServiceLocator, object> GetInstanceFactory(Type type)
+		/*public Func<object, IServiceProvider, object> GetInstanceFactory(Type type)
 		{
 			IOracleTypeConverter converter;
 			if (TypeConverters.TryGetValue(type, out converter))

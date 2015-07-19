@@ -19,20 +19,16 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(FindInvalidData))]
 	public class FindInvalidData : IReadOnlyServerCommand
 	{
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public FindInvalidData(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -55,7 +51,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument<TFormat> { DomainObjectName = "Module.Entity", ValidationName = "Validation" });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -100,7 +100,7 @@ namespace Revenj.Plugins.Server.Commands
 			{
 				var commandType = typeof(FindInvalidDataCommand<>).MakeGenericType(domainType);
 				var command = Activator.CreateInstance(commandType) as IFindInvalidDataCommand;
-				var result = command.FindInvalid(input, output, DomainModel, Locator, validationType, bindingType, argument.Specification);
+				var result = command.FindInvalid(input, output, DomainModel, locator, validationType, bindingType, argument.Specification);
 				return CommandResult<TOutput>.Success(result.Result, "Found {0} item(s)", result.Count);
 			}
 			catch (ArgumentException ex)
@@ -125,7 +125,7 @@ Example argument:
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IDomainModel dom,
-				IServiceLocator serviceLocator,
+				IServiceProvider serviceLocator,
 				Type validationType,
 				Type bindType,
 				TInput data);
@@ -138,7 +138,7 @@ Example argument:
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IDomainModel dom,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				Type validationType,
 				Type bindType,
 				TInput data)
@@ -200,7 +200,7 @@ Example argument:
 				ISerialization<TOutput> output,
 				List<TEntity> invalidItems,
 				IValidation<TEntity> validation,
-				IServiceLocator locator);
+				IServiceProvider locator);
 		}
 
 		private class BindToDomainObject<TValue, TEntity> : IBindToDomainObject<TEntity>
@@ -211,7 +211,7 @@ Example argument:
 				ISerialization<TOutput> output,
 				List<TEntity> invalidItems,
 				IValidation<TEntity> validation,
-				IServiceLocator locator)
+				IServiceProvider locator)
 			{
 				var repository = locator.Resolve<IRepository<TValue>>();
 				var i = repository.Find(invalidItems.Select(it => it.URI));

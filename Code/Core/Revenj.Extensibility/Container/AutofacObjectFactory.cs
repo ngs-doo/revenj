@@ -49,7 +49,7 @@ namespace Revenj.Extensibility
 			this.Cleanup = cleanup;
 		}
 
-		private Func<object[], object> BuildWithAspects(Type type)
+		private Func<object[], object> BuildWithAspects(Type type, bool canBeNull)
 		{
 			var services = new[] { type }.Union(type.GetInterfaces()).ToArray();
 			return args =>
@@ -60,10 +60,31 @@ namespace Revenj.Extensibility
 				}
 				catch (MissingMethodException mme)
 				{
+					if (canBeNull) return null;
 					throw new MissingMethodException(@"Can't create instance of an type {0}. 
 Check if type should be registered in the container or if correct arguments are passed.".With(type.FullName), mme);
 				}
 			};
+		}
+
+		public object GetService(Type type)
+		{
+			BuildScopeIfRequired();
+
+			Func<object> factory;
+			if (!SimpleCache.TryGetValue(type, out factory))
+			{
+				var serv = new TypedService(type);
+				IComponentRegistration reg;
+				var inContainer = CurrentScope.ComponentRegistry.TryGetRegistration(serv, out reg);
+				RegistrationCache.TryAdd(type, inContainer);
+				if (inContainer)
+					factory = CurrentScope.ResolveLookup(serv, reg, new Parameter[0]).Factory;
+				else
+					factory = () => BuildWithAspects(type, true)(null);
+				SimpleCache.TryAdd(type, factory);
+			}
+			return factory();
 		}
 
 		public object Resolve(Type type, object[] args)
@@ -82,7 +103,7 @@ Check if type should be registered in the container or if correct arguments are 
 					if (inContainer)
 						factory = CurrentScope.ResolveLookup(serv, reg, new Parameter[0]).Factory;
 					else
-						factory = () => BuildWithAspects(type)(null);
+						factory = () => BuildWithAspects(type, false)(null);
 					SimpleCache.TryAdd(type, factory);
 				}
 				return factory();
@@ -99,7 +120,7 @@ Check if type should be registered in the container or if correct arguments are 
 					if (inContainer)
 						factory = a => CurrentScope.ResolveLookup(serv, reg, a.Select(it => new TypedParameter(it.GetType(), it))).Factory();
 					else
-						factory = BuildWithAspects(type);
+						factory = BuildWithAspects(type, false);
 					CacheWithArguments.TryAdd(type, factory);
 				}
 				return factory(args);

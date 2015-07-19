@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Revenj.DatabasePersistence.Postgres.Converters;
-using Revenj.DomainPatterns;
 using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres
@@ -13,7 +12,7 @@ namespace Revenj.DatabasePersistence.Postgres
 
 	public interface IPostgresConverterFactory
 	{
-		Func<object, BufferedTextReader, IServiceLocator, object> GetInstanceFactory(Type type);
+		Func<object, BufferedTextReader, IServiceProvider, object> GetInstanceFactory(Type type);
 		Func<object, string> GetSerializationFactory(Type type);
 	}
 
@@ -26,7 +25,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			TypeConverters[type] = converter;
 		}
 
-		public Func<object, BufferedTextReader, IServiceLocator, object> GetInstanceFactory(Type type)
+		public Func<object, BufferedTextReader, IServiceProvider, object> GetInstanceFactory(Type type)
 		{
 			IPostgresTypeConverter converter;
 			if (TypeConverters.TryGetValue(type, out converter))

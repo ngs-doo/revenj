@@ -1,22 +1,21 @@
 ﻿using System;
 using Revenj.Core;
-using Revenj.DomainPatterns;
 
 namespace DSL
 {
 	public static class Core
 	{
-		public static IServiceLocator SetupPostgres(string connectionString, bool withAspects = false, bool externalConfiguration = false)
+		public static IServiceProvider SetupPostgres(string connectionString, bool withAspects = false, bool externalConfiguration = false)
 		{
 			return Setup(Database.Postgres, connectionString, withAspects, externalConfiguration);
 		}
 
-		/*public static IServiceLocator SetupOracle(string connectionString)
+		/*public static IServiceProvider SetupOracle(string connectionString)
 		{
 			return Setup(Database.Oracle, connectionString);
 		}*/
 
-		private static IServiceLocator Setup(Database db, string connectionString, bool withAspects, bool externalConfiguration)
+		private static IServiceProvider Setup(Database db, string connectionString, bool withAspects, bool externalConfiguration)
 		{
 			if (string.IsNullOrEmpty(connectionString))
 				throw new ArgumentNullException("connectionString", "Connection string not provided");

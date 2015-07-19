@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Web;
 using DSL;
-using Revenj.DomainPatterns;
 
 namespace Revenj.Wcf
 {
@@ -13,7 +12,7 @@ namespace Revenj.Wcf
 		protected void Application_Start(object sender, EventArgs e)
 		{
 			var register = new[] { typeof(RestApplication), typeof(SoapApplication), typeof(CommandConverter) };
-			Platform.Start<IServiceLocator>(register);
+			Platform.Start<IServiceProvider>(register);
 			TraceSource.TraceEvent(TraceEventType.Start, 1001);
 		}
 

@@ -16,20 +16,16 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(GetRootHistory))]
 	public class GetRootHistory : IReadOnlyServerCommand
 	{
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public GetRootHistory(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -48,7 +44,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument { Name = "Module.Entity", Uri = new[] { "1001", "1002" } });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -84,7 +84,7 @@ Please check your arguments.".With(argument.Name), null);
 			{
 				var commandType = typeof(FindCommand<>).MakeGenericType(rootType);
 				var command = Activator.CreateInstance(commandType) as IFindCommand;
-				var result = command.Find(output, Locator, argument.Uri);
+				var result = command.Find(output, locator, argument.Uri);
 
 				return CommandResult<TOutput>.Success(result.Result, "Found {0} item(s)", result.Count);
 			}
@@ -106,13 +106,13 @@ Example argument:
 
 		private interface IFindCommand
 		{
-			FindResult<TOutput> Find<TOutput>(ISerialization<TOutput> output, IServiceLocator locator, string[] uris);
+			FindResult<TOutput> Find<TOutput>(ISerialization<TOutput> output, IServiceProvider locator, string[] uris);
 		}
 
 		private class FindCommand<TRoot> : IFindCommand
 			where TRoot : IObjectHistory
 		{
-			public FindResult<TOutput> Find<TOutput>(ISerialization<TOutput> output, IServiceLocator locator, string[] uris)
+			public FindResult<TOutput> Find<TOutput>(ISerialization<TOutput> output, IServiceProvider locator, string[] uris)
 			{
 				IRepository<IHistory<TRoot>> repository;
 				try

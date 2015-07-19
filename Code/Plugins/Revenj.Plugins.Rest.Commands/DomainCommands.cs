@@ -12,16 +12,16 @@ namespace Revenj.Plugins.Rest.Commands
 	[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
 	public class DomainCommands : IDomainCommands
 	{
-		private static AdditionalCommand[] EmptyCommands = new AdditionalCommand[0];
+		private static readonly AdditionalCommand[] EmptyCommands = new AdditionalCommand[0];
 
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly ICommandConverter Converter;
 		private readonly IProcessingEngine Processing;
 		private readonly IDomainModel DomainModel;
 		private readonly IWireSerialization Serialization;
 
 		public DomainCommands(
-			IServiceLocator locator,
+			IServiceProvider locator,
 			ICommandConverter converter,
 			IProcessingEngine processing,
 			IDomainModel domainModel,

@@ -1,6 +1,5 @@
 ﻿using System;
 using DryIoc;
-using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Http;
 
@@ -9,9 +8,9 @@ namespace DSL
 	[Obsolete("Not functional yet. DryIoc still has some issues.")]
 	internal static class PlatformDry
 	{
-		public static IServiceLocator Start()
+		public static IServiceProvider Start()
 		{
-			return Start<IServiceLocator>();
+			return Start<IServiceProvider>();
 		}
 
 		public static TService Start<TService>(params Type[] types)

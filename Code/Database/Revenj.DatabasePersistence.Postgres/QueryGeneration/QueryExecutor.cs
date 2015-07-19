@@ -15,18 +15,18 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 	public class QueryExecutor : IQueryExecutor
 	{
 		private readonly IDatabaseQuery DatabaseQuery;
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly IPostgresConverterFactory ConverterFactory;
 		private readonly IExtensibilityProvider ExtensibilityProvider;
 
-		public QueryExecutor(IDatabaseQuery databaseQuery, IServiceLocator locator)
+		public QueryExecutor(IDatabaseQuery databaseQuery, IServiceProvider locator)
 			: this(databaseQuery, locator, locator.Resolve<IPostgresConverterFactory>(), locator.Resolve<IExtensibilityProvider>())
 		{
 		}
 
 		public QueryExecutor(
 			IDatabaseQuery databaseQuery,
-			IServiceLocator locator,
+			IServiceProvider locator,
 			IPostgresConverterFactory factory,
 			IExtensibilityProvider extensibilityProvider)
 		{

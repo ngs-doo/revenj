@@ -18,7 +18,7 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		/// <param name="locator">service locator</param>
 		/// <returns>populated result</returns>
-		TData Populate(IServiceLocator locator);
+		TData Populate(IServiceProvider locator);
 	}
 	/// <summary>
 	/// Document report is a service for populating documents.

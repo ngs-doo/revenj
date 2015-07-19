@@ -19,20 +19,16 @@ namespace Revenj.Plugins.Server.Commands
 	{
 		private static ConcurrentDictionary<Type, IDeleteCommand> Cache = new ConcurrentDictionary<Type, IDeleteCommand>(1, 127);
 
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public Delete(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -62,7 +58,11 @@ namespace Revenj.Plugins.Server.Commands
 					});
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -103,7 +103,7 @@ Please check your arguments.".With(argument.Name), null);
 					command = Activator.CreateInstance(commandType) as IDeleteCommand;
 					Cache.TryAdd(rootType, command);
 				}
-				var result = command.Delete(input, output, Locator, argument.Uri);
+				var result = command.Delete(input, output, locator, argument.Uri);
 
 				return CommandResult<TOutput>.Success(result, "Object deleted");
 			}
@@ -122,7 +122,7 @@ Example argument:
 			TOutput Delete<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				string uri);
 		}
 
@@ -132,7 +132,7 @@ Example argument:
 			public TOutput Delete<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				string uri)
 			{
 				try

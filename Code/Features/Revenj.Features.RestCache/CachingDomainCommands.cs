@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.ServiceModel;
 using Revenj.Api;
 using Revenj.DomainPatterns;
@@ -12,13 +13,13 @@ namespace Revenj.Features.RestCache
 	{
 		private readonly IDomainModel DomainModel;
 		private readonly DomainCommands DomainCommands;
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly IWireSerialization Serialization;
 
 		public CachingDomainCommands(
 			IDomainModel domainModel,
 			DomainCommands domainCommands,
-			IServiceLocator locator,
+			IServiceProvider locator,
 			IWireSerialization serialization)
 		{
 			this.DomainModel = domainModel;

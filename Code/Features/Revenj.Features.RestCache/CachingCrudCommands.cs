@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.ServiceModel;
 using Revenj.DomainPatterns;
 using Revenj.Plugins.Rest.Commands;
@@ -10,12 +11,12 @@ namespace Revenj.Features.RestCache
 	{
 		private readonly IDomainModel DomainModel;
 		private readonly CrudCommands CrudComands;
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 
 		public CachingCrudCommands(
 			IDomainModel domainModel,
 			CrudCommands crudCommands,
-			IServiceLocator locator)
+			IServiceProvider locator)
 		{
 			this.DomainModel = domainModel;
 			this.CrudComands = crudCommands;

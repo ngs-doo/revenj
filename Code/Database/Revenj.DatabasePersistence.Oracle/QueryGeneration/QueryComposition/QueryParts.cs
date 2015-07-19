@@ -16,7 +16,7 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 {
 	public abstract class QueryParts
 	{
-		public readonly IServiceLocator Locator;
+		public readonly IServiceProvider Locator;
 		public readonly IOracleConverterFactory ConverterFactory;
 
 		public readonly string ContextName;
@@ -39,7 +39,7 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 		internal readonly IEnumerable<IProjectionMatcher> ProjectionMatchers;
 
 		protected QueryParts(
-			IServiceLocator locator,
+			IServiceProvider locator,
 			string contextName,
 			IOracleConverterFactory factory,
 			ParameterAggregator parameters,

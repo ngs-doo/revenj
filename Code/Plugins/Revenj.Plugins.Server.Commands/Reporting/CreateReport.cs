@@ -18,20 +18,16 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(CreateReport))]
 	public class CreateReport : IReadOnlyServerCommand
 	{
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public CreateReport(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -52,7 +48,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument<TFormat> { ReportName = "Module.Report", TemplaterName = "CreatePdf" });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -108,7 +108,7 @@ Please check your arguments.".With(argument.ReportName), null);
 			{
 				var commandType = typeof(GenerateReportCommand<,>).MakeGenericType(reportType, ri.GetGenericArguments()[0]);
 				var command = Activator.CreateInstance(commandType) as IGenerateReport;
-				var result = command.Convert(input, Locator, documentType, argument.Data);
+				var result = command.Convert(input, locator, documentType, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Created, Serialize(output, result), "Report created");
 			}
@@ -137,13 +137,13 @@ Example argument:
 
 		private interface IGenerateReport
 		{
-			Stream Convert<TFormat>(ISerialization<TFormat> serializer, IServiceLocator locator, Type documentType, TFormat data);
+			Stream Convert<TFormat>(ISerialization<TFormat> serializer, IServiceProvider locator, Type documentType, TFormat data);
 		}
 
 		private class GenerateReportCommand<TReport, TResult> : IGenerateReport
 			where TReport : IReport<TResult>
 		{
-			public Stream Convert<TFormat>(ISerialization<TFormat> serializer, IServiceLocator locator, Type documentType, TFormat data)
+			public Stream Convert<TFormat>(ISerialization<TFormat> serializer, IServiceProvider locator, Type documentType, TFormat data)
 			{
 				TReport report;
 				try

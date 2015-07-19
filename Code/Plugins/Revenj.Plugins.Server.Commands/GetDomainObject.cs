@@ -20,20 +20,16 @@ namespace Revenj.Plugins.Server.Commands
 	{
 		private static ConcurrentDictionary<Type, IFindCommand> Cache = new ConcurrentDictionary<Type, IFindCommand>(1, 127);
 
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public GetDomainObject(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -54,7 +50,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument { Name = "Module.Entity", Uri = new[] { "1001", "1002" } });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -62,7 +62,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var result = GetAndReturn(output, either.Argument.Name, either.Argument.Uri, either.Argument.MatchOrder);
+				var result = GetAndReturn(locator, output, either.Argument.Name, either.Argument.Uri, either.Argument.MatchOrder);
 				return CommandResult<TOutput>.Success(result.Result, "Found {0} item(s)", result.Count);
 			}
 			catch (ArgumentException ex)
@@ -90,10 +90,10 @@ Please check your arguments.", name);
 			return objectType;
 		}
 
-		public IIdentifiable[] GetData(Argument argument)
+		public IIdentifiable[] GetData(IServiceProvider locator, Argument argument)
 		{
 			var objectType = ValidateArgument(argument.Name, argument.Uri);
-			var repository = Locator.Resolve<IRepository<IIdentifiable>>(typeof(IRepository<>).MakeGenericType(objectType));
+			var repository = locator.Resolve<IRepository<IIdentifiable>>(typeof(IRepository<>).MakeGenericType(objectType));
 			return repository.Find(argument.Uri);
 		}
 
@@ -104,6 +104,7 @@ Please check your arguments.", name);
 		}
 
 		private FindResult<TOutput> GetAndReturn<TOutput>(
+			IServiceProvider locator,
 			ISerialization<TOutput> output,
 			string name,
 			string[] uri,
@@ -117,14 +118,14 @@ Please check your arguments.", name);
 				command = Activator.CreateInstance(commandType) as IFindCommand;
 				Cache.TryAdd(objectType, command);
 			}
-			return command.Find(output, Locator, Permissions, uri, matchOrder);
+			return command.Find(output, locator, Permissions, uri, matchOrder);
 		}
 
 		private interface IFindCommand
 		{
 			FindResult<TOutput> Find<TOutput>(
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				IPermissionManager permissions,
 				string[] uris,
 				bool matchOrder);
@@ -152,7 +153,7 @@ Please check your arguments.", name);
 
 			public FindResult<TOutput> Find<TOutput>(
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				IPermissionManager permissions,
 				string[] uris,
 				bool matchOrder)

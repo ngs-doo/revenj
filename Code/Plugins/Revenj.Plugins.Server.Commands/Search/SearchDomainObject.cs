@@ -28,20 +28,16 @@ namespace Revenj.Plugins.Server.Commands
 				MaxSearchLimit = msl;
 		}
 
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public SearchDomainObject(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -75,7 +71,11 @@ namespace Revenj.Plugins.Server.Commands
 					});
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -83,7 +83,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var result = FindAndReturn(input, output, either.Argument);
+				var result = FindAndReturn(locator, input, output, either.Argument);
 				return CommandResult<TOutput>.Success(result.Result, "Found {0} item(s)", result.Count);
 			}
 			catch (ArgumentException ex)
@@ -116,7 +116,7 @@ Example argument:
 			}
 		}
 
-		public object[] FindData<TFormat>(ISerialization<TFormat> serializer, Argument<TFormat> argument)
+		public object[] FindData<TFormat>(IServiceProvider locator, ISerialization<TFormat> serializer, Argument<TFormat> argument)
 		{
 			var command = PrepareCommand(argument.Name, argument.SpecificationName);
 			var limit = argument.Limit ?? MaxSearchLimit;
@@ -124,7 +124,7 @@ Example argument:
 				command.FindBy(
 					serializer,
 					DomainModel,
-					Locator,
+					locator,
 					argument.Specification,
 					argument.Offset,
 					limit,
@@ -138,6 +138,7 @@ Example argument:
 		}
 
 		private SearchResult<TOutput> FindAndReturn<TInput, TOutput>(
+			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
 			Argument<TInput> argument)
@@ -149,7 +150,7 @@ Example argument:
 					input,
 					output,
 					DomainModel,
-					Locator,
+					locator,
 					Permissions,
 					argument.Specification,
 					argument.Offset,
@@ -162,7 +163,7 @@ Example argument:
 			TDomainObject[] FindBy<TFormat>(
 				ISerialization<TFormat> serializer,
 				IDomainModel domainModel,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TFormat data,
 				int? offset,
 				int? limit,
@@ -171,7 +172,7 @@ Example argument:
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IDomainModel domainModel,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				IPermissionManager permissions,
 				TInput data,
 				int? offset,
@@ -179,7 +180,7 @@ Example argument:
 				IDictionary<string, bool> order);
 		}
 
-		private static IQueryableRepository<T> GetRepository<T>(IServiceLocator locator)
+		private static IQueryableRepository<T> GetRepository<T>(IServiceProvider locator)
 			where T : IDataSource
 		{
 			try
@@ -209,7 +210,7 @@ Example argument:
 			public virtual TDomainObject[] FindBy<TFormat>(
 				ISerialization<TFormat> serializer,
 				IDomainModel domainModel,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TFormat data,
 				int? offset,
 				int? limit,
@@ -275,7 +276,7 @@ Example argument:
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IDomainModel domainModel,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				IPermissionManager permissions,
 				TInput data,
 				int? offset,
@@ -294,7 +295,7 @@ Example argument:
 			public override TDomainObject[] FindBy<TFormat>(
 				ISerialization<TFormat> serializer,
 				IDomainModel domainModel,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				TFormat data,
 				int? offset,
 				int? limit,

@@ -155,7 +155,7 @@ namespace Revenj.Core
 		/// </summary>
 		/// <param name="locator">service locator</param>
 		/// <returns>unit of work</returns>
-		public static IUnitOfWork DoWork(this IServiceLocator locator)
+		public static IUnitOfWork DoWork(this IServiceProvider locator)
 		{
 			return new UnitOfWork(locator.Resolve<IObjectFactory>());
 		}

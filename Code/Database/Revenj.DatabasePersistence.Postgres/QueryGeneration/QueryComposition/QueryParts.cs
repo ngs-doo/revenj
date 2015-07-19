@@ -17,7 +17,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 {
 	public abstract class QueryParts
 	{
-		public readonly IServiceLocator Locator;
+		public readonly IServiceProvider Locator;
 		public readonly IPostgresConverterFactory ConverterFactory;
 
 		public readonly string ContextName;
@@ -38,7 +38,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 		internal readonly IEnumerable<IProjectionMatcher> ProjectionMatchers;
 
 		protected QueryParts(
-			IServiceLocator locator,
+			IServiceProvider locator,
 			string contextName,
 			IPostgresConverterFactory converterFactory,
 			IEnumerable<IQuerySimplification> simplifications,

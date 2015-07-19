@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 using System.ServiceProcess;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -11,7 +12,7 @@ namespace Revenj.Features.Mailer
 	{
 		private readonly QueueProcessor Processor;
 
-		public QueueService(IServiceLocator locator)
+		public QueueService(IServiceProvider locator)
 		{
 			Processor = locator.Resolve<QueueProcessor>();
 			InitializeComponent();

@@ -113,7 +113,6 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 
 			registry.RegisterDelegate<IDomainModel>(c => new Revenj.DomainPatterns.DomainModel(serverModels, c.Resolve<IObjectFactory>()), Reuse.Singleton);
 			registry.Register<ITypeResolver, DomainTypeResolver>(Reuse.Singleton);
-			registry.Register<IServiceLocator, ServiceLocator>(Reuse.InCurrentScope);
 			registry.Register<IServiceProvider, ServiceLocator>(Reuse.InCurrentScope);
 			registry.Register(typeof(IDataCache<>), typeof(WeakCache<>), Reuse.InCurrentScope);
 			registry.Register(typeof(WeakCache<>), typeof(WeakCache<>), Reuse.InCurrentScope);

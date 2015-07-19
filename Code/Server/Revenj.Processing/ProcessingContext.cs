@@ -9,22 +9,21 @@ using System.Net;
 using System.Security;
 using System.Security.Principal;
 using Revenj.Common;
-using Revenj.Extensibility;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
 
 namespace Revenj.Processing
 {
-	public class ProcessingContext : IProcessingEngine
+	internal class ProcessingContext : IProcessingEngine
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
 
-		private readonly IObjectFactory Scope;
+		private readonly IServiceProvider Scope;
 		private readonly IPermissionManager Permissions;
 
 		public ProcessingContext(
-			IObjectFactory scope,
+			IServiceProvider scope,
 			IPermissionManager permissions)
 		{
 			Contract.Requires(scope != null);
@@ -49,8 +48,8 @@ namespace Revenj.Processing
 						start);
 			}
 
-			var inputSerializer = Scope.Resolve<ISerialization<TInput>>();
-			var outputSerializer = Scope.Resolve<ISerialization<TOutput>>();
+			var inputSerializer = (ISerialization<TInput>)Scope.GetService(typeof(ISerialization<TInput>));
+			var outputSerializer = (ISerialization<TOutput>)Scope.GetService(typeof(ISerialization<TOutput>));
 
 			var executedCommands = new List<ICommandResultDescription<TOutput>>();
 			try
@@ -75,8 +74,8 @@ namespace Revenj.Processing
 				foreach (var cd in commandDescriptions)
 				{
 					var startCommand = Stopwatch.GetTimestamp();
-					var command = Scope.Resolve<IServerCommand>(cd.CommandType);
-					var result = command.Execute(inputSerializer, outputSerializer, cd.Data);
+					var command = (IServerCommand)Scope.GetService(cd.CommandType);
+					var result = command.Execute(Scope, inputSerializer, outputSerializer, cd.Data);
 					if (result == null)
 						throw new FrameworkException("Result returned null for " + cd.CommandType);
 					executedCommands.Add(CommandResultDescription<TOutput>.Create(cd.RequestID, result, startCommand));

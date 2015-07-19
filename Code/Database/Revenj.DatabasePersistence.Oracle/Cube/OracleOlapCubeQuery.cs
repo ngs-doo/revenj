@@ -16,14 +16,14 @@ namespace Revenj.DatabasePersistence.Oracle
 {
 	public abstract class OracleOlapCubeQuery<TSource> : IOlapCubeQuery
 	{
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly IDatabaseQuery DatabaseQuery;
 
 		protected abstract string Source { get; }
 		protected readonly Dictionary<string, Func<string, string>> CubeDimensions = new Dictionary<string, Func<string, string>>();
 		protected readonly Dictionary<string, Func<string, string>> CubeFacts = new Dictionary<string, Func<string, string>>();
 
-		protected OracleOlapCubeQuery(IServiceLocator locator)
+		protected OracleOlapCubeQuery(IServiceProvider locator)
 		{
 			Contract.Requires(locator != null);
 

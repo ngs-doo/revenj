@@ -26,7 +26,7 @@ namespace Revenj.DomainPatterns
 					{
 						throw new ConfigurationErrorsException("Error loading " + t.FullName + ". " + ex.Message, ex);
 					}
-					state.Value.Ready += f => si.Configure(f.Resolve<IServiceLocator>());
+					state.Value.Ready += f => si.Configure(f.Resolve<IServiceProvider>());
 				}
 			}
 		}

@@ -24,7 +24,7 @@ namespace Revenj.Processing
 		private readonly IObjectFactory ObjectFactory;
 		private readonly IScopePool ScopePool;
 		private readonly IPermissionManager Permissions;
-		private readonly Dictionary<Type, Type> ActualCommands = new Dictionary<Type, Type>();
+		private readonly Dictionary<Type, IServerCommand> ActualCommands = new Dictionary<Type, IServerCommand>();
 		private Dictionary<Type, object> Serializators = new Dictionary<Type, object>(7);
 
 		public ProcessingEngine(
@@ -43,8 +43,9 @@ namespace Revenj.Processing
 			this.Permissions = permissions;
 			var commandTypes = extensibilityProvider.FindPlugins<IServerCommand>();
 
+			var commands = new Dictionary<Type, Type>();
 			foreach (var ct in commandTypes)
-				ActualCommands[ct] = ct;
+				commands[ct] = ct;
 			foreach (var ct in commandTypes)
 			{
 				var attr = ct.GetCustomAttributes(typeof(ExportMetadataAttribute), false) as ExportMetadataAttribute[];
@@ -56,10 +57,12 @@ namespace Revenj.Processing
 						var type = insteadOf.Value as Type;
 						if (commandTypes.All(it => it != type))
 							throw new FrameworkException("Can't find target {0} for InsteadOf attribute declared on {1}".With(type, ct));
-						ActualCommands[type] = ct;
+						commands[type] = ct;
 					}
 				}
 			}
+			foreach (var ct in commands)
+				ActualCommands[ct.Key] = ObjectFactory.Resolve<IServerCommand>(ct.Value);
 		}
 
 		private ISerialization<TFormat> GetSerializer<TFormat>()
@@ -75,28 +78,9 @@ namespace Revenj.Processing
 			return (ISerialization<TFormat>)serializer;
 		}
 
-		class CommandInfo<TFormat>
-		{
-			public readonly IServerCommandDescription<TFormat> Description;
-			public readonly Type Target;
-			public readonly bool IsReadOnly;
-
-			public CommandInfo(
-				IServerCommandDescription<TFormat> description,
-				Dictionary<Type, Type> allowedCommands)
-			{
-				this.Description = description;
-				if (allowedCommands.TryGetValue(description.CommandType, out Target))
-					this.IsReadOnly = typeof(IReadOnlyServerCommand).IsAssignableFrom(Target);
-			}
-
-			public IServerCommand GetCommand(IObjectFactory factory)
-			{
-				return factory.Resolve<IServerCommand>(Target);
-			}
-		}
-
-		public IProcessingResult<TOutput> Execute<TInput, TOutput>(IServerCommandDescription<TInput>[] commandDescriptions, IPrincipal principal)
+		public IProcessingResult<TOutput> Execute<TInput, TOutput>(
+			IServerCommandDescription<TInput>[] commandDescriptions,
+			IPrincipal principal)
 		{
 			var start = Stopwatch.GetTimestamp();
 
@@ -134,28 +118,28 @@ namespace Revenj.Processing
 			var inputSerializer = GetSerializer<TInput>();
 			var outputSerializer = GetSerializer<TOutput>();
 
-			var commands = new CommandInfo<TInput>[commandDescriptions.Length];
 			var useTransaction = false;
-			for (int i = 0; i < commands.Length; i++)
+			for (int i = 0; i < commandDescriptions.Length; i++)
 			{
-				var c = commands[i] = new CommandInfo<TInput>(commandDescriptions[i], ActualCommands);
-				useTransaction = useTransaction || !c.IsReadOnly;
-				if (c.Target == null)
+				IServerCommand command;
+				var cd = commandDescriptions[i];
+				if (!ActualCommands.TryGetValue(cd.CommandType, out command))
 				{
 					TraceSource.TraceEvent(
 						TraceEventType.Warning,
 						5321,
 						"Unknown target. User: {0}. Target: {1}",
 						principal.Identity.Name,
-						commandDescriptions[i].CommandType.FullName);
+						cd.CommandType.FullName);
 					return
 						ProcessingResult<TOutput>.Create(
 							"Unknown command: {0}. Check if requested command is registered in the system".With(
-								c.Description.CommandType),
-							HttpStatusCode.BadRequest,
+								cd.CommandType),
+							HttpStatusCode.NotImplemented,
 							null,
 							start);
 				}
+				useTransaction = useTransaction || (command is IReadOnlyServerCommand == false);
 			}
 
 			var executedCommands = new List<ICommandResultDescription<TOutput>>(commandDescriptions.Length);
@@ -181,13 +165,14 @@ namespace Revenj.Processing
 							null,
 							start);
 				}
-				foreach (var cmd in commands)
+				foreach (var cd in commandDescriptions)
 				{
 					var startCommand = Stopwatch.GetTimestamp();
-					var result = cmd.GetCommand(scope.Factory).Execute(inputSerializer, outputSerializer, cmd.Description.Data);
+					var cmd = ActualCommands[cd.CommandType];
+					var result = cmd.Execute(scope.Factory, inputSerializer, outputSerializer, cd.Data);
 					if (result == null)
-						throw new FrameworkException("Result returned null for " + cmd.Target.FullName);
-					executedCommands.Add(CommandResultDescription<TOutput>.Create(cmd.Description.RequestID, result, startCommand));
+						throw new FrameworkException("Result returned null for " + cd.CommandType.FullName);
+					executedCommands.Add(CommandResultDescription<TOutput>.Create(cd.RequestID, result, startCommand));
 					if ((int)result.Status >= 400)
 					{
 						ScopePool.Release(scope, false);

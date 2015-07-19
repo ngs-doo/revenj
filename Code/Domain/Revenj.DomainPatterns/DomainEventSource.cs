@@ -6,10 +6,10 @@ namespace Revenj.DomainPatterns
 {
 	public class DomainEventSource : IDomainEventSource
 	{
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly ConcurrentDictionary<Type, object> EventSources = new ConcurrentDictionary<Type, object>(1, 17);
 
-		public DomainEventSource(IServiceLocator locator)
+		public DomainEventSource(IServiceProvider locator)
 		{
 			Contract.Requires(locator != null);
 

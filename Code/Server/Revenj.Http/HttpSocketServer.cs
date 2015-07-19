@@ -20,14 +20,14 @@ namespace Revenj.Http
 
 		private static int MessageSizeLimit = 8 * 1024 * 1024;
 
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private readonly Socket Socket;
 		private readonly Routes Routes;
 		private readonly HttpAuth Authentication;
 
 		private readonly ConcurrentStack<HttpSocketContext> Contexts = new ConcurrentStack<HttpSocketContext>();
 
-		public HttpSocketServer(IServiceLocator locator)
+		public HttpSocketServer(IServiceProvider locator)
 		{
 			this.Locator = locator;
 			Socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);

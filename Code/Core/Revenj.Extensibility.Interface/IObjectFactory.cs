@@ -8,7 +8,7 @@ namespace Revenj.Extensibility
 	/// Object factory should be used for scoping so dependencies can be specified for that scope.
 	/// </summary>
 	[ContractClass(typeof(ObjectFactoryContract))]
-	public interface IObjectFactory : IDisposable
+	public interface IObjectFactory : IServiceProvider, IDisposable
 	{
 		/// <summary>
 		/// Check if service is registered with the factory
@@ -74,6 +74,12 @@ namespace Revenj.Extensibility
 			Contract.Requires(builder != null);
 		}
 		public void Dispose() { }
+
+		public object GetService(Type serviceType)
+		{
+			Contract.Requires(serviceType != null);
+			return null;
+		}
 	}
 
 	/// <summary>

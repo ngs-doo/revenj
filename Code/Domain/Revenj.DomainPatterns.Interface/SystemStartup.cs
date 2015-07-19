@@ -1,4 +1,6 @@
-﻿namespace Revenj.DomainPatterns
+﻿using System;
+
+namespace Revenj.DomainPatterns
 {
 	/// <summary>
 	/// Service which will be called during system startup.
@@ -9,6 +11,6 @@
 		/// Configure system behavior.
 		/// </summary>
 		/// <param name="locator">dynamic locator</param>
-		void Configure(IServiceLocator locator);
+		void Configure(IServiceProvider locator);
 	}
 }

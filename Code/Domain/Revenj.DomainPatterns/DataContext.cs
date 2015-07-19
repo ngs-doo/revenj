@@ -8,7 +8,7 @@ namespace Revenj.DomainPatterns
 {
 	public class DataContext : IDataContext
 	{
-		private readonly IServiceLocator Locator;
+		private readonly IServiceProvider Locator;
 		private ConcurrentDictionary<Type, object> Lookups;
 		private ConcurrentDictionary<Type, object> QuerySources;
 		private ConcurrentDictionary<Type, object> Repositories;
@@ -16,7 +16,7 @@ namespace Revenj.DomainPatterns
 		private ConcurrentDictionary<Type, object> Histories;
 		private IDataChangeNotification Changes;
 
-		public DataContext(IServiceLocator locator)
+		public DataContext(IServiceProvider locator)
 		{
 			this.Locator = locator;
 		}

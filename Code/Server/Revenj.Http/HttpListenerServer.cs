@@ -21,7 +21,7 @@ namespace Revenj.Http
 		private readonly Routes Routes;
 		private readonly HttpAuth Authentication;
 
-		public HttpListenerServer(IServiceLocator locator)
+		public HttpListenerServer(IServiceProvider locator)
 		{
 			Listener = new HttpListener();
 			Listener.IgnoreWriteExceptions = true;

@@ -25,7 +25,7 @@ namespace Revenj.SignalRWeb
 			int ka;
 			if (int.TryParse(ConfigurationManager.AppSettings["SignalR.KeepAlive"], out ka) && ka > 0)
 				GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(ka);
-			var locator = Platform.Start<IServiceLocator>();
+			var locator = Platform.Start();
 			NotifyHub.Model = locator.Resolve<IDomainModel>();
 			NotifyHub.ChangeNotification = locator.Resolve<IDataChangeNotification>();
 		}

@@ -112,7 +112,7 @@ Error: " + ex.Message;
 			Either<Type> maybeType,
 			Stream data,
 			bool canCreate,
-			IServiceLocator locator)
+			IServiceProvider locator)
 		{
 			if (maybeType.IsFailure) return maybeType.Error;
 			var type = maybeType.Result;

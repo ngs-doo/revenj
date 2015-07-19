@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Revenj.DomainPatterns;
+﻿using System;
+using System.Collections.Generic;
 using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Converters
@@ -26,7 +26,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return s3;
 		}
 
-		private static S3 ParseS3(BufferedTextReader reader, int context, int innerContext, IServiceLocator locator)
+		private static S3 ParseS3(BufferedTextReader reader, int context, int innerContext, IServiceProvider locator)
 		{
 			for (int i = 0; i < context; i++)
 				reader.Read();

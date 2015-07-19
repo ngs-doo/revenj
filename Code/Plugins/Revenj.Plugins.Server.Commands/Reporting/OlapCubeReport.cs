@@ -19,20 +19,16 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(OlapCubeReport))]
 	public class OlapCubeReport : IReadOnlyServerCommand
 	{
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public OlapCubeReport(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -62,7 +58,11 @@ namespace Revenj.Plugins.Server.Commands
 					});
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -96,7 +96,7 @@ namespace Revenj.Plugins.Server.Commands
 			IDocumentReport<DataTable> report;
 			try
 			{
-				report = Locator.Resolve<IDocumentReport<DataTable>>(documentType);
+				report = locator.Resolve<IDocumentReport<DataTable>>(documentType);
 			}
 			catch (Exception ex)
 			{
@@ -106,7 +106,7 @@ namespace Revenj.Plugins.Server.Commands
 			}
 			try
 			{
-				var table = AnalyzeOlapCube.PopulateTable(input, output, Locator, DomainModel, argument, Permissions);
+				var table = AnalyzeOlapCube.PopulateTable(input, output, locator, DomainModel, argument, Permissions);
 				var result = report.Create(table);
 				return CommandResult<TOutput>.Return(HttpStatusCode.Created, Serialize(output, result), "Report created");
 			}

@@ -18,6 +18,7 @@ namespace Revenj.Plugins.Server.Commands
 	public class TemplaterProcessDocument : IReadOnlyServerCommand
 	{
 		private static readonly string DocumentFolder;
+		//TODO: move IDocumentFactory to ctor
 		private static readonly IDocumentFactory TemplaterFactory = NGS.Templater.Configuration.Factory;
 
 		static TemplaterProcessDocument()
@@ -65,7 +66,11 @@ namespace Revenj.Plugins.Server.Commands
 					});
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -73,7 +78,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var result = Execute<TInput>(input, either.Argument);
+				var result = Execute<TInput>(locator, input, either.Argument);
 				return CommandResult<TOutput>.Success(Serialize(output, result), "Document created");
 			}
 			catch (FileNotFoundException fnf)
@@ -103,7 +108,7 @@ Example argument:
 			}
 		}
 
-		public Stream Execute<TInput>(ISerialization<TInput> input, Argument<TInput> argument)
+		public Stream Execute<TInput>(IServiceProvider locator, ISerialization<TInput> input, Argument<TInput> argument)
 		{
 			var file = Path.Combine(DocumentFolder, argument.File);
 			if (!File.Exists(file))
@@ -117,13 +122,13 @@ Example argument:
 				if (argument.GetSources != null)
 					foreach (var source in argument.GetSources)
 					{
-						var found = GetDomain.GetData(source);
+						var found = GetDomain.GetData(locator, source);
 						document.Process(found);
 					}
 				if (argument.SearchSources != null)
 					foreach (var source in argument.SearchSources)
 					{
-						var found = SearchDomain.FindData<TInput>(input, source);
+						var found = SearchDomain.FindData<TInput>(locator, input, source);
 						document.Process(found);
 					}
 				var specification =

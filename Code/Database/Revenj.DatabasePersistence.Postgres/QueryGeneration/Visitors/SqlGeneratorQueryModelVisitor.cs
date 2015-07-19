@@ -1,10 +1,10 @@
+using System;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
-using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
@@ -13,7 +13,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 	{
 		public static SqlCommandData GenerateSqlQuery(
 			QueryModel queryModel,
-			IServiceLocator locator,
+			IServiceProvider locator,
 			IPostgresConverterFactory factory,
 			IExtensibilityProvider extensibilityProvider)
 		{

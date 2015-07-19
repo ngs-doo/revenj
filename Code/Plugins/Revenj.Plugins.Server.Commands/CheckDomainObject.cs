@@ -33,7 +33,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument { Name = "Module.Entity", Uri = "1001" });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -43,7 +47,8 @@ namespace Revenj.Plugins.Server.Commands
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 			try
 			{
-				var result = GetDomainObject.GetData(new GetDomainObject.Argument { Name = either.Argument.Name, Uri = new[] { either.Argument.Uri } });
+				var arg = new GetDomainObject.Argument { Name = either.Argument.Name, Uri = new[] { either.Argument.Uri } };
+				var result = GetDomainObject.GetData(locator, arg);
 				return CommandResult<TOutput>.Success(output.Serialize(result.Length == 1), result.Length == 1 ? "Found" : "Not found");
 			}
 			catch (ArgumentException ex)

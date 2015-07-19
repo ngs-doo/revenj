@@ -17,7 +17,7 @@ namespace Revenj.Features.RestCache
 		private static readonly ConcurrentDictionary<Type, Func<string, Stream>> SingleLookups = new ConcurrentDictionary<Type, Func<string, Stream>>();
 		private static readonly ConcurrentDictionary<Type, Func<string[], bool, Stream>> CollectionLookups = new ConcurrentDictionary<Type, Func<string[], bool, Stream>>();
 
-		internal static Stream ReadFromCache(Type type, string uri, IServiceLocator locator)
+		internal static Stream ReadFromCache(Type type, string uri, IServiceProvider locator)
 		{
 			Func<string, Stream> converter;
 			if (!SingleLookups.TryGetValue(type, out converter))
@@ -29,7 +29,7 @@ namespace Revenj.Features.RestCache
 			return converter(uri);
 		}
 
-		internal static Stream ReadFromCache(Type type, string[] uri, bool matchOrder, IServiceLocator locator)
+		internal static Stream ReadFromCache(Type type, string[] uri, bool matchOrder, IServiceProvider locator)
 		{
 			Func<string[], bool, Stream> converter;
 			if (!CollectionLookups.TryGetValue(type, out converter))
@@ -71,7 +71,7 @@ namespace Revenj.Features.RestCache
 				}
 			}
 
-			public AggregateLookup(IServiceLocator locator)
+			public AggregateLookup(IServiceProvider locator)
 			{
 				Cache = locator.Resolve<IDataCache<T>>();
 				Serialization = locator.Resolve<IWireSerialization>();

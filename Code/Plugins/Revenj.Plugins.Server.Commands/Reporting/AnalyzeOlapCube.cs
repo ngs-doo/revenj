@@ -20,20 +20,16 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(AnalyzeOlapCube))]
 	public class AnalyzeOlapCube : IReadOnlyServerCommand
 	{
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public AnalyzeOlapCube(
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -78,7 +74,11 @@ namespace Revenj.Plugins.Server.Commands
 					});
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -86,7 +86,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var table = PopulateTable(input, output, Locator, DomainModel, either.Argument, Permissions);
+				var table = PopulateTable(input, output, locator, DomainModel, either.Argument, Permissions);
 				if (either.Argument.UseDataTable)
 					return CommandResult<TOutput>.Return(HttpStatusCode.Created, output.Serialize(table), "Data analyzed");
 				var result = ConvertTable.Convert(output, table);
@@ -109,7 +109,7 @@ Example argument:
 		public static DataTable PopulateTable<TInput, TOutput>(
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
-			IServiceLocator Locator,
+			IServiceProvider Locator,
 			IDomainModel DomainModel,
 			Argument<TInput> argument,
 			IPermissionManager Permissions)
@@ -205,7 +205,7 @@ Example argument:
 		{
 			DataTable Analyze<TFormat>(
 				ISerialization<TFormat> serializer,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				IOlapCubeQuery query,
 				IEnumerable<string> dimensions,
 				IEnumerable<string> facts,
@@ -219,7 +219,7 @@ Example argument:
 		{
 			public DataTable Analyze<TFormat>(
 				ISerialization<TFormat> serializer,
-				IServiceLocator locator,
+				IServiceProvider locator,
 				IOlapCubeQuery query,
 				IEnumerable<string> dimensions,
 				IEnumerable<string> facts,

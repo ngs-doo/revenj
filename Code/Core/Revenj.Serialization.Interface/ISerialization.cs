@@ -6,7 +6,7 @@ namespace Revenj.Serialization
 	/// <summary>
 	/// Generic serialization interface. 
 	/// Use TFormat to specify serialization type (example: ISerialization&lt;string&gt; for JSON serialization).
-	/// During deserialization provide IServiceLocator to context information when required
+	/// During deserialization provide IServiceProvider to context information when required
 	/// </summary>
 	/// <typeparam name="TFormat">define serialization type</typeparam>
 	[ContractClass(typeof(SerializationContract<>))]
@@ -53,7 +53,7 @@ namespace Revenj.Serialization
 		/// <summary>
 		/// Deserialize object without providing context information.
 		/// .NET objects or value objects don't require context so they can be deserialized
-		/// without IServiceLocator in context.
+		/// without IServiceProvider in context.
 		/// </summary>
 		/// <typeparam name="TFormat">serialization format</typeparam>
 		/// <typeparam name="T">object type</typeparam>

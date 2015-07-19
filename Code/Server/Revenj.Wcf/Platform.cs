@@ -1,17 +1,17 @@
 ﻿using System;
-using Revenj.Extensibility.Autofac;
-using Revenj.Extensibility.Autofac.Configuration;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
+using Revenj.Extensibility.Autofac;
+using Revenj.Extensibility.Autofac.Configuration;
 using Revenj.Wcf;
 
 namespace DSL
 {
 	public static class Platform
 	{
-		public static IServiceLocator Start()
+		public static IServiceProvider Start()
 		{
-			return Start<IServiceLocator>();
+			return Start<IServiceProvider>();
 		}
 
 		public static TService Start<TService>(params Type[] types)
@@ -31,8 +31,8 @@ namespace DSL
 			var container = builder.Build();
 			state.IsBooting = false;
 			var objectFactory = container.Resolve<IObjectFactory>();
-			var locator = objectFactory.Resolve<IServiceLocator>();
-			ContainerWcfHost.Resolver = s => locator.Resolve(s);
+			var locator = objectFactory.Resolve<IServiceProvider>();
+			ContainerWcfHost.Resolver = s => locator.GetService(s);
 			state.Started(objectFactory);
 			return locator.Resolve<TService>();
 		}

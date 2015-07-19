@@ -22,12 +22,13 @@ namespace Mailer
 	using Revenj.Features.Mailer;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System;
 
 	public class MailService : Revenj.Features.Mailer.MailService
 	{
 		private readonly IPersistableRepository<MailMessage> Repository;
 
-		public MailService(IServiceLocator locator) 
+		public MailService(IServiceProvider locator) 
 			: base(locator)
 		{
 			Repository = locator.Resolve<IPersistableRepository<MailMessage>>();

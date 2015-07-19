@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using Remotion.Linq.Clauses.ResultOperators;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
-using Revenj.DomainPatterns;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 {
 	public class MainQueryParts : QueryParts
 	{
 		public MainQueryParts(
-			IServiceLocator locator,
+			IServiceProvider locator,
 			IPostgresConverterFactory factory,
 			IEnumerable<IQuerySimplification> simplifications,
 			IEnumerable<IExpressionMatcher> expressionMatchers,

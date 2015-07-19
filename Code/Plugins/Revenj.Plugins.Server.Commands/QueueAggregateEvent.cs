@@ -22,24 +22,16 @@ namespace Revenj.Plugins.Server.Commands
 	{
 		private static ConcurrentDictionary<Type, IQueueCommand> Cache = new ConcurrentDictionary<Type, IQueueCommand>(1, 127);
 
-		private readonly IDomainEventStore EventStore;
-		private readonly IServiceLocator Locator;
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 
 		public QueueAggregateEvent(
-			IDomainEventStore eventStore,
-			IServiceLocator locator,
 			IDomainModel domainModel,
 			IPermissionManager permissions)
 		{
-			Contract.Requires(eventStore != null);
-			Contract.Requires(locator != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(permissions != null);
 
-			this.EventStore = eventStore;
-			this.Locator = locator;
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
 		}
@@ -60,7 +52,11 @@ namespace Revenj.Plugins.Server.Commands
 			return serializer.Serialize(new Argument<TFormat> { Name = "Module.Aggregate.Event", Uri = "1002" });
 		}
 
-		public ICommandResult<TOutput> Execute<TInput, TOutput>(ISerialization<TInput> input, ISerialization<TOutput> output, TInput data)
+		public ICommandResult<TOutput> Execute<TInput, TOutput>(
+			IServiceProvider locator,
+			ISerialization<TInput> input,
+			ISerialization<TOutput> output,
+			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
 			if (either.Error != null)
@@ -109,7 +105,7 @@ namespace Revenj.Plugins.Server.Commands
 					command = Activator.CreateInstance(commandType) as IQueueCommand;
 					Cache.TryAdd(eventType, command);
 				}
-				var result = command.Queue(input, output, Locator, EventStore, argument.Uri, argument.Data);
+				var result = command.Queue(input, output, locator, argument.Uri, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Accepted, result, "Event queued");
 			}
@@ -128,8 +124,7 @@ Example argument:
 			TOutput Queue<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
-				IDomainEventStore domainStore,
+				IServiceProvider locator,
 				string uri,
 				TInput data);
 		}
@@ -141,8 +136,7 @@ Example argument:
 			public TOutput Queue<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
-				IServiceLocator locator,
-				IDomainEventStore domainStore,
+				IServiceProvider locator,
 				string uri,
 				TInput data)
 			{
@@ -165,6 +159,7 @@ Example argument:
 				{
 					throw new ArgumentException(ex.Message, ex);
 				}
+				var domainStore = locator.Resolve<IDomainEventStore>();
 				try { domainStore.Queue(domainEvent); }
 				catch (SecurityException) { throw; }
 				catch (Exception ex)
@@ -172,8 +167,8 @@ Example argument:
 					throw new ArgumentException(
 						ex.Message,
 						data == null
-							? new FrameworkException("Error while Queueting event: {0}. Data not sent.".With(ex.Message), ex)
-							: new FrameworkException(@"Error while Queueting event: {0}. Sent data: 
+							? new FrameworkException("Error while Queuing event: {0}. Data not sent.".With(ex.Message), ex)
+							: new FrameworkException(@"Error while Queuing event: {0}. Sent data: 
 {1}".With(ex.Message, output.Serialize(domainEvent)), ex));
 				}
 				return output.Serialize(aggregate);
