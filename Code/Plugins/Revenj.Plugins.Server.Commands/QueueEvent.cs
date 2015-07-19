@@ -94,7 +94,7 @@ Please check your arguments.".With(argument.Name), null);
 				}
 				command.Queue(input, Locator, EventStore, argument.Data);
 
-				return CommandResult<TOutput>.Return(HttpStatusCode.OK, default(TOutput), "Event queued");
+				return CommandResult<TOutput>.Return(HttpStatusCode.Accepted, default(TOutput), "Event queued");
 			}
 			catch (ArgumentException ex)
 			{

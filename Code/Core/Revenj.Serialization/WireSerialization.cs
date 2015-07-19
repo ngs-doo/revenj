@@ -22,14 +22,14 @@ namespace Revenj.Serialization
 		public string Serialize(object value, string accept, Stream destination)
 		{
 			//fast path
-			if (accept == "application/json;minimal")
-			{
-				Json.Serialize(value, destination, true);
-				return "application/json";
-			}
 			if (accept == "application/json")
 			{
 				Json.Serialize(value, destination, false);
+				return "application/json";
+			}
+			if (accept == "application/json;minimal")
+			{
+				Json.Serialize(value, destination, true);
 				return "application/json";
 			}
 			if (accept == "application/x-protobuf")
@@ -44,18 +44,18 @@ namespace Revenj.Serialization
 			}
 			//Slow path
 			accept = (accept ?? "application/json").ToLowerInvariant();
-			if (accept.Contains("application/json"))
+			if (accept.Contains("application/xml"))
 			{
-				Json.Serialize(value, destination, false);
-				return "application/json";
+				Xml.Serialize(value, destination);
+				return "application/xml";
 			}
 			if (accept.Contains("application/x-protobuf"))
 			{
 				Protobuf.Serialize(value, destination);
 				return "application/x-protobuf";
 			}
-			Xml.Serialize(value, destination);
-			return "application/xml";
+			Json.Serialize(value, destination, false);
+			return "application/json";
 		}
 
 		public object Deserialize(Stream source, Type target, string contentType, StreamingContext context)
@@ -72,12 +72,12 @@ namespace Revenj.Serialization
 			if (contentType == "application/xml")
 				return Xml.Deserialize(source, target, context);
 			//slow path
-			contentType = (contentType ?? "application/json").ToLowerInvariant().TrimStart();
-			if (contentType.Contains("application/json"))
-				return Json.Deserialize(source, target, context);
+			contentType = (contentType ?? "application/json").ToLowerInvariant();
+			if (contentType.Contains("application/xml"))
+				return Xml.Deserialize(source, target, context);
 			if (contentType.Contains("application/x-protobuf"))
 				return Protobuf.Deserialize(source, target, context);
-			return Xml.Deserialize(source, target, context);
+			return Json.Deserialize(source, target, context);
 		}
 
 		public ISerialization<TFormat> GetSerializer<TFormat>()

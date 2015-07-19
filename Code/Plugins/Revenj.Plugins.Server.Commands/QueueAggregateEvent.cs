@@ -111,7 +111,7 @@ namespace Revenj.Plugins.Server.Commands
 				}
 				var result = command.Queue(input, output, Locator, EventStore, argument.Uri, argument.Data);
 
-				return CommandResult<TOutput>.Return(HttpStatusCode.Created, result, "Event queued");
+				return CommandResult<TOutput>.Return(HttpStatusCode.Accepted, result, "Event queued");
 			}
 			catch (ArgumentException ex)
 			{

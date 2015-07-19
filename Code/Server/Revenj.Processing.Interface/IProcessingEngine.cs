@@ -1,4 +1,6 @@
-﻿namespace Revenj.Processing
+﻿using System.Security.Principal;
+
+namespace Revenj.Processing
 {
 	/// <summary>
 	/// Service for processing server commands.
@@ -16,7 +18,8 @@
 		/// <typeparam name="TInput">command argument type</typeparam>
 		/// <typeparam name="TOutput">executed result type</typeparam>
 		/// <param name="commands">commands description</param>
+		/// <param name="principal">security context</param>
 		/// <returns>aggregated execution result</returns>
-		IProcessingResult<TOutput> Execute<TInput, TOutput>(IServerCommandDescription<TInput>[] commands);
+		IProcessingResult<TOutput> Execute<TInput, TOutput>(IServerCommandDescription<TInput>[] commands, IPrincipal principal);
 	}
 }

@@ -38,9 +38,11 @@ namespace Revenj.Wcf
 
 		public Stream PassThrough<TCommand, TArgument>(TArgument argument, string accept, AdditionalCommand[] additionalCommands)
 		{
+			var request = ThreadContext.Request;
+			var response = ThreadContext.Response;
 			var start = Stopwatch.GetTimestamp();
 			var engine = ProcessingEngine;
-			var sessionID = ThreadContext.Request.GetHeader("X-Revenj-Session-ID");
+			var sessionID = request.GetHeader("X-Revenj-Session-ID");
 			if (sessionID != null)
 			{
 				var scope = ObjectFactory.FindScope(sessionID);
@@ -55,22 +57,23 @@ namespace Revenj.Wcf
 				var ac = additionalCommands[i - 1];
 				commands[i] = new ObjectCommandDescription { RequestID = ac.ToHeader, CommandType = ac.CommandType, Data = ac.Argument };
 			}
-			var stream = RestApplication.ExecuteCommands<object>(engine, Serialization, commands, accept);
+			var stream = RestApplication.ExecuteCommands<object>(engine, Serialization, commands, request, response, accept);
 			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
-			ThreadContext.Response.AddHeader("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
+			response.AddHeader("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
 			return stream;
 		}
 
 		public Stream ConvertStream<TCommand, TArgument>(TArgument argument)
 		{
+			var request = ThreadContext.Request;
 			var match = new UriTemplateMatch();
 			match.RelativePathSegments.Add(typeof(TCommand).FullName);
-			ThreadContext.Request.UriTemplateMatch = match;
+			request.UriTemplateMatch = match;
 			if (argument == null)
 				return Application.Get();
 			using (var ms = ChunkedMemoryStream.Create())
 			{
-				Serialization.Serialize(argument, ThreadContext.Request.ContentType, ms);
+				Serialization.Serialize(argument, request.ContentType, ms);
 				ms.Position = 0;
 				return Application.Post(ms);
 			}

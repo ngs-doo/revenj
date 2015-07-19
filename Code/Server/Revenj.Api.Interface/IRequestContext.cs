@@ -32,7 +32,8 @@ namespace Revenj.Api
 		UriTemplateMatch UriTemplateMatch { get; set; }
 		/// <summary>
 		/// Read custom header.
-		/// Returns null if not found
+		/// Returns null if not found.
+		/// Use lowercase values for lookup
 		/// </summary>
 		/// <param name="name">header name</param>
 		/// <returns>found value</returns>

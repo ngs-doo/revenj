@@ -9,6 +9,7 @@ using Revenj.Api;
 using Revenj.Common;
 using Revenj.Extensibility;
 using Revenj.Processing;
+using System.Threading;
 
 namespace Revenj.Wcf
 {
@@ -49,7 +50,7 @@ namespace Revenj.Wcf
 
 			processingCommands = PrepareCommands(soapCommands).ToArray();
 
-			var result = ProcessingEngine.Execute<XElement, XElement>(processingCommands);
+			var result = ProcessingEngine.Execute<XElement, XElement>(processingCommands, Thread.CurrentPrincipal);
 
 			if (result.Status == HttpStatusCode.ServiceUnavailable)
 				HttpRuntime.UnloadAppDomain();

@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security;
-using System.Threading;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.Extensibility;
 using Revenj.Security;
@@ -96,7 +96,7 @@ namespace Revenj.Processing
 			}
 		}
 
-		public IProcessingResult<TOutput> Execute<TInput, TOutput>(IServerCommandDescription<TInput>[] commandDescriptions)
+		public IProcessingResult<TOutput> Execute<TInput, TOutput>(IServerCommandDescription<TInput>[] commandDescriptions, IPrincipal principal)
 		{
 			var start = Stopwatch.GetTimestamp();
 
@@ -120,7 +120,7 @@ namespace Revenj.Processing
 						TraceEventType.Warning,
 						5311,
 						"Access denied. User: {0}. Target: {1}",
-						Thread.CurrentPrincipal.Identity.Name,
+						principal.Identity.Name,
 						c.CommandType.FullName);
 					return
 						ProcessingResult<TOutput>.Create(
@@ -146,7 +146,7 @@ namespace Revenj.Processing
 						TraceEventType.Warning,
 						5321,
 						"Unknown target. User: {0}. Target: {1}",
-						Thread.CurrentPrincipal.Identity.Name,
+						principal.Identity.Name,
 						commandDescriptions[i].CommandType.FullName);
 					return
 						ProcessingResult<TOutput>.Create(
@@ -214,7 +214,7 @@ namespace Revenj.Processing
 					TraceEventType.Warning,
 					5312,
 					"Security error. User: {0}. Error: {1}.",
-					Thread.CurrentPrincipal.Identity.Name,
+					principal.Identity.Name,
 					ex);
 				ScopePool.Release(scope, false);
 				return
@@ -230,7 +230,7 @@ namespace Revenj.Processing
 					TraceEventType.Error,
 					5313,
 					"Multiple errors. User: {0}. Error: {1}.",
-					Thread.CurrentPrincipal.Identity.Name,
+					principal.Identity.Name,
 					ex.GetDetailedExplanation());
 				ScopePool.Release(scope, false);
 				return Exceptions.DebugMode
@@ -283,7 +283,7 @@ namespace Revenj.Processing
 					TraceEventType.Error,
 					5317,
 					"Unexpected error. User: {0}. Error: {1}",
-					Thread.CurrentPrincipal.Identity.Name,
+					principal.Identity.Name,
 					ex.GetDetailedExplanation());
 				ScopePool.Release(scope, false);
 				return Exceptions.DebugMode

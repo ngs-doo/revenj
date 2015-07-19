@@ -99,7 +99,7 @@ namespace Revenj.Plugins.Rest.Commands
 					} 
 				};
 			}
-			var accept = (ThreadContext.Request.Accept ?? "application/xml").ToLowerInvariant();
+			var accept = (ThreadContext.Request.Accept ?? "application/json").ToLowerInvariant();
 			return
 				Converter.PassThrough<SearchDomainObject, SearchDomainObject.Argument<object>>(
 					new SearchDomainObject.Argument<object>
@@ -157,7 +157,7 @@ namespace Revenj.Plugins.Rest.Commands
 					} 
 				};
 			}
-			var accept = (ThreadContext.Request.Accept ?? "application/xml").ToLowerInvariant();
+			var accept = (ThreadContext.Request.Accept ?? "application/json").ToLowerInvariant();
 			return
 				Converter.PassThrough<SearchDomainObject, SearchDomainObject.Argument<object>>(
 					new SearchDomainObject.Argument<object>

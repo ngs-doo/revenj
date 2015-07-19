@@ -67,7 +67,7 @@ namespace Revenj.Api
 		/// <returns>result converted to requested mime type</returns>
 		public static Stream PassThrough<TCommand, TArgument>(this ICommandConverter converter, TArgument argument)
 		{
-			var accept = (ThreadContext.Request.Accept ?? "application/xml").ToLowerInvariant();
+			var accept = (ThreadContext.Request.Accept ?? "application/json").ToLowerInvariant();
 			return converter.PassThrough<TCommand, TArgument>(argument, accept, EmptyCommands);
 		}
 	}

@@ -52,11 +52,13 @@ namespace Revenj.Wcf
 
 		private static ExecuteResult Execute<TInput>(
 			IProcessingEngine engine,
-			IServerCommandDescription<TInput>[] commands)
+			IServerCommandDescription<TInput>[] commands,
+			IRequestContext request,
+			IResponseContext response)
 		{
-			var result = engine.Execute<TInput, object>(commands);
+			var result = engine.Execute<TInput, object>(commands, request.Principal);
 			var first = result.ExecutedCommandResults != null ? result.ExecutedCommandResults.FirstOrDefault() : null;
-			ThreadContext.Response.StatusCode = first != null && first.Result != null
+			response.StatusCode = first != null && first.Result != null
 				? first.Result.Status
 				: result.Status;
 
@@ -73,7 +75,7 @@ namespace Revenj.Wcf
 				return new ExecuteResult { Error = Utility.ReturnError(first.Result.Message, first.Result.Status) };
 
 			foreach (var ar in result.ExecutedCommandResults.Skip(1))
-				ThreadContext.Response.AddHeader(ar.RequestID, ar.Result.Data.ToString());
+				response.AddHeader(ar.RequestID, ar.Result.Data.ToString());
 
 			return new ExecuteResult { Result = first.Result.Data };
 		}
@@ -86,6 +88,7 @@ namespace Revenj.Wcf
 		public Stream Post(Stream message)
 		{
 			var request = ThreadContext.Request;
+			var response = ThreadContext.Response;
 			var template = request.UriTemplateMatch;
 			var command = template.RelativePathSegments.Count > 0 ? template.RelativePathSegments[0] : null;
 
@@ -98,10 +101,10 @@ namespace Revenj.Wcf
 
 			var start = Stopwatch.GetTimestamp();
 
-			var accept = (request.Accept ?? "application/xml").ToLowerInvariant();
+			var accept = (request.Accept ?? "application/json").ToLowerInvariant();
 
 			var engine = ProcessingEngine;
-			var sessionID = request.GetHeader("X-Revenj-Session-ID");
+			var sessionID = request.GetHeader("x-revenj-session-id");
 			if (sessionID != null)
 			{
 				var scope = ObjectFactory.FindScope(sessionID);
@@ -114,24 +117,61 @@ namespace Revenj.Wcf
 			switch (request.ContentType)
 			{
 				case "application/json":
-					stream = ExecuteCommands(engine, Serialization, new[] { new JsonCommandDescription(template.QueryParameters, message, commandType) }, accept);
+					stream =
+						ExecuteCommands(
+							engine,
+							Serialization,
+							new[] { new JsonCommandDescription(template.QueryParameters, message, commandType) },
+							request,
+							response,
+							accept);
 					break;
 				case "application/x-protobuf":
-					stream = ExecuteCommands(engine, Serialization, new[] { new ProtobufCommandDescription(template.QueryParameters, message, commandType) }, accept);
+					stream =
+						ExecuteCommands(
+							engine,
+							Serialization,
+							new[] { new ProtobufCommandDescription(template.QueryParameters, message, commandType) },
+							request,
+							response,
+							accept);
 					break;
 				default:
 					if (message != null)
 					{
 						XElement el;
 						try { el = XElement.Load(message); }
-						catch (Exception ex) { return Utility.ReturnError("Error parsing request body. " + ex.Message, HttpStatusCode.BadRequest); }
-						stream = ExecuteCommands(engine, Serialization, new[] { new XmlCommandDescription(el, commandType) }, accept);
+						catch (Exception ex)
+						{
+							return
+								Utility.ReturnError(
+									"Error parsing request body as XML. " + ex.Message,
+									request.ContentType == null ? HttpStatusCode.UnsupportedMediaType : HttpStatusCode.BadRequest);
+						}
+						stream =
+							ExecuteCommands(
+								engine,
+								Serialization,
+								new[] { new XmlCommandDescription(el, commandType) },
+								request,
+								response,
+								accept);
 					}
-					else stream = ExecuteCommands(engine, Serialization, new[] { new XmlCommandDescription(template.QueryParameters, commandType) }, accept);
+					else
+					{
+						stream =
+							ExecuteCommands(
+								engine,
+								Serialization,
+								new[] { new XmlCommandDescription(template.QueryParameters, commandType) },
+								request,
+								response,
+								accept);
+					}
 					break;
 			}
 			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
-			ThreadContext.Response.AddHeader("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
+			response.AddHeader("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
 			return stream;
 		}
 
@@ -139,19 +179,21 @@ namespace Revenj.Wcf
 			IProcessingEngine engine,
 			IWireSerialization serialization,
 			IServerCommandDescription<TFormat>[] commands,
+			IRequestContext request,
+			IResponseContext response,
 			string accept)
 		{
-			var result = Execute(engine, commands);
+			var result = Execute(engine, commands, request, response);
 			if (result.Error != null)
 				return result.Error;
 			if (result.Result == null)
 			{
-				ThreadContext.Response.ContentType = accept;
+				response.ContentType = accept;
 				return null;
 			}
 			if (accept == "application/octet-stream")
 			{
-				ThreadContext.Response.ContentType = "application/octet-stream";
+				response.ContentType = "application/octet-stream";
 				if (result.Result is Stream)
 					return result.Result as Stream;
 				else if (result.Result is StreamReader)
@@ -195,11 +237,11 @@ namespace Revenj.Wcf
 				return Utility.ReturnError(
 					"Unexpected command result. Can't convert "
 					+ result.Result.GetType().FullName + " to octet-stream. Use application/x-dotnet mime type for .NET binary serialization",
-					HttpStatusCode.BadRequest);
+					HttpStatusCode.UnsupportedMediaType);
 			}
 			if (accept == "application/base64")
 			{
-				ThreadContext.Response.ContentType = "application/base64";
+				response.ContentType = "application/base64";
 				if (result.Result is Stream)
 				{
 					var stream = result.Result as Stream;
@@ -284,11 +326,11 @@ namespace Revenj.Wcf
 						return cms.ToBase64Stream();
 					}
 				}
-				return Utility.ReturnError("Unexpected command result. Can't convert to base64.", HttpStatusCode.BadRequest);
+				return Utility.ReturnError("Unexpected command result. Can't convert to base64.", HttpStatusCode.UnsupportedMediaType);
 			}
 			if (accept == "application/x-dotnet")
 			{
-				ThreadContext.Response.ContentType = "application/x-dotnet";
+				response.ContentType = "application/x-dotnet";
 				var bf = new BinaryFormatter();
 				bf.AssemblyFormat = FormatterAssemblyStyle.Simple;
 				var cms = ChunkedMemoryStream.Create();
@@ -297,7 +339,7 @@ namespace Revenj.Wcf
 				return cms;
 			}
 			var ms = ChunkedMemoryStream.Create();
-			ThreadContext.Response.ContentType = serialization.Serialize(result.Result, accept, ms);
+			response.ContentType = serialization.Serialize(result.Result, accept, ms);
 			ms.Position = 0;
 			return ms;
 		}
