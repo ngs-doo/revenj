@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -60,6 +61,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -68,7 +70,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var command = PrepareCommand(either.Argument.Name, either.Argument.SpecificationName);
+				var command = PrepareCommand(principal, either.Argument.Name, either.Argument.SpecificationName);
 				var exists = command.CheckExists(input, locator, either.Argument.Specification);
 				return CommandResult<TOutput>.Success(output.Serialize(exists), exists.ToString());
 			}
@@ -82,9 +84,9 @@ Example argument:
 			}
 		}
 
-		private IExistsCommand PrepareCommand(string domainName, string specificationName)
+		private IExistsCommand PrepareCommand(IPrincipal principal, string domainName, string specificationName)
 		{
-			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, domainName);
+			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, principal, domainName);
 			if (string.IsNullOrWhiteSpace(specificationName))
 			{
 				IExistsCommand command;
@@ -150,7 +152,7 @@ Example argument:
 					catch (Exception ex)
 					{
 						throw new ArgumentException(@"Specification could not be deserialized.
-Please provide specification name. Error: {0}.".With(ex.Message), ex);
+Please provide specification name. Error: " + ex.Message, ex);
 					}
 					if (specification == null)
 						throw new FrameworkException("Specification could not be deserialized. Please provide specification name.");
@@ -161,7 +163,7 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 					catch (Exception ex)
 					{
 						throw new ArgumentException(
-							"Error while executing query: {0}.".With(ex.Message),
+							"Error while executing query: " + ex.Message,
 							new FrameworkException("Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
 					}
 				}
@@ -209,7 +211,7 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 					}
 					catch (Exception ex)
 					{
-						throw new ArgumentException(@"Specification could not be deserialized: {0}.".With(ex.Message), ex);
+						throw new ArgumentException(@"Specification could not be deserialized: " + ex.Message, ex);
 					}
 				}
 				if (specification == null)
@@ -222,7 +224,7 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 				catch (Exception ex)
 				{
 					throw new ArgumentException(
-						"Error while executing query: {0}.".With(ex.Message),
+						"Error while executing query: " + ex.Message,
 						new FrameworkException("Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
 				}
 				return result.Any();

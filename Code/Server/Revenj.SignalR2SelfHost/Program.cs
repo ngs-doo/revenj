@@ -1,10 +1,10 @@
-﻿using System;
-using System.Configuration;
-using System.Threading;
-using DSL;
+﻿using DSL;
 using Microsoft.Owin.Hosting;
 using Owin;
 using Revenj.DomainPatterns;
+using System;
+using System.Configuration;
+using System.Threading;
 
 namespace Revenj.SignalR2SelfHost
 {
@@ -20,7 +20,7 @@ namespace Revenj.SignalR2SelfHost
 				Console.WriteLine("HttpAddress not defined in config and no address passed as command line argument");
 				return;
 			}
-			var locator = Platform.Start<IServiceLocator>();
+			var locator = Platform.Start();
 			NotifyHub.Model = locator.Resolve<IDomainModel>();
 			NotifyHub.ChangeNotification = locator.Resolve<IDataChangeNotification>();
 			using (WebApp.Start<Startup>(address))

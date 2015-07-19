@@ -33,6 +33,7 @@ namespace Revenj.Core
 			SetupSerialization(builder);
 
 			builder.RegisterType<PermissionManager>().As<IPermissionManager>().SingleInstance();
+			builder.Register(_ => System.Threading.Thread.CurrentPrincipal);
 
 			builder.RegisterType<OnContainerBuild>().As<IStartable>();
 

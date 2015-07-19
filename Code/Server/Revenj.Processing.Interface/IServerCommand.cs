@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Principal;
 using Revenj.Serialization;
 
 namespace Revenj.Processing
@@ -19,15 +20,17 @@ namespace Revenj.Processing
 		/// </summary>
 		/// <typeparam name="TInput">input format type</typeparam>
 		/// <typeparam name="TOutput">output format type</typeparam>
-		/// <param name="serviceProvider">current context</param>
+		/// <param name="locator">service locator</param>
 		/// <param name="input">input deserializer</param>
 		/// <param name="output">output serializer</param>
+		/// <param name="principal">security context</param>
 		/// <param name="data">command argument</param>
 		/// <returns>command response</returns>
 		ICommandResult<TOutput> Execute<TInput, TOutput>(
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data);
 	}
 	/// <summary>

@@ -13,6 +13,7 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
+using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -78,6 +79,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -86,7 +88,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var table = PopulateTable(input, output, locator, DomainModel, either.Argument, Permissions);
+				var table = PopulateTable(input, output, locator, DomainModel, either.Argument, principal, Permissions);
 				if (either.Argument.UseDataTable)
 					return CommandResult<TOutput>.Return(HttpStatusCode.Created, output.Serialize(table), "Data analyzed");
 				var result = ConvertTable.Convert(output, table);
@@ -112,7 +114,8 @@ Example argument:
 			IServiceProvider Locator,
 			IDomainModel DomainModel,
 			Argument<TInput> argument,
-			IPermissionManager Permissions)
+			IPrincipal principal,
+			IPermissionManager permissions)
 		{
 			var cubeType = DomainModel.Find(argument.CubeName);
 			if (cubeType == null)
@@ -121,7 +124,7 @@ Example argument:
 					new FrameworkException(@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output))));
 
-			if (!Permissions.CanAccess(cubeType))
+			if (!permissions.CanAccess(cubeType.FullName, principal))
 				throw new SecurityException("You don't have permission to access: {0}.".With(argument.CubeName));
 
 			if (!typeof(IOlapCubeQuery).IsAssignableFrom(cubeType))

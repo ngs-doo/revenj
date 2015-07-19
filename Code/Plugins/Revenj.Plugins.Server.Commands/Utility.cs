@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Security;
+using System.Security.Principal;
 using Revenj.DomainPatterns;
 using Revenj.Security;
 
@@ -16,6 +17,7 @@ namespace Revenj.Plugins.Server.Commands
 		public static Type FindDataSourceAndCheckPermissions(
 			this IDomainModel DomainModel,
 			IPermissionManager Permissions,
+			IPrincipal principal,
 			string domainName)
 		{
 			if (string.IsNullOrEmpty(domainName))
@@ -26,7 +28,7 @@ namespace Revenj.Plugins.Server.Commands
 			if (!typeof(IDataSource).IsAssignableFrom(domainObjectType))
 				throw new ArgumentException(@"Specified type ({0}) is not a data source. 
 Please check your arguments.".With(domainName));
-			if (!Permissions.CanAccess(domainObjectType))
+			if (!Permissions.CanAccess(domainObjectType.FullName, principal))
 				throw new SecurityException("You don't have permission to access: {0}.".With(domainName));
 			return domainObjectType;
 		}

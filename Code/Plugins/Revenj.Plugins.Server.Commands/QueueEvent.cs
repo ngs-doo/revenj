@@ -12,6 +12,7 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
+using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -53,6 +54,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -62,23 +64,27 @@ namespace Revenj.Plugins.Server.Commands
 
 			var eventType = DomainModel.Find(argument.Name);
 			if (eventType == null)
+			{
 				return
 					CommandResult<TOutput>.Fail(
 						"Couldn't find event type {0}.".With(argument.Name),
 						@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
+			}
 			if (!typeof(IDomainEvent).IsAssignableFrom(eventType))
+			{
 				return CommandResult<TOutput>.Fail(@"Specified type ({0}) is not a domain event. 
 Please check your arguments.".With(argument.Name), null);
-
-			if (!Permissions.CanAccess(eventType))
+			}
+			if (!Permissions.CanAccess(eventType.FullName, principal))
+			{
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,
 						default(TOutput),
 						"You don't have permission to access: {0}.",
 						argument.Name);
-
+			}
 			try
 			{
 				IQueueCommand command;

@@ -12,6 +12,7 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
+using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -55,6 +56,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -69,7 +71,7 @@ namespace Revenj.Plugins.Server.Commands
 					@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 
-			if (!Permissions.CanAccess(domainType))
+			if (!Permissions.CanAccess(domainType.FullName, principal))
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,
@@ -86,7 +88,7 @@ namespace Revenj.Plugins.Server.Commands
 							argument.DomainObjectName),
 						null);
 
-			if (!Permissions.CanAccess(validationType))
+			if (!Permissions.CanAccess(validationType.FullName, principal))
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,

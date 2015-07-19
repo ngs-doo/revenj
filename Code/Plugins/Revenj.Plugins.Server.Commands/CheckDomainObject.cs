@@ -5,6 +5,7 @@ using Revenj.Extensibility;
 using Revenj.Processing;
 using Revenj.Serialization;
 using Revenj.Utility;
+using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -37,6 +38,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
@@ -48,7 +50,7 @@ namespace Revenj.Plugins.Server.Commands
 			try
 			{
 				var arg = new GetDomainObject.Argument { Name = either.Argument.Name, Uri = new[] { either.Argument.Uri } };
-				var result = GetDomainObject.GetData(locator, arg);
+				var result = GetDomainObject.GetData(locator, arg, principal);
 				return CommandResult<TOutput>.Success(output.Serialize(result.Length == 1), result.Length == 1 ? "Found" : "Not found");
 			}
 			catch (ArgumentException ex)

@@ -98,7 +98,7 @@ namespace Revenj.Processing
 			for (int i = 0; i < commandDescriptions.Length; i++)
 			{
 				var c = commandDescriptions[i];
-				if (!Permissions.CanAccess(c.CommandType))
+				if (!Permissions.CanAccess(c.CommandType.FullName, principal))
 				{
 					TraceSource.TraceEvent(
 						TraceEventType.Warning,
@@ -148,7 +148,7 @@ namespace Revenj.Processing
 			{
 				try
 				{
-					scope = ScopePool.Take(!useTransaction);
+					scope = ScopePool.Take(!useTransaction, principal);
 				}
 				catch (Exception ex)
 				{
@@ -169,7 +169,7 @@ namespace Revenj.Processing
 				{
 					var startCommand = Stopwatch.GetTimestamp();
 					var cmd = ActualCommands[cd.CommandType];
-					var result = cmd.Execute(scope.Factory, inputSerializer, outputSerializer, cd.Data);
+					var result = cmd.Execute(scope.Factory, inputSerializer, outputSerializer, principal, cd.Data);
 					if (result == null)
 						throw new FrameworkException("Result returned null for " + cd.CommandType.FullName);
 					executedCommands.Add(CommandResultDescription<TOutput>.Create(cd.RequestID, result, startCommand));

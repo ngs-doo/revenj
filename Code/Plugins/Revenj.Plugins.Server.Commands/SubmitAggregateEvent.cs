@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Security;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -56,6 +57,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -65,37 +67,42 @@ namespace Revenj.Plugins.Server.Commands
 
 			var eventType = DomainModel.Find(argument.Name);
 			if (eventType == null)
+			{
 				return
 					CommandResult<TOutput>.Fail(
-						"Couldn't find event type {0}.".With(argument.Name),
+						"Couldn't find event type " + argument.Name,
 						@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
-
+			}
 			var aggregateInterface = eventType.GetInterfaces().FirstOrDefault(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IDomainEvent<>));
 			var aggregateType = aggregateInterface != null ? aggregateInterface.GetGenericArguments()[0] : null;
 			if (aggregateType == null)
+			{
 				return
 					CommandResult<TOutput>.Fail(
 						"{0} does not implement IDomainEvent<TAggregate>.".With(eventType.FullName),
 						@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
-
-			if (!Permissions.CanAccess(eventType))
+			}
+			if (!Permissions.CanAccess(eventType.FullName, principal))
+			{
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,
 						default(TOutput),
 						"You don't have permission to access: {0}.",
 						eventType.FullName);
+			}
 
-			if (!Permissions.CanAccess(aggregateType))
+			if (!Permissions.CanAccess(aggregateType.FullName, principal))
+			{
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,
 						default(TOutput),
 						"You don't have permission to access: {0}.",
 						aggregateType.FullName);
-
+			}
 			try
 			{
 				ISubmitCommand command;

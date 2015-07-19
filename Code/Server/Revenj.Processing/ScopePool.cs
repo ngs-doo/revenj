@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Configuration;
 using System.Diagnostics;
+using System.Security.Principal;
 using Revenj.DatabasePersistence;
 using Revenj.Extensibility;
 
@@ -9,7 +10,7 @@ namespace Revenj.Processing
 {
 	public interface IScopePool
 	{
-		Scope Take(bool readOnly);
+		Scope Take(bool readOnly, IPrincipal principal);
 		void Release(Scope factory, bool valid);
 	}
 
@@ -17,6 +18,7 @@ namespace Revenj.Processing
 	{
 		public readonly IObjectFactory Factory;
 		public readonly IDatabaseQuery Query;
+		public IPrincipal Principal { get; internal set; }
 
 		public Scope(IObjectFactory factory, IDatabaseQuery query)
 		{
@@ -89,7 +91,7 @@ namespace Revenj.Processing
 			}
 		}
 
-		private Scope SetupWritableScope()
+		private Scope SetupWritableScope(IPrincipal principal)
 		{
 			var id = Guid.NewGuid().ToString();
 			var inner = Factory.CreateScope(id);
@@ -97,6 +99,7 @@ namespace Revenj.Processing
 			{
 				var query = Queries.StartQuery(true);
 				inner.RegisterInstance(query);
+				inner.RegisterInstance(principal);
 				inner.RegisterType(typeof(ProcessingContext), typeof(IProcessingEngine), InstanceScope.Singleton);
 				return new Scope(inner, query);
 			}
@@ -108,22 +111,26 @@ namespace Revenj.Processing
 			}
 		}
 
-		public Scope Take(bool readOnly)
+		public Scope Take(bool readOnly, IPrincipal principal)
 		{
 			if (!readOnly)
-				return SetupWritableScope();
+				return SetupWritableScope(principal);
+			Scope scope;
 			switch (Mode)
 			{
 				case PoolMode.None:
-					return SetupReadonlyScope();
+					scope = SetupReadonlyScope();
+					break;
 				case PoolMode.Wait:
-					return Scopes.Take();
+					scope = Scopes.Take();
+					break;
 				default:
-					Scope scope;
 					if (!Scopes.TryTake(out scope))
-						return SetupReadonlyScope();
-					return scope;
+						scope = SetupReadonlyScope();
+					break;
 			}
+			scope.Principal = principal;
+			return scope;
 		}
 
 		public void Release(Scope scope, bool valid)

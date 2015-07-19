@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Processing;
@@ -56,6 +57,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument, TInput>(input, output, data, CreateExampleArgument);
@@ -67,7 +69,7 @@ namespace Revenj.Plugins.Server.Commands
 			if (objectType == null)
 				return CommandResult<TOutput>.Fail("Couldn't find domain object type {0}.".With(argument.Name), null);
 
-			if (!Permissions.CanAccess(objectType))
+			if (!Permissions.CanAccess(objectType.FullName, principal))
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,
@@ -90,7 +92,7 @@ namespace Revenj.Plugins.Server.Commands
 					command = Activator.CreateInstance(commandType) as IFindCommand;
 					Cache.TryAdd(objectType, command);
 				}
-				var result = command.Find(output, locator, Permissions, argument.Uri);
+				var result = command.Find(output, locator, Permissions, principal, argument.Uri);
 
 				return result != null
 					? CommandResult<TOutput>.Success(result, "Object found")
@@ -115,6 +117,7 @@ Example argument:
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
 				IPermissionManager permissions,
+				IPrincipal principal,
 				string uri);
 		}
 
@@ -125,11 +128,12 @@ Example argument:
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
 				IPermissionManager permissions,
+				IPrincipal principal,
 				string uri)
 			{
 				var repository = locator.Resolve<IRepository<TDomainObject>>();
 				var data = repository.Find(new[] { uri });
-				var filtered = permissions.ApplyFilters(data);
+				var filtered = permissions.ApplyFilters(principal, data);
 				if (filtered.Length == 1)
 					return output.Serialize(filtered[0]);
 				return default(TOutput);

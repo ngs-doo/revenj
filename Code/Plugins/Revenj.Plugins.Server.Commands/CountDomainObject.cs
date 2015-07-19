@@ -11,6 +11,7 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
+using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -60,6 +61,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -68,7 +70,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var command = PrepareCommand(either.Argument.Name, either.Argument.SpecificationName);
+				var command = PrepareCommand(principal, either.Argument.Name, either.Argument.SpecificationName);
 				var count = command.FindCount(input, locator, either.Argument.Specification);
 				return CommandResult<TOutput>.Success(output.Serialize(count), count.ToString());
 			}
@@ -82,9 +84,9 @@ Example argument:
 			}
 		}
 
-		private ICountCommand PrepareCommand(string domainName, string specificationName)
+		private ICountCommand PrepareCommand(IPrincipal principal, string domainName, string specificationName)
 		{
-			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, domainName);
+			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, principal, domainName);
 			if (string.IsNullOrWhiteSpace(specificationName))
 			{
 				ICountCommand command;

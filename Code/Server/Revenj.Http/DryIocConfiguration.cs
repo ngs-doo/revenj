@@ -43,6 +43,7 @@ namespace Revenj.Http
 		{
 			registry.RegisterInstance<ISystemState>(new ServerState());
 			registry.RegisterInstance<IPermissionManager>(new NoAuth());
+			registry.RegisterDelegate(_ => System.Threading.Thread.CurrentPrincipal, Reuse.Transient);
 
 			registry.Register<IRestApplication, RestApplication>(Reuse.Singleton);
 			registry.Register<RestApplication>(Reuse.Singleton);

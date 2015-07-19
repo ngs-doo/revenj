@@ -33,7 +33,9 @@ namespace Revenj.Processing
 			this.Permissions = permissions;
 		}
 
-		public IProcessingResult<TOutput> Execute<TInput, TOutput>(IServerCommandDescription<TInput>[] commandDescriptions, IPrincipal principal)
+		public IProcessingResult<TOutput> Execute<TInput, TOutput>(
+			IServerCommandDescription<TInput>[] commandDescriptions, 
+			IPrincipal principal)
 		{
 			var start = Stopwatch.GetTimestamp();
 
@@ -55,7 +57,7 @@ namespace Revenj.Processing
 			try
 			{
 				foreach (var c in commandDescriptions)
-					if (!Permissions.CanAccess(c.CommandType))
+					if (!Permissions.CanAccess(c.CommandType.FullName, principal))
 					{
 						TraceSource.TraceEvent(
 							TraceEventType.Warning,
@@ -75,7 +77,7 @@ namespace Revenj.Processing
 				{
 					var startCommand = Stopwatch.GetTimestamp();
 					var command = (IServerCommand)Scope.GetService(cd.CommandType);
-					var result = command.Execute(Scope, inputSerializer, outputSerializer, cd.Data);
+					var result = command.Execute(Scope, inputSerializer, outputSerializer, principal, cd.Data);
 					if (result == null)
 						throw new FrameworkException("Result returned null for " + cd.CommandType);
 					executedCommands.Add(CommandResultDescription<TOutput>.Create(cd.RequestID, result, startCommand));

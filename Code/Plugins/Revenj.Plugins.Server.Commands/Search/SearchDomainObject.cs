@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -75,6 +76,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -83,7 +85,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var result = FindAndReturn(locator, input, output, either.Argument);
+				var result = FindAndReturn(locator, input, output, principal, either.Argument);
 				return CommandResult<TOutput>.Success(result.Result, "Found {0} item(s)", result.Count);
 			}
 			catch (ArgumentException ex)
@@ -96,9 +98,9 @@ Example argument:
 			}
 		}
 
-		private ISearchDomainObjectCommand<object> PrepareCommand(string domainName, string specificationName)
+		private ISearchDomainObjectCommand<object> PrepareCommand(IPrincipal principal, string domainName, string specificationName)
 		{
-			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, domainName);
+			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, principal, domainName);
 			if (string.IsNullOrWhiteSpace(specificationName))
 			{
 				var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);
@@ -116,9 +118,13 @@ Example argument:
 			}
 		}
 
-		public object[] FindData<TFormat>(IServiceProvider locator, ISerialization<TFormat> serializer, Argument<TFormat> argument)
+		public object[] FindData<TFormat>(
+			IServiceProvider locator,
+			ISerialization<TFormat> serializer,
+			Argument<TFormat> argument,
+			IPrincipal principal)
 		{
-			var command = PrepareCommand(argument.Name, argument.SpecificationName);
+			var command = PrepareCommand(principal, argument.Name, argument.SpecificationName);
 			var limit = argument.Limit ?? MaxSearchLimit;
 			return
 				command.FindBy(
@@ -141,9 +147,10 @@ Example argument:
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			Argument<TInput> argument)
 		{
-			var command = PrepareCommand(argument.Name, argument.SpecificationName);
+			var command = PrepareCommand(principal, argument.Name, argument.SpecificationName);
 			var limit = argument.Limit ?? MaxSearchLimit;
 			return
 				command.FindAndSerialize(
@@ -152,6 +159,7 @@ Example argument:
 					DomainModel,
 					locator,
 					Permissions,
+					principal,
 					argument.Specification,
 					argument.Offset,
 					limit,
@@ -174,6 +182,7 @@ Example argument:
 				IDomainModel domainModel,
 				IServiceProvider locator,
 				IPermissionManager permissions,
+				IPrincipal principal,
 				TInput data,
 				int? offset,
 				int? limit,
@@ -201,6 +210,7 @@ Example argument:
 				result = result.Skip(offset.Value);
 			if (limit != null && limit.Value != int.MaxValue)
 				result = result.Take(limit.Value);
+			//TODO: security filter!?
 			return result.ToArray();
 		}
 
@@ -278,13 +288,14 @@ Example argument:
 				IDomainModel domainModel,
 				IServiceProvider locator,
 				IPermissionManager permissions,
+				IPrincipal principal,
 				TInput data,
 				int? offset,
 				int? limit,
 				IDictionary<string, bool> order)
 			{
 				var result = FindBy(input, domainModel, locator, data, offset, limit, order);
-				var filtered = permissions.ApplyFilters(result);
+				var filtered = permissions.ApplyFilters(principal, result);
 				return new SearchResult<TOutput> { Result = output.Serialize(filtered), Count = filtered.Length };
 			}
 		}

@@ -13,6 +13,7 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
+using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -54,6 +55,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -78,14 +80,15 @@ namespace Revenj.Plugins.Server.Commands
 						"Object: {0} is not a valid service.".With(argument.Name),
 						"{0} must implement {1} to be executed as a service call".With(argument.Name, typeof(IServerService<,>).FullName));
 
-			if (!Permissions.CanAccess(serviceType))
+			if (!Permissions.CanAccess(serviceType.FullName, principal))
+			{
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,
 						default(TOutput),
 						"You don't have permission to access: {0}.",
 						argument.Name);
-
+			}
 			try
 			{
 				IExecuteCommand command;

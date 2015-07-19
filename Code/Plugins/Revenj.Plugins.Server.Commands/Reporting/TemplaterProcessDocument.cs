@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using NGS.Templater;
 using Revenj.Extensibility;
 using Revenj.Processing;
@@ -70,6 +71,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -78,7 +80,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			try
 			{
-				var result = Execute<TInput>(locator, input, either.Argument);
+				var result = Execute<TInput>(locator, principal, input, either.Argument);
 				return CommandResult<TOutput>.Success(Serialize(output, result), "Document created");
 			}
 			catch (FileNotFoundException fnf)
@@ -108,7 +110,11 @@ Example argument:
 			}
 		}
 
-		public Stream Execute<TInput>(IServiceProvider locator, ISerialization<TInput> input, Argument<TInput> argument)
+		public Stream Execute<TInput>(
+			IServiceProvider locator,
+			IPrincipal principal,
+			ISerialization<TInput> input,
+			Argument<TInput> argument)
 		{
 			var file = Path.Combine(DocumentFolder, argument.File);
 			if (!File.Exists(file))
@@ -122,13 +128,13 @@ Example argument:
 				if (argument.GetSources != null)
 					foreach (var source in argument.GetSources)
 					{
-						var found = GetDomain.GetData(locator, source);
+						var found = GetDomain.GetData(locator, source, principal);
 						document.Process(found);
 					}
 				if (argument.SearchSources != null)
 					foreach (var source in argument.SearchSources)
 					{
-						var found = SearchDomain.FindData<TInput>(locator, input, source);
+						var found = SearchDomain.FindData<TInput>(locator, input, source, principal);
 						document.Process(found);
 					}
 				var specification =

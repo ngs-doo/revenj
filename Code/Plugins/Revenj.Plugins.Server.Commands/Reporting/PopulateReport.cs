@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Processing;
@@ -49,6 +50,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -58,24 +60,27 @@ namespace Revenj.Plugins.Server.Commands
 
 			var reportType = DomainModel.Find(argument.ReportName);
 			if (reportType == null)
+			{
 				return CommandResult<TOutput>.Fail(
 					"Couldn't find report type {0}.".With(argument.ReportName),
 					@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
-
+			}
 			var ri = reportType.GetInterfaces().FirstOrDefault(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IReport<>));
 			if (ri == null)
+			{
 				return CommandResult<TOutput>.Fail(@"Specified type ({0}) is not an report. 
 Please check your arguments.".With(argument.ReportName), null);
-
-			if (!Permissions.CanAccess(reportType))
+			}
+			if (!Permissions.CanAccess(reportType.FullName, principal))
+			{
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,
 						default(TOutput),
 						"You don't have permission to access: {0}.",
 						argument.ReportName);
-
+			}
 			try
 			{
 				var commandType = typeof(PopulateReportCommand<,>).MakeGenericType(reportType, ri.GetGenericArguments()[0]);

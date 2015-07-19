@@ -12,6 +12,7 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
+using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -75,6 +76,7 @@ namespace Revenj.Plugins.Server.Commands
 			IServiceProvider locator,
 			ISerialization<TInput> input,
 			ISerialization<TOutput> output,
+			IPrincipal principal,
 			TInput data)
 		{
 			var either = CommandResult<TOutput>.Check<Argument<TInput>, TInput>(input, output, data, CreateExampleArgument);
@@ -93,7 +95,7 @@ namespace Revenj.Plugins.Server.Commands
 				return CommandResult<TOutput>.Fail(@"Specified type ({0}) is not an aggregate root. 
 Please check your arguments.".With(argument.Name), null);
 
-			if (!Permissions.CanAccess(rootType))
+			if (!Permissions.CanAccess(rootType.FullName, principal))
 				return
 					CommandResult<TOutput>.Return(
 						HttpStatusCode.Forbidden,
