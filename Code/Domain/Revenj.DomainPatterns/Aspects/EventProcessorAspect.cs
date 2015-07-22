@@ -23,11 +23,7 @@ namespace Revenj.DomainPatterns
 				{
 					var attr = type.GetCustomAttributes(typeof(ServiceAttribute), false) as ServiceAttribute[];
 					if (attr == null || attr.Length == 0)
-					{
-						factory.RegisterType(type);
-						foreach (var i in interfaces)
-							factory.RegisterType(type, i, InstanceScope.Transient);
-					}
+						factory.RegisterType(type, InstanceScope.Transient, new[] { type }.Union(interfaces).ToArray());
 				}
 			}
 		}

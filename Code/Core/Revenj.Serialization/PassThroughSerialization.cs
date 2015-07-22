@@ -2,7 +2,7 @@
 
 namespace Revenj.Serialization
 {
-	public class PassThroughSerialization : ISerialization<object>
+	internal class PassThroughSerialization : ISerialization<object>
 	{
 		public object Serialize<T>(T value) { return value; }
 

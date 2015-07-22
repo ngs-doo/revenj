@@ -7,7 +7,7 @@ using Revenj.Extensibility;
 
 namespace Revenj.DomainPatterns
 {
-	public class DomainTypeResolver : ITypeResolver
+	internal class DomainTypeResolver : ITypeResolver
 	{
 		private readonly ISystemState State;
 		private readonly Lazy<IDomainModel> LazyDom;

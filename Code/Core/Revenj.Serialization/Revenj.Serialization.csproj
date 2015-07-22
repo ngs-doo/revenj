@@ -68,6 +68,7 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Setup.cs" />
     <Compile Include="Json\Converters\SecretConverter.cs" />
     <Compile Include="Json\Converters\DrawingConverter.cs" />
     <Compile Include="Json\Converters\BinaryConverter.cs" />

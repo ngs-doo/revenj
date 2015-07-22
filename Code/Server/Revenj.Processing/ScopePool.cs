@@ -8,13 +8,13 @@ using Revenj.Extensibility;
 
 namespace Revenj.Processing
 {
-	public interface IScopePool
+	internal interface IScopePool
 	{
 		Scope Take(bool readOnly, IPrincipal principal);
 		void Release(Scope factory, bool valid);
 	}
 
-	public sealed class Scope
+	internal sealed class Scope
 	{
 		public readonly IObjectFactory Factory;
 		public readonly IDatabaseQuery Query;
@@ -27,7 +27,7 @@ namespace Revenj.Processing
 		}
 	}
 
-	public class ScopePool : IScopePool, IDisposable
+	internal class ScopePool : IScopePool, IDisposable
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
 
@@ -100,7 +100,7 @@ namespace Revenj.Processing
 				var query = Queries.StartQuery(true);
 				inner.RegisterInstance(query);
 				inner.RegisterInstance(principal);
-				inner.RegisterType(typeof(ProcessingContext), typeof(IProcessingEngine), InstanceScope.Singleton);
+				inner.RegisterType(typeof(ProcessingContext), InstanceScope.Singleton, typeof(IProcessingEngine));
 				return new Scope(inner, query);
 			}
 			catch (Exception ex)

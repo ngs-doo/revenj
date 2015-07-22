@@ -6,7 +6,7 @@ using Revenj.Extensibility;
 
 namespace Revenj.Serialization
 {
-	public class GenericDataContractResolver : DataContractResolver
+	internal class GenericDataContractResolver : DataContractResolver
 	{
 		private readonly ITypeResolver TypeResolver;
 

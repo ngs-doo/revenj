@@ -17,19 +17,13 @@ namespace Revenj.DatabasePersistence.Oracle
 		void Notify(OracleNotifyInfoConverter[] notifiers, string target);
 	}
 
-	public class OracleDatabaseQuery : IOracleDatabaseQuery, IDisposable
+	internal class OracleDatabaseQuery : IOracleDatabaseQuery, IDisposable
 	{
-		public static int MinBatchSize { get; private set; }
 		private static readonly OracleAQAgent[] Recipients;
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 
 		static OracleDatabaseQuery()
 		{
-			MinBatchSize = 1000;
-			var mbs = ConfigurationManager.AppSettings["Database.MinBatchSize"];
-			int n;
-			if (!string.IsNullOrEmpty(mbs) && int.TryParse(mbs, out n))
-				MinBatchSize = n;
 			var rec = new List<OracleAQAgent>();
 			rec.Add(new OracleAQAgent(ConfigurationManager.AppSettings["Oracle.QueueConsumer"] ?? "Local"));
 			foreach (string k in ConfigurationManager.AppSettings.Keys)

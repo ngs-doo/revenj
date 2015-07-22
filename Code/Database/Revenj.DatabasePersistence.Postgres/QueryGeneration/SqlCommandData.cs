@@ -4,7 +4,7 @@ using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 {
-	public class SqlCommandData
+	internal class SqlCommandData
 	{
 		private readonly MainQueryParts Query;
 
@@ -29,7 +29,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 			writer.Write(Statement);
 			writer.Flush();
 			cms.Position = 0;
-			return PostgresDatabaseQuery.NewCommand(cms, Statement, Query.Selects.Count == 1);
+			return PostgresCommandFactory.NewCommand(cms, Statement, Query.Selects.Count == 1);
 		}
 
 		public ResultObjectMapping ProcessRow(IDataReader dr, BufferedTextReader reader)

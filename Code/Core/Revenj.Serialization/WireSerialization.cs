@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Revenj.Serialization
 {
-	public class WireSerialization : IWireSerialization
+	internal class WireSerialization : IWireSerialization
 	{
 		private readonly XmlSerialization Xml;
 		private readonly JsonSerialization Json;

@@ -10,7 +10,7 @@ using Revenj.Extensibility;
 
 namespace Revenj.Security
 {
-	public class PermissionManager : IPermissionManager, IDisposable
+	internal class PermissionManager : IPermissionManager, IDisposable
 	{
 		private readonly IObjectFactory ObjectFactory;
 

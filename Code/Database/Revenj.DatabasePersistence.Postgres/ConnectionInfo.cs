@@ -3,7 +3,7 @@ using Revenj.DatabasePersistence.Postgres.Npgsql;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
-	public class ConnectionInfo
+	internal class ConnectionInfo
 	{
 		private readonly NpgsqlConnection Connection;
 		internal static int LastCommandTimeout = 20;

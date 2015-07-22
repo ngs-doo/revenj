@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Revenj.Extensibility.Autofac.Core;
 using Castle.DynamicProxy;
+using Revenj.Extensibility.Autofac.Core;
 using Revenj.Utility;
 
 namespace Revenj.Extensibility
 {
-	public class AspectRepository : IAspectRegistrator, IAspectComposer, IInterceptorRegistrator, IDisposable
+	internal class AspectRepository : IAspectRegistrator, IAspectComposer, IInterceptorRegistrator, IDisposable
 	{
 		private HashSet<Type> RegisteredCreationTypes;
 		private HashSet<Type> AllCreationTypes;

@@ -11,7 +11,7 @@ using Revenj.Utility;
 
 namespace Revenj.Serialization
 {
-	public class XmlSerialization : ISerialization<XElement>
+	internal class XmlSerialization : ISerialization<XElement>
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Serialization");
 

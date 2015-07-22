@@ -4,7 +4,7 @@ using System.Security.Principal;
 
 namespace Revenj.Security
 {
-	internal struct UserPrincipal : IPrincipal
+	internal class UserPrincipal : IPrincipal
 	{
 		private readonly IIdentity User;
 		private readonly Lazy<HashSet<string>> Roles;

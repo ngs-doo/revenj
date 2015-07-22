@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Revenj.Security
 {
-	public class RepositoryAuthentication : IAuthentication<SecureString>, IAuthentication<string>, IAuthentication<byte[]>
+	internal class RepositoryAuthentication : IAuthentication<SecureString>, IAuthentication<string>, IAuthentication<byte[]>
 	{
 		private static readonly SHA1 SHA = SHA1.Create();
 

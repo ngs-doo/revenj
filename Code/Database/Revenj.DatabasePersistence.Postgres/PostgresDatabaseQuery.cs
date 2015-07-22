@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -21,46 +20,8 @@ namespace Revenj.DatabasePersistence.Postgres
 		long Count<T>(ISpecification<T> filter);
 	}
 
-	public class PostgresDatabaseQuery : IPostgresDatabaseQuery, IDisposable
+	public static class PostgresCommandFactory
 	{
-		public static int MinBatchSize { get; private set; }
-		public static long MaxObjectSize { get; private set; }
-		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
-
-		static PostgresDatabaseQuery()
-		{
-			MinBatchSize = 1000;
-			MaxObjectSize = 1024 * 1024;
-			var mbs = ConfigurationManager.AppSettings["Database.MinBatchSize"];
-			int n;
-			if (!string.IsNullOrEmpty(mbs) && int.TryParse(mbs, out n))
-				MinBatchSize = n;
-			mbs = ConfigurationManager.AppSettings["Database.MaxObjectSize"];
-			long m;
-			if (!string.IsNullOrEmpty(mbs) && long.TryParse(mbs, out m))
-				MaxObjectSize = m;
-		}
-
-		private NpgsqlConnection Connection;
-		private readonly NpgsqlTransaction Transaction;
-		private bool BrokenTransaction;
-		private bool DifferentConnection;
-
-		private readonly object sync = new object();
-
-		public PostgresDatabaseQuery(NpgsqlConnection connection, NpgsqlTransaction transaction)
-		{
-			Contract.Requires(connection != null);
-
-			this.Connection = connection;
-			this.Transaction = transaction;
-		}
-
-		public IDbCommand NewCommand()
-		{
-			return new NpgsqlCommand { CommandTimeout = Connection.CommandTimeout };
-		}
-
 		public static IDbCommand NewCommand(Stream stream)
 		{
 			return new NpgsqlCommand(stream) { CommandTimeout = ConnectionInfo.LastCommandTimeout };
@@ -83,6 +44,31 @@ namespace Revenj.DatabasePersistence.Postgres
 				CommandTimeout = ConnectionInfo.LastCommandTimeout,
 				ReaderBehavior = sequential ? CommandBehavior.SequentialAccess : CommandBehavior.Default
 			};
+		}
+	}
+
+	internal class PostgresDatabaseQuery : IPostgresDatabaseQuery, IDisposable
+	{
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
+
+		private NpgsqlConnection Connection;
+		private readonly NpgsqlTransaction Transaction;
+		private bool BrokenTransaction;
+		private bool DifferentConnection;
+
+		private readonly object sync = new object();
+
+		public PostgresDatabaseQuery(NpgsqlConnection connection, NpgsqlTransaction transaction)
+		{
+			Contract.Requires(connection != null);
+
+			this.Connection = connection;
+			this.Transaction = transaction;
+		}
+
+		public IDbCommand NewCommand()
+		{
+			return new NpgsqlCommand { CommandTimeout = Connection.CommandTimeout };
 		}
 
 		public bool InTransaction

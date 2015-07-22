@@ -7,7 +7,7 @@ using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 {
-	public class SelectSubqueryData
+	internal class SelectSubqueryData
 	{
 		private readonly List<KeyValuePair<IQuerySource, Func<object, BufferedTextReader, object>>> Selects = new List<KeyValuePair<IQuerySource, Func<object, BufferedTextReader, object>>>();
 

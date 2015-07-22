@@ -31,14 +31,27 @@ namespace Revenj.Utility
 			if (AllAssemblies.Count == 0)
 			{
 				AllAssemblies.AddRange(
-					from asm in AppDomain.CurrentDomain.GetAssemblies()
-					where !asm.IsDynamic
-						&& !asm.FullName.StartsWith("Microsoft.")
-						&& !asm.FullName.StartsWith("System.")
-						&& !asm.FullName.StartsWith("mscorlib")
-					select asm);
+					(from refAsm in AppDomain.CurrentDomain.GetAssemblies()
+					 from asm in GetAssemblyAndAllReferencedAssemblies(refAsm)
+					 where !asm.IsDynamic
+						 && !asm.FullName.StartsWith("Microsoft.")
+						 && !asm.FullName.StartsWith("System.")
+						 && !asm.FullName.StartsWith("mscorlib")
+					 select asm).Distinct());
 			}
 			return AllAssemblies;
+		}
+
+		private static IEnumerable<Assembly> GetAssemblyAndAllReferencedAssemblies(Assembly asm)
+		{
+			var found = new List<Assembly>();
+			found.Add(asm);
+			foreach (var refAsm in asm.GetReferencedAssemblies())
+			{
+				try { found.Add(Assembly.Load(refAsm)); }
+				catch { }
+			}
+			return found;
 		}
 
 		/// <summary>

@@ -63,6 +63,7 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Setup.cs" />
     <Compile Include="PermissionManager.cs" />
     <Compile Include="IRolePermission.cs" />
     <Compile Include="IGlobalPermission.cs" />

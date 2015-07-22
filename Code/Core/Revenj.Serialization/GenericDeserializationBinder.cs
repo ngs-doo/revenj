@@ -5,7 +5,7 @@ using Revenj.Extensibility;
 
 namespace Revenj.Serialization
 {
-	public class GenericDeserializationBinder : SerializationBinder
+	internal class GenericDeserializationBinder : SerializationBinder
 	{
 		private readonly Lazy<ITypeResolver> TypeResolver;
 

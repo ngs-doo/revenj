@@ -6,12 +6,11 @@ using System.Linq;
 using System.Text;
 using Revenj.Common;
 using Revenj.Extensibility.Autofac;
-using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Integration.Mef;
 
 namespace Revenj.Extensibility
 {
-	public class AutofacMefProvider : PluginsProvider
+	internal class AutofacMefProvider : PluginsProvider
 	{
 		public AutofacMefProvider(
 			PluginsConfiguration configuration,

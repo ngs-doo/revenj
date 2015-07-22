@@ -61,6 +61,7 @@
     </Compile>
     <Compile Include="Aspects\ServerServiceAspect.cs" />
     <Compile Include="CommandResultDescription.cs" />
+    <Compile Include="Setup.cs" />
     <Compile Include="ProcessingContext.cs" />
     <Compile Include="ProcessingEngine.cs" />
     <Compile Include="ProcessingResult.cs" />

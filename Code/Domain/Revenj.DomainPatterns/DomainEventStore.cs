@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 
 namespace Revenj.DomainPatterns
 {
-	public class DomainEventStore : IDomainEventStore
+	internal class DomainEventStore : IDomainEventStore
 	{
 		private readonly IServiceProvider Locator;
 		private readonly GlobalEventStore GlobalStore;

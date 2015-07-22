@@ -126,6 +126,7 @@
     <Compile Include="QueryGeneration\Visitors\SqlGeneratorQueryModelVisitor.cs" />
     <Compile Include="QueryGeneration\Visitors\SubqueryGeneratorQueryModelVisitor.cs" />
     <Compile Include="QueryGeneration\Visitors\SubquerySelectExpressionTreeVisitor.cs" />
+    <Compile Include="Setup.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">

@@ -5,7 +5,7 @@ using Revenj.Common;
 
 namespace Revenj.Extensibility
 {
-	public class PluginRepository<TTarget> : IPluginRepository<TTarget>
+	internal class PluginRepository<TTarget> : IPluginRepository<TTarget>
 	{
 		private readonly Dictionary<string, Type> PluginDictionary = new Dictionary<string, Type>();
 

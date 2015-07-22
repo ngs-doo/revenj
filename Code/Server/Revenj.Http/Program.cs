@@ -19,15 +19,18 @@ namespace Revenj.Http
 				}
 			}
 			var httpServer = ConfigurationManager.AppSettings["Revenj.HttpServer"];
+			Platform.Container container;
+			if (!Enum.TryParse<Platform.Container>(ConfigurationManager.AppSettings["Revenj.Container"], out container))
+				container = Platform.Container.Autofac;
 			Console.WriteLine("Starting server");
 			if (httpServer == "Socket")
 			{
-				var server = Platform.Start<HttpSocketServer>();
+				var server = Platform.Start<HttpSocketServer>(container);
 				server.Run();
 			}
 			else
 			{
-				var server = Platform.Start<HttpListenerServer>();
+				var server = Platform.Start<HttpListenerServer>(container);
 				server.Run();
 			}
 		}

@@ -86,10 +86,8 @@
     <Compile Include="HttpSocketServer.cs" />
     <Compile Include="HttpListenerContex.cs" />
     <Compile Include="NoAuth.cs" />
-    <Compile Include="Platform.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DryIocConfiguration.cs" />
     <Compile Include="RouteHandler.cs" />
     <Compile Include="RouteMatch.cs" />
     <Compile Include="Routes.cs" />

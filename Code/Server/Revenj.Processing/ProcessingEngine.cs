@@ -17,7 +17,7 @@ using Revenj.Utility;
 
 namespace Revenj.Processing
 {
-	public class ProcessingEngine : IProcessingEngine
+	internal class ProcessingEngine : IProcessingEngine
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
 

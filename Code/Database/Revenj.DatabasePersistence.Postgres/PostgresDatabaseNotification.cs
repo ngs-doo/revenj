@@ -14,7 +14,7 @@ using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
-	public class PostgresDatabaseNotification : IEagerNotification, IDisposable
+	internal class PostgresDatabaseNotification : IEagerNotification, IDisposable
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Revenj.Extensibility
 {
-	public class PluginsConfiguration
+	internal class PluginsConfiguration
 	{
 		public IEnumerable<string> Directories { get; set; }
 		public IEnumerable<Assembly> Assemblies { get; set; }

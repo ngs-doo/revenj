@@ -5,7 +5,7 @@ using System.Net;
 
 namespace Revenj.Processing
 {
-	public class ProcessingResult<TFormat> : IProcessingResult<TFormat>
+	internal class ProcessingResult<TFormat> : IProcessingResult<TFormat>
 	{
 		public string Message { get; private set; }
 		public HttpStatusCode Status { get; private set; }

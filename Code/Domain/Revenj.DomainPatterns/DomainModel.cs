@@ -8,7 +8,7 @@ using Revenj.Extensibility;
 
 namespace Revenj.DomainPatterns
 {
-	public class DomainModel : IDomainModel
+	internal class DomainModel : IDomainModel
 	{
 		private readonly List<Assembly> DomainAssemblies;
 		private readonly ConcurrentDictionary<string, Type> Cache = new ConcurrentDictionary<string, Type>(1, 127);

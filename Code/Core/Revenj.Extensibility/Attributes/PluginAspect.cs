@@ -21,9 +21,10 @@ namespace Revenj.Extensibility
 			{
 				if (type.IsClass && !type.IsAbstract)
 				{
+					//TODO: to multiple as services
 					foreach (var i in type.GetInterfaces())
 						if (plugins.ContainsKey(i))
-							factory.RegisterType(type, i, plugins[i]);
+							factory.RegisterType(type, plugins[i], i);
 				}
 			}
 		}

@@ -12,7 +12,7 @@ namespace Revenj.DomainPatterns
 		void Notify(NotifyInfo info);
 	}
 
-	public class RegisterChangeNotifications<TSource> : IObservable<TSource>, IDisposable
+	internal class RegisterChangeNotifications<TSource> : IObservable<TSource>, IDisposable
 	{
 		private readonly IDisposable ChangeNotification;
 		private readonly Func<IObserver<TSource>, IDisposable> Register;

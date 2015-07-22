@@ -6,7 +6,7 @@ using Revenj.Utility;
 
 namespace Revenj.Serialization
 {
-	public class ProtobufSerialization : ISerialization<MemoryStream>, ISerialization<Stream>
+	internal class ProtobufSerialization : ISerialization<MemoryStream>, ISerialization<Stream>
 	{
 		private readonly RuntimeTypeModel Model;
 

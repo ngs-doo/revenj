@@ -8,7 +8,7 @@ using Revenj.Common;
 
 namespace Revenj.DatabasePersistence.Oracle
 {
-	public class OracleQueryManager : IDatabaseQueryManager
+	internal class OracleQueryManager : IDatabaseQueryManager
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Database");
 

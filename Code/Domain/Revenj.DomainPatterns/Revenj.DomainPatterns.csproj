@@ -81,6 +81,7 @@
     <Compile Include="Cache\LazyCache.cs" />
     <Compile Include="Cache\EagerCache.cs" />
     <Compile Include="ChangeNotifications.cs" />
+    <Compile Include="Setup.cs" />
     <Compile Include="GlobalEventStore.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="DocumentReport.cs" />
@@ -96,7 +97,6 @@
     <Compile Include="SingleDomainEventSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Aspects\EventProcessorAspect.cs" />
-    <Compile Include="ServiceLocator.cs" />
     <Compile Include="Specifications\SpecificationByExpression.cs" />
     <Compile Include="Specifications\SpecificationByUri.cs" />
     <Compile Include="Validation.cs" />

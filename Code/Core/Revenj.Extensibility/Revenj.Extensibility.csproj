@@ -56,6 +56,7 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\SharedAssemblyInfo.cs">
@@ -405,6 +406,7 @@
     <Compile Include="Autofac\Util\TypeExtensions.cs" />
     <Compile Include="Autofac\Util\WindowsPhone\Wp7Extensions.cs" />
     <Compile Include="Autofac\Util\WindowsPhone\Wp7FactoryGenerator.cs" />
+    <Compile Include="Setup.cs" />
     <Compile Include="Container\DryIocObjectFactory.cs" />
     <Compile Include="Container\DryIoc.cs" />
     <Compile Include="DynamicProxy\IInterceptorRegistrator.cs" />

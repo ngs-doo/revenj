@@ -8,7 +8,7 @@ using Revenj.Utility;
 
 namespace Revenj.Serialization
 {
-	public class BinarySerialization : ISerialization<byte[]>
+	internal class BinarySerialization : ISerialization<byte[]>
 	{
 		private readonly Lazy<GenericDeserializationBinder> CustomDeserialization;
 

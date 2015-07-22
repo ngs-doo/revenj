@@ -11,7 +11,7 @@ namespace Revenj.DatabasePersistence.Postgres
 	}
 
 	[Serializable]
-	public class PostgresVersionInfo : IPostgresVersionInfo, ISerializable
+	internal class PostgresVersionInfo : IPostgresVersionInfo, ISerializable
 	{
 		public PostgresVersionInfo(ConnectionInfo connectionInfo)
 		{

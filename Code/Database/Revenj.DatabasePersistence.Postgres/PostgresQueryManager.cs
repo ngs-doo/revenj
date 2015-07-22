@@ -7,7 +7,7 @@ using Revenj.DatabasePersistence.Postgres.Npgsql;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
-	public class PostgresQueryManager : IDatabaseQueryManager, IDisposable
+	internal class PostgresQueryManager : IDatabaseQueryManager, IDisposable
 	{
 		private static int CpuCount = Environment.ProcessorCount;
 		private static int InitialCount = Environment.ProcessorCount < 17 ? 17 : Environment.ProcessorCount * 2 - 1;

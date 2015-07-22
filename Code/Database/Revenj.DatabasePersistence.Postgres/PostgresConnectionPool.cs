@@ -3,18 +3,18 @@ using System.Collections.Concurrent;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
-using System.Data.Common;
 using Revenj.DatabasePersistence.Postgres.Npgsql;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
+	//TODO: internal!?
 	public interface IConnectionPool
 	{
 		NpgsqlConnection Take(bool open);
 		void Release(NpgsqlConnection connection, bool valid);
 	}
 
-	public class PostgresConnectionPool : IConnectionPool, IDisposable
+	internal class PostgresConnectionPool : IConnectionPool, IDisposable
 	{
 		private readonly BlockingCollection<NpgsqlConnection> Connections = new BlockingCollection<NpgsqlConnection>(new ConcurrentBag<NpgsqlConnection>());
 

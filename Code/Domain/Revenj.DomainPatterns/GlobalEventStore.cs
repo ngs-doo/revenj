@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Revenj.DomainPatterns
 {
-	public class GlobalEventStore : IDisposable
+	internal class GlobalEventStore : IDisposable
 	{
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
 

@@ -47,7 +47,7 @@ namespace Revenj.Wcf
 			{
 				var scope = ObjectFactory.FindScope(sessionID);
 				if (scope == null)
-					return Utility.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
+					return response.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
 				engine = scope.Resolve<IProcessingEngine>();
 			}
 			var commands = new ObjectCommandDescription[1 + (additionalCommands != null ? additionalCommands.Length : 0)];

@@ -31,12 +31,11 @@ using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Features.Collections;
 using Revenj.Extensibility.Autofac.Features.GeneratedFactories;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Extensibility.Autofac.Features.Metadata;
+
 
 #if !(NET35 || WINDOWS_PHONE)
 using Revenj.Extensibility.Autofac.Features.LazyDependencies;
-using Revenj.Extensibility.Autofac.Features.OwnedInstances;
-using Revenj.Extensibility.Autofac.Features.Indexed;
+
 #endif
 
 #if WINDOWS_PHONE
@@ -66,7 +65,7 @@ namespace Revenj.Extensibility.Autofac
 	/// via extension methods in <see cref="RegistrationExtensions"/>.</remarks>
 	/// <seealso cref="IContainer"/>
 	/// <see cref="RegistrationExtensions"/>
-	public class ContainerBuilder
+	public class ContainerBuilder : IObjectFactoryBuilder
 	{
 		private readonly List<Action<IComponentRegistry>> _configurationCallbacks = new List<Action<IComponentRegistry>>();
 		private bool _wasBuilt;
@@ -126,6 +125,7 @@ namespace Revenj.Extensibility.Autofac
 				throw new InvalidOperationException(ContainerBuilderResources.BuildCanOnlyBeCalledOnce);
 
 			_wasBuilt = true;
+			AutofacObjectFactory.RegisterToContainer(this, this, null);
 
 			if (!excludeDefaultModules)
 				RegisterDefaultAdapters(componentRegistry);
@@ -147,5 +147,16 @@ namespace Revenj.Extensibility.Autofac
 #endif
 			componentRegistry.AddRegistrationSource(new GeneratedFactoryRegistrationSource());
 		}
+
+		private List<IFactoryBuilderInstance> instances = new List<IFactoryBuilderInstance>();
+		private List<IFactoryBuilderType> types = new List<IFactoryBuilderType>();
+		private List<IFactoryBuilderFunc> funcs = new List<IFactoryBuilderFunc>();
+
+		public IEnumerable<IFactoryBuilderInstance> Instances { get { return instances; } }
+		public IEnumerable<IFactoryBuilderType> Types { get { return types; } }
+		public IEnumerable<IFactoryBuilderFunc> Funcs { get { return funcs; } }
+		public void Add(IFactoryBuilderInstance item) { instances.Add(item); }
+		public void Add(IFactoryBuilderType item) { types.Add(item); }
+		public void Add(IFactoryBuilderFunc item) { funcs.Add(item); }
 	}
 }

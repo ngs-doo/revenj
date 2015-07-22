@@ -79,6 +79,7 @@
     </Compile>
     <Compile Include="Attributes\DatabaseFunctionAttribute.cs" />
     <Compile Include="ConnectionInfo.cs" />
+    <Compile Include="Setup.cs" />
     <Compile Include="Converters\BoolConverter.cs" />
     <Compile Include="Converters\ByteaConverter.cs" />
     <Compile Include="Converters\DrawingConverter.cs" />

@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 
 namespace Revenj.DomainPatterns
 {
-	public class DataContext : IDataContext
+	internal class DataContext : IDataContext
 	{
 		private readonly IServiceProvider Locator;
 		private ConcurrentDictionary<Type, object> Lookups;

@@ -1,40 +1,41 @@
 ﻿using System;
+using System.Configuration;
+using System.Linq;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
-using Revenj.Extensibility.Autofac;
-using Revenj.Extensibility.Autofac.Configuration;
 using Revenj.Wcf;
 
 namespace DSL
 {
 	public static class Platform
 	{
-		public static IServiceProvider Start()
+		public enum Container
 		{
-			return Start<IServiceProvider>();
+			Autofac,
+			DryIoc
 		}
 
-		public static TService Start<TService>(params Type[] types)
+		public static IServiceProvider Start(Container container = Container.Autofac)
+		{
+			return Start<IServiceProvider>(container);
+		}
+
+		public static TService Start<TService>(Container container, params Type[] types)
 		{
 			var state = new ServerState();
-			var builder = new ContainerBuilder();
-			builder.RegisterInstance(state).As<ISystemState>();
-			builder.RegisterModule(new ConfigurationSettingsReader("autofacConfiguration"));
+			var withAspects = ConfigurationManager.AppSettings["Revenj.AllowAspects"] == "true";
+			var builder = container == Container.Autofac ? Revenj.Extensibility.Setup.UseAutofac(true, false, withAspects) : Revenj.Extensibility.Setup.UseDryIoc();
+			builder.RegisterSingleton<ISystemState>(state);
 			foreach (var t in types)
-			{
-				builder.RegisterType(t);
-				foreach (var i in t.GetInterfaces())
-					builder.RegisterType(t).As(i);
-			}
-			if (types == null || types.Length == 0 && typeof(TService).IsClass)
-				builder.RegisterType(typeof(TService));
-			var container = builder.Build();
+				builder.RegisterType(t, InstanceScope.Transient, false, new[] { t }.Union(t.GetInterfaces()).ToArray());
+			if (types.Length == 0 && typeof(TService).IsClass)
+				builder.RegisterType(typeof(TService), InstanceScope.Transient, false);
+			var factory = builder.Build();
 			state.IsBooting = false;
-			var objectFactory = container.Resolve<IObjectFactory>();
-			var locator = objectFactory.Resolve<IServiceProvider>();
-			ContainerWcfHost.Resolver = s => locator.GetService(s);
-			state.Started(objectFactory);
-			return locator.Resolve<TService>();
+			factory.Resolve<IDomainModel>();
+			ContainerWcfHost.Resolver = s => factory.GetService(s);
+			state.Started(factory);
+			return factory.Resolve<TService>();
 		}
 	}
 }

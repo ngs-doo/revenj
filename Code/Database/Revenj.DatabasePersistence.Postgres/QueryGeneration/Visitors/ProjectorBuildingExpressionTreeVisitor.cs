@@ -10,7 +10,7 @@ using Remotion.Linq.Parsing;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 {
-	public class ProjectorBuildingExpressionTreeVisitor<T> : ExpressionTreeVisitor
+	internal class ProjectorBuildingExpressionTreeVisitor<T> : ExpressionTreeVisitor
 	{
 		// This is the generic ResultObjectMapping.GetObject<T>() method we'll use to obtain a queried object for an IQuerySource.
 		protected static readonly MethodInfo GetObjectMethod = typeof(ResultObjectMapping).GetMethod("GetObject");

@@ -6,7 +6,7 @@ using System.Security.Principal;
 
 namespace Revenj.Security
 {
-	public class RepositoryPrincipalFactory : IPrincipalFactory, IDisposable
+	internal class RepositoryPrincipalFactory : IPrincipalFactory, IDisposable
 	{
 		private readonly IQueryable<IUserRoles> LoadRoles;
 		private Dictionary<string, HashSet<string>> RoleCache = new Dictionary<string, HashSet<string>>();

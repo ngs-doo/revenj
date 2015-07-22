@@ -112,7 +112,7 @@ namespace Revenj.Extensibility
 		/// <summary>
 		/// Registered as service.
 		/// </summary>
-		Type AsType { get; }
+		Type[] AsType { get; }
 	}
 
 	[ContractClassFor(typeof(IFactoryBuilderType))]
@@ -129,7 +129,7 @@ namespace Revenj.Extensibility
 		}
 		public InstanceScope Scope { get; set; }
 		public bool IsGeneric { get; set; }
-		public Type AsType { get; set; }
+		public Type[] AsType { get; set; }
 	}
 
 	/// <summary>
@@ -148,7 +148,7 @@ namespace Revenj.Extensibility
 		/// <summary>
 		/// Registered as service.
 		/// </summary>
-		Type AsType { get; }
+		Type[] AsType { get; }
 	}
 
 	internal sealed class FactoryBuilderFunc : IFactoryBuilderFunc
@@ -156,7 +156,7 @@ namespace Revenj.Extensibility
 		internal Func<IObjectFactory, object> func;
 		public Func<IObjectFactory, object> Func { get { return func; } }
 		public InstanceScope Scope { get; set; }
-		public Type AsType { get; set; }
+		public Type[] AsType { get; set; }
 	}
 
 	[ContractClassFor(typeof(IObjectFactoryBuilder))]
@@ -186,7 +186,7 @@ namespace Revenj.Extensibility
 		/// <param name="type">service</param>
 		public static void RegisterType(this IObjectFactory factory, Type type)
 		{
-			RegisterType(factory, type, type, InstanceScope.Transient);
+			RegisterType(factory, type, InstanceScope.Transient);
 		}
 		/// <summary>
 		/// Register specified type to the container as custom service with provided scope.
@@ -195,15 +195,58 @@ namespace Revenj.Extensibility
 		/// <param name="type">service type</param>
 		/// <param name="asType">register as</param>
 		/// <param name="scope">resolution scope</param>
-		public static void RegisterType(this IObjectFactory factory, Type type, Type asType, InstanceScope scope)
+		public static void RegisterType(this IObjectFactory factory, Type type, InstanceScope scope, params Type[] asType)
 		{
 			Contract.Requires(factory != null);
 			Contract.Requires(type != null);
-			Contract.Requires(asType != null);
 
 			var ofb = new ObjectFactoryBuilder();
 			ofb.Add(new FactoryBuilderType { type = type, Scope = scope, AsType = asType });
 			factory.Register(ofb);
+		}
+		/// <summary>
+		/// Register specified type to the container as custom service with provided scope.
+		/// </summary>
+		/// <param name="builder">container builder</param>
+		/// <param name="type">service type</param>
+		/// <param name="asType">register as</param>
+		/// <param name="scope">resolution scope</param>
+		/// <param name="isGeneric">is generic type</param>
+		public static void RegisterType(
+			this IObjectFactoryBuilder builder,
+			Type type,
+			InstanceScope scope,
+			bool isGeneric,
+			params Type[] asType)
+		{
+			Contract.Requires(builder != null);
+			Contract.Requires(type != null);
+
+			builder.Add(new FactoryBuilderType { type = type, Scope = scope, AsType = asType, IsGeneric = isGeneric });
+		}
+		public static void RegisterType<TService>(
+			this IObjectFactoryBuilder builder,
+			InstanceScope scope = InstanceScope.Transient)
+		{
+			Contract.Requires(builder != null);
+
+			builder.Add(new FactoryBuilderType { type = typeof(TService), Scope = scope, IsGeneric = false });
+		}
+		public static void RegisterType<TService, TAs>(
+			this IObjectFactoryBuilder builder,
+			InstanceScope scope = InstanceScope.Transient)
+		{
+			Contract.Requires(builder != null);
+
+			builder.Add(new FactoryBuilderType { type = typeof(TService), Scope = scope, AsType = new[] { typeof(TAs) }, IsGeneric = false });
+		}
+		public static void RegisterType<TService, TAs1, TAs2>(
+			this IObjectFactoryBuilder builder,
+			InstanceScope scope = InstanceScope.Transient)
+		{
+			Contract.Requires(builder != null);
+
+			builder.Add(new FactoryBuilderType { type = typeof(TService), Scope = scope, AsType = new[] { typeof(TAs1), typeof(TAs2) }, IsGeneric = false });
 		}
 		/// <summary>
 		/// Register generic type to the container as custom service with provided scope.
@@ -212,7 +255,7 @@ namespace Revenj.Extensibility
 		/// <param name="type">service type</param>
 		/// <param name="asType">register as</param>
 		/// <param name="scope">resolution scope</param>
-		public static void RegisterGeneric(this IObjectFactory factory, Type type, Type asType, InstanceScope scope)
+		public static void RegisterGeneric(this IObjectFactory factory, Type type, InstanceScope scope, params Type[] asType)
 		{
 			Contract.Requires(factory != null);
 			Contract.Requires(type != null);
@@ -266,6 +309,14 @@ namespace Revenj.Extensibility
 			ofb.Add(new FactoryBuilderInstance { instance = instance, AsType = typeof(T) });
 			factory.Register(ofb);
 		}
+
+		public static void RegisterSingleton<T>(this IObjectFactoryBuilder builder, T instance)
+		{
+			Contract.Requires(builder != null);
+			Contract.Requires(instance != null);
+
+			builder.Add(new FactoryBuilderInstance { instance = instance, AsType = typeof(T) });
+		}
 		/// <summary>
 		/// Register all interfaces and specified service for provided instance to the container.
 		/// Services will be available in nested scopes too.
@@ -311,8 +362,25 @@ namespace Revenj.Extensibility
 			Contract.Requires(func != null);
 
 			var ofb = new ObjectFactoryBuilder();
-			ofb.Add(new FactoryBuilderFunc { func = f => func(f), AsType = typeof(T), Scope = scope });
+			ofb.Add(new FactoryBuilderFunc { func = f => func(f), AsType = new[] { typeof(T) }, Scope = scope });
 			factory.Register(ofb);
+		}
+
+		public static void RegisterFunc<T>(this IObjectFactoryBuilder builder, Func<IObjectFactory, T> func, InstanceScope scope = InstanceScope.Transient)
+		{
+			Contract.Requires(builder != null);
+			Contract.Requires(func != null);
+
+			builder.Add(new FactoryBuilderFunc { func = f => func(f), AsType = new[] { typeof(T) }, Scope = scope });
+		}
+		public static void RegisterFunc<T, TAs1, TAs2>(this IObjectFactoryBuilder builder, Func<IObjectFactory, T> func, InstanceScope scope = InstanceScope.Transient)
+			where TAs1 : T
+			where TAs2 : T
+		{
+			Contract.Requires(builder != null);
+			Contract.Requires(func != null);
+
+			builder.Add(new FactoryBuilderFunc { func = f => func(f), AsType = new[] { typeof(TAs1), typeof(TAs2) }, Scope = scope });
 		}
 	}
 }

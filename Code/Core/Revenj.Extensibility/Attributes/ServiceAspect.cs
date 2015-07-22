@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using System.Linq;
 using Revenj.Utility;
 
 namespace Revenj.Extensibility
@@ -12,12 +13,7 @@ namespace Revenj.Extensibility
 			{
 				var attr = type.GetCustomAttributes(typeof(ServiceAttribute), false) as ServiceAttribute[];
 				if (attr != null && attr.Length == 1)
-				{
-					var st = attr[0].Scope;
-					factory.RegisterType(type, type, st);
-					foreach (var i in type.GetInterfaces())
-						factory.RegisterType(type, i, st);
-				}
+					factory.RegisterType(type, attr[0].Scope, new[] { type }.Union(type.GetInterfaces()).ToArray());
 			}
 		}
 	}

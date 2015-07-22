@@ -9,7 +9,7 @@ using Revenj.Extensibility;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 {
-	public class SqlGeneratorQueryModelVisitor : QueryModelVisitorBase
+	internal class SqlGeneratorQueryModelVisitor : QueryModelVisitorBase
 	{
 		public static SqlCommandData GenerateSqlQuery(
 			QueryModel queryModel,

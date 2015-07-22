@@ -8,16 +8,17 @@ using Revenj.Extensibility.Autofac.Core;
 
 namespace Revenj.Extensibility
 {
-	public class AutofacObjectFactory : IObjectFactory
+	internal class AutofacObjectFactory : IObjectFactory
 	{
 		private ILifetimeScope CurrentScope;
-		private Stack<ILifetimeScope> MyScopes = new Stack<ILifetimeScope>();
+		private readonly Stack<ILifetimeScope> MyScopes = new Stack<ILifetimeScope>();
 
 		private readonly List<IObjectFactoryBuilder> FactoryBuilders = new List<IObjectFactoryBuilder>();
 		private readonly List<Action<ContainerBuilder>> AutofacBuilders = new List<Action<ContainerBuilder>>(2);
 		private bool ShouldBuildScope;
 
 		private readonly ConcurrentDictionary<Type, Func<object>> SimpleCache = new ConcurrentDictionary<Type, Func<object>>(1, 11);
+		private readonly ConcurrentDictionary<Type, Func<object>> ServiceCache = new ConcurrentDictionary<Type, Func<object>>(1, 11);
 		private readonly ConcurrentDictionary<Type, Func<object[], object>> CacheWithArguments = new ConcurrentDictionary<Type, Func<object[], object>>(1, 3);
 		private readonly ConcurrentDictionary<Type, bool> RegistrationCache = new ConcurrentDictionary<Type, bool>(1, 11);
 		private readonly AutofacObjectFactory ParentFactory;
@@ -49,7 +50,7 @@ namespace Revenj.Extensibility
 			this.Cleanup = cleanup;
 		}
 
-		private Func<object[], object> BuildWithAspects(Type type, bool canBeNull)
+		private Func<object[], object> BuildWithAspects(Type type)
 		{
 			var services = new[] { type }.Union(type.GetInterfaces()).ToArray();
 			return args =>
@@ -60,31 +61,77 @@ namespace Revenj.Extensibility
 				}
 				catch (MissingMethodException mme)
 				{
-					if (canBeNull) return null;
 					throw new MissingMethodException(@"Can't create instance of an type {0}. 
 Check if type should be registered in the container or if correct arguments are passed.".With(type.FullName), mme);
 				}
 			};
 		}
 
+		private Func<object> BuildFactoryForService(Type type)
+		{
+			if (type.IsClass)
+			{
+				foreach (var ctor in type.GetConstructors().Where(it => it.IsPublic))
+				{
+					var ctorParams = ctor.GetParameters();
+					if (ctorParams.Length == 0)
+						return () => Activator.CreateInstance(type);
+					if (ctorParams.Length == 1)
+					{
+						if (ctorParams[0].ParameterType == typeof(IServiceProvider)
+							|| ctorParams[0].ParameterType == typeof(IObjectFactory))
+							return () => Activator.CreateInstance(type, this);
+					}
+					var argFactories = new Func<object>[ctorParams.Length];
+					for (int i = 0; i < ctorParams.Length; i++)
+					{
+						var arg = GetFactory(ctorParams[i].ParameterType);
+						if (arg == null)
+							return null;
+						argFactories[i] = arg;
+					}
+					return () =>
+					{
+						var args = new object[argFactories.Length];
+						for (int i = 0; i < argFactories.Length; i++)
+							args[i] = argFactories[i]();
+						return Activator.CreateInstance(type, args);
+					};
+				}
+			}
+			return null;
+		}
+
 		public object GetService(Type type)
+		{
+			var factory = GetFactory(type);
+			return factory != null ? factory() : null;
+		}
+
+		private Func<object> GetFactory(Type type)
 		{
 			BuildScopeIfRequired();
 
 			Func<object> factory;
-			if (!SimpleCache.TryGetValue(type, out factory))
+			if (!SimpleCache.TryGetValue(type, out factory)
+				&& !ServiceCache.TryGetValue(type, out factory))
 			{
 				var serv = new TypedService(type);
 				IComponentRegistration reg;
 				var inContainer = CurrentScope.ComponentRegistry.TryGetRegistration(serv, out reg);
 				RegistrationCache.TryAdd(type, inContainer);
 				if (inContainer)
+				{
 					factory = CurrentScope.ResolveLookup(serv, reg, new Parameter[0]).Factory;
+					SimpleCache.TryAdd(type, factory);
+				}
 				else
-					factory = () => BuildWithAspects(type, true)(null);
-				SimpleCache.TryAdd(type, factory);
+				{
+					factory = BuildFactoryForService(type);
+					ServiceCache.TryAdd(type, factory);
+				}
 			}
-			return factory();
+			return factory;
 		}
 
 		public object Resolve(Type type, object[] args)
@@ -103,7 +150,7 @@ Check if type should be registered in the container or if correct arguments are 
 					if (inContainer)
 						factory = CurrentScope.ResolveLookup(serv, reg, new Parameter[0]).Factory;
 					else
-						factory = () => BuildWithAspects(type, false)(null);
+						factory = () => BuildWithAspects(type)(null);
 					SimpleCache.TryAdd(type, factory);
 				}
 				return factory();
@@ -120,7 +167,7 @@ Check if type should be registered in the container or if correct arguments are 
 					if (inContainer)
 						factory = a => CurrentScope.ResolveLookup(serv, reg, a.Select(it => new TypedParameter(it.GetType(), it))).Factory();
 					else
-						factory = BuildWithAspects(type, false);
+						factory = BuildWithAspects(type);
 					CacheWithArguments.TryAdd(type, factory);
 				}
 				return factory(args);
@@ -161,83 +208,108 @@ Check if type should be registered in the container or if correct arguments are 
 		{
 			foreach (var rb in FactoryBuilders)
 			{
-				foreach (var item in rb.Types.Where(i => i.IsGeneric == false))
-				{
-					RegistrationCache.TryAdd(item.AsType ?? item.Type, true);
-					switch (item.Scope)
-					{
-						case InstanceScope.Transient:
-							if (item.AsType == null)
-								cb.RegisterType(item.Type);
-							else
-								cb.RegisterType(item.Type).As(item.AsType);
-							break;
-						case InstanceScope.Singleton:
-							if (item.AsType == null)
-								cb.RegisterType(item.Type).SingleInstance();
-							else
-								cb.RegisterType(item.Type).As(item.AsType).SingleInstance();
-							break;
-						default:
-							if (item.AsType == null)
-								cb.RegisterType(item.Type).InstancePerLifetimeScope();
-							else
-								cb.RegisterType(item.Type).As(item.AsType).InstancePerLifetimeScope();
-							break;
-					}
-				}
-				foreach (var item in rb.Types.Where(i => i.IsGeneric))
-				{
-					RegistrationCache.TryAdd(item.AsType ?? item.Type, true);
-					switch (item.Scope)
-					{
-						case InstanceScope.Transient:
-							if (item.AsType == null)
-								cb.RegisterGeneric(item.Type);
-							else
-								cb.RegisterGeneric(item.Type).As(item.AsType);
-							break;
-						case InstanceScope.Singleton:
-							if (item.AsType == null)
-								cb.RegisterGeneric(item.Type).SingleInstance();
-							else
-								cb.RegisterGeneric(item.Type).As(item.AsType).SingleInstance();
-							break;
-						default:
-							if (item.AsType == null)
-								cb.RegisterGeneric(item.Type).InstancePerLifetimeScope();
-							else
-								cb.RegisterGeneric(item.Type).As(item.AsType).InstancePerLifetimeScope();
-							break;
-					}
-				}
-				foreach (var item in rb.Instances)
-				{
-					var type = item.AsType ?? item.Instance.GetType();
-					RegistrationCache.TryAdd(type, true);
-					cb.RegisterInstance(item.Instance).As(type);
-				}
-				foreach (var item in rb.Funcs)
-				{
-					if (item.AsType == null)
-						throw new NotSupportedException("Result type must be defined. Declared Func result is not defined");
-					RegistrationCache.TryAdd(item.AsType, true);
-					switch (item.Scope)
-					{
-						case InstanceScope.Transient:
-							cb.Register(c => item.Func(c.Resolve<IObjectFactory>())).As(item.AsType);
-							break;
-						case InstanceScope.Singleton:
-							cb.Register(c => item.Func(c.Resolve<IObjectFactory>())).As(item.AsType).SingleInstance();
-							break;
-						default:
-							cb.Register(c => item.Func(c.Resolve<IObjectFactory>())).As(item.AsType).InstancePerLifetimeScope();
-							break;
-					}
-				}
+				RegisterToContainer(cb, rb, RegistrationCache);
 			}
 			foreach (var builder in AutofacBuilders)
 				builder(cb);
+		}
+
+		internal static void RegisterToContainer(ContainerBuilder cb, IObjectFactoryBuilder rb, ConcurrentDictionary<Type, bool> cache)
+		{
+			foreach (var item in rb.Types.Where(i => i.IsGeneric == false))
+			{
+				if (cache != null)
+				{
+					if (item.AsType != null)
+						foreach (var t in item.AsType)
+							cache.TryAdd(t, true);
+					else
+						cache.TryAdd(item.Type, true);
+				}
+				switch (item.Scope)
+				{
+					case InstanceScope.Transient:
+						if (item.AsType == null || item.AsType.Length == 0)
+							cb.RegisterType(item.Type);
+						else
+							cb.RegisterType(item.Type).As(item.AsType);
+						break;
+					case InstanceScope.Singleton:
+						if (item.AsType == null || item.AsType.Length == 0)
+							cb.RegisterType(item.Type).SingleInstance();
+						else
+							cb.RegisterType(item.Type).As(item.AsType).SingleInstance();
+						break;
+					default:
+						if (item.AsType == null || item.AsType.Length == 0)
+							cb.RegisterType(item.Type).InstancePerLifetimeScope();
+						else
+							cb.RegisterType(item.Type).As(item.AsType).InstancePerLifetimeScope();
+						break;
+				}
+			}
+			foreach (var item in rb.Types.Where(i => i.IsGeneric))
+			{
+				if (cache != null)
+				{
+					if (item.AsType != null)
+						foreach (var t in item.AsType)
+							cache.TryAdd(t, true);
+					else
+						cache.TryAdd(item.Type, true);
+				}
+				switch (item.Scope)
+				{
+					case InstanceScope.Transient:
+						if (item.AsType == null || item.AsType.Length == 0)
+							cb.RegisterGeneric(item.Type);
+						else
+							cb.RegisterGeneric(item.Type).As(item.AsType);
+						break;
+					case InstanceScope.Singleton:
+						if (item.AsType == null || item.AsType.Length == 0)
+							cb.RegisterGeneric(item.Type).SingleInstance();
+						else
+							cb.RegisterGeneric(item.Type).As(item.AsType).SingleInstance();
+						break;
+					default:
+						if (item.AsType == null || item.AsType.Length == 0)
+							cb.RegisterGeneric(item.Type).InstancePerLifetimeScope();
+						else
+							cb.RegisterGeneric(item.Type).As(item.AsType).InstancePerLifetimeScope();
+						break;
+				}
+			}
+			foreach (var item in rb.Instances)
+			{
+				var type = item.AsType ?? item.Instance.GetType();
+				if (cache != null)
+					cache.TryAdd(type, true);
+				cb.RegisterInstance(item.Instance).As(type);
+			}
+			foreach (var it in rb.Funcs)
+			{
+				var item = it;
+				if (item.AsType == null || item.AsType.Length == 0)
+					throw new NotSupportedException("Result type must be defined. Declared Func result is not defined");
+				if (cache != null)
+				{
+					foreach (var t in item.AsType)
+						cache.TryAdd(t, true);
+				}
+				switch (item.Scope)
+				{
+					case InstanceScope.Transient:
+						cb.Register(c => item.Func(c.Resolve<IObjectFactory>())).As(item.AsType);
+						break;
+					case InstanceScope.Singleton:
+						cb.Register(c => item.Func(c.Resolve<IObjectFactory>())).As(item.AsType).SingleInstance();
+						break;
+					default:
+						cb.Register(c => item.Func(c.Resolve<IObjectFactory>())).As(item.AsType).InstancePerLifetimeScope();
+						break;
+				}
+			}
 		}
 
 		private void BuildScopeIfRequired()
@@ -254,6 +326,7 @@ Check if type should be registered in the container or if correct arguments are 
 				FactoryBuilders.Clear();
 				AutofacBuilders.Clear();
 				SimpleCache.Clear();
+				ServiceCache.Clear();
 				CacheWithArguments.Clear();
 				ShouldBuildScope = false;
 
@@ -268,7 +341,7 @@ Check if type should be registered in the container or if correct arguments are 
 			AutofacObjectFactory tv;
 			Action cleanup = string.IsNullOrEmpty(id) ? (Action)null : () => TaggedScopes.TryRemove(id, out tv);
 			var factory = new AutofacObjectFactory(this, innerComposer, cleanup);
-			factory.AutofacBuilders.Add(cb => cb.RegisterInstance(factory).As<IObjectFactory>().ExternallyOwned());
+			factory.AutofacBuilders.Add(cb => cb.RegisterInstance(factory).As<IObjectFactory>().As<IServiceProvider>().ExternallyOwned());
 			factory.RegisterInterfaces(innerComposer);
 			if (!string.IsNullOrEmpty(id))
 				TaggedScopes.TryAdd(id, factory);

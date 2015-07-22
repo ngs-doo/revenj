@@ -66,13 +66,13 @@ namespace Revenj.Wcf
 				HttpRuntime.UnloadAppDomain();
 
 			if ((int)result.Status >= 300)
-				return new ExecuteResult { Error = Utility.ReturnError(result.Message, result.Status) };
+				return new ExecuteResult { Error = response.ReturnError(result.Message, result.Status) };
 
 			if (first == null)
-				return new ExecuteResult { Error = Utility.ReturnError("Missing result", HttpStatusCode.InternalServerError) };
+				return new ExecuteResult { Error = response.ReturnError("Missing result", HttpStatusCode.InternalServerError) };
 
 			if ((int)first.Result.Status >= 300)
-				return new ExecuteResult { Error = Utility.ReturnError(first.Result.Message, first.Result.Status) };
+				return new ExecuteResult { Error = response.ReturnError(first.Result.Message, first.Result.Status) };
 
 			foreach (var ar in result.ExecutedCommandResults.Skip(1))
 				response.AddHeader(ar.RequestID, ar.Result.Data.ToString());
@@ -93,11 +93,11 @@ namespace Revenj.Wcf
 			var command = template.RelativePathSegments.Count > 0 ? template.RelativePathSegments[0] : null;
 
 			if (command == null)
-				return Utility.ReturnError("Command not specified", HttpStatusCode.BadRequest);
+				return response.ReturnError("Command not specified", HttpStatusCode.BadRequest);
 
 			var commandType = CommandsRepository.Find(command);
 			if (commandType == null)
-				return Utility.ReturnError("Unknown command " + command, HttpStatusCode.NotFound);
+				return response.ReturnError("Unknown command " + command, HttpStatusCode.NotFound);
 
 			var start = Stopwatch.GetTimestamp();
 
@@ -109,7 +109,7 @@ namespace Revenj.Wcf
 			{
 				var scope = ObjectFactory.FindScope(sessionID);
 				if (scope == null)
-					return Utility.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
+					return response.ReturnError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
 				engine = scope.Resolve<IProcessingEngine>();
 			}
 
@@ -144,7 +144,7 @@ namespace Revenj.Wcf
 						catch (Exception ex)
 						{
 							return
-								Utility.ReturnError(
+								response.ReturnError(
 									"Error parsing request body as XML. " + ex.Message,
 									request.ContentType == null ? HttpStatusCode.UnsupportedMediaType : HttpStatusCode.BadRequest);
 						}
@@ -234,7 +234,7 @@ namespace Revenj.Wcf
 					cms.Position = 0;
 					return cms;
 				}
-				return Utility.ReturnError(
+				return response.ReturnError(
 					"Unexpected command result. Can't convert "
 					+ result.Result.GetType().FullName + " to octet-stream. Use application/x-dotnet mime type for .NET binary serialization",
 					HttpStatusCode.UnsupportedMediaType);
@@ -326,7 +326,7 @@ namespace Revenj.Wcf
 						return cms.ToBase64Stream();
 					}
 				}
-				return Utility.ReturnError("Unexpected command result. Can't convert to base64.", HttpStatusCode.UnsupportedMediaType);
+				return response.ReturnError("Unexpected command result. Can't convert to base64.", HttpStatusCode.UnsupportedMediaType);
 			}
 			if (accept == "application/x-dotnet")
 			{

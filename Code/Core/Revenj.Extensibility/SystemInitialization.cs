@@ -2,7 +2,7 @@
 
 namespace Revenj.Extensibility
 {
-	public class SystemInitialization
+	internal class SystemInitialization
 	{
 		private readonly IAspectRegistrator AspectRegistrator;
 		private readonly IObjectFactory ObjectFactory;

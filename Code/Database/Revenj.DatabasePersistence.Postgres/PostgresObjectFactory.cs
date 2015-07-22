@@ -16,7 +16,7 @@ namespace Revenj.DatabasePersistence.Postgres
 		Func<object, string> GetSerializationFactory(Type type);
 	}
 
-	public class PostgresObjectFactory : IPostgresConverterRepository, IPostgresConverterFactory
+	internal class PostgresObjectFactory : IPostgresConverterRepository, IPostgresConverterFactory
 	{
 		private Dictionary<Type, IPostgresTypeConverter> TypeConverters = new Dictionary<Type, IPostgresTypeConverter>();
 

@@ -12,6 +12,7 @@ using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration
 {
+	//TODO: internal!?
 	public class QueryExecutor : IQueryExecutor
 	{
 		private readonly IDatabaseQuery DatabaseQuery;

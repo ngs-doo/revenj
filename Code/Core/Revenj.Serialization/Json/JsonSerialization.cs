@@ -15,12 +15,12 @@ namespace Revenj.Serialization
 {
 	public class JsonSerialization : ISerialization<string>, ISerialization<TextReader>
 	{
-		private readonly GenericDeserializationBinder Binder;
+		private readonly SerializationBinder Binder;
 		private readonly JsonSerializer SharedSerializer;
 		private static readonly StringEnumConverter EnumConverter = new StringEnumConverter();
 		private static readonly TextReaderConverter TextReaderConverter = new TextReaderConverter();
 
-		public JsonSerialization(GenericDeserializationBinder binder)
+		public JsonSerialization(SerializationBinder binder)
 		{
 			Contract.Requires(binder != null);
 
@@ -241,7 +241,7 @@ namespace Revenj.Serialization
 		{
 			private readonly IJsonObject Converter;
 			private readonly JsonSerializer JsonNet;
-			private readonly GenericDeserializationBinder Binder;
+			private readonly SerializationBinder Binder;
 			private readonly Type Target;
 			private readonly Type Type;
 			private readonly bool IsSimple;
@@ -252,7 +252,7 @@ namespace Revenj.Serialization
 			private readonly bool IsQueue;
 			private readonly bool IsLinkedList;
 
-			public Deserializer(Type target, JsonSerializer jsonNet, GenericDeserializationBinder binder)
+			public Deserializer(Type target, JsonSerializer jsonNet, SerializationBinder binder)
 			{
 				this.JsonNet = jsonNet;
 				this.Binder = binder;

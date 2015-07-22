@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 
 namespace Revenj.DomainPatterns
 {
-	public class DomainEventSource : IDomainEventSource
+	internal class DomainEventSource : IDomainEventSource
 	{
 		private readonly IServiceProvider Locator;
 		private readonly ConcurrentDictionary<Type, object> EventSources = new ConcurrentDictionary<Type, object>(1, 17);
