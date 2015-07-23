@@ -10,7 +10,7 @@ namespace Revenj.WindowsService
 	{
 		static void Main(string[] args)
 		{
-			var factory = Platform.Start<IObjectFactory>(Platform.Container.Autofac);
+			var factory = Platform.Start<IObjectFactory>();
 			var extensibility = factory.Resolve<IExtensibilityProvider>();
 			var plugins = extensibility.FindPlugins<ServiceBase>();
 			factory.RegisterTypes(plugins);

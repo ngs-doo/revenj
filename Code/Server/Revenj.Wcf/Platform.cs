@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -9,23 +10,36 @@ namespace DSL
 {
 	public static class Platform
 	{
-		public enum Container
+		internal enum Container
 		{
 			Autofac,
 			DryIoc
 		}
 
-		public static IServiceProvider Start(Container container = Container.Autofac)
+		public static IServiceProvider Start()
 		{
-			return Start<IServiceProvider>(container);
+			return Start<IServiceProvider>();
 		}
 
-		public static TService Start<TService>(Container container, params Type[] types)
+		public static TService Start<TService>(params Type[] types)
 		{
 			var state = new ServerState();
 			var withAspects = ConfigurationManager.AppSettings["Revenj.AllowAspects"] == "true";
-			var builder = container == Container.Autofac ? Revenj.Extensibility.Setup.UseAutofac(true, false, withAspects) : Revenj.Extensibility.Setup.UseDryIoc();
+			var dllPlugins =
+				(from key in ConfigurationManager.AppSettings.AllKeys
+				 where key.StartsWith("PluginsPath", StringComparison.OrdinalIgnoreCase)
+				 let path = ConfigurationManager.AppSettings[key]
+				 let pathRelative = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path)
+				 let chosenPath = Directory.Exists(pathRelative) ? pathRelative : path
+				 select chosenPath)
+				.ToList();
+			var container = Container.Autofac;
+			var builder = container == Container.Autofac
+				? Revenj.Extensibility.Setup.UseAutofac(null, dllPlugins, true, false, withAspects)
+				: Revenj.Extensibility.Setup.UseDryIoc(null, dllPlugins);
 			builder.RegisterSingleton<ISystemState>(state);
+			if (container == Container.DryIoc)
+				StandardModule.Configure(builder, true);
 			foreach (var t in types)
 				builder.RegisterType(t, InstanceScope.Transient, false, new[] { t }.Union(t.GetInterfaces()).ToArray());
 			if (types.Length == 0 && typeof(TService).IsClass)

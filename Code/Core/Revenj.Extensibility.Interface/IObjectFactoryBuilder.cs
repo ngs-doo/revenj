@@ -235,6 +235,7 @@ namespace Revenj.Extensibility
 		public static void RegisterType<TService, TAs>(
 			this IObjectFactoryBuilder builder,
 			InstanceScope scope = InstanceScope.Transient)
+			where TService : TAs
 		{
 			Contract.Requires(builder != null);
 
@@ -243,6 +244,7 @@ namespace Revenj.Extensibility
 		public static void RegisterType<TService, TAs1, TAs2>(
 			this IObjectFactoryBuilder builder,
 			InstanceScope scope = InstanceScope.Transient)
+			where TService : TAs1, TAs2
 		{
 			Contract.Requires(builder != null);
 
@@ -374,8 +376,7 @@ namespace Revenj.Extensibility
 			builder.Add(new FactoryBuilderFunc { func = f => func(f), AsType = new[] { typeof(T) }, Scope = scope });
 		}
 		public static void RegisterFunc<T, TAs1, TAs2>(this IObjectFactoryBuilder builder, Func<IObjectFactory, T> func, InstanceScope scope = InstanceScope.Transient)
-			where TAs1 : T
-			where TAs2 : T
+			where T : TAs1, TAs2
 		{
 			Contract.Requires(builder != null);
 			Contract.Requires(func != null);

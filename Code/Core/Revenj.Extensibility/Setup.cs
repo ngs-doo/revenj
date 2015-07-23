@@ -96,9 +96,10 @@ namespace Revenj.Extensibility
 
 		class DryIocContainerBuilder : IContainerBuilder
 		{
-			public readonly DryIoc.Container Container;
 			public readonly IObjectFactory Factory;
 			private readonly bool DslAspects;
+			private readonly PluginsConfiguration Plugins;
+			private readonly CastleDynamicProxyProvider Proxy;
 
 			public DryIocContainerBuilder(
 				IEnumerable<Assembly> pluginAssemblies,
@@ -106,28 +107,28 @@ namespace Revenj.Extensibility
 				bool dslAspects = false)
 			{
 				this.DslAspects = dslAspects;
-				this.Container = new DryIoc.Container(rules => rules.With(FactoryMethod.ConstructorWithResolvableArguments));
-				var dynamicProxy = new CastleDynamicProxyProvider();
-				this.RegisterSingleton<IMixinProvider>(dynamicProxy);
-				this.RegisterSingleton<IDynamicProxyProvider>(dynamicProxy);
-				var aopRepository = new AspectRepository(dynamicProxy);
+				var container = new DryIoc.Container(rules => rules.With(FactoryMethod.ConstructorWithResolvableArguments)).OpenScopeWithoutContext();
+				Proxy = new CastleDynamicProxyProvider();
+				this.RegisterSingleton<IMixinProvider>(Proxy);
+				this.RegisterSingleton<IDynamicProxyProvider>(Proxy);
+				var aopRepository = new AspectRepository(Proxy);
 				this.RegisterSingleton<IAspectRegistrator>(aopRepository);
 				this.RegisterSingleton<IAspectComposer>(aopRepository);
 				this.RegisterSingleton<IInterceptorRegistrator>(aopRepository);
-				Factory = new DryIocObjectFactory(Container, aopRepository);
+				Factory = new DryIocObjectFactory(container, aopRepository);
 				this.RegisterSingleton<IObjectFactory>(Factory);
 				this.RegisterSingleton<IServiceProvider>(Factory);
-				this.RegisterSingleton(new PluginsConfiguration
+				Plugins = new PluginsConfiguration
 				{
 					Directories = (pluginPaths ?? new string[0]).ToList(),
 					Assemblies = (pluginAssemblies ?? new Assembly[0]).ToList()
-				});
+				};
+				this.RegisterSingleton(Plugins);
 				this.RegisterType<SystemInitialization>();
 				this.RegisterType(typeof(PluginRepository<>), InstanceScope.Singleton, true, typeof(IPluginRepository<>));
 				var types = AssemblyScanner.GetAllTypes();
-				var pc = Factory.Resolve<PluginsConfiguration>();
-				var mp = Factory.Resolve<IMixinProvider>();
-				this.RegisterSingleton<IExtensibilityProvider>(new DryIocMefProvider(pc, mp, Container));
+				this.RegisterSingleton<IExtensibilityProvider>(new DryIocMefProvider(Plugins, Proxy, container));
+				DryIocObjectFactory.RegisterToContainer(container, this);
 			}
 
 			private List<IFactoryBuilderInstance> instances = new List<IFactoryBuilderInstance>();
@@ -143,7 +144,6 @@ namespace Revenj.Extensibility
 
 			public IObjectFactory Build()
 			{
-				DryIocObjectFactory.RegisterToContainer(Container, this);
 				var init = Factory.Resolve<SystemInitialization>();
 				init.Initialize(DslAspects);
 				return Factory;

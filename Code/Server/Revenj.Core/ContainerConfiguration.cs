@@ -10,14 +10,10 @@ using Revenj.Serialization;
 
 namespace Revenj.Core
 {
-	internal static class AutofacConfiguration
+	internal static class ContainerConfiguration
 	{
-		public static IServiceProvider Configure(Database database, string connectionString, bool withAspects, bool externalConfiguration)
+		public static IServiceProvider Configure(DSL.Core.Container container, Database database, string connectionString, bool withAspects, bool externalConfiguration)
 		{
-			var state = new SystemState();
-			var builder = Revenj.Extensibility.Setup.UseAutofac(externalConfiguration, false, withAspects);
-			builder.RegisterSingleton<ISystemState>(state);
-
 			var dllPlugins = externalConfiguration == false ? new string[0] :
 				(from key in ConfigurationManager.AppSettings.AllKeys
 				 where key.StartsWith("PluginsPath", StringComparison.OrdinalIgnoreCase)
@@ -27,7 +23,11 @@ namespace Revenj.Core
 				 select chosenPath)
 				.ToArray();
 			var assemblies = Revenj.Utility.AssemblyScanner.GetAssemblies().Where(it => it.FullName.StartsWith("Revenj."));
-			builder.ConfigureExtensibility(assemblies, dllPlugins, false);
+			var state = new SystemState();
+			var builder = container == DSL.Core.Container.Autofac
+				? Revenj.Extensibility.Setup.UseAutofac(assemblies, dllPlugins, externalConfiguration, false, withAspects)
+				: Revenj.Extensibility.Setup.UseDryIoc(assemblies, dllPlugins, false);
+			builder.RegisterSingleton<ISystemState>(state);
 			if (database == Core.Database.Postgres)
 				builder.ConfigurePostgres(connectionString);
 			//else

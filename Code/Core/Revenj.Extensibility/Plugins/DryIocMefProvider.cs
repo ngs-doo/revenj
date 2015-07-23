@@ -24,7 +24,7 @@ namespace Revenj.Extensibility
 
 			public DryIocResolution(IContainer container, PluginsConfiguration configuration)
 			{
-				this.Container = container.OpenScope();
+				this.Container = container.OpenScopeWithoutContext();
 				var assemblies = new List<Assembly>();
 				try
 				{
@@ -51,8 +51,24 @@ namespace Revenj.Extensibility
 				}
 				if (assemblies.Count > 0)
 				{
-					AttributedModel.Scan(assemblies);
-					this.Container.RegisterExports(assemblies.ToArray());
+					var exports = AttributedModel.Scan(assemblies);
+					foreach (var info in exports)
+					{
+						if (!info.ImplementationType.IsStatic())
+						{
+							var factory = info.CreateFactory();
+							for (var i = 0; i < info.Exports.Length; i++)
+							{
+								var export = info.Exports[i];
+								Container.Register(factory,
+									export.ServiceType, export.ServiceKeyInfo.Key, IfAlreadyRegistered.AppendNotKeyed, true);
+							}
+						}
+
+						if (info.IsFactory)
+							AttributedModel.RegisterFactoryMethods(Container, info);
+					}
+					//this.Container.RegisterExports(exports);
 				}
 			}
 
@@ -769,7 +785,7 @@ namespace DryIoc.MefAttributedModel
 			return exports;
 		}
 
-		private static void RegisterFactoryMethods(IRegistrator registrator, ExportedRegistrationInfo factoryInfo)
+		internal static void RegisterFactoryMethods(IRegistrator registrator, ExportedRegistrationInfo factoryInfo)
 		{
 			// NOTE: Cast is required for NET35
 			var members = factoryInfo.ImplementationType.GetAll(t =>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Diagnostics;
 using System.Web;
 using DSL;
@@ -12,11 +11,11 @@ namespace Revenj.Wcf
 
 		protected void Application_Start(object sender, EventArgs e)
 		{
-			Platform.Container container;
+			/*Platform.Container container;
 			if (!Enum.TryParse<Platform.Container>(ConfigurationManager.AppSettings["Revenj.Container"], out container))
-				container = Platform.Container.Autofac;
+				container = Platform.Container.Autofac;*/
 			var register = new[] { typeof(RestApplication), typeof(SoapApplication), typeof(CommandConverter) };
-			Platform.Start<IServiceProvider>(Platform.Container.Autofac, register);
+			Platform.Start<IServiceProvider>(register);
 			TraceSource.TraceEvent(TraceEventType.Start, 1001);
 		}
 

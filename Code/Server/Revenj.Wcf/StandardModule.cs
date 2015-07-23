@@ -7,7 +7,6 @@ using Revenj.Api;
 using Revenj.DatabasePersistence.Postgres;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
-using Revenj.Extensibility.Autofac;
 using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
@@ -29,39 +28,24 @@ namespace Revenj.Wcf
 			this.WithDatabase = withDatabase;
 		}
 
-		protected override void Load(Revenj.Extensibility.Autofac.ContainerBuilder builder)
+		public static void Configure(IObjectFactoryBuilder builder, bool withDatabase)
 		{
 			//TODO: register applications as implementation only
-			builder.RegisterType<RestApplication>().As<RestApplication, IRestApplication>();
-			builder.RegisterType<SoapApplication>().As<SoapApplication, ISoapApplication>();
-			builder.RegisterType<CommandConverter>().As<ICommandConverter>();
+			builder.RegisterType<RestApplication>();
+			builder.RegisterType<RestApplication, IRestApplication>();
+			builder.RegisterType<SoapApplication>();
+			builder.RegisterType<SoapApplication, ISoapApplication>();
+			builder.RegisterType<CommandConverter, ICommandConverter>();
 
-			SetupExtensibility(builder);
-			if (WithDatabase)
-				SetupPostgres(builder);
-			SetupPatterns(builder);
-			builder.ConfigureSerialization();
-			builder.ConfigureSecurity(true);
-			builder.ConfigureProcessing();
+			if (withDatabase)
+			{
+				var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
+				if (string.IsNullOrEmpty(cs))
+					throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
+Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
 
-			base.Load(builder);
-		}
-
-		private static void SetupExtensibility(Revenj.Extensibility.Autofac.ContainerBuilder builder)
-		{
-			var dllPlugins =
-				(from key in ConfigurationManager.AppSettings.AllKeys
-				 where key.StartsWith("PluginsPath", StringComparison.OrdinalIgnoreCase)
-				 let path = ConfigurationManager.AppSettings[key]
-				 let pathRelative = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path)
-				 let chosenPath = Directory.Exists(pathRelative) ? pathRelative : path
-				 select chosenPath)
-				.ToList();
-			builder.ConfigureExtensibility(null, dllPlugins, false);
-		}
-
-		private static void SetupPatterns(Revenj.Extensibility.Autofac.ContainerBuilder builder)
-		{
+				builder.ConfigurePostgres(cs);
+			}
 			var serverModels =
 				(from key in ConfigurationManager.AppSettings.AllKeys
 				 where key.StartsWith("ServerAssembly", StringComparison.OrdinalIgnoreCase)
@@ -83,6 +67,16 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			}
 
 			builder.ConfigurePatterns(_ => serverModels);
+			builder.ConfigureSerialization();
+			builder.ConfigureSecurity(true);
+			builder.ConfigureProcessing();
+		}
+
+		protected override void Load(Revenj.Extensibility.Autofac.ContainerBuilder builder)
+		{
+			Configure(builder, WithDatabase);
+
+			base.Load(builder);
 		}
 
 		private static Assembly LoadAssembly(string name)
@@ -93,16 +87,6 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			if (File.Exists(file))
 				return Assembly.LoadFrom(file);
 			throw new ConfigurationErrorsException("Can't find assembly " + name + ". Check your configuration");
-		}
-
-		private static void SetupPostgres(Revenj.Extensibility.Autofac.ContainerBuilder builder)
-		{
-			var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
-			if (string.IsNullOrEmpty(cs))
-				throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
-Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
-
-			builder.ConfigurePostgres(cs);
 		}
 	}
 }

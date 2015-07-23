@@ -37,7 +37,7 @@ namespace Revenj.Extensibility
 			DryIocObjectFactory parentFactory,
 			IAspectComposer aspects,
 			Action cleanup)
-			: this(parentFactory.CurrentScope.OpenScope(), aspects)
+			: this(parentFactory.CurrentScope.OpenScopeWithoutContext(), aspects)
 		{
 			this.ParentFactory = parentFactory;
 			this.Cleanup = cleanup;
@@ -159,7 +159,7 @@ Check if type should be registered in the container or if correct arguments are 
 				{
 					case InstanceScope.Transient:
 						if (item.AsType == null || item.AsType.Length == 0)
-							cb.Register(item.Type);
+							cb.Register(item.Type, Reuse.Transient);
 						else foreach (var t in item.AsType)
 								cb.Register(t, item.Type);
 						break;
@@ -171,9 +171,9 @@ Check if type should be registered in the container or if correct arguments are 
 						break;
 					default:
 						if (item.AsType == null || item.AsType.Length == 0)
-							cb.Register(item.Type, Reuse.InCurrentScope);
+							cb.Register(item.Type, Reuse.InResolutionScope);
 						else foreach (var t in item.AsType)
-								cb.Register(t, item.Type, Reuse.InCurrentScope);
+								cb.Register(t, item.Type, Reuse.InResolutionScope);
 						break;
 				}
 			}
@@ -199,7 +199,7 @@ Check if type should be registered in the container or if correct arguments are 
 						break;
 					default:
 						foreach (var t in item.AsType)
-							cb.RegisterDelegate(t, c => item.Func(c.Resolve<IObjectFactory>()), Reuse.InCurrentScope);
+							cb.RegisterDelegate(t, c => item.Func(c.Resolve<IObjectFactory>()), Reuse.InResolutionScope);
 						break;
 				}
 			}

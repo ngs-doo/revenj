@@ -58,7 +58,7 @@
     <Compile Include="Database.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemState.cs" />
-    <Compile Include="AutofacConfiguration.cs" />
+    <Compile Include="ContainerConfiguration.cs" />
     <Compile Include="UnitOfWork.cs" />
   </ItemGroup>
   <ItemGroup>
