@@ -50,9 +50,9 @@ namespace Revenj.Extensibility
 				Builder.RegisterType(typeof(PluginRepository<>), InstanceScope.Singleton, true, typeof(IPluginRepository<>));
 				if (withAspects)
 					Builder.RegisterModule(new AspectsModule(aopRepository));
-				var types = AssemblyScanner.GetAllTypes();
 				if (loadModules)
 				{
+					var types = AssemblyScanner.GetAllTypes();
 					foreach (var m in types)
 					{
 						if (m.Assembly.FullName.StartsWith("Revenj."))

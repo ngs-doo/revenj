@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
@@ -74,12 +75,12 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 			return "new \"-NGS-\".BLOB_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
-		public OracleParameter ToParameter(object value)
+		public DbParameter ToParameter(object value)
 		{
 			return new OracleParameter { OracleDbType = OracleDbType.Blob, Value = value };
 		}
 
-		public OracleParameter ToParameterVarray(IEnumerable value)
+		public DbParameter ToParameterVarray(IEnumerable value)
 		{
 			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<byte[]>()), UdtTypeName = "-NGS-.BLOB_ARR" };
 		}

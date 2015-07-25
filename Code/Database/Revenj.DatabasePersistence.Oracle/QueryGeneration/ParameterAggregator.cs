@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using Oracle.DataAccess.Client;
+using System.Data.Common;
 
 namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 {
 	public class ParameterAggregator
 	{
-		private readonly List<OracleParameter> NamedParameters = new List<OracleParameter>();
+		private readonly List<DbParameter> NamedParameters = new List<DbParameter>();
 
-		public string Add(OracleParameter parameter)
+		public string Add(DbParameter parameter)
 		{
 			var name = ":p" + (NamedParameters.Count + 1);
 			parameter.ParameterName = name;
@@ -15,6 +15,6 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration
 			return name;
 		}
 
-		public IEnumerable<OracleParameter> Parameters { get { return NamedParameters; } }
+		public IEnumerable<DbParameter> Parameters { get { return NamedParameters; } }
 	}
 }

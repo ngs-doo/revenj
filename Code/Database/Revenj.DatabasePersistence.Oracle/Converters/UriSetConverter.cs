@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
+using System.Data.Common;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
@@ -72,12 +73,12 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 			return "new \"-NGS-\".URI_SET(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
-		public OracleParameter ToParameter(object value)
+		public DbParameter ToParameter(object value)
 		{
 			return new OracleParameter { OracleDbType = OracleDbType.Varchar2, Value = value };
 		}
 
-		public OracleParameter ToParameterVarray(IEnumerable value)
+		public DbParameter ToParameterVarray(IEnumerable value)
 		{
 			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-NGS-.URI_SET" };
 		}

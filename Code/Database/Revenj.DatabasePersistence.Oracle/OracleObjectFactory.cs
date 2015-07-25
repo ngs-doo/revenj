@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Oracle.DataAccess.Client;
+using System.Data.Common;
 using Revenj.DatabasePersistence.Oracle.Converters;
 
 namespace Revenj.DatabasePersistence.Oracle
@@ -13,14 +13,13 @@ namespace Revenj.DatabasePersistence.Oracle
 
 	public interface IOracleConverterFactory
 	{
-		//Func<object, IServiceProvider, object> GetInstanceFactory(Type type);
 		Func<object, string> GetStringFactory(Type type);
 		Func<IEnumerable, string> GetVarrayStringFactory(Type type);
-		Func<object, OracleParameter> GetParameterFactory(Type type);
-		Func<IEnumerable, OracleParameter> GetVarrayParameterFactory(Type type);
+		Func<object, DbParameter> GetParameterFactory(Type type);
+		Func<IEnumerable, DbParameter> GetVarrayParameterFactory(Type type);
 	}
 
-	public class OracleObjectFactory : IOracleConverterRepository, IOracleConverterFactory
+	internal class OracleObjectFactory : IOracleConverterRepository, IOracleConverterFactory
 	{
 		private Dictionary<Type, KeyValuePair<IOracleTypeConverter, IOracleVarrayConverter>> TypeConverters =
 			new Dictionary<Type, KeyValuePair<IOracleTypeConverter, IOracleVarrayConverter>>();
@@ -67,7 +66,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			return null;
 		}
 
-		public Func<object, OracleParameter> GetParameterFactory(Type type)
+		public Func<object, DbParameter> GetParameterFactory(Type type)
 		{
 			KeyValuePair<IOracleTypeConverter, IOracleVarrayConverter> kv;
 			if (TypeConverters.TryGetValue(type, out kv))
@@ -75,7 +74,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			return null;
 		}
 
-		public Func<IEnumerable, OracleParameter> GetVarrayParameterFactory(Type type)
+		public Func<IEnumerable, DbParameter> GetVarrayParameterFactory(Type type)
 		{
 			KeyValuePair<IOracleTypeConverter, IOracleVarrayConverter> kv;
 			if (TypeConverters.TryGetValue(type, out kv))
