@@ -11,7 +11,6 @@ namespace Revenj.Extensibility
 	internal class AutofacObjectFactory : IObjectFactory
 	{
 		private ILifetimeScope CurrentScope;
-		private readonly Stack<ILifetimeScope> MyScopes = new Stack<ILifetimeScope>();
 
 		private readonly List<IObjectFactoryBuilder> FactoryBuilders = new List<IObjectFactoryBuilder>();
 		private readonly List<Action<ContainerBuilder>> AutofacBuilders = new List<Action<ContainerBuilder>>(2);
@@ -44,7 +43,7 @@ namespace Revenj.Extensibility
 			AutofacObjectFactory parentFactory,
 			IAspectComposer aspects,
 			Action cleanup)
-			: this(parentFactory.CurrentScope, aspects)
+			: this(parentFactory.CurrentScope.BeginLifetimeScope(), aspects)
 		{
 			this.ParentFactory = parentFactory;
 			this.Cleanup = cleanup;
@@ -207,9 +206,7 @@ Check if type should be registered in the container or if correct arguments are 
 		private void RegisterNew(ContainerBuilder cb)
 		{
 			foreach (var rb in FactoryBuilders)
-			{
 				RegisterToContainer(cb, rb, RegistrationCache);
-			}
 			foreach (var builder in AutofacBuilders)
 				builder(cb);
 		}
@@ -321,7 +318,9 @@ Check if type should be registered in the container or if correct arguments are 
 				if (!ShouldBuildScope)
 					return;
 				RegistrationCache.Clear();
-				CurrentScope = CurrentScope.BeginLifetimeScope(RegisterNew);
+				var cb = new ContainerBuilder();
+				RegisterNew(cb);
+				cb.Update(CurrentScope.ComponentRegistry);
 
 				FactoryBuilders.Clear();
 				AutofacBuilders.Clear();
@@ -329,8 +328,6 @@ Check if type should be registered in the container or if correct arguments are 
 				ServiceCache.Clear();
 				CacheWithArguments.Clear();
 				ShouldBuildScope = false;
-
-				MyScopes.Push(CurrentScope);
 			}
 		}
 
@@ -359,9 +356,7 @@ Check if type should be registered in the container or if correct arguments are 
 
 		public void Dispose()
 		{
-			lock (sync)
-				while (MyScopes.Count > 0)
-					MyScopes.Pop().Dispose();
+			CurrentScope.Dispose();
 			Aspects.Dispose();
 			if (Cleanup != null)
 				Cleanup();
