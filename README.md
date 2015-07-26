@@ -69,8 +69,11 @@ There are mostly two reasons to use it:
 Benchmarks:
 
  * [Data access layer benchmark](https://github.com/ngs-doo/dal-benchmark)
+
 ![DAL bench](tutorials/pictures/dal-bench.png)
+
  * [JSON benchmark](https://github.com/ngs-doo/json-benchmark)
+
 ![JSON bench](tutorials/pictures/json-bench.png)
 
 ##Getting started:
