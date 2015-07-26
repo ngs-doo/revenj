@@ -2,7 +2,7 @@
 
 [Event sourcing](http://martinfowler.com/eaaDev/EventSourcing.html) is an old concept with basic premise to capture changes to the system, instead of tracking the state of the system. 
 State can be always reconstructed by replaying captured events. 
-Revenj has [support for event sourcing](https://github.com/ngs-doo/revenj/blob/master/Code/Domain/Revenj.DomainPatterns.Interface/DomainEvent.cs) with few signatures and services.
+Revenj has [support for event sourcing](https://github.com/ngs-doo/revenj/blob/master/csharp/Domain/Revenj.DomainPatterns.Interface/DomainEvent.cs) with few signatures and services.
 
 ###Events in DSL
 

@@ -35,7 +35,7 @@ but this contains syntax sugar, since that is almost equivalent to a slightly lo
 So we have a module named Tutorial which will be mapped to namespace *Tutorial* in C#, to schema Tutorial in Postgres and an [aggregate root](http://dddcommunity.org/resources/ddd_terms/) *Example* (think of it as a master entity). 
 *ID* is provided by the database since we utilized sequence concept.
 
-To CRUD it we can use [REST-like API](https://github.com/ngs-doo/revenj/blob/master/Code/Plugins/Revenj.Plugins.Rest.Commands/ICrudCommands.cs) available in a plugin DLL provided with Revenj.
+To CRUD it we can use [REST-like API](https://github.com/ngs-doo/revenj/blob/master/csharp/Plugins/Revenj.Plugins.Rest.Commands/ICrudCommands.cs) available in a plugin DLL provided with Revenj.
 
 Rest plugin is using WCF signature for defining endpoint and is available (by default) via `/Crud.svc/Tutorial.Example` url.
 

@@ -1,8 +1,8 @@
 Revenj
 ======
 
-Revenj is a *fast* framework for .NET/Mono with advanced LINQ support for Postgres and Oracle databases. 
-It's ideal to use a REST-like service, but can also be used as a library from other frameworks such as ASP.NET. 
+Revenj is a *fast* framework for .NET/JVM with advanced LINQ support for Postgres and Oracle databases. 
+It's ideal to use a REST-like service, but can also be used as a library from other frameworks such as ASP.NET, Spring...
 
 DSL Platform will use Invasive software composition to integrate with Revenj, so 
 developers can focus on rich modeling (NoSQL/ER hybrid on top of ORDBMS).
@@ -69,22 +69,29 @@ There are mostly two reasons to use it:
 Benchmarks:
 
  * [Data access layer benchmark](https://github.com/ngs-doo/dal-benchmark)
+![DAL bench](tutorials/pictures/dal-bench.png)
  * [JSON benchmark](https://github.com/ngs-doo/json-benchmark)
+![JSON bench](tutorials/pictures/json-bench.png)
 
 ##Getting started:
 
-Setup a Postgres instance and a .NET/Mono.
+Setup a Postgres instance.
 
 Go through the tutorials:
 
+###.NET/Mono
+
  * [Setting up Visual studio and REST server](tutorials/revenj-tutorial-setup.md)
- * or [Setting up REST server on Linux](tutorials/revenj-tutorial-linux.md)
+ * or [Setting up REST server on Mono](tutorials/revenj-tutorial-mono.md)
  * [Event sourcing in Revenj](tutorials/revenj-tutorial-event-sourcing.md)
  * [Using advanced Event sourcing features in Revenj](tutorials/revenj-tutorial-aggregate-events.md)
  * [NoSQL documents in relational database](tutorials/revenj-tutorial-nosql-documents.md)
  * [Notifications / SignalR integration](tutorials/revenj-tutorial-notifications.md)
  * [Security basics](tutorials/revenj-tutorial-security-basics.md)
  * [LINQ basics](tutorials/revenj-tutorial-linq-basics.md)
+
+###JVM
+
 
 ##Revenj features
 

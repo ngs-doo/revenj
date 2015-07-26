@@ -6,7 +6,7 @@ Revenj leverages database notifications, such as [LISTEN/NOTIFY](http://www.post
 
 ####How to use it
 
-This allows it to provide several complex features through some simple services such as [`IDataChangeNotification`](https://github.com/ngs-doo/revenj/blob/master/Code/Domain/Revenj.DomainPatterns.Interface/Notification.cs) or through `IDataContext`. Change notification is a singleton which is getting invoked asyncly from database on commit. Thus events will be raised with a small delay. An example of registering for changes on an aggregate root Post will look like:
+This allows it to provide several complex features through some simple services such as [`IDataChangeNotification`](https://github.com/ngs-doo/revenj/blob/master/csharp/Domain/Revenj.DomainPatterns.Interface/Notification.cs) or through `IDataContext`. Change notification is a singleton which is getting invoked asyncly from database on commit. Thus events will be raised with a small delay. An example of registering for changes on an aggregate root Post will look like:
 
     IDataContext ctx = ...
     var changes = ctx.Track<Post>();
@@ -34,7 +34,7 @@ Alternatively global notifications can be left enabled, but specific aggregates 
 
 ####Server side pushes
 
-Revenj includes simple [SignalR](http://signalr.net/) integration (both for [v1](https://github.com/ngs-doo/revenj/tree/master/Code/Server/Revenj.SignalRWeb) and [v2](https://github.com/ngs-doo/revenj/tree/master/Code/Server/Revenj.SignalR2SelfHost)). They are based on notification infrastructure and offer several ways for interfacing:
+Revenj includes simple [SignalR](http://signalr.net/) integration (both for [v1](https://github.com/ngs-doo/revenj/tree/master/csharp/Server/Revenj.SignalRWeb) and [v2](https://github.com/ngs-doo/revenj/tree/master/csharp/Server/Revenj.SignalR2SelfHost)). They are based on notification infrastructure and offer several ways for interfacing:
 
  * listen to all notifications for an aggregate/event - Listen
  * listen for notifications for a specific aggregate - WatchSingle
@@ -69,7 +69,7 @@ Most of the heavy work is done in SignalR, so its [tutorials](https://github.com
 
 ####Processing streams on the server
 
-[Reactive extensions](http://msdn.microsoft.com/en-us/data/gg577609.aspx) can be utilized to consume notifications in a really convenient way. An example of this can be found in [Revenj mailer](https://github.com/ngs-doo/revenj/blob/master/Code/Features/Revenj.Features.Mailer/QueueProcessor.cs). Rx subscription is registered on `IMailMessage` interface with a buffer after which processing of all existing mails is executed. Relevant part of the code looks like:
+[Reactive extensions](http://msdn.microsoft.com/en-us/data/gg577609.aspx) can be utilized to consume notifications in a really convenient way. An example of this can be found in [Revenj mailer](https://github.com/ngs-doo/revenj/blob/master/csharp/Features/Revenj.Features.Mailer/QueueProcessor.cs). Rx subscription is registered on `IMailMessage` interface with a buffer after which processing of all existing mails is executed. Relevant part of the code looks like:
 
     Subscription =
         ChangeNotification.Track<IMailMessage>()
@@ -83,6 +83,6 @@ where *ChangeNotification* is `IDataChangeNotification`, *IMailMessage* is imple
         //the rest of properties need to be specified
     }
 
-DSL examples can be found in [mailer project](https://github.com/ngs-doo/revenj/tree/master/Code/Features/Revenj.Features.Mailer/DSL). *Due to bugs in Mono binary serialization, special DSL exists for Mono which uses native model instead of native&lt;type&gt; concept. `Native<type>` is implemented as binary field in the database and binary serialization is used for conversion to and from the database.*
+DSL examples can be found in [mailer project](https://github.com/ngs-doo/revenj/tree/master/csharp/Features/Revenj.Features.Mailer/DSL). *Due to bugs in Mono binary serialization, special DSL exists for Mono which uses native model instead of native&lt;type&gt; concept. `Native<type>` is implemented as binary field in the database and binary serialization is used for conversion to and from the database.*
 
 Notification is raised only for aggregates and events. Since entity and values must be a part of an aggregate/event to be persisted, hooks needs to be registered for containers (aggregate roots/events) of those objects. Fortunately hooks work on interfaces, so with the help of mixins and external interfaces succinct code can still be written. 
