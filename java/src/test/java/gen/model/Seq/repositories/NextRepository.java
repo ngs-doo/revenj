@@ -61,10 +61,10 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 				throw new RuntimeException(e);
 			}
 		}
-		org.revenj.patterns.Specification<gen.model.Seq.Next> specification = filter.get();
+		org.revenj.patterns.Specification<gen.model.Seq.Next> specification = filter.orElse(null);
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
-		org.revenj.postgres.PostgresWriter pgWriter = new org.revenj.postgres.PostgresWriter();
-		
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
 		
 		if (specification instanceof gen.model.Seq.Next.BetweenIds) {
 			gen.model.Seq.Next.BetweenIds spec = (gen.model.Seq.Next.BetweenIds)specification;
@@ -86,28 +86,29 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 				}
 			});
 		}
-		if (sql != null) {
-			if (limit != null && limit.isPresent() && limit.get() != null) {
-				sql += " LIMIT " + Integer.toString(limit.get());
+			if (sql != null) {
+				if (limit != null && limit.isPresent() && limit.get() != null) {
+					sql += " LIMIT " + Integer.toString(limit.get());
+				}
+				if (offset != null && offset.isPresent() && offset.get() != null) {
+					sql += " OFFSET " + Integer.toString(offset.get());
+				}
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+					applyFilters.accept(statement);
+					return readFromDb(statement, new java.util.ArrayList<>());
+				} catch (java.sql.SQLException | java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
+			java.util.stream.Stream<gen.model.Seq.Next> stream = stream(filter);
 			if (offset != null && offset.isPresent() && offset.get() != null) {
-				sql += " OFFSET " + Integer.toString(offset.get());
+				stream = stream.skip(offset.get());
 			}
-			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-				applyFilters.accept(statement);
-				return readFromDb(statement, new java.util.ArrayList<>());
-			} catch (java.sql.SQLException | java.io.IOException e) {
-				throw new RuntimeException(e);
+			if (limit != null && limit.isPresent() && limit.get() != null) {
+				stream = stream.limit(limit.get());
 			}
+			return stream.collect(java.util.stream.Collectors.toList());
 		}
-		java.util.stream.Stream<gen.model.Seq.Next> stream = stream(filter);
-		if (offset != null && offset.isPresent() && offset.get() != null) {
-			stream = stream.skip(offset.get());
-		}
-		if (limit != null && limit.isPresent() && limit.get() != null) {
-			stream = stream.limit(limit.get());
-		}
-		return stream.collect(java.util.stream.Collectors.toList());
 	}
 
 	
@@ -137,9 +138,9 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 			java.util.List<gen.model.Seq.Next> insert,
 			java.util.List<java.util.Map.Entry<gen.model.Seq.Next, gen.model.Seq.Next>> update,
 			java.util.List<gen.model.Seq.Next> delete) throws java.sql.SQLException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"Seq\".\"persist_Next\"(?, ?, ?, ?)")) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"Seq\".\"persist_Next\"(?, ?, ?, ?)");
+			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			java.util.List<String> result;
-			org.revenj.postgres.PostgresWriter sw = new org.revenj.postgres.PostgresWriter();
 			if (insert != null && !insert.isEmpty()) {
 		
 				if (assignSequenceID == null) throw new RuntimeException("Next repository has not been properly set up. Static __setupSequenceID method not called");

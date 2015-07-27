@@ -2,7 +2,7 @@ package org.revenj.postgres;
 
 import java.util.Arrays;
 
-public class PostgresWriter {
+public class PostgresWriter implements AutoCloseable {
 	private char[] buffer;
 	public final char[] tmp;
 	private int position;
@@ -10,6 +10,15 @@ public class PostgresWriter {
 	public PostgresWriter() {
 		buffer = new char[64];
 		tmp = new char[64];
+		position = 0;
+	}
+
+	public static PostgresWriter create()
+	{
+		return new PostgresWriter();
+	}
+
+	public void close() {
 		position = 0;
 	}
 

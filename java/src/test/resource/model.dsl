@@ -4,6 +4,7 @@ module test {
 		text text;
 		En? en;
 		En en2;
+		bool? nb;
 	}
 	enum En { A; B; }
 	root Composite(id) {
@@ -13,6 +14,15 @@ module test {
 		List<Entity> entities;
 		specification ForSimple 'it => it.simple.number == simple.number' {
 			Simple simple;
+		}
+	}
+	snowflake<Composite> CompositeList {
+		id;
+		enn;
+		entities;
+		simple;
+		specification ForSimple 'it => simples.Contains(it.simple)' {
+			List<Simple> simples;
 		}
 	}
 	entity Entity {

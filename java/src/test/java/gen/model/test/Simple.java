@@ -10,12 +10,14 @@ public final class Simple   implements java.io.Serializable {
 			final int number,
 			final String text,
 			final gen.model.test.En en,
-			final gen.model.test.En en2) {
+			final gen.model.test.En en2,
+			final Boolean nb) {
 			
 		setNumber(number);
 		setText(text);
 		setEn(en);
 		setEn2(en2);
+		setNb(nb);
 	}
 
 	
@@ -37,6 +39,7 @@ public final class Simple   implements java.io.Serializable {
 		result = prime * result + (this.text.hashCode());
 		result = prime * result + (this.en != null ? this.en.hashCode() : 0);
 		result = prime * result + (this.en2.hashCode());
+		result = prime * result + (this.nb != null ? this.nb.hashCode() : 0);
 		return result;
 	}
 
@@ -59,13 +62,15 @@ public final class Simple   implements java.io.Serializable {
 			return false;
 		if(!(this.en2.equals(other.en2)))
 			return false;
+		if(!(this.nb == other.nb || this.nb != null && this.nb.equals(other.nb)))
+			return false;
 
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Simple(" + number + ',' + text + ',' + en + ',' + en2 + ')';
+		return "Simple(" + number + ',' + text + ',' + en + ',' + en2 + ',' + nb + ')';
 	}
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Simple(
@@ -73,12 +78,14 @@ public final class Simple   implements java.io.Serializable {
 			@com.fasterxml.jackson.annotation.JsonProperty("number") final int number,
 			@com.fasterxml.jackson.annotation.JsonProperty("text") final String text,
 			@com.fasterxml.jackson.annotation.JsonProperty("en") final gen.model.test.En en,
-			@com.fasterxml.jackson.annotation.JsonProperty("en2") final gen.model.test.En en2) {
+			@com.fasterxml.jackson.annotation.JsonProperty("en2") final gen.model.test.En en2,
+			@com.fasterxml.jackson.annotation.JsonProperty("nb") final Boolean nb) {
 		
 		this.number = number;
 		this.text = text == null ? "" : text;
 		this.en = en;
 		this.en2 = en2 == null ? gen.model.test.En.A : en2;
+		this.nb = nb;
 	}
 
 	
@@ -158,25 +165,45 @@ public final class Simple   implements java.io.Serializable {
 	}
 
 	
+	private Boolean nb;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("nb")
+	public Boolean getNb()  {
+		
+		return nb;
+	}
+
+	
+	public Simple setNb(final Boolean value) {
+		
+		this.nb = value;
+		
+		return this;
+	}
+
+	
 	public Simple(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Simple> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index___number, int __index___text, int __index___en, int __index___en2) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index___number, int __index___text, int __index___en, int __index___en2, int __index___nb) {
 		
 		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index___text] = (item, reader, context) -> { item.text = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 		readers[__index___en2] = (item, reader, context) -> { item.en2 = gen.model.test.converters.EnConverter.fromReader(reader); };
+		readers[__index___nb] = (item, reader, context) -> { item.nb = org.revenj.postgres.converters.BoolConverter.parseNullable(reader); };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index__extended_number, int __index__extended_text, int __index__extended_en, int __index__extended_en2) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index__extended_number, int __index__extended_text, int __index__extended_en, int __index__extended_en2, int __index__extended_nb) {
 		
 		readers[__index__extended_number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_text] = (item, reader, context) -> { item.text = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index__extended_en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 		readers[__index__extended_en2] = (item, reader, context) -> { item.en2 = gen.model.test.converters.EnConverter.fromReader(reader); };
+		readers[__index__extended_nb] = (item, reader, context) -> { item.nb = org.revenj.postgres.converters.BoolConverter.parseNullable(reader); };
 	}
 }

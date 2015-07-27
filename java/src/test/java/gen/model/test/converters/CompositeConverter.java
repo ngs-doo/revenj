@@ -19,6 +19,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "Composite_entity".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCount = columns.size();
+			
 		readers = new ObjectConverter.Reader[columnCount];
 		for (int i = 0; i < readers.length; i++) {
 			readers[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -28,6 +29,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "-ngs_Composite_type-".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCountExtended = columnsExtended.size();
+			
 		readersExtended = new ObjectConverter.Reader[columnCountExtended];
 		for (int i = 0; i < readersExtended.length; i++) {
 			readersExtended[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -113,7 +115,6 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 	}
 
 	
-	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Composite>[] readers;
 	
@@ -124,7 +125,6 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		reader.read();
 		return instance;
 	}
-	
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.test.Composite>[] readersExtended;
 	

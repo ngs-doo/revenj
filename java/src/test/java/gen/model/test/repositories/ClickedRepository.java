@@ -61,10 +61,10 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 				throw new RuntimeException(e);
 			}
 		}
-		org.revenj.patterns.Specification<gen.model.test.Clicked> specification = filter.get();
+		org.revenj.patterns.Specification<gen.model.test.Clicked> specification = filter.orElse(null);
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
-		org.revenj.postgres.PostgresWriter pgWriter = new org.revenj.postgres.PostgresWriter();
-		
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
 		
 		if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
 			gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
@@ -102,28 +102,29 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 				}
 			});
 		}
-		if (sql != null) {
-			if (limit != null && limit.isPresent() && limit.get() != null) {
-				sql += " LIMIT " + Integer.toString(limit.get());
+			if (sql != null) {
+				if (limit != null && limit.isPresent() && limit.get() != null) {
+					sql += " LIMIT " + Integer.toString(limit.get());
+				}
+				if (offset != null && offset.isPresent() && offset.get() != null) {
+					sql += " OFFSET " + Integer.toString(offset.get());
+				}
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+					applyFilters.accept(statement);
+					return readFromDb(statement, new java.util.ArrayList<>());
+				} catch (java.sql.SQLException | java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
+			java.util.stream.Stream<gen.model.test.Clicked> stream = stream(filter);
 			if (offset != null && offset.isPresent() && offset.get() != null) {
-				sql += " OFFSET " + Integer.toString(offset.get());
+				stream = stream.skip(offset.get());
 			}
-			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-				applyFilters.accept(statement);
-				return readFromDb(statement, new java.util.ArrayList<>());
-			} catch (java.sql.SQLException | java.io.IOException e) {
-				throw new RuntimeException(e);
+			if (limit != null && limit.isPresent() && limit.get() != null) {
+				stream = stream.limit(limit.get());
 			}
+			return stream.collect(java.util.stream.Collectors.toList());
 		}
-		java.util.stream.Stream<gen.model.test.Clicked> stream = stream(filter);
-		if (offset != null && offset.isPresent() && offset.get() != null) {
-			stream = stream.skip(offset.get());
-		}
-		if (limit != null && limit.isPresent() && limit.get() != null) {
-			stream = stream.limit(limit.get());
-		}
-		return stream.collect(java.util.stream.Collectors.toList());
 	}
 
 	
@@ -143,9 +144,9 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 
 	@Override
 	public String[] submit(java.util.List<gen.model.test.Clicked> domainEvents) {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"URI\" FROM \"test\".\"submit_Clicked\"(?)")) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"URI\" FROM \"test\".\"submit_Clicked\"(?)");
+			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result = new String[domainEvents.size()];
-			org.revenj.postgres.PostgresWriter sw = new org.revenj.postgres.PostgresWriter();
 			org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(domainEvents, converter::to);
 			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 			pgo.setType("\"test\".\"Clicked_event\"[]");

@@ -19,6 +19,7 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "Entity_entity".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCount = columns.size();
+			
 		readers = new ObjectConverter.Reader[columnCount];
 		for (int i = 0; i < readers.length; i++) {
 			readers[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -28,6 +29,7 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "-ngs_Entity_type-".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCountExtended = columnsExtended.size();
+			
 		readersExtended = new ObjectConverter.Reader[columnCountExtended];
 		for (int i = 0; i < readersExtended.length; i++) {
 			readersExtended[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -131,7 +133,6 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 	}
 
 	
-	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Entity>[] readers;
 	
@@ -142,7 +143,6 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		reader.read();
 		return instance;
 	}
-	
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.test.Entity>[] readersExtended;
 	

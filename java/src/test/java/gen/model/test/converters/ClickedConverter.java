@@ -19,6 +19,7 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "Clicked_event".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCount = columns.size();
+			
 		readers = new ObjectConverter.Reader[columnCount];
 		for (int i = 0; i < readers.length; i++) {
 			readers[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -98,7 +99,6 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 		return RecordTuple.from(items);
 	}
 
-	
 	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Clicked>[] readers;

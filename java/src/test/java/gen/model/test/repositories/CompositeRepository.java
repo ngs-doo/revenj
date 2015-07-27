@@ -61,10 +61,10 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 				throw new RuntimeException(e);
 			}
 		}
-		org.revenj.patterns.Specification<gen.model.test.Composite> specification = filter.get();
+		org.revenj.patterns.Specification<gen.model.test.Composite> specification = filter.orElse(null);
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
-		org.revenj.postgres.PostgresWriter pgWriter = new org.revenj.postgres.PostgresWriter();
-		
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
 		
 		if (specification instanceof gen.model.test.Composite.ForSimple) {
 			gen.model.test.Composite.ForSimple spec = (gen.model.test.Composite.ForSimple)specification;
@@ -85,28 +85,29 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 				}
 			});
 		}
-		if (sql != null) {
-			if (limit != null && limit.isPresent() && limit.get() != null) {
-				sql += " LIMIT " + Integer.toString(limit.get());
+			if (sql != null) {
+				if (limit != null && limit.isPresent() && limit.get() != null) {
+					sql += " LIMIT " + Integer.toString(limit.get());
+				}
+				if (offset != null && offset.isPresent() && offset.get() != null) {
+					sql += " OFFSET " + Integer.toString(offset.get());
+				}
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+					applyFilters.accept(statement);
+					return readFromDb(statement, new java.util.ArrayList<>());
+				} catch (java.sql.SQLException | java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
+			java.util.stream.Stream<gen.model.test.Composite> stream = stream(filter);
 			if (offset != null && offset.isPresent() && offset.get() != null) {
-				sql += " OFFSET " + Integer.toString(offset.get());
+				stream = stream.skip(offset.get());
 			}
-			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-				applyFilters.accept(statement);
-				return readFromDb(statement, new java.util.ArrayList<>());
-			} catch (java.sql.SQLException | java.io.IOException e) {
-				throw new RuntimeException(e);
+			if (limit != null && limit.isPresent() && limit.get() != null) {
+				stream = stream.limit(limit.get());
 			}
+			return stream.collect(java.util.stream.Collectors.toList());
 		}
-		java.util.stream.Stream<gen.model.test.Composite> stream = stream(filter);
-		if (offset != null && offset.isPresent() && offset.get() != null) {
-			stream = stream.skip(offset.get());
-		}
-		if (limit != null && limit.isPresent() && limit.get() != null) {
-			stream = stream.limit(limit.get());
-		}
-		return stream.collect(java.util.stream.Collectors.toList());
 	}
 
 	
@@ -136,9 +137,9 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 			java.util.List<gen.model.test.Composite> insert,
 			java.util.List<java.util.Map.Entry<gen.model.test.Composite, gen.model.test.Composite>> update,
 			java.util.List<gen.model.test.Composite> delete) throws java.sql.SQLException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"test\".\"persist_Composite\"(?, ?, ?, ?)")) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"test\".\"persist_Composite\"(?, ?, ?, ?)");
+			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			java.util.List<String> result;
-			org.revenj.postgres.PostgresWriter sw = new org.revenj.postgres.PostgresWriter();
 			if (insert != null && !insert.isEmpty()) {
 				result = new java.util.ArrayList<>(insert.size());
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);

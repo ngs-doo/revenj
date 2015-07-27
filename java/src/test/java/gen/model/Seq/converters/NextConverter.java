@@ -19,6 +19,7 @@ public class NextConverter implements ObjectConverter<gen.model.Seq.Next> {
 				allColumns.stream().filter(it -> "Seq".equals(it.typeSchema) && "Next_entity".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCount = columns.size();
+			
 		readers = new ObjectConverter.Reader[columnCount];
 		for (int i = 0; i < readers.length; i++) {
 			readers[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -28,6 +29,7 @@ public class NextConverter implements ObjectConverter<gen.model.Seq.Next> {
 				allColumns.stream().filter(it -> "Seq".equals(it.typeSchema) && "-ngs_Next_type-".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCountExtended = columnsExtended.size();
+			
 		readersExtended = new ObjectConverter.Reader[columnCountExtended];
 		for (int i = 0; i < readersExtended.length; i++) {
 			readersExtended[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -81,7 +83,6 @@ public class NextConverter implements ObjectConverter<gen.model.Seq.Next> {
 	}
 
 	
-	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.Seq.Next>[] readers;
 	
@@ -92,7 +93,6 @@ public class NextConverter implements ObjectConverter<gen.model.Seq.Next> {
 		reader.read();
 		return instance;
 	}
-	
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.Seq.Next>[] readersExtended;
 	

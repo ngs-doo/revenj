@@ -19,6 +19,7 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "Simple".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCount = columns.size();
+			
 		readers = new ObjectConverter.Reader[columnCount];
 		for (int i = 0; i < readers.length; i++) {
 			readers[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -28,6 +29,7 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "-ngs_Simple_type-".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCountExtended = columnsExtended.size();
+			
 		readersExtended = new ObjectConverter.Reader[columnCountExtended];
 		for (int i = 0; i < readersExtended.length; i++) {
 			readersExtended[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
@@ -64,15 +66,23 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		column = columnsExtended.stream().filter(it -> "en2".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'en2' column in test Simple. Check if DB is in sync");
 		__index__extended_en2 = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "nb".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'nb' column in test Simple. Check if DB is in sync");
+		__index___nb = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "nb".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'nb' column in test Simple. Check if DB is in sync");
+		__index__extended_nb = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		
 			
-		gen.model.test.Simple.__configureConverter(readers, __index___number, __index___text, __index___en, __index___en2);
+		gen.model.test.Simple.__configureConverter(readers, __index___number, __index___text, __index___en, __index___en2, __index___nb);
 			
-		gen.model.test.Simple.__configureConverterExtended(readersExtended, __index__extended_number, __index__extended_text, __index__extended_en, __index__extended_en2);
+		gen.model.test.Simple.__configureConverterExtended(readersExtended, __index__extended_number, __index__extended_text, __index__extended_en, __index__extended_en2, __index__extended_nb);
 	}
 
 	@Override
@@ -96,6 +106,7 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		items[__index___text] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getText());
 		items[__index___en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		items[__index___en2] = gen.model.test.converters.EnConverter.toTuple(instance.getEn2());
+		items[__index___nb] = org.revenj.postgres.converters.BoolConverter.toTuple(instance.getNb());
 		return RecordTuple.from(items);
 	}
 
@@ -107,10 +118,10 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		items[__index__extended_text] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getText());
 		items[__index__extended_en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		items[__index__extended_en2] = gen.model.test.converters.EnConverter.toTuple(instance.getEn2());
+		items[__index__extended_nb] = org.revenj.postgres.converters.BoolConverter.toTuple(instance.getNb());
 		return RecordTuple.from(items);
 	}
 
-	
 	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Simple>[] readers;
@@ -122,7 +133,6 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		reader.read();
 		return instance;
 	}
-	
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.test.Simple>[] readersExtended;
 	
@@ -141,4 +151,6 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 	private final int __index__extended_en;
 	private final int __index___en2;
 	private final int __index__extended_en2;
+	private final int __index___nb;
+	private final int __index__extended_nb;
 }
