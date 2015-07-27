@@ -19,10 +19,13 @@ namespace DSL
 			return Setup(Container.Autofac, Database.Postgres, connectionString, withAspects, externalConfiguration);
 		}
 
-		/*public static IServiceProvider SetupOracle(string connectionString)
+		public static IServiceProvider SetupOracle(
+			string connectionString,
+			bool withAspects = false,
+			bool externalConfiguration = false)
 		{
-			return Setup(Database.Oracle, connectionString);
-		}*/
+			return Setup(Container.Autofac, Database.Oracle, connectionString, withAspects, externalConfiguration);
+		}
 
 		private static IServiceProvider Setup(Container container, Database db, string connectionString, bool withAspects, bool externalConfiguration)
 		{

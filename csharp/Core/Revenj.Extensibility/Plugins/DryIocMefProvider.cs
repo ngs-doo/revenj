@@ -31,11 +31,29 @@ namespace Revenj.Extensibility
 					if (configuration.Directories != null)
 					{
 						foreach (var directory in configuration.Directories)
-							foreach (var f in Directory.GetFiles(directory, "*Plugin*.dll", SearchOption.AllDirectories))
-								assemblies.Add(Assembly.LoadFrom(f));
+							if (directory != null)
+							{
+								var files = Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly);
+								foreach (var f in files)
+								{
+									var name = Path.GetFileNameWithoutExtension(f);
+									if (name != "Oracle.DataAccess")
+									{
+										try
+										{
+											assemblies.Add(Assembly.LoadFrom(f));
+										}
+										catch (Exception aex)
+										{
+											System.Diagnostics.Debug.WriteLine(aex.ToString());
+											throw new FrameworkException("Error loading plugin: " + f, aex);
+										}
+									}
+								}
+							}
 					}
 					if (configuration.Assemblies != null)
-						assemblies.AddRange(configuration.Assemblies);
+						assemblies.AddRange(configuration.Assemblies.Where(it => !it.FullName.StartsWith("Oracle.DataAccess")));
 				}
 				catch (System.Reflection.ReflectionTypeLoadException ex)
 				{

@@ -15,20 +15,32 @@ namespace Revenj.Wcf
 {
 	public class StandardModuleNoDatabase : StandardModule
 	{
-		public StandardModuleNoDatabase() : base(false) { }
+		public StandardModuleNoDatabase() : base(Database.None) { }
+	}
+
+	public class StandardModuleOracle : StandardModule
+	{
+		public StandardModuleOracle() : base(Database.Oracle) { }
 	}
 
 	public class StandardModule : Revenj.Extensibility.Autofac.Module
 	{
-		private readonly bool WithDatabase;
-
-		public StandardModule() : this(true) { }
-		public StandardModule(bool withDatabase)
+		public enum Database
 		{
-			this.WithDatabase = withDatabase;
+			Postgres,
+			Oracle,
+			None
 		}
 
-		public static void Configure(IObjectFactoryBuilder builder, bool withDatabase)
+		private readonly Database DB;
+
+		public StandardModule() : this(Database.Postgres) { }
+		protected StandardModule(Database database)
+		{
+			this.DB = database;
+		}
+
+		public static void Configure(IObjectFactoryBuilder builder, Database db)
 		{
 			//TODO: register applications as implementation only
 			builder.RegisterType<RestApplication>();
@@ -37,12 +49,20 @@ namespace Revenj.Wcf
 			builder.RegisterType<SoapApplication, ISoapApplication>();
 			builder.RegisterType<CommandConverter, ICommandConverter>();
 
-			if (withDatabase)
+			var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
+			if (db == Database.Postgres)
 			{
-				var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
 				if (string.IsNullOrEmpty(cs))
 					throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
 Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
+
+				builder.ConfigurePostgres(cs);
+			}
+			else if (db == Database.Oracle)
+			{
+				if (string.IsNullOrEmpty(cs))
+					throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
+Example: <add key=""ConnectionString"" value=""Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=MyOracleHost)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=xe)));User Id=oracle;Password=123456;"" />");
 
 				builder.ConfigurePostgres(cs);
 			}
@@ -74,7 +94,7 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 
 		protected override void Load(Revenj.Extensibility.Autofac.ContainerBuilder builder)
 		{
-			Configure(builder, WithDatabase);
+			Configure(builder, DB);
 
 			base.Load(builder);
 		}

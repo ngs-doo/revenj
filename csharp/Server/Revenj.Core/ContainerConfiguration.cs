@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using Revenj.DatabasePersistence.Oracle;
 using Revenj.DatabasePersistence.Postgres;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -22,7 +23,10 @@ namespace Revenj.Core
 				 let chosenPath = Directory.Exists(pathRelative) ? pathRelative : path
 				 select chosenPath)
 				.ToArray();
-			var assemblies = Revenj.Utility.AssemblyScanner.GetAssemblies().Where(it => it.FullName.StartsWith("Revenj."));
+			var assemblies =
+				from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
+				where asm.FullName.StartsWith("Revenj.") && !asm.FullName.StartsWith("Oracle.DataAccess")
+				select asm;
 			var state = new SystemState();
 			var builder = container == DSL.Core.Container.Autofac
 				? Revenj.Extensibility.Setup.UseAutofac(assemblies, dllPlugins, externalConfiguration, false, withAspects)
@@ -30,8 +34,8 @@ namespace Revenj.Core
 			builder.RegisterSingleton<ISystemState>(state);
 			if (database == Core.Database.Postgres)
 				builder.ConfigurePostgres(connectionString);
-			//else
-			//SetupOracle(builder, connectionString);
+			else
+				builder.ConfigureOracle(connectionString);
 			var serverModels =
 				(from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
 				 let type = asm.GetType("SystemBoot.Configuration")
@@ -48,20 +52,5 @@ namespace Revenj.Core
 			state.Started(factory);
 			return factory;
 		}
-
-		/*
-		private static void SetupOracle(Revenj.Extensibility.Autofac.ContainerBuilder builder, string cs)
-		{
-			builder.RegisterInstance(new Revenj.DatabasePersistence.Oracle.ConnectionInfo(cs));
-			builder.RegisterType<OracleQueryManager>().As<IDatabaseQueryManager>().InstancePerLifetimeScope();
-			builder.RegisterType<OracleDatabaseQuery>().As<IOracleDatabaseQuery>();
-			builder.Register(c => c.Resolve<IDatabaseQueryManager>().CreateQuery()).As<IDatabaseQuery>().InstancePerLifetimeScope();
-			builder.RegisterType<OracleAdvancedQueueNotification>().As<IDataChangeNotification>().SingleInstance();
-
-			builder.RegisterType<OracleObjectFactory>().As<IOracleConverterRepository, IOracleConverterFactory>().SingleInstance();
-
-			builder.RegisterType<Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryExecutor>();
-		}
-		*/
 	}
 }

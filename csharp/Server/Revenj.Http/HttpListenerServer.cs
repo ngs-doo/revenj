@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Security;
 using System.ServiceModel;
@@ -46,12 +47,13 @@ namespace Revenj.Http
 
 		public void Run()
 		{
+			var prefixes = Listener.Prefixes.ToArray();
 			try
 			{
 				Listener.Start();
 				TraceSource.TraceEvent(TraceEventType.Start, 1002);
 				Console.WriteLine("Server running on:");
-				foreach (var url in Listener.Prefixes)
+				foreach (var url in prefixes)
 					Console.WriteLine(url);
 				while (true)
 				{
@@ -67,6 +69,20 @@ namespace Revenj.Http
 						TraceSource.TraceEvent(TraceEventType.Error, 5401, "{0}", ex);
 					}
 				}
+			}
+			catch (HttpListenerException ex)
+			{
+				if (ex.Message == "Access is denied")
+				{
+					Console.WriteLine("Unable to start listener on specified port. Change port or grant access to it.");
+					if (prefixes.Length == 1)
+						Console.WriteLine("Permission can be allowed with: netsh http add urlacl url=" + prefixes[0] + " user=" + Environment.MachineName + "\\" + Environment.UserName);
+					else
+						Console.WriteLine("Use 'netsh http add urlacl' to give access permission");
+				}
+				Console.WriteLine(ex.ToString());
+				TraceSource.TraceEvent(TraceEventType.Error, 5402, "{0}", ex);
+				throw;
 			}
 			catch (Exception ex)
 			{
