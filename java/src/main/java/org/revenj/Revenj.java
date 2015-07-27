@@ -100,7 +100,7 @@ public abstract class Revenj {
 		} else if (classLoader.isPresent()) {
 			loader = classLoader.get();
 		} else {
-			loader = ClassLoader.getSystemClassLoader();
+			loader = Thread.currentThread().getContextClassLoader();
 		}
 		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class, loader);
 		return setup(connectionFactory, properties, Optional.of(loader), aspects.iterator());
@@ -140,7 +140,7 @@ public abstract class Revenj {
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
 		container.registerInstance(DomainModel.class, new SimpleDomainModel(properties.getProperty("namespace")), false);
-		PluginLoader plugins = new SimplePluginLoader(classLoader.orElse(null));
+		PluginLoader plugins = new SimplePluginLoader(classLoader.orElse(Thread.currentThread().getContextClassLoader()));
 		container.registerInstance(PluginLoader.class, plugins, false);
 		WireSerialization serialization = new RevenjSerialization(container);
 		container.registerInstance(WireSerialization.class, serialization, false);

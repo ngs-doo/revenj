@@ -4,13 +4,6 @@ import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.Serialization;
 import org.revenj.patterns.WireSerialization;
-import org.revenj.server.commands.CRUD.Create;
-import org.revenj.server.commands.CRUD.Delete;
-import org.revenj.server.commands.CRUD.Read;
-import org.revenj.server.commands.CRUD.Update;
-import org.revenj.server.commands.GetDomainObject;
-import org.revenj.server.commands.SubmitEvent;
-import org.revenj.server.commands.search.SearchDomainObject;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,27 +24,13 @@ public class ProcessingEngine {
 		this.serialization = serialization;
 		//TODO:...fix service loader in containers
 		if (extensibility.isPresent()) {
-			for (ServerCommand com : extensibility.get().resolve(container, ServerCommand.class)) {
+			ServerCommand[] commands = extensibility.get().resolve(container, ServerCommand.class);
+			for (ServerCommand com : commands) {
 				serverCommands.put(com.getClass(), com);
 			}
-			if(serverCommands.size() == 0) {
-				//TODO: forced add just for now
-				Container scope = container.createScope();
-				scope.register(Create.class, Read.class, Update.class, Delete.class);
-				scope.register(SearchDomainObject.class, GetDomainObject.class, SubmitEvent.class);
-				serverCommands.put(Create.class, scope.resolve(Create.class));
-				serverCommands.put(Read.class, scope.resolve(Read.class));
-				serverCommands.put(Update.class, scope.resolve(Update.class));
-				serverCommands.put(Delete.class, scope.resolve(Delete.class));
-				serverCommands.put(SearchDomainObject.class, scope.resolve(SearchDomainObject.class));
-				serverCommands.put(GetDomainObject.class, scope.resolve(GetDomainObject.class));
-				serverCommands.put(SubmitEvent.class, scope.resolve(SubmitEvent.class));
-				scope.close();
-			}
 		} else {
-			ServiceLoader<ServerCommand> plugins = classLoader.isPresent()
-					? ServiceLoader.load(ServerCommand.class, classLoader.get())
-					: ServiceLoader.load(ServerCommand.class);
+			ClassLoader cl = classLoader.orElseGet(() -> Thread.currentThread().getContextClassLoader());
+			ServiceLoader<ServerCommand> plugins = ServiceLoader.load(ServerCommand.class, cl);
 			for (ServerCommand com : plugins) {
 				serverCommands.put(com.getClass(), com);
 			}
@@ -63,7 +42,7 @@ public class ProcessingEngine {
 			ServerCommandDescription[] scd = new ServerCommandDescription[]{
 					new ServerCommandDescription<>(null, command, argument)
 			};
-			ProcessingResult<String> result = execute(Object.class,String.class, scd);
+			ProcessingResult<String> result = execute(Object.class, String.class, scd);
 			return result.executedCommandResults[0].result;
 		} catch (SQLException e) {
 			return new CommandResult(null, e.getMessage(), 409);
