@@ -170,8 +170,6 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 }
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
-	
 	public Next(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Next>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Next> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -189,4 +187,6 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }

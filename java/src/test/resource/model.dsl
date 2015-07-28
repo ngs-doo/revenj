@@ -9,12 +9,17 @@ module test {
 	enum En { A; B; }
 	root LazyLoad {
 		Composite? *comp;
+		SingleDetail? *sd;
+	}
+	root SingleDetail {
+		detail<LazyLoad.sd> details;
 	}
 	root Composite(id) {
 		uuid id;
 		En[] enn;
 		Simple simple;
 		List<Entity> entities;
+		detail<LazyLoad.comp> lazies;
 		specification ForSimple 'it => it.simple.number == simple.number' {
 			Simple simple;
 		}

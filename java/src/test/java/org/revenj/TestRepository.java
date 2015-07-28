@@ -3,10 +3,7 @@ package org.revenj;
 import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.test.*;
-import gen.model.test.repositories.ClickedRepository;
-import gen.model.test.repositories.CompositeListRepository;
-import gen.model.test.repositories.CompositeRepository;
-import gen.model.test.repositories.LazyLoadRepository;
+import gen.model.test.repositories.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.*;
@@ -150,5 +147,22 @@ public class TestRepository {
 		LazyLoad ll = llRepository.find(uri).get();
 		Assert.assertEquals(c.getURI(), ll.getCompURI());
 		Assert.assertEquals(5432, ll.getComp().getSimple().getNumber());
+	}
+
+	@Test
+	public void detailTest() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		SingleDetailRepository sdRepository = locator.resolve(SingleDetailRepository.class);
+		String uri = sdRepository.insert(new SingleDetail());
+		SingleDetail sd = sdRepository.find(uri).get();
+		Assert.assertEquals(0, sd.getDetails().length);
+		Assert.assertEquals(0, sd.getDetailsURI().length);
+		LazyLoadRepository llRepository = locator.resolve(LazyLoadRepository.class);
+		uri = llRepository.insert(new LazyLoad().setSd(sd));
+		SingleDetail sd2 = sdRepository.find(sd.getURI()).get();
+		Assert.assertEquals(1, sd2.getDetails().length);
+		Assert.assertEquals(1, sd2.getDetailsURI().length);
+		Assert.assertEquals(uri, sd2.getDetailsURI()[0]);
+		Assert.assertEquals(uri, sd2.getDetails()[0].getURI());
 	}
 }

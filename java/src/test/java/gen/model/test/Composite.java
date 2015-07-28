@@ -13,6 +13,7 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 		this.enn = new gen.model.test.En[] { };
 		this.simple = new gen.model.test.Simple();
 		this.entities = new java.util.ArrayList<gen.model.test.Entity>(4);
+		this.lazies = new gen.model.test.LazyLoad[] { };
 	}
 
 	
@@ -62,6 +63,8 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 			return false;
 		if(!((this.entities == other.entities || this.entities != null && this.entities.equals(other.entities))))
 			return false;
+		if(!(java.util.Arrays.equals(this.laziesURI, other.laziesURI)))
+			return false;
 
 		return true;
 	}
@@ -93,13 +96,15 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 			@com.fasterxml.jackson.annotation.JsonProperty("id") final java.util.UUID id,
 			@com.fasterxml.jackson.annotation.JsonProperty("enn") final gen.model.test.En[] enn,
 			@com.fasterxml.jackson.annotation.JsonProperty("simple") final gen.model.test.Simple simple,
-			@com.fasterxml.jackson.annotation.JsonProperty("entities") final java.util.List<gen.model.test.Entity> entities) {
+			@com.fasterxml.jackson.annotation.JsonProperty("entities") final java.util.List<gen.model.test.Entity> entities,
+			@com.fasterxml.jackson.annotation.JsonProperty("laziesURI") final String[] laziesURI) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
 		this.id = id == null ? new java.util.UUID(0L, 0L) : id;
 		this.enn = enn == null ? new gen.model.test.En[] { } : enn;
 		this.simple = simple == null ? new gen.model.test.Simple() : simple;
 		this.entities = entities == null ? new java.util.ArrayList<gen.model.test.Entity>(4) : entities;
+		this.laziesURI = laziesURI == null ? new String[0] : laziesURI;
 	}
 
 	
@@ -181,6 +186,49 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 	}
 
 	
+	private gen.model.test.LazyLoad[] lazies;
+
+	
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	public gen.model.test.LazyLoad[] getLazies()  {
+		
+	
+		if(this.laziesURI != null && this.laziesURI.length == 0)
+		{
+			this.lazies = new gen.model.test.LazyLoad[] { };
+			this.laziesURI = null;
+		}
+	
+		if (this.__locator.isPresent() && (this.laziesURI != null && (this.lazies == null || this.lazies.length != this.laziesURI.length))) {
+			gen.model.test.repositories.LazyLoadRepository repository = this.__locator.get().resolve(gen.model.test.repositories.LazyLoadRepository.class);
+			java.util.List<gen.model.test.LazyLoad> __list = repository.find(this.laziesURI);
+			lazies = __list.toArray(new gen.model.test.LazyLoad[__list.size()]);
+			this.laziesURI = null;
+		}
+		return this.lazies;
+	}
+
+	
+	private String[] laziesURI;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("laziesURI")
+	public String[] getLaziesURI()  {
+		
+	
+			if (this.lazies != null) {
+				final String[] _result = new String[this.lazies.length];
+				int _i = 0;
+				for (final gen.model.test.LazyLoad _it : this.lazies) {
+					_result[_i++] = _it.getURI();
+				}
+				return _result;
+			} 
+			if (this.laziesURI == null) return new String[0];
+		return this.laziesURI;
+	}
+
+	
 
 public static class ForSimple   implements java.io.Serializable, org.revenj.patterns.Specification<Composite> {
 	
@@ -222,8 +270,6 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 }
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
-	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -232,19 +278,29 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, int __index___enn, gen.model.test.converters.SimpleConverter __converter_simple, int __index___simple, gen.model.test.converters.EntityConverter __converter_entities, int __index___entities) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, int __index___enn, gen.model.test.converters.SimpleConverter __converter_simple, int __index___simple, gen.model.test.converters.EntityConverter __converter_entities, int __index___entities, int __index___laziesURI) {
 		
 		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index___enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) item.enn = __list.toArray(new gen.model.test.En[__list.size()]); else item.enn = new gen.model.test.En[] { }; }; };
 		readers[__index___simple] = (item, reader, context) -> { item.simple = __converter_simple.from(reader, context); };
 		readers[__index___entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) -> __converter_entities.from(rdr, ctx)); if (__list != null) item.entities = __list; else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
+		readers[__index___laziesURI] = (item, reader, context) -> { { 
+			java.util.List<String> __list = org.revenj.postgres.converters.StringConverter.parseCollection(reader, context, true); 
+			if (__list != null) item.laziesURI = __list.toArray(new String[__list.size()]); else item.laziesURI = new String[0]; 
+		}; };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index__extended_id, int __index__extended_enn, final gen.model.test.converters.SimpleConverter __converter_simple, int __index__extended_simple, final gen.model.test.converters.EntityConverter __converter_entities, int __index__extended_entities) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index__extended_id, int __index__extended_enn, final gen.model.test.converters.SimpleConverter __converter_simple, int __index__extended_simple, final gen.model.test.converters.EntityConverter __converter_entities, int __index__extended_entities, int __index__extended_laziesURI) {
 		
 		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) item.enn = __list.toArray(new gen.model.test.En[__list.size()]); else item.enn = new gen.model.test.En[] { }; }; };
 		readers[__index__extended_simple] = (item, reader, context) -> { item.simple = __converter_simple.fromExtended(reader, context); };
 		readers[__index__extended_entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) -> __converter_entities.fromExtended(rdr, ctx)); if (__list != null) item.entities = __list; else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
+		readers[__index__extended_laziesURI] = (item, reader, context) -> { { 
+			java.util.List<String> __list = org.revenj.postgres.converters.StringConverter.parseCollection(reader, context, true); 
+			if (__list != null) item.laziesURI = __list.toArray(new String[__list.size()]); else item.laziesURI = new String[0]; 
+		}; };
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }

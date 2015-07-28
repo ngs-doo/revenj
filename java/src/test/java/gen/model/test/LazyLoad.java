@@ -57,6 +57,10 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 			return false;
 		if(!(this.compID == other.compID || this.compID != null && this.compID.equals(other.compID)))
 			return false;
+		if(!(this.sdURI == other.sdURI || this.sdURI != null && this.sdURI.equals(other.sdURI)))
+			return false;
+		if(!(this.sdID == other.sdID || this.sdID != null && this.sdID.equals(other.sdID)))
+			return false;
 
 		return true;
 	}
@@ -68,9 +72,11 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 	
 	
 	public LazyLoad(
-			final gen.model.test.Composite comp) {
+			final gen.model.test.Composite comp,
+			final gen.model.test.SingleDetail sd) {
 			
 		setComp(comp);
+		setSd(sd);
 	}
 
 	
@@ -81,12 +87,16 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
 			@com.fasterxml.jackson.annotation.JsonProperty("ID") final int ID,
 			@com.fasterxml.jackson.annotation.JsonProperty("compURI") final String compURI,
-			@com.fasterxml.jackson.annotation.JsonProperty("compID") final java.util.UUID compID) {
+			@com.fasterxml.jackson.annotation.JsonProperty("compID") final java.util.UUID compID,
+			@com.fasterxml.jackson.annotation.JsonProperty("sdURI") final String sdURI,
+			@com.fasterxml.jackson.annotation.JsonProperty("sdID") final Integer sdID) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
 		this.ID = ID;
 		this.compURI = compURI;
 		this.compID = compID;
+		this.sdURI = sdURI;
+		this.sdID = sdID;
 	}
 
 	
@@ -187,7 +197,66 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 	}
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	private gen.model.test.SingleDetail sd;
+
+	
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	public gen.model.test.SingleDetail getSd()  {
+		
+	if (this.sdURI == null && this.sd != null) this.sd = null;
+	
+		if (__locator.isPresent() && (sd != null && !sd.getURI().equals(sdURI) || sd == null && sdURI != null)) {
+			gen.model.test.repositories.SingleDetailRepository repository = __locator.get().resolve(gen.model.test.repositories.SingleDetailRepository.class);
+			sd = repository.find(sdURI).orElse(null);
+		}
+		return sd;
+	}
+
+	
+	public LazyLoad setSd(final gen.model.test.SingleDetail value) {
+		
+		
+		if(value != null && value.getURI() == null) throw new IllegalArgumentException("Reference \"test.SingleDetail\" for property \"sd\" must be persisted before it's assigned");
+		this.sd = value;
+		
+		
+		if (value == null && this.sdID != null) {
+			this.sdID = null;
+		} else if (value != null) {
+			this.sdID = value.getID();
+		}
+		this.sdURI = value != null ? value.getURI() : null;
+		return this;
+	}
+
+	
+	private String sdURI;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("sdURI")
+	public String getSdURI()  {
+		
+		return this.sdURI;
+	}
+
+	
+	private Integer sdID;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("sdID")
+	public Integer getSdID()  {
+		
+		return sdID;
+	}
+
+	
+	private LazyLoad setSdID(final Integer value) {
+		
+		this.sdID = value;
+		
+		return this;
+	}
+
 	
 	public LazyLoad(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<LazyLoad> rdr : readers) {
@@ -197,17 +266,23 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers, int __index___ID, int __index___compURI, int __index___compID) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers, int __index___ID, int __index___compURI, int __index___compID, int __index___sdURI, int __index___sdID) {
 		
 		readers[__index___ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index___compURI] = (item, reader, context) -> { item.compURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index___compID] = (item, reader, context) -> { item.compID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
+		readers[__index___sdURI] = (item, reader, context) -> { item.sdURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
+		readers[__index___sdID] = (item, reader, context) -> { item.sdID = org.revenj.postgres.converters.IntConverter.parseNullable(reader); };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers, int __index__extended_ID, int __index__extended_compURI, int __index__extended_compID) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers, int __index__extended_ID, int __index__extended_compURI, int __index__extended_compID, int __index__extended_sdURI, int __index__extended_sdID) {
 		
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_compURI] = (item, reader, context) -> { item.compURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_compID] = (item, reader, context) -> { item.compID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
+		readers[__index__extended_sdURI] = (item, reader, context) -> { item.sdURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
+		readers[__index__extended_sdID] = (item, reader, context) -> { item.sdID = org.revenj.postgres.converters.IntConverter.parseNullable(reader); };
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }

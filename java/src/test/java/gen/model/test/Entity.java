@@ -247,8 +247,6 @@ public class Entity   implements java.io.Serializable {
 	}
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
-	
 	public Entity(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Entity> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -276,4 +274,6 @@ public class Entity   implements java.io.Serializable {
 		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }

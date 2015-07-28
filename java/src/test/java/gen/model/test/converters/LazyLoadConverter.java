@@ -58,15 +58,31 @@ public class LazyLoadConverter implements ObjectConverter<gen.model.test.LazyLoa
 		column = columnsExtended.stream().filter(it -> "compID".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'compID' column in test LazyLoad. Check if DB is in sync");
 		__index__extended_compID = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "sdURI".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'sdURI' column in test LazyLoad_entity. Check if DB is in sync");
+		__index___sdURI = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "sdURI".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'sdURI' column in test LazyLoad. Check if DB is in sync");
+		__index__extended_sdURI = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "sdID".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'sdID' column in test LazyLoad_entity. Check if DB is in sync");
+		__index___sdID = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "sdID".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'sdID' column in test LazyLoad. Check if DB is in sync");
+		__index__extended_sdID = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		
 			
-		gen.model.test.LazyLoad.__configureConverter(readers, __index___ID, __index___compURI, __index___compID);
+		gen.model.test.LazyLoad.__configureConverter(readers, __index___ID, __index___compURI, __index___compID, __index___sdURI, __index___sdID);
 			
-		gen.model.test.LazyLoad.__configureConverterExtended(readersExtended, __index__extended_ID, __index__extended_compURI, __index__extended_compID);
+		gen.model.test.LazyLoad.__configureConverterExtended(readersExtended, __index__extended_ID, __index__extended_compURI, __index__extended_compID, __index__extended_sdURI, __index__extended_sdID);
 	}
 
 	@Override
@@ -89,6 +105,8 @@ public class LazyLoadConverter implements ObjectConverter<gen.model.test.LazyLoa
 		items[__index___ID] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getID());
 		if (instance.getCompURI() != null)items[__index___compURI] = new org.revenj.postgres.converters.ValueTuple(instance.getCompURI());;
 		items[__index___compID] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getCompID());
+		if (instance.getSdURI() != null)items[__index___sdURI] = new org.revenj.postgres.converters.ValueTuple(instance.getSdURI());;
+		items[__index___sdID] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getSdID());
 		return RecordTuple.from(items);
 	}
 
@@ -111,6 +129,8 @@ public class LazyLoadConverter implements ObjectConverter<gen.model.test.LazyLoa
 		items[__index__extended_ID] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getID());
 		if (instance.getCompURI() != null)items[__index__extended_compURI] = new org.revenj.postgres.converters.ValueTuple(instance.getCompURI());;
 		items[__index__extended_compID] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getCompID());
+		if (instance.getSdURI() != null)items[__index__extended_sdURI] = new org.revenj.postgres.converters.ValueTuple(instance.getSdURI());;
+		items[__index__extended_sdID] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getSdID());
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
@@ -136,4 +156,8 @@ public class LazyLoadConverter implements ObjectConverter<gen.model.test.LazyLoa
 	private final int __index__extended_compURI;
 	private final int __index___compID;
 	private final int __index__extended_compID;
+	private final int __index___sdURI;
+	private final int __index__extended_sdURI;
+	private final int __index___sdID;
+	private final int __index__extended_sdID;
 }
