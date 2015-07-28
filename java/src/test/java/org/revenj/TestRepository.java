@@ -2,11 +2,9 @@ package org.revenj;
 
 import gen.model.Boot;
 import gen.model.Seq.Next;
-import gen.model.test.Clicked;
-import gen.model.test.Composite;
-import gen.model.test.En;
-import gen.model.test.Simple;
+import gen.model.test.*;
 import gen.model.test.repositories.ClickedRepository;
+import gen.model.test.repositories.CompositeListRepository;
 import gen.model.test.repositories.CompositeRepository;
 import org.junit.Assert;
 import org.junit.Test;
@@ -127,5 +125,15 @@ public class TestRepository {
 		Assert.assertEquals(1, uris.length);
 		List<Clicked> found = store.search(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal), En.B));
 		Assert.assertEquals(1, found.size());
+	}
+
+	@Test
+	public void specificationSnowflakeFind() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		CompositeRepository repository = locator.resolve(CompositeRepository.class);
+		CompositeListRepository listRepository = locator.resolve(CompositeListRepository.class);
+		String uri = repository.insert(new Composite().setSimple(new Simple().setNumber(1234)));
+		CompositeList list = listRepository.find(uri).get();
+		Assert.assertEquals(1234, list.getSimple().getNumber());
 	}
 }

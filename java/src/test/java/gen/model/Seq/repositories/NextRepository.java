@@ -47,12 +47,12 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	@Override
 	public java.util.List<gen.model.Seq.Next> search(java.util.Optional<org.revenj.patterns.Specification<gen.model.Seq.Next>> filter, java.util.Optional<Integer> limit, java.util.Optional<Integer> offset) {
 		String sql = null;
-		if (filter == null || !filter.isPresent() || filter.get() == null) {
+		if (filter == null || filter.orElse(null) == null) {
 			sql = "SELECT r FROM \"Seq\".\"Next_entity\" r";
-			if (limit != null && limit.isPresent() && limit.get() != null) {
+			if (limit != null && limit.orElse(null) != null) {
 				sql += " LIMIT " + Integer.toString(limit.get());
 			}
-			if (offset != null && offset.isPresent() && offset.get() != null) {
+			if (offset != null && offset.orElse(null) != null) {
 				sql += " OFFSET " + Integer.toString(offset.get());
 			}
 			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -61,7 +61,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 				throw new RuntimeException(e);
 			}
 		}
-		org.revenj.patterns.Specification<gen.model.Seq.Next> specification = filter.orElse(null);
+		org.revenj.patterns.Specification<gen.model.Seq.Next> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			
@@ -87,10 +87,10 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 			});
 		}
 			if (sql != null) {
-				if (limit != null && limit.isPresent() && limit.get() != null) {
+				if (limit != null && limit.orElse(null) != null) {
 					sql += " LIMIT " + Integer.toString(limit.get());
 				}
-				if (offset != null && offset.isPresent() && offset.get() != null) {
+				if (offset != null && offset.orElse(null) != null) {
 					sql += " OFFSET " + Integer.toString(offset.get());
 				}
 				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -101,10 +101,10 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 				}
 			}
 			java.util.stream.Stream<gen.model.Seq.Next> stream = stream(filter);
-			if (offset != null && offset.isPresent() && offset.get() != null) {
+			if (offset != null && offset.orElse(null) != null) {
 				stream = stream.skip(offset.get());
 			}
-			if (limit != null && limit.isPresent() && limit.get() != null) {
+			if (limit != null && limit.orElse(null) != null) {
 				stream = stream.limit(limit.get());
 			}
 			return stream.collect(java.util.stream.Collectors.toList());

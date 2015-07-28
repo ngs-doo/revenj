@@ -47,12 +47,12 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 	@Override
 	public java.util.List<gen.model.test.CompositeList> search(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.CompositeList>> filter, java.util.Optional<Integer> limit, java.util.Optional<Integer> offset) {
 		String sql = null;
-		if (filter == null || !filter.isPresent() || filter.get() == null) {
+		if (filter == null || filter.orElse(null) == null) {
 			sql = "SELECT r FROM \"test\".\"CompositeList_snowflake\" r";
-			if (limit != null && limit.isPresent() && limit.get() != null) {
+			if (limit != null && limit.orElse(null) != null) {
 				sql += " LIMIT " + Integer.toString(limit.get());
 			}
-			if (offset != null && offset.isPresent() && offset.get() != null) {
+			if (offset != null && offset.orElse(null) != null) {
 				sql += " OFFSET " + Integer.toString(offset.get());
 			}
 			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -61,15 +61,15 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 				throw new RuntimeException(e);
 			}
 		}
-		org.revenj.patterns.Specification<gen.model.test.CompositeList> specification = filter.orElse(null);
+		org.revenj.patterns.Specification<gen.model.test.CompositeList> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			
 			if (sql != null) {
-				if (limit != null && limit.isPresent() && limit.get() != null) {
+				if (limit != null && limit.orElse(null) != null) {
 					sql += " LIMIT " + Integer.toString(limit.get());
 				}
-				if (offset != null && offset.isPresent() && offset.get() != null) {
+				if (offset != null && offset.orElse(null) != null) {
 					sql += " OFFSET " + Integer.toString(offset.get());
 				}
 				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -80,10 +80,10 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 				}
 			}
 			java.util.stream.Stream<gen.model.test.CompositeList> stream = stream(filter);
-			if (offset != null && offset.isPresent() && offset.get() != null) {
+			if (offset != null && offset.orElse(null) != null) {
 				stream = stream.skip(offset.get());
 			}
-			if (limit != null && limit.isPresent() && limit.get() != null) {
+			if (limit != null && limit.orElse(null) != null) {
 				stream = stream.limit(limit.get());
 			}
 			return stream.collect(java.util.stream.Collectors.toList());
@@ -93,7 +93,7 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 	
 	@Override
 	public java.util.List<gen.model.test.CompositeList> find(String[] uris) {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"CompositeList_snowflake\" r WHERE r.URI = ANY(?)")) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"CompositeList_snowflake\" r WHERE r.\"URI\" = ANY(?)")) {
 			statement.setArray(1, connection.createArrayOf("text", uris));
 			return readFromDb(statement, new java.util.ArrayList<>(uris.length));			
 		} catch (java.sql.SQLException | java.io.IOException e) {
