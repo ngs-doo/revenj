@@ -33,7 +33,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	}
 
 	private java.util.ArrayList<gen.model.Seq.Next> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.Seq.Next> result) throws java.sql.SQLException, java.io.IOException {
-		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator::resolve);
+		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
 		try (java.sql.ResultSet rs = statement.executeQuery()) {
 			while (rs.next()) {
 				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
@@ -116,7 +116,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	public java.util.List<gen.model.Seq.Next> find(String[] uris) {
 		try (java.sql.Statement statement = connection.createStatement()) {
 			java.util.ArrayList<gen.model.Seq.Next> result = new java.util.ArrayList<>(uris.length);
-			org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator::resolve);
+			org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
 			StringBuilder sb = new StringBuilder("SELECT r FROM \"Seq\".\"Next_entity\" r WHERE r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");

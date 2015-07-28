@@ -6,6 +6,7 @@ import gen.model.test.*;
 import gen.model.test.repositories.ClickedRepository;
 import gen.model.test.repositories.CompositeListRepository;
 import gen.model.test.repositories.CompositeRepository;
+import gen.model.test.repositories.LazyLoadRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.*;
@@ -135,5 +136,19 @@ public class TestRepository {
 		String uri = repository.insert(new Composite().setSimple(new Simple().setNumber(1234)));
 		CompositeList list = listRepository.find(uri).get();
 		Assert.assertEquals(1234, list.getSimple().getNumber());
+	}
+
+	@Test
+	public void lazyLoadTest() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		CompositeRepository compRepository = locator.resolve(CompositeRepository.class);
+		String uri = compRepository.insert(new Composite().setSimple(new Simple().setNumber(5432)));
+		Composite c = compRepository.find(uri).get();
+		Assert.assertEquals(5432, c.getSimple().getNumber());
+		LazyLoadRepository llRepository = locator.resolve(LazyLoadRepository.class);
+		uri = llRepository.insert(new LazyLoad().setComp(c));
+		LazyLoad ll = llRepository.find(uri).get();
+		Assert.assertEquals(c.getURI(), ll.getCompURI());
+		Assert.assertEquals(5432, ll.getComp().getSimple().getNumber());
 	}
 }

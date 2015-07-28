@@ -7,6 +7,9 @@ module test {
 		bool? nb;
 	}
 	enum En { A; B; }
+	root LazyLoad {
+		Composite? *comp;
+	}
 	root Composite(id) {
 		uuid id;
 		En[] enn;

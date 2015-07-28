@@ -92,13 +92,6 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 		return RecordTuple.from(items);
 	}
 
-	public PostgresTuple toExtended(gen.model.test.Clicked instance) {
-		if (instance == null) return null;
-		PostgresTuple[] items = new PostgresTuple[columnCount];
-		
-		return RecordTuple.from(items);
-	}
-
 	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Clicked>[] readers;

@@ -1,5 +1,7 @@
 package org.revenj.postgres;
 
+import org.revenj.patterns.ServiceLocator;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -10,21 +12,17 @@ public class PostgresReader {
 	private int last;
 	private char[] buffer;
 	private int positionInBuffer;
-	public final Resolver resolver;
+	public final ServiceLocator locator;
 	public final char[] tmp;
-
-	public interface Resolver {
-		<T> T resolve(Class<T> manifest);
-	}
 
 	public PostgresReader() {
 		this(null);
 	}
 
-	public PostgresReader(Resolver resolver) {
+	public PostgresReader(ServiceLocator locator) {
 		this.buffer = new char[64];
 		this.tmp = new char[48];
-		this.resolver = resolver;
+		this.locator = locator;
 	}
 
 	public void process(String input) {

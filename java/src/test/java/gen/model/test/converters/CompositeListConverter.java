@@ -86,13 +86,6 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		return RecordTuple.from(items);
 	}
 
-	public PostgresTuple toExtended(gen.model.test.CompositeList instance) {
-		if (instance == null) return null;
-		PostgresTuple[] items = new PostgresTuple[columnCount];
-		
-		return RecordTuple.from(items);
-	}
-
 	
 	private final int columnCount;
 	
@@ -104,7 +97,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		int i = 0;
 		
 		String _URI_ = null;
-		java.util.UUID _id_ = new java.util.UUID(0L, 0L);
+		java.util.UUID _id_ = null;
 		gen.model.test.En[] _enn_ = null;
 		java.util.List<gen.model.test.Entity> _entities_ = null;
 		gen.model.test.Simple _simple_ = null;
@@ -123,6 +116,13 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 	private final int __index___URI;
 	private final int columnCountExtended;
 	
+	public PostgresTuple toExtended(gen.model.test.CompositeList instance) {
+		if (instance == null) return null;
+		PostgresTuple[] items = new PostgresTuple[columnCountExtended];
+		
+		return RecordTuple.from(items);
+	}
+
 	public gen.model.test.CompositeList fromExtended(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
@@ -131,7 +131,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		int i = 0;
 		
 		String _URI_ = null;
-		java.util.UUID _id_ = new java.util.UUID(0L, 0L);
+		java.util.UUID _id_ = null;
 		gen.model.test.En[] _enn_ = null;
 		java.util.List<gen.model.test.Entity> _entities_ = null;
 		gen.model.test.Simple _simple_ = null;

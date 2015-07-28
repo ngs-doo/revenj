@@ -156,6 +156,11 @@ public class Entity   implements java.io.Serializable {
 	public gen.model.test.Composite getComposite()  {
 		
 	if (this.compositeURI == null && this.composite != null) this.composite = null;
+	
+		if (__locator.isPresent() && (composite != null && !composite.getURI().equals(compositeURI) || composite == null && compositeURI != null)) {
+			gen.model.test.repositories.CompositeRepository repository = __locator.get().resolve(gen.model.test.repositories.CompositeRepository.class);
+			composite = repository.find(compositeURI).orElse(null);
+		}
 		return composite;
 	}
 
@@ -242,11 +247,14 @@ public class Entity   implements java.io.Serializable {
 	}
 
 	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	
 	public Entity(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Entity> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.test.converters.EntityConverter.buildURI(reader.tmp, Compositeid, Index);
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers, int __index___money, int __index___id, int __index___compositeURI, int __index___compositeID, int __index___Compositeid, int __index___Index) {
@@ -268,6 +276,4 @@ public class Entity   implements java.io.Serializable {
 		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }

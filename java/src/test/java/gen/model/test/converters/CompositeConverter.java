@@ -103,17 +103,6 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		return RecordTuple.from(items);
 	}
 
-	public PostgresTuple toExtended(gen.model.test.Composite instance) {
-		if (instance == null) return null;
-		PostgresTuple[] items = new PostgresTuple[columnCount];
-		
-		items[__index__extended_id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
-		items[__index__extended_enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), it -> gen.model.test.converters.EnConverter.toTuple(it));
-		items[__index__extended_simple] = __converter_simple.toExtended(instance.getSimple());
-		items[__index__extended_entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
-		return RecordTuple.from(items);
-	}
-
 	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Composite>[] readers;
@@ -124,6 +113,17 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		gen.model.test.Composite instance = from(reader, context, context == 0 ? 1 : context << 1, readers);
 		reader.read();
 		return instance;
+	}
+	
+	public PostgresTuple toExtended(gen.model.test.Composite instance) {
+		if (instance == null) return null;
+		PostgresTuple[] items = new PostgresTuple[columnCountExtended];
+		
+		items[__index__extended_id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
+		items[__index__extended_enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), it -> gen.model.test.converters.EnConverter.toTuple(it));
+		items[__index__extended_simple] = __converter_simple.toExtended(instance.getSimple());
+		items[__index__extended_entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
+		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.test.Composite>[] readersExtended;

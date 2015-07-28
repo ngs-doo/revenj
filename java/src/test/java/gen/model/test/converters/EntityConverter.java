@@ -119,19 +119,6 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		return RecordTuple.from(items);
 	}
 
-	public PostgresTuple toExtended(gen.model.test.Entity instance) {
-		if (instance == null) return null;
-		PostgresTuple[] items = new PostgresTuple[columnCount];
-		
-		items[__index__extended_money] = org.revenj.postgres.converters.DecimalConverter.toTuple(instance.getMoney());
-		items[__index__extended_id] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getId());
-		if (instance.getCompositeURI() != null)items[__index__extended_compositeURI] = new org.revenj.postgres.converters.ValueTuple(instance.getCompositeURI());;
-		items[__index__extended_compositeID] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getCompositeID());
-		items[__index__extended_Compositeid] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getCompositeid());
-		items[__index__extended_Index] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getIndex());
-		return RecordTuple.from(items);
-	}
-
 	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Entity>[] readers;
@@ -142,6 +129,19 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		gen.model.test.Entity instance = from(reader, context, context == 0 ? 1 : context << 1, readers);
 		reader.read();
 		return instance;
+	}
+	
+	public PostgresTuple toExtended(gen.model.test.Entity instance) {
+		if (instance == null) return null;
+		PostgresTuple[] items = new PostgresTuple[columnCountExtended];
+		
+		items[__index__extended_money] = org.revenj.postgres.converters.DecimalConverter.toTuple(instance.getMoney());
+		items[__index__extended_id] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getId());
+		if (instance.getCompositeURI() != null)items[__index__extended_compositeURI] = new org.revenj.postgres.converters.ValueTuple(instance.getCompositeURI());;
+		items[__index__extended_compositeID] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getCompositeID());
+		items[__index__extended_Compositeid] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getCompositeid());
+		items[__index__extended_Index] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getIndex());
+		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.test.Entity>[] readersExtended;

@@ -110,18 +110,6 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		return RecordTuple.from(items);
 	}
 
-	public PostgresTuple toExtended(gen.model.test.Simple instance) {
-		if (instance == null) return null;
-		PostgresTuple[] items = new PostgresTuple[columnCount];
-		
-		items[__index__extended_number] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getNumber());
-		items[__index__extended_text] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getText());
-		items[__index__extended_en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
-		items[__index__extended_en2] = gen.model.test.converters.EnConverter.toTuple(instance.getEn2());
-		items[__index__extended_nb] = org.revenj.postgres.converters.BoolConverter.toTuple(instance.getNb());
-		return RecordTuple.from(items);
-	}
-
 	
 	private final int columnCount;
 	private final ObjectConverter.Reader<gen.model.test.Simple>[] readers;
@@ -132,6 +120,18 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 		gen.model.test.Simple instance = from(reader, context, context == 0 ? 1 : context << 1, readers);
 		reader.read();
 		return instance;
+	}
+	
+	public PostgresTuple toExtended(gen.model.test.Simple instance) {
+		if (instance == null) return null;
+		PostgresTuple[] items = new PostgresTuple[columnCountExtended];
+		
+		items[__index__extended_number] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getNumber());
+		items[__index__extended_text] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getText());
+		items[__index__extended_en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
+		items[__index__extended_en2] = gen.model.test.converters.EnConverter.toTuple(instance.getEn2());
+		items[__index__extended_nb] = org.revenj.postgres.converters.BoolConverter.toTuple(instance.getNb());
+		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
 	private final ObjectConverter.Reader<gen.model.test.Simple>[] readersExtended;

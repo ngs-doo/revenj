@@ -33,7 +33,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 	}
 
 	private java.util.ArrayList<gen.model.test.Clicked> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.Clicked> result) throws java.sql.SQLException, java.io.IOException {
-		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator::resolve);
+		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
 		try (java.sql.ResultSet rs = statement.executeQuery()) {
 			while (rs.next()) {
 				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);

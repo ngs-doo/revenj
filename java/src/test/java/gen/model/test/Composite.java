@@ -222,11 +222,14 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 }
 
 	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.test.converters.CompositeConverter.buildURI(reader.tmp, id);
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, int __index___enn, gen.model.test.converters.SimpleConverter __converter_simple, int __index___simple, gen.model.test.converters.EntityConverter __converter_entities, int __index___entities) {
@@ -244,6 +247,4 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		readers[__index__extended_simple] = (item, reader, context) -> { item.simple = __converter_simple.fromExtended(reader, context); };
 		readers[__index__extended_entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) -> __converter_entities.fromExtended(rdr, ctx)); if (__list != null) item.entities = __list; else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }
