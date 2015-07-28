@@ -32,15 +32,15 @@ namespace Revenj.Http
 			var rs = result.RelativePathSegments;
 			int pos = RawUrl.IndexOf('?');
 			var maxLen = pos != -1 ? pos : RawUrl.Length;
-			var nextSeg = RawUrl.IndexOf('/', 1);
-			while (nextSeg != -1)
+			var nextSeg = RawUrl.IndexOf('/', 1) + 1;
+			while (nextSeg != 0)
 			{
 				var lastSeg = nextSeg;
-				nextSeg = RawUrl.IndexOf('/', nextSeg + 1);
-				if (nextSeg != -1 && nextSeg < maxLen)
-					rs.Add(RawUrl.Substring(lastSeg, nextSeg));
+				nextSeg = RawUrl.IndexOf('/', nextSeg) + 1;
+				if (nextSeg != 0)
+					rs.Add(RawUrl.Substring(lastSeg, nextSeg - lastSeg - 1));
 				else
-					rs.Add(RawUrl.Substring(lastSeg, maxLen));
+					rs.Add(RawUrl.Substring(lastSeg, maxLen - lastSeg));
 			}
 			var qp = result.QueryParameters;
 			if (QueryParams != null)
