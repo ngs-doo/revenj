@@ -60,3 +60,14 @@ module Seq {
 		}
 	}
 }
+module mixinReference {
+	mixin Report {
+		Author* author;
+	}
+	aggregate SpecificReport {
+		has mixin Report;
+	}
+	aggregate Author {
+		string name;
+	}
+}

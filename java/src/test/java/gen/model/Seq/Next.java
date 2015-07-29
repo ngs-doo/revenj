@@ -62,8 +62,6 @@ public class Next   implements java.io.Serializable, org.revenj.patterns.Aggrega
 		return "Next(" + URI + ')';
 	}
 	
-	private static final long serialVersionUID = 0x0097000a;
-	
 	@com.fasterxml.jackson.annotation.JsonCreator private Next(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -73,6 +71,8 @@ public class Next   implements java.io.Serializable, org.revenj.patterns.Aggrega
 		this.ID = ID;
 	}
 
+	
+	private static final long serialVersionUID = 0x0097000a;
 	
 	private int ID;
 
@@ -170,6 +170,8 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 }
 
 	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	
 	public Next(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Next>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Next> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -187,6 +189,4 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }
