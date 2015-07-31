@@ -5,7 +5,7 @@ import java.util.List;
 
 public class SelectFromWhere<T> extends SelectOnly<T> {
     public List<From> froms = new ArrayList<>();
-    public org.revenj.postgres.jinq.jpqlquery.Expression where;
+    public Expression where;
     public List<SortingParameters> sort = new ArrayList<>();
     public long limit = -1;
     public long skip = -1;
@@ -14,7 +14,7 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
      * Holds information needed to do a sort.
      */
     public static class SortingParameters {
-        public org.revenj.postgres.jinq.jpqlquery.Expression expr;
+        public Expression expr;
         public boolean isAscending;
     }
 
@@ -26,7 +26,7 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
      * After a JPQL query is generated, this stores parameters that need to be
      * filled-in, in the query
      */
-    private List<org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter> queryParameters;
+    private List<GeneratedQueryParameter> queryParameters;
 
     protected void generateQuery() {
         QueryGenerationState queryState = new QueryGenerationState();
@@ -39,12 +39,13 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
     }
 
     protected void prepareQueryGeneration(QueryGenerationState queryState) {
-        prepareQueryGeneration(org.revenj.postgres.jinq.jpqlquery.Expression.QueryGenerationPreparationPhase.FROM, queryState);
+        prepareQueryGeneration(Expression.QueryGenerationPreparationPhase.FROM, queryState);
     }
 
-    protected void prepareQueryGeneration(org.revenj.postgres.jinq.jpqlquery.Expression.QueryGenerationPreparationPhase preparePhase,
-                                          QueryGenerationState queryState) {
-        for (org.revenj.postgres.jinq.jpqlquery.Expression col : cols.columns) {
+    protected void prepareQueryGeneration(
+            Expression.QueryGenerationPreparationPhase preparePhase,
+            QueryGenerationState queryState) {
+        for (Expression col : cols.columns) {
             col.prepareQueryGeneration(preparePhase, queryState);
         }
         for (From from : froms) {
@@ -60,56 +61,56 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
     protected String generateQueryContents(QueryGenerationState queryState) {
         generateSelectFromWhere(queryState);
         generateSort(queryState);
-        return queryState.queryString;
+        return queryState.buildQueryString();
     }
 
     protected void generateSelectFromWhere(QueryGenerationState queryState) {
         if (cols.getNumColumns() > 0) {
-            queryState.queryString += "SELECT ";
+            queryState.appendQuery("SELECT ");
             if (isDistinct)
-                queryState.queryString += "DISTINCT ";
+                queryState.appendQuery("DISTINCT ");
             boolean isFirst = true;
-            for (org.revenj.postgres.jinq.jpqlquery.Expression col : cols.columns) {
-                if (!isFirst) queryState.queryString += ", ";
+            for (Expression col : cols.columns) {
+                if (!isFirst) queryState.appendQuery(", ");
                 isFirst = false;
                 col.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
             }
         }
         if (froms.size() > 0) {
-            queryState.queryString += " FROM ";
+            queryState.appendQuery(" FROM ");
             boolean isFirst = true;
             for (From from : froms) {
                 if (!isFirst) {
                     if (from.isPrecededByComma())
-                        queryState.queryString += ", ";
+                        queryState.appendQuery(", ");
                 }
                 from.generateFromString(queryState, isFirst);
                 isFirst = false;
-                queryState.queryString += " " + queryState.getFromAlias(from);
+                queryState.appendQuery(" ").appendQuery(queryState.getFromAlias(from));
             }
         }
         if (where != null) {
-            queryState.queryString += " WHERE ";
+            queryState.appendQuery(" WHERE ");
             where.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
         }
     }
 
     protected void generateSort(QueryGenerationState queryState) {
         if (!sort.isEmpty()) {
-            queryState.queryString += " ORDER BY";
+            queryState.appendQuery(" ORDER BY");
             boolean isFirst = true;
             for (SortingParameters sortParams : sort) {
-                if (!isFirst) queryState.queryString += ",";
+                if (!isFirst) queryState.appendQuery(",");
                 isFirst = false;
-                queryState.queryString += " ";
-                if (sortParams.expr instanceof org.revenj.postgres.jinq.jpqlquery.SubqueryExpression)
+                queryState.appendQuery(" ");
+                if (sortParams.expr instanceof SubqueryExpression)
                     // Special handling of subquery parantheses
-                    queryState.queryString += "(";
+                    queryState.appendQuery("(");
                 sortParams.expr.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_ORDER_BY_UNRESTRICTED_OPERATOR_PRECEDENCE);
-                queryState.queryString += (sortParams.isAscending ? " ASC" : " DESC");
-                if (sortParams.expr instanceof org.revenj.postgres.jinq.jpqlquery.SubqueryExpression)
+                queryState.appendQuery(sortParams.isAscending ? " ASC" : " DESC");
+                if (sortParams.expr instanceof SubqueryExpression)
                     // Special handling of subquery parantheses
-                    queryState.queryString += ")";
+                    queryState.appendQuery(")");
             }
         }
     }
@@ -122,14 +123,14 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
     }
 
     @Override
-    public List<org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter> getQueryParameters() {
+    public List<GeneratedQueryParameter> getQueryParameters() {
         if (queryParameters == null)
             generateQuery();
         return queryParameters;
     }
 
     @Override
-    public org.revenj.postgres.jinq.jpqlquery.RowReader<T> getRowReader() {
+    public RowReader<T> getRowReader() {
         return cols.reader;
     }
 
@@ -177,12 +178,4 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
         copySelectFromWhereTo(copy);
         return copy;
     }
-
-//   @Override
-//   public JPQLQuery<T> copy()
-//   {
-//      SelectFromWhere<T> newQuery = new SelectFromWhere<>();
-//      newQuery.query = query;
-//      return newQuery;
-//   }
 }

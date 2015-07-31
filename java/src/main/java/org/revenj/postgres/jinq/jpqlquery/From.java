@@ -51,7 +51,7 @@ public abstract class From implements JPQLFragment {
 
         @Override
         void generateFromString(QueryGenerationState queryState, boolean isFirst) {
-            queryState.queryString += name;
+            queryState.appendQuery(name);
         }
     }
 
@@ -63,7 +63,7 @@ public abstract class From implements JPQLFragment {
         @Override
         void generateFromString(QueryGenerationState queryState, boolean isFirst) {
             if (!isFirst)
-                queryState.queryString += " JOIN ";
+                queryState.appendQuery(" JOIN ");
             links.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
         }
 
@@ -77,7 +77,7 @@ public abstract class From implements JPQLFragment {
         @Override
         void generateFromString(QueryGenerationState queryState, boolean isFirst) {
             if (!isFirst)
-                queryState.queryString += " LEFT OUTER JOIN ";
+                queryState.appendQuery(" LEFT OUTER JOIN ");
             links.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
         }
 
@@ -91,7 +91,7 @@ public abstract class From implements JPQLFragment {
         @Override
         void generateFromString(QueryGenerationState queryState, boolean isFirst) {
             if (!isFirst)
-                queryState.queryString += " LEFT OUTER JOIN FETCH ";
+                queryState.appendQuery(" LEFT OUTER JOIN FETCH ");
             links.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
         }
 
@@ -105,7 +105,7 @@ public abstract class From implements JPQLFragment {
         @Override
         void generateFromString(QueryGenerationState queryState, boolean isFirst) {
             if (!isFirst)
-                queryState.queryString += " JOIN FETCH ";
+                queryState.appendQuery(" JOIN FETCH ");
             links.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
         }
 

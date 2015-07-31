@@ -29,10 +29,10 @@ public class UnaryExpression extends Expression {
         if (!precedence.hasPrecedence(operatorPrecedenceScope))
             queryState.appendQuery("(");
         if (!prefixOperator.isEmpty())
-            queryState.appendQuery(prefixOperator + " ");
+            queryState.appendQuery(prefixOperator).appendQuery(" ");
         operand.generateQuery(queryState, precedence);
         if (!postfixOperator.isEmpty())
-            queryState.appendQuery(" " + postfixOperator);
+            queryState.appendQuery(" ").appendQuery(postfixOperator);
 
         if (!precedence.hasPrecedence(operatorPrecedenceScope))
             queryState.appendQuery(")");

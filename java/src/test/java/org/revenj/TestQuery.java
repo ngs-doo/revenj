@@ -71,4 +71,26 @@ public class TestQuery {
         found = repository.query().noneMatch(next -> next.getID() == id + 2);
         Assert.assertTrue(found);
     }
+
+    @Test
+    public void collectionContainsQuery() throws IOException, SQLException {
+        ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+        NextRepository repository = locator.resolve(NextRepository.class);
+        String uri = repository.insert(new Next());
+        int id = Integer.parseInt(uri);
+        List<Integer> numbers = Arrays.asList(-1, 0, id);
+        List<Next> found = repository.query().filter(it -> numbers.contains(it.getID())).limit(2).list();
+        Assert.assertEquals(1, found.size());
+        Assert.assertEquals(id, found.get(0).getID());
+    }
+
+    @Test
+    public void uuidToString() throws IOException, SQLException {
+        ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+        CompositeRepository repository = locator.resolve(CompositeRepository.class);
+        UUID id = UUID.randomUUID();
+        String uri = repository.insert(new Composite().setId(id));
+        Composite found = repository.query().filter(it -> it.getId().toString().equals(uri)).findAny().get();
+        Assert.assertEquals(id, found.getId());
+    }
 }

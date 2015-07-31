@@ -467,6 +467,11 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
                                         search.getOnlyColumn(),
                                         base.getOnlyColumn())
                                 , new ConstantExpression("1")));
+            } else if (sig.equals(MethodChecker.uuidToString)) {
+                SymbExPassDown passdown = SymbExPassDown.with(val, false);
+                ColumnExpressions<?> base = val.base.visit(this, passdown);
+                return ColumnExpressions.singleColumn(base.reader,
+                        UnaryExpression.postfix("::text", base.getOnlyColumn()));
             }
             throw new TypedValueVisitorException("Do not know how to translate the method " + sig + " into a JPQL function");
         } else if (sig.equals(TransformationClassAnalyzer.stringBuilderToString)) {
@@ -534,7 +539,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
             ColumnExpressions<?> base = val.args.get(0).visit(this, passdown);
             return base;
         } else if (MethodChecker.jpqlFunctionStaticMethods.contains(sig)) {
-            if (sig.equals(MethodChecker.jpqlLike)) {
+            /*if (sig.equals(MethodChecker.jpqlLike)) {
                 SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
                 ColumnExpressions<?> base = val.args.get(0).visit(this, passdown);
                 ColumnExpressions<?> pattern = val.args.get(1).visit(this, passdown);
@@ -549,7 +554,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
                 TypedValue listVal = (isItemFirst ? val.args.get(1) : val.args.get(0));
                 TypedValue itemVal = (isItemFirst ? val.args.get(0) : val.args.get(1));
                 return handleIsIn(val, listVal, itemVal, isExpectingStream);
-            } else if (sig.equals(MethodChecker.mathAbsDouble)
+            } else */if (sig.equals(MethodChecker.mathAbsDouble)
                     || sig.equals(MethodChecker.mathAbsInt)
                     || sig.equals(MethodChecker.mathAbsLong)) {
                 SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
@@ -570,9 +575,11 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
             return super.staticMethodCallValue(val, in);
     }
 
-    protected ColumnExpressions<?> handleIsIn(TypedValue parent,
-                                              TypedValue listVal, TypedValue itemVal, boolean isExpectingStream)
-            throws TypedValueVisitorException {
+    protected ColumnExpressions<?> handleIsIn(
+            TypedValue parent,
+            TypedValue listVal,
+            TypedValue itemVal,
+            boolean isExpectingStream) throws TypedValueVisitorException {
         SymbExPassDown passdown = SymbExPassDown.with(parent, false);
         ColumnExpressions<?> item = itemVal.visit(this, passdown);
 
@@ -596,11 +603,11 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 //               }
 //               else
             return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-                    new BinaryExpression("IN", item.getOnlyColumn(), SubqueryExpression.from(sfw)));
+                    new BinaryExpression("", "= ANY(", ")", item.getOnlyColumn(), SubqueryExpression.from(sfw)));
         } else if (subQuery.isValidSubquery() && subQuery instanceof ParameterAsQuery) {
             ParameterAsQuery<?> paramQuery = (ParameterAsQuery<?>) subQuery;
             return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-                    new BinaryExpression("IN", item.getOnlyColumn(), paramQuery.cols.getOnlyColumn()));
+                    new BinaryExpression("", "= ANY(", ")", item.getOnlyColumn(), paramQuery.cols.getOnlyColumn()));
         }
         throw new TypedValueVisitorException("Trying to create a query using IN but with an unhandled subquery type");
     }

@@ -5,9 +5,7 @@ import java.util.regex.Pattern;
 
 import org.jinq.orm.stream.JinqStream;
 
-/**
- * Provides Java implementations of certain JPQL functions.
- */
+//TODO: remove
 public class JPQL {
 	/**
 	 * In-memory implementation of JPQL like.

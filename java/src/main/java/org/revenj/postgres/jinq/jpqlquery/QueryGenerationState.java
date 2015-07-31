@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 class QueryGenerationState {
-    String queryString = "";
-    Map<From, String> fromAliases = new IdentityHashMap<>();
-    List<GeneratedQueryParameter> parameters = new ArrayList<>();
+    private final StringBuilder queryString = new StringBuilder();
+    final Map<From, String> fromAliases = new IdentityHashMap<>();
+    final List<GeneratedQueryParameter> parameters = new ArrayList<>();
+
+    final String buildQueryString() {
+        return queryString.toString();
+    }
 
     /**
      * Gives a text label that can be used to identify an entry in the FROM section
@@ -63,9 +67,9 @@ class QueryGenerationState {
      *
      * @param str
      */
-    public void appendQuery(String str) {
-        // TODO: Perhaps this shouldn't be in QueryGenerationState but in a separate object just for holding query output.
-        queryString += str;
+    public QueryGenerationState appendQuery(String str) {
+        queryString.append(str);
+        return this;
     }
 
     // For assigning from and column aliases to queries

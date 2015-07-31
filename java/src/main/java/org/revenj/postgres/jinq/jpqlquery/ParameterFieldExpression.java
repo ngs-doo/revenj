@@ -12,7 +12,7 @@ public class ParameterFieldExpression extends org.revenj.postgres.jinq.jpqlquery
     @Override
     public void generateQuery(QueryGenerationState queryState, OperatorPrecedenceLevel operatorPrecedenceScope) {
         String paramName = queryState.registerParameter(this, lambdaIndex, fieldName);
-        queryState.appendQuery(":" + paramName);
+        queryState.appendQuery(":").appendQuery(paramName);
     }
 
     @Override

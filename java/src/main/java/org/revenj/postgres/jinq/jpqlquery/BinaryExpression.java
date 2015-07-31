@@ -4,9 +4,21 @@ public class BinaryExpression extends Expression {
     final Expression left;
     final Expression right;
     final String operator;
+    final String prepare;
+    final String finish;
 
     public BinaryExpression(String operator, Expression left, Expression right) {
         this.operator = operator;
+        this.prepare = "";
+        this.finish = "";
+        this.left = left;
+        this.right = right;
+    }
+
+    public BinaryExpression(String prepare, String operator, String finish, Expression left, Expression right) {
+        this.operator = operator;
+        this.prepare = prepare;
+        this.finish = finish;
         this.left = left;
         this.right = right;
     }
@@ -16,11 +28,13 @@ public class BinaryExpression extends Expression {
         OperatorPrecedenceLevel precedence = OperatorPrecedenceLevel.forOperator(operator);
         if (!precedence.hasPrecedence(operatorPrecedenceScope))
             queryState.appendQuery("(");
+        queryState.appendQuery(prepare);
         left.generateQuery(queryState, precedence);
-        queryState.appendQuery(" " + operator + " ");
+        queryState.appendQuery(" ").appendQuery(operator).appendQuery(" ");
         // Things on the right hand side should be wrapped in brackets if they are at the same precedence level
         // so we need to pass down a lower precedence scope there.
         right.generateQuery(queryState, precedence.getLevelBelow());
+        queryState.appendQuery(finish);
         if (!precedence.hasPrecedence(operatorPrecedenceScope))
             queryState.appendQuery(")");
     }

@@ -3,13 +3,12 @@ package org.revenj.postgres.jinq;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.revenj.postgres.jinq.transform.JPQLMultiLambdaQueryTransform;
 import org.revenj.postgres.jinq.transform.JPQLNoLambdaQueryTransform;
@@ -29,6 +28,26 @@ import org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter;
 import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
 
 class RevenjQueryComposer<T> {
+
+    private static final Map<Class<?>, String> typeMapping = new HashMap<>();
+
+    static {
+        typeMapping.put(int.class, "int");
+        typeMapping.put(Integer.class, "int");
+        typeMapping.put(String.class, "varchar");
+        typeMapping.put(long.class, "bigint");
+        typeMapping.put(Long.class, "bigint");
+        typeMapping.put(BigDecimal.class, "numeric");
+        typeMapping.put(float.class, "real");
+        typeMapping.put(Float.class, "real");
+        typeMapping.put(double.class, "float");
+        typeMapping.put(Double.class, "float");
+        typeMapping.put(UUID.class, "uuid");
+        typeMapping.put(Map.class, "hstore");
+        typeMapping.put(byte[].class, "bytea");
+    }
+
+
     private final MetamodelUtil metamodel;
     private final RevenjQueryComposerCache cachedQueries;
     private final Connection connection;
@@ -70,13 +89,46 @@ class RevenjQueryComposer<T> {
         return new RevenjQueryComposer<>(metamodel, manifest, cachedQueries, conn, locator, findAllQuery, new ArrayList<>());
     }
 
+    private static String getTypeFor(Class<?> manifest) {
+        return typeMapping.get(manifest);
+    }
+
+    private static String getElementTypeFor(Object[] elements) {
+        for (Object item : elements) {
+            if (item != null) {
+                String type = getTypeFor(item.getClass());
+                if (type != null) {
+                    return type;
+                }
+            }
+        }
+        return "unknown";
+    }
+
     private void fillQueryParameters(PreparedStatement ps, List<GeneratedQueryParameter> parameters) throws SQLException {
         for (int i = 0; i < parameters.size(); i++) {
             GeneratedQueryParameter param = parameters.get(i);
+            Object value;
             if (param.fieldName == null) {
-                ps.setObject(i + 1, lambdas.get(param.lambdaIndex).getCapturedArg(param.argIndex));
+                value = lambdas.get(param.lambdaIndex).getCapturedArg(param.argIndex);
             } else {
-                ps.setObject(i + 1, lambdas.get(param.lambdaIndex).getField(param.fieldName));
+                value = lambdas.get(param.lambdaIndex).getField(param.fieldName);
+            }
+            if (value instanceof Collection) {
+                Collection collection = (Collection) value;
+                Object[] elements = new Object[collection.size()];
+                int x = 0;
+                for (Object item : collection) {
+                    elements[x++] = item;
+                }
+                java.sql.Array array = connection.createArrayOf(getElementTypeFor(elements), elements);
+                ps.setArray(i + 1, array);
+            } else if (value instanceof Object[]) {
+                Object[] elements = (Object[]) value;
+                java.sql.Array array = connection.createArrayOf(getElementTypeFor(elements), elements);
+                ps.setArray(i + 1, array);
+            } else {
+                ps.setObject(i + 1, value);
             }
         }
     }

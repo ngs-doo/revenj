@@ -18,19 +18,19 @@ public class GroupedSelectFromWhere<T, U> extends SelectFromWhere<T> {
         generateSelectFromWhere(queryState);
         generateGroupBy(queryState);
         generateSort(queryState);
-        return queryState.queryString;
+        return queryState.buildQueryString();
     }
 
     protected void generateGroupBy(QueryGenerationState queryState) {
-        queryState.queryString += " GROUP BY ";
+        queryState.appendQuery(" GROUP BY ");
         boolean isFirst = true;
         for (org.revenj.postgres.jinq.jpqlquery.Expression col : groupingCols.columns) {
-            if (!isFirst) queryState.queryString += ", ";
+            if (!isFirst) queryState.appendQuery(", ");
             isFirst = false;
             col.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
         }
         if (having != null) {
-            queryState.queryString += " HAVING ";
+            queryState.appendQuery(" HAVING ");
             having.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
         }
     }
