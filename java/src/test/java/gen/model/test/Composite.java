@@ -253,6 +253,10 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		return this;
 	}
 
+	
+		public boolean test(gen.model.test.Composite it) {
+			return (it.getSimple().getNumber() == this.getSimple().getNumber());
+		}
 }
 
 	

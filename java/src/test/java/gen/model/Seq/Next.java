@@ -167,6 +167,10 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		return this;
 	}
 
+	
+		public boolean test(gen.model.Seq.Next it) {
+			return ( this.getMin() == null ||  ( (it.getID() >= this.getMin()) &&  (it.getID() <= this.getMax())));
+		}
 }
 
 	

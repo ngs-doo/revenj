@@ -8,28 +8,28 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 	
 	public CompositeListRepository(
 			 final java.sql.Connection connection,
+			 final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
-		
-			this.connection = connection;
-		
-			this.converter = converter;
-		
-			this.locator = locator;
+		this.connection = connection;
+		this.queryProvider = queryProvider;
+		this.converter = converter;
+		this.locator = locator;
 	}
 
 	private final java.sql.Connection connection;
+	private final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider;
 	private final org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public CompositeListRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.jinq.RevenjQueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList>>(){}.resolve(locator), locator);
 	}
 	
-	//@Override
-	private java.util.stream.Stream<gen.model.test.CompositeList> stream(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.CompositeList>> filter) {
-		throw new UnsupportedOperationException();
+	@Override
+	public org.revenj.patterns.Query<gen.model.test.CompositeList> query() {
+		return queryProvider.query(connection, locator, gen.model.test.CompositeList.class);
 	}
 
 	private java.util.ArrayList<gen.model.test.CompositeList> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.CompositeList> result) throws java.sql.SQLException, java.io.IOException {
@@ -79,14 +79,18 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 					throw new RuntimeException(e);
 				}
 			}
-			java.util.stream.Stream<gen.model.test.CompositeList> stream = stream(filter);
+			org.revenj.patterns.Query<gen.model.test.CompositeList> query = query().filter(specification::test);
 			if (offset != null && offset.orElse(null) != null) {
-				stream = stream.skip(offset.get());
+				query = query.skip(offset.get());
 			}
 			if (limit != null && limit.orElse(null) != null) {
-				stream = stream.limit(limit.get());
+				query = query.limit(limit.get());
 			}
-			return stream.collect(java.util.stream.Collectors.toList());
+			try {
+				return query.list();
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

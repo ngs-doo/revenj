@@ -1,6 +1,8 @@
 package org.revenj.patterns;
 
-public interface Specification<T> {
-	//TODO: soon
-	//Predicate<T> getPredicate();
+import java.io.Serializable;
+
+public interface Specification<T> extends Serializable {
+
+    boolean test(T item);
 }

@@ -8,28 +8,28 @@ public class SpecificReportRepository   implements org.revenj.patterns.Repositor
 	
 	public SpecificReportRepository(
 			 final java.sql.Connection connection,
+			 final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.mixinReference.SpecificReport> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
-		
-			this.connection = connection;
-		
-			this.converter = converter;
-		
-			this.locator = locator;
+		this.connection = connection;
+		this.queryProvider = queryProvider;
+		this.converter = converter;
+		this.locator = locator;
 	}
 
 	private final java.sql.Connection connection;
+	private final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider;
 	private final org.revenj.postgres.ObjectConverter<gen.model.mixinReference.SpecificReport> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public SpecificReportRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.SpecificReport>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.jinq.RevenjQueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.SpecificReport>>(){}.resolve(locator), locator);
 	}
 	
-	//@Override
-	private java.util.stream.Stream<gen.model.mixinReference.SpecificReport> stream(java.util.Optional<org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport>> filter) {
-		throw new UnsupportedOperationException();
+	@Override
+	public org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query() {
+		return queryProvider.query(connection, locator, gen.model.mixinReference.SpecificReport.class);
 	}
 
 	private java.util.ArrayList<gen.model.mixinReference.SpecificReport> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.mixinReference.SpecificReport> result) throws java.sql.SQLException, java.io.IOException {
@@ -79,14 +79,18 @@ public class SpecificReportRepository   implements org.revenj.patterns.Repositor
 					throw new RuntimeException(e);
 				}
 			}
-			java.util.stream.Stream<gen.model.mixinReference.SpecificReport> stream = stream(filter);
+			org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query = query().filter(specification::test);
 			if (offset != null && offset.orElse(null) != null) {
-				stream = stream.skip(offset.get());
+				query = query.skip(offset.get());
 			}
 			if (limit != null && limit.orElse(null) != null) {
-				stream = stream.limit(limit.get());
+				query = query.limit(limit.get());
 			}
-			return stream.collect(java.util.stream.Collectors.toList());
+			try {
+				return query.list();
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

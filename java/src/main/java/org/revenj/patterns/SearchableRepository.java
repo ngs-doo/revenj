@@ -2,34 +2,29 @@ package org.revenj.patterns;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-public interface SearchableRepository<TSource> {
-	//TODO: soon
-	/*Stream<TSource> stream(Optional<Specification<TSource>> specification);
+public interface SearchableRepository<T extends DataSource> {
 
-	default Stream<TSource> stream() {
-		return stream(Optional.<Specification<TSource>>empty());
-	}*/
+	Query<T> query();
 
-	List<TSource> search(
-			Optional<Specification<TSource>> specification,
+	List<T> search(
+			Optional<Specification<T>> specification,
 			Optional<Integer> limit,
 			Optional<Integer> offset);
 
-	default List<TSource> search() {
-		return search(Optional.<Specification<TSource>>empty(), Optional.<Integer>empty(), Optional.<Integer>empty());
+	default List<T> search() {
+		return search(Optional.<Specification<T>>empty(), Optional.<Integer>empty(), Optional.<Integer>empty());
 	}
 
-	default List<TSource> search(int limit) {
-		return search(Optional.<Specification<TSource>>empty(), Optional.of(limit), Optional.<Integer>empty());
+	default List<T> search(int limit) {
+		return search(Optional.<Specification<T>>empty(), Optional.of(limit), Optional.<Integer>empty());
 	}
 
-	default List<TSource> search(Specification<TSource> specification) {
+	default List<T> search(Specification<T> specification) {
 		return search(Optional.of(specification), Optional.<Integer>empty(), Optional.<Integer>empty());
 	}
 
-	default List<TSource> search(Specification<TSource> specification, int limit) {
+	default List<T> search(Specification<T> specification, int limit) {
 		return search(Optional.of(specification), Optional.of(limit), Optional.<Integer>empty());
 	}
 }

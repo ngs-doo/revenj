@@ -1,5 +1,5 @@
 package org.revenj.patterns;
 
-public interface Identifiable {
+public interface Identifiable extends DataSource {
 	String getURI();
 }

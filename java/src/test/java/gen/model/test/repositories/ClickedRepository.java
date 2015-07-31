@@ -8,28 +8,28 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 	
 	public ClickedRepository(
 			 final java.sql.Connection connection,
+			 final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.test.Clicked> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
-		
-			this.connection = connection;
-		
-			this.converter = converter;
-		
-			this.locator = locator;
+		this.connection = connection;
+		this.queryProvider = queryProvider;
+		this.converter = converter;
+		this.locator = locator;
 	}
 
 	private final java.sql.Connection connection;
+	private final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider;
 	private final org.revenj.postgres.ObjectConverter<gen.model.test.Clicked> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public ClickedRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Clicked>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.jinq.RevenjQueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Clicked>>(){}.resolve(locator), locator);
 	}
 	
-	//@Override
-	private java.util.stream.Stream<gen.model.test.Clicked> stream(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.Clicked>> filter) {
-		throw new UnsupportedOperationException();
+	@Override
+	public org.revenj.patterns.Query<gen.model.test.Clicked> query() {
+		return queryProvider.query(connection, locator, gen.model.test.Clicked.class);
 	}
 
 	private java.util.ArrayList<gen.model.test.Clicked> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.Clicked> result) throws java.sql.SQLException, java.io.IOException {
@@ -116,14 +116,18 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 					throw new RuntimeException(e);
 				}
 			}
-			java.util.stream.Stream<gen.model.test.Clicked> stream = stream(filter);
+			org.revenj.patterns.Query<gen.model.test.Clicked> query = query().filter(specification::test);
 			if (offset != null && offset.orElse(null) != null) {
-				stream = stream.skip(offset.get());
+				query = query.skip(offset.get());
 			}
 			if (limit != null && limit.orElse(null) != null) {
-				stream = stream.limit(limit.get());
+				query = query.limit(limit.get());
 			}
-			return stream.collect(java.util.stream.Collectors.toList());
+			try {
+				return query.list();
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

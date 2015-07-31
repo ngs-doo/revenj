@@ -261,6 +261,10 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		return this;
 	}
 
+	
+		public boolean test(gen.model.test.Clicked it) {
+			return ( ( it.getNumber().compareTo(this.getMin()) >= 0 && (this.getInSet().contains(it.getNumber()))) &&  it.getEn().equals(this.getEn()));
+		}
 }
 
 	
