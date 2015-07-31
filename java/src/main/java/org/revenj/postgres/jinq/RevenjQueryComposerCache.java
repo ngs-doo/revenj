@@ -7,14 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Used to cache query transformations so that we don't have to repeat the work
- * of applying transformations if we've applied the same transformation before.
- */
-public class RevenjQueryComposerCache {
-    /**
-     * Internal key used to represent a query transformation.
-     */
+class RevenjQueryComposerCache {
     private static class CacheKey {
         @Override
         public int hashCode() {
@@ -63,13 +56,13 @@ public class RevenjQueryComposerCache {
      * Map of cached query transforms. Maps from a description of the transform
      * to the cached result of the transform.
      */
-    Map<CacheKey, Optional<JPQLQuery<?>>> cachedQueryTransforms = new HashMap<>();
+    private final Map<CacheKey, Optional<JPQLQuery<?>>> cachedQueryTransforms = new HashMap<>();
 
     /**
      * Map of cached queries for finding all the entities of a certain type. The
      * map maps from entity name to the corresponding query.
      */
-    Map<String, Optional<JPQLQuery<?>>> cachedFindAllEntities = new HashMap<>();
+    private final Map<String, Optional<JPQLQuery<?>>> cachedFindAllEntities = new HashMap<>();
 
     /**
      * Looks up whether a certain transformation is already in the cache or not.
@@ -80,8 +73,10 @@ public class RevenjQueryComposerCache {
      * @return cached transformation result or null if this transformation hasn't
      * been cached
      */
-    public synchronized Optional<JPQLQuery<?>> findInCache(JPQLQuery<?> base,
-                                                           String transformationType, String[] lambdaSources) {
+    public synchronized Optional<JPQLQuery<?>> findInCache(
+            JPQLQuery<?> base,
+            String transformationType,
+            String[] lambdaSources) {
         return cacheQuery(base, transformationType, lambdaSources, null);
     }
 
@@ -135,7 +130,8 @@ public class RevenjQueryComposerCache {
      * otherwise, queryToCache is inserted into the cache and returned.
      */
     public synchronized Optional<JPQLQuery<?>> cacheFindAll(
-            String dataSource, Optional<JPQLQuery<?>> queryToCache) {
+            String dataSource,
+            Optional<JPQLQuery<?>> queryToCache) {
         if (cachedFindAllEntities.containsKey(dataSource))
             return cachedFindAllEntities.get(dataSource);
         if (queryToCache != null)

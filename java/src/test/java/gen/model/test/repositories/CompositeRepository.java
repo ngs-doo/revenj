@@ -8,7 +8,7 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 	
 	public CompositeRepository(
 			 final java.sql.Connection connection,
-			 final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider,
+			 final org.revenj.postgres.QueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.test.Composite> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
@@ -19,12 +19,12 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 	}
 
 	private final java.sql.Connection connection;
-	private final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider;
+	private final org.revenj.postgres.QueryProvider queryProvider;
 	private final org.revenj.postgres.ObjectConverter<gen.model.test.Composite> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public CompositeRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.jinq.RevenjQueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.resolve(locator), locator);
 	}
 	
 	@Override

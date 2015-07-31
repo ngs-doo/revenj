@@ -8,7 +8,7 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 	
 	public CompositeListRepository(
 			 final java.sql.Connection connection,
-			 final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider,
+			 final org.revenj.postgres.QueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
@@ -19,12 +19,12 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 	}
 
 	private final java.sql.Connection connection;
-	private final org.revenj.postgres.jinq.RevenjQueryProvider queryProvider;
+	private final org.revenj.postgres.QueryProvider queryProvider;
 	private final org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public CompositeListRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.jinq.RevenjQueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList>>(){}.resolve(locator), locator);
 	}
 	
 	@Override

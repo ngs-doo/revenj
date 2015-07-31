@@ -51,7 +51,7 @@ class RevenjQuery<T extends DataSource> implements Query<T> {
 
     @Override
     public long count() throws SQLException {
-        return queryComposer.runCount();
+        return queryComposer.count();
     }
 
     @Override

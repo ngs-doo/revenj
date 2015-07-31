@@ -57,7 +57,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		org.revenj.postgres.jinq.JinqMetaModel metamodel = new org.revenj.postgres.jinq.JinqMetaModel();
 		container.registerInstance(org.revenj.patterns.ServiceLocator.class, container, false);
 		container.registerInstance(org.revenj.postgres.jinq.transform.MetamodelUtil.class, metamodel, false);
-		container.registerInstance(org.revenj.postgres.jinq.RevenjQueryProvider.class, new org.revenj.postgres.jinq.RevenjQueryProvider(metamodel), false);
+		container.registerInstance(org.revenj.postgres.QueryProvider.class, new org.revenj.postgres.jinq.RevenjQueryProvider(metamodel), false);
 		
 		
 		gen.model.test.converters.SimpleConverter test$converter$SimpleConverter = new gen.model.test.converters.SimpleConverter(columns);
