@@ -74,6 +74,11 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"test\".\"CompositeList_snowflake\"";
+	}
+
+	@Override
 	public gen.model.test.CompositeList from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

@@ -54,6 +54,11 @@ public class NextConverter implements ObjectConverter<gen.model.Seq.Next> {
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"Seq\".\"Next_entity\"";
+	}
+
+	@Override
 	public gen.model.Seq.Next from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

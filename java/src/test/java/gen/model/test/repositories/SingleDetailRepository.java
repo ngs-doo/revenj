@@ -28,8 +28,11 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.test.SingleDetail> query() {
-		return queryProvider.query(connection, locator, gen.model.test.SingleDetail.class);
+	public org.revenj.patterns.Query<gen.model.test.SingleDetail> query(org.revenj.patterns.Specification<gen.model.test.SingleDetail> filter) {
+		org.revenj.patterns.Query<gen.model.test.SingleDetail> query = queryProvider.query(connection, locator, gen.model.test.SingleDetail.class);
+		if (filter == null) return query;
+				
+		return query.filter(filter);
 	}
 
 	private java.util.ArrayList<gen.model.test.SingleDetail> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.SingleDetail> result) throws java.sql.SQLException, java.io.IOException {
@@ -79,7 +82,7 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 					throw new RuntimeException(e);
 				}
 			}
-			org.revenj.patterns.Query<gen.model.test.SingleDetail> query = query().filter(specification::test);
+			org.revenj.patterns.Query<gen.model.test.SingleDetail> query = query(specification);
 			if (offset != null && offset.orElse(null) != null) {
 				query = query.skip(offset.get());
 			}

@@ -28,8 +28,11 @@ public class SpecificReportRepository   implements org.revenj.patterns.Repositor
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query() {
-		return queryProvider.query(connection, locator, gen.model.mixinReference.SpecificReport.class);
+	public org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query(org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport> filter) {
+		org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query = queryProvider.query(connection, locator, gen.model.mixinReference.SpecificReport.class);
+		if (filter == null) return query;
+				
+		return query.filter(filter);
 	}
 
 	private java.util.ArrayList<gen.model.mixinReference.SpecificReport> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.mixinReference.SpecificReport> result) throws java.sql.SQLException, java.io.IOException {
@@ -79,7 +82,7 @@ public class SpecificReportRepository   implements org.revenj.patterns.Repositor
 					throw new RuntimeException(e);
 				}
 			}
-			org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query = query().filter(specification::test);
+			org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query = query(specification);
 			if (offset != null && offset.orElse(null) != null) {
 				query = query.skip(offset.get());
 			}

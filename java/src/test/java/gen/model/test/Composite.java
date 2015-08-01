@@ -74,6 +74,22 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 		return "Composite(" + URI + ')';
 	}
 	
+	
+	public Composite(
+			final java.util.UUID id,
+			final gen.model.test.En[] enn,
+			final gen.model.test.Simple simple,
+			final java.util.List<gen.model.test.Entity> entities) {
+			
+		setId(id);
+		setEnn(enn);
+		setSimple(simple);
+		setEntities(entities);
+	}
+
+	
+	private static final long serialVersionUID = 0x0097000a;
+	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -91,8 +107,6 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 		this.laziesURI = laziesURI == null ? new String[0] : laziesURI;
 	}
 
-	
-	private static final long serialVersionUID = 0x0097000a;
 	
 	private java.util.UUID id;
 
@@ -260,8 +274,6 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 }
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
-	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -294,17 +306,5 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		}; };
 	}
 	
-	
-	public Composite(
-			final java.util.UUID id,
-			final gen.model.test.En[] enn,
-			final gen.model.test.Simple simple,
-			final java.util.List<gen.model.test.Entity> entities) {
-			
-		setId(id);
-		setEnn(enn);
-		setSimple(simple);
-		setEntities(entities);
-	}
-
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }

@@ -13,6 +13,8 @@ public interface ObjectConverter<T> {
 
 	PostgresTuple to(T instance);
 
+	String getDbName();
+
 	interface Reader<T> {
 		void read(T instance, PostgresReader reader, int context) throws IOException;
 	}

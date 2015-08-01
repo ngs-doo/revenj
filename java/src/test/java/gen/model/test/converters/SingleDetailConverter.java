@@ -62,6 +62,11 @@ public class SingleDetailConverter implements ObjectConverter<gen.model.test.Sin
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"test\".\"SingleDetail_entity\"";
+	}
+
+	@Override
 	public gen.model.test.SingleDetail from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

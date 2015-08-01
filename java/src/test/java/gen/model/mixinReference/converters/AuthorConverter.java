@@ -62,6 +62,11 @@ public class AuthorConverter implements ObjectConverter<gen.model.mixinReference
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"mixinReference\".\"Author_entity\"";
+	}
+
+	@Override
 	public gen.model.mixinReference.Author from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

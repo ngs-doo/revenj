@@ -88,6 +88,11 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"test\".\"Composite_entity\"";
+	}
+
+	@Override
 	public gen.model.test.Composite from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

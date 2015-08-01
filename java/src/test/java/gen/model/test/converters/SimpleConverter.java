@@ -86,6 +86,11 @@ public class SimpleConverter implements ObjectConverter<gen.model.test.Simple> {
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"test\".\"Simple\"";
+	}
+
+	@Override
 	public gen.model.test.Simple from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

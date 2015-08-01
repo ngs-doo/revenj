@@ -65,6 +65,16 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		return "Author(" + URI + ')';
 	}
 	
+	
+	public Author(
+			final String name) {
+			
+		setName(name);
+	}
+
+	
+	private static final long serialVersionUID = 0x0097000a;
+	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -76,8 +86,6 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		this.name = name == null ? "" : name;
 	}
 
-	
-	private static final long serialVersionUID = 0x0097000a;
 	
 	private int ID;
 
@@ -134,8 +142,6 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 	}
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
-	
 	public Author(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Author>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Author> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -156,11 +162,5 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 	}
 	
-	
-	public Author(
-			final String name) {
-			
-		setName(name);
-	}
-
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }

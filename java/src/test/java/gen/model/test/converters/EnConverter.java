@@ -13,6 +13,11 @@ public class EnConverter implements ObjectConverter<gen.model.test.En> {
 	private static final PostgresTuple TUPLE_B = org.revenj.postgres.converters.EnumConverter.toTuple(gen.model.test.En.B);
 
 	@Override
+	public String getDbName() {
+		return "\"test\".\"En\"";
+	}
+
+	@Override
 	public gen.model.test.En from(PostgresReader reader, int context) throws java.io.IOException {
 		return fromReader(reader);
 	}

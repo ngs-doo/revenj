@@ -28,8 +28,11 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.test.CompositeList> query() {
-		return queryProvider.query(connection, locator, gen.model.test.CompositeList.class);
+	public org.revenj.patterns.Query<gen.model.test.CompositeList> query(org.revenj.patterns.Specification<gen.model.test.CompositeList> filter) {
+		org.revenj.patterns.Query<gen.model.test.CompositeList> query = queryProvider.query(connection, locator, gen.model.test.CompositeList.class);
+		if (filter == null) return query;
+				
+		return query.filter(filter);
 	}
 
 	private java.util.ArrayList<gen.model.test.CompositeList> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.CompositeList> result) throws java.sql.SQLException, java.io.IOException {
@@ -79,7 +82,7 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 					throw new RuntimeException(e);
 				}
 			}
-			org.revenj.patterns.Query<gen.model.test.CompositeList> query = query().filter(specification::test);
+			org.revenj.patterns.Query<gen.model.test.CompositeList> query = query(specification);
 			if (offset != null && offset.orElse(null) != null) {
 				query = query.skip(offset.get());
 			}

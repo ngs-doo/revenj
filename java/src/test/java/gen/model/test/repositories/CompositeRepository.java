@@ -28,8 +28,17 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.test.Composite> query() {
-		return queryProvider.query(connection, locator, gen.model.test.Composite.class);
+	public org.revenj.patterns.Query<gen.model.test.Composite> query(org.revenj.patterns.Specification<gen.model.test.Composite> filter) {
+		org.revenj.patterns.Query<gen.model.test.Composite> query = queryProvider.query(connection, locator, gen.model.test.Composite.class);
+		if (filter == null) return query;
+		
+		
+		if (filter instanceof gen.model.test.Composite.ForSimple) {
+			gen.model.test.Composite.ForSimple _spec_ = (gen.model.test.Composite.ForSimple)filter;
+			gen.model.test.Simple _spec_simple_ = _spec_.getSimple();
+			return query.filter(it -> (it.getSimple().getNumber() == _spec_simple_.getNumber()));
+		}		
+		return query.filter(filter);
 	}
 
 	private java.util.ArrayList<gen.model.test.Composite> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.Composite> result) throws java.sql.SQLException, java.io.IOException {
@@ -99,7 +108,7 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 					throw new RuntimeException(e);
 				}
 			}
-			org.revenj.patterns.Query<gen.model.test.Composite> query = query().filter(specification::test);
+			org.revenj.patterns.Query<gen.model.test.Composite> query = query(specification);
 			if (offset != null && offset.orElse(null) != null) {
 				query = query.skip(offset.get());
 			}

@@ -1,5 +1,6 @@
 package org.revenj.patterns;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
@@ -30,10 +31,14 @@ public class Bytes {
 		this.length = length;
 	}
 
+	public static Bytes from(final byte[] content) {
+		return new Bytes(content, content.length);
+	}
+
 	/**
 	 * Helper object for providing zero length object (instead of null object)
 	 */
-	public static final Bytes EMPTY = new Bytes(new byte[0], 0);
+	public static final Bytes EMPTY = Bytes.from(new byte[0]);
 
 	/**
 	 * Copy bytes to output stream.
@@ -43,6 +48,10 @@ public class Bytes {
 	 */
 	public void copyTo(final OutputStream stream) throws IOException {
 		stream.write(content, 0, length);
+	}
+
+	public ByteArrayInputStream toStream() {
+		return new ByteArrayInputStream(content, 0, length);
 	}
 
 	private static final Charset utf8 = Charset.forName("UTF-8");

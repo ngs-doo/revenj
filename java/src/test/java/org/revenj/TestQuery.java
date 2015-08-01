@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.revenj.patterns.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -93,4 +94,38 @@ public class TestQuery {
         Composite found = repository.query().filter(it -> it.getId().toString().equals(uri)).findAny().get();
         Assert.assertEquals(id, found.getId());
     }
+
+	@Test
+	public void sendDomainObjectAsArgument() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		CompositeRepository repository = locator.resolve(CompositeRepository.class);
+		UUID id = UUID.randomUUID();
+		Random rnd = new Random();
+		int next = rnd.nextInt(100000);
+		repository.insert(new Composite().setId(id).setSimple(new Simple().setEn(En.A).setNumber(next)));
+		Simple simple = new Simple().setEn(En.A).setNumber(next);
+		Composite found = repository.query().filter(it -> it.getSimple().getNumber() == simple.getNumber()).sortedBy(it -> it.getId()).findFirst().get();
+		Assert.assertEquals(id, found.getId());
+	}
+
+	@Test
+	public void serchWithCustomSpec() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		NextRepository repository = locator.resolve(NextRepository.class);
+		String uri = repository.insert(new Next());
+		int id = Integer.parseInt(uri);
+		List<Next> found = repository.search(it -> it.getID() == id);
+		Assert.assertEquals(1, found.size());
+		Assert.assertEquals(id, found.get(0).getID());
+	}
+
+	@Test
+	public void queryWithRegisteredSpecification() throws IOException, SQLException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		NextRepository repository = locator.resolve(NextRepository.class);
+		String uri = repository.insert(new Next());
+		int id = Integer.parseInt(uri);
+		long size = repository.query(new Next.BetweenIds(id, id)).count();
+		Assert.assertEquals(1, size);
+	}
 }

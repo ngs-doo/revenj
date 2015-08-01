@@ -28,8 +28,19 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.test.Clicked> query() {
-		return queryProvider.query(connection, locator, gen.model.test.Clicked.class);
+	public org.revenj.patterns.Query<gen.model.test.Clicked> query(org.revenj.patterns.Specification<gen.model.test.Clicked> filter) {
+		org.revenj.patterns.Query<gen.model.test.Clicked> query = queryProvider.query(connection, locator, gen.model.test.Clicked.class);
+		if (filter == null) return query;
+		
+		
+		if (filter instanceof gen.model.test.Clicked.BetweenNumbers) {
+			gen.model.test.Clicked.BetweenNumbers _spec_ = (gen.model.test.Clicked.BetweenNumbers)filter;
+			java.math.BigDecimal _spec_min_ = _spec_.getMin();
+			java.util.Set<java.math.BigDecimal> _spec_inSet_ = _spec_.getInSet();
+			gen.model.test.En _spec_en_ = _spec_.getEn();
+			return query.filter(it -> ( ( it.getNumber().compareTo(_spec_min_) >= 0 && (_spec_inSet_.contains(it.getNumber()))) &&  it.getEn().equals(_spec_en_)));
+		}		
+		return query.filter(filter);
 	}
 
 	private java.util.ArrayList<gen.model.test.Clicked> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.Clicked> result) throws java.sql.SQLException, java.io.IOException {
@@ -116,7 +127,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 					throw new RuntimeException(e);
 				}
 			}
-			org.revenj.patterns.Query<gen.model.test.Clicked> query = query().filter(specification::test);
+			org.revenj.patterns.Query<gen.model.test.Clicked> query = query(specification);
 			if (offset != null && offset.orElse(null) != null) {
 				query = query.skip(offset.get());
 			}

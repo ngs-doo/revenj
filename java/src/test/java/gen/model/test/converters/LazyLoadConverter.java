@@ -86,6 +86,11 @@ public class LazyLoadConverter implements ObjectConverter<gen.model.test.LazyLoa
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"test\".\"LazyLoad_entity\"";
+	}
+
+	@Override
 	public gen.model.test.LazyLoad from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

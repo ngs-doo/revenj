@@ -5,7 +5,11 @@ import java.util.Optional;
 
 public interface SearchableRepository<T extends DataSource> {
 
-	Query<T> query();
+	Query<T> query(Specification<T> specification);
+
+	default Query<T> query() {
+		return query(null);
+	}
 
 	List<T> search(
 			Optional<Specification<T>> specification,

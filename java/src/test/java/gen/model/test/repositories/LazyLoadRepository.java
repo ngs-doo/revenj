@@ -28,8 +28,11 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.test.LazyLoad> query() {
-		return queryProvider.query(connection, locator, gen.model.test.LazyLoad.class);
+	public org.revenj.patterns.Query<gen.model.test.LazyLoad> query(org.revenj.patterns.Specification<gen.model.test.LazyLoad> filter) {
+		org.revenj.patterns.Query<gen.model.test.LazyLoad> query = queryProvider.query(connection, locator, gen.model.test.LazyLoad.class);
+		if (filter == null) return query;
+				
+		return query.filter(filter);
 	}
 
 	private java.util.ArrayList<gen.model.test.LazyLoad> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.LazyLoad> result) throws java.sql.SQLException, java.io.IOException {
@@ -79,7 +82,7 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 					throw new RuntimeException(e);
 				}
 			}
-			org.revenj.patterns.Query<gen.model.test.LazyLoad> query = query().filter(specification::test);
+			org.revenj.patterns.Query<gen.model.test.LazyLoad> query = query(specification);
 			if (offset != null && offset.orElse(null) != null) {
 				query = query.skip(offset.get());
 			}

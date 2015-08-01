@@ -94,6 +94,11 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"test\".\"Entity_entity\"";
+	}
+
+	@Override
 	public gen.model.test.Entity from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

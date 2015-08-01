@@ -28,8 +28,18 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.Seq.Next> query() {
-		return queryProvider.query(connection, locator, gen.model.Seq.Next.class);
+	public org.revenj.patterns.Query<gen.model.Seq.Next> query(org.revenj.patterns.Specification<gen.model.Seq.Next> filter) {
+		org.revenj.patterns.Query<gen.model.Seq.Next> query = queryProvider.query(connection, locator, gen.model.Seq.Next.class);
+		if (filter == null) return query;
+		
+		
+		if (filter instanceof gen.model.Seq.Next.BetweenIds) {
+			gen.model.Seq.Next.BetweenIds _spec_ = (gen.model.Seq.Next.BetweenIds)filter;
+			Integer _spec_min_ = _spec_.getMin();
+			int _spec_max_ = _spec_.getMax();
+			return query.filter(it -> ( _spec_min_ == null ||  ( (it.getID() >= _spec_min_) &&  (it.getID() <= _spec_max_))));
+		}		
+		return query.filter(filter);
 	}
 
 	private java.util.ArrayList<gen.model.Seq.Next> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.Seq.Next> result) throws java.sql.SQLException, java.io.IOException {
@@ -100,7 +110,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 					throw new RuntimeException(e);
 				}
 			}
-			org.revenj.patterns.Query<gen.model.Seq.Next> query = query().filter(specification::test);
+			org.revenj.patterns.Query<gen.model.Seq.Next> query = query(specification);
 			if (offset != null && offset.orElse(null) != null) {
 				query = query.skip(offset.get());
 			}

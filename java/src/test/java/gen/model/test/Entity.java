@@ -75,6 +75,20 @@ public class Entity   implements java.io.Serializable {
 		return "Entity(" + URI + ')';
 	}
 	
+	
+	public Entity(
+			final java.math.BigDecimal money,
+			final String id,
+			final gen.model.test.Composite composite) {
+			
+		setMoney(money);
+		setId(id);
+		setComposite(composite);
+	}
+
+	
+	private static final long serialVersionUID = 0x0097000a;
+	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -94,8 +108,6 @@ public class Entity   implements java.io.Serializable {
 		this.Index = Index;
 	}
 
-	
-	private static final long serialVersionUID = 0x0097000a;
 	
 	private java.math.BigDecimal money;
 
@@ -235,8 +247,6 @@ public class Entity   implements java.io.Serializable {
 	}
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
-	
 	public Entity(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Entity> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -265,15 +275,5 @@ public class Entity   implements java.io.Serializable {
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	
-	public Entity(
-			final java.math.BigDecimal money,
-			final String id,
-			final gen.model.test.Composite composite) {
-			
-		setMoney(money);
-		setId(id);
-		setComposite(composite);
-	}
-
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
 }

@@ -66,6 +66,11 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"test\".\"Clicked_event\"";
+	}
+
+	@Override
 	public gen.model.test.Clicked from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

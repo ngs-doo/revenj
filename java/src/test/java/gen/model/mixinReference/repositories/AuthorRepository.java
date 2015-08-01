@@ -28,8 +28,11 @@ public class AuthorRepository   implements org.revenj.patterns.Repository<gen.mo
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.mixinReference.Author> query() {
-		return queryProvider.query(connection, locator, gen.model.mixinReference.Author.class);
+	public org.revenj.patterns.Query<gen.model.mixinReference.Author> query(org.revenj.patterns.Specification<gen.model.mixinReference.Author> filter) {
+		org.revenj.patterns.Query<gen.model.mixinReference.Author> query = queryProvider.query(connection, locator, gen.model.mixinReference.Author.class);
+		if (filter == null) return query;
+				
+		return query.filter(filter);
 	}
 
 	private java.util.ArrayList<gen.model.mixinReference.Author> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.mixinReference.Author> result) throws java.sql.SQLException, java.io.IOException {
@@ -79,7 +82,7 @@ public class AuthorRepository   implements org.revenj.patterns.Repository<gen.mo
 					throw new RuntimeException(e);
 				}
 			}
-			org.revenj.patterns.Query<gen.model.mixinReference.Author> query = query().filter(specification::test);
+			org.revenj.patterns.Query<gen.model.mixinReference.Author> query = query(specification);
 			if (offset != null && offset.orElse(null) != null) {
 				query = query.skip(offset.get());
 			}

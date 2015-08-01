@@ -70,6 +70,11 @@ public class SpecificReportConverter implements ObjectConverter<gen.model.mixinR
 	}
 
 	@Override
+	public String getDbName() {
+		return "\"mixinReference\".\"SpecificReport_entity\"";
+	}
+
+	@Override
 	public gen.model.mixinReference.SpecificReport from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}

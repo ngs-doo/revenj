@@ -19,6 +19,14 @@ public interface WireSerialization {
 		return (T) deserialize((Type)manifest, data, accept);
 	}
 
+	default <T> T deserialize(Class<T> manifest, byte[] data, String accept) throws IOException {
+		return (T) deserialize((Type)manifest, new Bytes(data, data.length), accept);
+	}
+
+	default <T> T deserialize(Class<T> manifest, byte[] data, int length, String accept) throws IOException {
+		return (T) deserialize((Type)manifest, new Bytes(data, length), accept);
+	}
+
 	default <T> T deserialize(Class<T> manifest, InputStream stream, String accept) throws IOException {
 		return (T) deserialize((Type)manifest, stream, accept);
 	}
