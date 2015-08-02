@@ -128,4 +128,15 @@ public class TestQuery {
 		long size = repository.query(new Next.BetweenIds(id, id)).count();
 		Assert.assertEquals(1, size);
 	}
+
+	@Test
+	public void toStringAndValueOf() throws IOException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		NextRepository repository = locator.resolve(NextRepository.class);
+		String uri = repository.insert(new Next());
+		int id = Integer.parseInt(uri);
+		List<Next> found = repository.search(it -> String.valueOf(it.getID()).equals(uri) && id == Integer.valueOf(it.getURI()));
+		Assert.assertEquals(1, found.size());
+		Assert.assertEquals(id, found.get(0).getID());
+	}
 }

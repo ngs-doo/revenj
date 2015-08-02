@@ -121,7 +121,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 		return val.operand.visit(this, SymbExPassDown.with(val, in.isExpectingConditional));
 	}
 
-	private boolean isWideningCast(TypedValue val) {
+	public boolean isWideningCast(TypedValue val) {
 		if (val instanceof TypedValue.CastValue) {
 			TypedValue.CastValue castedVal = (TypedValue.CastValue) val;
 			Type toType = castedVal.getType();
@@ -152,7 +152,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 		return false;
 	}
 
-	private TypedValue skipWideningCast(TypedValue val) throws TypedValueVisitorException {
+	public TypedValue skipWideningCast(TypedValue val) throws TypedValueVisitorException {
 		if (!isWideningCast(val)) return val;
 		if (val instanceof TypedValue.CastValue) {
 			TypedValue.CastValue castedVal = (TypedValue.CastValue) val;
@@ -271,6 +271,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			MethodCallValue.VirtualMethodCallValue val,
 			SymbExPassDown in) throws TypedValueVisitorException {
 		MethodSignature sig = val.getSignature();
+		MethodHandlerVirtual handler;
 		if (TransformationClassAnalyzer.newPair.equals(sig)
 				|| TransformationClassAnalyzer.newTuple3.equals(sig)
 				|| TransformationClassAnalyzer.newTuple4.equals(sig)
@@ -403,60 +404,8 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			}
 
 			throw new TypedValueVisitorException("Cannot apply getOnlyValue() to the given subquery");
-		} else if (MethodChecker.jpqlFunctionMethods.contains(sig)) {
-			if (sig.equals(MethodChecker.bigDecimalAbs)
-					|| sig.equals(MethodChecker.bigIntegerAbs)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
-				ColumnExpressions<?> base = val.base.visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						FunctionExpression.singleParam("ABS", base.getOnlyColumn()));
-			} else if (sig.equals(MethodChecker.stringToUpper)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, false);
-				ColumnExpressions<?> base = val.base.visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						FunctionExpression.singleParam("UPPER", base.getOnlyColumn()));
-			} else if (sig.equals(MethodChecker.stringToLower)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, false);
-				ColumnExpressions<?> base = val.base.visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						FunctionExpression.singleParam("LOWER", base.getOnlyColumn()));
-			} else if (sig.equals(MethodChecker.stringLength)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, false);
-				ColumnExpressions<?> base = val.base.visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						FunctionExpression.singleParam("LENGTH", base.getOnlyColumn()));
-			} else if (sig.equals(MethodChecker.stringTrim)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, false);
-				ColumnExpressions<?> base = val.base.visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						FunctionExpression.singleParam("TRIM", base.getOnlyColumn()));
-			} else if (sig.equals(MethodChecker.stringSubstring)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, false);
-				ColumnExpressions<?> base = val.base.visit(this, passdown);
-				ColumnExpressions<?> startIndex = val.args.get(0).visit(this, passdown);
-				ColumnExpressions<?> endIndex = val.args.get(1).visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						FunctionExpression.threeParam("SUBSTRING",
-								base.getOnlyColumn(),
-								new BinaryExpression("+", startIndex.getOnlyColumn(), new ConstantExpression("1")),
-								new BinaryExpression("-", endIndex.getOnlyColumn(), startIndex.getOnlyColumn())));
-			} else if (sig.equals(MethodChecker.stringIndexOf)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, false);
-				ColumnExpressions<?> base = val.base.visit(this, passdown);
-				ColumnExpressions<?> search = val.args.get(0).visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						new BinaryExpression("-",
-								FunctionExpression.twoParam("LOCATE",
-										search.getOnlyColumn(),
-										base.getOnlyColumn())
-								, new ConstantExpression("1")));
-			} else if (sig.equals(MethodChecker.uuidToString)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, false);
-				ColumnExpressions<?> base = val.base.visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						UnaryExpression.postfix("::text", base.getOnlyColumn()));
-			}
-			throw new TypedValueVisitorException("Do not know how to translate the method " + sig + " into a JPQL function");
+		} else if ((handler = MethodChecker.jpqlFunctionMethods.get(sig)) != null) {
+			return handler.handle(val, in, this);
 		} else if (sig.equals(TransformationClassAnalyzer.stringBuilderToString)) {
 			List<ColumnExpressions<?>> concatenatedStrings = new ArrayList<>();
 			MethodCallValue.VirtualMethodCallValue baseVal = val;
@@ -477,16 +426,16 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 					throw new TypedValueVisitorException("Unexpected use of StringBuilder");
 			}
 
-			if (concatenatedStrings.size() == 1)
+			if (concatenatedStrings.size() == 1) {
 				return concatenatedStrings.get(0);
+			}
 			Expression head = concatenatedStrings.get(concatenatedStrings.size() - 1).getOnlyColumn();
 			for (int n = concatenatedStrings.size() - 2; n >= 0; n--)
 				head = FunctionExpression.twoParam("CONCAT", head, concatenatedStrings.get(n).getOnlyColumn());
 			return ColumnExpressions.singleColumn(new SimpleRowReader<>(), head);
 		} else {
 			try {
-				Method reflectedMethod = Annotations
-						.asmMethodSignatureToReflectionMethod(sig);
+				Method reflectedMethod = Annotations.asmMethodSignatureToReflectionMethod(sig);
 				// Special handling of Collection.contains() for subclasses of Collection.
 				if ("contains".equals(sig.name)
 						&& "(Ljava/lang/Object;)Z".equals(sig.desc)
@@ -505,42 +454,22 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 	@Override
 	public ColumnExpressions<?> staticMethodCallValue(MethodCallValue.StaticMethodCallValue val, SymbExPassDown in) throws TypedValueVisitorException {
 		MethodSignature sig = val.getSignature();
+		MethodHandlerStatic handler;
 		if (sig.equals(TransformationClassAnalyzer.integerValueOf)
 				|| sig.equals(TransformationClassAnalyzer.longValueOf)
 				|| sig.equals(TransformationClassAnalyzer.doubleValueOf)
 				|| sig.equals(TransformationClassAnalyzer.booleanValueOf)) {
-			// Integer.valueOf() to be like a cast and assume it's correct
+			// TODO: fix this. add cast to correct type
 			SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
 			ColumnExpressions<?> base = val.args.get(0).visit(this, passdown);
 			return base;
 		} else if (sig.equals(TransformationClassAnalyzer.bigIntegerValueOfLong)) {
 			throw new TypedValueVisitorException("New BigIntegers can only be created in the context of numeric promotion");
-		} else if (sig.equals(MethodChecker.stringValueOfObject)) {
-			if (!val.args.get(0).getType().equals(Type.getObjectType("java/lang/String")))
-				throw new TypedValueVisitorException("Do not know how to convert type " + val.args.get(0).getType() + " to a string");
-			SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
-			ColumnExpressions<?> base = val.args.get(0).visit(this, passdown);
-			return base;
-		} else if (MethodChecker.jpqlFunctionStaticMethods.contains(sig)) {
-			if (sig.equals(MethodChecker.mathAbsDouble)
-					|| sig.equals(MethodChecker.mathAbsInt)
-					|| sig.equals(MethodChecker.mathAbsLong)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
-				ColumnExpressions<?> base = val.args.get(0).visit(this, passdown);
-				return ColumnExpressions.singleColumn(base.reader,
-						FunctionExpression.singleParam("ABS", base.getOnlyColumn()));
-			} else if (sig.equals(MethodChecker.mathSqrt)) {
-				SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
-				TypedValue baseVal = val.args.get(0);
-				if (isWideningCast(baseVal))
-					baseVal = skipWideningCast(baseVal);
-				ColumnExpressions<?> base = baseVal.visit(this, passdown);
-				return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-						FunctionExpression.singleParam("SQRT", base.getOnlyColumn()));
-			}
-			throw new TypedValueVisitorException("Do not know how to translate the method " + sig + " into a JPQL function");
-		} else
+		} else if ((handler = MethodChecker.jpqlFunctionStaticMethods.get(sig)) != null) {
+			return handler.handle(val, in, this);
+		} else {
 			return super.staticMethodCallValue(val, in);
+		}
 	}
 
 	protected ColumnExpressions<?> handleIsIn(

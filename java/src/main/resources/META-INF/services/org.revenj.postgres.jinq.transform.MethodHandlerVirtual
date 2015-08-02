@@ -1,0 +1,8 @@
+org.revenj.postgres.jinq.transform.handlers.AbsInstanceHandler
+org.revenj.postgres.jinq.transform.handlers.LengthHandler
+org.revenj.postgres.jinq.transform.handlers.StringIndexOfHandler
+org.revenj.postgres.jinq.transform.handlers.SubstringHandler
+org.revenj.postgres.jinq.transform.handlers.ToLowerHandler
+org.revenj.postgres.jinq.transform.handlers.ToStringHandler
+org.revenj.postgres.jinq.transform.handlers.ToUpperHandler
+org.revenj.postgres.jinq.transform.handlers.TrimHandler

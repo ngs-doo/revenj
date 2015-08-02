@@ -1,10 +1,7 @@
 package org.revenj.postgres.jinq.transform;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jinq.orm.stream.JinqStream;
 
@@ -24,22 +21,6 @@ class MethodChecker implements PathAnalysisMethodChecker {
 
 	public final static MethodSignature objectEquals = new MethodSignature("java/lang/Object", "equals", "(Ljava/lang/Object;)Z");
 
-	public final static MethodSignature mathSqrt = new MethodSignature("java/lang/Math", "sqrt", "(D)D");
-	public final static MethodSignature mathAbsDouble = new MethodSignature("java/lang/Math", "abs", "(D)D");
-	public final static MethodSignature mathAbsInt = new MethodSignature("java/lang/Math", "abs", "(I)I");
-	public final static MethodSignature mathAbsLong = new MethodSignature("java/lang/Math", "abs", "(J)J");
-	public final static MethodSignature bigDecimalAbs = new MethodSignature("java/math/BigDecimal", "abs", "()Ljava/math/BigDecimal;");
-	public final static MethodSignature bigIntegerAbs = new MethodSignature("java/math/BigInteger", "abs", "()Ljava/math/BigInteger;");
-	public final static MethodSignature stringToUpper = new MethodSignature("java/lang/String", "toUpperCase", "()Ljava/lang/String;");
-	public final static MethodSignature stringToLower = new MethodSignature("java/lang/String", "toLowerCase", "()Ljava/lang/String;");
-	public final static MethodSignature stringValueOfObject = new MethodSignature("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
-	public final static MethodSignature stringTrim = new MethodSignature("java/lang/String", "trim", "()Ljava/lang/String;");
-	public final static MethodSignature stringLength = new MethodSignature("java/lang/String", "length", "()I");
-	public final static MethodSignature stringSubstring = new MethodSignature("java/lang/String", "substring", "(II)Ljava/lang/String;");
-	public final static MethodSignature stringIndexOf = new MethodSignature("java/lang/String", "indexOf", "(Ljava/lang/String;)I");
-
-	public final static MethodSignature uuidToString = new MethodSignature("java/util/UUID", "toString", "()Ljava/lang/String;");
-
 	static {
 		try {
 			// I'm initializing some of these method signatures through reflection
@@ -53,25 +34,31 @@ class MethodChecker implements PathAnalysisMethodChecker {
 		}
 	}
 
-	final static Set<MethodSignature> jpqlFunctionMethods = new HashSet<>();
-	final static Set<MethodSignature> jpqlFunctionStaticMethods = new HashSet<>();
+	final static Map<MethodSignature, MethodHandlerVirtual> jpqlFunctionMethods = new HashMap<>();
+	final static Map<MethodSignature, MethodHandlerStatic> jpqlFunctionStaticMethods = new HashMap<>();
 
 	static {
-		jpqlFunctionStaticMethods.add(mathSqrt);
-		jpqlFunctionStaticMethods.add(mathAbsDouble);
-		jpqlFunctionStaticMethods.add(mathAbsInt);
-		jpqlFunctionStaticMethods.add(mathAbsLong);
-		jpqlFunctionStaticMethods.add(stringValueOfObject);
-		jpqlFunctionMethods.add(bigDecimalAbs);
-		jpqlFunctionMethods.add(bigIntegerAbs);
-		jpqlFunctionMethods.add(stringToUpper);
-		jpqlFunctionMethods.add(stringToLower);
-		jpqlFunctionMethods.add(stringTrim);
-		jpqlFunctionMethods.add(stringLength);
-		jpqlFunctionMethods.add(stringSubstring);
-		jpqlFunctionMethods.add(stringIndexOf);
+		ServiceLoader<MethodHandlerStatic> staticHandlers = ServiceLoader.load(MethodHandlerStatic.class);
+		for (MethodHandlerStatic handler : staticHandlers) {
+			try {
+				for (MethodSignature signature : handler.getSupportedSignatures()) {
+					jpqlFunctionStaticMethods.put(signature, handler);
+				}
+			} catch (NoSuchMethodException ex) {
+				ex.printStackTrace();
+			}
+		}
 
-		jpqlFunctionMethods.add(uuidToString);
+		ServiceLoader<MethodHandlerVirtual> virtualHandlers = ServiceLoader.load(MethodHandlerVirtual.class);
+		for (MethodHandlerVirtual handler : virtualHandlers) {
+			try {
+				for (MethodSignature signature : handler.getSupportedSignatures()) {
+					jpqlFunctionMethods.put(signature, handler);
+				}
+			} catch (NoSuchMethodException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	public final static MethodSignature streamSumInt = TransformationClassAnalyzer.streamSumInt;
@@ -131,8 +118,9 @@ class MethodChecker implements PathAnalysisMethodChecker {
 	 */
 	@Override
 	public OperationSideEffect isStaticMethodSafe(MethodSignature m) {
-		return (safeStaticMethods.contains(m)
-				|| jpqlFunctionStaticMethods.contains(m)) ? OperationSideEffect.NONE : OperationSideEffect.UNSAFE;
+		return safeStaticMethods.contains(m) || jpqlFunctionStaticMethods.containsKey(m)
+				? OperationSideEffect.NONE
+				: OperationSideEffect.UNSAFE;
 	}
 
 	/* (non-Javadoc)
@@ -142,16 +130,14 @@ class MethodChecker implements PathAnalysisMethodChecker {
 	public OperationSideEffect isMethodSafe(MethodSignature m, TypedValue base, List<TypedValue> args) {
 		if (isObjectEqualsSafe && objectEquals.equals(m)) {
 			return OperationSideEffect.NONE;
-		} else if (safeMethods.contains(m) || subqueryMethods.contains(m)
-				|| jpqlFunctionMethods.contains(m)) {
+		} else if (safeMethods.contains(m) || subqueryMethods.contains(m) || jpqlFunctionMethods.containsKey(m)) {
 			return OperationSideEffect.NONE;
 		} else {
 			// Use reflection to get info about the method (or would it be better
 			// to do this through direct bytecode inspection?), and see if it's
 			// annotated as safe
 			try {
-				Method reflectedMethod = Annotations
-						.asmMethodSignatureToReflectionMethod(m);
+				Method reflectedMethod = Annotations.asmMethodSignatureToReflectionMethod(m);
 				// Special handling of Collection.contains() for subclasses of Collection.
 				if (isCollectionContainsSafe
 						&& "contains".equals(m.name)
