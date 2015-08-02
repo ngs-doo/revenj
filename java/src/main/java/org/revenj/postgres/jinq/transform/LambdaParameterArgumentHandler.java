@@ -96,7 +96,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
                 new ParameterExpression(lambda.getLambdaIndex(), argIndex));
     }
 
-    protected JPQLQuery<?> handleIndirectLambdaSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
+    protected JinqPostgresQuery<?> handleIndirectLambdaSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
         // The actual value for the parameter is not available because this is a sub-lambda.
         // Extract the parent scope to see how the parameter is used in the parent lambda
         TypedValue paramVal = lambda.getIndirectCapturedArg(argIndex);
@@ -117,7 +117,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
         }
     }
 
-    protected JPQLQuery<?> getAndValidateSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
+    protected JinqPostgresQuery<?> getAndValidateSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
         // There are a few cases where collections can be passed into a query.
         try {
             if (!Collection.class.isAssignableFrom(Annotations.asmTypeToClass(argType))) {
@@ -149,12 +149,12 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
             return handleLambdaArg(argIndex - numLambdaCapturedArgs, argType);
     }
 
-    protected JPQLQuery<?> handleLambdaSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
+    protected JinqPostgresQuery<?> handleLambdaSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
         throw new TypedValueVisitorException("Unhandled lambda subquery arguments");
     }
 
     @Override
-    public JPQLQuery<?> handleSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
+    public JinqPostgresQuery<?> handleSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
         if (argIndex < numLambdaCapturedArgs) {
             if (lambda == null)
                 throw new TypedValueVisitorException("No lambda source was supplied where parameters can be extracted");
@@ -225,7 +225,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
     }
 
     @Override
-    public JPQLQuery<?> handleSubQueryThisFieldRead(String name, Type argType)
+    public JinqPostgresQuery<?> handleSubQueryThisFieldRead(String name, Type argType)
             throws TypedValueVisitorException {
         throw new TypedValueVisitorException("Cannot read fields of this lambda for a subquery");
     }

@@ -1,6 +1,6 @@
 package org.revenj.postgres.jinq.transform;
 
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
 public class CountTransform extends JPQLNoLambdaQueryTransform {
     AggregateTransform transform;
@@ -11,7 +11,7 @@ public class CountTransform extends JPQLNoLambdaQueryTransform {
     }
 
     @Override
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         return transform.apply(query, null, parentArgumentScope);
     }
 

@@ -10,14 +10,14 @@ public class GroupingTransform extends JPQLMultiLambdaQueryTransform {
         super(config);
     }
 
-    private <U, V, W> JPQLQuery<U> apply(JPQLQuery<V> query, LambdaAnalysis groupingLambda, LambdaAnalysis[] lambdas, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    private <U, V, W> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, LambdaAnalysis groupingLambda, LambdaAnalysis[] lambdas, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         try {
             if (query.isSelectFromWhere()) {
                 SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;
 
                 // Figure out the columns needed for the key value
                 SelectTransform keyTransform = new SelectTransform(config, false);
-                JPQLQuery<W> keyQuery = keyTransform.apply(query, groupingLambda, parentArgumentScope);
+                JinqPostgresQuery<W> keyQuery = keyTransform.apply(query, groupingLambda, parentArgumentScope);
                 if (!keyQuery.isSelectFromWhere())
                     throw new QueryTransformException("Expecting the result of the key calculation to be a SelectFromWhere query");
                 SelectOnly<W> keySelect = new SelectOnly<>();
@@ -65,7 +65,7 @@ public class GroupingTransform extends JPQLMultiLambdaQueryTransform {
     }
 
     @Override
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, LambdaAnalysis[] lambdas, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, LambdaAnalysis[] lambdas, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         return apply(query, lambdas[0], Arrays.copyOfRange(lambdas, 1, lambdas.length), parentArgumentScope);
     }
 

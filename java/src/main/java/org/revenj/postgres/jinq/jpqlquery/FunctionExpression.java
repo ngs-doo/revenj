@@ -32,7 +32,7 @@ public class FunctionExpression extends Expression {
     }
 
     @Override
-    public void generateQuery(org.revenj.postgres.jinq.jpqlquery.QueryGenerationState queryState, OperatorPrecedenceLevel operatorPrecedenceScope) {
+    public void generateQuery(QueryGenerationState queryState, OperatorPrecedenceLevel operatorPrecedenceScope) {
         queryState.appendQuery(functionName);
         queryState.appendQuery("(");
         boolean isFirst = true;
@@ -47,7 +47,7 @@ public class FunctionExpression extends Expression {
     @Override
     public void prepareQueryGeneration(
             QueryGenerationPreparationPhase preparePhase,
-            org.revenj.postgres.jinq.jpqlquery.QueryGenerationState queryState) {
+            QueryGenerationState queryState) {
         for (Expression arg : arguments)
             arg.prepareQueryGeneration(preparePhase, queryState);
     }

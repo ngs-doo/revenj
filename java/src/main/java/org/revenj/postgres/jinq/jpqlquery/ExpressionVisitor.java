@@ -1,7 +1,7 @@
 package org.revenj.postgres.jinq.jpqlquery;
 
 public class ExpressionVisitor {
-    public void visitDefaultExpression(org.revenj.postgres.jinq.jpqlquery.Expression expr) {
+    public void visitDefaultExpression(Expression expr) {
     }
 
     public void visitAggregateFunction(
@@ -13,7 +13,7 @@ public class ExpressionVisitor {
         visitDefaultExpression(expr);
     }
 
-    public void visitCaseWhen(org.revenj.postgres.jinq.jpqlquery.CaseWhenExpression expr) {
+    public void visitCaseWhen(CaseWhenExpression expr) {
         visitDefaultExpression(expr);
     }
 
@@ -42,7 +42,7 @@ public class ExpressionVisitor {
         visitDefaultExpression(expr);
     }
 
-    public void visitSubquery(org.revenj.postgres.jinq.jpqlquery.SubqueryExpression expr) {
+    public void visitSubquery(SubqueryExpression expr) {
         visitDefaultExpression(expr);
     }
 

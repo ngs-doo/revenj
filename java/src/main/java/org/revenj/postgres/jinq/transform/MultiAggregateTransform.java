@@ -9,7 +9,7 @@ public class MultiAggregateTransform extends JPQLMultiLambdaQueryTransform {
     }
 
     @Override
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, LambdaAnalysis[] lambdas, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, LambdaAnalysis[] lambdas, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         try {
             if (query.isSelectFromWhere()) {
                 SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;

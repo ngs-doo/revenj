@@ -1,6 +1,6 @@
 package org.revenj.postgres.jinq.jpqlquery;
 
-public class ParameterExpression extends org.revenj.postgres.jinq.jpqlquery.Expression {
+public class ParameterExpression extends Expression {
     private int lambdaIndex;
     private int argIndex;
 
@@ -11,7 +11,8 @@ public class ParameterExpression extends org.revenj.postgres.jinq.jpqlquery.Expr
 
     @Override
     public void generateQuery(QueryGenerationState queryState, OperatorPrecedenceLevel operatorPrecedenceScope) {
-        String paramName = queryState.registerParameter(this, lambdaIndex, argIndex);
+		//TODO switch to Postgres $ so params can be reused
+        queryState.registerParameter(this, lambdaIndex, argIndex);
         queryState.appendQuery("?");
     }
 

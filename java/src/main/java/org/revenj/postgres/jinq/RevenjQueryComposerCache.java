@@ -1,6 +1,6 @@
 package org.revenj.postgres.jinq;
 
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ class RevenjQueryComposerCache {
         }
 
         String transformationType;
-        JPQLQuery<?> baseQuery;
+        JinqPostgresQuery<?> baseQuery;
         String[] lambdaSources;
     }
 
@@ -56,13 +56,13 @@ class RevenjQueryComposerCache {
      * Map of cached query transforms. Maps from a description of the transform
      * to the cached result of the transform.
      */
-    private final Map<CacheKey, Optional<JPQLQuery<?>>> cachedQueryTransforms = new HashMap<>();
+    private final Map<CacheKey, Optional<JinqPostgresQuery<?>>> cachedQueryTransforms = new HashMap<>();
 
     /**
      * Map of cached queries for finding all the entities of a certain type. The
      * map maps from entity name to the corresponding query.
      */
-    private final Map<String, Optional<JPQLQuery<?>>> cachedFindAllEntities = new HashMap<>();
+    private final Map<String, Optional<JinqPostgresQuery<?>>> cachedFindAllEntities = new HashMap<>();
 
     /**
      * Looks up whether a certain transformation is already in the cache or not.
@@ -73,8 +73,8 @@ class RevenjQueryComposerCache {
      * @return cached transformation result or null if this transformation hasn't
      * been cached
      */
-    public synchronized Optional<JPQLQuery<?>> findInCache(
-            JPQLQuery<?> base,
+    public synchronized Optional<JinqPostgresQuery<?>> findInCache(
+            JinqPostgresQuery<?> base,
             String transformationType,
             String[] lambdaSources) {
         return cacheQuery(base, transformationType, lambdaSources, null);
@@ -90,11 +90,11 @@ class RevenjQueryComposerCache {
      * @param resultingQuery     result of the transformation that should be cached
      * @return the existing cached entry or resultingQuery if nothing is cached
      */
-    public synchronized Optional<JPQLQuery<?>> cacheQuery(
-            JPQLQuery<?> base,
+    public synchronized Optional<JinqPostgresQuery<?>> cacheQuery(
+            JinqPostgresQuery<?> base,
             String transformationType,
             String[] lambdaSources,
-            Optional<JPQLQuery<?>> resultingQuery) {
+            Optional<JinqPostgresQuery<?>> resultingQuery) {
         CacheKey key = new CacheKey();
         key.transformationType = transformationType;
         key.baseQuery = base;
@@ -114,7 +114,7 @@ class RevenjQueryComposerCache {
      * @param dataSource name of the type of entity the query should return
      * @return the cached query or null if no query has been cached.
      */
-    public synchronized Optional<JPQLQuery<?>> findCachedFindAll(String dataSource) {
+    public synchronized Optional<JinqPostgresQuery<?>> findCachedFindAll(String dataSource) {
         return cacheFindAll(dataSource, null);
     }
 
@@ -129,9 +129,9 @@ class RevenjQueryComposerCache {
      * @return if a query has already been cached, that query is returned;
      * otherwise, queryToCache is inserted into the cache and returned.
      */
-    public synchronized Optional<JPQLQuery<?>> cacheFindAll(
+    public synchronized Optional<JinqPostgresQuery<?>> cacheFindAll(
             String dataSource,
-            Optional<JPQLQuery<?>> queryToCache) {
+            Optional<JinqPostgresQuery<?>> queryToCache) {
         if (cachedFindAllEntities.containsKey(dataSource))
             return cachedFindAllEntities.get(dataSource);
         if (queryToCache != null)

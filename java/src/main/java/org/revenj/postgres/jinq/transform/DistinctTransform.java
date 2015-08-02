@@ -1,6 +1,6 @@
 package org.revenj.postgres.jinq.transform;
 
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectOnly;
 
 public class DistinctTransform extends JPQLNoLambdaQueryTransform {
@@ -8,7 +8,7 @@ public class DistinctTransform extends JPQLNoLambdaQueryTransform {
         super(config);
     }
 
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, org.revenj.postgres.jinq.transform.SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, org.revenj.postgres.jinq.transform.SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         if (query.canDistinct()) {
             SelectOnly<V> select = (SelectOnly<V>) query;
 

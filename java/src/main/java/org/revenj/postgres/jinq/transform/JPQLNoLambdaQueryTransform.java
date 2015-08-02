@@ -1,6 +1,6 @@
 package org.revenj.postgres.jinq.transform;
 
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
 public abstract class JPQLNoLambdaQueryTransform extends JPQLQueryTransform {
 
@@ -8,7 +8,7 @@ public abstract class JPQLNoLambdaQueryTransform extends JPQLQueryTransform {
         super(config);
     }
 
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         return null;
     }
 }

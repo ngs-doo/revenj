@@ -3,11 +3,11 @@ package org.revenj.postgres.jinq.jpqlquery;
 import java.util.List;
 
 /**
- * Data structure used to represent JPQL queries and the conversions
+ * Data structure used to represent Postgres queries and the conversions
  * needed to parse results into a form usable by Jinq.
  */
-public abstract class JPQLQuery<T> implements JPQLFragment {
-    public static <U> JPQLQuery<U> findAll(String dataSource) {
+public abstract class JinqPostgresQuery<T> implements JinqPostgresFragment {
+    public static <U> JinqPostgresQuery<U> findAll(String dataSource) {
         SelectFromWhere<U> query = new SelectFromWhere<>();
         From from = From.forDataSource(dataSource);
         query.cols = ColumnExpressions.singleColumn(new SimpleRowReader<>(), new FromAliasExpression(from));
@@ -15,7 +15,7 @@ public abstract class JPQLQuery<T> implements JPQLFragment {
         return query;
     }
 
-    public JPQLQuery() {
+    public JinqPostgresQuery() {
     }
 
     /**
@@ -37,7 +37,7 @@ public abstract class JPQLQuery<T> implements JPQLFragment {
 
     public abstract List<GeneratedQueryParameter> getQueryParameters();
 
-    public abstract JPQLQuery<T> shallowCopy();
+    public abstract JinqPostgresQuery<T> shallowCopy();
 
     public abstract RowReader<T> getRowReader();
 }

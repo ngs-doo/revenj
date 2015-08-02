@@ -1,6 +1,6 @@
 package org.revenj.postgres.jinq.transform;
 
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectFromWhere;
 
 public class LimitSkipTransform extends JPQLNoLambdaQueryTransform {
@@ -14,7 +14,7 @@ public class LimitSkipTransform extends JPQLNoLambdaQueryTransform {
     long constraint;
 
     @Override
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         if (query instanceof SelectFromWhere) {
             SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;
 

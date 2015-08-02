@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.postgresql.util.PGobject;
 import org.revenj.patterns.*;
 import org.revenj.postgres.PostgresWriter;
-import org.revenj.postgres.converters.PostgresTuple;
 import org.revenj.postgres.jinq.transform.JPQLMultiLambdaQueryTransform;
 import org.revenj.postgres.jinq.transform.JPQLNoLambdaQueryTransform;
 import org.revenj.postgres.jinq.transform.JPQLOneLambdaQueryTransform;
@@ -30,7 +29,7 @@ import org.revenj.postgres.jinq.transform.WhereTransform;
 import org.revenj.postgres.ObjectConverter;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter;
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
 class RevenjQueryComposer<T> {
 
@@ -57,7 +56,7 @@ class RevenjQueryComposer<T> {
 	private final RevenjQueryComposerCache cachedQueries;
 	private final Connection connection;
 	private final ServiceLocator locator;
-	private final JPQLQuery<T> query;
+	private final JinqPostgresQuery<T> query;
 	private final Class<T> manifest;
 
 	/**
@@ -68,11 +67,11 @@ class RevenjQueryComposer<T> {
 	 */
 	private final List<LambdaInfo> lambdas = new ArrayList<>();
 
-	private RevenjQueryComposer(RevenjQueryComposer<?> base, Class<T> manifest, JPQLQuery<T> query, List<LambdaInfo> chainedLambdas, LambdaInfo... additionalLambdas) {
+	private RevenjQueryComposer(RevenjQueryComposer<?> base, Class<T> manifest, JinqPostgresQuery<T> query, List<LambdaInfo> chainedLambdas, LambdaInfo... additionalLambdas) {
 		this(base.metamodel, manifest, base.cachedQueries, base.connection, base.locator, query, chainedLambdas, additionalLambdas);
 	}
 
-	private RevenjQueryComposer(MetamodelUtil metamodel, Class<T> manifest, RevenjQueryComposerCache cachedQueries, Connection connection, ServiceLocator locator, JPQLQuery<T> query, List<LambdaInfo> chainedLambdas, LambdaInfo... additionalLambdas) {
+	private RevenjQueryComposer(MetamodelUtil metamodel, Class<T> manifest, RevenjQueryComposerCache cachedQueries, Connection connection, ServiceLocator locator, JinqPostgresQuery<T> query, List<LambdaInfo> chainedLambdas, LambdaInfo... additionalLambdas) {
 		this.metamodel = metamodel;
 		this.manifest = manifest;
 		this.cachedQueries = cachedQueries;
@@ -90,7 +89,7 @@ class RevenjQueryComposer<T> {
 			RevenjQueryComposerCache cachedQueries,
 			Connection conn,
 			ServiceLocator locator,
-			JPQLQuery<T> findAllQuery) {
+			JinqPostgresQuery<T> findAllQuery) {
 		return new RevenjQueryComposer<>(metamodel, manifest, cachedQueries, conn, locator, findAllQuery, new ArrayList<>());
 	}
 
@@ -307,10 +306,10 @@ class RevenjQueryComposer<T> {
 	}
 
 	private <U> RevenjQueryComposer<U> applyTransformWithLambda(Class<U> newManifest, JPQLNoLambdaQueryTransform transform) {
-		Optional<JPQLQuery<?>> cachedQuery = cachedQueries.findInCache(query, transform.getTransformationTypeCachingTag(), null);
+		Optional<JinqPostgresQuery<?>> cachedQuery = cachedQueries.findInCache(query, transform.getTransformationTypeCachingTag(), null);
 		if (cachedQuery == null) {
 			cachedQuery = Optional.empty();
-			JPQLQuery<U> newQuery = null;
+			JinqPostgresQuery<U> newQuery = null;
 			try {
 				newQuery = transform.apply(query, null);
 			} catch (QueryTransformException e) {
@@ -324,7 +323,7 @@ class RevenjQueryComposer<T> {
 		if (!cachedQuery.isPresent()) {
 			return null;
 		}
-		return new RevenjQueryComposer<>(this, newManifest, (JPQLQuery<U>) cachedQuery.get(), lambdas);
+		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas);
 	}
 
 	public <U> RevenjQueryComposer<U> applyTransformWithLambda(Class<U> newManifest, JPQLOneLambdaQueryTransform transform, Object lambda) {
@@ -332,13 +331,13 @@ class RevenjQueryComposer<T> {
 		if (lambdaInfo == null) {
 			return null;
 		}
-		Optional<JPQLQuery<?>> cachedQuery =
+		Optional<JinqPostgresQuery<?>> cachedQuery =
 				cachedQueries.findInCache(
 						query,
 						transform.getTransformationTypeCachingTag(),
 						new String[]{lambdaInfo.getLambdaSourceString()});
 		if (cachedQuery == null) {
-			JPQLQuery<U> newQuery = null;
+			JinqPostgresQuery<U> newQuery = null;
 			try {
 				LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, null, true, true, true);
 				if (lambdaAnalysis == null) {
@@ -357,7 +356,7 @@ class RevenjQueryComposer<T> {
 		if (!cachedQuery.isPresent()) {
 			return null;
 		}
-		return new RevenjQueryComposer<>(this, newManifest, (JPQLQuery<U>) cachedQuery.get(), lambdas, lambdaInfo);
+		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas, lambdaInfo);
 	}
 
 	public <U> RevenjQueryComposer<U> applyTransformWithLambdas(Class<U> newManifest, JPQLMultiLambdaQueryTransform transform, Object[] groupingLambdas) {
@@ -371,10 +370,10 @@ class RevenjQueryComposer<T> {
 			lambdaSources[n] = lambdaInfos[n].getLambdaSourceString();
 		}
 
-		Optional<JPQLQuery<?>> cachedQuery =
+		Optional<JinqPostgresQuery<?>> cachedQuery =
 				cachedQueries.findInCache(query, transform.getTransformationTypeCachingTag(), lambdaSources);
 		if (cachedQuery == null) {
-			JPQLQuery<U> newQuery = null;
+			JinqPostgresQuery<U> newQuery = null;
 			try {
 				LambdaAnalysis[] lambdaAnalyses = new LambdaAnalysis[lambdaInfos.length];
 				for (int n = 0; n < lambdaInfos.length; n++) {
@@ -396,7 +395,7 @@ class RevenjQueryComposer<T> {
 		if (!cachedQuery.isPresent()) {
 			return null;
 		}
-		return new RevenjQueryComposer<>(this, newManifest, (JPQLQuery<U>) cachedQuery.get(), lambdas, lambdaInfos);
+		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas, lambdaInfos);
 	}
 
 	/**

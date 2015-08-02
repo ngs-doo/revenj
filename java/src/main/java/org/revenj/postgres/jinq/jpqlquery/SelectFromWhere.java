@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SelectFromWhere<T> extends SelectOnly<T> {
-    public List<From> froms = new ArrayList<>();
+    public final List<From> froms = new ArrayList<>(1);
     public Expression where;
-    public List<SortingParameters> sort = new ArrayList<>();
+    public final List<SortingParameters> sort = new ArrayList<>(1);
     public long limit = -1;
     public long skip = -1;
 
@@ -51,8 +51,9 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
         for (From from : froms) {
             from.prepareQueryGeneration(preparePhase, queryState);
         }
-        if (where != null)
-            where.prepareQueryGeneration(preparePhase, queryState);
+        if (where != null) {
+			where.prepareQueryGeneration(preparePhase, queryState);
+		}
         for (SortingParameters sortParams : sort) {
             sortParams.expr.prepareQueryGeneration(preparePhase, queryState);
         }

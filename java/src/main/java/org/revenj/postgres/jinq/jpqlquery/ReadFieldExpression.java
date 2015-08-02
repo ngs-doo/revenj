@@ -1,10 +1,10 @@
 package org.revenj.postgres.jinq.jpqlquery;
 
-public class ReadFieldExpression extends org.revenj.postgres.jinq.jpqlquery.Expression {
-	public final org.revenj.postgres.jinq.jpqlquery.Expression base;
+public class ReadFieldExpression extends Expression {
+	public final Expression base;
 	public final String field;
 
-	public ReadFieldExpression(org.revenj.postgres.jinq.jpqlquery.Expression base, String field) {
+	public ReadFieldExpression(Expression base, String field) {
 		this.base = base;
 		this.field = field;
 	}

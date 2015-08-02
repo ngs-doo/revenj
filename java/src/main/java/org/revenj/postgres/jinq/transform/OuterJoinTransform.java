@@ -63,7 +63,7 @@ public class OuterJoinTransform extends JPQLOneLambdaQueryTransform {
     }
 
     @Override
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, LambdaAnalysis lambda, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, LambdaAnalysis lambda, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         try {
             if (query.isSelectFromWhere()) {
                 SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;
@@ -75,7 +75,7 @@ public class OuterJoinTransform extends JPQLOneLambdaQueryTransform {
                     throw new QueryTransformException("Can only handle a single path in a JOIN at the moment");
 
                 SymbExPassDown passdown = SymbExPassDown.with(null, false);
-                JPQLQuery<?> returnExpr = PathAnalysisSimplifier
+                JinqPostgresQuery<?> returnExpr = PathAnalysisSimplifier
                         .simplify(lambda.symbolicAnalysis.paths.get(0).getReturnValue(), config.getComparisonMethods())
                         .visit(translator, passdown);
 

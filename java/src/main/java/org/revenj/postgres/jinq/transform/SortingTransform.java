@@ -2,7 +2,7 @@ package org.revenj.postgres.jinq.transform;
 
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
 import org.revenj.postgres.jinq.jpqlquery.ColumnExpressions;
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectFromWhere;
 
 public class SortingTransform extends org.revenj.postgres.jinq.transform.JPQLOneLambdaQueryTransform {
@@ -14,7 +14,7 @@ public class SortingTransform extends org.revenj.postgres.jinq.transform.JPQLOne
     private boolean isAscending;
 
     @Override
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, LambdaAnalysis lambda, org.revenj.postgres.jinq.transform.SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, LambdaAnalysis lambda, org.revenj.postgres.jinq.transform.SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         try {
             if (query instanceof SelectFromWhere && query.canSort()) {
                 SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;

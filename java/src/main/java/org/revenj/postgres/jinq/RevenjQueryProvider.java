@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.util.Optional;
 
 import org.revenj.postgres.QueryProvider;
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
 import org.revenj.patterns.DataSource;
 import org.revenj.patterns.Query;
@@ -21,13 +21,13 @@ public class RevenjQueryProvider implements QueryProvider {
 
     public <T extends DataSource> Query<T> query(Connection connection, ServiceLocator locator, Class<T> dataSource) {
         String sqlSource = metamodel.dataSourceNameFromClass(dataSource);
-        Optional<JPQLQuery<?>> cachedQuery = cachedQueries.findCachedFindAll(sqlSource);
+        Optional<JinqPostgresQuery<?>> cachedQuery = cachedQueries.findCachedFindAll(sqlSource);
         if (cachedQuery == null) {
-            JPQLQuery<T> query = JPQLQuery.findAll(sqlSource);
+            JinqPostgresQuery<T> query = JinqPostgresQuery.findAll(sqlSource);
             cachedQuery = Optional.of(query);
             cachedQuery = cachedQueries.cacheFindAll(sqlSource, cachedQuery);
         }
-        JPQLQuery<T> query = (JPQLQuery<T>) cachedQuery.get();
+        JinqPostgresQuery<T> query = (JinqPostgresQuery<T>) cachedQuery.get();
         RevenjQueryComposer<T> queryComposer = RevenjQueryComposer.findAll(
                 metamodel,
                 dataSource,

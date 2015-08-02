@@ -2,7 +2,7 @@ package org.revenj.postgres.jinq.jpqlquery;
 
 import java.util.List;
 
-public class ParameterAsQuery<T> extends JPQLQuery<T> {
+public class ParameterAsQuery<T> extends JinqPostgresQuery<T> {
     public ColumnExpressions<T> cols;
 
     @Override

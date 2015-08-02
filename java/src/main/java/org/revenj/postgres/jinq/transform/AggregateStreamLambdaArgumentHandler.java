@@ -3,7 +3,7 @@ package org.revenj.postgres.jinq.transform;
 import org.jinq.rebased.org.objectweb.asm.Type;
 
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
-import org.revenj.postgres.jinq.jpqlquery.JPQLQuery;
+import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectOnly;
 
 /**
@@ -21,7 +21,7 @@ public class AggregateStreamLambdaArgumentHandler extends LambdaParameterArgumen
     }
 
     @Override
-    protected JPQLQuery<?> handleLambdaSubQueryArg(int argIndex, Type argType)
+    protected JinqPostgresQuery<?> handleLambdaSubQueryArg(int argIndex, Type argType)
             throws TypedValueVisitorException {
         if (argIndex == 0)
             return select;

@@ -44,7 +44,7 @@ public class JoinTransform extends JPQLOneLambdaQueryTransform {
         return this;
     }
 
-    static boolean isSimpleFrom(JPQLQuery<?> query) {
+    static boolean isSimpleFrom(JinqPostgresQuery<?> query) {
         if (!query.isSelectFromWhere()) return false;
         SelectFromWhere<?> sfw = (SelectFromWhere<?>) query;
         if (sfw.where != null) return false;
@@ -57,7 +57,7 @@ public class JoinTransform extends JPQLOneLambdaQueryTransform {
     }
 
     @Override
-    public <U, V> JPQLQuery<U> apply(JPQLQuery<V> query, LambdaAnalysis lambda, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, LambdaAnalysis lambda, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
         try {
             if (query.isSelectFromWhere()) {
                 SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;
@@ -69,7 +69,7 @@ public class JoinTransform extends JPQLOneLambdaQueryTransform {
                     throw new QueryTransformException("Can only handle a single path in a JOIN at the moment");
 
                 SymbExPassDown passdown = SymbExPassDown.with(null, false);
-                JPQLQuery<U> returnExpr = (JPQLQuery<U>) PathAnalysisSimplifier
+                JinqPostgresQuery<U> returnExpr = (JinqPostgresQuery<U>) PathAnalysisSimplifier
                         .simplify(lambda.symbolicAnalysis.paths.get(0).getReturnValue(), config.getComparisonMethods())
                         .visit(translator, passdown);
 

@@ -6,7 +6,6 @@ public abstract class Expression {
     }
 
     public void generateQuery(QueryGenerationState queryState, OperatorPrecedenceLevel operatorPrecedenceScope) {
-
     }
 
     public abstract void prepareQueryGeneration(QueryGenerationPreparationPhase preparePhase, QueryGenerationState queryState);

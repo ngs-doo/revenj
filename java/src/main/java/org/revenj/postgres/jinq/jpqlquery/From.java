@@ -1,6 +1,6 @@
 package org.revenj.postgres.jinq.jpqlquery;
 
-public abstract class From implements JPQLFragment {
+public abstract class From implements JinqPostgresFragment {
     abstract void generateFromString(QueryGenerationState queryState, boolean isFirst);
 
     public boolean isPrecededByComma() {

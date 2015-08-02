@@ -14,7 +14,6 @@ import ch.epfl.labos.iu.orm.queryll2.path.TransformationClassAnalyzer;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.BasicSymbolicInterpreter.OperationSideEffect;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodSignature;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValue;
-import org.revenj.postgres.jinq.JPQL;
 
 class MethodChecker implements PathAnalysisMethodChecker {
 	private final Set<Class<?>> safeMethodAnnotations;
@@ -25,10 +24,6 @@ class MethodChecker implements PathAnalysisMethodChecker {
 
 	public final static MethodSignature objectEquals = new MethodSignature("java/lang/Object", "equals", "(Ljava/lang/Object;)Z");
 
-	//public final static MethodSignature jpqlLike;
-	//public final static MethodSignature jpqlIsIn;
-	//public final static MethodSignature jpqlIsInList;
-	//public final static MethodSignature jpqlListContains;
 	public final static MethodSignature mathSqrt = new MethodSignature("java/lang/Math", "sqrt", "(D)D");
 	public final static MethodSignature mathAbsDouble = new MethodSignature("java/lang/Math", "abs", "(D)D");
 	public final static MethodSignature mathAbsInt = new MethodSignature("java/lang/Math", "abs", "(I)I");
@@ -49,10 +44,6 @@ class MethodChecker implements PathAnalysisMethodChecker {
 		try {
 			// I'm initializing some of these method signatures through reflection
 			// instead of statically so that it's easier to find breakages due to method renaming etc.
-			//jpqlLike = MethodSignature.fromMethod(JPQL.class.getMethod("like", String.class, String.class));
-			//jpqlIsIn = MethodSignature.fromMethod(JPQL.class.getMethod("isIn", Object.class, JinqStream.class));
-			//jpqlIsInList = MethodSignature.fromMethod(JPQL.class.getMethod("isInList", Object.class, Collection.class));
-			//jpqlListContains = MethodSignature.fromMethod(JPQL.class.getMethod("listContains", Collection.class, Object.class));
 
 			streamSelectAll = MethodSignature.fromMethod(JinqStream.class.getMethod("selectAll", JinqStream.Join.class));
 			streamSelectAllList = MethodSignature.fromMethod(JinqStream.class.getMethod("selectAllList", JinqStream.JoinToIterable.class));
@@ -62,16 +53,10 @@ class MethodChecker implements PathAnalysisMethodChecker {
 		}
 	}
 
-	// TODO: I'm not sure how to cast integers to strings in JPQL
-//   public final static MethodSignature stringBuilderAppendInt = new MethodSignature("java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;");
 	final static Set<MethodSignature> jpqlFunctionMethods = new HashSet<>();
 	final static Set<MethodSignature> jpqlFunctionStaticMethods = new HashSet<>();
 
 	static {
-		//jpqlFunctionStaticMethods.add(jpqlLike);
-		//jpqlFunctionStaticMethods.add(jpqlIsIn);
-		//jpqlFunctionStaticMethods.add(jpqlIsInList);
-		//jpqlFunctionStaticMethods.add(jpqlListContains);
 		jpqlFunctionStaticMethods.add(mathSqrt);
 		jpqlFunctionStaticMethods.add(mathAbsDouble);
 		jpqlFunctionStaticMethods.add(mathAbsInt);
@@ -186,9 +171,7 @@ class MethodChecker implements PathAnalysisMethodChecker {
 
 	@Override
 	public boolean isFluentChaining(MethodSignature sig) {
-		if (TransformationClassAnalyzer.stringBuilderAppendString.equals(sig))
-			return true;
-		return false;
+		return TransformationClassAnalyzer.stringBuilderAppendString.equals(sig);
 	}
 
 	@Override

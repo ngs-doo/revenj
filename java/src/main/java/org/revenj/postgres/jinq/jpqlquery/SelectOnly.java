@@ -2,7 +2,7 @@ package org.revenj.postgres.jinq.jpqlquery;
 
 import java.util.List;
 
-public class SelectOnly<T> extends JPQLQuery<T> {
+public class SelectOnly<T> extends JinqPostgresQuery<T> {
     public ColumnExpressions<T> cols;
     public boolean isAggregated = false;
     public boolean isDistinct = false;
