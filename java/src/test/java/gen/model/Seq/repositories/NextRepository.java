@@ -119,7 +119,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 			}
 			try {
 				return query.list();
-			} catch (java.sql.SQLException e) {
+			} catch (java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -149,9 +149,9 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	
 	@Override
 	public java.util.List<String> persist(
-			java.util.List<gen.model.Seq.Next> insert,
-			java.util.List<java.util.Map.Entry<gen.model.Seq.Next, gen.model.Seq.Next>> update,
-			java.util.List<gen.model.Seq.Next> delete) throws java.sql.SQLException {
+			java.util.Collection<gen.model.Seq.Next> insert,
+			java.util.Collection<java.util.Map.Entry<gen.model.Seq.Next, gen.model.Seq.Next>> update,
+			java.util.Collection<gen.model.Seq.Next> delete) throws java.io.IOException {
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"Seq\".\"persist_Next\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			java.util.List<String> result;
@@ -225,18 +225,18 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 			try (java.sql.ResultSet rs = statement.executeQuery()) {
 				rs.next();
 				String message = rs.getString(1);
-				if (message != null) throw new java.sql.SQLException(message);
+				if (message != null) throw new java.io.IOException(message);
 			}
 			return result;
-		} catch (java.io.IOException e) {
-			throw new java.sql.SQLException(e);
+		} catch (java.sql.SQLException e) {
+			throw new java.io.IOException(e);
 		}
 	}
 
 	
-	public static void __setupSequenceID(java.util.function.BiConsumer<java.util.List<gen.model.Seq.Next>, java.sql.Connection> sequence) {
+	public static void __setupSequenceID(java.util.function.BiConsumer<java.util.Collection<gen.model.Seq.Next>, java.sql.Connection> sequence) {
 		assignSequenceID = sequence;
 	}
 
-	private static java.util.function.BiConsumer<java.util.List<gen.model.Seq.Next>, java.sql.Connection> assignSequenceID;
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.Seq.Next>, java.sql.Connection> assignSequenceID;
 }

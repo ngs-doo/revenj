@@ -136,7 +136,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 			}
 			try {
 				return query.list();
-			} catch (java.sql.SQLException e) {
+			} catch (java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -158,7 +158,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 	}
 
 	@Override
-	public String[] submit(java.util.List<gen.model.test.Clicked> domainEvents) {
+	public String[] submit(java.util.Collection<gen.model.test.Clicked> domainEvents) {
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"URI\" FROM \"test\".\"submit_Clicked\"(?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result = new String[domainEvents.size()];

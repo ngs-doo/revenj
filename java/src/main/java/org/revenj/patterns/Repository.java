@@ -1,12 +1,13 @@
 package org.revenj.patterns;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 public interface Repository<T extends Identifiable> extends SearchableRepository<T> {
 	List<T> find(String[] uris);
 
-	default List<T> find(List<String> uris) {
+	default List<T> find(Collection<String> uris) {
 		return find(uris.toArray(new String[uris.size()]));
 	}
 

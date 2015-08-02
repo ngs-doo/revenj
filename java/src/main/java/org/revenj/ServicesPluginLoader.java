@@ -7,14 +7,14 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.*;
 
-final class SimplePluginLoader implements PluginLoader {
+final class ServicesPluginLoader implements PluginLoader {
 
 	private static final String PREFIX = "META-INF/services/";
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private final ClassLoader loader;
 
-	SimplePluginLoader(ClassLoader loader) {
+	ServicesPluginLoader(ClassLoader loader) {
 		this.loader = loader != null ? loader : ClassLoader.getSystemClassLoader();
 	}
 

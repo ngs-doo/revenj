@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public class TestQuery {
 
     @Test
-    public void simpleQuery() throws IOException, SQLException {
+    public void simpleQuery() throws IOException {
         ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
         NextRepository repository = locator.resolve(NextRepository.class);
         repository.insert(new Next());
@@ -33,7 +33,7 @@ public class TestQuery {
     }
 
     @Test
-    public void queryWithFilter() throws IOException, SQLException {
+    public void queryWithFilter() throws IOException {
         ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
         NextRepository repository = locator.resolve(NextRepository.class);
         String uri = repository.insert(new Next());
@@ -44,7 +44,7 @@ public class TestQuery {
     }
 
     @Test
-    public void queryWithFilterAndCount() throws IOException, SQLException {
+    public void queryWithFilterAndCount() throws IOException {
         ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
         NextRepository repository = locator.resolve(NextRepository.class);
         String uri = repository.insert(new Next());
@@ -57,7 +57,7 @@ public class TestQuery {
     }
 
     @Test
-    public void queryWithFilterAndFindAny() throws IOException, SQLException {
+    public void queryWithFilterAndFindAny() throws IOException {
         ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
         NextRepository repository = locator.resolve(NextRepository.class);
         String uri = repository.insert(new Next());
@@ -74,7 +74,7 @@ public class TestQuery {
     }
 
     @Test
-    public void collectionContainsQuery() throws IOException, SQLException {
+    public void collectionContainsQuery() throws IOException {
         ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
         NextRepository repository = locator.resolve(NextRepository.class);
         String uri = repository.insert(new Next());
@@ -86,7 +86,7 @@ public class TestQuery {
     }
 
     @Test
-    public void uuidToString() throws IOException, SQLException {
+    public void uuidToString() throws IOException {
         ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
         CompositeRepository repository = locator.resolve(CompositeRepository.class);
         UUID id = UUID.randomUUID();
@@ -96,7 +96,7 @@ public class TestQuery {
     }
 
 	@Test
-	public void sendDomainObjectAsArgument() throws IOException, SQLException {
+	public void sendDomainObjectAsArgument() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		CompositeRepository repository = locator.resolve(CompositeRepository.class);
 		UUID id = UUID.randomUUID();
@@ -109,7 +109,7 @@ public class TestQuery {
 	}
 
 	@Test
-	public void serchWithCustomSpec() throws IOException, SQLException {
+	public void serchWithCustomSpec() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
@@ -120,7 +120,7 @@ public class TestQuery {
 	}
 
 	@Test
-	public void queryWithRegisteredSpecification() throws IOException, SQLException {
+	public void queryWithRegisteredSpecification() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());

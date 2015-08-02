@@ -111,15 +111,15 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 
 	
 	public static void __setupSequenceID() {
-		java.util.function.BiConsumer<java.util.List<SpecificReport>, java.sql.Connection> assignSequence = (items, connection) -> {
+		java.util.function.BiConsumer<java.util.Collection<SpecificReport>, java.sql.Connection> assignSequence = (items, connection) -> {
 			try (java.sql.PreparedStatement st = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT nextval('\"mixinReference\".\"SpecificReport_ID_seq\"'::regclass)::int FROM generate_series(1, ?)")) {
 				st.setInt(1, items.size());
-				java.sql.ResultSet rs = st.executeQuery();
-				int cnt = 0;
-				while (rs.next()) {
-					items.get(cnt++).ID = rs.getInt(1);
+				try (java.sql.ResultSet rs = st.executeQuery()) {
+					java.util.Iterator<SpecificReport> iterator = items.iterator();
+					while (rs.next()) {
+						iterator.next().ID = rs.getInt(1);
+					}
 				}
-				rs.close();
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}

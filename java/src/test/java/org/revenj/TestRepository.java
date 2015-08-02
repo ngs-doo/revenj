@@ -17,7 +17,7 @@ import java.util.*;
 public class TestRepository {
 
 	@Test
-	public void repositoryTest() throws IOException, SQLException {
+	public void repositoryTest() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
 		Composite co = new Composite();
@@ -49,7 +49,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void eventTest() throws IOException, SQLException {
+	public void eventTest() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
 		Clicked cl = new Clicked().setBigint(Long.MAX_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
@@ -64,7 +64,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void sequenceTest() throws IOException, SQLException {
+	public void sequenceTest() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
 		}.resolve(locator);
@@ -78,7 +78,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void simpleRootSearch() throws IOException, SQLException {
+	public void simpleRootSearch() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
 		}.resolve(locator);
@@ -89,7 +89,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void simpleEventSearch() throws IOException, SQLException {
+	public void simpleEventSearch() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
 		Clicked cl1 = new Clicked().setBigint(Long.MIN_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
@@ -101,7 +101,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void specificationRootSearch() throws IOException, SQLException {
+	public void specificationRootSearch() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
 		}.resolve(locator);
@@ -112,7 +112,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void specificationEventSearch() throws IOException, SQLException {
+	public void specificationEventSearch() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
 		Random rnd = new Random();
@@ -126,7 +126,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void specificationSnowflakeFind() throws IOException, SQLException {
+	public void specificationSnowflakeFind() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		CompositeRepository repository = locator.resolve(CompositeRepository.class);
 		CompositeListRepository listRepository = locator.resolve(CompositeListRepository.class);
@@ -136,7 +136,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void lazyLoadTest() throws IOException, SQLException {
+	public void lazyLoadTest() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		CompositeRepository compRepository = locator.resolve(CompositeRepository.class);
 		String uri = compRepository.insert(new Composite().setSimple(new Simple().setNumber(5432)));
@@ -150,7 +150,7 @@ public class TestRepository {
 	}
 
 	@Test
-	public void detailTest() throws IOException, SQLException {
+	public void detailTest() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		SingleDetailRepository sdRepository = locator.resolve(SingleDetailRepository.class);
 		String uri = sdRepository.insert(new SingleDetail());

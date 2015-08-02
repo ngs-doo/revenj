@@ -50,7 +50,7 @@ public final class Create implements ServerCommand {
 		}
 		AggregateRoot instance;
 		try {
-			instance = (AggregateRoot)input.deserialize(manifest.get(), arg.Data);
+			instance = (AggregateRoot) input.deserialize(manifest.get(), arg.Data);
 		} catch (IOException e) {
 			return CommandResult.badRequest("Error deserializing provided input for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
@@ -63,7 +63,7 @@ public final class Create implements ServerCommand {
 		try {
 			String uri = repository.insert(instance);
 			return new CommandResult<>(output.serialize(uri), "Object created", 201);
-		} catch (SQLException e) {
+		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
 	}

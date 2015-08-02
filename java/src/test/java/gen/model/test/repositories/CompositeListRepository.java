@@ -91,7 +91,7 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 			}
 			try {
 				return query.list();
-			} catch (java.sql.SQLException e) {
+			} catch (java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
 		}

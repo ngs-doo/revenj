@@ -18,22 +18,20 @@ public class ProcessingEngine {
 	public ProcessingEngine(
 			Container container,
 			WireSerialization serialization,
-			Optional<PluginLoader> extensibility,
-			Optional<ClassLoader> classLoader) throws Exception {
+			Optional<PluginLoader> extensibility) throws Exception {
+		this(container,
+				serialization,
+				extensibility.isPresent() ? extensibility.get().resolve(container, ServerCommand.class) : new ServerCommand[0]);
+	}
+
+	public ProcessingEngine(
+			Container container,
+			WireSerialization serialization,
+			ServerCommand[] commands) {
 		this.container = container;
 		this.serialization = serialization;
-		//TODO:...fix service loader in containers
-		if (extensibility.isPresent()) {
-			ServerCommand[] commands = extensibility.get().resolve(container, ServerCommand.class);
-			for (ServerCommand com : commands) {
-				serverCommands.put(com.getClass(), com);
-			}
-		} else {
-			ClassLoader cl = classLoader.orElseGet(() -> Thread.currentThread().getContextClassLoader());
-			ServiceLoader<ServerCommand> plugins = ServiceLoader.load(ServerCommand.class, cl);
-			for (ServerCommand com : plugins) {
-				serverCommands.put(com.getClass(), com);
-			}
+		for (ServerCommand com : commands) {
+			serverCommands.put(com.getClass(), com);
 		}
 	}
 

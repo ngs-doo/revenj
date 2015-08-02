@@ -1,7 +1,7 @@
 package org.revenj.patterns;
 
 import java.io.Serializable;
-import java.sql.SQLException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -23,21 +23,21 @@ public interface Query<T extends DataSource> {
 
 	<V extends Comparable<V>> Query<T> sortedDescendingBy(Compare<T, V> order);
 
-	long count() throws SQLException;
+	long count() throws IOException;
 
-	boolean anyMatch(Specification<? super T> predicate) throws SQLException;
+	boolean anyMatch(Specification<? super T> predicate) throws IOException;
 
-	boolean allMatch(Specification<? super T> predicate) throws SQLException;
+	boolean allMatch(Specification<? super T> predicate) throws IOException;
 
-	boolean noneMatch(Specification<? super T> predicate) throws SQLException;
+	boolean noneMatch(Specification<? super T> predicate) throws IOException;
 
-	Optional<T> findFirst() throws SQLException;
+	Optional<T> findFirst() throws IOException;
 
-	Optional<T> findAny() throws SQLException;
+	Optional<T> findAny() throws IOException;
 
-	List<T> list() throws SQLException;
+	List<T> list() throws IOException;
 
-	default Stream<T> stream() throws SQLException {
+	default Stream<T> stream() throws IOException {
 		return list().stream();
 	}
 }

@@ -1,21 +1,21 @@
 package org.revenj.patterns;
 
-import java.sql.SQLException;
+import java.io.IOException;
 import java.util.*;
 
 public interface PersistableRepository<T extends AggregateRoot> extends Repository<T> {
 
-	List<String> persist(List<T> insert, List<Map.Entry<T, T>> update, List<T> delete) throws SQLException;
+	List<String> persist(Collection<T> insert, Collection<Map.Entry<T, T>> update, Collection<T> delete) throws IOException;
 
-	default List<String> insert(List<T> items) throws SQLException {
+	default List<String> insert(Collection<T> items) throws IOException {
 		return persist(items, null, null);
 	}
 
-	default String insert(T item) throws SQLException {
+	default String insert(T item) throws IOException {
 		return persist(Collections.singletonList(item), null, null).get(0);
 	}
 
-	default void update(List<T> items) throws SQLException {
+	default void update(Collection<T> items) throws IOException {
 		List<Map.Entry<T, T>> pairs = new ArrayList<>(items.size());
 		for (T item : items) {
 			pairs.add(new AbstractMap.SimpleEntry<T, T>(null, item));
@@ -23,19 +23,19 @@ public interface PersistableRepository<T extends AggregateRoot> extends Reposito
 		persist(null, pairs, null);
 	}
 
-	default void update(T old, T current) throws SQLException {
+	default void update(T old, T current) throws IOException {
 		persist(null, Collections.singletonList(new AbstractMap.SimpleEntry<T, T>(old, current)), null);
 	}
 
-	default void update(T item) throws SQLException {
+	default void update(T item) throws IOException {
 		persist(null, Collections.singletonList(new AbstractMap.SimpleEntry<T, T>(null, item)), null);
 	}
 
-	default void delete(List<T> items) throws SQLException {
+	default void delete(Collection<T> items) throws IOException {
 		persist(null, null, items);
 	}
 
-	default void delete(T item) throws SQLException {
+	default void delete(T item) throws IOException {
 		persist(null, null, Collections.singletonList(item));
 	}
 }

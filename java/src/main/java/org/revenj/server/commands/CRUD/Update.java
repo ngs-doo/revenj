@@ -71,7 +71,7 @@ public final class Update implements ServerCommand {
 			}
 			repository.update(found.get(), instance);
 			return new CommandResult<>(output.serialize(instance), "Object changed", 200);
-		} catch (SQLException e) {
+		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
 	}
