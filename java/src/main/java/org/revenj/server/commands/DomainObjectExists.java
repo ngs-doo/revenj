@@ -1,21 +1,18 @@
-package org.revenj.server.commands.search;
+package org.revenj.server.commands;
 
 import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
-import org.revenj.server.commands.Utility;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-public class SearchDomainObject implements ServerCommand {
+public class DomainObjectExists implements ServerCommand {
 
 	private final DomainModel domainModel;
 
-	public SearchDomainObject(DomainModel domainModel) {
+	public DomainObjectExists(DomainModel domainModel) {
 		this.domainModel = domainModel;
 	}
 
@@ -23,17 +20,11 @@ public class SearchDomainObject implements ServerCommand {
 		public String Name;
 		public String SpecificationName;
 		public TFormat Specification;
-		public Integer Offset;
-		public Integer Limit;
-		public Map<String, String> Order;
 
-		public Argument(String name, String specificationName, TFormat specification, Integer offset, Integer limit, Map<String, String> order) {
+		public Argument(String name, String specificationName, TFormat specification) {
 			this.Name = name;
 			this.SpecificationName = specificationName;
 			this.Specification = specification;
-			this.Offset = offset;
-			this.Limit = limit;
-			this.Order = order;
 		}
 
 		@SuppressWarnings("unused")
@@ -80,7 +71,11 @@ public class SearchDomainObject implements ServerCommand {
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
-		List<AggregateRoot> found = repository.search(filter, Optional.ofNullable(arg.Limit), Optional.ofNullable(arg.Offset));
-		return CommandResult.success("Found " + found.size() + " items", output.serialize(found));
+		try {
+			boolean found = repository.query().anyMatch(filter.orElse(null));
+			return CommandResult.success(Boolean.toString(found), output.serialize(found));
+		} catch (IOException e) {
+			return CommandResult.badRequest("Error executing query. " + e.getMessage());
+		}
 	}
 }

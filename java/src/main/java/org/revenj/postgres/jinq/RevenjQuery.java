@@ -22,6 +22,7 @@ class RevenjQuery<T extends DataSource> implements Query<T> {
 
 	@Override
 	public Query<T> filter(Specification<T> predicate) {
+		if (predicate == null) return this;
 		RevenjQueryComposer newComposer = this.queryComposer.where(predicate);
 		return makeQueryStream(newComposer);
 	}
@@ -62,7 +63,7 @@ class RevenjQuery<T extends DataSource> implements Query<T> {
 	@Override
 	public boolean anyMatch(Specification<? super T> predicate) throws IOException {
 		try {
-			return this.queryComposer.where(predicate).any();
+			return predicate != null ? this.queryComposer.where(predicate).any() : this.queryComposer.any();
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
@@ -80,7 +81,7 @@ class RevenjQuery<T extends DataSource> implements Query<T> {
 	@Override
 	public boolean noneMatch(Specification<? super T> predicate) throws IOException {
 		try {
-			return this.queryComposer.where(predicate).none();
+			return predicate != null ? this.queryComposer.where(predicate).none() : this.queryComposer.none();
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
