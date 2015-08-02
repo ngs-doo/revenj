@@ -88,8 +88,7 @@ public final class Simple   implements java.io.Serializable {
 		this.nb = nb;
 	}
 
-	
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = -291381243082712657L;
 	
 	private int number;
 

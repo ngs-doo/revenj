@@ -86,8 +86,7 @@ public class Entity   implements java.io.Serializable {
 		setComposite(composite);
 	}
 
-	
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = 1195384034376131948L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

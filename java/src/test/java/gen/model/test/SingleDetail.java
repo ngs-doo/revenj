@@ -64,8 +64,7 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 	public String toString() {
 		return "SingleDetail(" + URI + ')';
 	}
-	
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = -6070953689689103614L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

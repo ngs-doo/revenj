@@ -79,8 +79,7 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 		setSd(sd);
 	}
 
-	
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = -5450737743208180488L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private LazyLoad(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

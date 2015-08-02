@@ -72,8 +72,7 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		setName(name);
 	}
 
-	
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = -877654453748777979L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

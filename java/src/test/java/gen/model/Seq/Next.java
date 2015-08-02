@@ -61,8 +61,7 @@ public class Next   implements java.io.Serializable, org.revenj.patterns.Aggrega
 	public String toString() {
 		return "Next(" + URI + ')';
 	}
-	
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = 3516683802980100636L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Next(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -130,7 +129,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = 912439880943059786L;
 	
 	private Integer min;
 

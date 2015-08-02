@@ -75,8 +75,7 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		setAuthor(author);
 	}
 
-	
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = -8331585046799064526L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

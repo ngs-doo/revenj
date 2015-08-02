@@ -141,6 +141,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Composite.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEnn", "\"enn\"");
+		metamodel.registerProperty(gen.model.test.Composite.class, "getEn", "\"en\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getSimple", "\"simple\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"");
@@ -154,6 +155,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEnn", "\"enn\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEn", "\"en\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getSimple", "\"simple\"");
 		test$converter$EntityConverter.configure(container);

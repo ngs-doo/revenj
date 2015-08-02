@@ -10,6 +10,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 			@com.fasterxml.jackson.annotation.JsonProperty("URI")  final String URI,
 			@com.fasterxml.jackson.annotation.JsonProperty("id")  final java.util.UUID id,
 			@com.fasterxml.jackson.annotation.JsonProperty("enn")  final gen.model.test.En[] enn,
+			@com.fasterxml.jackson.annotation.JsonProperty("en")  final gen.model.test.En en,
 			@com.fasterxml.jackson.annotation.JsonProperty("entities")  final java.util.List<gen.model.test.Entity> entities,
 			@com.fasterxml.jackson.annotation.JsonProperty("simple")  final gen.model.test.Simple simple) {
 			
@@ -17,6 +18,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 		this.id = id != null ? id : new java.util.UUID(0L, 0L);
 		this.enn = enn != null ? enn : new gen.model.test.En[] { };
 		org.revenj.Guards.checkNulls(enn);
+		this.en = en != null ? en : gen.model.test.En.A;
 		this.entities = entities != null ? entities : new java.util.ArrayList<gen.model.test.Entity>(4);
 		org.revenj.Guards.checkNulls(entities);
 		this.simple = simple != null ? simple : new gen.model.test.Simple();
@@ -29,6 +31,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 		this.URI = java.util.UUID.randomUUID().toString();
 		this.id = java.util.UUID.randomUUID();
 		this.enn = new gen.model.test.En[] { };
+		this.en = gen.model.test.En.A;
 		this.entities = new java.util.ArrayList<gen.model.test.Entity>(4);
 		this.simple = new gen.model.test.Simple();
 	}
@@ -67,8 +70,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = -7158436314497071898L;
 	
 	private final java.util.UUID id;
 
@@ -87,6 +89,16 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	public gen.model.test.En[] getEnn()  {
 		
 		return this.enn;
+	}
+
+	
+	private final gen.model.test.En en;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("en")
+	public gen.model.test.En getEn()  {
+		
+		return this.en;
 	}
 
 	
@@ -128,7 +140,7 @@ public static class ForSimple   implements java.io.Serializable {
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = 0x0097000a;
+	private static final long serialVersionUID = 1574868718660017412L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 

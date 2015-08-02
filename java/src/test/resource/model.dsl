@@ -17,6 +17,7 @@ module test {
 	root Composite(id) {
 		uuid id;
 		En[] enn;
+		En en;
 		Simple simple;
 		List<Entity> entities;
 		detail<LazyLoad.comp> lazies;
@@ -27,6 +28,7 @@ module test {
 	snowflake<Composite> CompositeList {
 		id;
 		enn;
+		en;
 		entities;
 		simple;
 		specification ForSimple 'it => simples.Contains(it.simple)' {
