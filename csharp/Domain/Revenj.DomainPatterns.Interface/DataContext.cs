@@ -143,6 +143,25 @@ namespace Revenj.DomainPatterns
 			context.Update(pairs);
 		}
 		/// <summary>
+		/// Bulk update existing aggregate roots.
+		/// Data will be sent immediately to the backing store.
+		/// Change tracking value will be used if available.
+		/// </summary>
+		/// <typeparam name="T">aggregate type</typeparam>
+		/// <param name="context">data context</param>
+		/// <param name="aggregates">aggregate root instances</param>
+		public static void Update<T>(this IDataContext context, T[] aggregates) where T : IAggregateRoot
+		{
+			var pairs = new KeyValuePair<T, T>[aggregates.Length];
+			for (int i = 0; i < aggregates.Length; i++)
+			{
+				var agg = aggregates[i];
+				var ct = agg as IChangeTracking<T>;
+				pairs[i++] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), agg);
+			}
+			context.Update(pairs);
+		}
+		/// <summary>
 		/// Update existing aggregate root.
 		/// Data will be sent immediately to the backing store.
 		/// Change tracking value will be used if available.
