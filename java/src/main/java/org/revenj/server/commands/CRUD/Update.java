@@ -1,14 +1,10 @@
 package org.revenj.server.commands.CRUD;
 
-import org.revenj.Utils;
 import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
-import org.revenj.server.commands.Utility;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.sql.SQLException;
 import java.util.Optional;
 
 public final class Update implements ServerCommand {
@@ -39,8 +35,7 @@ public final class Update implements ServerCommand {
 	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
 		Argument<TInput> arg;
 		try {
-			Type genericType = Utils.makeGenericType(Argument.class, data.getClass());
-			arg = (Argument) input.deserialize(genericType, data);
+			arg = input.deserialize(data, Argument.class, data.getClass());
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
@@ -61,7 +56,7 @@ public final class Update implements ServerCommand {
 		}
 		PersistableRepository repository;
 		try {
-			repository = Utility.resolvePersistableRepository(locator, manifest.get());
+			repository = locator.resolve(PersistableRepository.class, manifest.get());
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}

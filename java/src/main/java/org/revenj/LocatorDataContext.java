@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-class LocatorDataContext implements DataContext {
+final class LocatorDataContext implements DataContext {
 	private final ServiceLocator locator;
 	private ConcurrentHashMap<Class<?>, SearchableRepository> repositories;
 	private ConcurrentHashMap<Class<?>, DomainEventStore> eventStores;

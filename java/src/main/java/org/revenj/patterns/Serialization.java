@@ -1,5 +1,7 @@
 package org.revenj.patterns;
 
+import org.revenj.Utils;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 
@@ -9,7 +11,12 @@ public interface Serialization<TFormat> {
 	Object deserialize(Type type, TFormat data) throws IOException;
 
 	@SuppressWarnings("unchecked")
-	default <T> T deserialize(Class<T> manifest, TFormat data) throws IOException {
-		return (T) deserialize((Type) manifest, data);
+	default <T> T deserialize(TFormat data, Class<T> manifest) throws IOException {
+		return (T) deserialize(manifest, data);
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(TFormat data, Class<T> container, Type argument, Type... arguments) throws IOException {
+		return (T) deserialize(Utils.makeGenericType(container, argument, arguments), data);
 	}
 }

@@ -1,12 +1,10 @@
 package org.revenj.server.commands;
 
-import org.revenj.Utils;
 import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Optional;
 
 public class SubmitEvent implements ServerCommand {
@@ -37,8 +35,7 @@ public class SubmitEvent implements ServerCommand {
 	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
 		Argument<TInput> arg;
 		try {
-			Type genericType = Utils.makeGenericType(Argument.class, data.getClass());
-			arg = (Argument) input.deserialize(genericType, data);
+			arg = input.deserialize(data, Argument.class, data.getClass());
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
@@ -57,7 +54,7 @@ public class SubmitEvent implements ServerCommand {
 		}
 		DomainEventStore store;
 		try {
-			store = Utility.resolveEventStore(locator, manifest.get());
+			store = locator.resolve(DomainEventStore.class, manifest.get());
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving event store for: " + arg.Name + ". Reason: " + e.getMessage());
 		}

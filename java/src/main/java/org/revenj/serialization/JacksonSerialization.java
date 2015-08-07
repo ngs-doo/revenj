@@ -13,11 +13,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 
-class JsonSerialization implements Serialization<String> {
+final class JacksonSerialization implements Serialization<String> {
 
 	private final ObjectMapper mapper;
 
-	public JsonSerialization(ServiceLocator locator) {
+	public JacksonSerialization(ServiceLocator locator) {
 		mapper = new ObjectMapper()
 				.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
-class SimpleContainer implements Container {
+final class SimpleContainer implements Container {
 
 	private static class Registration<T> {
 		public final SimpleContainer owner;

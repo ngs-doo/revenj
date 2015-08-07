@@ -6,7 +6,6 @@ import org.revenj.patterns.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
-import org.revenj.server.commands.Utility;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -37,7 +36,7 @@ public final class Read implements ServerCommand {
 	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
 		Argument arg;
 		try {
-			arg = input.deserialize(Argument.class, data);
+			arg = input.deserialize(data, Argument.class);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
@@ -47,7 +46,7 @@ public final class Read implements ServerCommand {
 		}
 		Repository repository;
 		try {
-			repository = Utility.resolveRepository(locator, manifest.get());
+			repository = locator.resolve(Repository.class, manifest.get());
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}

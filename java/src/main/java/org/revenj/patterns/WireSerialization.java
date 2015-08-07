@@ -1,5 +1,7 @@
 package org.revenj.patterns;
 
+import org.revenj.Utils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,20 +17,44 @@ public interface WireSerialization {
 
 	Object deserialize(Type type, InputStream stream, String accept) throws IOException;
 
-	default <T> T deserialize(Class<T> manifest, Bytes data, String accept) throws IOException {
-		return (T) deserialize((Type)manifest, data, accept);
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(Bytes data, String accept, Class<T> manifest) throws IOException {
+		return (T) deserialize(manifest, data, accept);
 	}
 
-	default <T> T deserialize(Class<T> manifest, byte[] data, String accept) throws IOException {
-		return (T) deserialize((Type)manifest, new Bytes(data, data.length), accept);
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(Bytes data, String accept, Class<T> container, Type argument, Type... arguments) throws IOException {
+		return (T) deserialize(Utils.makeGenericType(container, argument, arguments), data, accept);
 	}
 
-	default <T> T deserialize(Class<T> manifest, byte[] data, int length, String accept) throws IOException {
-		return (T) deserialize((Type)manifest, new Bytes(data, length), accept);
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(byte[] data, String accept, Class<T> manifest) throws IOException {
+		return (T) deserialize(manifest, new Bytes(data, data.length), accept);
 	}
 
-	default <T> T deserialize(Class<T> manifest, InputStream stream, String accept) throws IOException {
-		return (T) deserialize((Type)manifest, stream, accept);
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(byte[] data, String accept, Class<T> container, Type argument, Type... arguments) throws IOException {
+		return (T) deserialize(Utils.makeGenericType(container, argument, arguments), new Bytes(data, data.length), accept);
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(byte[] data, int length, String accept, Class<T> manifest) throws IOException {
+		return (T) deserialize(manifest, new Bytes(data, length), accept);
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(byte[] data, int length, String accept, Class<T> container, Type argument, Type... arguments) throws IOException {
+		return (T) deserialize(Utils.makeGenericType(container, argument, arguments), new Bytes(data, length), accept);
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(InputStream stream, String accept, Class<T> manifest) throws IOException {
+		return (T) deserialize(manifest, stream, accept);
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(InputStream stream, String accept, Class<T> container, Type argument, Type... arguments) throws IOException {
+		return (T) deserialize(Utils.makeGenericType(container, argument, arguments), stream, accept);
 	}
 
 	<TFormat> Optional<Serialization<TFormat>> find(Class<TFormat> format);

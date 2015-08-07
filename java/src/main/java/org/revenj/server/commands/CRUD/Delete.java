@@ -4,11 +4,9 @@ import org.revenj.Utils;
 import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
-import org.revenj.server.commands.Utility;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.sql.SQLException;
 import java.util.Optional;
 
 public final class Delete implements ServerCommand {
@@ -48,7 +46,7 @@ public final class Delete implements ServerCommand {
 		}
 		PersistableRepository repository;
 		try {
-			repository = Utility.resolvePersistableRepository(locator, manifest.get());
+			repository = locator.resolve(PersistableRepository.class, manifest.get());
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}

@@ -4,7 +4,6 @@ import org.revenj.Utils;
 import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
-import org.revenj.server.commands.Utility;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -46,8 +45,7 @@ public class SearchDomainObject implements ServerCommand {
 	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
 		Argument<TInput> arg;
 		try {
-			Type genericType = Utils.makeGenericType(Argument.class, data.getClass());
-			arg = (Argument) input.deserialize(genericType, data);
+			arg = input.deserialize(data, Argument.class, data.getClass());
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
@@ -77,7 +75,7 @@ public class SearchDomainObject implements ServerCommand {
 		}
 		SearchableRepository repository;
 		try {
-			repository = Utility.resolveSearchRepository(locator, manifest.get());
+			repository = locator.resolve(SearchableRepository.class, manifest.get());
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}

@@ -78,7 +78,7 @@ public class TestProcessingEngine {
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		CommandResultDescription<String> description = result.executedCommandResults[0];
 		Assert.assertEquals(201, description.result.status);
-		String uri = json.deserialize(String.class, description.result.data);
+		String uri = json.deserialize(description.result.data, String.class);
 		Assert.assertEquals(composite.getId().toString(), uri);
 		cd = new ServerCommandDescription<>(
 				null,
@@ -93,7 +93,7 @@ public class TestProcessingEngine {
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		description = result.executedCommandResults[0];
 		Assert.assertEquals(200, description.result.status);
-		Composite c2 = json.deserialize(Composite.class, description.result.data);
+		Composite c2 = json.deserialize(description.result.data, Composite.class);
 		//Assert.assertEquals(composite, c2);//TODO
 		Assert.assertEquals(composite.getId(), c2.getId());
 		Assert.assertEquals(composite.getSimple(), c2.getSimple());

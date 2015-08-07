@@ -11,12 +11,12 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
-public class RevenjSerialization implements WireSerialization {
-	private final JsonSerialization json;
+public final class RevenjSerialization implements WireSerialization {
+	private final JacksonSerialization json;
 	private final PassThroughSerialization passThrough;
 
 	public RevenjSerialization(ServiceLocator locator) {
-		this.json = new JsonSerialization(locator);
+		this.json = new JacksonSerialization(locator);
 		this.passThrough = new PassThroughSerialization();
 	}
 

@@ -3,7 +3,7 @@ package org.revenj;
 import java.math.BigDecimal;
 import java.util.*;
 
-public class Guards {
+public abstract class Guards {
 	public static <T> void checkNulls(final Iterable<T> values) {
 		if (values == null) return;
 

@@ -5,7 +5,7 @@ import org.revenj.patterns.Serialization;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-class PassThroughSerialization implements Serialization<Object> {
+final class PassThroughSerialization implements Serialization<Object> {
 
 	@Override
 	public Object serialize(Object value) {

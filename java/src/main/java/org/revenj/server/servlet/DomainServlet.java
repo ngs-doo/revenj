@@ -13,13 +13,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.function.Function;
 
 public class DomainServlet extends HttpServlet {
-
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private final DomainModel model;
 	private final ProcessingEngine engine;
@@ -47,7 +44,7 @@ public class DomainServlet extends HttpServlet {
 				} else {
 					Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
 					Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
-					SearchDomainObject.Argument arg = new SearchDomainObject.Argument(name.get(), spec, null, offset, limit, null);
+					SearchDomainObject.Argument arg = new SearchDomainObject.Argument(name.get(), null, null, offset, limit, null);
 					Utility.executeJson(engine, res, SearchDomainObject.class, arg);
 				}
 			} else res.sendError(405, "Invalid URL path: " + path);
@@ -58,7 +55,7 @@ public class DomainServlet extends HttpServlet {
 				if (spec != null) {
 					res.sendError(405, "Parsing specification from URL argument not yet supported. Use PUT method instead");
 				} else {
-					CountDomainObject.Argument arg = new CountDomainObject.Argument(name.get(), spec, null);
+					CountDomainObject.Argument arg = new CountDomainObject.Argument(name.get(), null, null);
 					Utility.executeJson(engine, res, CountDomainObject.class, arg);
 				}
 			} else res.sendError(405, "Invalid URL path: " + path);
@@ -69,7 +66,7 @@ public class DomainServlet extends HttpServlet {
 				if (spec != null) {
 					res.sendError(405, "Parsing specification from URL argument not yet supported. Use PUT method instead");
 				} else {
-					DomainObjectExists.Argument arg = new DomainObjectExists.Argument(name.get(), spec, null);
+					DomainObjectExists.Argument arg = new DomainObjectExists.Argument(name.get(), null, null);
 					Utility.executeJson(engine, res, DomainObjectExists.class, arg);
 				}
 			} else res.sendError(405, "Invalid URL path: " + path);
@@ -87,7 +84,7 @@ public class DomainServlet extends HttpServlet {
 	protected void doPut(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String path = req.getPathInfo();
 		if (path.startsWith("/find/")) {
-			String[] uris = serialization.deserialize(String[].class, req.getInputStream(), req.getContentType());
+			String[] uris = serialization.deserialize(req.getInputStream(), req.getContentType(), String[].class);
 			findType(path, "/find/", res).ifPresent(name -> {
 				GetDomainObject.Argument arg = new GetDomainObject.Argument(name, uris, "match".equals(req.getParameter("order")));
 				Utility.executeJson(engine, res, GetDomainObject.class, arg);
@@ -95,8 +92,8 @@ public class DomainServlet extends HttpServlet {
 		} else if (path.startsWith("/search/")) {
 			final Optional<String> name = findType(path, "/search/", res);
 			if (name.isPresent()) {
-				final Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
-				final Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
+				Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
+				Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
 				executeWithSpecification(
 						SearchDomainObject.class,
 						req,
