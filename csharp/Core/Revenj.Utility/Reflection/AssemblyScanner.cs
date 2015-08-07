@@ -37,6 +37,8 @@ namespace Revenj.Utility
 						 && !asm.FullName.StartsWith("Microsoft.")
 						 && !asm.FullName.StartsWith("System.")
 						 && !asm.FullName.StartsWith("mscorlib")
+						 && !asm.FullName.StartsWith("Oracle.DataAccess")
+						 && !asm.FullName.StartsWith("Revenj.DatabasePersistence.Oracle")
 					 select asm).Distinct());
 			}
 			return AllAssemblies;

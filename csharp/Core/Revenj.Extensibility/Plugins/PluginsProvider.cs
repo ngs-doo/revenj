@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using Revenj.Common;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Utility;
 
 namespace Revenj.Extensibility
 {
-	public abstract class PluginsProvider : IExtensibilityProvider
+	internal abstract class PluginsProvider : IExtensibilityProvider
 	{
 		private readonly IMixinProvider MixinProvider;
 		private readonly IResolution Container;
@@ -28,6 +30,48 @@ namespace Revenj.Extensibility
 
 			this.MixinProvider = mixinProvider;
 			this.Container = container;
+		}
+
+		internal static List<Assembly> FindPlugins(PluginsConfiguration configuration)
+		{
+			var assemblies = new List<Assembly>();
+			if (configuration.Directories.Count == 0 && configuration.Assemblies.Count == 0)
+			{
+				var rootPath = AppDomain.CurrentDomain.BaseDirectory ?? typeof(AutofacMefProvider).Assembly.Location;
+				foreach (var f in Directory.GetFiles(rootPath, "*.Plugins.*.dll", SearchOption.TopDirectoryOnly))
+				{
+					try { assemblies.Add(Assembly.LoadFrom(f)); }
+					catch (Exception aex)
+					{
+						System.Diagnostics.Debug.WriteLine(aex.ToString());
+						throw new FrameworkException("Error loading plugin: " + f, aex);
+					}
+				}
+			}
+			foreach (var directory in configuration.Directories)
+			{
+				if (directory != null)
+				{
+					foreach (var f in Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly))
+					{
+						var name = Path.GetFileNameWithoutExtension(f);
+						//TODO: temporary hack, will clean up later
+						if (name != "Oracle.DataAccess" && name != "Revenj.DatabasePersistence.Oracle")
+						{
+							try { assemblies.Add(Assembly.LoadFrom(f)); }
+							catch (Exception aex)
+							{
+								System.Diagnostics.Debug.WriteLine(aex.ToString());
+								throw new FrameworkException("Error loading plugin: " + f, aex);
+							}
+						}
+					}
+				}
+			}
+			foreach (var asm in configuration.Assemblies)
+				if (asm != null)
+					assemblies.Add(asm);
+			return assemblies;
 		}
 
 		public IEnumerable<Type> FindPlugins<TService>(Func<Type, Type, bool> filter)

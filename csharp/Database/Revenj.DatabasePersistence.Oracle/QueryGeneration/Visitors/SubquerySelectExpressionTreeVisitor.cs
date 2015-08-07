@@ -158,6 +158,9 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors
 				foreach (var mm in Query.MemberMatchers)
 					if (mm.TryMatch(expression, sb, exp => sb.Append(plain), ctx))
 						break;
+				foreach (var mm in QueryParts.StaticMemberMatchers)
+					if (mm.TryMatch(expression, sb, exp => sb.Append(plain), ctx))
+						break;
 				if (sb.Length > 0)
 				{
 					if (last.Name != null)//TODO: last.name!?

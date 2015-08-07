@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using DryIoc;
 using DryIoc.MefAttributedModel;
 using Revenj.Common;
@@ -25,35 +23,30 @@ namespace Revenj.Extensibility
 			public DryIocResolution(IContainer container, PluginsConfiguration configuration)
 			{
 				this.Container = container.OpenScopeWithoutContext();
-				var assemblies = new List<Assembly>();
 				try
 				{
-					if (configuration.Directories != null)
+					var assemblies = FindPlugins(configuration);
+					if (assemblies.Count > 0)
 					{
-						foreach (var directory in configuration.Directories)
-							if (directory != null)
+						var exports = AttributedModel.Scan(assemblies);
+						foreach (var info in exports)
+						{
+							if (!info.ImplementationType.IsStatic())
 							{
-								var files = Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly);
-								foreach (var f in files)
+								var factory = info.CreateFactory();
+								for (var i = 0; i < info.Exports.Length; i++)
 								{
-									var name = Path.GetFileNameWithoutExtension(f);
-									if (name != "Oracle.DataAccess")
-									{
-										try
-										{
-											assemblies.Add(Assembly.LoadFrom(f));
-										}
-										catch (Exception aex)
-										{
-											System.Diagnostics.Debug.WriteLine(aex.ToString());
-											throw new FrameworkException("Error loading plugin: " + f, aex);
-										}
-									}
+									var export = info.Exports[i];
+									Container.Register(factory,
+										export.ServiceType, export.ServiceKeyInfo.Key, IfAlreadyRegistered.AppendNotKeyed, true);
 								}
 							}
+
+							if (info.IsFactory)
+								AttributedModel.RegisterFactoryMethods(Container, info);
+						}
+						//this.Container.RegisterExports(exports);
 					}
-					if (configuration.Assemblies != null)
-						assemblies.AddRange(configuration.Assemblies.Where(it => !it.FullName.StartsWith("Oracle.DataAccess")));
 				}
 				catch (System.Reflection.ReflectionTypeLoadException ex)
 				{
@@ -66,27 +59,6 @@ namespace Revenj.Extensibility
 				{
 					System.Diagnostics.Debug.WriteLine(ex.ToString());
 					throw new FrameworkException("Error loading plugins.", ex);
-				}
-				if (assemblies.Count > 0)
-				{
-					var exports = AttributedModel.Scan(assemblies);
-					foreach (var info in exports)
-					{
-						if (!info.ImplementationType.IsStatic())
-						{
-							var factory = info.CreateFactory();
-							for (var i = 0; i < info.Exports.Length; i++)
-							{
-								var export = info.Exports[i];
-								Container.Register(factory,
-									export.ServiceType, export.ServiceKeyInfo.Key, IfAlreadyRegistered.AppendNotKeyed, true);
-							}
-						}
-
-						if (info.IsFactory)
-							AttributedModel.RegisterFactoryMethods(Container, info);
-					}
-					//this.Container.RegisterExports(exports);
 				}
 			}
 

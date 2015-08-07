@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using Revenj.Common;
 using Revenj.Extensibility.Autofac;
@@ -29,36 +28,9 @@ namespace Revenj.Extensibility
 				{
 					try
 					{
-						var assemblies = new List<Assembly>();
-						if (configuration.Directories != null)
-						{
-							foreach (var directory in configuration.Directories)
-								if (directory != null)
-								{
-									var files = Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly);
-									foreach (var f in files)
-									{
-										var name = Path.GetFileNameWithoutExtension(f);
-										if (name != "Oracle.DataAccess")
-										{
-											try
-											{
-												assemblies.Add(Assembly.LoadFrom(f));
-											}
-											catch (Exception aex)
-											{
-												System.Diagnostics.Debug.WriteLine(aex.ToString());
-												throw new FrameworkException("Error loading plugin: " + f, aex);
-											}
-										}
-									}
-								}
-						}
-						if (configuration.Assemblies != null)
-							assemblies.AddRange(configuration.Assemblies);
+						var assemblies = FindPlugins(configuration);
 						foreach (var asm in assemblies)
-							if (asm != null && !asm.FullName.StartsWith("Oracle.DataAccess"))
-								builder.RegisterComposablePartCatalog(new AssemblyCatalog(asm));
+							builder.RegisterComposablePartCatalog(new AssemblyCatalog(asm));
 					}
 					catch (System.Reflection.ReflectionTypeLoadException ex)
 					{

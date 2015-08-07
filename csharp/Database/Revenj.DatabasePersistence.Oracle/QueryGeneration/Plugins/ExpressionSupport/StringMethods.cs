@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -9,8 +8,7 @@ using Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport
 {
-	[Export(typeof(IExpressionMatcher))]
-	public class StringMethods : IExpressionMatcher
+	internal class StringMethods : IExpressionMatcher
 	{
 		private delegate void MethodCallDelegate(
 			MethodCallExpression methodCall,
@@ -54,6 +52,8 @@ namespace Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport
 			SupportedMethods.Add(typeof(string).GetMethod("Replace", new Type[] { typeof(char), typeof(char) }), ReplaceString);
 			SupportedMethods.Add(typeof(string).GetMethod("IsNullOrEmpty", new[] { typeof(string) }), IsNullOrEmpty);
 			SupportedMethods.Add(typeof(string).GetMethod("IsNullOrWhiteSpace", new[] { typeof(string) }), IsNullOrWhiteSpace);
+			SupportedMethods.Add(typeof(string).GetMethod("Substring", new[] { typeof(int) }), SubstringFrom);
+			SupportedMethods.Add(typeof(string).GetMethod("Substring", new[] { typeof(int), typeof(int) }), SubstringFromTo);
 		}
 
 		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
@@ -287,6 +287,40 @@ namespace Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport
 			queryBuilder.Append("TRIM(");
 			visitExpression(methodCall.Arguments[0]);
 			queryBuilder.Append(") IS NULL ");
+		}
+
+		private static void SubstringFrom(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		{
+			queryBuilder.Append("SUBSTR(");
+			visitExpression(methodCall.Object);
+			queryBuilder.Append(",");
+			var ce = methodCall.Arguments[0] as ConstantExpression;
+			if (ce != null && ce.Type == typeof(int))
+				queryBuilder.Append(1 + (int)ce.Value);
+			else
+			{
+				queryBuilder.Append("1 + ");
+				visitExpression(methodCall.Arguments[0]);
+			}
+			queryBuilder.Append(")");
+		}
+
+		private static void SubstringFromTo(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		{
+			queryBuilder.Append("SUBSTR(");
+			visitExpression(methodCall.Object);
+			queryBuilder.Append(",");
+			var ce = methodCall.Arguments[0] as ConstantExpression;
+			if (ce != null && ce.Type == typeof(int))
+				queryBuilder.Append(1 + (int)ce.Value);
+			else
+			{
+				queryBuilder.Append("1 + ");
+				visitExpression(methodCall.Arguments[0]);
+			}
+			queryBuilder.Append(",");
+			visitExpression(methodCall.Arguments[1]);
+			queryBuilder.Append(")");
 		}
 	}
 }

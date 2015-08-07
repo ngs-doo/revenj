@@ -5,7 +5,7 @@ namespace Revenj.Extensibility
 {
 	internal class PluginsConfiguration
 	{
-		public IEnumerable<string> Directories { get; set; }
-		public IEnumerable<Assembly> Assemblies { get; set; }
+		public List<string> Directories { get; set; }
+		public List<Assembly> Assemblies { get; set; }
 	}
 }

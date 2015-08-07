@@ -96,6 +96,9 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors
 			foreach (var candidate in QueryParts.ExpressionMatchers)
 				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
 					return expression;
+			foreach (var candidate in QueryParts.StaticExpressionMatchers)
+				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
+					return expression;
 
 			switch (expression.NodeType)
 			{
@@ -235,6 +238,9 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors
 			foreach (var candidate in QueryParts.MemberMatchers)
 				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
 					return expression;
+			foreach (var candidate in QueryParts.StaticMemberMatchers)
+				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
+					return expression;
 
 			if (BinaryLevel == 0 && Level == 1 || BinaryLevel + 1 < Level)
 			{
@@ -312,6 +318,9 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors
 		protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
 		{
 			foreach (var candidate in QueryParts.ExpressionMatchers)
+				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
+					return expression;
+			foreach (var candidate in QueryParts.StaticExpressionMatchers)
 				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
 					return expression;
 

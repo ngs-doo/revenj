@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -9,8 +8,7 @@ using Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport
 {
-	[Export(typeof(IMemberMatcher))]
-	public class CommonMembers : IMemberMatcher
+	internal class CommonMembers : IMemberMatcher
 	{
 		private delegate void MemberCallDelegate(MemberExpression memberAccess, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context);
 

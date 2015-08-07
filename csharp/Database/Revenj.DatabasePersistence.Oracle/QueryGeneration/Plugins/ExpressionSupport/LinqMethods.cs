@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,8 +11,7 @@ using Revenj.DomainPatterns;
 
 namespace Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport
 {
-	[Export(typeof(IExpressionMatcher))]
-	public class LinqMethods : IExpressionMatcher
+	internal class LinqMethods : IExpressionMatcher
 	{
 		private delegate bool MethodCallDelegate(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression);
 

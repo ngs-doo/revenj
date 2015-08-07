@@ -2,8 +2,6 @@
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using Revenj.DatabasePersistence.Oracle;
-using Revenj.DatabasePersistence.Postgres;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Security;
@@ -25,7 +23,7 @@ namespace Revenj.Core
 				.ToArray();
 			var assemblies =
 				from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
-				where asm.FullName.StartsWith("Revenj.") && !asm.FullName.StartsWith("Oracle.DataAccess")
+				where asm.FullName.StartsWith("Revenj.")
 				select asm;
 			var state = new SystemState();
 			var builder = container == DSL.Core.Container.Autofac
@@ -33,9 +31,9 @@ namespace Revenj.Core
 				: Revenj.Extensibility.Setup.UseDryIoc(assemblies, dllPlugins, false);
 			builder.RegisterSingleton<ISystemState>(state);
 			if (database == Core.Database.Postgres)
-				builder.ConfigurePostgres(connectionString);
+				SetupPostgres(builder, connectionString);
 			else
-				builder.ConfigureOracle(connectionString);
+				SetupOracle(builder, connectionString);
 			var serverModels =
 				(from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
 				 let type = asm.GetType("SystemBoot.Configuration")
@@ -51,6 +49,16 @@ namespace Revenj.Core
 			state.IsBooting = false;
 			state.Started(factory);
 			return factory;
+		}
+
+		private static void SetupPostgres(IObjectFactoryBuilder builder, string connectionString)
+		{
+			Revenj.DatabasePersistence.Postgres.Setup.ConfigurePostgres(builder, connectionString);
+		}
+
+		private static void SetupOracle(IObjectFactoryBuilder builder, string connectionString)
+		{
+			Revenj.DatabasePersistence.Oracle.Setup.ConfigureOracle(builder, connectionString);
 		}
 	}
 }

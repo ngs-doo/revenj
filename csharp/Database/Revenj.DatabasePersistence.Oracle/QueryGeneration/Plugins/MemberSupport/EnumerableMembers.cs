@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Text;
 using Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition;
@@ -8,8 +7,7 @@ using Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport
 {
-	[Export(typeof(IMemberMatcher))]
-	public class EnumerableMembers : IMemberMatcher
+	internal class EnumerableMembers : IMemberMatcher
 	{
 		private delegate void MemberCallDelegate(
 			MemberExpression memberAccess,
