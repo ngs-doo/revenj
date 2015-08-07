@@ -1,5 +1,6 @@
 package org.revenj.server.commands.search;
 
+import org.revenj.Utils;
 import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
@@ -45,7 +46,7 @@ public class SearchDomainObject implements ServerCommand {
 	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
 		Argument<TInput> arg;
 		try {
-			Type genericType = Utility.makeGenericType(Argument.class, data.getClass());
+			Type genericType = Utils.makeGenericType(Argument.class, data.getClass());
 			arg = (Argument) input.deserialize(genericType, data);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());

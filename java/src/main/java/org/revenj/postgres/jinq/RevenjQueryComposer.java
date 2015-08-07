@@ -1,8 +1,6 @@
 package org.revenj.postgres.jinq;
 
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.postgresql.util.PGobject;
+import org.revenj.Utils;
 import org.revenj.patterns.*;
 import org.revenj.postgres.PostgresWriter;
 import org.revenj.postgres.jinq.transform.JPQLMultiLambdaQueryTransform;
@@ -79,8 +78,9 @@ class RevenjQueryComposer<T> {
 		this.locator = locator;
 		this.query = query;
 		lambdas.addAll(chainedLambdas);
-		for (LambdaInfo newLambda : additionalLambdas)
+		for (LambdaInfo newLambda : additionalLambdas) {
 			lambdas.add(newLambda);
+		}
 	}
 
 	public static <T> RevenjQueryComposer<T> findAll(
@@ -184,43 +184,12 @@ class RevenjQueryComposer<T> {
 		return objectConverters.computeIfAbsent(manifest, clazz ->
 		{
 			try {
-				ObjectConverter result = (ObjectConverter) locator.resolve(new GenericType(ObjectConverter.class, clazz));
+				ObjectConverter result = (ObjectConverter) locator.resolve(Utils.makeGenericType(ObjectConverter.class, clazz));
 				return Optional.of(result);
 			} catch (Exception ignore) {
 				return Optional.empty();
 			}
 		});
-	}
-
-	private static class GenericType implements ParameterizedType {
-
-		private final Type raw;
-		private final Type[] arguments;
-
-		public GenericType(Type raw, Class<?> argument) {
-			this.raw = raw;
-			this.arguments = new Type[]{argument};
-		}
-
-		@Override
-		public Type[] getActualTypeArguments() {
-			return arguments;
-		}
-
-		@Override
-		public Type getRawType() {
-			return raw;
-		}
-
-		@Override
-		public Type getOwnerType() {
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			return raw.getTypeName() + "<" + arguments[0].getTypeName() + ">";
-		}
 	}
 
 	public long count() throws SQLException {

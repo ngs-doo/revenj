@@ -3,8 +3,6 @@ package org.revenj;
 import org.revenj.patterns.*;
 
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,43 +17,12 @@ class LocatorDataContext implements DataContext {
 		this.locator = locator;
 	}
 
-	private static class GenericType implements ParameterizedType {
-
-		private final Type raw;
-		private final Type[] arguments;
-
-		public GenericType(Type raw, Class<?> argument) {
-			this.raw = raw;
-			this.arguments = new Type[]{argument};
-		}
-
-		@Override
-		public Type[] getActualTypeArguments() {
-			return arguments;
-		}
-
-		@Override
-		public Type getRawType() {
-			return raw;
-		}
-
-		@Override
-		public Type getOwnerType() {
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			return raw.getTypeName() + "<" + arguments[0].getTypeName() + ">";
-		}
-	}
-
 	private SearchableRepository getRepository(Class<?> manifest) {
 		if (repositories == null) repositories = new ConcurrentHashMap<>();
 		return repositories.computeIfAbsent(manifest, clazz ->
 		{
 			try {
-				return (SearchableRepository) locator.resolve(new GenericType(SearchableRepository.class, manifest));
+				return (SearchableRepository) locator.resolve(Utils.makeGenericType(SearchableRepository.class, manifest));
 			} catch (ReflectiveOperationException ex) {
 				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
 			}
@@ -67,7 +34,7 @@ class LocatorDataContext implements DataContext {
 		return eventStores.computeIfAbsent(manifest, clazz ->
 		{
 			try {
-				return (DomainEventStore) locator.resolve(new GenericType(SearchableRepository.class, manifest));
+				return (DomainEventStore) locator.resolve(Utils.makeGenericType(SearchableRepository.class, manifest));
 			} catch (ReflectiveOperationException ex) {
 				throw new RuntimeException("Domain event store is not registered for: " + manifest, ex);
 			}
