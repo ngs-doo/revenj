@@ -156,10 +156,8 @@ public class SymbExToSubQuery extends TypedValueVisitor<SymbExPassDown, JinqPost
 
 				// Create the query
 				SelectFromWhere<?> query = new SelectFromWhere<>();
-				From from = From.forNavigationalLinks(
-						new ReadFieldExpression(nLinkBase.getOnlyColumn(), linkName));
-				query.cols = ColumnExpressions.singleColumn(
-						new SimpleRowReader<>(), new FromAliasExpression(from));
+				From from = From.forNavigationalLinks(new ReadFieldExpression(nLinkBase.getOnlyColumn(), linkName));
+				query.cols = ColumnExpressions.singleColumn(SimpleRowReader.READER, new FromAliasExpression(from));
 				query.froms.add(from);
 				return query;
 			}

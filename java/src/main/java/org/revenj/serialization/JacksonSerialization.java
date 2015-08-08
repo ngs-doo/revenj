@@ -27,7 +27,7 @@ final class JacksonSerialization implements Serialization<String> {
 				.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 	}
 
-	byte[] serializeToBytes(Object value) throws IOException {
+	byte[] serializeAsBytes(Object value) throws IOException {
 		return mapper.writeValueAsBytes(value);
 	}
 

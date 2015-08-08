@@ -70,9 +70,6 @@ public class WhereTransform extends JPQLOneLambdaQueryTransform {
 					// This path returns true, so it's redundant to actually
 					// put true into the final code.
 					returnExpr = null;
-				} else {
-					// This path returns false, so we can ignore it
-					continue;
 				}
 			}
 

@@ -55,7 +55,7 @@ public class AggregateTransform extends JPQLOneLambdaQueryTransform {
 				SelectOnly<U> toReturn = (SelectOnly<U>) select.shallowCopy();
 				toReturn.isAggregated = true;
 				toReturn.cols = ColumnExpressions.singleColumn(
-						new SimpleRowReader<>(),
+						SimpleRowReader.READER,
 						new AggregateFunctionExpression(aggregatedExpr, type.name(), select.isDistinct));
 				return toReturn;
 			}

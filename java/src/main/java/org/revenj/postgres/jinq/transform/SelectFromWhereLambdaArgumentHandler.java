@@ -12,7 +12,8 @@ import org.revenj.postgres.jinq.jpqlquery.*;
  * Select..From..Where query.
  */
 public class SelectFromWhereLambdaArgumentHandler extends LambdaParameterArgumentHandler {
-	final static ColumnExpressions<?> passthroughColsForTesting = ColumnExpressions.singleColumn(new SimpleRowReader(), new ConstantExpression("PASSTHROUGH TEST"));
+	final static ColumnExpressions<?> passthroughColsForTesting =
+			ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression("PASSTHROUGH TEST"));
 
 	ColumnExpressions<?> cols;
 

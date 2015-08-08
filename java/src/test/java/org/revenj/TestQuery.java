@@ -51,9 +51,10 @@ public class TestQuery {
         int id = Integer.parseInt(uri);
         long found = repository.query().filter(next -> next.getID() == id).count();
         Assert.assertEquals(1, found);
-        //TODO: doesn't work correctly
-        //found = repository.query().filter(next -> false).count();
-        //Assert.assertEquals(0, found);
+        found = repository.query().filter(next -> false).count();
+        Assert.assertEquals(0, found);
+        found = repository.query().filter(next -> true).count();
+        Assert.assertNotEquals(0, found);
     }
 
     @Test

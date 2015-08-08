@@ -33,7 +33,7 @@ public class MathSqrtHandler implements MethodHandlerStatic {
 			baseVal = columns.skipWideningCast(baseVal);
 		}
 		ColumnExpressions<?> base = baseVal.visit(columns, passdown);
-		return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
+		return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 				FunctionExpression.singleParam("SQRT", base.getOnlyColumn()));
 	}
 }

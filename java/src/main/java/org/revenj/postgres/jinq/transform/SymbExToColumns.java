@@ -43,37 +43,27 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 
 	@Override
 	public ColumnExpressions<?> booleanConstantValue(ConstantValue.BooleanConstant val, SymbExPassDown in) throws TypedValueVisitorException {
-		if (in.isExpectingConditional) {
-			return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-					new ConstantExpression(val.val ? "(1=1)" : "(1!=1)"));
-		} else {
-			return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-					new ConstantExpression(val.val ? "TRUE" : "FALSE"));
-		}
+		return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression(val.val ? "true" : "false"));
 	}
 
 	@Override
 	public ColumnExpressions<?> integerConstantValue(ConstantValue.IntegerConstant val, SymbExPassDown in) throws TypedValueVisitorException {
-		return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-				new ConstantExpression(Integer.toString(val.val)));
+		return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression(Integer.toString(val.val)));
 	}
 
 	@Override
 	public ColumnExpressions<?> longConstantValue(ConstantValue.LongConstant val, SymbExPassDown in) throws TypedValueVisitorException {
-		return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-				new ConstantExpression(Long.toString(val.val)));
+		return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression(Long.toString(val.val)));
 	}
 
 	@Override
 	public ColumnExpressions<?> doubleConstantValue(ConstantValue.DoubleConstant val, SymbExPassDown in) throws TypedValueVisitorException {
-		return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-				new ConstantExpression(Double.toString(val.val)));
+		return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression(Double.toString(val.val)));
 	}
 
 	@Override
 	public ColumnExpressions<?> stringConstantValue(ConstantValue.StringConstant val, SymbExPassDown in) throws TypedValueVisitorException {
-		return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
-				new ConstantExpression("'" + val.val.replaceAll("'", "''") + "'"));
+		return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression("'" + val.val.replaceAll("'", "''") + "'"));
 	}
 
 	@Override
@@ -103,11 +93,11 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 		if (config.metamodel.isKnownEnumType(val.owner)) {
 			String enumFullName = config.metamodel.getFullEnumConstantName(val.owner, val.name);
 			if (enumFullName != null)
-				return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
+				return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 						new ConstantExpression(enumFullName));
 		} else if ("java/lang/Boolean".equals(val.owner)) {
 			if ("TRUE".equals(val.name) || "FALSE".equals(val.name))
-				return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
+				return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 						new ConstantExpression("TRUE".equals(val.name) ? "TRUE" : "FALSE"));
 		}
 		return defaultValue(val, in);
@@ -194,10 +184,10 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			operandVal = leftVal;
 		ColumnExpressions<?> operand = operandVal.visit(this, passdown);
 		if ("=".equals(opString))
-			return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 					UnaryExpression.postfix("IS NULL", operand.getOnlyColumn()));
 		else
-			return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 					UnaryExpression.postfix("IS NOT NULL", operand.getOnlyColumn()));
 	}
 
@@ -300,10 +290,10 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			if (in.isExpectingConditional &&
 					(sig.getReturnType().equals(Type.BOOLEAN_TYPE)
 							|| sig.getReturnType().equals(Type.getObjectType("java/lang/Boolean")))) {
-				return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
+				return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 						new BinaryExpression("=", new ReadFieldExpression(base.getOnlyColumn(), fieldName), new ConstantExpression("TRUE")));
 			}
-			return ColumnExpressions.singleColumn(new SimpleRowReader<>(), new ReadFieldExpression(base.getOnlyColumn(), fieldName));
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ReadFieldExpression(base.getOnlyColumn(), fieldName));
 		} else if (MetamodelUtil.TUPLE_ACCESSORS.containsKey(sig)) {
 			int idx = MetamodelUtil.TUPLE_ACCESSORS.get(sig) - 1;
 			// TODO: This is a little wonky passing down isExpectingConditional, but I think it's right for those times you create a tuple with booleans and then extract the booleans later
@@ -375,7 +365,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 					ColumnExpressions<?> toReturn = new ColumnExpressions<>(sfw.cols.reader);
 					for (Expression col : sfw.cols.columns) {
 						SelectFromWhere<?> oneColQuery = sfw.shallowCopy();
-						oneColQuery.cols = ColumnExpressions.singleColumn(new SimpleRowReader<>(), col);
+						oneColQuery.cols = ColumnExpressions.singleColumn(SimpleRowReader.READER, col);
 						toReturn.columns.add(SubqueryExpression.from(oneColQuery));
 					}
 					return toReturn;
@@ -397,7 +387,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 				ColumnExpressions<?> toReturn = new ColumnExpressions<>(sfw.cols.reader);
 				for (Expression col : sfw.cols.columns) {
 					SelectFromWhere<?> oneColQuery = sfw.shallowCopy();
-					oneColQuery.cols = ColumnExpressions.singleColumn(new SimpleRowReader<>(), col);
+					oneColQuery.cols = ColumnExpressions.singleColumn(SimpleRowReader.READER, col);
 					toReturn.columns.add(SubqueryExpression.from(oneColQuery));
 				}
 				return toReturn;
@@ -432,7 +422,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			Expression head = concatenatedStrings.get(concatenatedStrings.size() - 1).getOnlyColumn();
 			for (int n = concatenatedStrings.size() - 2; n >= 0; n--)
 				head = FunctionExpression.twoParam("CONCAT", head, concatenatedStrings.get(n).getOnlyColumn());
-			return ColumnExpressions.singleColumn(new SimpleRowReader<>(), head);
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER, head);
 		} else {
 			try {
 				Method reflectedMethod = Annotations.asmMethodSignatureToReflectionMethod(sig);
@@ -486,11 +476,11 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 
 		if (subQuery.isValidSubquery() && subQuery instanceof SelectFromWhere) {
 			SelectFromWhere<?> sfw = (SelectFromWhere<?>) subQuery;
-			return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 					new BinaryExpression("", "= ANY(", ")", item.getOnlyColumn(), SubqueryExpression.from(sfw)));
 		} else if (subQuery.isValidSubquery() && subQuery instanceof ParameterAsQuery) {
 			ParameterAsQuery<?> paramQuery = (ParameterAsQuery<?>) subQuery;
-			return ColumnExpressions.singleColumn(new SimpleRowReader<>(),
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 					new BinaryExpression("", "= ANY(", ")", item.getOnlyColumn(), paramQuery.cols.getOnlyColumn()));
 		}
 		throw new TypedValueVisitorException("Trying to create a query using IN but with an unhandled subquery type");

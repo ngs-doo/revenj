@@ -24,7 +24,7 @@ public final class RevenjSerialization implements WireSerialization {
 	public Bytes serialize(Object value, String contentType) {
 		try {
 			//if (contentType == null || "application/json".equals(contentType)) {
-			byte[] content = json.serializeToBytes(value);
+			byte[] content = json.serializeAsBytes(value);
 			return new Bytes(content, content.length);
 			//}
 		} catch (IOException e) {

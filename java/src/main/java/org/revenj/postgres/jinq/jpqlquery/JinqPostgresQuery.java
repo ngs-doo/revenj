@@ -10,7 +10,7 @@ public abstract class JinqPostgresQuery<T> implements JinqPostgresFragment {
     public static <U> JinqPostgresQuery<U> findAll(String dataSource) {
         SelectFromWhere<U> query = new SelectFromWhere<>();
         From from = From.forDataSource(dataSource);
-        query.cols = ColumnExpressions.singleColumn(new SimpleRowReader<>(), new FromAliasExpression(from));
+        query.cols = ColumnExpressions.singleColumn(SimpleRowReader.READER, new FromAliasExpression(from));
         query.froms.add(from);
         return query;
     }
