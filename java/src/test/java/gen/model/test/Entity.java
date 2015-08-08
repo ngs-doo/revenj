@@ -86,7 +86,7 @@ public class Entity   implements java.io.Serializable {
 		setComposite(composite);
 	}
 
-	private static final long serialVersionUID = 1195384034376131948L;
+	private static final long serialVersionUID = 4208321896772800559L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -274,5 +274,5 @@ public class Entity   implements java.io.Serializable {
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }

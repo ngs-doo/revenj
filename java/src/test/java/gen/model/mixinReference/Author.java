@@ -72,7 +72,7 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		setName(name);
 	}
 
-	private static final long serialVersionUID = -877654453748777979L;
+	private static final long serialVersionUID = -6978854967791670084L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -161,5 +161,5 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }

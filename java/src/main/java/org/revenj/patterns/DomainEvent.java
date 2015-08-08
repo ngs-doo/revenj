@@ -1,8 +1,8 @@
 package org.revenj.patterns;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public interface DomainEvent extends Identifiable {
-	LocalDateTime getQueuedAt();
-	LocalDateTime getProcessedAt();
+	OffsetDateTime getQueuedAt();
+	OffsetDateTime getProcessedAt();
 }

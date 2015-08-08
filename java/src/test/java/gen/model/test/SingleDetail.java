@@ -64,7 +64,7 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 	public String toString() {
 		return "SingleDetail(" + URI + ')';
 	}
-	private static final long serialVersionUID = -6070953689689103614L;
+	private static final long serialVersionUID = -8025764409584011783L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -183,5 +183,5 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 		}; };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }

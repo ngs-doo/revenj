@@ -75,7 +75,7 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		setAuthor(author);
 	}
 
-	private static final long serialVersionUID = -8331585046799064526L;
+	private static final long serialVersionUID = 4219875639659691859L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -207,5 +207,5 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		readers[__index__extended_authorID] = (item, reader, context) -> { item.authorID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator;
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }

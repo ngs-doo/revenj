@@ -3,17 +3,15 @@ package org.revenj;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public abstract class Utils {
 	public static final LocalDate MIN_LOCAL_DATE = LocalDate.of(1, 1, 1);
-	public static final ZonedDateTime MIN_DATE_TIME = ZonedDateTime.of(MIN_LOCAL_DATE, LocalTime.of(0, 0), ZoneId.of("UTC"));
+	public static final LocalDateTime MIN_LOCAL_DATE_TIME = LocalDateTime.of(1, 1, 1, 0, 0, 0, 0);
+	public static final OffsetDateTime MIN_DATE_TIME = OffsetDateTime.of(MIN_LOCAL_DATE_TIME, ZoneOffset.UTC);
 	public static final UUID MIN_UUID = new java.util.UUID(0L, 0L);
 	public static final byte[] EMPTY_BINARY = new byte[0];
 	public static final BigDecimal ZERO_0 = BigDecimal.ZERO.setScale(0);

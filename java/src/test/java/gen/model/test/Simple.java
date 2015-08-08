@@ -11,13 +11,15 @@ public final class Simple   implements java.io.Serializable {
 			final String text,
 			final gen.model.test.En en,
 			final gen.model.test.En en2,
-			final Boolean nb) {
+			final Boolean nb,
+			final java.time.OffsetDateTime ts) {
 			
 		setNumber(number);
 		setText(text);
 		setEn(en);
 		setEn2(en2);
 		setNb(nb);
+		setTs(ts);
 	}
 
 	
@@ -27,6 +29,7 @@ public final class Simple   implements java.io.Serializable {
 		this.number = 0;
 		this.text = "";
 		this.en2 = gen.model.test.En.A;
+		this.ts = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC);
 	}
 
 	
@@ -40,6 +43,7 @@ public final class Simple   implements java.io.Serializable {
 		result = prime * result + (this.en != null ? this.en.hashCode() : 0);
 		result = prime * result + (this.en2.hashCode());
 		result = prime * result + (this.nb != null ? this.nb.hashCode() : 0);
+		result = prime * result + (this.ts == null ? 0 : this.ts.hashCode());
 		return result;
 	}
 
@@ -64,13 +68,15 @@ public final class Simple   implements java.io.Serializable {
 			return false;
 		if(!(this.nb == other.nb || this.nb != null && this.nb.equals(other.nb)))
 			return false;
+		if(!(this.ts == other.ts || this.ts != null && other.ts != null && this.ts.equals(other.ts)))
+			return false;
 
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Simple(" + number + ',' + text + ',' + en + ',' + en2 + ',' + nb + ')';
+		return "Simple(" + number + ',' + text + ',' + en + ',' + en2 + ',' + nb + ',' + ts + ')';
 	}
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Simple(
@@ -79,16 +85,18 @@ public final class Simple   implements java.io.Serializable {
 			@com.fasterxml.jackson.annotation.JsonProperty("text") final String text,
 			@com.fasterxml.jackson.annotation.JsonProperty("en") final gen.model.test.En en,
 			@com.fasterxml.jackson.annotation.JsonProperty("en2") final gen.model.test.En en2,
-			@com.fasterxml.jackson.annotation.JsonProperty("nb") final Boolean nb) {
+			@com.fasterxml.jackson.annotation.JsonProperty("nb") final Boolean nb,
+			@com.fasterxml.jackson.annotation.JsonProperty("ts") final java.time.OffsetDateTime ts) {
 		
 		this.number = number;
 		this.text = text == null ? "" : text;
 		this.en = en;
 		this.en2 = en2 == null ? gen.model.test.En.A : en2;
 		this.nb = nb;
+		this.ts = ts == null ? java.time.OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.UTC) : ts;
 	}
 
-	private static final long serialVersionUID = -291381243082712657L;
+	private static final long serialVersionUID = 8229426925649646296L;
 	
 	private int number;
 
@@ -182,27 +190,48 @@ public final class Simple   implements java.io.Serializable {
 	}
 
 	
+	private java.time.OffsetDateTime ts;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("ts")
+	public java.time.OffsetDateTime getTs()  {
+		
+		return ts;
+	}
+
+	
+	public Simple setTs(final java.time.OffsetDateTime value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"ts\" cannot be null!");
+		this.ts = value;
+		
+		return this;
+	}
+
+	
 	public Simple(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Simple> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index___number, int __index___text, int __index___en, int __index___en2, int __index___nb) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index___number, int __index___text, int __index___en, int __index___en2, int __index___nb, int __index___ts) {
 		
 		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index___text] = (item, reader, context) -> { item.text = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 		readers[__index___en2] = (item, reader, context) -> { item.en2 = gen.model.test.converters.EnConverter.fromReader(reader); };
 		readers[__index___nb] = (item, reader, context) -> { item.nb = org.revenj.postgres.converters.BoolConverter.parseNullable(reader); };
+		readers[__index___ts] = (item, reader, context) -> { item.ts = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, false, true); };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index__extended_number, int __index__extended_text, int __index__extended_en, int __index__extended_en2, int __index__extended_nb) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Simple>[] readers, int __index__extended_number, int __index__extended_text, int __index__extended_en, int __index__extended_en2, int __index__extended_nb, int __index__extended_ts) {
 		
 		readers[__index__extended_number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_text] = (item, reader, context) -> { item.text = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index__extended_en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 		readers[__index__extended_en2] = (item, reader, context) -> { item.en2 = gen.model.test.converters.EnConverter.fromReader(reader); };
 		readers[__index__extended_nb] = (item, reader, context) -> { item.nb = org.revenj.postgres.converters.BoolConverter.parseNullable(reader); };
+		readers[__index__extended_ts] = (item, reader, context) -> { item.ts = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, false, true); };
 	}
 }

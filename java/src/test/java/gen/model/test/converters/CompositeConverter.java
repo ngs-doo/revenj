@@ -67,6 +67,14 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'simple' column in test Composite. Check if DB is in sync");
 		__index__extended_simple = (int)column.get().order - 1;
 			
+		column = columns.stream().filter(it -> "tsl".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'tsl' column in test Composite_entity. Check if DB is in sync");
+		__index___tsl = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "tsl".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'tsl' column in test Composite. Check if DB is in sync");
+		__index__extended_tsl = (int)column.get().order - 1;
+			
 		column = columns.stream().filter(it -> "entities".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entities' column in test Composite_entity. Check if DB is in sync");
 		__index___entities = (int)column.get().order - 1;
@@ -90,9 +98,9 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		__converter_entities = locator.resolve(gen.model.test.converters.EntityConverter.class);
 		
 			
-		gen.model.test.Composite.__configureConverter(readers, __index___id, __index___enn, __index___en, __converter_simple, __index___simple, __converter_entities, __index___entities, __index___laziesURI);
+		gen.model.test.Composite.__configureConverter(readers, __index___id, __index___enn, __index___en, __converter_simple, __index___simple, __index___tsl, __converter_entities, __index___entities, __index___laziesURI);
 			
-		gen.model.test.Composite.__configureConverterExtended(readersExtended, __index__extended_id, __index__extended_enn, __index__extended_en, __converter_simple, __index__extended_simple, __converter_entities, __index__extended_entities, __index__extended_laziesURI);
+		gen.model.test.Composite.__configureConverterExtended(readersExtended, __index__extended_id, __index__extended_enn, __index__extended_en, __converter_simple, __index__extended_simple, __index__extended_tsl, __converter_entities, __index__extended_entities, __index__extended_laziesURI);
 	}
 
 	@Override
@@ -121,6 +129,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		items[__index___enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), it -> gen.model.test.converters.EnConverter.toTuple(it));
 		items[__index___en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		items[__index___simple] = __converter_simple.to(instance.getSimple());
+		items[__index___tsl] = org.revenj.postgres.converters.ArrayTuple.create(instance.getTsl(), it -> org.revenj.postgres.converters.TimestampConverter.toTuple(it));
 		items[__index___entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
 		if (instance.getLaziesURI() != null) items[__index___laziesURI] = org.revenj.postgres.converters.ArrayTuple.create(instance.getLaziesURI(), org.revenj.postgres.converters.ValueTuple::new);;
 		return RecordTuple.from(items);
@@ -146,6 +155,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		items[__index__extended_enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), it -> gen.model.test.converters.EnConverter.toTuple(it));
 		items[__index__extended_en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		items[__index__extended_simple] = __converter_simple.toExtended(instance.getSimple());
+		items[__index__extended_tsl] = org.revenj.postgres.converters.ArrayTuple.create(instance.getTsl(), it -> org.revenj.postgres.converters.TimestampConverter.toTuple(it));
 		items[__index__extended_entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
 		if (instance.getLaziesURI() != null) items[__index__extended_laziesURI] = org.revenj.postgres.converters.ArrayTuple.create(instance.getLaziesURI(), org.revenj.postgres.converters.ValueTuple::new);;
 		return RecordTuple.from(items);
@@ -176,6 +186,8 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 	private gen.model.test.converters.SimpleConverter __converter_simple;
 	private final int __index___simple;
 	private final int __index__extended_simple;
+	private final int __index___tsl;
+	private final int __index__extended_tsl;
 	private gen.model.test.converters.EntityConverter __converter_entities;
 	private final int __index___entities;
 	private final int __index__extended_entities;

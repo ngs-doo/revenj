@@ -5,6 +5,7 @@ module test {
 		En? en;
 		En en2;
 		bool? nb;
+		timestamp ts;
 	}
 	enum En { A; B; }
 	root LazyLoad {
@@ -19,6 +20,7 @@ module test {
 		En[] enn;
 		En en;
 		Simple simple;
+		List<timestamp> tsl;
 		List<Entity> entities;
 		detail<LazyLoad.comp> lazies;
 		specification ForSimple 'it => it.simple.number == simple.number' {
@@ -29,6 +31,7 @@ module test {
 		id;
 		enn;
 		en;
+		tsl;
 		entities;
 		simple;
 		specification ForSimple 'it => simples.Contains(it.simple)' {

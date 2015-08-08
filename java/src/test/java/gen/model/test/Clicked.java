@@ -41,21 +41,21 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	}
 
 	
-	private java.time.LocalDateTime ProcessedAt;
+	private java.time.OffsetDateTime ProcessedAt;
 
 	
 	@com.fasterxml.jackson.annotation.JsonProperty("ProcessedAt")
-	public java.time.LocalDateTime getProcessedAt()  {
+	public java.time.OffsetDateTime getProcessedAt()  {
 		
 		return this.ProcessedAt;
 	}
 
 	
-	private java.time.LocalDateTime QueuedAt;
+	private java.time.OffsetDateTime QueuedAt;
 
 	
 	@com.fasterxml.jackson.annotation.JsonProperty("QueuedAt")
-	public java.time.LocalDateTime getQueuedAt()  {
+	public java.time.OffsetDateTime getQueuedAt()  {
 		
 		return this.QueuedAt;
 	}
@@ -84,7 +84,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = -1792210254194871233L;
+	private static final long serialVersionUID = 591873206555336212L;
 	
 	private java.time.LocalDate date;
 
@@ -202,7 +202,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.HashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = -7151976449450314348L;
+	private static final long serialVersionUID = -2308079797757545951L;
 	
 	private java.math.BigDecimal min;
 
@@ -269,8 +269,8 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Clicked(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
-			@com.fasterxml.jackson.annotation.JsonProperty("ProcessedAt") final java.time.LocalDateTime ProcessedAt,
-			@com.fasterxml.jackson.annotation.JsonProperty("QueuedAt") final java.time.LocalDateTime QueuedAt,
+			@com.fasterxml.jackson.annotation.JsonProperty("ProcessedAt") final java.time.OffsetDateTime ProcessedAt,
+			@com.fasterxml.jackson.annotation.JsonProperty("QueuedAt") final java.time.OffsetDateTime QueuedAt,
 			@com.fasterxml.jackson.annotation.JsonProperty("date") final java.time.LocalDate date,
 			@com.fasterxml.jackson.annotation.JsonProperty("number") final java.math.BigDecimal number,
 			@com.fasterxml.jackson.annotation.JsonProperty("bigint") final Long bigint,
@@ -296,8 +296,8 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers, int __index____event_id, int __index___QueuedAt, int __index___ProcessedAt, int __index___date, int __index___number, int __index___bigint, int __index___bool, int __index___en) {
 		
 		readers[__index____event_id] = (item, reader, context) -> { item.URI = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
-		readers[__index___QueuedAt] = (item, reader, context) -> { item.QueuedAt = org.revenj.postgres.converters.TimestampConverter.parse(reader, context, false); };
-		readers[__index___ProcessedAt] = (item, reader, context) -> { item.ProcessedAt = org.revenj.postgres.converters.TimestampConverter.parse(reader, context, true); };
+		readers[__index___QueuedAt] = (item, reader, context) -> { item.QueuedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, false, true); };
+		readers[__index___ProcessedAt] = (item, reader, context) -> { item.ProcessedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, true, true); };
 		readers[__index___date] = (item, reader, context) -> { item.date = org.revenj.postgres.converters.DateConverter.parse(reader, true); };
 		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
 		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };

@@ -106,6 +106,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Simple.class, "getEn", "\"en\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getEn2", "\"en2\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNb", "\"nb\"");
+		metamodel.registerProperty(gen.model.test.Simple.class, "getTs", "\"ts\"");
 		test$converter$LazyLoadConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.LazyLoad.class, "\"test\".\"LazyLoad_entity\"");
 		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getURI", "\"URI\"");
@@ -143,6 +144,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEnn", "\"enn\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEn", "\"en\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getSimple", "\"simple\"");
+		metamodel.registerProperty(gen.model.test.Composite.class, "getTsl", "\"tsl\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"");
 		test$converter$CompositeListConverter.configure(container);
@@ -156,6 +158,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEnn", "\"enn\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEn", "\"en\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getTsl", "\"tsl\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getSimple", "\"simple\"");
 		test$converter$EntityConverter.configure(container);
