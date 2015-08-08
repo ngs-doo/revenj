@@ -108,6 +108,10 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 		reader.read();
 		return instance;
 	}
+
+	public gen.model.test.Clicked from(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readers);
+	}
 	private final int __index____event_id;
 	private final int __index___QueuedAt;
 	private final int __index___ProcessedAt;

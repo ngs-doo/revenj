@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-class RevenjQuery<T extends DataSource> implements Query<T> {
+final class RevenjQuery<T extends DataSource> implements Query<T> {
 	final RevenjQueryComposer<T> queryComposer;
 
 	public RevenjQuery(RevenjQueryComposer<T> query) {

@@ -56,6 +56,12 @@ module test {
 			En? en;
 		}
 	}
+	report FindMany {
+		uuid id;
+		Set<uuid> ids;
+		List<CompositeList> composites 'it => ids.Contains(it.id)' order by id limit 4;
+		Composite found 'it => it.id == id';
+	}
 }
 module Seq {
 	root Next {

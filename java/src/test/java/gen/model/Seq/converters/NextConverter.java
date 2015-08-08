@@ -90,6 +90,10 @@ public class NextConverter implements ObjectConverter<gen.model.Seq.Next> {
 		reader.read();
 		return instance;
 	}
+
+	public gen.model.Seq.Next from(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readers);
+	}
 	
 	public PostgresTuple toExtended(gen.model.Seq.Next instance) {
 		if (instance == null) return null;
@@ -107,6 +111,10 @@ public class NextConverter implements ObjectConverter<gen.model.Seq.Next> {
 		gen.model.Seq.Next instance = from(reader, context, context == 0 ? 1 : context << 1, readersExtended);
 		reader.read();
 		return instance;
+	}
+
+	public gen.model.Seq.Next fromExtended(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readersExtended);
 	}
 	private final int __index___ID;
 	private final int __index__extended_ID;

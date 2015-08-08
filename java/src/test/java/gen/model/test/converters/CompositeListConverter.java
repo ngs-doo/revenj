@@ -95,11 +95,6 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 	}
 
 	@Override
-	public gen.model.test.CompositeList from(PostgresReader reader) throws java.io.IOException {
-		return from(reader, 0);
-	}
-
-	@Override
 	public PostgresTuple to(gen.model.test.CompositeList instance) {
 		if (instance == null) return null;
 		PostgresTuple[] items = new PostgresTuple[columnCount];
@@ -110,11 +105,17 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 	
 	private final int columnCount;
 	
+	@Override
 	public gen.model.test.CompositeList from(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
-		context = context == 0 ? 1 : context << 1;
-		reader.read(context);
+		gen.model.test.CompositeList result = from(reader, context, context == 0 ? 1 : context << 1);
+		reader.read();
+		return result;
+	}
+
+	public gen.model.test.CompositeList from(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		reader.read(outerContext);
 		int i = 0;
 		
 		String _URI_ = null;
@@ -131,11 +132,11 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 			if (__index___enn == i) { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) _enn_ = __list.toArray(new gen.model.test.En[__list.size()]); else _enn_ = new gen.model.test.En[] { }; }; i++; }
 			if (__index___en == i) { _en_ = gen.model.test.converters.EnConverter.fromReader(reader); i++; }
 			if (__index___tsl == i) { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) _tsl_ = __list; else _tsl_ = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; i++; }
-			if (__index___entities == i) { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) -> __converter_entities.from(rdr, ctx)); if (__list != null) _entities_ = __list; else _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4); }; i++; }
+			if (__index___entities == i) { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) _entities_ = __list; else _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4); }; i++; }
 			if (__index___simple == i) { _simple_ = __converter_simple.from(reader, context); i++; }
 		}
 		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _entities_, _simple_);
-		reader.read(context + 1);
+		reader.read(outerContext);
 		return instance;
 	}
 	private final int __index___URI;
@@ -151,8 +152,13 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 	public gen.model.test.CompositeList fromExtended(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
-		context = context == 0 ? 1 : context << 1;
-		reader.read(context);
+		gen.model.test.CompositeList result = fromExtended(reader, context, context == 0 ? 1 : context << 1);
+		reader.read();
+		return result;
+	}
+
+	public gen.model.test.CompositeList fromExtended(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		reader.read(outerContext);
 		int i = 0;
 		
 		String _URI_ = null;
@@ -169,11 +175,11 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 			if (__index__extended_enn == i) { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) _enn_ = __list.toArray(new gen.model.test.En[__list.size()]); else _enn_ = new gen.model.test.En[] { }; }; i++; }
 			if (__index__extended_en == i) { _en_ = gen.model.test.converters.EnConverter.fromReader(reader); i++; }
 			if (__index__extended_tsl == i) { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) _tsl_ = __list; else _tsl_ = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; i++; }
-			if (__index__extended_entities == i) { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) -> __converter_entities.fromExtended(rdr, ctx)); if (__list != null) _entities_ = __list; else _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4); }; i++; }
+			if (__index__extended_entities == i) { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::fromExtended); if (__list != null) _entities_ = __list; else _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4); }; i++; }
 			if (__index__extended_simple == i) { _simple_ = __converter_simple.fromExtended(reader, context); i++; }
 		}
 		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _entities_, _simple_);
-		reader.read(context + 1);
+		reader.read(outerContext);
 		return instance;
 	}
 	private final int __index__extended_URI;

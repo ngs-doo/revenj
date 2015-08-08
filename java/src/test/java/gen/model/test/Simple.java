@@ -96,7 +96,7 @@ public final class Simple   implements java.io.Serializable {
 		this.ts = ts == null ? java.time.OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.UTC) : ts;
 	}
 
-	private static final long serialVersionUID = 8229426925649646296L;
+	private static final long serialVersionUID = -8495669171532074327L;
 	
 	private int number;
 

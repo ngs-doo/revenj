@@ -99,6 +99,10 @@ public class SingleDetailConverter implements ObjectConverter<gen.model.test.Sin
 		reader.read();
 		return instance;
 	}
+
+	public gen.model.test.SingleDetail from(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readers);
+	}
 	
 	public PostgresTuple toExtended(gen.model.test.SingleDetail instance) {
 		if (instance == null) return null;
@@ -117,6 +121,10 @@ public class SingleDetailConverter implements ObjectConverter<gen.model.test.Sin
 		gen.model.test.SingleDetail instance = from(reader, context, context == 0 ? 1 : context << 1, readersExtended);
 		reader.read();
 		return instance;
+	}
+
+	public gen.model.test.SingleDetail fromExtended(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readersExtended);
 	}
 	private final int __index___ID;
 	private final int __index__extended_ID;

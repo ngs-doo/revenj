@@ -128,7 +128,7 @@ public class ArrayTuple extends PostgresTuple {
 	}
 
 	public interface RecordParser<T> {
-		T parse(PostgresReader reader, int context) throws IOException;
+		T parse(PostgresReader reader, int outerContext, int context) throws IOException;
 	}
 
 	public static <T> List<T> parse(PostgresReader reader, int context, RecordParser<T> converter) throws IOException {
@@ -151,7 +151,7 @@ public class ArrayTuple extends PostgresTuple {
 		}
 		List<T> list = new ArrayList<>();
 		int arrayContext = Math.max(context << 1, 1);
-		//int recordContext = arrayContext << 1;
+		int recordContext = arrayContext << 1;
 		while (cur != -1 && cur != '}') {
 			cur = reader.read();
 			if (cur == 'N') {
@@ -162,7 +162,7 @@ public class ArrayTuple extends PostgresTuple {
 				if (escaped) {
 					reader.read(arrayContext);
 				}
-				list.add(converter.parse(reader, arrayContext));
+				list.add(converter.parse(reader, 0, recordContext));
 				if (escaped) {
 					cur = reader.read(arrayContext + 1);
 				} else {

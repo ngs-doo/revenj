@@ -99,6 +99,10 @@ public class AuthorConverter implements ObjectConverter<gen.model.mixinReference
 		reader.read();
 		return instance;
 	}
+
+	public gen.model.mixinReference.Author from(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readers);
+	}
 	
 	public PostgresTuple toExtended(gen.model.mixinReference.Author instance) {
 		if (instance == null) return null;
@@ -117,6 +121,10 @@ public class AuthorConverter implements ObjectConverter<gen.model.mixinReference
 		gen.model.mixinReference.Author instance = from(reader, context, context == 0 ? 1 : context << 1, readersExtended);
 		reader.read();
 		return instance;
+	}
+
+	public gen.model.mixinReference.Author fromExtended(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readersExtended);
 	}
 	private final int __index___ID;
 	private final int __index__extended_ID;

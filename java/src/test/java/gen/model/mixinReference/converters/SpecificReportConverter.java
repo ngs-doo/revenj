@@ -108,6 +108,10 @@ public class SpecificReportConverter implements ObjectConverter<gen.model.mixinR
 		reader.read();
 		return instance;
 	}
+
+	public gen.model.mixinReference.SpecificReport from(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readers);
+	}
 	
 	public PostgresTuple toExtended(gen.model.mixinReference.SpecificReport instance) {
 		if (instance == null) return null;
@@ -127,6 +131,10 @@ public class SpecificReportConverter implements ObjectConverter<gen.model.mixinR
 		gen.model.mixinReference.SpecificReport instance = from(reader, context, context == 0 ? 1 : context << 1, readersExtended);
 		reader.read();
 		return instance;
+	}
+
+	public gen.model.mixinReference.SpecificReport fromExtended(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+		return from(reader, outerContext, context, readersExtended);
 	}
 	private final int __index___ID;
 	private final int __index__extended_ID;

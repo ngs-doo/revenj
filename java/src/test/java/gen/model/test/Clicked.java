@@ -84,7 +84,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = 591873206555336212L;
+	private static final long serialVersionUID = 400408826033464727L;
 	
 	private java.time.LocalDate date;
 
@@ -202,7 +202,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.HashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = -2308079797757545951L;
+	private static final long serialVersionUID = 3349159424317714348L;
 	
 	private java.math.BigDecimal min;
 
