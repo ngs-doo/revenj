@@ -230,7 +230,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 				ColumnExpressions<?> left = val.left.visit(this, passdown);
 				ColumnExpressions<?> right = val.right.visit(this, passdown);
 				return ColumnExpressions.singleColumn(left.reader,
-						FunctionExpression.twoParam("MOD", left.getOnlyColumn(), right.getOnlyColumn()));
+						new BinaryExpression("%", left.getOnlyColumn(), right.getOnlyColumn()));
 			}
 			throw new TypedValueVisitorException("mod operator cannot be used for the given types.");
 		}

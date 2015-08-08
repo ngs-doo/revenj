@@ -7,6 +7,8 @@ import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValue;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
 import org.revenj.postgres.jinq.jpqlquery.*;
 
+import java.util.List;
+
 public class WhereTransform extends JPQLOneLambdaQueryTransform {
 	boolean withSource;
 
@@ -54,8 +56,9 @@ public class WhereTransform extends JPQLOneLambdaQueryTransform {
 			QueryTransformException {
 		SymbExToColumns translator = config.newSymbExToColumns(SelectFromWhereLambdaArgumentHandler.fromSelectFromWhere(sfw, where, config.metamodel, parentArgumentScope, withSource));
 		Expression methodExpr = null;
-		for (int n = 0; n < where.symbolicAnalysis.paths.size(); n++) {
-			PathAnalysis path = where.symbolicAnalysis.paths.get(n);
+		final List<PathAnalysis> paths = where.symbolicAnalysis.paths;
+		for (int n = 0; n < paths.size(); n++) {
+			PathAnalysis path = paths.get(n);
 
 			TypedValue returnVal = PathAnalysisSimplifier
 					.simplifyBoolean(path.getReturnValue(), config.getComparisonMethods());
@@ -70,6 +73,8 @@ public class WhereTransform extends JPQLOneLambdaQueryTransform {
 					// This path returns true, so it's redundant to actually
 					// put true into the final code.
 					returnExpr = null;
+				} else if (paths.size() > 1) {
+					continue;
 				}
 			}
 
