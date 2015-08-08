@@ -15,6 +15,7 @@ DSL Platform will take care of various boilerplate and model evolution while Rev
  * event sourcing
 
 and various other simple and complex features captured in the model.
+With Revenj you will stop writing PO*O and instead focus on domain model/business value.
 
 ##How it works
 
@@ -51,9 +52,9 @@ Domain is described using various modeling building blocks in a DSL, for example
 Which gives you a DTO/POCO/POJO/POPO/POSO... across different languages, 
 tables, types, views, functions specialized for supported ORDBMS, 
 repositories, converters, serialization and various other boilerplate required by the supported frameworks.
-There are also a lot more modeling concepts which go beyond basic persistence features and cover reporting/customization/high performance aspects of the application.
+There are also a lot more modeling concepts which go beyond basic persistence features and cover reporting/customization/high performance aspects of the application. 
 
-The biggest benefit shows when you start changing your model and DSL compiler gives you not only the new DLL, 
+The biggest benefit shows when you start changing your model and DSL compiler gives you not only the new DLL/jar, 
 but also a SQL migration file which tries to preserve data if possible. 
 SQL migration is created by the compiler analyzing differences between models, so you don't need to write manual migration scripts.
 
@@ -78,7 +79,7 @@ Benchmarks:
 
 ##Getting started:
 
-Setup a Postgres instance.
+Setup a Postgres or Oracle instance.
 
 Go through the tutorials:
 
@@ -95,17 +96,19 @@ Go through the tutorials:
 
 ###JVM
 
+ * [JINQ basics](tutorials/revenj-tutorial-jinq-basics.md)
+
 
 ##Revenj features
 
-Revenj doesn't try to be yet another framework, since it tries to reuse existing libraries whenever possible and is basically only a thin access layer to the domain captured in the DSL.
+Revenj is basically only a thin access layer to the domain captured in the DSL.
 
 Some of the features/approaches available in the framework or precompiled library and just exposed through the framework:
 
- * advanced LINQ driver - no impedance mismatch between database objects and .NET classes
+ * advanced LINQ/JINQ driver - no impedance mismatch between database objects and .NET classes
  * event sourcing - capture events in the system. Bulk process events. Replay events to reconstruct aggregate roots
  * notification infrastructure - integrate with SignalR for push notification or invalidate cache to keep data up-to-date
- * plugin based architecture - almost everything is a plugin, from REST commands to LINQ converters
+ * plugin based architecture - almost everything is a plugin, from REST commands to LINQ/JINQ converters
  * signature based implementations - no need for convention or configuration, just add a new implementation or plugin and let it be picked up by the system
  * NoSQL modeling in relational database - let system automatically decompose and aggregate complex object hierarchies across several tables and data sources
  * AOP support - hot-patch your system with aspects when such scenario is most convenient
@@ -163,7 +166,9 @@ DSL model:
 
 results in same objects which can be consumed through IDataContext:
 
-####LINQ query:
+####LINQ/JINQ query:
+
+#####C&#35;
 
     IDataContext context = ...
     string matchingKey = ...
@@ -172,14 +177,31 @@ results in same objects which can be consumed through IDataContext:
     ...
     context.Update(matchingObjects);
 
+#####Java
+
+    DataContext context = ...
+    String matchingKey = ...
+    List<ComplexObject> matchingObjects = context.query(ComplexObject.class).filter(co => co.getVersions().anyMatch(v => v.getDictionary().containsKey(matchingKey))).list();
+    Stream<Legacy> legacyObjects = context.query(Legacy.class).filter(l => l.name.startsWith(matchingKey)).stream();
+    ...
+    context.update(matchingObjects);
+
 ####Lookup by identity:
 
 ComplexObject is an aggregate root which is one of the objects identified by unique identity: URI.
 URI is a string version of primary key; which mostly differs on composite primary keys.
 
+#####C&#35;
+
     IDataContext context = ...
     string[] uris = ...
     var foundObjects = context.Find<ComplexObject>(uris);
+
+#####Java
+
+    DataContext context = ...
+    String[] uris = ...
+    List<ComplexObject> foundObjects = context.find(ComplexObject.class, uris);
 
 ####Listening for change:
 
@@ -244,3 +266,4 @@ Revenj can be also used as a NoSQL database through a REST API and consumed from
 
 [Command line client](https://github.com/ngs-doo/dsl-compiler-client) and Eclipse plugin can be used to automate various aspects of the process or have IDE support on the *nix environments.
 
+Java version is work in progress. Not suitable for production use yet. 

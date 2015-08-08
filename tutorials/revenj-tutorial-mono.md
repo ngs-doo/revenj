@@ -91,11 +91,11 @@ File should have an ddd or dsl extension.
 We will now use DSL command line client to run one action that will do several things at once using our DSL file: parse the DSL file for errors, generate SQL script, automatically apply the SQL script to the database, generate target/server library. 
 Also it will download latest version of Revenj. This is all done by this command:
 
-    java -jar dsl-clc.jar -properties=my.props
+    java -jar dsl-clc.jar properties=my.props
 	
 Instead of using a my.props file, we could send arguments using command line, such as:
 
-    java -jar dsl-clc.jar -db=localhost:5432/ngsdb?user=dbUser -revenj=./model/ServerModel.dll -migration -apply -compiler
+    java -jar dsl-clc.jar postgres=localhost:5432/ngsdb?user=dbUser revenj.net=./model/ServerModel.dll migration apply compiler
 
 But for convenience, let's stick with the .props file. Output will be as follows:
 
@@ -108,49 +108,9 @@ Since we have passed in compiler argument stating that we wish to use the offlin
 
 Enter **y** to accept and clc will download Revenj libraries to default (./revenj) folder.
 
-	Downloading Revenj from Github...
+	Downloading Revenj.NET from Github...
 	Unpacked: Revenj.Http.exe. Size: 43kB
-	Unpacked: Autofac.Configuration.dll. Size: 30kB
-	Unpacked: Autofac.dll. Size: 212kB
-	Unpacked: Autofac.Integration.Mef.dll. Size: 21kB
-	Unpacked: Castle.Core.dll. Size: 424kB
-	Unpacked: LitS3.dll. Size: 46kB
-	Unpacked: Mono.Security.dll. Size: 285kB
-	Unpacked: Newtonsoft.Json.dll. Size: 419kB
-	Unpacked: Revenj.Common.dll. Size: 6kB
-	Unpacked: Revenj.DatabasePersistence.Interface.dll. Size: 8kB
-	Unpacked: Revenj.DatabasePersistence.Postgres.dll. Size: 137kB
-	Unpacked: Revenj.DomainPatterns.dll. Size: 41kB
-	Unpacked: Revenj.DomainPatterns.Interface.dll. Size: 20kB
-	Unpacked: Revenj.Extensibility.dll. Size: 110kB
-	Unpacked: Revenj.Extensibility.Interface.dll. Size: 35kB
-	Unpacked: Revenj.Features.Mailer.dll. Size: 22kB
-	Unpacked: Revenj.Features.Storage.dll. Size: 12kB
-	Unpacked: Revenj.Logging.Interface.dll. Size: 5kB
-	Unpacked: Revenj.Logging.NLog.dll. Size: 5kB
-	Unpacked: Revenj.Plugins.DatabasePersistence.Postgres.dll. Size: 47kB
-	Unpacked: Revenj.Security.dll. Size: 17kB
-	Unpacked: Revenj.Security.Interface.dll. Size: 6kB
-	Unpacked: Revenj.Serialization.dll. Size: 49kB
-	Unpacked: Revenj.Serialization.Interface.dll. Size: 6kB
-	Unpacked: Revenj.Templater.dll. Size: 210kB
-	Unpacked: Revenj.Utility.dll. Size: 26kB
-	Unpacked: NLog.dll. Size: 379kB
-	Unpacked: Npgsql.dll. Size: 308kB
-	Unpacked: protobuf-net.dll. Size: 188kB
-	Unpacked: Remotion.Linq.dll. Size: 204kB
-	Unpacked: Revenj.Api.Interface.dll. Size: 8kB
-	Unpacked: Revenj.Features.RestCache.dll. Size: 11kB
-	Unpacked: Revenj.Plugins.Aspects.dll. Size: 22kB
-	Unpacked: Revenj.Plugins.Rest.Commands.dll. Size: 42kB
-	Unpacked: Revenj.Plugins.Server.Commands.dll. Size: 70kB
-	Unpacked: Revenj.Processing.dll. Size: 19kB
-	Unpacked: Revenj.Processing.Interface.dll. Size: 6kB
-	Unpacked: Revenj.Wcf.dll. Size: 61kB
-	Unpacked: Serialize.Linq.dll. Size: 44kB
-	Unpacked: System.Reactive.Core.dll. Size: 100kB
-	Unpacked: System.Reactive.Interfaces.dll. Size: 23kB
-	Unpacked: System.Reactive.Linq.dll. Size: 662kB
+    ... (omitted)
 	Unpacked: Revenj.Http.exe.config. Size: 2kB
 
 Now that all dependencies are downloaded, CLC starts to process our DSL. 
@@ -158,8 +118,8 @@ First by compiling it and creating Mono .dll file with our model in it, then by 
 If you have an error inside your DSL, they will be shown during the beginning of this part of the process and all activities will be stopped. 
 Output from the whole process can be seen here:
 
-	Compiling Revenj library...
-	Compiled Revenj library to: /var/mono/wwwroot/clc/./model/ServerModel.dll
+	Compiling Revenj.NET library...
+	Compiled Revenj.NET library to: /var/mono/wwwroot/clc/./model/ServerModel.dll
 	Creating SQL migration...
 	Migration saved to /var/mono/wwwroot/clc/./migrationDirectory/sql-migration-1406165252523.sql
 	--CREATE: Tutorial-Example
@@ -210,7 +170,7 @@ Save the file.
 
 Start the http server using this command:
 
-	$ mono Revenj.Httpd.exe
+	$ mono Revenj.Http.exe
 
 Output be like this:
 
@@ -315,11 +275,11 @@ DSL described above will result in a model which the developer would usually wri
 
 Run the CLC again with same command as above and you will get much more information than before; for each newly added property or concept.
 	
-	[mono@oel6dsl clc]$ java -jar dsl-clc.jar -properties=my.props
+	[mono@oel6dsl clc]$ java -jar dsl-clc.jar properties=my.props
 	Compiling DSL...
 	Calling: https://compiler.dsl-platform.com:8443/platform/Platform.svc/unmanaged/source?targets=CSharpServer
-	Compiling Revenj library...
-	Compiled Revenj library to: /var/mono/wwwroot/clc/./revenj/ServerModel.dll
+	Compiling Revenj.NET library...
+	Compiled Revenj.NET library to: /var/mono/wwwroot/clc/./revenj/ServerModel.dll
 	Downloading SQL migration...
 	Calling: https://compiler.dsl-platform.com:8443/platform/Platform.svc/unmanaged/postgres-migration?version=1.0.2.22572
 	Migration saved to /var/mono/wwwroot/clc/./migrationDirectory/sql-migration-1406167016944.sql

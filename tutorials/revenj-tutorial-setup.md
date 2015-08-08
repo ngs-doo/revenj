@@ -1,6 +1,6 @@
 ## Revenj tutorial with .NET, Postgres and Visual studio
 
-**Revenj** is a framework for .NET and Mono with support for Postgres and Oracle databases. 
+**Revenj** is a set of libraries for .NET and Mono with support for Postgres and Oracle databases. 
 While it can be used as any other framework, it's rather small (feature wise) and it's best used as a backend for [DSL Platform](https://dsl-platform.com). 
 This makes it ideal as a [REST service](http://c2.com/cgi/wiki?RestArchitecturalStyle) built on [DSL](http://c2.com/cgi/wiki?DomainSpecificLanguage) models, or within some other framework such as ASP.NET. 
 
