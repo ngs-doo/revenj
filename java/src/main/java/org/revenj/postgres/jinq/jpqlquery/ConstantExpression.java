@@ -1,7 +1,7 @@
 package org.revenj.postgres.jinq.jpqlquery;
 
 public class ConstantExpression extends Expression {
-	String text;
+	final String text;
 
 	public ConstantExpression(String text) {
 		this.text = text;

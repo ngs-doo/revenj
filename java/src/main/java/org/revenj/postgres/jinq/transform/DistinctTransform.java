@@ -4,26 +4,26 @@ import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectOnly;
 
 public class DistinctTransform extends JPQLNoLambdaQueryTransform {
-    public DistinctTransform(JPQLQueryTransformConfiguration config) {
-        super(config);
-    }
+	public DistinctTransform(JPQLQueryTransformConfiguration config) {
+		super(config);
+	}
 
-    public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, org.revenj.postgres.jinq.transform.SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
-        if (query.canDistinct()) {
-            SelectOnly<V> select = (SelectOnly<V>) query;
+	public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, org.revenj.postgres.jinq.transform.SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
+		if (query.canDistinct()) {
+			SelectOnly<V> select = (SelectOnly<V>) query;
 
-            // Create the new query, merging in the analysis of the method
-            SelectOnly<U> toReturn = (SelectOnly<U>) select.shallowCopy();
-            toReturn.isDistinct = true;
+			// Create the new query, merging in the analysis of the method
+			SelectOnly<U> toReturn = (SelectOnly<U>) select.shallowCopy();
+			toReturn.isDistinct = true;
 
-            return toReturn;
-        }
-        throw new QueryTransformException("Existing query cannot be transformed further");
-    }
+			return toReturn;
+		}
+		throw new QueryTransformException("Existing query cannot be transformed further");
+	}
 
-    @Override
-    public String getTransformationTypeCachingTag() {
-        return DistinctTransform.class.getName();
-    }
+	@Override
+	public String getTransformationTypeCachingTag() {
+		return DistinctTransform.class.getName();
+	}
 
 }

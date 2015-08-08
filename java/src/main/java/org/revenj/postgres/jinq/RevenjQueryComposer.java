@@ -30,7 +30,7 @@ import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter;
 import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
-class RevenjQueryComposer<T> {
+final class RevenjQueryComposer<T> {
 
 	private static final Map<Class<?>, String> typeMapping = new HashMap<>();
 

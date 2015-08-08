@@ -13,18 +13,18 @@ import org.revenj.postgres.jinq.jpqlquery.SelectOnly;
  * Select..From..Where query.
  */
 public class AggregateStreamLambdaArgumentHandler extends LambdaParameterArgumentHandler {
-    SelectOnly<?> select;
+	SelectOnly<?> select;
 
-    public AggregateStreamLambdaArgumentHandler(SelectOnly<?> select, LambdaAnalysis lambda, MetamodelUtil metamodel, SymbExArgumentHandler parentArgumentScope, boolean hasInQueryStreamSource) {
-        super(lambda, metamodel, parentArgumentScope, hasInQueryStreamSource);
-        this.select = select;
-    }
+	public AggregateStreamLambdaArgumentHandler(SelectOnly<?> select, LambdaAnalysis lambda, MetamodelUtil metamodel, SymbExArgumentHandler parentArgumentScope, boolean hasInQueryStreamSource) {
+		super(lambda, metamodel, parentArgumentScope, hasInQueryStreamSource);
+		this.select = select;
+	}
 
-    @Override
-    protected JinqPostgresQuery<?> handleLambdaSubQueryArg(int argIndex, Type argType)
-            throws TypedValueVisitorException {
-        if (argIndex == 0)
-            return select;
-        throw new TypedValueVisitorException("Lambda trying to access unknown lambda parameter");
-    }
+	@Override
+	protected JinqPostgresQuery<?> handleLambdaSubQueryArg(int argIndex, Type argType)
+			throws TypedValueVisitorException {
+		if (argIndex == 0)
+			return select;
+		throw new TypedValueVisitorException("Lambda trying to access unknown lambda parameter");
+	}
 }

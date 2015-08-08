@@ -7,37 +7,37 @@ import java.util.List;
  * needed to parse results into a form usable by Jinq.
  */
 public abstract class JinqPostgresQuery<T> implements JinqPostgresFragment {
-    public static <U> JinqPostgresQuery<U> findAll(String dataSource) {
-        SelectFromWhere<U> query = new SelectFromWhere<>();
-        From from = From.forDataSource(dataSource);
-        query.cols = ColumnExpressions.singleColumn(SimpleRowReader.READER, new FromAliasExpression(from));
-        query.froms.add(from);
-        return query;
-    }
+	public static <U> JinqPostgresQuery<U> findAll(String dataSource) {
+		SelectFromWhere<U> query = new SelectFromWhere<>();
+		From from = From.forDataSource(dataSource);
+		query.cols = ColumnExpressions.singleColumn(SimpleRowReader.READER, new FromAliasExpression(from));
+		query.froms.add(from);
+		return query;
+	}
 
-    public JinqPostgresQuery() {
-    }
+	public JinqPostgresQuery() {
+	}
 
-    /**
-     * @return true iff the query is a simple select...from...where style query
-     */
-    public abstract boolean isSelectFromWhere();
+	/**
+	 * @return true iff the query is a simple select...from...where style query
+	 */
+	public abstract boolean isSelectFromWhere();
 
-    public abstract boolean isSelectOnly();
+	public abstract boolean isSelectOnly();
 
-    public abstract boolean isSelectFromWhereGroupHaving();
+	public abstract boolean isSelectFromWhereGroupHaving();
 
-    public abstract boolean canSort();
+	public abstract boolean canSort();
 
-    public abstract boolean canDistinct();
+	public abstract boolean canDistinct();
 
-    public abstract boolean isValidSubquery();
+	public abstract boolean isValidSubquery();
 
-    public abstract String getQueryString();
+	public abstract String getQueryString();
 
-    public abstract List<GeneratedQueryParameter> getQueryParameters();
+	public abstract List<GeneratedQueryParameter> getQueryParameters();
 
-    public abstract JinqPostgresQuery<T> shallowCopy();
+	public abstract JinqPostgresQuery<T> shallowCopy();
 
-    public abstract RowReader<T> getRowReader();
+	public abstract RowReader<T> getRowReader();
 }

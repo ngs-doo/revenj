@@ -10,13 +10,13 @@ import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 //    how many variants there actually are
 
 public interface SymbExArgumentHandler {
-    ColumnExpressions<?> handleArg(int argIndex, Type argType) throws TypedValueVisitorException;
+	ColumnExpressions<?> handleArg(int argIndex, Type argType) throws TypedValueVisitorException;
 
-    JinqPostgresQuery<?> handleSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException;
+	JinqPostgresQuery<?> handleSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException;
 
-    boolean checkIsInQueryStreamSource(int argIndex);
+	boolean checkIsInQueryStreamSource(int argIndex);
 
-    ColumnExpressions<?> handleThisFieldRead(String name, Type argType) throws TypedValueVisitorException;
+	ColumnExpressions<?> handleThisFieldRead(String name, Type argType) throws TypedValueVisitorException;
 
-    JinqPostgresQuery<?> handleSubQueryThisFieldRead(String name, Type argType) throws TypedValueVisitorException;
+	JinqPostgresQuery<?> handleSubQueryThisFieldRead(String name, Type argType) throws TypedValueVisitorException;
 }
