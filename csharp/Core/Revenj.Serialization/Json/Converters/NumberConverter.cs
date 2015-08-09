@@ -618,7 +618,7 @@ namespace Revenj.Serialization.Json.Converters
 			if (ch == '.')
 			{
 				i++;
-				int div = 1;
+				long div = 1;
 				for (; i < buf.Length && i < len; i++)
 				{
 					int ind = buf[i] - 48;
@@ -751,7 +751,7 @@ namespace Revenj.Serialization.Json.Converters
 			if (ch == '.')
 			{
 				i++;
-				int div = 1;
+				long div = 1;
 				for (; i < buf.Length && i < len; i++)
 				{
 					int ind = buf[i] - 48;
