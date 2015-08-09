@@ -117,7 +117,7 @@ namespace Revenj.Serialization.Json.Converters
 			nextToken = JsonSerialization.GetNextToken(sr);
 			if (nextToken == '}') return new RectangleF();
 			float x = 0, y = 0, w = 0, h = 0;
-			do
+			while(true)
 			{
 				var name = StringConverter.Deserialize(sr, nextToken);
 				nextToken = JsonSerialization.GetNextToken(sr);
@@ -145,7 +145,10 @@ namespace Revenj.Serialization.Json.Converters
 					default:
 						throw new SerializationException("Expecting 'X', 'Y', 'Width' or 'Height' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + name);
 				}
-			} while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',');
+
+				if ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) != ',') break;
+				nextToken = JsonSerialization.GetNextToken(sr);
+			}
 			if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			return new RectangleF(x, y, w, h);
 		}
@@ -159,7 +162,7 @@ namespace Revenj.Serialization.Json.Converters
 		public static void DeserializeRectangleFCollection(BufferedTextReader sr, int nextToken, ICollection<RectangleF> res)
 		{
 			res.Add(DeserializeRectangleF(sr, ref nextToken));
-			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
+			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
 				res.Add(DeserializeRectangleF(sr, ref nextToken));
@@ -183,10 +186,9 @@ namespace Revenj.Serialization.Json.Converters
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 					res.Add(null);
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for Color value. Expecting number, string or null");
-				nextToken = sr.Read();
 			}
 			else res.Add(DeserializeRectangleF(sr, ref nextToken));
-			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
+			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
 				if (nextToken == 'n')
@@ -194,7 +196,6 @@ namespace Revenj.Serialization.Json.Converters
 					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 						res.Add(null);
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for Color value. Expecting number, string or null");
-					nextToken = sr.Read();
 				}
 				else res.Add(DeserializeRectangleF(sr, ref nextToken));
 			}
