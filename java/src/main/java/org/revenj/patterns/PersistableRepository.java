@@ -28,7 +28,7 @@ public interface PersistableRepository<T extends AggregateRoot> extends Reposito
 	}
 
 	default void update(T item) throws IOException {
-		persist(null, Collections.singletonList(new AbstractMap.SimpleEntry<T, T>(null, item)), null);
+		update(null, item);
 	}
 
 	default void delete(Collection<T> items) throws IOException {

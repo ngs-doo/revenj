@@ -44,11 +44,16 @@ module test {
 		money money;
 		string(10) id;
 		Composite? *composite;
-		Set<Detail> detail;
+		Set<Detail1> detail1;
+		Set<Detail2> detail2;
 	}
-	entity Detail {
+	entity Detail1 {
 		float? f;
 		float ff;
+	}
+	entity Detail2 {
+		url? u;
+		double[] dd;
 	}
 	event Clicked {
 		date? date;

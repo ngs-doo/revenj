@@ -195,13 +195,13 @@ public class TestRepository {
 		UUID id = UUID.randomUUID();
 		co.setId(id);
 		Entity e1 = new Entity();
-		e1.getDetail().add(new Detail());
-		e1.getDetail().add(new Detail());
+		e1.getDetail1().add(new Detail1());
+		e1.getDetail1().add(new Detail1());
 		co.getEntities().add(e1);
 		Entity e2 = new Entity();
-		e2.getDetail().add(new Detail());
-		e2.getDetail().add(new Detail());
-		e2.getDetail().add(new Detail());
+		e2.getDetail1().add(new Detail1());
+		e2.getDetail1().add(new Detail1());
+		e2.getDetail1().add(new Detail1());
 		co.getEntities().add(e2);
 		String uri = repository.insert(co);
 		Assert.assertEquals(co.getURI(), uri);
@@ -210,7 +210,7 @@ public class TestRepository {
 		Composite co2 = found.get();
 		Assert.assertEquals(co.getURI(), co2.getURI());
 		Assert.assertEquals(2, co2.getEntities().size());
-		Assert.assertEquals(2, co2.getEntities().get(0).getDetail().size());
-		Assert.assertEquals(3, co2.getEntities().get(1).getDetail().size());
+		Assert.assertEquals(2, co2.getEntities().get(0).getDetail1().size());
+		Assert.assertEquals(3, co2.getEntities().get(1).getDetail1().size());
 	}
 }

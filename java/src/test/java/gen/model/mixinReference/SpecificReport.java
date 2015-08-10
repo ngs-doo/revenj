@@ -68,15 +68,6 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		return "SpecificReport(" + URI + ')';
 	}
 	
-	
-	public SpecificReport(
-			final gen.model.mixinReference.Author author) {
-			
-		setAuthor(author);
-	}
-
-	private static final long serialVersionUID = 7877927081063902530L;
-	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -90,6 +81,7 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		this.authorID = authorID;
 	}
 
+	private static final long serialVersionUID = 1655748044525582608L;
 	
 	private int ID;
 
@@ -209,6 +201,8 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 	}
 
 	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
 	public SpecificReport(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SpecificReport>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<SpecificReport> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -231,5 +225,11 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		readers[__index__extended_authorID] = (item, reader, context) -> { item.authorID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
+	public SpecificReport(
+			final gen.model.mixinReference.Author author) {
+			
+		setAuthor(author);
+	}
+
 }

@@ -11,7 +11,8 @@ public class Entity   implements java.io.Serializable {
 		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.money = java.math.BigDecimal.ZERO.setScale(2);
 		this.id = "";
-		this.detail = new java.util.HashSet<gen.model.test.Detail>(4);
+		this.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4);
+		this.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4);
 		this.Compositeid = java.util.UUID.randomUUID();
 		this.Index = 0;
 	}
@@ -63,7 +64,9 @@ public class Entity   implements java.io.Serializable {
 			return false;
 		if(!(this.compositeID == other.compositeID || this.compositeID != null && this.compositeID.equals(other.compositeID)))
 			return false;
-		if(!((this.detail == other.detail || this.detail != null && this.detail.equals(other.detail))))
+		if(!((this.detail1 == other.detail1 || this.detail1 != null && this.detail1.equals(other.detail1))))
+			return false;
+		if(!((this.detail2 == other.detail2 || this.detail2 != null && this.detail2.equals(other.detail2))))
 			return false;
 		if(!(this.Compositeid.equals(other.Compositeid)))
 			return false;
@@ -78,21 +81,6 @@ public class Entity   implements java.io.Serializable {
 		return "Entity(" + URI + ')';
 	}
 	
-	
-	public Entity(
-			final java.math.BigDecimal money,
-			final String id,
-			final gen.model.test.Composite composite,
-			final java.util.Set<gen.model.test.Detail> detail) {
-			
-		setMoney(money);
-		setId(id);
-		setComposite(composite);
-		setDetail(detail);
-	}
-
-	private static final long serialVersionUID = -2177394063124542140L;
-	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -100,7 +88,8 @@ public class Entity   implements java.io.Serializable {
 			@com.fasterxml.jackson.annotation.JsonProperty("id") final String id,
 			@com.fasterxml.jackson.annotation.JsonProperty("compositeURI") final String compositeURI,
 			@com.fasterxml.jackson.annotation.JsonProperty("compositeID") final java.util.UUID compositeID,
-			@com.fasterxml.jackson.annotation.JsonProperty("detail") final java.util.Set<gen.model.test.Detail> detail,
+			@com.fasterxml.jackson.annotation.JsonProperty("detail1") final java.util.Set<gen.model.test.Detail1> detail1,
+			@com.fasterxml.jackson.annotation.JsonProperty("detail2") final java.util.Set<gen.model.test.Detail2> detail2,
 			@com.fasterxml.jackson.annotation.JsonProperty("Compositeid") final java.util.UUID Compositeid,
 			@com.fasterxml.jackson.annotation.JsonProperty("Index") final int Index) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
@@ -109,11 +98,13 @@ public class Entity   implements java.io.Serializable {
 		this.id = id == null ? "" : id;
 		this.compositeURI = compositeURI;
 		this.compositeID = compositeID;
-		this.detail = detail == null ? new java.util.HashSet<gen.model.test.Detail>(4) : detail;
+		this.detail1 = detail1 == null ? new java.util.HashSet<gen.model.test.Detail1>(4) : detail1;
+		this.detail2 = detail2 == null ? new java.util.HashSet<gen.model.test.Detail2>(4) : detail2;
 		this.Compositeid = Compositeid == null ? new java.util.UUID(0L, 0L) : Compositeid;
 		this.Index = Index;
 	}
 
+	private static final long serialVersionUID = -6551847213236502407L;
 	
 	private java.math.BigDecimal money;
 
@@ -216,27 +207,53 @@ public class Entity   implements java.io.Serializable {
 	}
 
 	
-	static void __bindTodetail(java.util.function.Consumer<gen.model.test.Entity> binder) {
-		__binderdetail = binder;
+	static void __bindTodetail1(java.util.function.Consumer<gen.model.test.Entity> binder) {
+		__binderdetail1 = binder;
 	}
 
-	private static java.util.function.Consumer<gen.model.test.Entity> __binderdetail;
+	private static java.util.function.Consumer<gen.model.test.Entity> __binderdetail1;
 	
-	private java.util.Set<gen.model.test.Detail> detail;
+	private java.util.Set<gen.model.test.Detail1> detail1;
 
 	
-	@com.fasterxml.jackson.annotation.JsonProperty("detail")
-	public java.util.Set<gen.model.test.Detail> getDetail()  {
+	@com.fasterxml.jackson.annotation.JsonProperty("detail1")
+	public java.util.Set<gen.model.test.Detail1> getDetail1()  {
 		
-		return detail;
+		return detail1;
 	}
 
 	
-	public Entity setDetail(final java.util.Set<gen.model.test.Detail> value) {
+	public Entity setDetail1(final java.util.Set<gen.model.test.Detail1> value) {
 		
-		if(value == null) throw new IllegalArgumentException("Property \"detail\" cannot be null!");
+		if(value == null) throw new IllegalArgumentException("Property \"detail1\" cannot be null!");
 		org.revenj.Guards.checkNulls(value);
-		this.detail = value;
+		this.detail1 = value;
+		
+		return this;
+	}
+
+	
+	static void __bindTodetail2(java.util.function.Consumer<gen.model.test.Entity> binder) {
+		__binderdetail2 = binder;
+	}
+
+	private static java.util.function.Consumer<gen.model.test.Entity> __binderdetail2;
+	
+	private java.util.Set<gen.model.test.Detail2> detail2;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("detail2")
+	public java.util.Set<gen.model.test.Detail2> getDetail2()  {
+		
+		return detail2;
+	}
+
+	
+	public Entity setDetail2(final java.util.Set<gen.model.test.Detail2> value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"detail2\" cannot be null!");
+		org.revenj.Guards.checkNulls(value);
+		this.detail2 = value;
 		
 		return this;
 	}
@@ -285,10 +302,13 @@ public class Entity   implements java.io.Serializable {
 			for (gen.model.test.Entity e : parent.getEntities()) { 
 				e.Compositeid = parent.getId();
 				e.Index = i++; 
-				__binderdetail.accept(e);
+				__binderdetail1.accept(e);
+				__binderdetail2.accept(e);
 			}
 		});
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	public Entity(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Entity> rdr : readers) {
@@ -298,27 +318,43 @@ public class Entity   implements java.io.Serializable {
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers, int __index___money, int __index___id, int __index___compositeURI, int __index___compositeID, gen.model.test.converters.DetailConverter __converter_detail, int __index___detail, int __index___Compositeid, int __index___Index) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers, int __index___money, int __index___id, int __index___compositeURI, int __index___compositeID, gen.model.test.converters.Detail1Converter __converter_detail1, int __index___detail1, gen.model.test.converters.Detail2Converter __converter_detail2, int __index___detail2, int __index___Compositeid, int __index___Index) {
 		
 		readers[__index___money] = (item, reader, context) -> { item.money = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
 		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index___compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index___compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
-		readers[__index___detail] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail::from); if (__list != null) item.detail = new java.util.HashSet<gen.model.test.Detail>(__list); else item.detail = new java.util.HashSet<gen.model.test.Detail>(4); }; };
+		readers[__index___detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::from); if (__list != null) item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(__list); else item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4); }; };
+		readers[__index___detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::from); if (__list != null) item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(__list); else item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4); }; };
 		readers[__index___Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index___Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers, int __index__extended_money, int __index__extended_id, int __index__extended_compositeURI, int __index__extended_compositeID, final gen.model.test.converters.DetailConverter __converter_detail, int __index__extended_detail, int __index__extended_Compositeid, int __index__extended_Index) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers, int __index__extended_money, int __index__extended_id, int __index__extended_compositeURI, int __index__extended_compositeID, final gen.model.test.converters.Detail1Converter __converter_detail1, int __index__extended_detail1, final gen.model.test.converters.Detail2Converter __converter_detail2, int __index__extended_detail2, int __index__extended_Compositeid, int __index__extended_Index) {
 		
 		readers[__index__extended_money] = (item, reader, context) -> { item.money = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
 		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index__extended_compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
-		readers[__index__extended_detail] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail::fromExtended); if (__list != null) item.detail = new java.util.HashSet<gen.model.test.Detail>(__list); else item.detail = new java.util.HashSet<gen.model.test.Detail>(4); }; };
+		readers[__index__extended_detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::fromExtended); if (__list != null) item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(__list); else item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4); }; };
+		readers[__index__extended_detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::fromExtended); if (__list != null) item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(__list); else item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4); }; };
 		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
+	public Entity(
+			final java.math.BigDecimal money,
+			final String id,
+			final gen.model.test.Composite composite,
+			final java.util.Set<gen.model.test.Detail1> detail1,
+			final java.util.Set<gen.model.test.Detail2> detail2) {
+			
+		setMoney(money);
+		setId(id);
+		setComposite(composite);
+		setDetail1(detail1);
+		setDetail2(detail2);
+	}
+
 }

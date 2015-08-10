@@ -67,13 +67,21 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'compositeID' column in test Entity. Check if DB is in sync");
 		__index__extended_compositeID = (int)column.get().order - 1;
 			
-		column = columns.stream().filter(it -> "detail".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'detail' column in test Entity_entity. Check if DB is in sync");
-		__index___detail = (int)column.get().order - 1;
+		column = columns.stream().filter(it -> "detail1".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'detail1' column in test Entity_entity. Check if DB is in sync");
+		__index___detail1 = (int)column.get().order - 1;
 			
-		column = columnsExtended.stream().filter(it -> "detail".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'detail' column in test Entity. Check if DB is in sync");
-		__index__extended_detail = (int)column.get().order - 1;
+		column = columnsExtended.stream().filter(it -> "detail1".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'detail1' column in test Entity. Check if DB is in sync");
+		__index__extended_detail1 = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "detail2".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'detail2' column in test Entity_entity. Check if DB is in sync");
+		__index___detail2 = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "detail2".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'detail2' column in test Entity. Check if DB is in sync");
+		__index__extended_detail2 = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "Compositeid".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'Compositeid' column in test Entity_entity. Check if DB is in sync");
@@ -94,12 +102,13 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
-		__converter_detail = locator.resolve(gen.model.test.converters.DetailConverter.class);
+		__converter_detail1 = locator.resolve(gen.model.test.converters.Detail1Converter.class);
+		__converter_detail2 = locator.resolve(gen.model.test.converters.Detail2Converter.class);
 		
 			
-		gen.model.test.Entity.__configureConverter(readers, __index___money, __index___id, __index___compositeURI, __index___compositeID, __converter_detail, __index___detail, __index___Compositeid, __index___Index);
+		gen.model.test.Entity.__configureConverter(readers, __index___money, __index___id, __index___compositeURI, __index___compositeID, __converter_detail1, __index___detail1, __converter_detail2, __index___detail2, __index___Compositeid, __index___Index);
 			
-		gen.model.test.Entity.__configureConverterExtended(readersExtended, __index__extended_money, __index__extended_id, __index__extended_compositeURI, __index__extended_compositeID, __converter_detail, __index__extended_detail, __index__extended_Compositeid, __index__extended_Index);
+		gen.model.test.Entity.__configureConverterExtended(readersExtended, __index__extended_money, __index__extended_id, __index__extended_compositeURI, __index__extended_compositeID, __converter_detail1, __index__extended_detail1, __converter_detail2, __index__extended_detail2, __index__extended_Compositeid, __index__extended_Index);
 	}
 
 	@Override
@@ -128,7 +137,8 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		items[__index___id] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getId());
 		if (instance.getCompositeURI() != null)items[__index___compositeURI] = new org.revenj.postgres.converters.ValueTuple(instance.getCompositeURI());;
 		items[__index___compositeID] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getCompositeID());
-		items[__index___detail] = org.revenj.postgres.converters.ArrayTuple.create(instance.getDetail(), __converter_detail::to);
+		items[__index___detail1] = org.revenj.postgres.converters.ArrayTuple.create(instance.getDetail1(), __converter_detail1::to);
+		items[__index___detail2] = org.revenj.postgres.converters.ArrayTuple.create(instance.getDetail2(), __converter_detail2::to);
 		items[__index___Compositeid] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getCompositeid());
 		items[__index___Index] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getIndex());
 		return RecordTuple.from(items);
@@ -158,7 +168,8 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		items[__index__extended_id] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getId());
 		if (instance.getCompositeURI() != null)items[__index__extended_compositeURI] = new org.revenj.postgres.converters.ValueTuple(instance.getCompositeURI());;
 		items[__index__extended_compositeID] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getCompositeID());
-		items[__index__extended_detail] = org.revenj.postgres.converters.ArrayTuple.create(instance.getDetail(), __converter_detail::toExtended);
+		items[__index__extended_detail1] = org.revenj.postgres.converters.ArrayTuple.create(instance.getDetail1(), __converter_detail1::toExtended);
+		items[__index__extended_detail2] = org.revenj.postgres.converters.ArrayTuple.create(instance.getDetail2(), __converter_detail2::toExtended);
 		items[__index__extended_Compositeid] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getCompositeid());
 		items[__index__extended_Index] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getIndex());
 		return RecordTuple.from(items);
@@ -185,9 +196,12 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 	private final int __index__extended_compositeURI;
 	private final int __index___compositeID;
 	private final int __index__extended_compositeID;
-	private gen.model.test.converters.DetailConverter __converter_detail;
-	private final int __index___detail;
-	private final int __index__extended_detail;
+	private gen.model.test.converters.Detail1Converter __converter_detail1;
+	private final int __index___detail1;
+	private final int __index__extended_detail1;
+	private gen.model.test.converters.Detail2Converter __converter_detail2;
+	private final int __index___detail2;
+	private final int __index__extended_detail2;
 	private final int __index___Compositeid;
 	private final int __index__extended_Compositeid;
 	private final int __index___Index;

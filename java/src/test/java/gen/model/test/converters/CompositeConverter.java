@@ -138,7 +138,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		items[__index___en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		items[__index___simple] = __converter_simple.to(instance.getSimple());
 		items[__index___change] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getChange());
-		items[__index___tsl] = org.revenj.postgres.converters.ArrayTuple.create(instance.getTsl(), it -> org.revenj.postgres.converters.TimestampConverter.toTuple(it));
+		items[__index___tsl] = org.revenj.postgres.converters.ArrayTuple.create(instance.getTsl(), org.revenj.postgres.converters.TimestampConverter::toTuple);
 		items[__index___entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::to);
 		if (instance.getLaziesURI() != null) items[__index___laziesURI] = org.revenj.postgres.converters.ArrayTuple.create(instance.getLaziesURI(), org.revenj.postgres.converters.ValueTuple::new);;
 		return RecordTuple.from(items);
@@ -169,7 +169,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		items[__index__extended_en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		items[__index__extended_simple] = __converter_simple.toExtended(instance.getSimple());
 		items[__index__extended_change] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getChange());
-		items[__index__extended_tsl] = org.revenj.postgres.converters.ArrayTuple.create(instance.getTsl(), it -> org.revenj.postgres.converters.TimestampConverter.toTuple(it));
+		items[__index__extended_tsl] = org.revenj.postgres.converters.ArrayTuple.create(instance.getTsl(), org.revenj.postgres.converters.TimestampConverter::toTuple);
 		items[__index__extended_entities] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEntities(), __converter_entities::toExtended);
 		if (instance.getLaziesURI() != null) items[__index__extended_laziesURI] = org.revenj.postgres.converters.ArrayTuple.create(instance.getLaziesURI(), org.revenj.postgres.converters.ValueTuple::new);;
 		return RecordTuple.from(items);

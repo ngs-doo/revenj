@@ -8,15 +8,15 @@ import java.util.stream.*;
 import org.revenj.postgres.*;
 import org.revenj.postgres.converters.*;
 
-public class DetailConverter implements ObjectConverter<gen.model.test.Detail> {
+public class Detail1Converter implements ObjectConverter<gen.model.test.Detail1> {
 
 	@SuppressWarnings("unchecked")
-	public DetailConverter(List<ObjectConverter.ColumnInfo> allColumns) throws java.io.IOException {
+	public Detail1Converter(List<ObjectConverter.ColumnInfo> allColumns) throws java.io.IOException {
 		Optional<ObjectConverter.ColumnInfo> column;
 		
 			
 		final java.util.List<ObjectConverter.ColumnInfo> columns =
-				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "Detail_entity".equals(it.typeName))
+				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "Detail1_entity".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCount = columns.size();
 			
@@ -26,7 +26,7 @@ public class DetailConverter implements ObjectConverter<gen.model.test.Detail> {
 		}
 			
 		final java.util.List<ObjectConverter.ColumnInfo> columnsExtended =
-				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "-ngs_Detail_type-".equals(it.typeName))
+				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "-ngs_Detail1_type-".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCountExtended = columnsExtended.size();
 			
@@ -36,43 +36,43 @@ public class DetailConverter implements ObjectConverter<gen.model.test.Detail> {
 		}
 			
 		column = columns.stream().filter(it -> "f".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'f' column in test Detail_entity. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'f' column in test Detail1_entity. Check if DB is in sync");
 		__index___f = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "f".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'f' column in test Detail. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'f' column in test Detail1. Check if DB is in sync");
 		__index__extended_f = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "ff".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'ff' column in test Detail_entity. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'ff' column in test Detail1_entity. Check if DB is in sync");
 		__index___ff = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "ff".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'ff' column in test Detail. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'ff' column in test Detail1. Check if DB is in sync");
 		__index__extended_ff = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "EntityCompositeid".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'EntityCompositeid' column in test Detail_entity. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'EntityCompositeid' column in test Detail1_entity. Check if DB is in sync");
 		__index___EntityCompositeid = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "EntityCompositeid".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'EntityCompositeid' column in test Detail. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'EntityCompositeid' column in test Detail1. Check if DB is in sync");
 		__index__extended_EntityCompositeid = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "EntityIndex".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'EntityIndex' column in test Detail_entity. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'EntityIndex' column in test Detail1_entity. Check if DB is in sync");
 		__index___EntityIndex = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "EntityIndex".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'EntityIndex' column in test Detail. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'EntityIndex' column in test Detail1. Check if DB is in sync");
 		__index__extended_EntityIndex = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "Index".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'Index' column in test Detail_entity. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'Index' column in test Detail1_entity. Check if DB is in sync");
 		__index___Index = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "Index".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'Index' column in test Detail. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'Index' column in test Detail1. Check if DB is in sync");
 		__index__extended_Index = (int)column.get().order - 1;
 	}
 
@@ -80,30 +80,30 @@ public class DetailConverter implements ObjectConverter<gen.model.test.Detail> {
 		
 		
 			
-		gen.model.test.Detail.__configureConverter(readers, __index___f, __index___ff, __index___EntityCompositeid, __index___EntityIndex, __index___Index);
+		gen.model.test.Detail1.__configureConverter(readers, __index___f, __index___ff, __index___EntityCompositeid, __index___EntityIndex, __index___Index);
 			
-		gen.model.test.Detail.__configureConverterExtended(readersExtended, __index__extended_f, __index__extended_ff, __index__extended_EntityCompositeid, __index__extended_EntityIndex, __index__extended_Index);
+		gen.model.test.Detail1.__configureConverterExtended(readersExtended, __index__extended_f, __index__extended_ff, __index__extended_EntityCompositeid, __index__extended_EntityIndex, __index__extended_Index);
 	}
 
 	@Override
 	public String getDbName() {
-		return "\"test\".\"Detail_entity\"";
+		return "\"test\".\"Detail1_entity\"";
 	}
 
 	@Override
-	public gen.model.test.Detail from(PostgresReader reader) throws java.io.IOException {
+	public gen.model.test.Detail1 from(PostgresReader reader) throws java.io.IOException {
 		return from(reader, 0);
 	}
 
-	private gen.model.test.Detail from(PostgresReader reader, int outerContext, int context, ObjectConverter.Reader<gen.model.test.Detail>[] readers) throws java.io.IOException {
+	private gen.model.test.Detail1 from(PostgresReader reader, int outerContext, int context, ObjectConverter.Reader<gen.model.test.Detail1>[] readers) throws java.io.IOException {
 		reader.read(outerContext);
-		gen.model.test.Detail instance = new gen.model.test.Detail(reader, context, readers);
+		gen.model.test.Detail1 instance = new gen.model.test.Detail1(reader, context, readers);
 		reader.read(outerContext);
 		return instance;
 	}
 
 	@Override
-	public PostgresTuple to(gen.model.test.Detail instance) {
+	public PostgresTuple to(gen.model.test.Detail1 instance) {
 		if (instance == null) return null;
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
@@ -117,21 +117,21 @@ public class DetailConverter implements ObjectConverter<gen.model.test.Detail> {
 
 	
 	private final int columnCount;
-	private final ObjectConverter.Reader<gen.model.test.Detail>[] readers;
+	private final ObjectConverter.Reader<gen.model.test.Detail1>[] readers;
 	
-	public gen.model.test.Detail from(PostgresReader reader, int context) throws java.io.IOException {
+	public gen.model.test.Detail1 from(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
-		gen.model.test.Detail instance = from(reader, context, context == 0 ? 1 : context << 1, readers);
+		gen.model.test.Detail1 instance = from(reader, context, context == 0 ? 1 : context << 1, readers);
 		reader.read();
 		return instance;
 	}
 
-	public gen.model.test.Detail from(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+	public gen.model.test.Detail1 from(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
 		return from(reader, outerContext, context, readers);
 	}
 	
-	public PostgresTuple toExtended(gen.model.test.Detail instance) {
+	public PostgresTuple toExtended(gen.model.test.Detail1 instance) {
 		if (instance == null) return null;
 		PostgresTuple[] items = new PostgresTuple[columnCountExtended];
 		
@@ -143,17 +143,17 @@ public class DetailConverter implements ObjectConverter<gen.model.test.Detail> {
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
-	private final ObjectConverter.Reader<gen.model.test.Detail>[] readersExtended;
+	private final ObjectConverter.Reader<gen.model.test.Detail1>[] readersExtended;
 	
-	public gen.model.test.Detail fromExtended(PostgresReader reader, int context) throws java.io.IOException {
+	public gen.model.test.Detail1 fromExtended(PostgresReader reader, int context) throws java.io.IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') return null;
-		gen.model.test.Detail instance = from(reader, context, context == 0 ? 1 : context << 1, readersExtended);
+		gen.model.test.Detail1 instance = from(reader, context, context == 0 ? 1 : context << 1, readersExtended);
 		reader.read();
 		return instance;
 	}
 
-	public gen.model.test.Detail fromExtended(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
+	public gen.model.test.Detail1 fromExtended(PostgresReader reader, int outerContext, int context) throws java.io.IOException {
 		return from(reader, outerContext, context, readersExtended);
 	}
 	private final int __index___f;

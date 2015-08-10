@@ -139,7 +139,7 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 			java.util.Collection<gen.model.test.LazyLoad> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.test.LazyLoad, gen.model.test.LazyLoad>> update,
 			java.util.Collection<gen.model.test.LazyLoad> delete) throws java.io.IOException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"test\".\"persist_LazyLoad\"(?, ?, ?, ?)");
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"test\".\"persist_LazyLoad\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {
@@ -217,6 +217,60 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 				if (message != null) throw new java.io.IOException(message);
 			}
 			return result;
+		} catch (java.sql.SQLException e) {
+			throw new java.io.IOException(e);
+		}
+	}
+
+	
+	@Override
+	public String insert(gen.model.test.LazyLoad item) throws java.io.IOException {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"test\".\"insert_LazyLoad\"(ARRAY[?])");
+			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
+			java.util.List<gen.model.test.LazyLoad> insert = java.util.Collections.singletonList(item);
+				assignSequenceID.accept(insert, connection);
+			if (insertLoop != null) insertLoop.accept(insert, sw);
+			sw.reset();
+			org.revenj.postgres.converters.PostgresTuple tuple = converter.to(item);
+			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+			pgo.setType("\"test\".\"LazyLoad_entity\"");
+			sw.reset();
+			tuple.buildTuple(sw, false);
+			pgo.setValue(sw.toString());
+			statement.setObject(1, pgo);
+			statement.execute();
+			return item.getURI();
+		} catch (java.sql.SQLException e) {
+			throw new java.io.IOException(e);
+		}
+	}
+
+	@Override
+	public void update(gen.model.test.LazyLoad oldItem, gen.model.test.LazyLoad newItem) throws java.io.IOException {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"test\".\"update_LazyLoad\"(ARRAY[?], ARRAY[?])");
+			 org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
+			if (oldItem == null) oldItem = find(newItem.getURI()).get();
+			java.util.List<gen.model.test.LazyLoad> oldUpdate = java.util.Collections.singletonList(oldItem);
+			java.util.List<gen.model.test.LazyLoad> newUpdate = java.util.Collections.singletonList(newItem);
+			if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
+			org.revenj.postgres.converters.PostgresTuple tupleOld = converter.to(oldItem);
+			org.revenj.postgres.converters.PostgresTuple tupleNew = converter.to(newItem);
+			org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
+			org.postgresql.util.PGobject pgNew = new org.postgresql.util.PGobject();
+			pgOld.setType("\"test\".\"LazyLoad_entity\"");
+			pgNew.setType("\"test\".\"LazyLoad_entity\"");
+			tupleOld.buildTuple(sw, false);
+			pgOld.setValue(sw.toString());
+			sw.reset();
+			tupleNew.buildTuple(sw, false);
+			pgNew.setValue(sw.toString());
+			statement.setObject(1, pgOld);
+			statement.setObject(2, pgNew);
+			try (java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				String message = rs.getString(1);
+				if (message != null) throw new java.io.IOException(message);
+			}
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
 		}

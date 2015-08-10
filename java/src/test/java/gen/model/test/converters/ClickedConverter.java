@@ -92,7 +92,7 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 		items[__index___date] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getDate());
 		items[__index___number] = org.revenj.postgres.converters.DecimalConverter.toTuple(instance.getNumber());
 		items[__index___bigint] = org.revenj.postgres.converters.LongConverter.toTuple(instance.getBigint());
-		items[__index___bool] = org.revenj.postgres.converters.ArrayTuple.create(instance.getBool(), it -> org.revenj.postgres.converters.BoolConverter.toTuple(it));
+		items[__index___bool] = org.revenj.postgres.converters.ArrayTuple.create(instance.getBool(), org.revenj.postgres.converters.BoolConverter::toTuple);
 		items[__index___en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		return RecordTuple.from(items);
 	}

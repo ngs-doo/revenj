@@ -70,17 +70,6 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 		return "LazyLoad(" + URI + ')';
 	}
 	
-	
-	public LazyLoad(
-			final gen.model.test.Composite comp,
-			final gen.model.test.SingleDetail sd) {
-			
-		setComp(comp);
-		setSd(sd);
-	}
-
-	private static final long serialVersionUID = -6042857654982037784L;
-	
 	@com.fasterxml.jackson.annotation.JsonCreator private LazyLoad(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -98,6 +87,7 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 		this.sdID = sdID;
 	}
 
+	private static final long serialVersionUID = 1506507816582469178L;
 	
 	private int ID;
 
@@ -281,6 +271,8 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 		);
 	}
 	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
 	public LazyLoad(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<LazyLoad> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -307,5 +299,13 @@ public class LazyLoad   implements java.io.Serializable, org.revenj.patterns.Agg
 		readers[__index__extended_sdID] = (item, reader, context) -> { item.sdID = org.revenj.postgres.converters.IntConverter.parseNullable(reader); };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
+	public LazyLoad(
+			final gen.model.test.Composite comp,
+			final gen.model.test.SingleDetail sd) {
+			
+		setComp(comp);
+		setSd(sd);
+	}
+
 }

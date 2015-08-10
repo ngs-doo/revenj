@@ -165,7 +165,7 @@ public class CompositeRepository   implements org.revenj.patterns.Repository<gen
 			java.util.Collection<gen.model.test.Composite> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.test.Composite, gen.model.test.Composite>> update,
 			java.util.Collection<gen.model.test.Composite> delete) throws java.io.IOException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"test\".\"persist_Composite\"(?, ?, ?, ?)");
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"test\".\"persist_Composite\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {

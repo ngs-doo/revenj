@@ -86,6 +86,71 @@ public class ArrayTuple extends PostgresTuple {
 		return true;
 	}
 
+	public static PostgresTuple create(double[] elements, Function<Double, PostgresTuple> converter) {
+		if (elements == null) {
+			return null;
+		} else if (elements.length == 0) {
+			return EMPTY;
+		}
+		PostgresTuple[] tuples = new PostgresTuple[elements.length];
+		for (int i = 0; i < elements.length; i++) {
+			tuples[i] = converter.apply(elements[i]);
+		}
+		return new ArrayTuple(tuples);
+	}
+
+	public static PostgresTuple create(int[] elements, Function<Integer, PostgresTuple> converter) {
+		if (elements == null) {
+			return null;
+		} else if (elements.length == 0) {
+			return EMPTY;
+		}
+		PostgresTuple[] tuples = new PostgresTuple[elements.length];
+		for (int i = 0; i < elements.length; i++) {
+			tuples[i] = converter.apply(elements[i]);
+		}
+		return new ArrayTuple(tuples);
+	}
+
+	public static PostgresTuple create(long[] elements, Function<Long, PostgresTuple> converter) {
+		if (elements == null) {
+			return null;
+		} else if (elements.length == 0) {
+			return EMPTY;
+		}
+		PostgresTuple[] tuples = new PostgresTuple[elements.length];
+		for (int i = 0; i < elements.length; i++) {
+			tuples[i] = converter.apply(elements[i]);
+		}
+		return new ArrayTuple(tuples);
+	}
+
+	public static PostgresTuple create(float[] elements, Function<Float, PostgresTuple> converter) {
+		if (elements == null) {
+			return null;
+		} else if (elements.length == 0) {
+			return EMPTY;
+		}
+		PostgresTuple[] tuples = new PostgresTuple[elements.length];
+		for (int i = 0; i < elements.length; i++) {
+			tuples[i] = converter.apply(elements[i]);
+		}
+		return new ArrayTuple(tuples);
+	}
+
+	public static PostgresTuple create(boolean[] elements, Function<Boolean, PostgresTuple> converter) {
+		if (elements == null) {
+			return null;
+		} else if (elements.length == 0) {
+			return EMPTY;
+		}
+		PostgresTuple[] tuples = new PostgresTuple[elements.length];
+		for (int i = 0; i < elements.length; i++) {
+			tuples[i] = converter.apply(elements[i]);
+		}
+		return new ArrayTuple(tuples);
+	}
+
 	public static <T> PostgresTuple create(T[] elements, Function<T, PostgresTuple> converter) {
 		if (elements == null) {
 			return null;

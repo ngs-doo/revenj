@@ -39,13 +39,13 @@ public abstract class InetConverter {
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur != '{';
-		if (espaced) {
+		boolean escaped = cur != '{';
+		if (escaped) {
 			reader.read(context);
 		}
 		cur = reader.peek();
 		if (cur == '}') {
-			if (espaced) {
+			if (escaped) {
 				reader.read(context + 2);
 			} else {
 				reader.read(2);
@@ -66,7 +66,7 @@ public abstract class InetConverter {
 				cur = reader.read();
 			}
 		} while (cur == ',');
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();

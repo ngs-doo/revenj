@@ -63,7 +63,7 @@ public abstract class StringConverter {
 		return parseEscapedString(reader, context, cur, ')');
 	}
 
-	private static String parseEscapedString(PostgresReader reader, int context, int cur, char matchEnd) throws IOException {
+	static String parseEscapedString(PostgresReader reader, int context, int cur, char matchEnd) throws IOException {
 		cur = reader.read(context);
 		reader.initBuffer();
 		do {
@@ -88,20 +88,20 @@ public abstract class StringConverter {
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur != '{';
-		if (espaced) {
+		boolean escaped = cur != '{';
+		if (escaped) {
 			reader.read(context);
 		}
-		int innerContext = context << 1;
 		cur = reader.peek();
 		if (cur == '}') {
-			if (espaced) {
+			if (escaped) {
 				reader.read(context + 2);
 			} else {
 				reader.read(2);
 			}
 			return new ArrayList<>(0);
 		}
+        int innerContext = context << 1;
 		List<String> list = new ArrayList<>();
 		String emptyCol = allowNull ? null : "";
 		do {
@@ -120,7 +120,7 @@ public abstract class StringConverter {
 				}
 			}
 		} while (cur == ',');
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();

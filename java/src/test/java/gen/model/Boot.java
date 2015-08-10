@@ -84,9 +84,13 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.register(test$converter$EntityConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Entity>>(){}.type, test$converter$EntityConverter, false);
 		
-		gen.model.test.converters.DetailConverter test$converter$DetailConverter = new gen.model.test.converters.DetailConverter(columns);
-		container.register(test$converter$DetailConverter);
-		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Detail>>(){}.type, test$converter$DetailConverter, false);
+		gen.model.test.converters.Detail1Converter test$converter$Detail1Converter = new gen.model.test.converters.Detail1Converter(columns);
+		container.register(test$converter$Detail1Converter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Detail1>>(){}.type, test$converter$Detail1Converter, false);
+		
+		gen.model.test.converters.Detail2Converter test$converter$Detail2Converter = new gen.model.test.converters.Detail2Converter(columns);
+		container.register(test$converter$Detail2Converter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Detail2>>(){}.type, test$converter$Detail2Converter, false);
 		
 		gen.model.test.converters.ClickedConverter test$converter$ClickedConverter = new gen.model.test.converters.ClickedConverter(columns);
 		container.register(test$converter$ClickedConverter);
@@ -172,12 +176,18 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Entity.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getComposite", "\"composite\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeID", "\"compositeID\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getDetail", "\"detail\"");
-		test$converter$DetailConverter.configure(container);
-		metamodel.registerDataSource(gen.model.test.Detail.class, "\"test\".\"Detail_entity\"");
-		metamodel.registerProperty(gen.model.test.Detail.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.test.Detail.class, "getF", "\"f\"");
-		metamodel.registerProperty(gen.model.test.Detail.class, "getFf", "\"ff\"");
+		metamodel.registerProperty(gen.model.test.Entity.class, "getDetail1", "\"detail1\"");
+		metamodel.registerProperty(gen.model.test.Entity.class, "getDetail2", "\"detail2\"");
+		test$converter$Detail1Converter.configure(container);
+		metamodel.registerDataSource(gen.model.test.Detail1.class, "\"test\".\"Detail1_entity\"");
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getF", "\"f\"");
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getFf", "\"ff\"");
+		test$converter$Detail2Converter.configure(container);
+		metamodel.registerDataSource(gen.model.test.Detail2.class, "\"test\".\"Detail2_entity\"");
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getU", "\"u\"");
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getDd", "\"dd\"");
 		test$converter$ClickedConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Clicked.class, "\"test\".\"Clicked_event\"");
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getURI", "\"URI\"");
@@ -236,9 +246,12 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
-		metamodel.registerProperty(gen.model.test.Detail.class, "getEntityCompositeid", "\"EntityCompositeid\"");
-		metamodel.registerProperty(gen.model.test.Detail.class, "getEntityIndex", "\"EntityIndex\"");
-		metamodel.registerProperty(gen.model.test.Detail.class, "getIndex", "\"Index\"");
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"");
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityIndex", "\"EntityIndex\"");
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getIndex", "\"Index\"");
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getEntityCompositeid", "\"EntityCompositeid\"");
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getEntityIndex", "\"EntityIndex\"");
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getIndex", "\"Index\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthor", "\"author\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthorID", "\"authorID\"");
 	}

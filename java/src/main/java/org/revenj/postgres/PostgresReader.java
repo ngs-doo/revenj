@@ -5,7 +5,7 @@ import org.revenj.patterns.ServiceLocator;
 import java.io.IOException;
 import java.util.Arrays;
 
-public final class PostgresReader implements PostgresBuffer {
+public final class PostgresReader implements PostgresBuffer, AutoCloseable {
 	private String input = "";
 	private int length;
 	private int positionInInput;
@@ -23,6 +23,15 @@ public final class PostgresReader implements PostgresBuffer {
 		this.buffer = new char[64];
 		this.tmp = new char[48];
 		this.locator = locator;
+	}
+
+	public static PostgresReader create(ServiceLocator locator) {
+		return new PostgresReader(locator);
+	}
+
+	public void close() {
+		length = positionInBuffer = positionInInput = 0;
+		last = -1;
 	}
 
 	public void process(String input) {

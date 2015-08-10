@@ -139,7 +139,7 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 			java.util.Collection<gen.model.test.SingleDetail> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.test.SingleDetail, gen.model.test.SingleDetail>> update,
 			java.util.Collection<gen.model.test.SingleDetail> delete) throws java.io.IOException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"test\".\"persist_SingleDetail\"(?, ?, ?, ?)");
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"test\".\"persist_SingleDetail\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {

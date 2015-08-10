@@ -2,11 +2,11 @@ package gen.model.test;
 
 
 
-public class Detail   implements java.io.Serializable {
+public class Detail1   implements java.io.Serializable {
 	
 	
 	
-	public Detail() {
+	public Detail1() {
 			
 		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ff = 0.0f;
@@ -40,12 +40,12 @@ public class Detail   implements java.io.Serializable {
 
 		if (getClass() != obj.getClass())
 			return false;
-		final Detail other = (Detail) obj;
+		final Detail1 other = (Detail1) obj;
 
 		return URI.equals(other.URI);
 	}
 
-	public boolean equals(final Detail other) {
+	public boolean equals(final Detail1 other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -70,21 +70,10 @@ public class Detail   implements java.io.Serializable {
 
 	@Override
 	public String toString() {
-		return "Detail(" + URI + ')';
+		return "Detail1(" + URI + ')';
 	}
 	
-	
-	public Detail(
-			final Float f,
-			final float ff) {
-			
-		setF(f);
-		setFf(ff);
-	}
-
-	private static final long serialVersionUID = -8668626911374779308L;
-	
-	@com.fasterxml.jackson.annotation.JsonCreator private Detail(
+	@com.fasterxml.jackson.annotation.JsonCreator private Detail1(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
 			@com.fasterxml.jackson.annotation.JsonProperty("f") final Float f,
@@ -101,6 +90,7 @@ public class Detail   implements java.io.Serializable {
 		this.Index = Index;
 	}
 
+	private static final long serialVersionUID = -1320745481152118765L;
 	
 	private Float f;
 
@@ -112,7 +102,7 @@ public class Detail   implements java.io.Serializable {
 	}
 
 	
-	public Detail setF(final Float value) {
+	public Detail1 setF(final Float value) {
 		
 		this.f = value;
 		
@@ -130,7 +120,7 @@ public class Detail   implements java.io.Serializable {
 	}
 
 	
-	public Detail setFf(final float value) {
+	public Detail1 setFf(final float value) {
 		
 		this.ff = value;
 		
@@ -148,7 +138,7 @@ public class Detail   implements java.io.Serializable {
 	}
 
 	
-	private Detail setEntityCompositeid(final java.util.UUID value) {
+	private Detail1 setEntityCompositeid(final java.util.UUID value) {
 		
 		if(value == null) throw new IllegalArgumentException("Property \"EntityCompositeid\" cannot be null!");
 		this.EntityCompositeid = value;
@@ -167,7 +157,7 @@ public class Detail   implements java.io.Serializable {
 	}
 
 	
-	private Detail setEntityIndex(final int value) {
+	private Detail1 setEntityIndex(final int value) {
 		
 		this.EntityIndex = value;
 		
@@ -185,7 +175,7 @@ public class Detail   implements java.io.Serializable {
 	}
 
 	
-	private Detail setIndex(final int value) {
+	private Detail1 setIndex(final int value) {
 		
 		this.Index = value;
 		
@@ -194,9 +184,9 @@ public class Detail   implements java.io.Serializable {
 
 	
 	static {
-		gen.model.test.Entity.__bindTodetail(parent -> {
+		gen.model.test.Entity.__bindTodetail1(parent -> {
 			int i = 0;
-			for (gen.model.test.Detail e : parent.getDetail()) { 
+			for (gen.model.test.Detail1 e : parent.getDetail1()) { 
 				e.EntityCompositeid = parent.getCompositeid();
 				e.EntityIndex = parent.getIndex();
 				e.Index = i++; 
@@ -204,15 +194,17 @@ public class Detail   implements java.io.Serializable {
 		});
 	}
 	
-	public Detail(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Detail>[] readers) throws java.io.IOException {
-		for (org.revenj.postgres.ObjectConverter.Reader<Detail> rdr : readers) {
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
+	public Detail1(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Detail1>[] readers) throws java.io.IOException {
+		for (org.revenj.postgres.ObjectConverter.Reader<Detail1> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.test.converters.DetailConverter.buildURI(reader, EntityCompositeid, EntityIndex, Index);
+		URI = gen.model.test.converters.Detail1Converter.buildURI(reader, EntityCompositeid, EntityIndex, Index);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Detail>[] readers, int __index___f, int __index___ff, int __index___EntityCompositeid, int __index___EntityIndex, int __index___Index) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Detail1>[] readers, int __index___f, int __index___ff, int __index___EntityCompositeid, int __index___EntityIndex, int __index___Index) {
 		
 		readers[__index___f] = (item, reader, context) -> { item.f = org.revenj.postgres.converters.FloatConverter.parseNullable(reader); };
 		readers[__index___ff] = (item, reader, context) -> { item.ff = org.revenj.postgres.converters.FloatConverter.parse(reader); };
@@ -221,7 +213,7 @@ public class Detail   implements java.io.Serializable {
 		readers[__index___Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Detail>[] readers, int __index__extended_f, int __index__extended_ff, int __index__extended_EntityCompositeid, int __index__extended_EntityIndex, int __index__extended_Index) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Detail1>[] readers, int __index__extended_f, int __index__extended_ff, int __index__extended_EntityCompositeid, int __index__extended_EntityIndex, int __index__extended_Index) {
 		
 		readers[__index__extended_f] = (item, reader, context) -> { item.f = org.revenj.postgres.converters.FloatConverter.parseNullable(reader); };
 		readers[__index__extended_ff] = (item, reader, context) -> { item.ff = org.revenj.postgres.converters.FloatConverter.parse(reader); };
@@ -230,5 +222,13 @@ public class Detail   implements java.io.Serializable {
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
+	public Detail1(
+			final Float f,
+			final float ff) {
+			
+		setF(f);
+		setFf(ff);
+	}
+
 }

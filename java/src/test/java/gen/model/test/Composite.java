@@ -83,25 +83,6 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 		return "Composite(" + URI + ')';
 	}
 	
-	
-	public Composite(
-			final java.util.UUID id,
-			final gen.model.test.En[] enn,
-			final gen.model.test.En en,
-			final gen.model.test.Simple simple,
-			final java.util.List<java.time.OffsetDateTime> tsl,
-			final java.util.List<gen.model.test.Entity> entities) {
-			
-		setId(id);
-		setEnn(enn);
-		setEn(en);
-		setSimple(simple);
-		setTsl(tsl);
-		setEntities(entities);
-	}
-
-	private static final long serialVersionUID = 297609519054106963L;
-	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -125,6 +106,7 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 		this.laziesURI = laziesURI == null ? new String[0] : laziesURI;
 	}
 
+	private static final long serialVersionUID = 6519786450071968189L;
 	
 	private java.util.UUID id;
 
@@ -329,7 +311,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = -4703546318225045498L;
+	private static final long serialVersionUID = -2296544793857394152L;
 	
 	private gen.model.test.Simple simple;
 
@@ -386,6 +368,8 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		);
 	}
 	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -424,5 +408,21 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		}; };
 	}
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
+	public Composite(
+			final java.util.UUID id,
+			final gen.model.test.En[] enn,
+			final gen.model.test.En en,
+			final gen.model.test.Simple simple,
+			final java.util.List<java.time.OffsetDateTime> tsl,
+			final java.util.List<gen.model.test.Entity> entities) {
+			
+		setId(id);
+		setEnn(enn);
+		setEn(en);
+		setSimple(simple);
+		setTsl(tsl);
+		setEntities(entities);
+	}
+
 }

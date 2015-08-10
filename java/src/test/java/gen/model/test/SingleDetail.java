@@ -64,7 +64,6 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 	public String toString() {
 		return "SingleDetail(" + URI + ')';
 	}
-	private static final long serialVersionUID = -3007756369192401678L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -77,6 +76,7 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 		this.detailsURI = detailsURI == null ? new String[0] : detailsURI;
 	}
 
+	private static final long serialVersionUID = 6925688876159714812L;
 	
 	private int ID;
 
@@ -181,6 +181,8 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 		);
 	}
 	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	
 	public SingleDetail(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SingleDetail>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<SingleDetail> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -206,6 +208,4 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 			if (__list != null) item.detailsURI = __list.toArray(new String[__list.size()]); else item.detailsURI = new String[0]; 
 		}; };
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }
