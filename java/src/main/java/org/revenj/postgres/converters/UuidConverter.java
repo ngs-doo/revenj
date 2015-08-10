@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -33,7 +34,13 @@ public abstract class UuidConverter {
 		}
 	}
 
-	public static void serialize(UUID value, char[] buf, int start) {
+	public static void serializeURI(PostgresBuffer sw, UUID value) {
+		if (value == null) return;
+		serialize(value, sw.getTempBuffer(), 0);
+		sw.addToBuffer(sw.getTempBuffer(), 36);
+	}
+
+	private static void serialize(UUID value, char[] buf, int start) {
 		final long hi = value.getMostSignificantBits();
 		final long lo = value.getLeastSignificantBits();
 		final int hi1 = (int) (hi >> 32);

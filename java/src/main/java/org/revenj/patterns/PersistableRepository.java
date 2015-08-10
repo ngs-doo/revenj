@@ -5,14 +5,14 @@ import java.util.*;
 
 public interface PersistableRepository<T extends AggregateRoot> extends Repository<T> {
 
-	List<String> persist(Collection<T> insert, Collection<Map.Entry<T, T>> update, Collection<T> delete) throws IOException;
+	String[] persist(Collection<T> insert, Collection<Map.Entry<T, T>> update, Collection<T> delete) throws IOException;
 
-	default List<String> insert(Collection<T> items) throws IOException {
+	default String[] insert(Collection<T> items) throws IOException {
 		return persist(items, null, null);
 	}
 
 	default String insert(T item) throws IOException {
-		return persist(Collections.singletonList(item), null, null).get(0);
+		return persist(Collections.singletonList(item), null, null)[0];
 	}
 
 	default void update(Collection<T> items) throws IOException {

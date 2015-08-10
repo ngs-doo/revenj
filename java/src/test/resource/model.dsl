@@ -20,6 +20,7 @@ module test {
 		En[] enn;
 		En en;
 		Simple simple;
+		date change { versioning; }
 		List<timestamp> tsl;
 		List<Entity> entities;
 		detail<LazyLoad.comp> lazies;
@@ -32,6 +33,7 @@ module test {
 		enn;
 		en;
 		tsl;
+		change;
 		entities;
 		simple;
 		specification ForSimple 'it => simples.Contains(it.simple)' {
@@ -42,6 +44,11 @@ module test {
 		money money;
 		string(10) id;
 		Composite? *composite;
+		Set<Detail> detail;
+	}
+	entity Detail {
+		float? f;
+		float ff;
 	}
 	event Clicked {
 		date? date;

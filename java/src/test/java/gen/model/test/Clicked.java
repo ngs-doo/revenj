@@ -84,7 +84,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = 400408826033464727L;
+	private static final long serialVersionUID = 670254099749360367L;
 	
 	private java.time.LocalDate date;
 
@@ -202,7 +202,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.HashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = 3349159424317714348L;
+	private static final long serialVersionUID = -2069754393445955708L;
 	
 	private java.math.BigDecimal min;
 
@@ -303,5 +303,14 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };
 		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) item.bool = new java.util.HashSet<Boolean>(__list); else item.bool = new java.util.HashSet<Boolean>(4); }; };
 		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
+	}
+	
+	static {
+		gen.model.test.repositories.ClickedRepository.__setupURI((events, uris) -> {
+			int _i = 0;
+			for (gen.model.test.Clicked eve : events) {
+				eve.URI = uris[_i++];
+			}
+		});
 	}
 }

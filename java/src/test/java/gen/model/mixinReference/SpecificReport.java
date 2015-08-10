@@ -68,6 +68,15 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		return "SpecificReport(" + URI + ')';
 	}
 	
+	
+	public SpecificReport(
+			final gen.model.mixinReference.Author author) {
+			
+		setAuthor(author);
+	}
+
+	private static final long serialVersionUID = 7877927081063902530L;
+	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -81,7 +90,6 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		this.authorID = authorID;
 	}
 
-	private static final long serialVersionUID = 545643936112053386L;
 	
 	private int ID;
 
@@ -101,8 +109,8 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 	}
 
 	
-	public static void __setupSequenceID() {
-		java.util.function.BiConsumer<java.util.Collection<SpecificReport>, java.sql.Connection> assignSequence = (items, connection) -> {
+	static {
+		gen.model.mixinReference.repositories.SpecificReportRepository.__setupSequenceID((items, connection) -> {
 			try (java.sql.PreparedStatement st = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT nextval('\"mixinReference\".\"SpecificReport_ID_seq\"'::regclass)::int FROM generate_series(1, ?)")) {
 				st.setInt(1, items.size());
 				try (java.sql.ResultSet rs = st.executeQuery()) {
@@ -114,11 +122,35 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
-		};
-
-		gen.model.mixinReference.repositories.SpecificReportRepository.__setupSequenceID(assignSequence);
+		});
 	}
 	
+	
+	static {
+		gen.model.mixinReference.repositories.SpecificReportRepository.__setupPersist(
+			(aggregates, sw) -> {
+				try {
+					for (gen.model.mixinReference.SpecificReport agg : aggregates) {
+						 
+						agg.URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(sw, agg.ID);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			},
+			(oldAggregates, newAggregates) -> {
+				for (int i = 0; i < newAggregates.size(); i++) {
+					gen.model.mixinReference.SpecificReport oldAgg = oldAggregates.get(i);
+					gen.model.mixinReference.SpecificReport newAgg = newAggregates.get(i);
+					 
+				}
+			},
+			(aggregates) -> { 
+				for (gen.model.mixinReference.SpecificReport agg : aggregates) { 
+				}
+			}
+		);
+	}
 	
 	private gen.model.mixinReference.Author author;
 
@@ -177,13 +209,11 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 	}
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	
 	public SpecificReport(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SpecificReport>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<SpecificReport> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(reader.tmp, ID);
+		URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -201,11 +231,5 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		readers[__index__extended_authorID] = (item, reader, context) -> { item.authorID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
 	
-	
-	public SpecificReport(
-			final gen.model.mixinReference.Author author) {
-			
-		setAuthor(author);
-	}
-
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }

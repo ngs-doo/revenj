@@ -58,7 +58,7 @@ public static class Result   {
 		this.ids = new java.util.HashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = 8382656269718732140L;
+	private static final long serialVersionUID = 4535092221242796340L;
 	
 	private java.util.UUID id;
 
@@ -100,9 +100,8 @@ public static class Result   {
 
 	
 	public Result populate(org.revenj.patterns.ServiceLocator locator) {
-		try (java.sql.Connection connection = locator.resolve(java.sql.Connection.class);
-			org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create();
-			java.sql.PreparedStatement ps = connection.prepareStatement("SELECT \"test\".\"FindMany\"(?, ?)")) {
+		java.sql.Connection connection = locator.resolve(java.sql.Connection.class);
+		try (java.sql.PreparedStatement ps = connection.prepareStatement("SELECT \"test\".\"FindMany\"(?, ?)")) {
 			int index = 1;
 			
 			ps.setObject(index, this.id);

@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -10,11 +11,9 @@ import java.util.function.Function;
 
 public abstract class EnumConverter {
 
-	public static int serializeURI(char[] buf, int pos, Enum value) {
-		if (value == null) return pos;
-		String str = value.name();
-		str.getChars(0, str.length(), buf, pos);
-		return pos + str.length();
+	public static void serializeURI(PostgresBuffer sw, Enum value) {
+		if (value == null) return;
+		sw.addToBuffer(value.name());
 	}
 
 	public static <T extends Enum> List<T> parseCollection(

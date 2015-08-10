@@ -67,6 +67,14 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'compositeID' column in test Entity. Check if DB is in sync");
 		__index__extended_compositeID = (int)column.get().order - 1;
 			
+		column = columns.stream().filter(it -> "detail".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'detail' column in test Entity_entity. Check if DB is in sync");
+		__index___detail = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "detail".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'detail' column in test Entity. Check if DB is in sync");
+		__index__extended_detail = (int)column.get().order - 1;
+			
 		column = columns.stream().filter(it -> "Compositeid".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'Compositeid' column in test Entity_entity. Check if DB is in sync");
 		__index___Compositeid = (int)column.get().order - 1;
@@ -86,11 +94,12 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
+		__converter_detail = locator.resolve(gen.model.test.converters.DetailConverter.class);
 		
 			
-		gen.model.test.Entity.__configureConverter(readers, __index___money, __index___id, __index___compositeURI, __index___compositeID, __index___Compositeid, __index___Index);
+		gen.model.test.Entity.__configureConverter(readers, __index___money, __index___id, __index___compositeURI, __index___compositeID, __converter_detail, __index___detail, __index___Compositeid, __index___Index);
 			
-		gen.model.test.Entity.__configureConverterExtended(readersExtended, __index__extended_money, __index__extended_id, __index__extended_compositeURI, __index__extended_compositeID, __index__extended_Compositeid, __index__extended_Index);
+		gen.model.test.Entity.__configureConverterExtended(readersExtended, __index__extended_money, __index__extended_id, __index__extended_compositeURI, __index__extended_compositeID, __converter_detail, __index__extended_detail, __index__extended_Compositeid, __index__extended_Index);
 	}
 
 	@Override
@@ -119,6 +128,7 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		items[__index___id] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getId());
 		if (instance.getCompositeURI() != null)items[__index___compositeURI] = new org.revenj.postgres.converters.ValueTuple(instance.getCompositeURI());;
 		items[__index___compositeID] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getCompositeID());
+		items[__index___detail] = org.revenj.postgres.converters.ArrayTuple.create(instance.getDetail(), __converter_detail::to);
 		items[__index___Compositeid] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getCompositeid());
 		items[__index___Index] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getIndex());
 		return RecordTuple.from(items);
@@ -148,6 +158,7 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 		items[__index__extended_id] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getId());
 		if (instance.getCompositeURI() != null)items[__index__extended_compositeURI] = new org.revenj.postgres.converters.ValueTuple(instance.getCompositeURI());;
 		items[__index__extended_compositeID] = org.revenj.postgres.converters.UuidConverter.toTupleNullable(instance.getCompositeID());
+		items[__index__extended_detail] = org.revenj.postgres.converters.ArrayTuple.create(instance.getDetail(), __converter_detail::toExtended);
 		items[__index__extended_Compositeid] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getCompositeid());
 		items[__index__extended_Index] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getIndex());
 		return RecordTuple.from(items);
@@ -174,16 +185,19 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 	private final int __index__extended_compositeURI;
 	private final int __index___compositeID;
 	private final int __index__extended_compositeID;
+	private gen.model.test.converters.DetailConverter __converter_detail;
+	private final int __index___detail;
+	private final int __index__extended_detail;
 	private final int __index___Compositeid;
 	private final int __index__extended_Compositeid;
 	private final int __index___Index;
 	private final int __index__extended_Index;
 	
-	public static String buildURI(char[] _buf, java.util.UUID Compositeid, int Index) throws java.io.IOException {
-		int _len = 0;
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, java.util.UUID Compositeid, int Index) throws java.io.IOException {
+		_sw.initBuffer();
 		String _tmp;
-		_len = org.revenj.postgres.converters.UuidConverter.serializeURI(_buf, _len, Compositeid);
-		_buf[_len++] = '/';_len = org.revenj.postgres.converters.IntConverter.serializeURI(_buf, _len, Index);
-		return new String(_buf, 0, _len);
+		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, Compositeid);
+		_sw.addToBuffer('/');org.revenj.postgres.converters.IntConverter.serializeURI(_sw, Index);
+		return _sw.bufferToString();
 	}
 }

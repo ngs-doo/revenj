@@ -1,6 +1,8 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
+import org.revenj.postgres.PostgresWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,22 +10,20 @@ import java.util.List;
 
 public abstract class StringConverter {
 
-	public static int serializeURI(char[] buf, int pos, String value) {
-		if (value == null) return pos;
-		value.getChars(0, value.length(), buf, pos);
-		return pos + value.length();
+	public static void serializeURI(PostgresBuffer sw, String value) {
+		if (value == null) return;
+		sw.addToBuffer(value);
 	}
 
-	public static int serializeCompositeURI(char[] buf, int pos, String value) {
-		if (value == null) return pos;
+	public static void serializeCompositeURI(PostgresBuffer sw, String value) {
+		if (value == null) return;
 		for (int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
 			if (c == '\\' || c == '/') {
-				buf[pos++] = '\\';
+				sw.addToBuffer('\\');
 			}
-			buf[pos++] = c;
+			sw.addToBuffer(c);
 		}
-		return pos;
 	}
 
 	public static void skip(PostgresReader reader, int context) throws IOException {

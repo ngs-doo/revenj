@@ -39,9 +39,10 @@ public abstract class PostgresTuple {
 	}
 
 	public String buildTuple(boolean quote) {
-		PostgresWriter sw = new PostgresWriter();
-		buildTuple(sw, quote);
-		return sw.toString();
+		try (PostgresWriter sw = PostgresWriter.create()) {
+			buildTuple(sw, quote);
+			return sw.toString();
+		}
 	}
 
 	static void escapeQuote(PostgresWriter sw, char c) {

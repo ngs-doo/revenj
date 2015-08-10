@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -10,11 +11,9 @@ import java.util.List;
 
 public abstract class DecimalConverter {
 
-	public static int serialize(char[] buf, int pos, BigDecimal value) {
-		if (value == null) return pos;
-		String str = value.toString();
-		str.getChars(0, str.length(), buf, pos);
-		return pos + str.length();
+	public static void serializeURI(PostgresBuffer sw, BigDecimal value) {
+		if (value == null) return;
+		sw.addToBuffer(value.toPlainString());
 	}
 
 	public static BigDecimal parse(PostgresReader reader, boolean allowNulls) throws IOException {

@@ -119,33 +119,48 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 		}
 	}
 	
+	public static void __setupPersist(
+			java.util.function.BiConsumer<java.util.Collection<gen.model.test.LazyLoad>, org.revenj.postgres.PostgresWriter> insert, 
+			java.util.function.BiConsumer<java.util.List<gen.model.test.LazyLoad>, java.util.List<gen.model.test.LazyLoad>> update,
+			java.util.function.Consumer<java.util.Collection<gen.model.test.LazyLoad>> delete) {
+		insertLoop = insert;
+		updateLoop = update;
+		deleteLoop = delete;
+	}
+
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.test.LazyLoad>, org.revenj.postgres.PostgresWriter> insertLoop;
+	private static java.util.function.BiConsumer<java.util.List<gen.model.test.LazyLoad>, java.util.List<gen.model.test.LazyLoad>> updateLoop;
+	private static java.util.function.Consumer<java.util.Collection<gen.model.test.LazyLoad>> deleteLoop;
+
+	private static final String[] EMPTY_URI = new String[0];
+
 	@Override
-	public java.util.List<String> persist(
+	public String[] persist(
 			java.util.Collection<gen.model.test.LazyLoad> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.test.LazyLoad, gen.model.test.LazyLoad>> update,
 			java.util.Collection<gen.model.test.LazyLoad> delete) throws java.io.IOException {
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"test\".\"persist_LazyLoad\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
-			java.util.List<String> result;
+			String[] result;
 			if (insert != null && !insert.isEmpty()) {
-		
-				if (assignSequenceID == null) throw new RuntimeException("LazyLoad repository has not been properly set up. Static __setupSequenceID method not called");
 				assignSequenceID.accept(insert, connection);
-				result = new java.util.ArrayList<>(insert.size());
+				if (insertLoop != null) insertLoop.accept(insert, sw);
+				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 				pgo.setType("\"test\".\"LazyLoad_entity\"[]");
+				sw.reset();
 				tuple.buildTuple(sw, false);
 				pgo.setValue(sw.toString());
-				sw.reset();
 				statement.setObject(1, pgo);
+				result = new String[insert.size()];
+				int i = 0;
 				for (gen.model.test.LazyLoad it : insert) {
-					String uri = gen.model.test.converters.LazyLoadConverter.buildURI(sw.tmp, it.getID());
-					result.add(uri);
+					result[i++] = it.getURI();
 				}
 			} else {
 				statement.setArray(1, null);
-				result = new java.util.ArrayList<>(0);
+				result = EMPTY_URI;
 			}
 			if (update != null && !update.isEmpty()) {
 				java.util.List<gen.model.test.LazyLoad> oldUpdate = new java.util.ArrayList<>(update.size());
@@ -166,6 +181,7 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
+				if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
 				org.revenj.postgres.converters.PostgresTuple tupleOld = org.revenj.postgres.converters.ArrayTuple.create(oldUpdate, converter::to);
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
@@ -185,6 +201,7 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 				statement.setArray(3, null);
 			}
 			if (delete != null && !delete.isEmpty()) {
+				if (deleteLoop != null) deleteLoop.accept(delete);
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(delete, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 				pgo.setType("\"test\".\"LazyLoad_entity\"[]");

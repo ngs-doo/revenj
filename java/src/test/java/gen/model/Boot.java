@@ -84,6 +84,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.register(test$converter$EntityConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Entity>>(){}.type, test$converter$EntityConverter, false);
 		
+		gen.model.test.converters.DetailConverter test$converter$DetailConverter = new gen.model.test.converters.DetailConverter(columns);
+		container.register(test$converter$DetailConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Detail>>(){}.type, test$converter$DetailConverter, false);
+		
 		gen.model.test.converters.ClickedConverter test$converter$ClickedConverter = new gen.model.test.converters.ClickedConverter(columns);
 		container.register(test$converter$ClickedConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Clicked>>(){}.type, test$converter$ClickedConverter, false);
@@ -111,7 +115,6 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerDataSource(gen.model.test.LazyLoad.class, "\"test\".\"LazyLoad_entity\"");
 		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getID", "\"ID\"");
-		gen.model.test.LazyLoad.__setupSequenceID();
 		
 		container.register(gen.model.test.repositories.LazyLoadRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
@@ -125,7 +128,6 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerDataSource(gen.model.test.SingleDetail.class, "\"test\".\"SingleDetail_entity\"");
 		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getID", "\"ID\"");
-		gen.model.test.SingleDetail.__setupSequenceID();
 		
 		container.register(gen.model.test.repositories.SingleDetailRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.SingleDetail>>(){}.type, gen.model.test.repositories.SingleDetailRepository::new, false);
@@ -144,6 +146,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEnn", "\"enn\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEn", "\"en\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getSimple", "\"simple\"");
+		metamodel.registerProperty(gen.model.test.Composite.class, "getChange", "\"change\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getTsl", "\"tsl\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"");
@@ -159,6 +162,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEnn", "\"enn\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEn", "\"en\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getTsl", "\"tsl\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getChange", "\"change\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getSimple", "\"simple\"");
 		test$converter$EntityConverter.configure(container);
@@ -168,6 +172,12 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Entity.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getComposite", "\"composite\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeID", "\"compositeID\"");
+		metamodel.registerProperty(gen.model.test.Entity.class, "getDetail", "\"detail\"");
+		test$converter$DetailConverter.configure(container);
+		metamodel.registerDataSource(gen.model.test.Detail.class, "\"test\".\"Detail_entity\"");
+		metamodel.registerProperty(gen.model.test.Detail.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.test.Detail.class, "getF", "\"f\"");
+		metamodel.registerProperty(gen.model.test.Detail.class, "getFf", "\"ff\"");
 		test$converter$ClickedConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Clicked.class, "\"test\".\"Clicked_event\"");
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getURI", "\"URI\"");
@@ -188,7 +198,6 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerDataSource(gen.model.Seq.Next.class, "\"Seq\".\"Next_entity\"");
 		metamodel.registerProperty(gen.model.Seq.Next.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.Seq.Next.class, "getID", "\"ID\"");
-		gen.model.Seq.Next.__setupSequenceID();
 		
 		container.register(gen.model.Seq.repositories.NextRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
@@ -198,7 +207,6 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerDataSource(gen.model.mixinReference.SpecificReport.class, "\"mixinReference\".\"SpecificReport_entity\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getID", "\"ID\"");
-		gen.model.mixinReference.SpecificReport.__setupSequenceID();
 		
 		container.register(gen.model.mixinReference.repositories.SpecificReportRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.SpecificReport>>(){}.type, gen.model.mixinReference.repositories.SpecificReportRepository::new, false);
@@ -208,7 +216,6 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerDataSource(gen.model.mixinReference.Author.class, "\"mixinReference\".\"Author_entity\"");
 		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getID", "\"ID\"");
-		gen.model.mixinReference.Author.__setupSequenceID();
 		
 		container.register(gen.model.mixinReference.repositories.AuthorRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
@@ -229,6 +236,9 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
+		metamodel.registerProperty(gen.model.test.Detail.class, "getEntityCompositeid", "\"EntityCompositeid\"");
+		metamodel.registerProperty(gen.model.test.Detail.class, "getEntityIndex", "\"EntityIndex\"");
+		metamodel.registerProperty(gen.model.test.Detail.class, "getIndex", "\"Index\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthor", "\"author\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthorID", "\"authorID\"");
 	}

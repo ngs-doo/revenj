@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -9,17 +10,18 @@ import java.util.List;
 
 public abstract class LongConverter {
 
-	public static int serializeURI(char[] buf, int pos, long value) throws IOException {
-		int offset = NumberConverter.serialize(value, buf, pos);
-		for (int i = 0; i < 21 - offset; i++) {
-			buf[pos + i] = buf[pos + offset + i];
+	public static void serializeURI(PostgresBuffer sw, long value) throws IOException {
+		if (value == Long.MIN_VALUE) {
+			sw.addToBuffer("-9223372036854775808");
+		} else {
+			int offset = NumberConverter.serialize(value, sw.getTempBuffer());
+			sw.addToBuffer(sw.getTempBuffer(), offset, 21);
 		}
-		return pos + 21 - offset;
 	}
 
-	public static int serializeURI(char[] buf, int pos, Long value) throws IOException {
-		if (value == null) return pos;
-		return serializeURI(buf, pos, value.longValue());
+	public static void serializeURI(PostgresBuffer sw, Long value) throws IOException {
+		if (value == null) return;
+		serializeURI(sw, value.longValue());
 	}
 
 	public static Long parseNullable(PostgresReader reader) {
@@ -118,7 +120,7 @@ public abstract class LongConverter {
 		}
 
 		public void insertRecord(PostgresWriter sw, String escaping, Mapping mappings) {
-			int offset = NumberConverter.serialize(value, sw.tmp, 0);
+			int offset = NumberConverter.serialize(value, sw.tmp);
 			sw.write(sw.tmp, offset, 21);
 		}
 

@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -30,17 +31,15 @@ public abstract class HstoreConverter {
 		return sb.toString();
 	}
 
-	public static int serializeURI(char[] buf, int pos, Map<String, String> value) {
-		if (value == null) return pos;
-		String str = toDatabase(value);
-		str.getChars(0, str.length(), buf, pos);
-		return pos + str.length();
+	public static void serializeURI(PostgresBuffer sw, Map<String, String> value) {
+		if (value == null) return;
+		sw.addToBuffer(toDatabase(value));
 	}
 
-	public static int serializeCompositeURI(char[] buf, int pos, Map<String, String> value) {
-		if (value == null) return pos;
+	public static void serializeCompositeURI(PostgresBuffer sw, Map<String, String> value) {
+		if (value == null) return;
 		String str = toDatabase(value);
-		return StringConverter.serializeCompositeURI(buf, pos, str);
+		StringConverter.serializeCompositeURI(sw, str);
 	}
 
 	public static Map<String, String> parse(PostgresReader reader, int context, boolean allowNulls) throws IOException {
@@ -49,16 +48,15 @@ public abstract class HstoreConverter {
 			return allowNulls ? null : new HashMap<>(0);
 		}
 		reader.read();
-		return parseMap(reader, context, context > 0 ? context << 1 : 1, cur, ')');
+		return parseMap(reader, context, context > 0 ? context << 1 : 1, ')');
 	}
 
 	private static Map<String, String> parseMap(
 			PostgresReader reader,
 			int context,
 			int quoteContext,
-			int cur,
 			char matchEnd) throws IOException {
-		cur = reader.read(quoteContext);
+		int cur = reader.read(quoteContext);
 		if (cur == ',' || cur == matchEnd) {
 			return new HashMap<>(0);
 		}

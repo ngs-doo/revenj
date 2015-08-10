@@ -64,6 +64,7 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 	public String toString() {
 		return "SingleDetail(" + URI + ')';
 	}
+	private static final long serialVersionUID = -3007756369192401678L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -76,7 +77,6 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 		this.detailsURI = detailsURI == null ? new String[0] : detailsURI;
 	}
 
-	private static final long serialVersionUID = -1982768976423157222L;
 	
 	private int ID;
 
@@ -96,8 +96,8 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 	}
 
 	
-	public static void __setupSequenceID() {
-		java.util.function.BiConsumer<java.util.Collection<SingleDetail>, java.sql.Connection> assignSequence = (items, connection) -> {
+	static {
+		gen.model.test.repositories.SingleDetailRepository.__setupSequenceID((items, connection) -> {
 			try (java.sql.PreparedStatement st = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT nextval('\"test\".\"SingleDetail_ID_seq\"'::regclass)::int FROM generate_series(1, ?)")) {
 				st.setInt(1, items.size());
 				try (java.sql.ResultSet rs = st.executeQuery()) {
@@ -109,9 +109,7 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
-		};
-
-		gen.model.test.repositories.SingleDetailRepository.__setupSequenceID(assignSequence);
+		});
 	}
 	
 	private gen.model.test.LazyLoad[] details;
@@ -157,13 +155,37 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 	}
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	static {
+		gen.model.test.repositories.SingleDetailRepository.__setupPersist(
+			(aggregates, sw) -> {
+				try {
+					for (gen.model.test.SingleDetail agg : aggregates) {
+						 
+						agg.URI = gen.model.test.converters.SingleDetailConverter.buildURI(sw, agg.ID);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			},
+			(oldAggregates, newAggregates) -> {
+				for (int i = 0; i < newAggregates.size(); i++) {
+					gen.model.test.SingleDetail oldAgg = oldAggregates.get(i);
+					gen.model.test.SingleDetail newAgg = newAggregates.get(i);
+					 
+				}
+			},
+			(aggregates) -> { 
+				for (gen.model.test.SingleDetail agg : aggregates) { 
+				}
+			}
+		);
+	}
 	
 	public SingleDetail(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SingleDetail>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<SingleDetail> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.test.converters.SingleDetailConverter.buildURI(reader.tmp, ID);
+		URI = gen.model.test.converters.SingleDetailConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -184,4 +206,6 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 			if (__list != null) item.detailsURI = __list.toArray(new String[__list.size()]); else item.detailsURI = new String[0]; 
 		}; };
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }

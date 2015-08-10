@@ -65,6 +65,15 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		return "Author(" + URI + ')';
 	}
 	
+	
+	public Author(
+			final String name) {
+			
+		setName(name);
+	}
+
+	private static final long serialVersionUID = -128713849998849451L;
+	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
@@ -76,7 +85,6 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		this.name = name == null ? "" : name;
 	}
 
-	private static final long serialVersionUID = 9147648680431821005L;
 	
 	private int ID;
 
@@ -96,8 +104,8 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 	}
 
 	
-	public static void __setupSequenceID() {
-		java.util.function.BiConsumer<java.util.Collection<Author>, java.sql.Connection> assignSequence = (items, connection) -> {
+	static {
+		gen.model.mixinReference.repositories.AuthorRepository.__setupSequenceID((items, connection) -> {
 			try (java.sql.PreparedStatement st = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT nextval('\"mixinReference\".\"Author_ID_seq\"'::regclass)::int FROM generate_series(1, ?)")) {
 				st.setInt(1, items.size());
 				try (java.sql.ResultSet rs = st.executeQuery()) {
@@ -109,9 +117,7 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
-		};
-
-		gen.model.mixinReference.repositories.AuthorRepository.__setupSequenceID(assignSequence);
+		});
 	}
 	
 	private String name;
@@ -133,13 +139,37 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 	}
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	static {
+		gen.model.mixinReference.repositories.AuthorRepository.__setupPersist(
+			(aggregates, sw) -> {
+				try {
+					for (gen.model.mixinReference.Author agg : aggregates) {
+						 
+						agg.URI = gen.model.mixinReference.converters.AuthorConverter.buildURI(sw, agg.ID);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			},
+			(oldAggregates, newAggregates) -> {
+				for (int i = 0; i < newAggregates.size(); i++) {
+					gen.model.mixinReference.Author oldAgg = oldAggregates.get(i);
+					gen.model.mixinReference.Author newAgg = newAggregates.get(i);
+					 
+				}
+			},
+			(aggregates) -> { 
+				for (gen.model.mixinReference.Author agg : aggregates) { 
+				}
+			}
+		);
+	}
 	
 	public Author(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Author>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Author> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.mixinReference.converters.AuthorConverter.buildURI(reader.tmp, ID);
+		URI = gen.model.mixinReference.converters.AuthorConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -155,11 +185,5 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 	}
 	
-	
-	public Author(
-			final String name) {
-			
-		setName(name);
-	}
-
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }

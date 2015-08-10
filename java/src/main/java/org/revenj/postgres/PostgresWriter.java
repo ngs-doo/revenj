@@ -2,7 +2,7 @@ package org.revenj.postgres;
 
 import java.util.Arrays;
 
-public class PostgresWriter implements AutoCloseable {
+public final class PostgresWriter implements PostgresBuffer, AutoCloseable {
 	private char[] buffer;
 	public final char[] tmp;
 	private int position;
@@ -13,8 +13,7 @@ public class PostgresWriter implements AutoCloseable {
 		position = 0;
 	}
 
-	public static PostgresWriter create()
-	{
+	public static PostgresWriter create() {
 		return new PostgresWriter();
 	}
 
@@ -35,11 +34,28 @@ public class PostgresWriter implements AutoCloseable {
 		position += len;
 	}
 
+	public void write(byte c) {
+		if (position == buffer.length) {
+			buffer = Arrays.copyOf(buffer, buffer.length * 2);
+		}
+		buffer[position++] = (char)c;
+	}
+
 	public void write(char c) {
 		if (position == buffer.length) {
 			buffer = Arrays.copyOf(buffer, buffer.length * 2);
 		}
 		buffer[position++] = c;
+	}
+
+	public void write(char[] buf) {
+		if (position + buf.length >= buffer.length) {
+			buffer = Arrays.copyOf(buffer, buffer.length * 2 + buf.length);
+		}
+		for (int i = 0; i < buf.length; i++) {
+			buffer[position + i] = buf[i];
+		}
+		position += buf.length;
 	}
 
 	public void write(char[] buf, int len) {
@@ -168,5 +184,51 @@ public class PostgresWriter implements AutoCloseable {
 			}
 		}
 		sb.append("')");
+	}
+
+	@Override
+	public char[] getTempBuffer() {
+		return tmp;
+	}
+
+	@Override
+	public void initBuffer() {
+		reset();
+	}
+
+	@Override
+	public void initBuffer(char c) {
+		reset();
+		write(c);
+	}
+
+	@Override
+	public void addToBuffer(char c) {
+		write(c);
+	}
+
+	@Override
+	public void addToBuffer(char[] buf) {
+		write(buf);
+	}
+
+	@Override
+	public void addToBuffer(char[] buf, int len) {
+		write(buf, len);
+	}
+
+	@Override
+	public void addToBuffer(char[] buf, int off, int end) {
+		write(buf, off, end);
+	}
+
+	@Override
+	public void addToBuffer(String input) {
+		write(input);
+	}
+
+	@Override
+	public String bufferToString() {
+		return toString();
 	}
 }

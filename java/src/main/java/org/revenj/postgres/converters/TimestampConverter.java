@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -25,7 +26,12 @@ public abstract class TimestampConverter {
 			1
 	};
 
-	public static int serialize(char[] buffer, int pos, LocalDateTime value) {
+	public static void serializeURI(PostgresBuffer sw, LocalDateTime value) {
+		int len = serialize(sw.getTempBuffer(), 0, value);
+		sw.addToBuffer(sw.getTempBuffer(), len);
+	}
+
+	private static int serialize(char[] buffer, int pos, LocalDateTime value) {
 		//TODO: Java supports wider range of dates
 		buffer[pos + 4] = '-';
 		buffer[pos + 7] = '-';
@@ -309,7 +315,7 @@ public abstract class TimestampConverter {
 
 		public void insertRecord(PostgresWriter sw, String escaping, Mapping mappings) {
 			int len = serialize(sw.tmp, 0, value);
-			sw.write(sw.tmp, 0, len);
+			sw.writeBuffer(len);
 		}
 
 		public void insertArray(PostgresWriter sw, String escaping, Mapping mappings) {

@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -13,7 +14,12 @@ public abstract class DateConverter {
 	//actually different date can be used
 	public static final LocalDate MIN_DATE = LocalDate.of(1, 1, 1);
 
-	public static void serialize(char[] buf, int start, LocalDate value) {
+	public static void serializeURI(PostgresBuffer sw, LocalDate value) {
+		serialize(sw.getTempBuffer(), 0, value);
+		sw.addToBuffer(sw.getTempBuffer(), 10);
+	}
+
+	private static void serialize(char[] buf, int start, LocalDate value) {
 		//TODO: Java supports wider range of dates
 		NumberConverter.write4(value.getYear(), buf, start);
 		buf[start + 4] = '-';
@@ -21,6 +27,7 @@ public abstract class DateConverter {
 		buf[start + 7] = '-';
 		NumberConverter.write2(value.getDayOfMonth(), buf, start + 8);
 	}
+
 
 	public static LocalDate parse(PostgresReader reader, boolean allowNulls) throws IOException {
 		int cur = reader.read();
@@ -120,7 +127,7 @@ public abstract class DateConverter {
 
 		public void insertRecord(PostgresWriter sw, String escaping, Mapping mappings) {
 			serialize(sw.tmp, 0, value);
-			sw.write(sw.tmp, 0, 10);
+			sw.writeBuffer(10);
 		}
 
 		public void insertArray(PostgresWriter sw, String escaping, Mapping mappings) {

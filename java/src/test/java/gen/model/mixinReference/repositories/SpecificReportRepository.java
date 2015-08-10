@@ -119,33 +119,48 @@ public class SpecificReportRepository   implements org.revenj.patterns.Repositor
 		}
 	}
 	
+	public static void __setupPersist(
+			java.util.function.BiConsumer<java.util.Collection<gen.model.mixinReference.SpecificReport>, org.revenj.postgres.PostgresWriter> insert, 
+			java.util.function.BiConsumer<java.util.List<gen.model.mixinReference.SpecificReport>, java.util.List<gen.model.mixinReference.SpecificReport>> update,
+			java.util.function.Consumer<java.util.Collection<gen.model.mixinReference.SpecificReport>> delete) {
+		insertLoop = insert;
+		updateLoop = update;
+		deleteLoop = delete;
+	}
+
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.mixinReference.SpecificReport>, org.revenj.postgres.PostgresWriter> insertLoop;
+	private static java.util.function.BiConsumer<java.util.List<gen.model.mixinReference.SpecificReport>, java.util.List<gen.model.mixinReference.SpecificReport>> updateLoop;
+	private static java.util.function.Consumer<java.util.Collection<gen.model.mixinReference.SpecificReport>> deleteLoop;
+
+	private static final String[] EMPTY_URI = new String[0];
+
 	@Override
-	public java.util.List<String> persist(
+	public String[] persist(
 			java.util.Collection<gen.model.mixinReference.SpecificReport> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.mixinReference.SpecificReport, gen.model.mixinReference.SpecificReport>> update,
 			java.util.Collection<gen.model.mixinReference.SpecificReport> delete) throws java.io.IOException {
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT * FROM \"mixinReference\".\"persist_SpecificReport\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
-			java.util.List<String> result;
+			String[] result;
 			if (insert != null && !insert.isEmpty()) {
-		
-				if (assignSequenceID == null) throw new RuntimeException("SpecificReport repository has not been properly set up. Static __setupSequenceID method not called");
 				assignSequenceID.accept(insert, connection);
-				result = new java.util.ArrayList<>(insert.size());
+				if (insertLoop != null) insertLoop.accept(insert, sw);
+				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 				pgo.setType("\"mixinReference\".\"SpecificReport_entity\"[]");
+				sw.reset();
 				tuple.buildTuple(sw, false);
 				pgo.setValue(sw.toString());
-				sw.reset();
 				statement.setObject(1, pgo);
+				result = new String[insert.size()];
+				int i = 0;
 				for (gen.model.mixinReference.SpecificReport it : insert) {
-					String uri = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(sw.tmp, it.getID());
-					result.add(uri);
+					result[i++] = it.getURI();
 				}
 			} else {
 				statement.setArray(1, null);
-				result = new java.util.ArrayList<>(0);
+				result = EMPTY_URI;
 			}
 			if (update != null && !update.isEmpty()) {
 				java.util.List<gen.model.mixinReference.SpecificReport> oldUpdate = new java.util.ArrayList<>(update.size());
@@ -166,6 +181,7 @@ public class SpecificReportRepository   implements org.revenj.patterns.Repositor
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
+				if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
 				org.revenj.postgres.converters.PostgresTuple tupleOld = org.revenj.postgres.converters.ArrayTuple.create(oldUpdate, converter::to);
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
@@ -185,6 +201,7 @@ public class SpecificReportRepository   implements org.revenj.patterns.Repositor
 				statement.setArray(3, null);
 			}
 			if (delete != null && !delete.isEmpty()) {
+				if (deleteLoop != null) deleteLoop.accept(delete);
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(delete, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 				pgo.setType("\"mixinReference\".\"SpecificReport_entity\"[]");

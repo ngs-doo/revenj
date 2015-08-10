@@ -174,11 +174,18 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 					result[i] = rs.getString(1);
 				}
 			}
+			if (assignUris != null) assignUris.accept(domainEvents, result);
 			return result;
 		} catch (java.sql.SQLException e) {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public static void __setupURI(java.util.function.BiConsumer<java.util.Collection<gen.model.test.Clicked>, String[]> assign) {
+		assignUris = assign;
+	}
+
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.test.Clicked>, String[]> assignUris;
 
 	@Override
 	public void mark(String[] uris) {

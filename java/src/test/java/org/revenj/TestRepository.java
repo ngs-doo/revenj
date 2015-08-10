@@ -32,6 +32,7 @@ public class TestRepository {
 		Optional<Composite> found = repository.find(uri);
 		Assert.assertTrue(found.isPresent());
 		Composite co2 = found.get();
+		Assert.assertEquals(co.getURI(), co2.getURI());
 		Assert.assertEquals(co.getId(), co2.getId());
 		Assert.assertEquals(co.getSimple().getNumber(), co2.getSimple().getNumber());
 		Assert.assertEquals(co.getSimple().getText(), co2.getSimple().getText());
@@ -164,5 +165,52 @@ public class TestRepository {
 		Assert.assertEquals(1, sd2.getDetailsURI().length);
 		Assert.assertEquals(uri, sd2.getDetailsURI()[0]);
 		Assert.assertEquals(uri, sd2.getDetails()[0].getURI());
+	}
+
+	@Test
+	public void collectionReference() throws IOException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
+		Composite co = new Composite();
+		UUID id = UUID.randomUUID();
+		co.setId(id);
+		co.getEntities().add(new Entity());
+		co.getEntities().add(new Entity());
+		co.getEntities().add(new Entity());
+		String uri = repository.insert(co);
+		Assert.assertEquals(co.getURI(), uri);
+		Optional<Composite> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Composite co2 = found.get();
+		Assert.assertEquals(co.getURI(), co2.getURI());
+		Assert.assertEquals(3, co2.getEntities().size());
+	}
+
+
+	@Test
+	public void nestedCollectionReference() throws IOException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
+		Composite co = new Composite();
+		UUID id = UUID.randomUUID();
+		co.setId(id);
+		Entity e1 = new Entity();
+		e1.getDetail().add(new Detail());
+		e1.getDetail().add(new Detail());
+		co.getEntities().add(e1);
+		Entity e2 = new Entity();
+		e2.getDetail().add(new Detail());
+		e2.getDetail().add(new Detail());
+		e2.getDetail().add(new Detail());
+		co.getEntities().add(e2);
+		String uri = repository.insert(co);
+		Assert.assertEquals(co.getURI(), uri);
+		Optional<Composite> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Composite co2 = found.get();
+		Assert.assertEquals(co.getURI(), co2.getURI());
+		Assert.assertEquals(2, co2.getEntities().size());
+		Assert.assertEquals(2, co2.getEntities().get(0).getDetail().size());
+		Assert.assertEquals(3, co2.getEntities().get(1).getDetail().size());
 	}
 }

@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -20,17 +21,14 @@ public abstract class ByteaConverter {
 	}
 
 	private static final byte[] EMPTY_BYTES = new byte[0];
+	private static final char[] XX = "\\x".toCharArray();
 
-	public static int serialize(char[] buf, int pos, byte[] value) {
-		buf[pos] = '\\';
-		buf[pos + 1] = 'x';
-		int cnt = 2;
-		//TODO: buf array index check
+	public static void serializeURI(PostgresBuffer sw, byte[] value) {
+		sw.addToBuffer(XX);
 		for (byte b : value) {
-			buf[cnt++] = CharMap[b >> 4];
-			buf[cnt++] = CharMap[b & 0xf];
+			sw.addToBuffer(CharMap[b >> 4]);
+			sw.addToBuffer(CharMap[b & 0xf]);
 		}
-		return pos + 2 + value.length * 2;
 	}
 
 	private static byte[] toArray(List<Byte> list) {

@@ -61,6 +61,7 @@ public class Next   implements java.io.Serializable, org.revenj.patterns.Aggrega
 	public String toString() {
 		return "Next(" + URI + ')';
 	}
+	private static final long serialVersionUID = 1873853155574758092L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Next(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -71,7 +72,6 @@ public class Next   implements java.io.Serializable, org.revenj.patterns.Aggrega
 		this.ID = ID;
 	}
 
-	private static final long serialVersionUID = -8578041122908514444L;
 	
 	private int ID;
 
@@ -91,8 +91,8 @@ public class Next   implements java.io.Serializable, org.revenj.patterns.Aggrega
 	}
 
 	
-	public static void __setupSequenceID() {
-		java.util.function.BiConsumer<java.util.Collection<Next>, java.sql.Connection> assignSequence = (items, connection) -> {
+	static {
+		gen.model.Seq.repositories.NextRepository.__setupSequenceID((items, connection) -> {
 			try (java.sql.PreparedStatement st = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT nextval('\"Seq\".\"Next_ID_seq\"'::regclass)::int FROM generate_series(1, ?)")) {
 				st.setInt(1, items.size());
 				try (java.sql.ResultSet rs = st.executeQuery()) {
@@ -104,9 +104,7 @@ public class Next   implements java.io.Serializable, org.revenj.patterns.Aggrega
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
-		};
-
-		gen.model.Seq.repositories.NextRepository.__setupSequenceID(assignSequence);
+		});
 	}
 	
 
@@ -129,7 +127,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = -3677372128856660622L;
+	private static final long serialVersionUID = 4275911866664574330L;
 	
 	private Integer min;
 
@@ -173,13 +171,37 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 }
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	static {
+		gen.model.Seq.repositories.NextRepository.__setupPersist(
+			(aggregates, sw) -> {
+				try {
+					for (gen.model.Seq.Next agg : aggregates) {
+						 
+						agg.URI = gen.model.Seq.converters.NextConverter.buildURI(sw, agg.ID);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
+			},
+			(oldAggregates, newAggregates) -> {
+				for (int i = 0; i < newAggregates.size(); i++) {
+					gen.model.Seq.Next oldAgg = oldAggregates.get(i);
+					gen.model.Seq.Next newAgg = newAggregates.get(i);
+					 
+				}
+			},
+			(aggregates) -> { 
+				for (gen.model.Seq.Next agg : aggregates) { 
+				}
+			}
+		);
+	}
 	
 	public Next(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Next>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Next> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.Seq.converters.NextConverter.buildURI(reader.tmp, ID);
+		URI = gen.model.Seq.converters.NextConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -192,4 +214,6 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 }

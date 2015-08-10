@@ -1,5 +1,7 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresWriter;
+
 public abstract class NumberConverter {
 
 	private static final int[] NUMBERS;
@@ -17,7 +19,13 @@ public abstract class NumberConverter {
 	static void write2(int number, char[] buffer, int start) {
 		int pair = NUMBERS[number];
 		buffer[start] = (char) (pair >> 8);
-		buffer[start + 1] = (char) (byte) (pair);
+		buffer[start + 1] = (char) (byte) pair;
+	}
+
+	static void write2(int number, PostgresWriter sw) {
+		int pair = NUMBERS[number];
+		sw.write((char) (pair >> 8));
+		sw.write((byte) pair);
 	}
 
 	static void write4(int number, char[] buffer, int start) {
@@ -28,7 +36,18 @@ public abstract class NumberConverter {
 		int rem = number - div * 100;
 		int pair2 = NUMBERS[rem];
 		buffer[start + 2] = (char) (pair2 >> 8);
-		buffer[start + 3] = (char) (byte) (pair2);
+		buffer[start + 3] = (char) (byte) pair2;
+	}
+
+	static void write4(int number, PostgresWriter sw) {
+		int div = number / 100;
+		int pair1 = NUMBERS[div];
+		sw.write((char) (pair1 >> 8));
+		sw.write((char) (byte) (pair1));
+		int rem = number - div * 100;
+		int pair2 = NUMBERS[rem];
+		sw.write((char) (pair2 >> 8));
+		sw.write((byte) pair2);
 	}
 
 	static int read2(char[] source, int start) {
@@ -70,15 +89,14 @@ public abstract class NumberConverter {
 	 *
 	 * @param value
 	 * @param buf
-	 * @param start
 	 * @return
 	 */
-	public static int serialize(int value, char[] buf, int start) {
+	public static int serialize(int value, char[] buf) {
 		int q, r;
-		int charPos = 10 + start;
+		int charPos = 10;
 		int i = value < 0 ? -value : value;
 		int v = 0;
-		while (charPos > start) {
+		while (charPos > 0) {
 			q = i / 100;
 			r = i - ((q << 6) + (q << 5) + (q << 2));
 			i = q;
@@ -88,7 +106,7 @@ public abstract class NumberConverter {
 			if (i == 0) break;
 		}
 		buf[charPos] = '-';
-		return charPos - start + 1 + (v >> 24);
+		return charPos + 1 + (v >> 24);
 	}
 
 	/**
@@ -96,17 +114,16 @@ public abstract class NumberConverter {
 	 *
 	 * @param value
 	 * @param buf
-	 * @param start
 	 * @return
 	 */
-	public static int serialize(long value, char[] buf, int start) {
+	public static int serialize(long value, char[] buf) {
 		long q;
 		int r;
-		int charPos = start + 20;
+		int charPos = 20;
 		long i = value < 0 ? -value : value;
 
 		int v = 0;
-		while (charPos > start) {
+		while (charPos > 0) {
 			q = i / 100;
 			r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
 			i = q;
@@ -116,7 +133,7 @@ public abstract class NumberConverter {
 			if (i == 0) break;
 		}
 		buf[charPos] = '-';
-		return charPos - start + 1 + (v >> 24);
+		return charPos + 1 + (v >> 24);
 	}
 
 

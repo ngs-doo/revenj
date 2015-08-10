@@ -5,7 +5,7 @@ import org.revenj.patterns.ServiceLocator;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class PostgresReader {
+public final class PostgresReader implements PostgresBuffer {
 	private String input = "";
 	private int length;
 	private int positionInInput;
@@ -61,20 +61,71 @@ public class PostgresReader {
 		return last;
 	}
 
+	@Override
+	public char[] getTempBuffer() {
+		return tmp;
+	}
+
+	@Override
 	public void initBuffer() {
 		positionInBuffer = 0;
 	}
 
+	@Override
 	public void initBuffer(char c) {
 		positionInBuffer = 1;
 		buffer[0] = c;
 	}
 
+	@Override
 	public void addToBuffer(char c) {
 		if (positionInBuffer == buffer.length) {
 			buffer = Arrays.copyOf(buffer, buffer.length * 2);
 		}
 		buffer[positionInBuffer++] = c;
+	}
+
+	@Override
+	public void addToBuffer(char[] buf) {
+		if (positionInBuffer + buf.length >= buffer.length) {
+			buffer = Arrays.copyOf(buffer, buffer.length * 2 + buf.length);
+		}
+		for (int i = 0; i < buf.length; i++) {
+			buffer[positionInBuffer + i] = buf[i];
+		}
+		positionInBuffer += buf.length;
+	}
+
+	@Override
+	public void addToBuffer(char[] buf, int len) {
+		if (positionInBuffer + len >= buffer.length) {
+			buffer = Arrays.copyOf(buffer, buffer.length * 2 + len);
+		}
+		for (int i = 0; i < len; i++) {
+			buffer[positionInBuffer + i] = buf[i];
+		}
+		positionInBuffer += len;
+	}
+
+	@Override
+	public void addToBuffer(char[] buf, int offset, int end) {
+		if (positionInBuffer + end >= buffer.length) {
+			buffer = Arrays.copyOf(buffer, buffer.length * 2 + end);
+		}
+		for (int i = offset; i < end; i++) {
+			buffer[positionInBuffer + i - offset] = buf[i];
+		}
+		positionInBuffer += end - offset;
+	}
+
+	@Override
+	public void addToBuffer(String input) {
+		int len = input.length();
+		if (positionInBuffer + len >= buffer.length) {
+			buffer = Arrays.copyOf(buffer, buffer.length * 2 + len);
+		}
+		input.getChars(0, len, buffer, positionInBuffer);
+		positionInBuffer += len;
 	}
 
 	public void fillUntil(char c1, char c2) throws IOException {
@@ -111,12 +162,13 @@ public class PostgresReader {
 
 	public void fillTotal(char[] target, int offset, int count) throws IOException {
 		//TODO: better exceptions
-		for(int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			target[i + offset] = input.charAt(positionInInput + i);
 		}
 		positionInInput += count;
 	}
 
+	@Override
 	public String bufferToString() {
 		return new String(buffer, 0, positionInBuffer);
 	}
@@ -146,6 +198,6 @@ public class PostgresReader {
 		long hash = 0x811C9DC5;
 		for (int i = 0; i < len && i < buffer.length; i++)
 			hash = (hash ^ buffer[i]) * 0x1000193;
-		return (int)hash;
+		return (int) hash;
 	}
 }

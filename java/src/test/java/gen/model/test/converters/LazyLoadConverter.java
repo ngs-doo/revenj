@@ -159,11 +159,11 @@ public class LazyLoadConverter implements ObjectConverter<gen.model.test.LazyLoa
 	private final int __index___ID;
 	private final int __index__extended_ID;
 	
-	public static String buildURI(char[] _buf, int ID) throws java.io.IOException {
-		int _len = 0;
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, int ID) throws java.io.IOException {
+		_sw.initBuffer();
 		String _tmp;
-		_len = org.revenj.postgres.converters.IntConverter.serializeURI(_buf, _len, ID);
-		return new String(_buf, 0, _len);
+		org.revenj.postgres.converters.IntConverter.serializeURI(_sw, ID);
+		return _sw.bufferToString();
 	}
 	private final int __index___compURI;
 	private final int __index__extended_compURI;

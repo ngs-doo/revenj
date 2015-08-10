@@ -1,5 +1,6 @@
 package org.revenj.postgres.converters;
 
+import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
@@ -9,21 +10,15 @@ import java.util.List;
 
 public abstract class BoolConverter {
 
-	public static int serializeURI(char[] buf, int pos, Boolean value) {
-		if (value == null) return pos;
+	private static final char[] TRUE = "true".toCharArray();
+	private static final char[] FALSE = "false".toCharArray();
+
+	public static void serializeURI(PostgresBuffer sw, Boolean value) {
+		if (value == null) return;
 		if (value) {
-			buf[pos] = 't';
-			buf[pos + 1] = 'r';
-			buf[pos + 2] = 'u';
-			buf[pos + 3] = 'e';
-			return pos + 4;
+			sw.addToBuffer(TRUE);
 		} else {
-			buf[pos] = 'f';
-			buf[pos + 1] = 'a';
-			buf[pos + 2] = 'l';
-			buf[pos + 3] = 's';
-			buf[pos + 4] = 'e';
-			return pos + 5;
+			sw.addToBuffer(FALSE);
 		}
 	}
 

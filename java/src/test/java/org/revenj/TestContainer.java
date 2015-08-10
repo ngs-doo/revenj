@@ -38,7 +38,7 @@ public class TestContainer {
 	}
 
 	@Test
-		 public void typeTest() throws IOException {
+	public void typeTest() throws IOException {
 		B.counter = 0;
 		Container container = new SimpleContainer(false);
 		container.register(A.class);
