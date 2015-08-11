@@ -118,7 +118,6 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var espaced = cur != '{';
 			if (espaced)
 				reader.Read(context);
-			var innerContext = context << 1;
 			cur = reader.Peek();
 			if (cur == '}')
 			{
@@ -128,6 +127,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					reader.Read(2);
 				return new List<string>(0);
 			}
+			var innerContext = context << 1;
 			var list = new List<string>();
 			var emptyCol = allowNull ? null : string.Empty;
 			do

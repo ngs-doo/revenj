@@ -1,11 +1,14 @@
 package org.revenj.postgres.converters;
 
+import org.postgresql.util.PGobject;
 import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
 import javax.swing.text.Segment;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -25,6 +28,24 @@ public abstract class TimestampConverter {
 			10,
 			1
 	};
+
+	public static void setParameter(PostgresBuffer sw, PreparedStatement ps, int index, LocalDateTime value) throws SQLException {
+		PGobject pg = new PGobject();
+		pg.setType("timestamptz");
+		char[] buf = sw.getTempBuffer();
+		int len = serialize(buf, 0, value);
+		pg.setValue(new String(buf, 0, len));
+		ps.setObject(index, pg);
+	}
+
+	public static void setParameter(PostgresBuffer sw, PreparedStatement ps, int index, OffsetDateTime value) throws SQLException {
+		PGobject pg = new PGobject();
+		pg.setType("timestamptz");
+		char[] buf = sw.getTempBuffer();
+		int len = serialize(buf, 0, value);
+		pg.setValue(new String(buf, 0, len));
+		ps.setObject(index, pg);
+	}
 
 	public static void serializeURI(PostgresBuffer sw, LocalDateTime value) {
 		int len = serialize(sw.getTempBuffer(), 0, value);

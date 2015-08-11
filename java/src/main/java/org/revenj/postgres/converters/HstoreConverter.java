@@ -5,7 +5,9 @@ import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class HstoreConverter {
@@ -47,7 +49,6 @@ public abstract class HstoreConverter {
 		if (cur == ',' || cur == ')') {
 			return allowNulls ? null : new HashMap<>(0);
 		}
-		reader.read();
 		return parseMap(reader, context, context > 0 ? context << 1 : 1, ')');
 	}
 
@@ -124,6 +125,42 @@ public abstract class HstoreConverter {
 			}
 		} while (cur != -1);
 		return dict;
+	}
+
+	public static List<Map<String, String>> parseCollection(
+			PostgresReader reader,
+			int context,
+			boolean allowNulls) throws IOException {
+		int cur = reader.read();
+		if (cur == ',' || cur == ')') {
+			return null;
+		}
+		boolean escaped = cur != '{';
+		if (escaped) {
+			reader.read(context);
+		}
+		int innerContext = context << 1;
+		ArrayList<Map<String, String>> list = new ArrayList<>();
+		cur = reader.peek();
+		if (cur == '}') {
+			reader.read();
+		}
+		while (cur != -1 && cur != '}') {
+			cur = reader.read();
+			if (cur == 'N') {
+				cur = reader.read(4);
+				list.add(allowNulls ? null : new HashMap<>());
+			} else {
+				list.add(parseMap(reader, innerContext, innerContext << 1, '}'));
+				cur = reader.last();
+			}
+		}
+		if (escaped) {
+			reader.read(context + 1);
+		} else {
+			reader.read();
+		}
+		return list;
 	}
 
 	public static PostgresTuple toTuple(Map<String, String> value) {

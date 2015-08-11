@@ -43,7 +43,7 @@ public abstract class UrlConverter {
         do {
             cur = reader.read();
             if (cur == '"' || cur == '\\') {
-                String url = StringConverter.parseEscapedString(reader, innerContext, cur, '}');
+                String url = StringConverter.parseEscapedString(reader, innerContext, '}');
                 list.add(URI.create(url));
                 cur = reader.last();
             } else {

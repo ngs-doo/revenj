@@ -60,11 +60,11 @@ public abstract class StringConverter {
 			reader.read();
 			return reader.bufferToString();
 		}
-		return parseEscapedString(reader, context, cur, ')');
+		return parseEscapedString(reader, context, ')');
 	}
 
-	static String parseEscapedString(PostgresReader reader, int context, int cur, char matchEnd) throws IOException {
-		cur = reader.read(context);
+	static String parseEscapedString(PostgresReader reader, int context, char matchEnd) throws IOException {
+		int cur = reader.read(context);
 		reader.initBuffer();
 		do {
 			if (cur == '\\' || cur == '"') {
@@ -107,7 +107,7 @@ public abstract class StringConverter {
 		do {
 			cur = reader.read();
 			if (cur == '"' || cur == '\\') {
-				list.add(parseEscapedString(reader, innerContext, cur, '}'));
+				list.add(parseEscapedString(reader, innerContext, '}'));
 				cur = reader.last();
 			} else {
 				reader.initBuffer((char) cur);
