@@ -2,10 +2,10 @@ package org.revenj.postgres.jinq.transform;
 
 import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
-public class CountTransform extends JPQLNoLambdaQueryTransform {
+public class CountTransform extends RevenjNoLambdaQueryTransform {
 	AggregateTransform transform;
 
-	public CountTransform(JPQLQueryTransformConfiguration config) {
+	public CountTransform(RevenjQueryTransformConfiguration config) {
 		super(config);
 		transform = new AggregateTransform(config, AggregateTransform.AggregateType.COUNT);
 	}

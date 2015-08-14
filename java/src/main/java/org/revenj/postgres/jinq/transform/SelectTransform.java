@@ -6,10 +6,10 @@ import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectFromWhere;
 import org.revenj.postgres.jinq.jpqlquery.SelectOnly;
 
-public class SelectTransform extends JPQLOneLambdaQueryTransform {
+public class SelectTransform extends RevenjOneLambdaQueryTransform {
 	boolean withSource;
 
-	public SelectTransform(JPQLQueryTransformConfiguration config, boolean withSource) {
+	public SelectTransform(RevenjQueryTransformConfiguration config, boolean withSource) {
 		super(config);
 		this.withSource = withSource;
 	}

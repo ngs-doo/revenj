@@ -36,8 +36,8 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 	}
 
 	private java.util.ArrayList<gen.model.test.CompositeList> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.CompositeList> result) throws java.sql.SQLException, java.io.IOException {
-		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
-		try (java.sql.ResultSet rs = statement.executeQuery()) {
+		try (java.sql.ResultSet rs = statement.executeQuery();
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
 				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
 				reader.process(pgo.getValue());

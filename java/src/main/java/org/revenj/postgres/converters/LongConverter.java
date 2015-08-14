@@ -97,6 +97,10 @@ public abstract class LongConverter {
 
 	private static final PostgresTuple MIN_TUPLE = new ValueTuple("-9223372036854775808", false, false);
 
+	public static PostgresTuple toTuple(Long value) {
+		return value == null ? null : toTuple(value.longValue());
+	}
+
 	public static PostgresTuple toTuple(long value) {
 		if (value == Long.MIN_VALUE) {
 			return MIN_TUPLE;

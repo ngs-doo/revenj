@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public class Composite   implements java.io.Serializable, org.revenj.patterns.AggregateRoot {
+public class Composite   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot {
 	
 	
 	
@@ -39,24 +39,19 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-
-		if (getClass() != obj.getClass())
+		if (obj == null || obj instanceof Composite == false)
 			return false;
 		final Composite other = (Composite) obj;
-
 		return URI.equals(other.URI);
 	}
 
-	public boolean equals(final Composite other) {
+	public boolean deepEquals(final Composite other) {
 		if (this == other)
 			return true;
 		if (other == null)
 			return false;
 		if (!URI.equals(other.URI))
 			return false;
-
 		
 		if(!(this.id.equals(other.id)))
 			return false;
@@ -74,14 +69,34 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 			return false;
 		if(!(java.util.Arrays.equals(this.laziesURI, other.laziesURI)))
 			return false;
-
 		return true;
+	}
+
+	private Composite(Composite other) {
+		this.URI = other.URI;
+		this.__locator = other.__locator;
+		this.id = other.id;
+		this.enn = java.util.Arrays.copyOf(other.enn, other.enn.length);
+		this.en = other.en;
+		this.simple = other.simple == null ? null : (gen.model.test.Simple)(other.simple.clone());
+		this.change = other.change;
+		this.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(other.tsl);
+		this.entities = other.entities.stream().map(it -> (gen.model.test.Entity)it.clone()).collect(java.util.stream.Collectors.toList());
+		this.laziesURI = other.getLaziesURI();
+		this.__originalValue = other.__originalValue;
+	}
+
+	@Override
+	public Object clone() {
+		return new Composite(this);
 	}
 
 	@Override
 	public String toString() {
 		return "Composite(" + URI + ')';
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -106,7 +121,7 @@ public class Composite   implements java.io.Serializable, org.revenj.patterns.Ag
 		this.laziesURI = laziesURI == null ? new String[0] : laziesURI;
 	}
 
-	private static final long serialVersionUID = 6519786450071968189L;
+	private static final long serialVersionUID = 3820546927543476644L;
 	
 	private java.util.UUID id;
 
@@ -311,7 +326,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = -2296544793857394152L;
+	private static final long serialVersionUID = 4386091708159808589L;
 	
 	private gen.model.test.Simple simple;
 
@@ -361,14 +376,22 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 					__binderentities.accept(newAgg); 
 				}
 			},
-			(aggregates) -> { 
+			aggregates -> { 
 				for (gen.model.test.Composite agg : aggregates) { 
 				}
+			},
+			agg -> { 
+				
+		Composite _res = agg.__originalValue;
+		agg.__originalValue = new Composite(agg);
+		if (_res != null) {
+			return _res;
+		}				
+				return null;
 			}
 		);
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private transient Composite __originalValue;
 	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
@@ -376,6 +399,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		}
 		URI = gen.model.test.converters.CompositeConverter.buildURI(reader, id);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__originalValue = new Composite(this);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, int __index___enn, int __index___en, gen.model.test.converters.SimpleConverter __converter_simple, int __index___simple, int __index___change, int __index___tsl, gen.model.test.converters.EntityConverter __converter_entities, int __index___entities, int __index___laziesURI) {

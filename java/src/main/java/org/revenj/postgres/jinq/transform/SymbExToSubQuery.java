@@ -14,10 +14,10 @@ import org.revenj.postgres.jinq.jpqlquery.*;
 
 public class SymbExToSubQuery extends TypedValueVisitor<SymbExPassDown, JinqPostgresQuery<?>, TypedValueVisitorException> {
 	final SymbExArgumentHandler argHandler;
-	JPQLQueryTransformConfiguration config = new JPQLQueryTransformConfiguration();
+	RevenjQueryTransformConfiguration config = new RevenjQueryTransformConfiguration();
 	boolean isExpectingStream;
 
-	SymbExToSubQuery(JPQLQueryTransformConfiguration config, SymbExArgumentHandler argumentHandler, boolean isExpectingStream) {
+	SymbExToSubQuery(RevenjQueryTransformConfiguration config, SymbExArgumentHandler argumentHandler, boolean isExpectingStream) {
 		this.config = config;
 		this.argHandler = argumentHandler;
 		this.isExpectingStream = isExpectingStream;

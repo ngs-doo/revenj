@@ -2,7 +2,7 @@ package gen.model.mixinReference;
 
 
 
-public class Author   implements java.io.Serializable, org.revenj.patterns.AggregateRoot {
+public class Author   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot {
 	
 	
 	
@@ -33,37 +33,46 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-
-		if (getClass() != obj.getClass())
+		if (obj == null || obj instanceof Author == false)
 			return false;
 		final Author other = (Author) obj;
-
 		return URI.equals(other.URI);
 	}
 
-	public boolean equals(final Author other) {
+	public boolean deepEquals(final Author other) {
 		if (this == other)
 			return true;
 		if (other == null)
 			return false;
 		if (!URI.equals(other.URI))
 			return false;
-
 		
 		if(!(this.ID == other.ID))
 			return false;
 		if(!(this.name.equals(other.name)))
 			return false;
-
 		return true;
+	}
+
+	private Author(Author other) {
+		this.URI = other.URI;
+		this.__locator = other.__locator;
+		this.ID = other.ID;
+		this.name = other.name;
+		this.__originalValue = other.__originalValue;
+	}
+
+	@Override
+	public Object clone() {
+		return new Author(this);
 	}
 
 	@Override
 	public String toString() {
 		return "Author(" + URI + ')';
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -76,7 +85,7 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		this.name = name == null ? "" : name;
 	}
 
-	private static final long serialVersionUID = 5636260817367407711L;
+	private static final long serialVersionUID = 8163416533335998160L;
 	
 	private int ID;
 
@@ -150,14 +159,22 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 					 
 				}
 			},
-			(aggregates) -> { 
+			aggregates -> { 
 				for (gen.model.mixinReference.Author agg : aggregates) { 
 				}
+			},
+			agg -> { 
+				
+		Author _res = agg.__originalValue;
+		agg.__originalValue = new Author(agg);
+		if (_res != null) {
+			return _res;
+		}				
+				return null;
 			}
 		);
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private transient Author __originalValue;
 	
 	public Author(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Author>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Author> rdr : readers) {
@@ -165,6 +182,7 @@ public class Author   implements java.io.Serializable, org.revenj.patterns.Aggre
 		}
 		URI = gen.model.mixinReference.converters.AuthorConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__originalValue = new Author(this);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Author>[] readers, int __index___ID, int __index___name) {

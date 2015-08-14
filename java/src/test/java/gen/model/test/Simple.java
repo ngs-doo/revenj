@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public final class Simple   implements java.io.Serializable {
+public final class Simple   implements java.lang.Cloneable, java.io.Serializable {
 	
 	
 	
@@ -51,12 +51,14 @@ public final class Simple   implements java.io.Serializable {
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-
 		if (!(obj instanceof Simple))
 			return false;
-		final Simple other = (Simple) obj;
+		return deepEquals((Simple) obj);
+	}
+
+	public boolean deepEquals(final Simple other) {
+		if (other == null)
+			return false;
 		
 		if(!(this.number == other.number))
 			return false;
@@ -70,8 +72,22 @@ public final class Simple   implements java.io.Serializable {
 			return false;
 		if(!(this.ts == other.ts || this.ts != null && other.ts != null && this.ts.equals(other.ts)))
 			return false;
-
 		return true;
+	}
+
+	private Simple(Simple other) {
+		
+		this.number = other.number;
+		this.text = other.text;
+		this.en = other.en;
+		this.en2 = other.en2;
+		this.nb = other.nb;
+		this.ts = other.ts;
+	}
+
+	@Override
+	public Object clone() {
+		return new Simple(this);
 	}
 
 	@Override
@@ -96,7 +112,7 @@ public final class Simple   implements java.io.Serializable {
 		this.ts = ts == null ? java.time.OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.UTC) : ts;
 	}
 
-	private static final long serialVersionUID = -2003114452914735093L;
+	private static final long serialVersionUID = -1412572509986060564L;
 	
 	private int number;
 

@@ -5,19 +5,14 @@ import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
 import gen.model.test.*;
 import gen.model.test.repositories.*;
-import org.jinq.orm.stream.JinqStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.*;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TestQuery {
 
@@ -87,12 +82,14 @@ public class TestQuery {
 	}
 
 	@Test
-	public void uuidToString() throws IOException {
+	public void uuidFunctions() throws IOException {
 		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		CompositeRepository repository = locator.resolve(CompositeRepository.class);
 		UUID id = UUID.randomUUID();
 		String uri = repository.insert(new Composite().setId(id));
 		Composite found = repository.query().filter(it -> it.getId().toString().equals(uri)).findAny().get();
+		Assert.assertEquals(id, found.getId());
+		found = repository.query().filter(it -> UUID.fromString(it.getURI()).equals(id)).findAny().get();
 		Assert.assertEquals(id, found.getId());
 	}
 
@@ -161,5 +158,70 @@ public class TestQuery {
 		} else {
 			Assert.assertEquals(totalOdd + 1, newTotalOdd);
 		}
+	}
+
+	@Test
+	public void queryWithNotFilter() throws IOException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		NextRepository repository = locator.resolve(NextRepository.class);
+		String uri = repository.insert(new Next());
+		int id = Integer.parseInt(uri);
+		Specification<Next> filter = next -> next.getID() == id + 1;
+		Optional<Next> found = repository.query().filter(filter).findAny();
+		Assert.assertFalse(found.isPresent());
+		//found = repository.query().filter(filter.negate()).findAny();
+		//Assert.assertTrue(found.isPresent());
+	}
+
+	@Test
+	public void localDateFunctions() throws IOException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		DataContext db = locator.resolve(DataContext.class);
+		LocalDate ld = LocalDate.now();
+		Clicked cl = new Clicked().setDate(ld);
+		db.submit(cl);
+		Query<Clicked> query = db.query(Clicked.class);
+		String uri = cl.getURI();
+		boolean found1 = query.anyMatch(it -> it.getURI().equals(uri) && ld.compareTo(it.getDate()) == 0);
+		boolean found2 = query.anyMatch(it -> it.getURI().equals(uri) && ld.equals(it.getDate()) && ld.isEqual(it.getDate()));
+		boolean notFound = query.anyMatch(it -> it.getURI().equals(uri) && ld.compareTo(it.getDate()) != 0);
+		Assert.assertTrue(found1);
+		Assert.assertTrue(found2);
+		Assert.assertFalse(notFound);
+	}
+
+	@Test
+	public void offsetDateTimeFunctions() throws IOException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		DataContext db = locator.resolve(DataContext.class);
+		Clicked cl = new Clicked();
+		db.submit(cl);
+		Query<Clicked> query = db.query(Clicked.class);
+		OffsetDateTime dt = cl.getQueuedAt();
+		boolean found = query.anyMatch(it -> it.getURI().equals(cl.getURI()) && it.getProcessedAt().compareTo(dt) == 0);
+		boolean notFound = query.anyMatch(it -> it.getURI().equals(cl.getURI()) && it.getProcessedAt().compareTo(dt) != 0);
+		Assert.assertTrue(found);
+		Assert.assertFalse(notFound);
+	}
+
+	//@Test
+	public void numberFunctions() throws IOException {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		DataContext db = locator.resolve(DataContext.class);
+		LocalDate ld = LocalDate.now();
+		Clicked cl = new Clicked().setDate(ld);
+		db.submit(cl);
+		Query<Clicked> query = db.query(Clicked.class);
+		String uri = cl.getURI();
+		//TODO: produces incorrect queries
+		boolean found1 = query.anyMatch(it -> Long.valueOf(3).equals(it.getBigint()) && it.getEn() == En.A || it.getURI().toUpperCase().equals(uri));
+		boolean found2 = query.anyMatch(it -> 3L >= it.getBigint() && it.getDate() == LocalDate.now() || Integer.valueOf(it.getURI()).equals(Integer.valueOf(uri)));
+		boolean found3 = query.anyMatch(it -> Long.valueOf(3).equals(it.getBigint()) && it.getEn() == En.B || it.getURI().toUpperCase().equals(uri));
+		En b = En.B;
+		boolean found4 = query.anyMatch(it -> it.getEn() == b || it.getURI().toUpperCase().equals(uri));
+		Assert.assertTrue(found1);
+		Assert.assertTrue(found2);
+		Assert.assertTrue(found3);
+		Assert.assertTrue(found4);
 	}
 }

@@ -6,6 +6,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -14,10 +17,12 @@ import org.postgresql.util.PGobject;
 import org.revenj.Utils;
 import org.revenj.patterns.*;
 import org.revenj.postgres.PostgresWriter;
-import org.revenj.postgres.jinq.transform.JPQLMultiLambdaQueryTransform;
-import org.revenj.postgres.jinq.transform.JPQLNoLambdaQueryTransform;
-import org.revenj.postgres.jinq.transform.JPQLOneLambdaQueryTransform;
-import org.revenj.postgres.jinq.transform.JPQLQueryTransformConfiguration;
+import org.revenj.postgres.converters.PostgresTuple;
+import org.revenj.postgres.converters.TimestampConverter;
+import org.revenj.postgres.jinq.transform.RevenjMultiLambdaQueryTransform;
+import org.revenj.postgres.jinq.transform.RevenjNoLambdaQueryTransform;
+import org.revenj.postgres.jinq.transform.RevenjOneLambdaQueryTransform;
+import org.revenj.postgres.jinq.transform.RevenjQueryTransformConfiguration;
 import org.revenj.postgres.jinq.transform.LambdaAnalysis;
 import org.revenj.postgres.jinq.transform.LambdaInfo;
 import org.revenj.postgres.jinq.transform.LimitSkipTransform;
@@ -110,6 +115,7 @@ final class RevenjQueryComposer<T> {
 	}
 
 	private void fillQueryParameters(PreparedStatement ps, List<GeneratedQueryParameter> parameters) throws SQLException {
+		PostgresWriter writer = null;
 		for (int i = 0; i < parameters.size(); i++) {
 			GeneratedQueryParameter param = parameters.get(i);
 			Object value;
@@ -134,12 +140,27 @@ final class RevenjQueryComposer<T> {
 				elements = (Object[]) value;
 			}
 			if (elements == null) {
-				Optional<ObjectConverter> converter = getConverterFor(value.getClass());
+				Class<?> manifest = value.getClass();
+				Optional<ObjectConverter> converter = getConverterFor(manifest);
 				if (converter.isPresent()) {
 					PGobject pgo = new PGobject();
-					pgo.setValue(converter.get().to(value).buildTuple(false));
+					if (writer == null) writer = PostgresWriter.create();
+					writer.reset();
+					PostgresTuple tuple = converter.get().to(value);
+					tuple.buildTuple(writer, false);
+					pgo.setValue(writer.toString());
 					pgo.setType(converter.get().getDbName());
 					ps.setObject(i + 1, pgo);
+				} else if (value instanceof LocalDate) {
+					ps.setDate(i + 1, java.sql.Date.valueOf((LocalDate) value));
+					//if (writer == null) writer = PostgresWriter.create();
+					//DateConverter.setParameter(writer, ps, i + 1, (LocalDate) value);
+				} else if (value instanceof LocalDateTime) {
+					if (writer == null) writer = PostgresWriter.create();
+					TimestampConverter.setParameter(writer, ps, i + 1, (LocalDateTime) value);
+				} else if (value instanceof OffsetDateTime) {
+					if (writer == null) writer = PostgresWriter.create();
+					TimestampConverter.setParameter(writer, ps, i + 1, (OffsetDateTime) value);
 				} else {
 					ps.setObject(i + 1, value);
 				}
@@ -155,17 +176,16 @@ final class RevenjQueryComposer<T> {
 				if (converter.isPresent()) {
 					ObjectConverter oc = converter.get();
 					Object[] pgos = new Object[elements.length];
-					try (PostgresWriter writer = PostgresWriter.create()) {
-						for (int x = 0; x < pgos.length; x++) {
-							Object item = elements[x];
-							if (item != null) {
-								PGobject pgo = new PGobject();
-								oc.to(item).buildTuple(writer, false);
-								pgo.setValue(writer.toString());
-								writer.reset();
-								pgo.setType(oc.getDbName());
-								ps.setObject(i + 1, pgo);
-							}
+					if (writer == null) writer = PostgresWriter.create();
+					for (int x = 0; x < pgos.length; x++) {
+						Object item = elements[x];
+						if (item != null) {
+							PGobject pgo = new PGobject();
+							writer.reset();
+							oc.to(item).buildTuple(writer, false);
+							pgo.setValue(writer.toString());
+							pgo.setType(oc.getDbName());
+							ps.setObject(i + 1, pgo);
 						}
 					}
 					java.sql.Array array = connection.createArrayOf(oc.getDbName(), pgos);
@@ -176,6 +196,7 @@ final class RevenjQueryComposer<T> {
 				}
 			}
 		}
+		if (writer != null) writer.close();
 	}
 
 	private static final ConcurrentMap<Class<?>, Optional<ObjectConverter>> objectConverters = new ConcurrentHashMap<>();
@@ -274,7 +295,7 @@ final class RevenjQueryComposer<T> {
 		return result;
 	}
 
-	private <U> RevenjQueryComposer<U> applyTransformWithLambda(Class<U> newManifest, JPQLNoLambdaQueryTransform transform) {
+	private <U> RevenjQueryComposer<U> applyTransformWithLambda(Class<U> newManifest, RevenjNoLambdaQueryTransform transform) {
 		Optional<JinqPostgresQuery<?>> cachedQuery = cachedQueries.findInCache(query, transform.getTransformationTypeCachingTag(), null);
 		if (cachedQuery == null) {
 			cachedQuery = Optional.empty();
@@ -295,7 +316,7 @@ final class RevenjQueryComposer<T> {
 		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas);
 	}
 
-	public <U> RevenjQueryComposer<U> applyTransformWithLambda(Class<U> newManifest, JPQLOneLambdaQueryTransform transform, Object lambda) {
+	public <U> RevenjQueryComposer<U> applyTransformWithLambda(Class<U> newManifest, RevenjOneLambdaQueryTransform transform, Object lambda) {
 		LambdaInfo lambdaInfo = LambdaInfo.analyze(lambda, lambdas.size(), true);
 		if (lambdaInfo == null) {
 			return null;
@@ -328,7 +349,7 @@ final class RevenjQueryComposer<T> {
 		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas, lambdaInfo);
 	}
 
-	public <U> RevenjQueryComposer<U> applyTransformWithLambdas(Class<U> newManifest, JPQLMultiLambdaQueryTransform transform, Object[] groupingLambdas) {
+	public <U> RevenjQueryComposer<U> applyTransformWithLambdas(Class<U> newManifest, RevenjMultiLambdaQueryTransform transform, Object[] groupingLambdas) {
 		LambdaInfo[] lambdaInfos = new LambdaInfo[groupingLambdas.length];
 		String[] lambdaSources = new String[lambdaInfos.length];
 		for (int n = 0; n < groupingLambdas.length; n++) {
@@ -372,11 +393,11 @@ final class RevenjQueryComposer<T> {
 	 * Since a JPAQueryComposer can only be transformed once, we only need one transformationConfig
 	 * (and it is instantiated lazily).
 	 */
-	private JPQLQueryTransformConfiguration transformationConfig = null;
+	private RevenjQueryTransformConfiguration transformationConfig = null;
 
-	public JPQLQueryTransformConfiguration getConfig() {
+	public RevenjQueryTransformConfiguration getConfig() {
 		if (transformationConfig == null) {
-			transformationConfig = new JPQLQueryTransformConfiguration();
+			transformationConfig = new RevenjQueryTransformConfiguration();
 			transformationConfig.metamodel = metamodel;
 			transformationConfig.alternateClassLoader = null;
 			transformationConfig.isObjectEqualsSafe = true;

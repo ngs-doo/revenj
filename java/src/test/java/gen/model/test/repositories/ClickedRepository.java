@@ -44,8 +44,8 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 	}
 
 	private java.util.ArrayList<gen.model.test.Clicked> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.Clicked> result) throws java.sql.SQLException, java.io.IOException {
-		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
-		try (java.sql.ResultSet rs = statement.executeQuery()) {
+		try (java.sql.ResultSet rs = statement.executeQuery();
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
 				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
 				reader.process(pgo.getValue());
@@ -161,6 +161,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 	public String[] submit(java.util.Collection<gen.model.test.Clicked> domainEvents) {
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"URI\" FROM \"test\".\"submit_Clicked\"(?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
+			if (prepareEvents != null) prepareEvents.accept(domainEvents);
 			String[] result = new String[domainEvents.size()];
 			org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(domainEvents, converter::to);
 			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
@@ -181,10 +182,14 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 		}
 	}
 
-	public static void __setupURI(java.util.function.BiConsumer<java.util.Collection<gen.model.test.Clicked>, String[]> assign) {
+	public static void __configure(
+			java.util.function.Consumer<java.util.Collection<gen.model.test.Clicked>> prepare,
+			java.util.function.BiConsumer<java.util.Collection<gen.model.test.Clicked>, String[]> assign) {
+		prepareEvents = prepare;
 		assignUris = assign;
 	}
 
+	private static java.util.function.Consumer<java.util.Collection<gen.model.test.Clicked>> prepareEvents;
 	private static java.util.function.BiConsumer<java.util.Collection<gen.model.test.Clicked>, String[]> assignUris;
 
 	@Override

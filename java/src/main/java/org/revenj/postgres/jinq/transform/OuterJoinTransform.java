@@ -5,17 +5,17 @@ import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
 
 import org.revenj.postgres.jinq.jpqlquery.*;
 
-public class OuterJoinTransform extends JPQLOneLambdaQueryTransform {
+public class OuterJoinTransform extends RevenjOneLambdaQueryTransform {
 	boolean isExpectingStream;
 	boolean isJoinFetch;
 
-	public OuterJoinTransform(JPQLQueryTransformConfiguration config, boolean isExpectingStream, boolean isJoinFetch) {
+	public OuterJoinTransform(RevenjQueryTransformConfiguration config, boolean isExpectingStream, boolean isJoinFetch) {
 		super(config);
 		this.isExpectingStream = isExpectingStream;
 		this.isJoinFetch = isJoinFetch;
 	}
 
-	public OuterJoinTransform(JPQLQueryTransformConfiguration config) {
+	public OuterJoinTransform(RevenjQueryTransformConfiguration config) {
 		this(config, true, false);
 	}
 

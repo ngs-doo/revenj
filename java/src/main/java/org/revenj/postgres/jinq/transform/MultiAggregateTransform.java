@@ -3,8 +3,8 @@ package org.revenj.postgres.jinq.transform;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
 import org.revenj.postgres.jinq.jpqlquery.*;
 
-public class MultiAggregateTransform extends JPQLMultiLambdaQueryTransform {
-    public MultiAggregateTransform(org.revenj.postgres.jinq.transform.JPQLQueryTransformConfiguration config) {
+public class MultiAggregateTransform extends RevenjMultiLambdaQueryTransform {
+    public MultiAggregateTransform(RevenjQueryTransformConfiguration config) {
         super(config);
     }
 

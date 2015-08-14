@@ -37,11 +37,15 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/Long"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/Boolean"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/String"));
+		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/time/LocalDate"));
+		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/time/LocalDateTime"));
+		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/time/OffsetDateTime"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/sql/Date"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/sql/Time"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/sql/Timestamp"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/util/Date"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/util/Calendar"));
+		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/util/UUID"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/math/BigDecimal"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/math/BigInteger"));
 	}
@@ -88,7 +92,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 		// outside the query where they will be evaluated and then passed in
 		// as a parameter)
 		if (!ALLOWED_QUERY_PARAMETER_TYPES.contains(argType)
-				&& !metamodel.isKnownEnumType(argType.getInternalName())
+				&& metamodel.getEnumName(argType.getInternalName()) == null
 				&& !metamodel.isKnownManagedType(argType.getClassName()))
 			throw new TypedValueVisitorException("Accessing a field with unhandled type");
 
@@ -214,7 +218,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 			// outside the query where they will be evaluated and then passed in
 			// as a parameter)
 			if (!ALLOWED_QUERY_PARAMETER_TYPES.contains(argType)
-					&& !metamodel.isKnownEnumType(argType.getInternalName())
+					&& metamodel.getEnumName(argType.getInternalName()) == null
 					&& !metamodel.isKnownManagedType(argType.getClassName()))
 				throw new TypedValueVisitorException("Accessing a field with unhandled type");
 

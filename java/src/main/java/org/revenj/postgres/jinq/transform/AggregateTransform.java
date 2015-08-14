@@ -3,13 +3,13 @@ package org.revenj.postgres.jinq.transform;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
 import org.revenj.postgres.jinq.jpqlquery.*;
 
-public class AggregateTransform extends JPQLOneLambdaQueryTransform {
+public class AggregateTransform extends RevenjOneLambdaQueryTransform {
 	public enum AggregateType {
 		SUM, AVG, MAX, MIN,
 		COUNT, // COUNT is only usable for multiaggregate and grouping subqueries
 	}
 
-	public AggregateTransform(JPQLQueryTransformConfiguration config, AggregateType type) {
+	public AggregateTransform(RevenjQueryTransformConfiguration config, AggregateType type) {
 		super(config);
 		this.type = type;
 	}

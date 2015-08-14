@@ -84,7 +84,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = 5682600863962303717L;
+	private static final long serialVersionUID = -6549152950664106736L;
 	
 	private java.time.LocalDate date;
 
@@ -202,7 +202,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.HashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = -6392672991341132466L;
+	private static final long serialVersionUID = 1343500346550503133L;
 	
 	private java.math.BigDecimal min;
 
@@ -306,11 +306,20 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 	}
 	
 	static {
-		gen.model.test.repositories.ClickedRepository.__setupURI((events, uris) -> {
-			int _i = 0;
-			for (gen.model.test.Clicked eve : events) {
-				eve.URI = uris[_i++];
+		gen.model.test.repositories.ClickedRepository.__configure(
+			events -> {
+				java.time.OffsetDateTime now = java.time.OffsetDateTime.now();
+				for (gen.model.test.Clicked eve : events) {
+					eve.URI = null;
+					eve.QueuedAt = now;eve.ProcessedAt = now;
+				}
+			},
+			(events, uris) -> {
+				int _i = 0;
+				for (gen.model.test.Clicked eve : events) {
+					eve.URI = uris[_i++];
+				}
 			}
-		});
+		);
 	}
 }

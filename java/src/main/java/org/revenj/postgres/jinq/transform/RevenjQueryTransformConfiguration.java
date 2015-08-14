@@ -7,7 +7,7 @@ import ch.epfl.labos.iu.orm.queryll2.path.PathAnalysis;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodSignature;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValue;
 
-public class JPQLQueryTransformConfiguration {
+public class RevenjQueryTransformConfiguration {
 	public MetamodelUtil metamodel;
 	/**
 	 * When dealing with subqueries, we may need to inspect the code of
@@ -41,6 +41,6 @@ public class JPQLQueryTransformConfiguration {
 		}
 	}
 
-	public JPQLQueryTransformConfiguration() {
+	public RevenjQueryTransformConfiguration() {
 	}
 }

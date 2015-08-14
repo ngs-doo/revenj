@@ -181,8 +181,8 @@ results in same objects which can be consumed through IDataContext:
 
     DataContext context = ...
     String matchingKey = ...
-    List<ComplexObject> matchingObjects = context.query(ComplexObject.class).filter(co => co.getVersions().anyMatch(v => v.getDictionary().containsKey(matchingKey))).list();
-    Stream<Legacy> legacyObjects = context.query(Legacy.class).filter(l => l.name.startsWith(matchingKey)).stream();
+    List<ComplexObject> matchingObjects = context.query(ComplexObject.class).filter(co -> co.getVersions().anyMatch(v => v.getDictionary().containsKey(matchingKey))).list();
+    Stream<Legacy> legacyObjects = context.query(Legacy.class).filter(l -> l.name.startsWith(matchingKey)).stream();
     ...
     context.update(matchingObjects);
 

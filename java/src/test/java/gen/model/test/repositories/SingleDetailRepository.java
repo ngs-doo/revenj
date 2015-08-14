@@ -36,8 +36,8 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 	}
 
 	private java.util.ArrayList<gen.model.test.SingleDetail> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.SingleDetail> result) throws java.sql.SQLException, java.io.IOException {
-		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
-		try (java.sql.ResultSet rs = statement.executeQuery()) {
+		try (java.sql.ResultSet rs = statement.executeQuery();
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
 				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
 				reader.process(pgo.getValue());
@@ -100,9 +100,9 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 	
 	@Override
 	public java.util.List<gen.model.test.SingleDetail> find(String[] uris) {
-		try (java.sql.Statement statement = connection.createStatement()) {
+		try (java.sql.Statement statement = connection.createStatement();
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.ArrayList<gen.model.test.SingleDetail> result = new java.util.ArrayList<>(uris.length);
-			org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
 			StringBuilder sb = new StringBuilder("SELECT r FROM \"test\".\"SingleDetail_entity\" r WHERE r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
@@ -122,15 +122,18 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 	public static void __setupPersist(
 			java.util.function.BiConsumer<java.util.Collection<gen.model.test.SingleDetail>, org.revenj.postgres.PostgresWriter> insert, 
 			java.util.function.BiConsumer<java.util.List<gen.model.test.SingleDetail>, java.util.List<gen.model.test.SingleDetail>> update,
-			java.util.function.Consumer<java.util.Collection<gen.model.test.SingleDetail>> delete) {
+			java.util.function.Consumer<java.util.Collection<gen.model.test.SingleDetail>> delete,
+			java.util.function.Function<gen.model.test.SingleDetail, gen.model.test.SingleDetail> track) {
 		insertLoop = insert;
 		updateLoop = update;
 		deleteLoop = delete;
+		trackChanges = track;
 	}
 
 	private static java.util.function.BiConsumer<java.util.Collection<gen.model.test.SingleDetail>, org.revenj.postgres.PostgresWriter> insertLoop;
 	private static java.util.function.BiConsumer<java.util.List<gen.model.test.SingleDetail>, java.util.List<gen.model.test.SingleDetail>> updateLoop;
 	private static java.util.function.Consumer<java.util.Collection<gen.model.test.SingleDetail>> deleteLoop;
+	private static java.util.function.Function<gen.model.test.SingleDetail, gen.model.test.SingleDetail> trackChanges;
 
 	private static final String[] EMPTY_URI = new String[0];
 
@@ -144,7 +147,7 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {
 				assignSequenceID.accept(insert, connection);
-				if (insertLoop != null) insertLoop.accept(insert, sw);
+				insertLoop.accept(insert, sw);
 				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
@@ -157,6 +160,7 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 				int i = 0;
 				for (gen.model.test.SingleDetail it : insert) {
 					result[i++] = it.getURI();
+					trackChanges.apply(it);
 				}
 			} else {
 				statement.setArray(1, null);
@@ -168,8 +172,12 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 				java.util.Map<String, Integer> missing = new java.util.HashMap<>();
 				int cnt = 0;
 				for (java.util.Map.Entry<gen.model.test.SingleDetail, gen.model.test.SingleDetail> it : update) {
-					oldUpdate.add(it.getKey());
-					if (it.getKey() == null) {
+					gen.model.test.SingleDetail oldValue = trackChanges.apply(it.getValue());
+					if (it.getKey() != null) {
+						oldValue = it.getKey();
+					}
+					oldUpdate.add(oldValue);
+					if (oldValue == null) {
 						missing.put(it.getValue().getURI(), cnt);
 					}
 					newUpdate.add(it.getValue());
@@ -181,7 +189,7 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
-				if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
+				updateLoop.accept(oldUpdate, newUpdate);
 				org.revenj.postgres.converters.PostgresTuple tupleOld = org.revenj.postgres.converters.ArrayTuple.create(oldUpdate, converter::to);
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
@@ -201,7 +209,7 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 				statement.setArray(3, null);
 			}
 			if (delete != null && !delete.isEmpty()) {
-				if (deleteLoop != null) deleteLoop.accept(delete);
+				deleteLoop.accept(delete);
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(delete, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 				pgo.setType("\"test\".\"SingleDetail_entity\"[]");

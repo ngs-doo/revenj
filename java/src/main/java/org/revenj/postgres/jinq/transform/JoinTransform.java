@@ -4,13 +4,13 @@ import ch.epfl.labos.iu.orm.queryll2.path.PathAnalysisSimplifier;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
 import org.revenj.postgres.jinq.jpqlquery.*;
 
-public class JoinTransform extends JPQLOneLambdaQueryTransform {
+public class JoinTransform extends RevenjOneLambdaQueryTransform {
 	boolean withSource;
 	boolean joinAsPairs;
 	boolean isExpectingStream;
 	boolean isJoinFetch;
 
-	public JoinTransform(JPQLQueryTransformConfiguration config, boolean withSource, boolean joinAsPairs, boolean isExpectingStream, boolean isJoinFetch) {
+	public JoinTransform(RevenjQueryTransformConfiguration config, boolean withSource, boolean joinAsPairs, boolean isExpectingStream, boolean isJoinFetch) {
 		super(config);
 		this.withSource = withSource;
 		this.isExpectingStream = isExpectingStream;
@@ -20,7 +20,7 @@ public class JoinTransform extends JPQLOneLambdaQueryTransform {
 		this.isJoinFetch = isJoinFetch;
 	}
 
-	public JoinTransform(JPQLQueryTransformConfiguration config) {
+	public JoinTransform(RevenjQueryTransformConfiguration config) {
 		this(config, false, true, true, false);
 	}
 

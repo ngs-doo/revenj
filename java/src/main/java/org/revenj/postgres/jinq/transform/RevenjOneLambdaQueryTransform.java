@@ -2,9 +2,9 @@ package org.revenj.postgres.jinq.transform;
 
 import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
-public abstract class JPQLOneLambdaQueryTransform extends JPQLQueryTransform {
+public abstract class RevenjOneLambdaQueryTransform extends RevenjQueryTransform {
 
-	JPQLOneLambdaQueryTransform(JPQLQueryTransformConfiguration config) {
+	RevenjOneLambdaQueryTransform(RevenjQueryTransformConfiguration config) {
 		super(config);
 	}
 

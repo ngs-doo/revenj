@@ -188,6 +188,22 @@ public abstract class Guards {
 		}
 	}
 
+	public static <T> boolean compareQueue(final Queue<T> left, final Queue<T> right) {
+		if (left == null && right == null) return true;
+		if (left == null || right == null) return false;
+
+		final Iterator<T> leftIterator = left.iterator();
+		final Iterator<T> rightIterator = right.iterator();
+
+		while (leftIterator.hasNext() && rightIterator.hasNext()) {
+			final T l = leftIterator.next();
+			final T r = rightIterator.next();
+			if (!(l == r || l != null && r != null && l.equals(r))) return false;
+		}
+
+		return leftIterator.hasNext() == rightIterator.hasNext();
+	}
+
 	public static boolean compareBigDecimal(final Iterable<BigDecimal> left, final Iterable<BigDecimal> right) {
 		if (left == null && right == null) return true;
 		if (left == null || right == null) return false;
@@ -222,7 +238,7 @@ public abstract class Guards {
 		public int compare(final BigDecimal left, final BigDecimal right) {
 			return left == null && right == null ? 0
 					: left == null ? -1
-					: right == null? 1
+					: right == null ? 1
 					: left.compareTo(right);
 		}
 	};

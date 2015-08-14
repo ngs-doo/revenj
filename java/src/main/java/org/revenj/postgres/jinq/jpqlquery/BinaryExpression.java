@@ -7,7 +7,7 @@ public class BinaryExpression extends Expression {
 	final String prepare;
 	final String finish;
 
-	public BinaryExpression(String operator, Expression left, Expression right) {
+	public BinaryExpression(Expression left, String operator, Expression right) {
 		this.operator = operator;
 		this.prepare = "";
 		this.finish = "";
@@ -15,8 +15,8 @@ public class BinaryExpression extends Expression {
 		this.right = right;
 	}
 
-	public BinaryExpression(String prepare, String operator, String finish, Expression left, Expression right) {
-		this.operator = operator;
+	public BinaryExpression(String prepare, Expression left, String between, Expression right, String finish) {
+		this.operator = between;
 		this.prepare = prepare;
 		this.finish = finish;
 		this.left = left;

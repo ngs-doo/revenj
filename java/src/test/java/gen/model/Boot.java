@@ -64,6 +64,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.register(test$converter$SimpleConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Simple>>(){}.type, test$converter$SimpleConverter, false);
 		
+		gen.model.test.converters.EnConverter test$converter$EnConverter = new gen.model.test.converters.EnConverter();
+		container.register(test$converter$EnConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.En>>(){}.type, test$converter$EnConverter, false);
+		
 		gen.model.test.converters.LazyLoadConverter test$converter$LazyLoadConverter = new gen.model.test.converters.LazyLoadConverter(columns);
 		container.register(test$converter$LazyLoadConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.LazyLoad>>(){}.type, test$converter$LazyLoadConverter, false);
@@ -115,6 +119,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Simple.class, "getEn2", "\"en2\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNb", "\"nb\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getTs", "\"ts\"");
+		metamodel.registerEnum(gen.model.test.En.class, "\"test\".\"En\"");
 		test$converter$LazyLoadConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.LazyLoad.class, "\"test\".\"LazyLoad_entity\"");
 		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getURI", "\"URI\"");

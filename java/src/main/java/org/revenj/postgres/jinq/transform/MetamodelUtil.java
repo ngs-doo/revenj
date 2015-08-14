@@ -20,7 +20,7 @@ public abstract class MetamodelUtil {
 	protected final Map<MethodSignature, MetamodelUtilAttribute> nLinkMethods;
 	protected final Set<MethodSignature> safeMethods;
 	protected final Set<MethodSignature> safeStaticMethods;
-	protected final Map<String, List<Enum<?>>> enums;
+	protected final Map<String, String> enums;
 	protected final Set<String> knownEmbeddedtypes = new HashSet<>();
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> comparisonMethods;
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> comparisonMethodsWithObjectEquals;
@@ -114,10 +114,10 @@ public abstract class MetamodelUtil {
 		nLinkMethods.put(methodSig, pluralAttribute);
 	}
 
-	protected void registerEnum(Class<?> fieldJavaType) {
+	public void registerEnum(Class<?> enumClass, String dbName) {
 		// Record the enum, and mark equals() using the enum as safe
-		String enumTypeName = Type.getInternalName(fieldJavaType);
-		enums.put(enumTypeName, Arrays.asList(((Class<Enum<?>>) fieldJavaType).getEnumConstants()));
+		String enumTypeName = Type.getInternalName(enumClass);
+		enums.put(enumTypeName, dbName);
 		MethodSignature eqMethod = new MethodSignature(enumTypeName, "equals", "(Ljava/lang/Object;)Z");
 		comparisonMethods.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
 		comparisonMethodsWithObjectEquals.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
@@ -186,41 +186,12 @@ public abstract class MetamodelUtil {
 		return nLinkMethods.get(sig).name;
 	}
 
-	/**
-	 * Returns true if a Class refers to a known enum type
-	 *
-	 * @param className class name using asm style / between package parts
-	 * @return
-	 */
-	public boolean isKnownEnumType(String className) {
-		return enums.containsKey(className);
+	public String getEnumName(String className) {
+		return enums.get(className);
 	}
 
-	/**
-	 * If className.name refers to an enum constant, then the method will
-	 * return the full name of that enum constant so that it can be
-	 * embedded in a JPQL query. Otherwise, returns null.
-	 *
-	 * @param className
-	 * @param name
-	 * @return
-	 */
-	public String getFullEnumConstantName(String className, String name) {
-		List<Enum<?>> enumConstants = enums.get(className);
-		if (enumConstants == null) return null;
-		for (Enum<?> e : enumConstants) {
-			if (e.name().equals(name))
-				return className.replace("/", ".") + "." + name;
-		}
-		return null;
-	}
-
-	public Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp>
-	getComparisonMethods(boolean withObjectEquals) {
-		if (withObjectEquals)
-			return comparisonMethodsWithObjectEquals;
-		else
-			return comparisonMethods;
+	public Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> getComparisonMethods(boolean withObjectEquals) {
+		return withObjectEquals ? comparisonMethodsWithObjectEquals : comparisonMethods;
 	}
 
 	public Set<Class<?>> getSafeMethodAnnotations() {

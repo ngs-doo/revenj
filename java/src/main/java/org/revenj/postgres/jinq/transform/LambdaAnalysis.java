@@ -151,8 +151,19 @@ public class LambdaAnalysis {
 				// Special handling of invokeVirtual here.
 				return analyzeInvokeVirtual(lambdaInfo, metamodel, alternateClassLoader, isObjectEqualsSafe, isCollectionContainsSafe, throwExceptionOnFailure);
 			}
-			if (throwExceptionOnFailure)
-				throw new IllegalArgumentException("Lambda has an unknown format (an unsupported type of method handle is possibly being used here)");
+			SerializedLambda s = lambdaInfo.serializedLambda;
+			try {
+				if (s != null) {
+					MethodAnalysisResults analysis = analyzeLambda(metamodel, alternateClassLoader, isObjectEqualsSafe, isCollectionContainsSafe, s.implClass, s.implMethodName, s.implMethodSignature);
+					if (analysis != null) {
+						return new LambdaAnalysis(lambdaInfo.Lambda, s, analysis, lambdaInfo.lambdaIndex);
+					}
+				}
+			} catch (Exception ignore) {
+			}
+			if (throwExceptionOnFailure) {
+				throw new IllegalArgumentException("Lambda has an unknown format (an unsupported type of method handle is possibly being used here: " + lambdaInfo.getLambdaSourceString() + " )");
+			}
 			return null;
 		}
 

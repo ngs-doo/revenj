@@ -5,8 +5,8 @@ import org.revenj.postgres.jinq.jpqlquery.ColumnExpressions;
 import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectFromWhere;
 
-public class SortingTransform extends org.revenj.postgres.jinq.transform.JPQLOneLambdaQueryTransform {
-	public SortingTransform(org.revenj.postgres.jinq.transform.JPQLQueryTransformConfiguration config, boolean isAscending) {
+public class SortingTransform extends RevenjOneLambdaQueryTransform {
+	public SortingTransform(RevenjQueryTransformConfiguration config, boolean isAscending) {
 		super(config);
 		this.isAscending = isAscending;
 	}

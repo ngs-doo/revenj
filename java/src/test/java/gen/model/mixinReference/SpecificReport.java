@@ -3,7 +3,7 @@ package gen.model.mixinReference;
 
 
 @com.fasterxml.jackson.annotation.JsonTypeName("mixinReference.SpecificReport")
-public class SpecificReport   implements java.io.Serializable, org.revenj.patterns.AggregateRoot, gen.model.mixinReference.Report<gen.model.mixinReference.SpecificReport> {
+public class SpecificReport   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, gen.model.mixinReference.Report<gen.model.mixinReference.SpecificReport> {
 	
 	
 	
@@ -34,24 +34,19 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-
-		if (getClass() != obj.getClass())
+		if (obj == null || obj instanceof SpecificReport == false)
 			return false;
 		final SpecificReport other = (SpecificReport) obj;
-
 		return URI.equals(other.URI);
 	}
 
-	public boolean equals(final SpecificReport other) {
+	public boolean deepEquals(final SpecificReport other) {
 		if (this == other)
 			return true;
 		if (other == null)
 			return false;
 		if (!URI.equals(other.URI))
 			return false;
-
 		
 		if(!(this.ID == other.ID))
 			return false;
@@ -59,14 +54,29 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 			return false;
 		if(!(this.authorID == other.authorID))
 			return false;
-
 		return true;
+	}
+
+	private SpecificReport(SpecificReport other) {
+		this.URI = other.URI;
+		this.__locator = other.__locator;
+		this.ID = other.ID;
+		this.__originalValue = other.__originalValue;
+		this.authorURI = other.authorURI;
+		this.authorID = other.authorID;
+	}
+
+	@Override
+	public Object clone() {
+		return new SpecificReport(this);
 	}
 
 	@Override
 	public String toString() {
 		return "SpecificReport(" + URI + ')';
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -81,7 +91,7 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 		this.authorID = authorID;
 	}
 
-	private static final long serialVersionUID = 1655748044525582608L;
+	private static final long serialVersionUID = 5705205896720223903L;
 	
 	private int ID;
 
@@ -137,12 +147,22 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 					 
 				}
 			},
-			(aggregates) -> { 
+			aggregates -> { 
 				for (gen.model.mixinReference.SpecificReport agg : aggregates) { 
 				}
+			},
+			agg -> { 
+				
+		SpecificReport _res = agg.__originalValue;
+		agg.__originalValue = new SpecificReport(agg);
+		if (_res != null) {
+			return _res;
+		}				
+				return null;
 			}
 		);
 	}
+	private transient SpecificReport __originalValue;
 	
 	private gen.model.mixinReference.Author author;
 
@@ -201,14 +221,13 @@ public class SpecificReport   implements java.io.Serializable, org.revenj.patter
 	}
 
 	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	
 	public SpecificReport(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SpecificReport>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<SpecificReport> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__originalValue = new SpecificReport(this);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<SpecificReport>[] readers, int __index___ID, int __index___authorURI, int __index___authorID) {

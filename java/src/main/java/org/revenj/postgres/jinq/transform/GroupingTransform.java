@@ -5,8 +5,8 @@ import java.util.Arrays;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
 import org.revenj.postgres.jinq.jpqlquery.*;
 
-public class GroupingTransform extends JPQLMultiLambdaQueryTransform {
-	public GroupingTransform(org.revenj.postgres.jinq.transform.JPQLQueryTransformConfiguration config) {
+public class GroupingTransform extends RevenjMultiLambdaQueryTransform {
+	public GroupingTransform(RevenjQueryTransformConfiguration config) {
 		super(config);
 	}
 

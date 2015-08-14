@@ -2,9 +2,9 @@ package org.revenj.postgres.jinq.transform;
 
 import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 
-public abstract class JPQLGroupingMultiLambdaQueryTransform extends JPQLQueryTransform {
+public abstract class RevenjGroupingMultiLambdaQueryTransform extends RevenjQueryTransform {
 
-	JPQLGroupingMultiLambdaQueryTransform(JPQLQueryTransformConfiguration config) {
+	RevenjGroupingMultiLambdaQueryTransform(RevenjQueryTransformConfiguration config) {
 		super(config);
 	}
 

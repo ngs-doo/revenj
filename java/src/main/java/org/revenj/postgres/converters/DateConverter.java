@@ -1,10 +1,13 @@
 package org.revenj.postgres.converters;
 
+import org.postgresql.util.PGobject;
 import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,16 @@ public abstract class DateConverter {
 
 	//actually different date can be used
 	public static final LocalDate MIN_DATE = LocalDate.of(1, 1, 1);
+
+	public static void setParameter(PostgresBuffer sw, PreparedStatement ps, int index, LocalDate value) throws SQLException {
+		PGobject pg = new PGobject();
+		//TODO: postgres driver for some reason embeds timezone along the date
+		pg.setType("date");
+		char[] buf = sw.getTempBuffer();
+		serialize(buf, 0, value);
+		pg.setValue(new String(buf, 0, 10));
+		ps.setObject(index, pg);
+	}
 
 	public static void serializeURI(PostgresBuffer sw, LocalDate value) {
 		serialize(sw.getTempBuffer(), 0, value);

@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public class Entity   implements java.io.Serializable {
+public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 	
 	
 	
@@ -37,24 +37,19 @@ public class Entity   implements java.io.Serializable {
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-
-		if (getClass() != obj.getClass())
+		if (obj == null || obj instanceof Entity == false)
 			return false;
 		final Entity other = (Entity) obj;
-
 		return URI.equals(other.URI);
 	}
 
-	public boolean equals(final Entity other) {
+	public boolean deepEquals(final Entity other) {
 		if (this == other)
 			return true;
 		if (other == null)
 			return false;
 		if (!URI.equals(other.URI))
 			return false;
-
 		
 		if(!(this.money == other.money || this.money != null && other.money != null && this.money.compareTo(other.money) == 0))
 			return false;
@@ -72,14 +67,33 @@ public class Entity   implements java.io.Serializable {
 			return false;
 		if(!(this.Index == other.Index))
 			return false;
-
 		return true;
+	}
+
+	private Entity(Entity other) {
+		this.URI = other.URI;
+		this.__locator = other.__locator;
+		this.money = other.money;
+		this.id = other.id;
+		this.compositeURI = other.compositeURI;
+		this.compositeID = other.compositeID;
+		this.detail1 = other.detail1.stream().map(it -> (gen.model.test.Detail1)it.clone()).collect(java.util.stream.Collectors.toSet());
+		this.detail2 = other.detail2.stream().map(it -> (gen.model.test.Detail2)it.clone()).collect(java.util.stream.Collectors.toSet());
+		this.Compositeid = other.Compositeid;
+		this.Index = other.Index;
+	}
+
+	@Override
+	public Object clone() {
+		return new Entity(this);
 	}
 
 	@Override
 	public String toString() {
 		return "Entity(" + URI + ')';
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -104,7 +118,7 @@ public class Entity   implements java.io.Serializable {
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = -6551847213236502407L;
+	private static final long serialVersionUID = 7653665292156173192L;
 	
 	private java.math.BigDecimal money;
 
@@ -152,12 +166,12 @@ public class Entity   implements java.io.Serializable {
 	@com.fasterxml.jackson.annotation.JsonIgnore
 	public gen.model.test.Composite getComposite()  {
 		
-	if (this.compositeURI == null && this.composite != null) this.composite = null;
 	
 		if (__locator.isPresent() && (composite != null && !composite.getURI().equals(compositeURI) || composite == null && compositeURI != null)) {
 			gen.model.test.repositories.CompositeRepository repository = __locator.get().resolve(gen.model.test.repositories.CompositeRepository.class);
 			composite = repository.find(compositeURI).orElse(null);
 		}
+	if (this.compositeURI == null && this.composite != null) this.composite = null;
 		return composite;
 	}
 
@@ -307,8 +321,6 @@ public class Entity   implements java.io.Serializable {
 			}
 		});
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	public Entity(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Entity> rdr : readers) {

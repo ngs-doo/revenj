@@ -3,8 +3,8 @@ package org.revenj.postgres.jinq.transform;
 import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectOnly;
 
-public class DistinctTransform extends JPQLNoLambdaQueryTransform {
-	public DistinctTransform(JPQLQueryTransformConfiguration config) {
+public class DistinctTransform extends RevenjNoLambdaQueryTransform {
+	public DistinctTransform(RevenjQueryTransformConfiguration config) {
 		super(config);
 	}
 

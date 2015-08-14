@@ -3,8 +3,8 @@ package org.revenj.postgres.jinq.transform;
 import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.postgres.jinq.jpqlquery.SelectFromWhere;
 
-public class LimitSkipTransform extends JPQLNoLambdaQueryTransform {
-	public LimitSkipTransform(JPQLQueryTransformConfiguration config, boolean isLimit, long n) {
+public class LimitSkipTransform extends RevenjNoLambdaQueryTransform {
+	public LimitSkipTransform(RevenjQueryTransformConfiguration config, boolean isLimit, long n) {
 		super(config);
 		constraint = n;
 		this.isLimit = isLimit;

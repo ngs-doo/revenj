@@ -18,14 +18,16 @@ import org.revenj.postgres.jinq.jpqlquery.Expression;
  * a lambda to a JPQL query (e.g. how to apply a where lambda to
  * a JPQL query, producing a new JPQL query)
  */
-public abstract class JPQLQueryTransform {
-	JPQLQueryTransformConfiguration config = new JPQLQueryTransformConfiguration();
+public abstract class RevenjQueryTransform {
+	RevenjQueryTransformConfiguration config = new RevenjQueryTransformConfiguration();
 
-	JPQLQueryTransform(JPQLQueryTransformConfiguration config) {
+	RevenjQueryTransform(RevenjQueryTransformConfiguration config) {
 		this.config = config;
 	}
 
-	protected <U> ColumnExpressions<U> makeSelectExpression(SymbExToColumns translator, LambdaAnalysis lambda) throws TypedValueVisitorException {
+	protected <U> ColumnExpressions<U> makeSelectExpression(
+			SymbExToColumns translator,
+			LambdaAnalysis lambda) throws TypedValueVisitorException {
 		// Handle the case where there is only one path
 		if (lambda.symbolicAnalysis.paths.size() == 1) {
 			SymbExPassDown passdown = SymbExPassDown.with(null, false);
@@ -35,9 +37,9 @@ public abstract class JPQLQueryTransform {
 		// Multi-path case
 
 		// Calculate the return expressions and path conditions for each path
-		List<ColumnExpressions<U>> returnExprs = new ArrayList<>();
-		List<Expression> pathExprs = new ArrayList<>();
 		int numPaths = lambda.symbolicAnalysis.paths.size();
+		List<ColumnExpressions<U>> returnExprs = new ArrayList<>(numPaths);
+		List<Expression> pathExprs = new ArrayList<>(numPaths);
 		for (int n = 0; n < numPaths; n++) {
 			SymbExPassDown passdown = SymbExPassDown.with(null, false);
 			returnExprs.add(simplifyAndTranslatePathToColumns(lambda, n, translator, passdown));
@@ -48,8 +50,9 @@ public abstract class JPQLQueryTransform {
 		for (int n = 1; n < numPaths; n++) {
 			// TODO: Check that all the readers are compatible (should be due to Java type-checking, though
 			//    the user could do something silly like return Objects instead of something more specific)
-			if (returnExprs.get(n).getNumColumns() != returnExprs.get(0).getNumColumns())
+			if (returnExprs.get(n).getNumColumns() != returnExprs.get(0).getNumColumns()) {
 				throw new TypedValueVisitorException("Different paths returned different numbers of columns");
+			}
 		}
 
 		// Merge everything into a giant CASE WHEN statement
@@ -83,31 +86,39 @@ public abstract class JPQLQueryTransform {
 		return toReturn;
 	}
 
-	protected <U> ColumnExpressions<U> simplifyAndTranslateMainPathToColumns(LambdaAnalysis lambda, SymbExToColumns translator,
-	                                                                         SymbExPassDown passdown) throws TypedValueVisitorException {
+	protected <U> ColumnExpressions<U> simplifyAndTranslateMainPathToColumns(
+			LambdaAnalysis lambda,
+			SymbExToColumns translator,
+			SymbExPassDown passdown) throws TypedValueVisitorException {
 		return simplifyAndTranslatePathToColumns(lambda, 0, translator, passdown);
 	}
 
-	protected <U> ColumnExpressions<U> simplifyAndTranslatePathToColumns(LambdaAnalysis lambda, int pathIdx, SymbExToColumns translator,
-	                                                                     SymbExPassDown passdown) throws TypedValueVisitorException {
+	protected <U> ColumnExpressions<U> simplifyAndTranslatePathToColumns(
+			LambdaAnalysis lambda,
+			int pathIdx,
+			SymbExToColumns translator,
+			SymbExPassDown passdown) throws TypedValueVisitorException {
 		return (ColumnExpressions<U>) PathAnalysisSimplifier
 				.simplify(lambda.symbolicAnalysis.paths.get(pathIdx).getReturnValue(), config.getComparisonMethods())
 				.visit(translator, passdown);
 	}
 
-	protected Expression pathConditionsToExpr(SymbExToColumns translator,
-	                                          PathAnalysis path) throws TypedValueVisitorException {
+	protected Expression pathConditionsToExpr(
+			SymbExToColumns translator,
+			PathAnalysis path) throws TypedValueVisitorException {
 		Expression conditionExpr = null;
 		for (TypedValue cmp : path.getConditions()) {
 			SymbExPassDown passdown = SymbExPassDown.with(null, true);
 			ColumnExpressions<?> col = cmp.visit(translator, passdown);
-			if (!col.isSingleColumn())
+			if (!col.isSingleColumn()) {
 				throw new TypedValueVisitorException("Expecting a single column result for path condition");
+			}
 			Expression expr = col.getOnlyColumn();
-			if (conditionExpr != null)
-				conditionExpr = new BinaryExpression("AND", conditionExpr, expr);
-			else
+			if (conditionExpr != null) {
+				conditionExpr = new BinaryExpression(conditionExpr, "AND", expr);
+			} else {
 				conditionExpr = expr;
+			}
 		}
 		return conditionExpr;
 	}

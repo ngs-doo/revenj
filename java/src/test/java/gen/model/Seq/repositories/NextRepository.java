@@ -43,8 +43,8 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	}
 
 	private java.util.ArrayList<gen.model.Seq.Next> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.Seq.Next> result) throws java.sql.SQLException, java.io.IOException {
-		org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
-		try (java.sql.ResultSet rs = statement.executeQuery()) {
+		try (java.sql.ResultSet rs = statement.executeQuery();
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
 				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
 				reader.process(pgo.getValue());
@@ -128,9 +128,9 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	
 	@Override
 	public java.util.List<gen.model.Seq.Next> find(String[] uris) {
-		try (java.sql.Statement statement = connection.createStatement()) {
+		try (java.sql.Statement statement = connection.createStatement();
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.ArrayList<gen.model.Seq.Next> result = new java.util.ArrayList<>(uris.length);
-			org.revenj.postgres.PostgresReader reader = new org.revenj.postgres.PostgresReader(locator);
 			StringBuilder sb = new StringBuilder("SELECT r FROM \"Seq\".\"Next_entity\" r WHERE r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
@@ -150,15 +150,18 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	public static void __setupPersist(
 			java.util.function.BiConsumer<java.util.Collection<gen.model.Seq.Next>, org.revenj.postgres.PostgresWriter> insert, 
 			java.util.function.BiConsumer<java.util.List<gen.model.Seq.Next>, java.util.List<gen.model.Seq.Next>> update,
-			java.util.function.Consumer<java.util.Collection<gen.model.Seq.Next>> delete) {
+			java.util.function.Consumer<java.util.Collection<gen.model.Seq.Next>> delete,
+			java.util.function.Function<gen.model.Seq.Next, gen.model.Seq.Next> track) {
 		insertLoop = insert;
 		updateLoop = update;
 		deleteLoop = delete;
+		trackChanges = track;
 	}
 
 	private static java.util.function.BiConsumer<java.util.Collection<gen.model.Seq.Next>, org.revenj.postgres.PostgresWriter> insertLoop;
 	private static java.util.function.BiConsumer<java.util.List<gen.model.Seq.Next>, java.util.List<gen.model.Seq.Next>> updateLoop;
 	private static java.util.function.Consumer<java.util.Collection<gen.model.Seq.Next>> deleteLoop;
+	private static java.util.function.Function<gen.model.Seq.Next, gen.model.Seq.Next> trackChanges;
 
 	private static final String[] EMPTY_URI = new String[0];
 
@@ -172,7 +175,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {
 				assignSequenceID.accept(insert, connection);
-				if (insertLoop != null) insertLoop.accept(insert, sw);
+				insertLoop.accept(insert, sw);
 				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
@@ -185,6 +188,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 				int i = 0;
 				for (gen.model.Seq.Next it : insert) {
 					result[i++] = it.getURI();
+					trackChanges.apply(it);
 				}
 			} else {
 				statement.setArray(1, null);
@@ -196,8 +200,12 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 				java.util.Map<String, Integer> missing = new java.util.HashMap<>();
 				int cnt = 0;
 				for (java.util.Map.Entry<gen.model.Seq.Next, gen.model.Seq.Next> it : update) {
-					oldUpdate.add(it.getKey());
-					if (it.getKey() == null) {
+					gen.model.Seq.Next oldValue = trackChanges.apply(it.getValue());
+					if (it.getKey() != null) {
+						oldValue = it.getKey();
+					}
+					oldUpdate.add(oldValue);
+					if (oldValue == null) {
 						missing.put(it.getValue().getURI(), cnt);
 					}
 					newUpdate.add(it.getValue());
@@ -209,7 +217,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
-				if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
+				updateLoop.accept(oldUpdate, newUpdate);
 				org.revenj.postgres.converters.PostgresTuple tupleOld = org.revenj.postgres.converters.ArrayTuple.create(oldUpdate, converter::to);
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
@@ -229,7 +237,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 				statement.setArray(3, null);
 			}
 			if (delete != null && !delete.isEmpty()) {
-				if (deleteLoop != null) deleteLoop.accept(delete);
+				deleteLoop.accept(delete);
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(delete, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 				pgo.setType("\"Seq\".\"Next_entity\"[]");
@@ -267,6 +275,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 			pgo.setValue(sw.toString());
 			statement.setObject(1, pgo);
 			statement.execute();
+			trackChanges.apply(item);
 			return item.getURI();
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
@@ -277,6 +286,8 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	public void update(gen.model.Seq.Next oldItem, gen.model.Seq.Next newItem) throws java.io.IOException {
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"Seq\".\"update_Next\"(ARRAY[?], ARRAY[?])");
 			 org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
+			if (oldItem == null) oldItem = trackChanges.apply(newItem);
+			else trackChanges.apply(newItem);
 			if (oldItem == null) oldItem = find(newItem.getURI()).get();
 			java.util.List<gen.model.Seq.Next> oldUpdate = java.util.Collections.singletonList(oldItem);
 			java.util.List<gen.model.Seq.Next> newUpdate = java.util.Collections.singletonList(newItem);

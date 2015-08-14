@@ -9,10 +9,10 @@ import org.revenj.postgres.jinq.jpqlquery.*;
 
 import java.util.List;
 
-public class WhereTransform extends JPQLOneLambdaQueryTransform {
+public class WhereTransform extends RevenjOneLambdaQueryTransform {
 	boolean withSource;
 
-	public WhereTransform(JPQLQueryTransformConfiguration config, boolean withSource) {
+	public WhereTransform(RevenjQueryTransformConfiguration config, boolean withSource) {
 		super(config);
 		this.withSource = withSource;
 	}
@@ -26,10 +26,11 @@ public class WhereTransform extends JPQLOneLambdaQueryTransform {
 
 				// Create the new query, merging in the analysis of the method
 				SelectFromWhere<U> toReturn = (SelectFromWhere<U>) sfw.shallowCopy();
-				if (sfw.where == null)
+				if (sfw.where == null) {
 					toReturn.where = methodExpr;
-				else
-					toReturn.where = new BinaryExpression("AND", sfw.where, methodExpr);
+				} else {
+					toReturn.where = new BinaryExpression(sfw.where, "AND", methodExpr);
+				}
 				return toReturn;
 			} else if (query.isSelectFromWhereGroupHaving()) {
 				GroupedSelectFromWhere<V, ?> sfw = (GroupedSelectFromWhere<V, ?>) query;
@@ -37,10 +38,11 @@ public class WhereTransform extends JPQLOneLambdaQueryTransform {
 
 				// Create the new query, merging in the analysis of the method
 				GroupedSelectFromWhere<U, ?> toReturn = (GroupedSelectFromWhere<U, ?>) sfw.shallowCopy();
-				if (sfw.having == null)
+				if (sfw.having == null) {
 					toReturn.having = methodExpr;
-				else
-					toReturn.having = new BinaryExpression("AND", sfw.having, methodExpr);
+				} else {
+					toReturn.having = new BinaryExpression(sfw.having, "AND", methodExpr);
+				}
 				return toReturn;
 			}
 			throw new QueryTransformException("Existing query cannot be transformed further");
@@ -84,17 +86,19 @@ public class WhereTransform extends JPQLOneLambdaQueryTransform {
 			// Merge path conditions and return value to create a value for the path
 			Expression pathExpr = returnExpr;
 			if (conditionExpr != null) {
-				if (pathExpr == null)
+				if (pathExpr == null) {
 					pathExpr = conditionExpr;
-				else
-					pathExpr = new BinaryExpression("AND", pathExpr, conditionExpr);
+				} else {
+					pathExpr = new BinaryExpression(pathExpr, "AND", conditionExpr);
+				}
 			}
 
 			// Merge into new expression summarizing the method
-			if (methodExpr != null)
-				methodExpr = new BinaryExpression("OR", methodExpr, pathExpr);
-			else
+			if (methodExpr != null) {
+				methodExpr = new BinaryExpression(methodExpr, "OR", pathExpr);
+			} else {
 				methodExpr = pathExpr;
+			}
 		}
 		return methodExpr;
 	}

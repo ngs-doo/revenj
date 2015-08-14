@@ -87,7 +87,8 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 		if (instance == null) return null;
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
-		items[__index___QueuedAt] = org.revenj.postgres.converters.TimestampConverter.toTuple(java.time.LocalDateTime.now());
+		items[__index____event_id] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getURI());
+		items[__index___QueuedAt] = org.revenj.postgres.converters.TimestampConverter.toTuple(instance.getQueuedAt());
 		items[__index___ProcessedAt] = org.revenj.postgres.converters.TimestampConverter.toTuple(instance.getProcessedAt());
 		items[__index___date] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getDate());
 		items[__index___number] = org.revenj.postgres.converters.DecimalConverter.toTuple(instance.getNumber());

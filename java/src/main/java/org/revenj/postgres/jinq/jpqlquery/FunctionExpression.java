@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionExpression extends Expression {
-	final List<Expression> arguments = new ArrayList<>();
+	final List<Expression> arguments = new ArrayList<>(3);
 	String functionName;
 
 	public static FunctionExpression singleParam(String name, Expression base) {
@@ -35,11 +35,10 @@ public class FunctionExpression extends Expression {
 	public void generateQuery(QueryGenerationState queryState, OperatorPrecedenceLevel operatorPrecedenceScope) {
 		queryState.appendQuery(functionName);
 		queryState.appendQuery("(");
-		boolean isFirst = true;
-		for (Expression arg : arguments) {
-			if (!isFirst) queryState.appendQuery(", ");
-			isFirst = false;
-			arg.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
+		arguments.get(0).generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
+		for (int i = 1; i < arguments.size(); i++) {
+			queryState.appendQuery(", ");
+			arguments.get(i).generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
 		}
 		queryState.appendQuery(")");
 	}
@@ -58,9 +57,10 @@ public class FunctionExpression extends Expression {
 		FunctionExpression o = (FunctionExpression) obj;
 		if (!functionName.equals(o.functionName)) return false;
 		if (arguments.size() != o.arguments.size()) return false;
-		for (int n = 0; n < arguments.size(); n++)
+		for (int n = 0; n < arguments.size(); n++) {
 			if (!arguments.get(n).equals(o.arguments.get(n)))
 				return false;
+		}
 		return true;
 	}
 

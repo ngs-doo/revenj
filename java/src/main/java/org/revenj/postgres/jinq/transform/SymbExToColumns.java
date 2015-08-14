@@ -23,9 +23,9 @@ import org.revenj.postgres.jinq.jpqlquery.*;
 
 public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExpressions<?>, TypedValueVisitorException> {
 	final SymbExArgumentHandler argHandler;
-	final JPQLQueryTransformConfiguration config;
+	final RevenjQueryTransformConfiguration config;
 
-	SymbExToColumns(JPQLQueryTransformConfiguration config, SymbExArgumentHandler argumentHandler) {
+	SymbExToColumns(RevenjQueryTransformConfiguration config, SymbExArgumentHandler argumentHandler) {
 		this.config = config;
 		this.argHandler = argumentHandler;
 	}
@@ -90,11 +90,10 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 	@Override
 	public ColumnExpressions<?> getStaticFieldValue(TypedValue.GetStaticFieldValue val, SymbExPassDown in) throws TypedValueVisitorException {
 		// Check if we're just reading an enum constant
-		if (config.metamodel.isKnownEnumType(val.owner)) {
-			String enumFullName = config.metamodel.getFullEnumConstantName(val.owner, val.name);
-			if (enumFullName != null)
-				return ColumnExpressions.singleColumn(SimpleRowReader.READER,
-						new ConstantExpression(enumFullName));
+		String dbEnum = config.metamodel.getEnumName(val.owner);
+		if (dbEnum != null) {
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
+					new ConstantExpression("'" + val.name + "'::" + dbEnum));
 		} else if ("java/lang/Boolean".equals(val.owner)) {
 			if ("TRUE".equals(val.name) || "FALSE".equals(val.name))
 				return ColumnExpressions.singleColumn(SimpleRowReader.READER,
@@ -217,7 +216,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 		ColumnExpressions<U> left = (ColumnExpressions<U>) leftVal.visit(this, passdown);
 		ColumnExpressions<U> right = (ColumnExpressions<U>) rightVal.visit(this, passdown);
 		return ColumnExpressions.singleColumn(isFinalTypeFromLeft ? left.reader : right.reader,
-				new BinaryExpression(opString, left.getOnlyColumn(), right.getOnlyColumn()));
+				new BinaryExpression(left.getOnlyColumn(), opString, right.getOnlyColumn()));
 	}
 
 	@Override
@@ -230,7 +229,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 				ColumnExpressions<?> left = val.left.visit(this, passdown);
 				ColumnExpressions<?> right = val.right.visit(this, passdown);
 				return ColumnExpressions.singleColumn(left.reader,
-						new BinaryExpression("%", left.getOnlyColumn(), right.getOnlyColumn()));
+						new BinaryExpression(left.getOnlyColumn(), "%", right.getOnlyColumn()));
 			}
 			throw new TypedValueVisitorException("mod operator cannot be used for the given types.");
 		}
@@ -291,7 +290,10 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 					(sig.getReturnType().equals(Type.BOOLEAN_TYPE)
 							|| sig.getReturnType().equals(Type.getObjectType("java/lang/Boolean")))) {
 				return ColumnExpressions.singleColumn(SimpleRowReader.READER,
-						new BinaryExpression("=", new ReadFieldExpression(base.getOnlyColumn(), fieldName), new ConstantExpression("TRUE")));
+						new BinaryExpression(
+								new ReadFieldExpression(base.getOnlyColumn(), fieldName),
+								"=",
+								new ConstantExpression("TRUE")));
 			}
 			return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ReadFieldExpression(base.getOnlyColumn(), fieldName));
 		} else if (MetamodelUtil.TUPLE_ACCESSORS.containsKey(sig)) {
@@ -477,11 +479,11 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 		if (subQuery.isValidSubquery() && subQuery instanceof SelectFromWhere) {
 			SelectFromWhere<?> sfw = (SelectFromWhere<?>) subQuery;
 			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
-					new BinaryExpression("", "= ANY(", ")", item.getOnlyColumn(), SubqueryExpression.from(sfw)));
+					new BinaryExpression("", item.getOnlyColumn(), "= ANY(", SubqueryExpression.from(sfw), ")"));
 		} else if (subQuery.isValidSubquery() && subQuery instanceof ParameterAsQuery) {
 			ParameterAsQuery<?> paramQuery = (ParameterAsQuery<?>) subQuery;
 			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
-					new BinaryExpression("", "= ANY(", ")", item.getOnlyColumn(), paramQuery.cols.getOnlyColumn()));
+					new BinaryExpression("", item.getOnlyColumn(), "= ANY(", paramQuery.cols.getOnlyColumn(), ")"));
 		}
 		throw new TypedValueVisitorException("Trying to create a query using IN but with an unhandled subquery type");
 	}

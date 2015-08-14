@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public class Detail2   implements java.io.Serializable {
+public class Detail2   implements java.lang.Cloneable, java.io.Serializable {
 	
 	
 	
@@ -35,24 +35,19 @@ public class Detail2   implements java.io.Serializable {
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-
-		if (getClass() != obj.getClass())
+		if (obj == null || obj instanceof Detail2 == false)
 			return false;
 		final Detail2 other = (Detail2) obj;
-
 		return URI.equals(other.URI);
 	}
 
-	public boolean equals(final Detail2 other) {
+	public boolean deepEquals(final Detail2 other) {
 		if (this == other)
 			return true;
 		if (other == null)
 			return false;
 		if (!URI.equals(other.URI))
 			return false;
-
 		
 		if(!(this.u == other.u || this.u != null && this.u.equals(other.u)))
 			return false;
@@ -64,14 +59,30 @@ public class Detail2   implements java.io.Serializable {
 			return false;
 		if(!(this.Index == other.Index))
 			return false;
-
 		return true;
+	}
+
+	private Detail2(Detail2 other) {
+		this.URI = other.URI;
+		this.__locator = other.__locator;
+		this.u = other.u;
+		this.dd = java.util.Arrays.copyOf(other.dd, other.dd.length);
+		this.EntityCompositeid = other.EntityCompositeid;
+		this.EntityIndex = other.EntityIndex;
+		this.Index = other.Index;
+	}
+
+	@Override
+	public Object clone() {
+		return new Detail2(this);
 	}
 
 	@Override
 	public String toString() {
 		return "Detail2(" + URI + ')';
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail2(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -90,7 +101,7 @@ public class Detail2   implements java.io.Serializable {
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = 7258107986353762074L;
+	private static final long serialVersionUID = 1954934970069923439L;
 	
 	private java.net.URI u;
 
@@ -194,8 +205,6 @@ public class Detail2   implements java.io.Serializable {
 			}
 		});
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	public Detail2(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Detail2>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Detail2> rdr : readers) {

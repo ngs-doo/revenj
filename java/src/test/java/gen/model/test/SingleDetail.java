@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public class SingleDetail   implements java.io.Serializable, org.revenj.patterns.AggregateRoot {
+public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot {
 	
 	
 	
@@ -33,37 +33,46 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-
-		if (getClass() != obj.getClass())
+		if (obj == null || obj instanceof SingleDetail == false)
 			return false;
 		final SingleDetail other = (SingleDetail) obj;
-
 		return URI.equals(other.URI);
 	}
 
-	public boolean equals(final SingleDetail other) {
+	public boolean deepEquals(final SingleDetail other) {
 		if (this == other)
 			return true;
 		if (other == null)
 			return false;
 		if (!URI.equals(other.URI))
 			return false;
-
 		
 		if(!(this.ID == other.ID))
 			return false;
 		if(!(java.util.Arrays.equals(this.detailsURI, other.detailsURI)))
 			return false;
-
 		return true;
+	}
+
+	private SingleDetail(SingleDetail other) {
+		this.URI = other.URI;
+		this.__locator = other.__locator;
+		this.ID = other.ID;
+		this.detailsURI = other.getDetailsURI();
+		this.__originalValue = other.__originalValue;
+	}
+
+	@Override
+	public Object clone() {
+		return new SingleDetail(this);
 	}
 
 	@Override
 	public String toString() {
 		return "SingleDetail(" + URI + ')';
 	}
+	
+	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -76,7 +85,7 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 		this.detailsURI = detailsURI == null ? new String[0] : detailsURI;
 	}
 
-	private static final long serialVersionUID = 6925688876159714812L;
+	private static final long serialVersionUID = -4053638405587575291L;
 	
 	private int ID;
 
@@ -174,14 +183,22 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 					 
 				}
 			},
-			(aggregates) -> { 
+			aggregates -> { 
 				for (gen.model.test.SingleDetail agg : aggregates) { 
 				}
+			},
+			agg -> { 
+				
+		SingleDetail _res = agg.__originalValue;
+		agg.__originalValue = new SingleDetail(agg);
+		if (_res != null) {
+			return _res;
+		}				
+				return null;
 			}
 		);
 	}
-	
-	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private transient SingleDetail __originalValue;
 	
 	public SingleDetail(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SingleDetail>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<SingleDetail> rdr : readers) {
@@ -189,6 +206,7 @@ public class SingleDetail   implements java.io.Serializable, org.revenj.patterns
 		}
 		URI = gen.model.test.converters.SingleDetailConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__originalValue = new SingleDetail(this);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<SingleDetail>[] readers, int __index___ID, int __index___detailsURI) {
