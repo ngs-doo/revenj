@@ -105,7 +105,7 @@ Revenj is basically only a thin access layer to the domain captured in the DSL.
 
 Some of the features/approaches available in the framework or precompiled library and just exposed through the framework:
 
- * advanced LINQ/JINQ driver - no impedance mismatch between database objects and .NET classes
+ * advanced LINQ/JINQ driver - no impedance mismatch between database objects and .NET/JVM classes
  * event sourcing - capture events in the system. Bulk process events. Replay events to reconstruct aggregate roots
  * notification infrastructure - integrate with SignalR for push notification or invalidate cache to keep data up-to-date
  * plugin based architecture - almost everything is a plugin, from REST commands to LINQ/JINQ converters
