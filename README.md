@@ -13,6 +13,8 @@ DSL Platform will take care of various boilerplate and model evolution while Rev
  * notifications
  * cache invalidation
  * event sourcing
+ * security
+ * serialization
 
 and various other simple and complex features captured in the model.
 With Revenj you will stop writing PO*O and instead focus on domain model/business value.
