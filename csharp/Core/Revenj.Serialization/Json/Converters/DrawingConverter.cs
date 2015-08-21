@@ -111,19 +111,46 @@ namespace Revenj.Serialization.Json.Converters
 				Serialize(value.Value, sw, buffer);
 		}
 
-		public static RectangleF DeserializeRectangleF(BufferedTextReader sr, ref int nextToken)
+		public static RectangleF DeserializeRectangleF(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '{') throw new SerializationException("Expecting '{' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			nextToken = JsonSerialization.GetNextToken(sr);
-			if (nextToken == '}') return new RectangleF();
+			if (nextToken == '}') return RectangleF.Empty;
 			float x = 0, y = 0, w = 0, h = 0;
-			do
+			var name = StringConverter.Deserialize(sr, nextToken);
+			nextToken = JsonSerialization.GetNextToken(sr);
+			if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			nextToken = JsonSerialization.GetNextToken(sr);
+			var value = NumberConverter.DeserializeFloat(sr, ref nextToken);
+			switch (name)
 			{
-				var name = StringConverter.Deserialize(sr, nextToken);
+				case "X":
+				case "x":
+					x = value;
+					break;
+				case "Y":
+				case "y":
+					y = value;
+					break;
+				case "Width":
+				case "width":
+					w = value;
+					break;
+				case "Height":
+				case "height":
+					h = value;
+					break;
+				default:
+					throw new SerializationException("Expecting 'X', 'Y', 'Width' or 'Height' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + name);
+			}
+			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
+			{
+				nextToken = JsonSerialization.GetNextToken(sr);
+				name = StringConverter.Deserialize(sr, nextToken);
 				nextToken = JsonSerialization.GetNextToken(sr);
 				if (nextToken != ':') throw new SerializationException("Expecting ':' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 				nextToken = JsonSerialization.GetNextToken(sr);
-				var value = NumberConverter.DeserializeFloat(sr, ref nextToken);
+				value = NumberConverter.DeserializeFloat(sr, ref nextToken);
 				switch (name)
 				{
 					case "X":
@@ -145,7 +172,7 @@ namespace Revenj.Serialization.Json.Converters
 					default:
 						throw new SerializationException("Expecting 'X', 'Y', 'Width' or 'Height' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + name);
 				}
-			} while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',');
+			}
 			if (nextToken != '}') throw new SerializationException("Expecting '}' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			return new RectangleF(x, y, w, h);
 		}
@@ -158,15 +185,15 @@ namespace Revenj.Serialization.Json.Converters
 		}
 		public static void DeserializeRectangleFCollection(BufferedTextReader sr, int nextToken, ICollection<RectangleF> res)
 		{
-			res.Add(DeserializeRectangleF(sr, ref nextToken));
-			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
+			res.Add(DeserializeRectangleF(sr, nextToken));
+			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
-				res.Add(DeserializeRectangleF(sr, ref nextToken));
+				res.Add(DeserializeRectangleF(sr, nextToken));
 			}
 			if (nextToken != ']')
 			{
-				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				if (nextToken == -1) throw new SerializationException("Unexpected end of JSON in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
@@ -183,10 +210,9 @@ namespace Revenj.Serialization.Json.Converters
 				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 					res.Add(null);
 				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for Color value. Expecting number, string or null");
-				nextToken = sr.Read();
 			}
-			else res.Add(DeserializeRectangleF(sr, ref nextToken));
-			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
+			else res.Add(DeserializeRectangleF(sr, nextToken));
+			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
 			{
 				nextToken = JsonSerialization.GetNextToken(sr);
 				if (nextToken == 'n')
@@ -194,13 +220,12 @@ namespace Revenj.Serialization.Json.Converters
 					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
 						res.Add(null);
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for Color value. Expecting number, string or null");
-					nextToken = sr.Read();
 				}
-				else res.Add(DeserializeRectangleF(sr, ref nextToken));
+				else res.Add(DeserializeRectangleF(sr, nextToken));
 			}
 			if (nextToken != ']')
 			{
-				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				if (nextToken == -1) throw new SerializationException("Unexpected end of JSON in collection.");
 				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
 			}
 		}
