@@ -141,7 +141,7 @@ namespace Revenj.Http
 						using (var stream = route.Handle(match.BoundVars, ctx.Stream))
 						{
 							var keepAlive = ctx.Return(stream, socket);
-							if (keepAlive && socket.Connected) continue;
+							if (keepAlive && socket.Connected && socket.Poll(1000000, SelectMode.SelectRead)) continue;
 							socket.Close();
 							break;
 						}

@@ -289,7 +289,8 @@ namespace Revenj.Http
 
 		internal bool Return(Stream stream, Socket socket)
 		{
-			var http = HttpResponse[(int)ResponseStatus - 100];
+			int responseCode = (int)ResponseStatus;
+			var http = HttpResponse[responseCode - 100];
 			Buffer.BlockCopy(http, 0, Temp, 0, http.Length);
 			var offset = http.Length;
 			if (ResponseIsJson)
@@ -313,7 +314,7 @@ namespace Revenj.Http
 			bool keepAlive;
 			if (IsHttp10)
 			{
-				if (GetRequestHeader("connection") == "Keep-Alive")
+				if (responseCode < 400 && GetRequestHeader("connection") == "Keep-Alive")
 				{
 					keepAlive = true;
 					Buffer.BlockCopy(ConnectionKeepAlive, 0, Temp, offset, ConnectionKeepAlive.Length);
@@ -329,7 +330,7 @@ namespace Revenj.Http
 			}
 			else
 			{
-				if (GetRequestHeader("connection") == "close")
+				if (responseCode >= 400 || GetRequestHeader("connection") == "close")
 				{
 					keepAlive = false;
 					socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, false);
