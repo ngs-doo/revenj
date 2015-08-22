@@ -488,16 +488,13 @@ namespace Revenj.Utility
 		/// Stream will be added to pool if required.
 		/// Doesn't release allocated buffers
 		/// </summary>
-		/// <param name="disposing"></param>
 		public override void Close()
 		{
-			if (disposed) return;
 			if (IsShared)
 			{
-				Writer.Flush();
 				Reader.DiscardBufferedData();
 			}
-			else if (BoundToThread == Thread.CurrentThread.ManagedThreadId)
+			else if (!disposed && BoundToThread == Thread.CurrentThread.ManagedThreadId)
 			{
 				disposed = true;
 				if (Writer != null)

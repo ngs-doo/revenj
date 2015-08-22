@@ -464,6 +464,8 @@ namespace Revenj.Http
 
 		internal void ReturnError(Socket socket, int status, string message, bool withHeaders)
 		{
+			if (!socket.Connected)
+				return;
 			var http = HttpResponse[status - 100];
 			Buffer.BlockCopy(http, 0, Temp, 0, http.Length);
 			var offset = http.Length;

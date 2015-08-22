@@ -5,7 +5,7 @@ namespace Revenj.Api
 	/// <summary>
 	/// Generic SOAP API service.
 	/// Allows for multiple commands at once.
-	/// All commands are executed inside a single transaciton.
+	/// All commands are executed inside a single transaction.
 	/// SOAP uses XML serialization.
 	/// </summary>
 	[ServiceContract(Namespace = "https://dsl-platform.com")]
@@ -14,7 +14,7 @@ namespace Revenj.Api
 		/// <summary>
 		/// Execute requested commands defined by description.
 		/// </summary>
-		/// <param name="soapCommands">comand description</param>
+		/// <param name="soapCommands">command description</param>
 		/// <returns>executed results</returns>
 		[OperationContract]
 		SoapResultDescription Execute(SoapCommandDescription[] soapCommands);
@@ -28,7 +28,7 @@ namespace Revenj.Api
 		/// Execute requested command(s) defined by description(s).
 		/// </summary>
 		/// <param name="app">soap application service</param>
-		/// <param name="commands">comand descriptions</param>
+		/// <param name="commands">command descriptions</param>
 		/// <returns>executed results</returns>
 		public static SoapResultDescription Execute(this ISoapApplication app, params SoapCommandDescription[] commands)
 		{

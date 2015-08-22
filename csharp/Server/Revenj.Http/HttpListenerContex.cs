@@ -22,8 +22,10 @@ namespace Revenj.Http
 			this.RouteMatch = routeMatch;
 			this.Principal = principal;
 			var at = request.AcceptTypes;
-			if (at != null && at.Length != 0)
+			if (at != null && at.Length == 1)
 				AcceptType = at[0];
+			else if (at != null)
+				AcceptType = request.Headers["Accept"];
 		}
 
 		private readonly string AcceptType;
