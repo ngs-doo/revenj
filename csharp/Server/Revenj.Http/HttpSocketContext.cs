@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -151,10 +150,21 @@ namespace Revenj.Http
 		public string HttpProtocolVersion;
 		public string AbsolutePath;
 
+		struct HeaderPair
+		{
+			public readonly string Key;
+			public readonly string Value;
+			public HeaderPair(string key, string value)
+			{
+				this.Key = key;
+				this.Value = value;
+			}
+		}
+
 		private int RequestHeadersLength;
-		private readonly KeyValuePair<string, string>[] RequestHeaders = new KeyValuePair<string, string>[32];
+		private readonly HeaderPair[] RequestHeaders = new HeaderPair[64];
 		private int ResponseHeadersLength;
-		private readonly KeyValuePair<string, string>[] ResponseHeaders = new KeyValuePair<string, string>[32];
+		private readonly HeaderPair[] ResponseHeaders = new HeaderPair[64];
 
 		public string GetRequestHeader(string name)
 		{
@@ -223,7 +233,7 @@ namespace Revenj.Http
 			return null;
 		}
 
-		public bool Process(Socket socket)
+		public bool Parse(Socket socket)
 		{
 			positionInTmp = 0;
 			totalBytes = 0;
@@ -249,7 +259,6 @@ namespace Revenj.Http
 			TemplateMatch = null;
 			ResponseIsJson = false;
 			ContentTypeResponseIndex = -1;
-			string contentLength = null;
 			do
 			{
 				var start = rowEnd + 1;
@@ -273,20 +282,20 @@ namespace Revenj.Http
 					string value = new string(nameBuf, 0, rowEnd - i - 1);
 					if (RequestHeadersLength == RequestHeaders.Length)
 					{
-						ReturnError(socket, 413, "Only up to 32 headers allowed", false);
+						ReturnError(socket, 413, "Only up to " + RequestHeaders.Length + " headers allowed", false);
 						return false;
 					}
-					RequestHeaders[RequestHeadersLength++] = new KeyValuePair<string, string>(name, value);
-					if (name == "content-length") contentLength = value;
+					RequestHeaders[RequestHeadersLength++] = new HeaderPair(name, value);
 				}
 				rowEnd++;
 			} while (positionInTmp <= Temp.Length);
 			if (HttpMethod == "POST" || HttpMethod == "PUT")
 			{
 				long len = 0;
-				if (contentLength != null)
+				var ct = GetRequestHeader("content-length");
+				if (ct != null)
 				{
-					if (!long.TryParse(contentLength, out len)) return ReturnError(socket, 411);
+					if (!long.TryParse(ct, out len)) return ReturnError(socket, 411);
 					if (len > Limit) return ReturnError(socket, 413);
 				}
 				else return ReturnError(socket, 411);
@@ -600,7 +609,6 @@ namespace Revenj.Http
 			for (int i = 0; i < type.Length; i++)
 				Temp[offset + i] = (byte)type[i];
 			offset += type.Length;
-			offset += type.Length;
 			Temp[offset] = 13;
 			Temp[offset + 1] = 10;
 			return offset + 2;
@@ -658,6 +666,7 @@ namespace Revenj.Http
 				{
 					ResponseHeaders[ContentTypeResponseIndex] = ResponseHeaders[ResponseHeadersLength - 1];
 					ResponseHeadersLength--;
+					ContentTypeResponseIndex = -1;
 				}
 				ResponseIsJson = value == "application/json";
 			}
@@ -671,9 +680,11 @@ namespace Revenj.Http
 
 		public void AddHeader(string type, string value)
 		{
+			if (ResponseHeadersLength == ResponseHeaders.Length)
+				throw new NotSupportedException("Only up to " + ResponseHeaders.Length + " response headers allowed");
 			if (type == "Content-Type")
 				ContentTypeResponseIndex = ResponseHeadersLength;
-			ResponseHeaders[ResponseHeadersLength++] = new KeyValuePair<string, string>(type, value);
+			ResponseHeaders[ResponseHeadersLength++] = new HeaderPair(type, value);
 		}
 
 		HttpStatusCode IResponseContext.StatusCode

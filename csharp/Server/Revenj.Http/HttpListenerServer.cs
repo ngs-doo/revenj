@@ -115,7 +115,7 @@ namespace Revenj.Http
 						ThreadContext.Request = ctx;
 						ThreadContext.Response = ctx;
 						Thread.CurrentPrincipal = auth.Principal;
-						using (var stream = route.Handle(match.BoundVars, context.Request.InputStream))
+						using (var stream = route.Handle(match.OrderedArgs, context.Request.InputStream))
 						{
 							var cms = stream as ChunkedMemoryStream;
 							if (cms != null)

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
-using System.Net;
 using System.Reflection;
 
 namespace Revenj.Http
@@ -48,6 +47,11 @@ namespace Revenj.Http
 			foreach (var kv in boundVars)
 				args[ArgumentOrder[kv.Key]] = kv.Value;
 
+			return Invocation(args, stream);
+		}
+
+		internal Stream Handle(string[] args, Stream stream)
+		{
 			return Invocation(args, stream);
 		}
 	}

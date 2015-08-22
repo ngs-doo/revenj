@@ -6,18 +6,25 @@ namespace Revenj.Http
 {
 	internal class RouteMatch
 	{
-		internal readonly Dictionary<string, string> BoundVars;
+		internal readonly string[] OrderedArgs;
+		internal readonly KeyValuePair<string, string>[] BoundVars;
 		private readonly Dictionary<string, string> QueryParams;
 		private readonly string RawUrl;
 
-		public RouteMatch(Dictionary<string, string> boundVars, string rawUrl)
+		public RouteMatch(string[] orderedArgs, KeyValuePair<string, string>[] boundVars, string rawUrl)
 		{
+			this.OrderedArgs = orderedArgs;
 			this.BoundVars = boundVars;
 			this.RawUrl = rawUrl;
 		}
 
-		public RouteMatch(Dictionary<string, string> boundVars, Dictionary<string, string> queryParams, string rawUrl)
+		public RouteMatch(
+			string[] orderedArgs,
+			KeyValuePair<string, string>[] boundVars,
+			Dictionary<string, string> queryParams,
+			string rawUrl)
 		{
+			this.OrderedArgs = orderedArgs;
 			this.BoundVars = boundVars;
 			this.QueryParams = queryParams;
 			this.RawUrl = rawUrl;

@@ -82,14 +82,14 @@ namespace Revenj.Http
 
 		struct ReqId : IEquatable<ReqId>
 		{
+			private readonly int HashCode;
 			private readonly string Http;
 			private readonly string Path;
-			private readonly int HashCode;
 			public ReqId(string http, string path)
 			{
+				this.HashCode = http.GetHashCode() + path.GetHashCode();
 				this.Http = http;
 				this.Path = path;
-				this.HashCode = http.GetHashCode() + path.GetHashCode();
 			}
 			public override int GetHashCode() { return HashCode; }
 			public override bool Equals(object obj) { return Equals((ReqId)obj); }

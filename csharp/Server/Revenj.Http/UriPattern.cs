@@ -15,7 +15,7 @@ namespace Revenj.Http
 		private readonly string Template;
 		private readonly Regex TemplatePattern;
 		private readonly string[] Tokens;
-		private readonly HashSet<string> TokenSet;
+		private readonly Dictionary<string, int> TokenMap;
 		private readonly int TokensCount;
 		public readonly int Groups;
 		private readonly Func<string, int, RouteMatch> ExtractMatcher;
@@ -25,7 +25,9 @@ namespace Revenj.Http
 			template = template.TrimEnd('*').ToUpperInvariant();
 			this.Template = template;
 			Tokens = GetTokens(template);
-			TokenSet = new HashSet<string>(Tokens);
+			TokenMap = new Dictionary<string, int>();
+			for (int i = 0; i < Tokens.Length; i++)
+				TokenMap[Tokens[i]] = i;
 			TokensCount = Tokens.Length;
 			if (TokensCount == 0 && !template.Contains("?") && !template.Contains("{"))
 				ExtractMatcher = StaticExtractMatch;
@@ -44,7 +46,9 @@ namespace Revenj.Http
 			return ExtractMatcher(url, offset);
 		}
 
-		private static Dictionary<string, string> Empty = new Dictionary<string, string>(0);
+		private static readonly string[] EmptyArgs = new string[0];
+		private static readonly KeyValuePair<string, string>[] EmptyPairs = new KeyValuePair<string, string>[0];
+		private static readonly Dictionary<string, string> EmptyDict = new Dictionary<string, string>(0);
 
 		public RouteMatch ExtractMatch(string url, int offset)
 		{
@@ -55,7 +59,7 @@ namespace Revenj.Http
 		{
 			int pos = url.IndexOf('?');
 			if (pos == -1)
-				return new RouteMatch(Empty, url);
+				return new RouteMatch(EmptyArgs, EmptyPairs, url);
 			var queryParams = new Dictionary<string, string>();
 			pos++;
 			while (pos < url.Length)
@@ -71,21 +75,25 @@ namespace Revenj.Http
 				var upper = key.ToUpperInvariant();
 				queryParams.Add(key, value);
 			}
-			return new RouteMatch(Empty, queryParams, url);
+			return new RouteMatch(EmptyArgs, EmptyPairs, queryParams, url);
 		}
 
 		private RouteMatch DynamicExtractMatch(string url, int offset)
 		{
 			var match = TemplatePattern.Match(url, offset);
-			var boundVars = new Dictionary<string, string>(TokensCount);
+			var boundVars = new KeyValuePair<string, string>[TokensCount];
+			var orderedArgs = new string[TokensCount];
 			var groups = match.Groups;
 			for (int i = 1; i < groups.Count; i++)
-				boundVars.Add(Tokens[i - 1], groups[i].Value);
+			{
+				boundVars[i - 1] = new KeyValuePair<string, string>(Tokens[i - 1], groups[i].Value);
+				orderedArgs[i - 1] = groups[i].Value;
+			}
 			if (groups.Count == TokensCount + 1)
-				return new RouteMatch(boundVars, url);
+				return new RouteMatch(orderedArgs, boundVars, url);
 			int pos = url.IndexOf('?');
 			if (pos == -1)
-				return new RouteMatch(boundVars, Empty, url);
+				return new RouteMatch(orderedArgs, boundVars, EmptyDict, url);
 			var queryParams = new Dictionary<string, string>();
 			pos++;
 			while (pos < url.Length)
@@ -99,11 +107,15 @@ namespace Revenj.Http
 				var value = HttpUtility.UrlDecode(url.Substring(start, pos - start));
 				pos++;
 				var upper = key.ToUpperInvariant();
-				if (TokenSet.Contains(upper))
-					boundVars.Add(upper, value);
+				int index;
+				if (TokenMap.TryGetValue(upper, out index))
+				{
+					boundVars[index] = new KeyValuePair<string, string>(upper, value);
+					orderedArgs[index] = value;
+				}
 				queryParams.Add(key, value);
 			}
-			return new RouteMatch(boundVars, queryParams, url);
+			return new RouteMatch(orderedArgs, boundVars, queryParams, url);
 		}
 
 		private string BuildRegex(string template)

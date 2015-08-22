@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Security;
+using System.Security.Principal;
 using System.ServiceModel;
 using System.Threading;
 using Revenj.Api;
@@ -117,11 +118,12 @@ namespace Revenj.Http
 			var socket = (Socket)state;
 			socket.Blocking = true;
 			HttpSocketContext ctx;
+			IPrincipal previousPrincipal = null;
 			if (!Contexts.TryPop(out ctx))
 				ctx = new HttpSocketContext(socket.LocalEndPoint.ToString(), MessageSizeLimit);
 			try
 			{
-				while (ctx.Process(socket))
+				while (ctx.Parse(socket))
 				{
 					RouteMatch match;
 					var route = Routes.Find(ctx.HttpMethod, ctx.RawUrl, ctx.AbsolutePath, out match);
@@ -137,8 +139,9 @@ namespace Revenj.Http
 						ctx.ForRouteWithAuth(match, auth.Principal);
 						ThreadContext.Request = ctx;
 						ThreadContext.Response = ctx;
-						Thread.CurrentPrincipal = auth.Principal;
-						using (var stream = route.Handle(match.BoundVars, ctx.Stream))
+						if (previousPrincipal != auth.Principal)
+							Thread.CurrentPrincipal = previousPrincipal = auth.Principal;
+						using (var stream = route.Handle(match.OrderedArgs, ctx.Stream))
 						{
 							var keepAlive = ctx.Return(stream, socket);
 							if (keepAlive && socket.Connected && socket.Poll(1000000, SelectMode.SelectRead)) continue;
