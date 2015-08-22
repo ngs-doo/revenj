@@ -306,26 +306,32 @@ namespace Revenj.Http
 					if (len > Limit) return ReturnError(socket, 413);
 				}
 				else return ReturnError(socket, 411);
-				totalBytes = positionInTmp - rowEnd;
 				Stream.SetLength(0);
-				Stream.Write(InputTemp, rowEnd, totalBytes);
-				while (totalBytes < len)
+				var size = totalBytes - rowEnd;
+				Stream.Write(InputTemp, rowEnd, size);
+				len -= size;
+				while (len > 0)
 				{
-					var size = socket.Receive(InputTemp);
+					size = socket.Receive(InputTemp);
 					Stream.Write(InputTemp, 0, size);
-					totalBytes += size;
+					len -= size;
 				}
 				Stream.Position = 0;
-			}
-			Pipeline = rowEnd < totalBytes;
-			if (Pipeline)
-			{
-				Buffer.BlockCopy(InputTemp, rowEnd, InputTemp, 0, totalBytes - rowEnd);
-				totalBytes -= rowEnd;
+				rowEnd = totalBytes;
+				totalBytes = 0;
 			}
 			else
 			{
-				totalBytes = 0;
+				Pipeline = rowEnd < totalBytes;
+				if (Pipeline)
+				{
+					Buffer.BlockCopy(InputTemp, rowEnd, InputTemp, 0, totalBytes - rowEnd);
+					totalBytes -= rowEnd;
+				}
+				else
+				{
+					totalBytes = 0;
+				}
 			}
 			return true;
 		}
