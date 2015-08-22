@@ -104,8 +104,9 @@ namespace Revenj.Http
 		}
 
 		public readonly ChunkedMemoryStream Stream;
-		private readonly byte[] Temp = new byte[4096];
-		private readonly char[] TmpCharBuf = new char[4096];
+		private readonly byte[] InputTemp = new byte[8192];
+		private readonly byte[] OutputTemp = new byte[8192];
+		private readonly char[] TmpCharBuf = new char[8192];
 
 		private int totalBytes;
 		private int positionInTmp;
@@ -123,25 +124,23 @@ namespace Revenj.Http
 
 		private int ReadUntil(Socket socket, byte match, int position)
 		{
-			int totalRead = positionInTmp;
 			int retries = 0;
 			do
 			{
-				for (int i = position; i < totalRead; i++)
+				for (int i = position; i < totalBytes; i++)
 				{
-					if (Temp[i] == match)
+					if (InputTemp[i] == match)
 					{
-						totalBytes += totalRead - positionInTmp;
-						positionInTmp = totalRead;
+						positionInTmp = i;
 						return i;
 					}
 				}
-				position = totalRead;
-				var size = socket.Receive(Temp, totalRead, Temp.Length - totalRead, SocketFlags.None);
+				position = totalBytes;
+				var size = socket.Receive(InputTemp, totalBytes, InputTemp.Length - totalBytes, SocketFlags.None);
 				retries++;
 				if (size == 0) return -1;
-				totalRead += size;
-			} while (retries < 100 && totalRead < Temp.Length);
+				totalBytes += size;
+			} while (retries < 100 && totalBytes < InputTemp.Length);
 			return -1;
 		}
 
@@ -186,6 +185,8 @@ namespace Revenj.Http
 		private bool ResponseIsJson;
 		private int ContentTypeResponseIndex;
 
+		internal bool Pipeline;
+
 		private static string ReadMethod(int len, byte[] buf)
 		{
 			if (len == 3)
@@ -205,19 +206,19 @@ namespace Revenj.Http
 
 		private string ReadProtocol(int end)
 		{
-			if (Temp[end - 8] != 32)
+			if (InputTemp[end - 8] != 32)
 			{
 				HttpResponse = HttpResponse11;
 				return null;
 			}
-			if (Temp[end - 7] != (byte)'H') return null;
-			if (Temp[end - 6] != (byte)'T') return null;
-			if (Temp[end - 5] != (byte)'T') return null;
-			if (Temp[end - 4] != (byte)'P') return null;
-			if (Temp[end - 3] != (byte)'/') return null;
-			if (Temp[end - 2] != (byte)'1') return null;
-			if (Temp[end - 1] != (byte)'.') return null;
-			var last = Temp[end];
+			if (InputTemp[end - 7] != (byte)'H') return null;
+			if (InputTemp[end - 6] != (byte)'T') return null;
+			if (InputTemp[end - 5] != (byte)'T') return null;
+			if (InputTemp[end - 4] != (byte)'P') return null;
+			if (InputTemp[end - 3] != (byte)'/') return null;
+			if (InputTemp[end - 2] != (byte)'1') return null;
+			if (InputTemp[end - 1] != (byte)'.') return null;
+			var last = InputTemp[end];
 			if (last == 48)
 			{
 				IsHttp10 = true;
@@ -233,13 +234,18 @@ namespace Revenj.Http
 			return null;
 		}
 
+		public void Reset()
+		{
+			totalBytes = 0;
+		}
+
 		public bool Parse(Socket socket)
 		{
 			positionInTmp = 0;
-			totalBytes = 0;
+			Pipeline = false;
 			var methodEnd = ReadUntil(socket, Space, 0);
 			if (methodEnd == -1) return ReturnError(socket, 505);
-			HttpMethod = ReadMethod(methodEnd, Temp);
+			HttpMethod = ReadMethod(methodEnd, InputTemp);
 			var rowEnd = ReadUntil(socket, LF, methodEnd + 1);
 			if (rowEnd == -1 || rowEnd < 12) return ReturnError(socket, 505);
 			RequestHeadersLength = 0;
@@ -269,16 +275,16 @@ namespace Revenj.Http
 				{
 					int i = start;
 					for (; i < rowEnd; i++)
-						if (Temp[i] == ':')
+						if (InputTemp[i] == ':')
 							break;
 					if (i == rowEnd) return ReturnError(socket, 414);
 					var nameBuf = TmpCharBuf;
 					for (int x = start; x < i; x++)
-						nameBuf[x - start] = Lower[Temp[x]];
+						nameBuf[x - start] = Lower[InputTemp[x]];
 					string name = new string(nameBuf, 0, i - start);
-					if (Temp[i + 1] == 32) i++;
+					if (InputTemp[i + 1] == 32) i++;
 					for (int x = i + 1; x < rowEnd; x++)
-						nameBuf[x - i - 1] = (char)Temp[x];
+						nameBuf[x - i - 1] = (char)InputTemp[x];
 					string value = new string(nameBuf, 0, rowEnd - i - 1);
 					if (RequestHeadersLength == RequestHeaders.Length)
 					{
@@ -288,7 +294,8 @@ namespace Revenj.Http
 					RequestHeaders[RequestHeadersLength++] = new HeaderPair(name, value);
 				}
 				rowEnd++;
-			} while (positionInTmp <= Temp.Length);
+			} while (positionInTmp <= InputTemp.Length);
+			rowEnd += 2;
 			if (HttpMethod == "POST" || HttpMethod == "PUT")
 			{
 				long len = 0;
@@ -299,17 +306,26 @@ namespace Revenj.Http
 					if (len > Limit) return ReturnError(socket, 413);
 				}
 				else return ReturnError(socket, 411);
-				rowEnd += 2;
 				totalBytes = positionInTmp - rowEnd;
 				Stream.SetLength(0);
-				Stream.Write(Temp, rowEnd, totalBytes);
+				Stream.Write(InputTemp, rowEnd, totalBytes);
 				while (totalBytes < len)
 				{
-					var size = socket.Receive(Temp);
-					Stream.Write(Temp, 0, size);
+					var size = socket.Receive(InputTemp);
+					Stream.Write(InputTemp, 0, size);
 					totalBytes += size;
 				}
 				Stream.Position = 0;
+			}
+			Pipeline = rowEnd < totalBytes;
+			if (Pipeline)
+			{
+				Buffer.BlockCopy(InputTemp, rowEnd, InputTemp, 0, totalBytes - rowEnd);
+				totalBytes -= rowEnd;
+			}
+			else
+			{
+				totalBytes = 0;
 			}
 			return true;
 		}
@@ -321,10 +337,10 @@ namespace Revenj.Http
 			var end = rowEnd - 2 - HttpProtocolVersion.Length;
 			for (int x = httpLen1; x < end; x++)
 			{
-				var tb = Temp[x];
+				var tb = InputTemp[x];
 				if (tb > 250)
 				{
-					RawUrl = UTF8.GetString(Temp, httpLen1, end - httpLen1);
+					RawUrl = UTF8.GetString(InputTemp, httpLen1, end - httpLen1);
 					return;
 				}
 				charBuf[x - httpLen1] = (char)tb;
@@ -345,11 +361,11 @@ namespace Revenj.Http
 		{
 			int responseCode = (int)ResponseStatus;
 			var http = HttpResponse[responseCode - 100];
-			Buffer.BlockCopy(http, 0, Temp, 0, http.Length);
+			Buffer.BlockCopy(http, 0, OutputTemp, 0, http.Length);
 			var offset = http.Length;
 			if (ResponseIsJson)
 			{
-				Buffer.BlockCopy(JsonContentType, 0, Temp, offset, JsonContentType.Length);
+				Buffer.BlockCopy(JsonContentType, 0, OutputTemp, offset, JsonContentType.Length);
 				offset += JsonContentType.Length;
 			}
 			else if (ResponseContentType != null)
@@ -361,16 +377,16 @@ namespace Revenj.Http
 				var kv = ResponseHeaders[x];
 				var val = kv.Key;
 				for (int i = 0; i < val.Length; i++)
-					Temp[offset + i] = (byte)val[i];
+					OutputTemp[offset + i] = (byte)val[i];
 				offset += val.Length;
-				Temp[offset++] = 58;
-				Temp[offset++] = 32;
+				OutputTemp[offset++] = 58;
+				OutputTemp[offset++] = 32;
 				val = kv.Value;
 				for (int i = 0; i < val.Length; i++)
-					Temp[offset + i] = (byte)val[i];
+					OutputTemp[offset + i] = (byte)val[i];
 				offset += val.Length;
-				Temp[offset++] = 13;
-				Temp[offset++] = 10;
+				OutputTemp[offset++] = 13;
+				OutputTemp[offset++] = 10;
 			}
 			bool keepAlive;
 			if (IsHttp10)
@@ -378,14 +394,14 @@ namespace Revenj.Http
 				if (responseCode < 400 && GetRequestHeader("connection") == "Keep-Alive")
 				{
 					keepAlive = true;
-					Buffer.BlockCopy(ConnectionKeepAlive, 0, Temp, offset, ConnectionKeepAlive.Length);
+					Buffer.BlockCopy(ConnectionKeepAlive, 0, OutputTemp, offset, ConnectionKeepAlive.Length);
 					offset += ConnectionKeepAlive.Length;
 				}
 				else
 				{
 					keepAlive = false;
 					socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, false);
-					Buffer.BlockCopy(ConnectionClose, 0, Temp, offset, ConnectionClose.Length);
+					Buffer.BlockCopy(ConnectionClose, 0, OutputTemp, offset, ConnectionClose.Length);
 					offset += ConnectionClose.Length;
 				}
 			}
@@ -395,7 +411,7 @@ namespace Revenj.Http
 				{
 					keepAlive = false;
 					socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, false);
-					Buffer.BlockCopy(ConnectionClose, 0, Temp, offset, ConnectionClose.Length);
+					Buffer.BlockCopy(ConnectionClose, 0, OutputTemp, offset, ConnectionClose.Length);
 					offset += ConnectionClose.Length;
 				}
 				else keepAlive = true;
@@ -405,7 +421,7 @@ namespace Revenj.Http
 			if (cms != null)
 			{
 				offset = AddContentLength(cms.Length, offset);
-				socket.Send(Temp, offset, SocketFlags.None);
+				socket.Send(OutputTemp, offset, SocketFlags.None);
 				cms.Send(socket);
 				cms.Dispose();
 			}
@@ -421,25 +437,25 @@ namespace Revenj.Http
 					else
 						throw new NotSupportedException("Chunked stream not implemented");
 					offset = AddContentLength(len, offset);
-					if (len + offset < Temp.Length)
+					if (len + offset < OutputTemp.Length)
 					{
 						int pos = 0;
 						int size = (int)len;
 						do
 						{
-							pos += stream.Read(Temp, pos + offset, size - pos);
+							pos += stream.Read(OutputTemp, pos + offset, size - pos);
 						} while (pos < len);
-						socket.Send(Temp, size + offset, SocketFlags.None);
+						socket.Send(OutputTemp, size + offset, SocketFlags.None);
 					}
 					else
 					{
 						int pos = 0;
 						int size = (int)len;
-						socket.Send(Temp, offset, SocketFlags.Partial);
+						socket.Send(OutputTemp, offset, SocketFlags.Partial);
 						do
 						{
-							pos = stream.Read(Temp, 0, Temp.Length);
-							socket.Send(Temp, pos, SocketFlags.None);
+							pos = stream.Read(OutputTemp, 0, OutputTemp.Length);
+							socket.Send(OutputTemp, pos, SocketFlags.None);
 						} while (pos != 0);
 					}
 				}
@@ -450,8 +466,8 @@ namespace Revenj.Http
 			}
 			else
 			{
-				Buffer.BlockCopy(ZeroContentLength, 0, Temp, offset, ZeroContentLength.Length);
-				socket.Send(Temp, offset + ZeroContentLength.Length, SocketFlags.None);
+				Buffer.BlockCopy(ZeroContentLength, 0, OutputTemp, offset, ZeroContentLength.Length);
+				socket.Send(OutputTemp, offset + ZeroContentLength.Length, SocketFlags.None);
 			}
 			return keepAlive;
 		}
@@ -467,16 +483,16 @@ namespace Revenj.Http
 			if (!socket.Connected)
 				return;
 			var http = HttpResponse[status - 100];
-			Buffer.BlockCopy(http, 0, Temp, 0, http.Length);
+			Buffer.BlockCopy(http, 0, OutputTemp, 0, http.Length);
 			var offset = http.Length;
-			Buffer.BlockCopy(ConnectionClose, 0, Temp, offset, ConnectionClose.Length);
+			Buffer.BlockCopy(ConnectionClose, 0, OutputTemp, offset, ConnectionClose.Length);
 			offset += ConnectionClose.Length;
 			offset = AddServerAndDate(offset);
 			socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, false);
 			if (message == null)
 			{
-				Buffer.BlockCopy(ZeroContentLength, 0, Temp, offset, ZeroContentLength.Length);
-				socket.Send(Temp, offset + ZeroContentLength.Length, SocketFlags.None);
+				Buffer.BlockCopy(ZeroContentLength, 0, OutputTemp, offset, ZeroContentLength.Length);
+				socket.Send(OutputTemp, offset + ZeroContentLength.Length, SocketFlags.None);
 				socket.Close();
 				return;
 			}
@@ -485,20 +501,20 @@ namespace Revenj.Http
 				for (int x = 0; x < ResponseHeadersLength; x++)
 				{
 					var kv = ResponseHeaders[x];
-					offset += ASCII.GetBytes(kv.Key, 0, kv.Key.Length, Temp, offset);
-					Temp[offset++] = 58;
-					Temp[offset++] = 32;
-					offset += ASCII.GetBytes(kv.Value, 0, kv.Value.Length, Temp, offset);
-					Temp[offset++] = 13;
-					Temp[offset++] = 10;
+					offset += ASCII.GetBytes(kv.Key, 0, kv.Key.Length, OutputTemp, offset);
+					OutputTemp[offset++] = 58;
+					OutputTemp[offset++] = 32;
+					offset += ASCII.GetBytes(kv.Value, 0, kv.Value.Length, OutputTemp, offset);
+					OutputTemp[offset++] = 13;
+					OutputTemp[offset++] = 10;
 				}
 			}
-			Buffer.BlockCopy(PlainTextContentType, 0, Temp, offset, PlainTextContentType.Length);
+			Buffer.BlockCopy(PlainTextContentType, 0, OutputTemp, offset, PlainTextContentType.Length);
 			offset += PlainTextContentType.Length;
 			var len = UTF8.GetByteCount(message);
 			offset = AddContentLength(len, offset);
-			offset += UTF8.GetBytes(message, 0, message.Length, Temp, offset);
-			socket.Send(Temp, offset, SocketFlags.None);
+			offset += UTF8.GetBytes(message, 0, message.Length, OutputTemp, offset);
+			socket.Send(OutputTemp, offset, SocketFlags.None);
 			socket.Close();
 			return;
 		}
@@ -526,37 +542,37 @@ namespace Revenj.Http
 				var hourBuf = DateNumbers[hour];
 				var minBuf = DateNumbers[min];
 				var secBuf = DateNumbers[sec];
-				Buffer.BlockCopy(DateNow, 0, Temp, offset, 6);
+				Buffer.BlockCopy(DateNow, 0, OutputTemp, offset, 6);
 				var start = offset + 6;
-				Temp[start] = dayNameBuf[0];
-				Temp[start + 1] = dayNameBuf[1];
-				Temp[start + 2] = dayNameBuf[2];
-				Temp[start + 3] = 44;
-				Temp[start + 4] = 32;
-				Temp[start + 5] = dayBuf[0];
-				Temp[start + 6] = dayBuf[1];
-				Temp[start + 7] = 32;
-				Temp[start + 8] = monthBuf[0];
-				Temp[start + 9] = monthBuf[1];
-				Temp[start + 10] = monthBuf[2];
-				Temp[start + 11] = 32;
-				Temp[start + 12] = yearBuf1[0];
-				Temp[start + 13] = yearBuf1[1];
-				Temp[start + 14] = yearBuf2[0];
-				Temp[start + 15] = yearBuf2[1];
-				Temp[start + 16] = 32;
-				Temp[start + 17] = hourBuf[0];
-				Temp[start + 18] = hourBuf[1];
-				Temp[start + 19] = 58;
-				Temp[start + 20] = minBuf[0];
-				Temp[start + 21] = minBuf[1];
-				Temp[start + 22] = 58;
-				Temp[start + 23] = secBuf[0];
-				Temp[start + 24] = secBuf[1];
-				Buffer.BlockCopy(Temp, start, TmpDateNow, 6, 25);
+				OutputTemp[start] = dayNameBuf[0];
+				OutputTemp[start + 1] = dayNameBuf[1];
+				OutputTemp[start + 2] = dayNameBuf[2];
+				OutputTemp[start + 3] = 44;
+				OutputTemp[start + 4] = 32;
+				OutputTemp[start + 5] = dayBuf[0];
+				OutputTemp[start + 6] = dayBuf[1];
+				OutputTemp[start + 7] = 32;
+				OutputTemp[start + 8] = monthBuf[0];
+				OutputTemp[start + 9] = monthBuf[1];
+				OutputTemp[start + 10] = monthBuf[2];
+				OutputTemp[start + 11] = 32;
+				OutputTemp[start + 12] = yearBuf1[0];
+				OutputTemp[start + 13] = yearBuf1[1];
+				OutputTemp[start + 14] = yearBuf2[0];
+				OutputTemp[start + 15] = yearBuf2[1];
+				OutputTemp[start + 16] = 32;
+				OutputTemp[start + 17] = hourBuf[0];
+				OutputTemp[start + 18] = hourBuf[1];
+				OutputTemp[start + 19] = 58;
+				OutputTemp[start + 20] = minBuf[0];
+				OutputTemp[start + 21] = minBuf[1];
+				OutputTemp[start + 22] = 58;
+				OutputTemp[start + 23] = secBuf[0];
+				OutputTemp[start + 24] = secBuf[1];
+				Buffer.BlockCopy(OutputTemp, start, TmpDateNow, 6, 25);
 				LastTicks = envTicks;
-				Buffer.BlockCopy(TmpDateNow, 31, Temp, start + 25, TmpDateNow.Length - 31);
-				Buffer.BlockCopy(ServerName, 0, Temp, offset + TmpDateNow.Length, ServerName.Length);
+				Buffer.BlockCopy(TmpDateNow, 31, OutputTemp, start + 25, TmpDateNow.Length - 31);
+				Buffer.BlockCopy(ServerName, 0, OutputTemp, offset + TmpDateNow.Length, ServerName.Length);
 				lock (ServerName)
 				{
 					var tdn = DateNow;
@@ -566,20 +582,20 @@ namespace Revenj.Http
 				return offset + DateNow.Length + ServerName.Length;
 			}
 			var dn = DateNow;
-			Buffer.BlockCopy(DateNow, 0, Temp, offset, dn.Length);
-			Buffer.BlockCopy(ServerName, 0, Temp, offset + dn.Length, ServerName.Length);
+			Buffer.BlockCopy(DateNow, 0, OutputTemp, offset, dn.Length);
+			Buffer.BlockCopy(ServerName, 0, OutputTemp, offset + dn.Length, ServerName.Length);
 			return offset + dn.Length + ServerName.Length;
 		}
 
 		private int AddContentLength(long len, int offset)
 		{
-			Buffer.BlockCopy(ContentLength, 0, Temp, offset, ContentLength.Length);
+			Buffer.BlockCopy(ContentLength, 0, OutputTemp, offset, ContentLength.Length);
 			offset += ContentLength.Length;
-			offset = Serialize(len, Temp, offset);
-			Temp[offset] = 13;
-			Temp[offset + 1] = 10;
-			Temp[offset + 2] = 13;
-			Temp[offset + 3] = 10;
+			offset = Serialize(len, OutputTemp, offset);
+			OutputTemp[offset] = 13;
+			OutputTemp[offset + 1] = 10;
+			OutputTemp[offset + 2] = 13;
+			OutputTemp[offset + 3] = 10;
 			return offset + 4;
 		}
 
@@ -606,13 +622,13 @@ namespace Revenj.Http
 
 		private int AddContentType(string type, int offset)
 		{
-			Buffer.BlockCopy(ContentType, 0, Temp, offset, ContentType.Length);
+			Buffer.BlockCopy(ContentType, 0, OutputTemp, offset, ContentType.Length);
 			offset += ContentType.Length;
 			for (int i = 0; i < type.Length; i++)
-				Temp[offset + i] = (byte)type[i];
+				OutputTemp[offset + i] = (byte)type[i];
 			offset += type.Length;
-			Temp[offset] = 13;
-			Temp[offset + 1] = 10;
+			OutputTemp[offset] = 13;
+			OutputTemp[offset + 1] = 10;
 			return offset + 2;
 		}
 

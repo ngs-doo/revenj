@@ -121,6 +121,7 @@ namespace Revenj.Http
 			IPrincipal previousPrincipal = null;
 			if (!Contexts.TryPop(out ctx))
 				ctx = new HttpSocketContext(socket.LocalEndPoint.ToString(), MessageSizeLimit);
+			ctx.Reset();
 			try
 			{
 				while (ctx.Parse(socket))
@@ -144,7 +145,11 @@ namespace Revenj.Http
 						using (var stream = route.Handle(match.OrderedArgs, ctx.Stream))
 						{
 							var keepAlive = ctx.Return(stream, socket);
-							if (keepAlive && socket.Connected && socket.Poll(1000000, SelectMode.SelectRead)) continue;
+							if (keepAlive)
+							{
+								if (ctx.Pipeline) continue;
+								else if (socket.Connected && socket.Poll(1000000, SelectMode.SelectRead)) continue;
+							}
 							socket.Close();
 							break;
 						}

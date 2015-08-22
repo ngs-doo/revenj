@@ -427,7 +427,7 @@ namespace Revenj.Utility
 			var total = TotalSize >> BlockShift;
 			var remaining = TotalSize & BlockAnd;
 			for (int i = 0; i < total; i++)
-				socket.Send(Blocks[i]);
+				socket.Send(Blocks[i], SocketFlags.Partial);
 			socket.Send(Blocks[total], remaining, SocketFlags.None);
 		}
 
