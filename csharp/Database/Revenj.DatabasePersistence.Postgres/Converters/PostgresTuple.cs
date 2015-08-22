@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Revenj.Utility;
@@ -74,7 +74,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			}
 		}
 
-		private static readonly ConcurrentDictionary<string, string> QuoteEscape = new ConcurrentDictionary<string, string>(1, 17);
+		private static Dictionary<string, string> QuoteEscape = new Dictionary<string, string>();
 
 		public static string BuildQuoteEscape(string escaping)
 		{
@@ -95,7 +95,9 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					sb.Replace("\\", "\\\\").Replace("\"", "\\\"");
 			}
 			result = sb.ToString();
-			QuoteEscape.TryAdd(escaping, result);
+			var newQuotes = new Dictionary<string, string>(QuoteEscape);
+			newQuotes[escaping] = result;
+			QuoteEscape = newQuotes;
 			return result;
 		}
 

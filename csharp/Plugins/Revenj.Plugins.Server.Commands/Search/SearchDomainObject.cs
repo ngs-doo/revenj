@@ -98,13 +98,24 @@ Example argument:
 			}
 		}
 
+		private static Dictionary<Type, ISearchDomainObjectCommand<object>> CacheNoSpecification =
+			new Dictionary<Type, ISearchDomainObjectCommand<object>>();
+
 		private ISearchDomainObjectCommand<object> PrepareCommand(IPrincipal principal, string domainName, string specificationName)
 		{
 			var domainObjectType = DomainModel.FindDataSourceAndCheckPermissions(Permissions, principal, domainName);
 			if (string.IsNullOrWhiteSpace(specificationName))
 			{
-				var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);
-				return Activator.CreateInstance(commandType) as ISearchDomainObjectCommand<object>;
+				ISearchDomainObjectCommand<object> search;
+				if (!CacheNoSpecification.TryGetValue(domainObjectType, out search))
+				{
+					var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);
+					search = Activator.CreateInstance(commandType) as ISearchDomainObjectCommand<object>;
+					var newCache = new Dictionary<Type, ISearchDomainObjectCommand<object>>(CacheNoSpecification);
+					newCache[domainObjectType] = search;
+					CacheNoSpecification = newCache;
+				}
+				return search;
 			}
 			else
 			{

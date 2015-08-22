@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
@@ -18,7 +18,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(Read))]
 	public class Read : IReadOnlyServerCommand
 	{
-		private static ConcurrentDictionary<Type, IFindCommand> Cache = new ConcurrentDictionary<Type, IFindCommand>(1, 127);
+		private static Dictionary<Type, IFindCommand> Cache = new Dictionary<Type, IFindCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -90,7 +90,9 @@ namespace Revenj.Plugins.Server.Commands
 				{
 					var commandType = typeof(FindCommand<>).MakeGenericType(objectType);
 					command = Activator.CreateInstance(commandType) as IFindCommand;
-					Cache.TryAdd(objectType, command);
+					var newCache = new Dictionary<Type, IFindCommand>(Cache);
+					newCache[objectType] = command;
+					Cache = newCache;
 				}
 				var result = command.Find(output, locator, Permissions, principal, argument.Uri);
 

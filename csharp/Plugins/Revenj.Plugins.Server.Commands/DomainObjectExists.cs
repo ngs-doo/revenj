@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(DomainObjectExists))]
 	public class DomainObjectExists : IReadOnlyServerCommand
 	{
-		private static ConcurrentDictionary<Type, IExistsCommand> Cache = new ConcurrentDictionary<Type, IExistsCommand>(1, 127);
+		private static Dictionary<Type, IExistsCommand> Cache = new Dictionary<Type, IExistsCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -94,7 +94,9 @@ Example argument:
 				{
 					var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);
 					command = Activator.CreateInstance(commandType) as IExistsCommand;
-					Cache.TryAdd(domainObjectType, command);
+					var newCache = new Dictionary<Type, IExistsCommand>(Cache);
+					newCache[domainObjectType] = command;
+					Cache = newCache;
 				}
 				return command;
 			}

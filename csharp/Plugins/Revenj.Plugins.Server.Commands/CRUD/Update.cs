@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -12,7 +12,6 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -20,7 +19,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(Update))]
 	public class Update : IServerCommand
 	{
-		private static ConcurrentDictionary<Type, IUpdateCommand> Cache = new ConcurrentDictionary<Type, IUpdateCommand>(1, 127);
+		private static Dictionary<Type, IUpdateCommand> Cache = new Dictionary<Type, IUpdateCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -122,7 +121,9 @@ Please check your arguments.".With(argument.Name), null);
 				{
 					var commandType = typeof(UpdateCommand<>).MakeGenericType(rootType);
 					command = Activator.CreateInstance(commandType) as IUpdateCommand;
-					Cache.TryAdd(rootType, command);
+					var newCache = new Dictionary<Type, IUpdateCommand>(Cache);
+					newCache[rootType] = command;
+					Cache = newCache;
 				}
 				var result = command.Update(input, output, locator, argument.Uri, argument.Data);
 

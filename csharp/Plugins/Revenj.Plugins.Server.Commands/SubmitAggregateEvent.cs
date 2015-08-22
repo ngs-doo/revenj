@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(SubmitAggregateEvent))]
 	public class SubmitAggregateEvent : IServerCommand
 	{
-		private static ConcurrentDictionary<Type, ISubmitCommand> Cache = new ConcurrentDictionary<Type, ISubmitCommand>(1, 127);
+		private static Dictionary<Type, ISubmitCommand> Cache = new Dictionary<Type, ISubmitCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -110,7 +110,9 @@ namespace Revenj.Plugins.Server.Commands
 				{
 					var commandType = typeof(SubmitEventCommand<,>).MakeGenericType(eventType, aggregateType);
 					command = Activator.CreateInstance(commandType) as ISubmitCommand;
-					Cache.TryAdd(eventType, command);
+					var newCache = new Dictionary<Type, ISubmitCommand>(Cache);
+					newCache[eventType] = command;
+					Cache = newCache;
 				}
 				var result = command.Submit(input, output, locator, argument.Uri, argument.Data);
 

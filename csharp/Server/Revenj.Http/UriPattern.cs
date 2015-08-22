@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -11,18 +12,25 @@ namespace Revenj.Http
 		private static string RegexMetaCharactersReplacements = @"\$0";
 		private static string PathGroup = "([^/?#]*)";
 
+		private readonly string Template;
 		private readonly Regex TemplatePattern;
 		private readonly string[] Tokens;
 		private readonly HashSet<string> TokenSet;
 		private readonly int TokensCount;
 		public readonly int Groups;
+		private readonly Func<string, int, RouteMatch> ExtractMatcher;
 
 		public UriPattern(string template)
 		{
 			template = template.TrimEnd('*').ToUpperInvariant();
+			this.Template = template;
 			Tokens = GetTokens(template);
 			TokenSet = new HashSet<string>(Tokens);
 			TokensCount = Tokens.Length;
+			if (TokensCount == 0 && !template.Contains("?") && !template.Contains("{"))
+				ExtractMatcher = StaticExtractMatch;
+			else
+				ExtractMatcher = DynamicExtractMatch;
 			var segments = BuildRegex(template);
 			var finalPattern = EscapePattern.Replace(segments, PathGroup);
 			TemplatePattern = new Regex(finalPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -33,12 +41,40 @@ namespace Revenj.Http
 		{
 			if (!TemplatePattern.IsMatch(url, offset))
 				return null;
-			return ExtractMatch(url, offset);
+			return ExtractMatcher(url, offset);
 		}
 
 		private static Dictionary<string, string> Empty = new Dictionary<string, string>(0);
 
 		public RouteMatch ExtractMatch(string url, int offset)
+		{
+			return ExtractMatcher(url, offset);
+		}
+
+		private RouteMatch StaticExtractMatch(string url, int offset)
+		{
+			int pos = url.IndexOf('?');
+			if (pos == -1)
+				return new RouteMatch(Empty, url);
+			var queryParams = new Dictionary<string, string>();
+			pos++;
+			while (pos < url.Length)
+			{
+				int start = pos;
+				while (pos < url.Length && url[pos] != '=') pos++;
+				var key = HttpUtility.UrlDecode(url.Substring(start, pos - start));
+				pos++;
+				start = pos;
+				while (pos < url.Length && url[pos] != '&') pos++;
+				var value = HttpUtility.UrlDecode(url.Substring(start, pos - start));
+				pos++;
+				var upper = key.ToUpperInvariant();
+				queryParams.Add(key, value);
+			}
+			return new RouteMatch(Empty, queryParams, url);
+		}
+
+		private RouteMatch DynamicExtractMatch(string url, int offset)
 		{
 			var match = TemplatePattern.Match(url, offset);
 			var boundVars = new Dictionary<string, string>(TokensCount);

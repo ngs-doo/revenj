@@ -17,7 +17,7 @@ namespace Revenj.Http
 
 		private static readonly byte[][] HttpResponse10 = new byte[406][];
 		private static readonly byte[][] HttpResponse11 = new byte[406][];
-		private static readonly byte[] ContentLength = Encoding.UTF8.GetBytes("Content-Length: ");
+		private static readonly byte[] ContentLength = UTF8.GetBytes("Content-Length: ");
 		private static readonly byte[] ZeroContentLength = ASCII.GetBytes("Content-Length: 0\r\n\r\n");
 		private static readonly byte[] ContentType = ASCII.GetBytes("Content-Type: ");
 		private static readonly byte[] PlainTextContentType = ASCII.GetBytes("Content-Type: text/plain; charset=UTF-8\r\n");
@@ -25,18 +25,27 @@ namespace Revenj.Http
 		private static readonly byte[] ConnectionClose = ASCII.GetBytes("Connection: close\r\n");
 		private static readonly byte[] ConnectionKeepAlive = ASCII.GetBytes("Connection: Keep-Alive\r\n");
 		private static readonly byte[] ServerName = ASCII.GetBytes("Server: Revenj " + typeof(HttpSocketContext).Assembly.GetName().Version.ToString(3) + "\r\n");
-		private static readonly byte[] DateNow = ASCII.GetBytes("Date: Fri, 13 Jul 2015 20:00:00 GMT\r\n");
-		private static long LastDate = DateTime.MinValue.Second;
+		private static byte[] DateNow = ASCII.GetBytes("Date: Fri, 13 Jul 2015 20:00:00 GMT\r\n");
+		private static byte[] TmpDateNow = ASCII.GetBytes("Date: Fri, 13 Jul 2015 20:00:00 GMT\r\n");
+		private static long LastTicks;
 		private static readonly byte[][] DateDayNames = new byte[7][];
 		private static readonly byte[][] DateNumbers = new byte[100][];
 		private static readonly byte[][] DateDayMonths = new byte[12][];
+		private static readonly int[] ZeroOffset = new int[10];
 
 		private static readonly byte Space = 32;
 		private static readonly byte CR = 13;
 		private static readonly byte LF = 10;
 
+		private static readonly char[] Lower = new char[255];
+
 		static HttpSocketContext()
 		{
+			for (int i = 0; i < Lower.Length; i++)
+				Lower[i] = i >= 'A' && i <= 'Z' ? (char)(i - 'A' + 'a') : (char)i;
+
+			ZeroOffset[0] = 1;
+
 			SetupResponse(HttpResponse10, "HTTP/1.0");
 			SetupResponse(HttpResponse11, "HTTP/1.1");
 
@@ -97,6 +106,7 @@ namespace Revenj.Http
 
 		public readonly ChunkedMemoryStream Stream;
 		private readonly byte[] Temp = new byte[4096];
+		private readonly char[] TmpCharBuf = new char[4096];
 
 		private int totalBytes;
 		private int positionInTmp;
@@ -127,6 +137,7 @@ namespace Revenj.Http
 						return i;
 					}
 				}
+				position = totalRead;
 				var size = socket.Receive(Temp, totalRead, Temp.Length - totalRead, SocketFlags.None);
 				retries++;
 				if (size == 0) return -1;
@@ -140,14 +151,20 @@ namespace Revenj.Http
 		public string HttpProtocolVersion;
 		public string AbsolutePath;
 
-		private readonly Dictionary<string, string> RequestHeaders = new Dictionary<string, string>();
-		private readonly Dictionary<string, string> ResponseHeaders = new Dictionary<string, string>();
+		private int RequestHeadersLength;
+		private readonly KeyValuePair<string, string>[] RequestHeaders = new KeyValuePair<string, string>[32];
+		private int ResponseHeadersLength;
+		private readonly KeyValuePair<string, string>[] ResponseHeaders = new KeyValuePair<string, string>[32];
 
 		public string GetRequestHeader(string name)
 		{
-			string result;
-			RequestHeaders.TryGetValue(name, out result);
-			return result;
+			for (int i = 0; i < RequestHeadersLength; i++)
+			{
+				var kv = RequestHeaders[i];
+				if (name.Equals(kv.Key))
+					return kv.Value;
+			}
+			return null;
 		}
 
 		private byte[][] HttpResponse;
@@ -157,6 +174,7 @@ namespace Revenj.Http
 		private string ResponseContentType;
 		private UriTemplateMatch TemplateMatch;
 		private bool ResponseIsJson;
+		private int ContentTypeResponseIndex;
 
 		private static string ReadMethod(int len, byte[] buf)
 		{
@@ -177,33 +195,31 @@ namespace Revenj.Http
 
 		private string ReadProtocol(int end)
 		{
-			if (Temp[end - 8] == 32)
+			if (Temp[end - 8] != 32)
 			{
-				string method;
-				var last = Temp[end];
-				if (last == 48)
-				{
-					IsHttp10 = true;
-					HttpResponse = HttpResponse10;
-					method = "HTTP/1.0";
-				}
-				else if (last == 49)
-				{
-					IsHttp10 = false;
-					HttpResponse = HttpResponse11;
-					method = "HTTP/1.1";
-				}
-				else return null;
-				if (Temp[end - 7] != (byte)'H') return null;
-				if (Temp[end - 6] != (byte)'T') return null;
-				if (Temp[end - 5] != (byte)'T') return null;
-				if (Temp[end - 4] != (byte)'P') return null;
-				if (Temp[end - 3] != (byte)'/') return null;
-				if (Temp[end - 2] != (byte)'1') return null;
-				if (Temp[end - 1] != (byte)'.') return null;
-				return method;
+				HttpResponse = HttpResponse11;
+				return null;
 			}
-			HttpResponse = HttpResponse11;
+			if (Temp[end - 7] != (byte)'H') return null;
+			if (Temp[end - 6] != (byte)'T') return null;
+			if (Temp[end - 5] != (byte)'T') return null;
+			if (Temp[end - 4] != (byte)'P') return null;
+			if (Temp[end - 3] != (byte)'/') return null;
+			if (Temp[end - 2] != (byte)'1') return null;
+			if (Temp[end - 1] != (byte)'.') return null;
+			var last = Temp[end];
+			if (last == 48)
+			{
+				IsHttp10 = true;
+				HttpResponse = HttpResponse10;
+				return "HTTP/1.0";
+			}
+			else if (last == 49)
+			{
+				IsHttp10 = false;
+				HttpResponse = HttpResponse11;
+				return "HTTP/1.1";
+			}
 			return null;
 		}
 
@@ -216,15 +232,15 @@ namespace Revenj.Http
 			HttpMethod = ReadMethod(methodEnd, Temp);
 			var rowEnd = ReadUntil(socket, LF, methodEnd + 1);
 			if (rowEnd == -1 || rowEnd < 12) return ReturnError(socket, 505);
-			RequestHeaders.Clear();
-			ResponseHeaders.Clear();
+			RequestHeadersLength = 0;
+			ResponseHeadersLength = 0;
 			HttpProtocolVersion = ReadProtocol(rowEnd - 2);
 			if (HttpProtocolVersion == null)
 			{
 				ReturnError(socket, 505, "Only HTTP/1.1 and HTTP/1.0 supported (partially)", false);
 				return false;
 			}
-			RawUrl = Encoding.UTF8.GetString(Temp, HttpMethod.Length + 1, rowEnd - 3 - HttpProtocolVersion.Length - HttpMethod.Length);
+			ReadUrl(rowEnd);
 			int askSign = RawUrl.IndexOf('?');
 			AbsolutePath = askSign == -1 ? RawUrl : RawUrl.Substring(0, askSign);
 			ResponseStatus = HttpStatusCode.OK;
@@ -232,6 +248,8 @@ namespace Revenj.Http
 			ResponseContentType = null;
 			TemplateMatch = null;
 			ResponseIsJson = false;
+			ContentTypeResponseIndex = -1;
+			string contentLength = null;
 			do
 			{
 				var start = rowEnd + 1;
@@ -245,21 +263,30 @@ namespace Revenj.Http
 						if (Temp[i] == ':')
 							break;
 					if (i == rowEnd) return ReturnError(socket, 414);
-					string name = Encoding.ASCII.GetString(Temp, start, i - start);
+					var nameBuf = TmpCharBuf;
+					for (int x = start; x < i; x++)
+						nameBuf[x - start] = Lower[Temp[x]];
+					string name = new string(nameBuf, 0, i - start);
 					if (Temp[i + 1] == 32) i++;
-					string value = Encoding.ASCII.GetString(Temp, i + 1, rowEnd - i - 1);
-					var lowercase = name.ToLowerInvariant();
-					RequestHeaders[lowercase] = value;
+					for (int x = i + 1; x < rowEnd; x++)
+						nameBuf[x - i - 1] = (char)Temp[x];
+					string value = new string(nameBuf, 0, rowEnd - i - 1);
+					if (RequestHeadersLength == RequestHeaders.Length)
+					{
+						ReturnError(socket, 413, "Only up to 32 headers allowed", false);
+						return false;
+					}
+					RequestHeaders[RequestHeadersLength++] = new KeyValuePair<string, string>(name, value);
+					if (name == "content-length") contentLength = value;
 				}
 				rowEnd++;
 			} while (positionInTmp <= Temp.Length);
 			if (HttpMethod == "POST" || HttpMethod == "PUT")
 			{
-				var cl = RequestHeaders["content-length"];
 				long len = 0;
-				if (cl != null)
+				if (contentLength != null)
 				{
-					if (!long.TryParse(cl, out len)) return ReturnError(socket, 411);
+					if (!long.TryParse(contentLength, out len)) return ReturnError(socket, 411);
 					if (len > Limit) return ReturnError(socket, 413);
 				}
 				else return ReturnError(socket, 411);
@@ -276,6 +303,24 @@ namespace Revenj.Http
 				Stream.Position = 0;
 			}
 			return true;
+		}
+
+		private void ReadUrl(int rowEnd)
+		{
+			var httpLen1 = HttpMethod.Length + 1;
+			var charBuf = TmpCharBuf;
+			var end = rowEnd - 2 - HttpProtocolVersion.Length;
+			for (int x = httpLen1; x < end; x++)
+			{
+				var tb = Temp[x];
+				if (tb > 250)
+				{
+					RawUrl = UTF8.GetString(Temp, httpLen1, end - httpLen1);
+					return;
+				}
+				charBuf[x - httpLen1] = (char)tb;
+			}
+			RawUrl = new string(charBuf, 0, end - httpLen1);
 		}
 
 		private RouteMatch Route;
@@ -302,12 +347,19 @@ namespace Revenj.Http
 			{
 				offset = AddContentType(ResponseContentType, offset);
 			}
-			foreach (var kv in ResponseHeaders)
+			for (int x = 0; x < ResponseHeadersLength; x++)
 			{
-				offset += Encoding.ASCII.GetBytes(kv.Key, 0, kv.Key.Length, Temp, offset);
+				var kv = ResponseHeaders[x];
+				var val = kv.Key;
+				for (int i = 0; i < val.Length; i++)
+					Temp[offset + i] = (byte)val[i];
+				offset += val.Length;
 				Temp[offset++] = 58;
 				Temp[offset++] = 32;
-				offset += Encoding.ASCII.GetBytes(kv.Value, 0, kv.Value.Length, Temp, offset);
+				val = kv.Value;
+				for (int i = 0; i < val.Length; i++)
+					Temp[offset + i] = (byte)val[i];
+				offset += val.Length;
 				Temp[offset++] = 13;
 				Temp[offset++] = 10;
 			}
@@ -419,21 +471,22 @@ namespace Revenj.Http
 			}
 			if (withHeaders)
 			{
-				foreach (var kv in ResponseHeaders)
+				for (int x = 0; x < ResponseHeadersLength; x++)
 				{
-					offset += Encoding.ASCII.GetBytes(kv.Key, 0, kv.Key.Length, Temp, offset);
+					var kv = ResponseHeaders[x];
+					offset += ASCII.GetBytes(kv.Key, 0, kv.Key.Length, Temp, offset);
 					Temp[offset++] = 58;
 					Temp[offset++] = 32;
-					offset += Encoding.ASCII.GetBytes(kv.Value, 0, kv.Value.Length, Temp, offset);
+					offset += ASCII.GetBytes(kv.Value, 0, kv.Value.Length, Temp, offset);
 					Temp[offset++] = 13;
 					Temp[offset++] = 10;
 				}
 			}
 			Buffer.BlockCopy(PlainTextContentType, 0, Temp, offset, PlainTextContentType.Length);
 			offset += PlainTextContentType.Length;
-			var len = Encoding.UTF8.GetByteCount(message);
+			var len = UTF8.GetByteCount(message);
 			offset = AddContentLength(len, offset);
-			offset += Encoding.UTF8.GetBytes(message, 0, message.Length, Temp, offset);
+			offset += UTF8.GetBytes(message, 0, message.Length, Temp, offset);
 			socket.Send(Temp, offset, SocketFlags.None);
 			socket.Close();
 			return;
@@ -441,10 +494,11 @@ namespace Revenj.Http
 
 		private int AddServerAndDate(int offset)
 		{
-			var date = DateTime.UtcNow;
-			var ticks = date.Ticks / 10000000;
-			if (LastDate != ticks)
+			var envTicks = Environment.TickCount / 1000;
+			if (LastTicks != envTicks)
 			{
+				var date = DateTime.UtcNow;
+				var ticks = date.Ticks / 10000000;
 				var original = ticks;
 				var sec = ticks % 60;
 				ticks = ticks / 60;
@@ -488,15 +542,22 @@ namespace Revenj.Http
 				Temp[start + 22] = 58;
 				Temp[start + 23] = secBuf[0];
 				Temp[start + 24] = secBuf[1];
-				Buffer.BlockCopy(Temp, start, DateNow, 6, 25);
-				LastDate = original;
-				Buffer.BlockCopy(DateNow, 31, Temp, start + 25, DateNow.Length - 31);
-				Buffer.BlockCopy(ServerName, 0, Temp, offset + DateNow.Length, ServerName.Length);
+				Buffer.BlockCopy(Temp, start, TmpDateNow, 6, 25);
+				LastTicks = envTicks;
+				Buffer.BlockCopy(TmpDateNow, 31, Temp, start + 25, TmpDateNow.Length - 31);
+				Buffer.BlockCopy(ServerName, 0, Temp, offset + TmpDateNow.Length, ServerName.Length);
+				lock (ServerName)
+				{
+					var tdn = DateNow;
+					DateNow = TmpDateNow;
+					TmpDateNow = tdn;
+				}
 				return offset + DateNow.Length + ServerName.Length;
 			}
-			Buffer.BlockCopy(DateNow, 0, Temp, offset, DateNow.Length);
-			Buffer.BlockCopy(ServerName, 0, Temp, offset + DateNow.Length, ServerName.Length);
-			return offset + DateNow.Length + ServerName.Length;
+			var dn = DateNow;
+			Buffer.BlockCopy(DateNow, 0, Temp, offset, dn.Length);
+			Buffer.BlockCopy(ServerName, 0, Temp, offset + dn.Length, ServerName.Length);
+			return offset + dn.Length + ServerName.Length;
 		}
 
 		private int AddContentLength(long len, int offset)
@@ -526,7 +587,7 @@ namespace Revenj.Http
 				abs = div;
 				if (abs == 0) break;
 			} while (pos > offset);
-			if (num[0] == 48) pos++;
+			pos += ZeroOffset[num[0] - 48];
 			var len = offset + 10 - pos;
 			Buffer.BlockCopy(target, pos + 1, target, offset, len);
 			return offset + len;
@@ -536,7 +597,10 @@ namespace Revenj.Http
 		{
 			Buffer.BlockCopy(ContentType, 0, Temp, offset, ContentType.Length);
 			offset += ContentType.Length;
-			offset += Encoding.ASCII.GetBytes(type, 0, type.Length, Temp, offset);
+			for (int i = 0; i < type.Length; i++)
+				Temp[offset + i] = (byte)type[i];
+			offset += type.Length;
+			offset += type.Length;
 			Temp[offset] = 13;
 			Temp[offset + 1] = 10;
 			return offset + 2;
@@ -590,7 +654,11 @@ namespace Revenj.Http
 			set
 			{
 				ResponseContentType = value;
-				ResponseHeaders.Remove("Content-Type");
+				if (ContentTypeResponseIndex != -1)
+				{
+					ResponseHeaders[ContentTypeResponseIndex] = ResponseHeaders[ResponseHeadersLength - 1];
+					ResponseHeadersLength--;
+				}
 				ResponseIsJson = value == "application/json";
 			}
 		}
@@ -603,7 +671,9 @@ namespace Revenj.Http
 
 		public void AddHeader(string type, string value)
 		{
-			ResponseHeaders[type] = value;
+			if (type == "Content-Type")
+				ContentTypeResponseIndex = ResponseHeadersLength;
+			ResponseHeaders[ResponseHeadersLength++] = new KeyValuePair<string, string>(type, value);
 		}
 
 		HttpStatusCode IResponseContext.StatusCode

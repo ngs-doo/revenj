@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -18,7 +18,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(Delete))]
 	public class Delete : IServerCommand
 	{
-		private static ConcurrentDictionary<Type, IDeleteCommand> Cache = new ConcurrentDictionary<Type, IDeleteCommand>(1, 127);
+		private static Dictionary<Type, IDeleteCommand> Cache = new Dictionary<Type, IDeleteCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -103,7 +103,9 @@ Please check your arguments.".With(argument.Name), null);
 				{
 					var commandType = typeof(DeleteCommand<>).MakeGenericType(rootType);
 					command = Activator.CreateInstance(commandType) as IDeleteCommand;
-					Cache.TryAdd(rootType, command);
+					var newCache = new Dictionary<Type, IDeleteCommand>(Cache);
+					newCache[rootType] = command;
+					Cache = newCache;
 				}
 				var result = command.Delete(input, output, locator, argument.Uri);
 

@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Security;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -13,7 +14,6 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -21,7 +21,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(ExecuteService))]
 	public class ExecuteService : IServerCommand
 	{
-		private static ConcurrentDictionary<Type, IExecuteCommand> Cache = new ConcurrentDictionary<Type, IExecuteCommand>(1, 127);
+		private static Dictionary<Type, IExecuteCommand> Cache = new Dictionary<Type, IExecuteCommand>();
 
 		private readonly ITypeResolver TypeResolver;
 		private readonly IPermissionManager Permissions;
@@ -96,7 +96,9 @@ namespace Revenj.Plugins.Server.Commands
 				{
 					var commandType = typeof(ExecuteServiceCommand<,>).MakeGenericType(serviceInterface.GetGenericArguments());
 					command = Activator.CreateInstance(commandType) as IExecuteCommand;
-					Cache.TryAdd(serviceType, command);
+					var newCache = new Dictionary<Type, IExecuteCommand>(Cache);
+					newCache[serviceType] = command;
+					Cache = newCache;
 				}
 				var result = command.Execute(input, output, locator, serviceType, argument.Data);
 

@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -13,7 +13,6 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -21,7 +20,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(PersistAggregateRoot))]
 	public class PersistAggregateRoot : IServerCommand
 	{
-		private static ConcurrentDictionary<Type, IPersistCommand> Cache = new ConcurrentDictionary<Type, IPersistCommand>(1, 127);
+		private static Dictionary<Type, IPersistCommand> Cache = new Dictionary<Type, IPersistCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -111,7 +110,9 @@ Please check your arguments.".With(argument.RootName), null);
 				{
 					var commandType = typeof(PersistAggregateRootCommand<>).MakeGenericType(rootType);
 					command = Activator.CreateInstance(commandType) as IPersistCommand;
-					Cache.TryAdd(rootType, command);
+					var newCache = new Dictionary<Type, IPersistCommand>(Cache);
+					newCache[rootType] = command;
+					Cache = newCache;
 				}
 				var uris = command.Persist(input, locator, argument.ToInsert, argument.ToUpdate, argument.ToDelete);
 

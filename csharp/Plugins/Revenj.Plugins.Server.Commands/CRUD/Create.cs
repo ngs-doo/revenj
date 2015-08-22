@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -11,7 +12,6 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -19,7 +19,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(Create))]
 	public class Create : IServerCommand
 	{
-		private static ConcurrentDictionary<Type, ICreateCommand> Cache = new ConcurrentDictionary<Type, ICreateCommand>(1, 127);
+		private static Dictionary<Type, ICreateCommand> Cache = new Dictionary<Type, ICreateCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -110,7 +110,9 @@ Please check your arguments.".With(argument.Name), null);
 				{
 					var commandType = typeof(CreateCommand<>).MakeGenericType(rootType);
 					command = Activator.CreateInstance(commandType) as ICreateCommand;
-					Cache.TryAdd(rootType, command);
+					var newCache = new Dictionary<Type, ICreateCommand>(Cache);
+					newCache[rootType] = command;
+					Cache = newCache;
 				}
 				var result = command.Create(input, output, locator, argument.Data);
 

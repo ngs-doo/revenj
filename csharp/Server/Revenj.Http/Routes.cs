@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -11,7 +10,7 @@ namespace Revenj.Http
 	internal class Routes
 	{
 		private readonly Dictionary<string, Dictionary<string, List<RouteHandler>>> MethodRoutes = new Dictionary<string, Dictionary<string, List<RouteHandler>>>();
-		private readonly ConcurrentDictionary<string, RouteHandler> Cache = new ConcurrentDictionary<string, RouteHandler>(1, 127);
+		private Dictionary<ReqId, RouteHandler> Cache = new Dictionary<ReqId, RouteHandler>();
 
 		public Routes(IServiceProvider locator)
 		{
@@ -81,9 +80,28 @@ namespace Revenj.Http
 				list.Add(handler);
 		}
 
+		struct ReqId : IEquatable<ReqId>
+		{
+			private readonly string Http;
+			private readonly string Path;
+			private readonly int HashCode;
+			public ReqId(string http, string path)
+			{
+				this.Http = http;
+				this.Path = path;
+				this.HashCode = http.GetHashCode() + path.GetHashCode();
+			}
+			public override int GetHashCode() { return HashCode; }
+			public override bool Equals(object obj) { return Equals((ReqId)obj); }
+			public bool Equals(ReqId other)
+			{
+				return this.Http == other.Http && this.Path == other.Path;
+			}
+		}
+
 		public RouteHandler Find(string httpMethod, string rawUrl, string absolutePath, out RouteMatch routeMatch)
 		{
-			var reqId = httpMethod + ":" + absolutePath;
+			var reqId = new ReqId(httpMethod, absolutePath);
 			RouteHandler handler;
 			if (Cache.TryGetValue(reqId, out handler))
 			{
@@ -111,7 +129,9 @@ namespace Revenj.Http
 				if (match != null)
 				{
 					routeMatch = match;
-					Cache.TryAdd(reqId, h);
+					var newCache = new Dictionary<ReqId, RouteHandler>(Cache);
+					newCache[reqId] = h;
+					Cache = newCache;
 					return h;
 				}
 			}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics.Contracts;
@@ -27,7 +26,7 @@ namespace Revenj.Security
 		private Dictionary<string, List<Pair>> RolePermissions;
 		private readonly Dictionary<Type, List<Filter>> RegisteredFilters = new Dictionary<Type, List<Filter>>();
 
-		private readonly ConcurrentDictionary<string, bool> Cache = new ConcurrentDictionary<string, bool>(1, 127);
+		private Dictionary<string, bool> Cache = new Dictionary<string, bool>();
 
 		private readonly IDisposable GlobalSubscription;
 		private readonly IDisposable RoleSubscription;
@@ -79,7 +78,7 @@ namespace Revenj.Security
 					 select new { g.Key, values })
 					.ToDictionary(it => it.Key, it => it.values.ToList());
 			}
-			Cache.Clear();
+			Cache = new Dictionary<string, bool>();
 			PermissionsChanged = false;
 		}
 
@@ -119,7 +118,9 @@ namespace Revenj.Security
 					}
 				}
 			}
-			Cache.TryAdd(id, isAllowed);
+			var newCache = new Dictionary<string, bool>(Cache);
+			newCache[id] = isAllowed;
+			Cache = newCache;
 			return isAllowed;
 		}
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -11,7 +10,7 @@ namespace Revenj.DomainPatterns
 	internal class DomainModel : IDomainModel
 	{
 		private readonly List<Assembly> DomainAssemblies;
-		private readonly ConcurrentDictionary<string, Type> Cache = new ConcurrentDictionary<string, Type>(1, 127);
+		private Dictionary<string, Type> Cache = new Dictionary<string, Type>();
 
 		public delegate DomainModel Factory(IEnumerable<Assembly> assemblies);
 
@@ -56,7 +55,11 @@ namespace Revenj.DomainPatterns
 					 where asmType != null
 					 select asmType).FirstOrDefault();
 				if (found != null)
-					Cache.TryAdd(name, found);
+				{
+					var newCache = new Dictionary<string, Type>(Cache);
+					newCache[name] = found;
+					Cache = newCache;
+				}
 			}
 			return found;
 		}

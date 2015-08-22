@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -11,7 +12,6 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -19,7 +19,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(CountDomainObject))]
 	public class CountDomainObject : IReadOnlyServerCommand
 	{
-		private static ConcurrentDictionary<Type, ICountCommand> Cache = new ConcurrentDictionary<Type, ICountCommand>(1, 127);
+		private static Dictionary<Type, ICountCommand> Cache = new Dictionary<Type, ICountCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -94,7 +94,9 @@ Example argument:
 				{
 					var commandType = typeof(SearchDomainObjectCommand<>).MakeGenericType(domainObjectType);
 					command = Activator.CreateInstance(commandType) as ICountCommand;
-					Cache.TryAdd(domainObjectType, command);
+					var newCache = new Dictionary<Type, ICountCommand>(Cache);
+					newCache[domainObjectType] = command;
+					Cache = newCache;
 				}
 				return command;
 			}

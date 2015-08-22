@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Security;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -12,7 +13,6 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -20,7 +20,7 @@ namespace Revenj.Plugins.Server.Commands
 	[ExportMetadata(Metadata.ClassType, typeof(QueueEvent))]
 	public class QueueEvent : IReadOnlyServerCommand
 	{
-		private static ConcurrentDictionary<Type, IQueueCommand> Cache = new ConcurrentDictionary<Type, IQueueCommand>(1, 127);
+		private static Dictionary<Type, IQueueCommand> Cache = new Dictionary<Type, IQueueCommand>();
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
@@ -92,7 +92,9 @@ Please check your arguments.".With(argument.Name), null);
 				{
 					var commandType = typeof(QueueEventCommand<>).MakeGenericType(eventType);
 					command = Activator.CreateInstance(commandType) as IQueueCommand;
-					Cache.TryAdd(eventType, command);
+					var newCache = new Dictionary<Type, IQueueCommand>(Cache);
+					newCache[eventType] = command;
+					Cache = newCache;
 				}
 				command.Queue(input, locator, argument.Data);
 
