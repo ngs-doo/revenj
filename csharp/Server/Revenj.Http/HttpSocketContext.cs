@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using Revenj.Api;
 using Revenj.Utility;
 
@@ -581,11 +582,12 @@ namespace Revenj.Http
 				LastTicks = envTicks;
 				Buffer.BlockCopy(TmpDateNow, 31, OutputTemp, start + 25, TmpDateNow.Length - 31);
 				Buffer.BlockCopy(ServerName, 0, OutputTemp, offset + TmpDateNow.Length, ServerName.Length);
-				lock (ServerName)
+				if (Monitor.TryEnter(ServerName))
 				{
 					var tdn = DateNow;
 					DateNow = TmpDateNow;
 					TmpDateNow = tdn;
+					Monitor.Exit(ServerName);
 				}
 				return offset + DateNow.Length + ServerName.Length;
 			}

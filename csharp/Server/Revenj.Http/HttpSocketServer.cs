@@ -32,6 +32,7 @@ namespace Revenj.Http
 		{
 			this.Locator = locator;
 			var endpoints = new List<IPEndPoint>();
+			var networkType = AddressFamily.InterNetworkV6;
 			foreach (string key in ConfigurationManager.AppSettings.Keys)
 			{
 				if (key.StartsWith("HttpAddress", StringComparison.InvariantCultureIgnoreCase))
@@ -42,8 +43,18 @@ namespace Revenj.Http
 					{
 						var ips = Dns.GetHostAddresses(addr.Host);
 						foreach (var i in ips)
-							if (i.AddressFamily == AddressFamily.InterNetworkV6)
+							if (i.AddressFamily == networkType)
 								endpoints.Add(new IPEndPoint(i, addr.Port));
+						if (endpoints.Count == 0 && ips.Length > 0)
+						{
+							if (ips[0].AddressFamily == AddressFamily.InterNetwork)
+							{
+								networkType = AddressFamily.InterNetwork;
+								foreach (var i in ips)
+									if (i.AddressFamily == networkType)
+										endpoints.Add(new IPEndPoint(i, addr.Port));
+							}
+						}
 					}
 					else endpoints.Add(new IPEndPoint(ip, addr.Port));
 				}
