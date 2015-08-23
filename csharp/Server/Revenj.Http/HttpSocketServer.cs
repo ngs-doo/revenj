@@ -31,8 +31,6 @@ namespace Revenj.Http
 		public HttpSocketServer(IServiceProvider locator)
 		{
 			this.Locator = locator;
-			Socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-			//Socket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, 0);
 			var endpoints = new List<IPEndPoint>();
 			foreach (string key in ConfigurationManager.AppSettings.Keys)
 			{
@@ -51,7 +49,27 @@ namespace Revenj.Http
 				}
 			}
 			if (endpoints.Count == 0)
-				endpoints.Add(new IPEndPoint(IPAddress.Any, 8999));
+			{
+				Console.WriteLine("Http address not found in config. Starting IPv6 on all interfaces");
+				Socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+				//Socket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, 0);
+				endpoints.Add(new IPEndPoint(IPAddress.IPv6Any, 8999));
+			}
+			else if (endpoints.FindAll(it => it.AddressFamily == AddressFamily.InterNetworkV6).Count == endpoints.Count)
+			{
+				Socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+				//Socket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, 0);
+			}
+			else if (endpoints.FindAll(it => it.AddressFamily == AddressFamily.InterNetwork).Count == endpoints.Count)
+			{
+				Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				//Socket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, 0);
+			}
+			else
+			{
+				throw new ConfigurationErrorsException(@"Unable to setup configuration for both IPv4 and IPv6. Use either only IPv4 or IPv6. 
+Please check settings: " + string.Join(", ", endpoints));
+			}
 			foreach (var ep in endpoints)
 			{
 				Socket.Bind(ep);

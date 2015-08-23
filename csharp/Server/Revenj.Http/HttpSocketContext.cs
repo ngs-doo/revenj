@@ -92,6 +92,7 @@ namespace Revenj.Http
 			response[304] = ASCII.GetBytes(method + " 404 Not Found\r\n");
 			response[305] = ASCII.GetBytes(method + " 405 Method Not Allowed\r\n");
 			response[306] = ASCII.GetBytes(method + " 406 Not Acceptable\r\n");
+			response[308] = ASCII.GetBytes(method + " 408 Request Timeout\r\n");
 			response[309] = ASCII.GetBytes(method + " 409 Conflict\r\n");
 			response[311] = ASCII.GetBytes(method + " 411 Length Required\r\n");
 			response[313] = ASCII.GetBytes(method + " 413 Request Entity Too Large\r\n");
@@ -176,7 +177,7 @@ namespace Revenj.Http
 			return null;
 		}
 
-		private byte[][] HttpResponse;
+		private byte[][] HttpResponse = HttpResponse11;
 		private bool IsHttp10;
 		private HttpStatusCode ResponseStatus;
 		private long? ResponseLength;
@@ -298,11 +299,11 @@ namespace Revenj.Http
 			rowEnd += 2;
 			if (HttpMethod == "POST" || HttpMethod == "PUT")
 			{
-				long len = 0;
+				int len = 0;
 				var ct = GetRequestHeader("content-length");
 				if (ct != null)
 				{
-					if (!long.TryParse(ct, out len)) return ReturnError(socket, 411);
+					if (!int.TryParse(ct, out len)) return ReturnError(socket, 411);
 					if (len > Limit) return ReturnError(socket, 413);
 				}
 				else return ReturnError(socket, 411);
@@ -312,7 +313,8 @@ namespace Revenj.Http
 				len -= size;
 				while (len > 0)
 				{
-					size = socket.Receive(InputTemp);
+					size = socket.Receive(InputTemp, Math.Min(len, InputTemp.Length), SocketFlags.None);
+					if (size < 1) return ReturnError(socket, 408);
 					Stream.Write(InputTemp, 0, size);
 					len -= size;
 				}
@@ -397,7 +399,7 @@ namespace Revenj.Http
 			bool keepAlive;
 			if (IsHttp10)
 			{
-				if (responseCode < 400 && GetRequestHeader("connection") == "Keep-Alive")
+				if (responseCode < 400 && "keep-alive".Equals(GetRequestHeader("connection"), StringComparison.OrdinalIgnoreCase))
 				{
 					keepAlive = true;
 					Buffer.BlockCopy(ConnectionKeepAlive, 0, OutputTemp, offset, ConnectionKeepAlive.Length);
@@ -413,7 +415,7 @@ namespace Revenj.Http
 			}
 			else
 			{
-				if (responseCode >= 400 || GetRequestHeader("connection") == "close")
+				if (responseCode >= 400 || "close".Equals(GetRequestHeader("connection"), StringComparison.OrdinalIgnoreCase))
 				{
 					keepAlive = false;
 					socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, false);
