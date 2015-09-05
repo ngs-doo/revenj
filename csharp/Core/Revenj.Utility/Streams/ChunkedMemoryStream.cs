@@ -58,6 +58,7 @@ namespace Revenj.Utility
 
 		/// <summary>
 		/// Create or get a new instance of memory stream
+		/// Stream is bound to thread and must be released from the same thread
 		/// </summary>
 		/// <returns>usable memory stream instance</returns>
 		public static ChunkedMemoryStream Create()
@@ -66,8 +67,7 @@ namespace Revenj.Utility
 			if (MemoryPool.TryPop(out stream))
 			{
 				CurrentEstimate--;
-				stream.CurrentPosition = 0;
-				stream.TotalSize = 0;
+				stream.Reset();
 				stream.BoundToThread = Thread.CurrentThread.ManagedThreadId;
 				stream.disposed = false;
 				return stream;
@@ -76,6 +76,11 @@ namespace Revenj.Utility
 			return new ChunkedMemoryStream();
 		}
 
+		/// <summary>
+		/// Create reusable stream.
+		/// Disposing the stream only has the effect of resetting it.
+		/// </summary>
+		/// <returns></returns>
 		public static ChunkedMemoryStream Static()
 		{
 			var cms = new ChunkedMemoryStream(new byte[BlockSize]);
@@ -87,6 +92,7 @@ namespace Revenj.Utility
 
 		/// <summary>
 		/// Create new empty stream
+		/// Stream is bound to thread and must be released from the same thread
 		/// </summary>
 		public ChunkedMemoryStream()
 		{
@@ -235,6 +241,14 @@ namespace Revenj.Utility
 				TotalSize = CurrentPosition;
 			}
 			return CurrentPosition;
+		}
+		/// <summary>
+		/// Set length and position to 0
+		/// </summary>
+		public void Reset()
+		{
+			TotalSize = 0;
+			CurrentPosition = 0;
 		}
 		/// <summary>
 		/// Set new length of the stream.
@@ -422,6 +436,10 @@ namespace Revenj.Utility
 			stream.Write(Blocks[total], 0, remaining);
 		}
 
+		/// <summary>
+		/// Send entire stream to provided socket.
+		/// </summary>
+		/// <param name="socket">where to send</param>
 		public void Send(Socket socket)
 		{
 			var total = TotalSize >> BlockShift;

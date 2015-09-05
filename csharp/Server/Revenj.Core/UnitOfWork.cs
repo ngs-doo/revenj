@@ -79,6 +79,27 @@ namespace Revenj.Core
 			return Context.Query<T>();
 		}
 
+		public T[] Search<T>(ISpecification<T> filter, int? limit, int? offset) where T : IDataSource
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.Search<T>(filter, limit, offset);
+		}
+
+		public long Count<T>(ISpecification<T> filter) where T : IDataSource
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.Count<T>(filter);
+		}
+
+		public bool Exists<T>(ISpecification<T> filter) where T : IDataSource
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.Exists<T>(filter);
+		}
+
 		public void Create<T>(IEnumerable<T> aggregates) where T : IAggregateRoot
 		{
 			if (Finished)

@@ -98,6 +98,30 @@ namespace Revenj.DomainPatterns
 			return values.ToArray();
 		}
 
+		public long Count<TCondition>(ISpecification<TCondition> specification)
+		{
+			CheckInvalid();
+			IEnumerable<TValue> values = Data.Values;
+			var specNative = specification as ISpecification<TValue>;
+			if (specNative != null && specNative.IsSatisfied != null)
+				values = values.Where(specNative.IsSatisfied.Compile());
+			if (specification != null && specification.IsSatisfied != null)
+				values = values.OfType<TCondition>().Where(specification.IsSatisfied.Compile()).Cast<TValue>();
+			return values.LongCount();
+		}
+
+		public bool Exists<TCondition>(ISpecification<TCondition> specification)
+		{
+			CheckInvalid();
+			IEnumerable<TValue> values = Data.Values;
+			var specNative = specification as ISpecification<TValue>;
+			if (specNative != null && specNative.IsSatisfied != null)
+				values = values.Where(specNative.IsSatisfied.Compile());
+			if (specification != null && specification.IsSatisfied != null)
+				values = values.OfType<TCondition>().Where(specification.IsSatisfied.Compile()).Cast<TValue>();
+			return values.Any();
+		}
+
 		public void Dispose()
 		{
 			Subscription.Dispose();

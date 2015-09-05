@@ -48,6 +48,22 @@ namespace Revenj.DomainPatterns
 		/// <param name="offset">skip initial results</param>
 		/// <returns>found items</returns>
 		TValue[] Search<TCondition>(ISpecification<TCondition> specification, int? limit, int? offset);
+		/// <summary>
+		/// Count data using provided specification.
+		/// If specification is provided it must be compatible with data type.
+		/// </summary>
+		/// <typeparam name="TCondition">specification type</typeparam>
+		/// <param name="specification">filter predicate</param>
+		/// <returns>total found items</returns>
+		long Count<TCondition>(ISpecification<TCondition> specification);
+		/// <summary>
+		/// Check for data using provided specification.
+		/// If specification is provided it must be compatible with data type.
+		/// </summary>
+		/// <typeparam name="TCondition">specification type</typeparam>
+		/// <param name="specification">filter predicate</param>
+		/// <returns>data has been found</returns>
+		bool Exists<TCondition>(ISpecification<TCondition> specification);
 	}
 	/// <summary>
 	/// Aggregate root persistable repository.
@@ -136,6 +152,32 @@ namespace Revenj.DomainPatterns
 			Contract.Requires(repository != null);
 
 			return repository.Search<TValue>(null, null, null);
+		}
+		/// <summary>
+		/// Count all data of specified type.
+		/// </summary>
+		/// <typeparam name="TValue">data type</typeparam>
+		/// <param name="repository">queryable repository</param>
+		/// <returns>total found items</returns>
+		public static long Count<TValue>(this IQueryableRepository<TValue> repository)
+			where TValue : IDataSource
+		{
+			Contract.Requires(repository != null);
+
+			return repository.Count<TValue>(null);
+		}
+		/// <summary>
+		/// Check for any data of specified type.
+		/// </summary>
+		/// <typeparam name="TValue">data type</typeparam>
+		/// <param name="repository">queryable repository</param>
+		/// <returns>items has been found</returns>
+		public static bool Exists<TValue>(this IQueryableRepository<TValue> repository)
+			where TValue : IDataSource
+		{
+			Contract.Requires(repository != null);
+
+			return repository.Exists<TValue>(null);
 		}
 		/// <summary>
 		/// Find objects by provided identifier

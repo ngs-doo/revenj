@@ -175,12 +175,9 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 			public long FindCount<TSpecification>(IServiceProvider locator, TSpecification specification)
 			{
 				var repository = GetRepository<TDomainObject>(locator);
-				IQueryable<TDomainObject> result;
 				if (specification == null)
-					result = repository.Query();
-				else
-					result = repository.Query((dynamic)specification);
-				return result.LongCount();
+					return repository.Count();
+				return repository.Count((dynamic)specification);
 			}
 		}
 
@@ -218,10 +215,9 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 				}
 				if (specification == null)
 					throw new FrameworkException("Specification could not be deserialized.");
-				IQueryable<TDomainObject> result;
 				try
 				{
-					result = repository.Query(specification);
+					return repository.Count(specification);
 				}
 				catch (Exception ex)
 				{
@@ -229,7 +225,6 @@ Please provide specification name. Error: {0}.".With(ex.Message), ex);
 						"Error while executing query: {0}.".With(ex.Message),
 						new FrameworkException("Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
 				}
-				return result.LongCount();
 			}
 		}
 	}

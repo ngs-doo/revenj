@@ -141,9 +141,8 @@ Example argument:
 				TFormat data)
 			{
 				var repository = GetRepository<TDomainObject>(locator);
-				IQueryable<TDomainObject> result;
 				if (data == null)
-					result = repository.Query<TDomainObject>(null);
+					return repository.Exists<TDomainObject>(null);
 				else
 				{
 					dynamic specification;
@@ -160,7 +159,7 @@ Please provide specification name. Error: " + ex.Message, ex);
 						throw new FrameworkException("Specification could not be deserialized. Please provide specification name.");
 					try
 					{
-						result = repository.Query(specification);
+						return repository.Exists(specification);
 					}
 					catch (Exception ex)
 					{
@@ -169,18 +168,14 @@ Please provide specification name. Error: " + ex.Message, ex);
 							new FrameworkException("Specification deserialized as: {0}".With((TFormat)serializer.Serialize(specification)), ex));
 					}
 				}
-				return result.Any();
 			}
 
 			public bool CheckExists<TSpecification>(IServiceProvider locator, TSpecification specification)
 			{
 				var repository = GetRepository<TDomainObject>(locator);
-				IQueryable<TDomainObject> result;
 				if (specification == null)
-					result = repository.Query();
-				else
-					result = repository.Query((dynamic)specification);
-				return result.Any();
+					return repository.Exists();
+				return repository.Exists((dynamic)specification);
 			}
 		}
 

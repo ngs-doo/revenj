@@ -11,6 +11,7 @@ namespace Revenj.DomainPatterns
 		private readonly IServiceProvider Locator;
 		private ConcurrentDictionary<Type, object> Lookups;
 		private ConcurrentDictionary<Type, object> QuerySources;
+		private ConcurrentDictionary<Type, object> SearchSources;
 		private ConcurrentDictionary<Type, object> Repositories;
 		private ConcurrentDictionary<Type, object> EventStores;
 		private ConcurrentDictionary<Type, object> Histories;
@@ -51,9 +52,36 @@ namespace Revenj.DomainPatterns
 			return (IQueryable<T>)queryable;
 		}
 
+		private IQueryableRepository<T> GetQueryRepository<T>() where T : IDataSource
+		{
+			object searchable;
+			if (SearchSources == null) SearchSources = new ConcurrentDictionary<Type, object>(1, 7);
+			if (!SearchSources.TryGetValue(typeof(T), out searchable))
+			{
+				searchable = Locator.Resolve<IQueryableRepository<T>>();
+				SearchSources.TryAdd(typeof(T), searchable);
+			}
+			return (IQueryableRepository<T>)searchable;
+		}
+
 		public IQueryable<T> Query<T>() where T : IDataSource
 		{
 			return GetQuerySource<T>();
+		}
+
+		public T[] Search<T>(ISpecification<T> filter, int? limit, int? offset) where T : IDataSource
+		{
+			return GetQueryRepository<T>().Search(filter, limit, offset);
+		}
+
+		public long Count<T>(ISpecification<T> filter) where T : IDataSource
+		{
+			return GetQueryRepository<T>().Count(filter);
+		}
+
+		public bool Exists<T>(ISpecification<T> filter) where T : IDataSource
+		{
+			return GetQueryRepository<T>().Exists(filter);
 		}
 
 		private IPersistableRepository<T> GetRepository<T>() where T : IAggregateRoot

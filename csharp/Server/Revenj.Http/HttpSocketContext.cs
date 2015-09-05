@@ -308,7 +308,7 @@ namespace Revenj.Http
 					if (len > Limit) return ReturnError(socket, 413);
 				}
 				else return ReturnError(socket, 411);
-				Stream.SetLength(0);
+				Stream.Reset();
 				var size = totalBytes - rowEnd;
 				Stream.Write(InputTemp, rowEnd, size);
 				len -= size;

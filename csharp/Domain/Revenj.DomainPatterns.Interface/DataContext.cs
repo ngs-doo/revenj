@@ -27,6 +27,32 @@ namespace Revenj.DomainPatterns
 		/// <returns>LINQ projection</returns>
 		IQueryable<T> Query<T>() where T : IDataSource;
 		/// <summary>
+		/// Search data using provided specification.
+		/// Specification is optional.
+		/// </summary>
+		/// <typeparam name="T">data type</typeparam>
+		/// <param name="filter">filter predicate</param>
+		/// <param name="limit">limit maximum number of results</param>
+		/// <param name="offset">skip initial results</param>
+		/// <returns>found items</returns>
+		T[] Search<T>(ISpecification<T> filter, int? limit, int? offset) where T : IDataSource;
+		/// <summary>
+		/// Count data using provided specification.
+		/// Specification is optional.
+		/// </summary>
+		/// <typeparam name="T">data type</typeparam>
+		/// <param name="filter">filter predicate</param>
+		/// <returns>total found items</returns>
+		long Count<T>(ISpecification<T> filter) where T : IDataSource;
+		/// <summary>
+		/// Check if data exists using provided specification.
+		/// Specification is optional.
+		/// </summary>
+		/// <typeparam name="T">data type</typeparam>
+		/// <param name="filter">filter predicate</param>
+		/// <returns>items exists</returns>
+		bool Exists<T>(ISpecification<T> filter) where T : IDataSource;
+		/// <summary>
 		/// Create new aggregate roots. 
 		/// Data will be sent immediately to the backing store.
 		/// </summary>
@@ -113,11 +139,51 @@ namespace Revenj.DomainPatterns
 			return default(T);
 		}
 		/// <summary>
+		/// Search data using provided specification.
+		/// </summary>
+		/// <typeparam name="T">data type</typeparam>
+		/// <param name="context">data context</param>
+		/// <param name="filter">filter predicate</param>
+		/// <returns>found items</returns>
+		public static T[] Search<T>(this IDataContext context, ISpecification<T> filter) where T : IDataSource
+		{
+			return context.Search(filter, null, null);
+		}
+		/// <summary>
+		/// Search all data.
+		/// </summary>
+		/// <typeparam name="T">data type</typeparam>
+		/// <param name="context">data context</param>
+		/// <returns>found items</returns>
+		public static T[] Search<T>(this IDataContext context) where T : IDataSource
+		{
+			return context.Search((ISpecification<T>)null, null, null);
+		}
+		/// <summary>
+		/// Count all data.
+		/// </summary>
+		/// <typeparam name="T">data type</typeparam>
+		/// <param name="context">data context</param>
+		/// <returns>total found items</returns>
+		public static long Count<T>(this IDataContext context) where T : IDataSource
+		{
+			return context.Count((ISpecification<T>)null);
+		}
+		/// <summary>
+		/// Data exists.
+		/// </summary>
+		/// <typeparam name="T">data type</typeparam>
+		/// <param name="context">data context</param>
+		/// <returns>items exists</returns>
+		public static bool Exists<T>(this IDataContext context) where T : IDataSource
+		{
+			return context.Exists((ISpecification<T>)null);
+		}
+		/// <summary>
 		/// Create new aggregate root.
 		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
-		/// <param name="context">data context</param>
 		/// <param name="root">root instance</param>
 		public static void Create<T>(this IDataContext context, T root) where T : IAggregateRoot
 		{
@@ -154,6 +220,25 @@ namespace Revenj.DomainPatterns
 		{
 			var pairs = new KeyValuePair<T, T>[aggregates.Length];
 			for (int i = 0; i < aggregates.Length; i++)
+			{
+				var agg = aggregates[i];
+				var ct = agg as IChangeTracking<T>;
+				pairs[i++] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), agg);
+			}
+			context.Update(pairs);
+		}
+		/// <summary>
+		/// Bulk update existing aggregate roots.
+		/// Data will be sent immediately to the backing store.
+		/// Change tracking value will be used if available.
+		/// </summary>
+		/// <typeparam name="T">aggregate type</typeparam>
+		/// <param name="context">data context</param>
+		/// <param name="aggregates">aggregate root instances</param>
+		public static void Update<T>(this IDataContext context, List<T> aggregates) where T : IAggregateRoot
+		{
+			var pairs = new KeyValuePair<T, T>[aggregates.Count];
+			for (int i = 0; i < aggregates.Count; i++)
 			{
 				var agg = aggregates[i];
 				var ct = agg as IChangeTracking<T>;

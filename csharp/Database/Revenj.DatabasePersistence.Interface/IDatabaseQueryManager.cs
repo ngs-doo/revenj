@@ -76,7 +76,7 @@ namespace Revenj.DatabasePersistence
 			Contract.Requires(query != null);
 
 			if (!query.InTransaction)
-				throw new ArgumentException("Only queries in transaction can be rollbacked");
+				throw new ArgumentException("Only queries in transaction can be rolled back");
 			manager.EndQuery(query, false);
 		}
 	}
