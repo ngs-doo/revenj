@@ -66,6 +66,20 @@ namespace Revenj.DomainPatterns
 			}
 		}
 
+		public TValue Find(string uri)
+		{
+			TValue item;
+			item = Cache.Get(uri + Suffix) as TValue;
+			if (item == null)
+			{
+				var found = Repository.Find(uri);
+				if (found != null)
+					Cache.Set(uri + Suffix, found, CachePolicy);
+				return found;
+			}
+			return item;
+		}
+
 		public TValue[] Find(IEnumerable<string> uris)
 		{
 			var list = (uris ?? new string[0]).Where(it => it != null).ToList();

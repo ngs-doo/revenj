@@ -7,62 +7,48 @@ using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
-	public interface IBulkRepository<T> where T : IIdentifiable
+	public interface IBulkRepository<T>
 	{
+		Func<IDataReader, int, T> Find(ChunkedMemoryStream stream, string uri);
 		Func<IDataReader, int, T[]> Find(ChunkedMemoryStream stream, IEnumerable<string> uris);
 		Func<IDataReader, int, T[]> Search(ChunkedMemoryStream stream, ISpecification<T> filter, int? limit, int? offset);
 		Func<IDataReader, int, long> Count(ChunkedMemoryStream stream, ISpecification<T> filter);
 		Func<IDataReader, int, bool> Exists(ChunkedMemoryStream stream, ISpecification<T> filter);
 	}
 
-	public interface IBulkReader
-	{
-		void Reset();
-		Lazy<T[]> Find<T>(IBulkRepository<T> repository, IEnumerable<string> uri) where T : IIdentifiable;
-		Lazy<T[]> Search<T>(IBulkRepository<T> repository, ISpecification<T> filter, int? limit, int? offset) where T : IIdentifiable;
-		Lazy<long> Count<T>(IBulkRepository<T> repository, ISpecification<T> filter) where T : IIdentifiable;
-		Lazy<bool> Exists<T>(IBulkRepository<T> repository, ISpecification<T> filter) where T : IIdentifiable;
-		void Execute();
-	}
-
 	public static class BulkReaderHelper
 	{
-		public static IBulkReader BulkRead(this IPostgresDatabaseQuery query, ChunkedMemoryStream stream)
+		public static IRepositoryBulkReader BulkRead(this IServiceProvider locator, ChunkedMemoryStream stream)
 		{
-			return new BulkReader(query, stream);
+			var query = locator.Resolve<IDatabaseQuery>();
+			return new BulkReader(locator, query, stream);
 		}
 
-		public static Lazy<T> Find<T>(this IBulkReader reader, IBulkRepository<T> repository, string uri) where T : IIdentifiable
+		class BulkReader : IRepositoryBulkReader
 		{
-			var findMany = reader.Find(repository, new[] { uri });
-			return new Lazy<T>(() =>
-			{
-				var result = findMany.Value;
-				if (result.Length != 0)
-					return result[0];
-				return default(T);
-			});
-		}
-
-		class BulkReader : IBulkReader
-		{
-			private readonly IPostgresDatabaseQuery Query;
+			private readonly IServiceProvider Locator;
+			private readonly IDatabaseQuery Query;
 			private readonly ChunkedMemoryStream Stream;
 			private readonly TextWriter Writer;
 			private int Index;
 			private readonly List<Func<IDataReader, int, object>> Actions = new List<Func<IDataReader, int, object>>();
 			private object[] Results;
+			private object LastRepository;
+			private readonly Dictionary<Type, object> Repositories = new Dictionary<Type, object>();
 
-			internal BulkReader(IPostgresDatabaseQuery query, ChunkedMemoryStream stream)
+			internal BulkReader(IServiceProvider locator, IDatabaseQuery query, ChunkedMemoryStream stream)
 			{
+				this.Locator = locator;
 				this.Query = query;
 				this.Stream = stream;
 				this.Writer = stream.GetWriter();
-				Reset();
+				Stream.Reset();
+				Writer.Write("SELECT (");
 			}
 
 			public void Reset()
 			{
+				Writer.Flush();
 				Stream.Reset();
 				Writer.Write("SELECT (");
 				Results = null;
@@ -100,24 +86,48 @@ namespace Revenj.DatabasePersistence.Postgres
 					});
 			}
 
-			public Lazy<T[]> Find<T>(IBulkRepository<T> repository, IEnumerable<string> uri) where T : IIdentifiable
+			private IBulkRepository<T> GetRepository<T>()
 			{
-				return Add(repository.Find(Stream, uri));
+				if (LastRepository is IBulkRepository<T>)
+					return (IBulkRepository<T>)LastRepository;
+				if (Repositories.TryGetValue(typeof(T), out LastRepository))
+					return (IBulkRepository<T>)LastRepository;
+				try
+				{
+					var repository = Locator.Resolve<IBulkRepository<T>>();
+					LastRepository = repository;
+					Repositories[typeof(T)] = repository;
+					return repository;
+				}
+				catch (Exception ex)
+				{
+					throw new ArgumentException("Specified type: " + typeof(T).FullName + " doesn't support bulk reading.", ex);
+				}
 			}
 
-			public Lazy<T[]> Search<T>(IBulkRepository<T> repository, ISpecification<T> filter, int? limit, int? offset) where T : IIdentifiable
+			public Lazy<T> Find<T>(string uri) where T : IIdentifiable
 			{
-				return Add(repository.Search(Stream, filter, limit, offset));
+				return Add(GetRepository<T>().Find(Stream, uri));
 			}
 
-			public Lazy<long> Count<T>(IBulkRepository<T> repository, ISpecification<T> filter) where T : IIdentifiable
+			public Lazy<T[]> Find<T>(IEnumerable<string> uris) where T : IIdentifiable
 			{
-				return Add(repository.Count(Stream, filter));
+				return Add(GetRepository<T>().Find(Stream, uris));
 			}
 
-			public Lazy<bool> Exists<T>(IBulkRepository<T> repository, ISpecification<T> filter) where T : IIdentifiable
+			public Lazy<T[]> Search<T>(ISpecification<T> filter, int? limit, int? offset) where T : IDataSource
 			{
-				return Add(repository.Exists(Stream, filter));
+				return Add(GetRepository<T>().Search(Stream, filter, limit, offset));
+			}
+
+			public Lazy<long> Count<T>(ISpecification<T> filter) where T : IDataSource
+			{
+				return Add(GetRepository<T>().Count(Stream, filter));
+			}
+
+			public Lazy<bool> Exists<T>(ISpecification<T> filter) where T : IDataSource
+			{
+				return Add(GetRepository<T>().Exists(Stream, filter));
 			}
 		}
 	}

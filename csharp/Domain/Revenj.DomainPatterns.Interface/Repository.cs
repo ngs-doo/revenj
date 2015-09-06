@@ -14,6 +14,12 @@ namespace Revenj.DomainPatterns
 		where TValue : IIdentifiable
 	{
 		/// <summary>
+		/// Find objects by identity
+		/// </summary>
+		/// <param name="uri">object identity</param>
+		/// <returns>found object, null if not found</returns>
+		TValue Find(string uri);
+		/// <summary>
 		/// Find objects by provided identifiers
 		/// </summary>
 		/// <param name="uris">object identifiers</param>
@@ -84,6 +90,57 @@ namespace Revenj.DomainPatterns
 		/// <param name="delete">remove aggregates</param>
 		/// <returns>created identifiers</returns>
 		string[] Persist(IEnumerable<TRoot> insert, IEnumerable<KeyValuePair<TRoot, TRoot>> update, IEnumerable<TRoot> delete);
+	}
+	/// <summary>
+	/// Provides bulk access to DB operations (if supported by implementation)
+	/// </summary>
+	public interface IRepositoryBulkReader
+	{
+		/// <summary>
+		/// Reset reader for new queries
+		/// </summary>
+		void Reset();
+		/// <summary>
+		/// Find object by identity
+		/// </summary>
+		/// <typeparam name="T">object type</typeparam>
+		/// <param name="uri">string primary key representation</param>
+		/// <returns>object which was found</returns>
+		Lazy<T> Find<T>(string uri) where T : IIdentifiable;
+		/// <summary>
+		/// Find objects by identity
+		/// </summary>
+		/// <typeparam name="T">object type</typeparam>
+		/// <param name="uris">primary keys as strings</param>
+		/// <returns>found objects</returns>
+		Lazy<T[]> Find<T>(IEnumerable<string> uris) where T : IIdentifiable;
+		/// <summary>
+		/// Search for objects using provided specification
+		/// </summary>
+		/// <typeparam name="T">object type</typeparam>
+		/// <param name="filter">search filter</param>
+		/// <param name="limit">max results</param>
+		/// <param name="offset">skip initial results</param>
+		/// <returns>found objects</returns>
+		Lazy<T[]> Search<T>(ISpecification<T> filter, int? limit, int? offset) where T : IDataSource;
+		/// <summary>
+		/// Count domain object using provided specification
+		/// </summary>
+		/// <typeparam name="T">object type</typeparam>
+		/// <param name="filter">search filter</param>
+		/// <returns>total found objects</returns>
+		Lazy<long> Count<T>(ISpecification<T> filter) where T : IDataSource;
+		/// <summary>
+		/// Check if objects exists using provided specification
+		/// </summary>
+		/// <typeparam name="T">object type</typeparam>
+		/// <param name="filter">search filter</param>
+		/// <returns>objects exists</returns>
+		Lazy<bool> Exists<T>(ISpecification<T> filter) where T : IDataSource;
+		/// <summary>
+		/// Execute queries
+		/// </summary>
+		void Execute();
 	}
 	/// <summary>
 	/// Utility for easier usage of repositories.
@@ -178,24 +235,6 @@ namespace Revenj.DomainPatterns
 			Contract.Requires(repository != null);
 
 			return repository.Exists<TValue>(null);
-		}
-		/// <summary>
-		/// Find objects by provided identifier
-		/// </summary>
-		/// <typeparam name="TValue">object type</typeparam>
-		/// <param name="repository">repository to data</param>
-		/// <param name="uri">object identifier</param>
-		/// <returns>found object</returns>
-		public static TValue Find<TValue>(this IRepository<TValue> repository, string uri)
-			where TValue : IIdentifiable
-		{
-			Contract.Requires(repository != null);
-			Contract.Requires(uri != null);
-
-			var found = repository.Find(new[] { uri });
-			if (found.Length > 0)
-				return found[0];
-			return default(TValue);
 		}
 		/// <summary>
 		/// Insert new aggregate roots.

@@ -50,6 +50,16 @@ namespace Revenj.DomainPatterns
 			}
 		}
 
+		public TValue Find(string uri)
+		{
+			if (uri == null)
+				return null;
+			CheckInvalid();
+			TValue item;
+			Data.TryGetValue(uri, out item);
+			return item;
+		}
+
 		public TValue[] Find(IEnumerable<string> uris)
 		{
 			if (uris != null)

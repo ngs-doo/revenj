@@ -31,6 +31,28 @@ namespace Revenj.DomainPatterns
 			}
 		}
 
+		public TValue Find(string uri)
+		{
+			if (uri == null)
+				return null;
+			var dict = Cache.Target as ConcurrentDictionary<string, TValue>;
+			if (dict == null)
+			{
+				dict = new ConcurrentDictionary<string, TValue>(1, 17);
+				Cache.Target = dict;
+			}
+			else
+			{
+				TValue item;
+				if (dict.TryGetValue(uri, out item))
+					return item;
+			}
+			var found = Repository.Value.Find(uri);
+			if (found != null)
+				dict.TryAdd(uri, found);
+			return found;
+		}
+
 		public TValue[] Find(IEnumerable<string> uris)
 		{
 			var list = (uris ?? new string[0]).Where(it => it != null).ToList();

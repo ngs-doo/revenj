@@ -276,6 +276,26 @@ namespace Revenj.DatabasePersistence.Postgres
 			tw.Write('\'');
 		}
 
+		public static void WriteSimpleUri(TextWriter tw, string uri)
+		{
+			tw.Write('\'');
+			var ind = uri.IndexOf('\'');
+			if (ind == -1)
+				tw.Write(uri);
+			else
+			{
+				for (var i = 0; i < uri.Length; i++)
+				{
+					var c = uri[i];
+					if (c == '\'')
+						tw.Write("''");
+					else
+						tw.Write(c);
+				}
+			}
+			tw.Write('\'');
+		}
+
 		private static readonly char[] EscapeUris = new char[] { '\\', '/', '\'' };
 
 		public static void WriteCompositeUriList(TextWriter tw, List<string> uris)
@@ -325,6 +345,32 @@ namespace Revenj.DatabasePersistence.Postgres
 							tw.Write(c);
 						i++;
 					}
+				}
+			}
+			tw.Write("')");
+		}
+
+		public static void WriteCompositeUri(TextWriter tw, string uri)
+		{
+			tw.Write("('");
+			var i = 0;
+			var ind = uri.IndexOfAny(EscapeUris);
+			if (ind == -1)
+				tw.Write(uri);
+			else
+			{
+				while (i < uri.Length)
+				{
+					var c = uri[i];
+					if (c == '\\')
+						tw.Write(uri[++i]);
+					else if (c == '/')
+						tw.Write("','");
+					else if (c == '\'')
+						tw.Write("''");
+					else
+						tw.Write(c);
+					i++;
 				}
 			}
 			tw.Write("')");

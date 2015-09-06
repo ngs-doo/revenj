@@ -71,6 +71,13 @@ namespace Revenj.DatabasePersistence.Oracle
 			return sb.ToString();
 		}
 
+		public static string BuildSimpleUri(string uri)
+		{
+			if (uri.Contains("'"))
+				return "'" + uri.Replace("'", "''") + "'";
+			return "'" + uri + "'";
+		}
+
 		public static string BuildCompositeUriList(List<string> uris)
 		{
 			if (uris.Count == 0)
@@ -100,6 +107,32 @@ namespace Revenj.DatabasePersistence.Oracle
 				sb.Append("'),");
 			}
 			sb.Length--;
+			return sb.ToString();
+		}
+
+		public static string BuildCompositeUri(string uri)
+		{
+			var sb = new StringBuilder(uri.Length + 4);
+			sb.Append("'");
+			var len = uri.Length;
+			int i = 0;
+			while (i < len)
+			{
+				var c = uri[i];
+				if (c == '\\')
+				{
+					i++;
+					sb.Append(uri[i]);
+				}
+				else if (c == '/')
+					sb.Append("','");
+				else if (c == '\'')
+					sb.Append("''");
+				else
+					sb.Append(c);
+				i++;
+			}
+			sb.Append("'");
 			return sb.ToString();
 		}
 	}
