@@ -97,9 +97,10 @@ namespace Revenj.DomainPatterns
 	public interface IRepositoryBulkReader
 	{
 		/// <summary>
-		/// Reset reader for new queries
+		/// Reset reader for new queries.
 		/// </summary>
-		void Reset();
+		/// <param name="usePrepared">use prepared statements</param>
+		void Reset(bool usePrepared);
 		/// <summary>
 		/// Find object by identity
 		/// </summary>

@@ -2,6 +2,7 @@
 using Revenj.DatabasePersistence.Postgres.QueryGeneration;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
@@ -36,6 +37,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			builder.RegisterType<PostgresObjectFactory, IPostgresConverterRepository, IPostgresConverterFactory>(InstanceScope.Singleton);
 			builder.RegisterType<QueryExecutor>();
 			builder.RegisterSingleton<IPostgresVersionInfo>(new PostgresVersionInfo(ci));
+			builder.RegisterFunc(c => BulkReaderHelper.BulkRead(c, ChunkedMemoryStream.Create()), InstanceScope.Context);
 		}
 	}
 }
