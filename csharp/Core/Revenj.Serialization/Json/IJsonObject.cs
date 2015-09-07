@@ -40,6 +40,24 @@ namespace Revenj.Serialization
 			sw.Flush();
 			stream.Position = 0;
 		}
+		public static void Serialize(this IJsonObject[] array, ChunkedMemoryStream stream, int len)
+		{
+			stream.Reset();
+			var sw = stream.GetWriter();
+			sw.Write('[');
+			if (len > 0)
+			{
+				array[0].Serialize(sw, false, null);
+				for (int i = 1; i < len; i++)
+				{
+					sw.Write(',');
+					array[i].Serialize(sw, false, null);
+				}
+			}
+			sw.Write(']');
+			sw.Flush();
+			stream.Position = 0;
+		}
 		public static void Serialize(this IList<IJsonObject> values, ChunkedMemoryStream stream)
 		{
 			stream.Reset();
