@@ -65,6 +65,13 @@ namespace Revenj.Core
 			Scope.Dispose();
 		}
 
+		public T Find<T>(string uri) where T : IIdentifiable
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.Find<T>(uri);
+		}
+
 		public T[] Find<T>(IEnumerable<string> uris) where T : IIdentifiable
 		{
 			if (Finished)

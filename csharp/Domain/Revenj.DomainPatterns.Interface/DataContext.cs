@@ -14,6 +14,13 @@ namespace Revenj.DomainPatterns
 	public interface IDataContext
 	{
 		/// <summary>
+		/// Find identifiable data from provided URI
+		/// </summary>
+		/// <typeparam name="T">data type</typeparam>
+		/// <param name="uri">identity</param>
+		/// <returns>found value</returns>
+		T Find<T>(string uri) where T : IIdentifiable;
+		/// <summary>
 		/// Find identifiable data from provided URIs
 		/// </summary>
 		/// <typeparam name="T">data type</typeparam>
@@ -124,20 +131,6 @@ namespace Revenj.DomainPatterns
 	/// </summary>
 	public static class DataContextHelper
 	{
-		/// <summary>
-		/// Find identifiable object using provided URI
-		/// </summary>
-		/// <typeparam name="T">data type</typeparam>
-		/// <param name="context">data context</param>
-		/// <param name="uri">search by URI</param>
-		/// <returns>found object or null</returns>
-		public static T Find<T>(this IDataContext context, string uri) where T : IIdentifiable
-		{
-			var res = context.Find<T>(new[] { uri });
-			if (res.Length == 1)
-				return res[0];
-			return default(T);
-		}
 		/// <summary>
 		/// Search data using provided specification.
 		/// </summary>

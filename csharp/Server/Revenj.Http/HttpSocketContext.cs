@@ -163,9 +163,9 @@ namespace Revenj.Http
 		}
 
 		private int RequestHeadersLength;
-		private readonly HeaderPair[] RequestHeaders = new HeaderPair[64];
+		private HeaderPair[] RequestHeaders = new HeaderPair[16];
 		private int ResponseHeadersLength;
-		private readonly HeaderPair[] ResponseHeaders = new HeaderPair[64];
+		private HeaderPair[] ResponseHeaders = new HeaderPair[16];
 
 		public string GetRequestHeader(string name)
 		{
@@ -290,8 +290,9 @@ namespace Revenj.Http
 					string value = new string(nameBuf, 0, rowEnd - i - 1);
 					if (RequestHeadersLength == RequestHeaders.Length)
 					{
-						ReturnError(socket, 413, "Only up to " + RequestHeaders.Length + " headers allowed", false);
-						return false;
+						var newHeaders = new HeaderPair[RequestHeaders.Length * 2];
+						Array.Copy(RequestHeaders, newHeaders, RequestHeaders.Length);
+						RequestHeaders = newHeaders;
 					}
 					RequestHeaders[RequestHeadersLength++] = new HeaderPair(name, value);
 				}
@@ -430,7 +431,7 @@ namespace Revenj.Http
 			if (cms != null)
 			{
 				offset = AddContentLength(cms.Length, offset);
-				socket.Send(OutputTemp, offset, SocketFlags.None);
+				socket.Send(OutputTemp, offset, SocketFlags.Partial);
 				cms.Send(socket);
 				cms.Dispose();
 			}
@@ -709,7 +710,11 @@ namespace Revenj.Http
 		public void AddHeader(string type, string value)
 		{
 			if (ResponseHeadersLength == ResponseHeaders.Length)
-				throw new NotSupportedException("Only up to " + ResponseHeaders.Length + " response headers allowed");
+			{
+				var newHeaders = new HeaderPair[ResponseHeaders.Length * 2];
+				Array.Copy(ResponseHeaders, newHeaders, ResponseHeaders.Length);
+				ResponseHeaders = newHeaders;
+			}
 			if (type == "Content-Type")
 				ContentTypeResponseIndex = ResponseHeadersLength;
 			ResponseHeaders[ResponseHeadersLength++] = new HeaderPair(type, value);

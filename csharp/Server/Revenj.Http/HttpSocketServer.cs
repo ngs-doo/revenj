@@ -171,7 +171,11 @@ Please check settings: " + string.Join(", ", endpoints));
 							if (keepAlive)
 							{
 								if (ctx.Pipeline) continue;
-								else if (socket.Connected && socket.Poll(1000000, SelectMode.SelectRead)) continue;
+								else if (socket.Connected)
+								{
+									Thread.Yield();
+									if (socket.Poll(1000000, SelectMode.SelectRead)) continue;
+								}
 							}
 							socket.Close();
 							break;

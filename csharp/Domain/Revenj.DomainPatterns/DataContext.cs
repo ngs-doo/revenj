@@ -9,7 +9,8 @@ namespace Revenj.DomainPatterns
 	internal class DataContext : IDataContext
 	{
 		private readonly IServiceProvider Locator;
-		private ConcurrentDictionary<Type, object> Lookups;
+		private ConcurrentDictionary<Type, object> SingleLookups;
+		private ConcurrentDictionary<Type, object> ManyLookups;
 		private ConcurrentDictionary<Type, object> QuerySources;
 		private ConcurrentDictionary<Type, object> SearchSources;
 		private ConcurrentDictionary<Type, object> Repositories;
@@ -22,21 +23,39 @@ namespace Revenj.DomainPatterns
 			this.Locator = locator;
 		}
 
-		private Func<IEnumerable<string>, T[]> GetLookup<T>()
+		private Func<string, T> GetSingleLookup<T>()
 		{
 			object lookup;
-			if (Lookups == null) Lookups = new ConcurrentDictionary<Type, object>(1, 7);
-			if (!Lookups.TryGetValue(typeof(T), out lookup))
+			if (SingleLookups == null) SingleLookups = new ConcurrentDictionary<Type, object>(1, 7);
+			if (!SingleLookups.TryGetValue(typeof(T), out lookup))
+			{
+				lookup = Locator.Resolve<Func<string, T>>();
+				SingleLookups.TryAdd(typeof(T), lookup);
+			}
+			return (Func<string, T>)lookup;
+		}
+
+		public T Find<T>(string uri) where T : IIdentifiable
+		{
+			var lookup = GetSingleLookup<T>();
+			return lookup(uri);
+		}
+
+		private Func<IEnumerable<string>, T[]> GetManyLookup<T>()
+		{
+			object lookup;
+			if (ManyLookups == null) ManyLookups = new ConcurrentDictionary<Type, object>(1, 7);
+			if (!ManyLookups.TryGetValue(typeof(T), out lookup))
 			{
 				lookup = Locator.Resolve<Func<IEnumerable<string>, T[]>>();
-				Lookups.TryAdd(typeof(T), lookup);
+				ManyLookups.TryAdd(typeof(T), lookup);
 			}
 			return (Func<IEnumerable<string>, T[]>)lookup;
 		}
 
 		public T[] Find<T>(IEnumerable<string> uris) where T : IIdentifiable
 		{
-			var lookup = GetLookup<T>();
+			var lookup = GetManyLookup<T>();
 			return lookup(uris);
 		}
 
