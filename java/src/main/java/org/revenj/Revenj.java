@@ -2,10 +2,8 @@ package org.revenj;
 
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
-import org.revenj.patterns.DataContext;
-import org.revenj.patterns.DomainModel;
-import org.revenj.patterns.ServiceLocator;
-import org.revenj.patterns.WireSerialization;
+import org.revenj.patterns.*;
+import org.revenj.postgres.PostgresDatabaseNotification;
 import org.revenj.serialization.RevenjSerialization;
 import org.revenj.server.ProcessingEngine;
 
@@ -140,12 +138,20 @@ public abstract class Revenj {
 		SimpleContainer container = new SimpleContainer("true".equals(properties.getProperty("resolveUnknown")));
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
-		container.registerInstance(DomainModel.class, new SimpleDomainModel(properties.getProperty("namespace")), false);
+		DomainModel domainModel = new SimpleDomainModel(properties.getProperty("namespace"));
+		container.registerInstance(DomainModel.class, domainModel, false);
 		container.registerClass(DataContext.class, LocatorDataContext.class, false);
 		PluginLoader plugins = new ServicesPluginLoader(classLoader.orElse(Thread.currentThread().getContextClassLoader()));
 		container.registerInstance(PluginLoader.class, plugins, false);
 		WireSerialization serialization = new RevenjSerialization(container);
 		container.registerInstance(WireSerialization.class, serialization, false);
+		PostgresDatabaseNotification databaseNotification =
+				new PostgresDatabaseNotification(
+						connectionFactory,
+						Optional.of(domainModel),
+						container);
+		container.registerInstance(EagerNotification.class, databaseNotification, false);
+		container.registerInstance(DataChangeNotification.class, databaseNotification, false);
 		try {
 			container.register(new ProcessingEngine(container, serialization, Optional.of(plugins)));
 		} catch (Exception e) {

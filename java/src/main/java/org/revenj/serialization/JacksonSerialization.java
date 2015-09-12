@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.revenj.patterns.Serialization;
 import org.revenj.patterns.ServiceLocator;
 
@@ -23,8 +23,7 @@ final class JacksonSerialization implements Serialization<String> {
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 				.setInjectableValues(new InjectableValues.Std().addValue("__locator", locator))
 				.registerModule(new Jdk8Module())
-				.registerModule(new JSR310Module())
-				.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+				.registerModule(new JavaTimeModule());
 	}
 
 	byte[] serializeAsBytes(Object value) throws IOException {

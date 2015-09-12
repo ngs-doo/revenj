@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface ServiceLocator {
 	Object resolve(Type type) throws ReflectiveOperationException;
 
+	@SuppressWarnings("unchecked")
 	default <T> Optional<T> tryResolve(Class<T> manifest) {
 		try {
 			Object instance = resolve((Type) manifest);
@@ -17,6 +18,7 @@ public interface ServiceLocator {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	default <T> T resolve(Class<T> manifest) {
 		try {
 			return (T) resolve((Type) manifest);
@@ -25,6 +27,7 @@ public interface ServiceLocator {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	default <T> T resolve(Class<T> container, Type argument, Type... arguments) throws ReflectiveOperationException {
 		return (T) resolve(Utils.makeGenericType(container, argument, arguments));
 	}

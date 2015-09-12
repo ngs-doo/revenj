@@ -10,7 +10,7 @@ import java.util.Arrays;
  * Allow reuse of same byte[] by specifying custom length
  * Array is valid only up until specified length.
  */
-public class Bytes {
+public final class Bytes {
 	/**
 	 * Byte array which can be reused
 	 */

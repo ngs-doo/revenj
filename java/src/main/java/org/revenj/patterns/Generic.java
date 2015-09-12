@@ -15,7 +15,8 @@ public abstract class Generic<T> {
 		this.type = ((ParameterizedType) superclass).getActualTypeArguments()[0];
 	}
 
-	public <T> T resolve(ServiceLocator locator) {
+	@SuppressWarnings("unchecked")
+	public T resolve(ServiceLocator locator) {
 		try {
 			return (T) locator.resolve(type);
 		} catch (ReflectiveOperationException e) {
