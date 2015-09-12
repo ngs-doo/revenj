@@ -63,7 +63,6 @@ public class TestContainer {
 	static class D {
 	}
 
-
 	@Test
 	public void optionalTest() throws IOException {
 		B.counter = 0;

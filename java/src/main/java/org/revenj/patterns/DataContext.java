@@ -1,5 +1,7 @@
 package org.revenj.patterns;
 
+import rx.Observable;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -56,4 +58,8 @@ public interface DataContext {
 	default <T extends DomainEvent> void submit(T event) {
 		submit(Collections.singletonList(event));
 	}
+
+	<T> T populate(Report<T> report);
+
+	<T extends Identifiable> Observable<DataChangeNotification.TrackInfo<T>> track(Class<T> manifest);
 }

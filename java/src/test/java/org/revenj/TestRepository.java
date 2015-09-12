@@ -4,8 +4,11 @@ import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.test.*;
 import gen.model.test.repositories.*;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 
 import java.io.IOException;
@@ -16,9 +19,21 @@ import java.util.*;
 
 public class TestRepository {
 
+	private Container container;
+
+	@Before
+	public void initContainer() throws IOException {
+		container = (Container) Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+	}
+
+	@After
+	public void closeContainer() throws Exception {
+		container.close();
+	}
+
 	@Test
 	public void repositoryTest() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
 		Composite co = new Composite();
 		UUID id = UUID.randomUUID();
@@ -51,7 +66,7 @@ public class TestRepository {
 
 	@Test
 	public void eventTest() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
 		Clicked cl = new Clicked().setBigint(Long.MAX_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
 		String uri = store.submit(cl);
@@ -66,7 +81,7 @@ public class TestRepository {
 
 	@Test
 	public void sequenceTest() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
 		}.resolve(locator);
 		Next next = new Next();
@@ -80,7 +95,7 @@ public class TestRepository {
 
 	@Test
 	public void simpleRootSearch() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
 		}.resolve(locator);
 		Next next = new Next();
@@ -91,7 +106,7 @@ public class TestRepository {
 
 	@Test
 	public void simpleEventSearch() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
 		Clicked cl1 = new Clicked().setBigint(Long.MIN_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
 		Clicked cl2 = new Clicked().setBigint(Long.MAX_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
@@ -103,7 +118,7 @@ public class TestRepository {
 
 	@Test
 	public void specificationRootSearch() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		PersistableRepository<Next> repository = new Generic<PersistableRepository<Next>>() {
 		}.resolve(locator);
 		String uri = repository.insert(new Next());
@@ -114,7 +129,7 @@ public class TestRepository {
 
 	@Test
 	public void specificationEventSearch() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
 		Random rnd = new Random();
 		Long rndLong = rnd.nextLong();
@@ -128,7 +143,7 @@ public class TestRepository {
 
 	@Test
 	public void specificationSnowflakeFind() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		CompositeRepository repository = locator.resolve(CompositeRepository.class);
 		CompositeListRepository listRepository = locator.resolve(CompositeListRepository.class);
 		String uri = repository.insert(new Composite().setSimple(new Simple().setNumber(1234)));
@@ -138,7 +153,7 @@ public class TestRepository {
 
 	@Test
 	public void lazyLoadTest() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		CompositeRepository compRepository = locator.resolve(CompositeRepository.class);
 		String uri = compRepository.insert(new Composite().setSimple(new Simple().setNumber(5432)));
 		Composite c = compRepository.find(uri).get();
@@ -152,7 +167,7 @@ public class TestRepository {
 
 	@Test
 	public void detailTest() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		SingleDetailRepository sdRepository = locator.resolve(SingleDetailRepository.class);
 		String uri = sdRepository.insert(new SingleDetail());
 		SingleDetail sd = sdRepository.find(uri).get();
@@ -169,7 +184,7 @@ public class TestRepository {
 
 	@Test
 	public void collectionReference() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
 		Composite co = new Composite();
 		UUID id = UUID.randomUUID();
@@ -189,7 +204,7 @@ public class TestRepository {
 
 	@Test
 	public void nestedCollectionReference() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		PersistableRepository<Composite> repository = locator.resolve(CompositeRepository.class);
 		Composite co = new Composite();
 		UUID id = UUID.randomUUID();

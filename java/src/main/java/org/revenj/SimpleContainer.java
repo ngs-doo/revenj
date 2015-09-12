@@ -2,12 +2,14 @@ package org.revenj;
 
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.ServiceLocator;
+import rx.*;
 
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 final class SimpleContainer implements Container {
@@ -16,27 +18,39 @@ final class SimpleContainer implements Container {
 		public final SimpleContainer owner;
 		public final Class<T> manifest;
 		public T instance;
-		public final Function<ServiceLocator, T> factory;
+		public final Function<ServiceLocator, T> singleFactory;
+		public final BiFunction<ServiceLocator, Type[], T> biFactory;
 		public final boolean singleton;
 
-		private Registration(SimpleContainer owner, Class<T> manifest, T instance, Function<ServiceLocator, T> factory, boolean singleton) {
+		private Registration(
+				SimpleContainer owner,
+				Class<T> manifest,
+				T instance,
+				Function<ServiceLocator, T> singleFactory,
+				BiFunction<ServiceLocator, Type[], T> biFactory,
+				boolean singleton) {
 			this.owner = owner;
 			this.manifest = manifest;
 			this.instance = instance;
-			this.factory = factory;
+			this.singleFactory = singleFactory;
+			this.biFactory = biFactory;
 			this.singleton = singleton;
 		}
 
 		static <T> Registration<T> register(SimpleContainer owner, Class<T> manifest, boolean singleton) {
-			return new Registration<>(owner, manifest, null, null, singleton);
+			return new Registration<>(owner, manifest, null, null, null, singleton);
 		}
 
 		static <T> Registration<T> register(SimpleContainer owner, T instance) {
-			return new Registration<>(owner, null, instance, null, true);
+			return new Registration<>(owner, null, instance, null, null, true);
 		}
 
 		static <T> Registration<T> register(SimpleContainer owner, Function<ServiceLocator, T> factory, boolean singleton) {
-			return new Registration<>(owner, null, null, factory, singleton);
+			return new Registration<>(owner, null, null, factory, null, singleton);
+		}
+
+		static <T> Registration<T> register(SimpleContainer owner, BiFunction<ServiceLocator, Type[], T> factory, boolean singleton) {
+			return new Registration<>(owner, null, null, null, factory, singleton);
 		}
 
 		boolean promoted;
@@ -135,6 +149,16 @@ final class SimpleContainer implements Container {
 	SimpleContainer(boolean resolveUnknown) {
 		parent = null;
 		this.resolveUnknown = resolveUnknown;
+		registerGenerics(
+				Optional.class,
+				(locator, args) -> {
+					try {
+						return Optional.ofNullable(locator.resolve(args[0]));
+					} catch (ReflectiveOperationException ignore) {
+						return Optional.empty();
+					}
+				}
+		);
 	}
 
 	private SimpleContainer(SimpleContainer parent) {
@@ -197,9 +221,15 @@ final class SimpleContainer implements Container {
 		}
 		if (typeInfo.rawClass == null) {
 			return Either.fail(type + " is not an instance of Class<?> and cannot be resolved");
-		} else if (typeInfo.rawClass == Optional.class) {
-			Either<Object> content = tryResolve(typeInfo.genericArguments[0], caller);
-			return Either.success(Optional.ofNullable(content.value));
+		}
+		Registration<?> registration = getRegistration(typeInfo.rawClass);
+		if (registration != null && registration.biFactory != null && typeInfo.genericArguments != null) {
+			try {
+				Object result = registration.biFactory.apply(caller, typeInfo.genericArguments);
+				return Either.success(result);
+			} catch (Exception ex) {
+				return Either.fail(ex);
+			}
 		} else if (typeInfo.constructors.length == 0 && typeInfo.mappedType != null) {
 			return tryResolve(typeInfo.mappedType, caller);
 		}
@@ -344,8 +374,27 @@ final class SimpleContainer implements Container {
 				}
 				return tryResolveClass(target, caller);
 			}
-			return Either.fail(type + " is not registered in the container.\n" +
+			return target.isInterface()
+					? Either.fail(type + " is not registered in the container.\n" +
+					"Since " + type + " is an interface, it must be registered into the container.")
+					: Either.fail(type + " is not registered in the container.\n" +
 					"If you wish to resolve types not registered in the container, specify resolveUnknown=true in Properties configuration.");
+		}
+		if (registration.biFactory != null && type instanceof ParameterizedType) {
+			ParameterizedType pt = (ParameterizedType) type;
+			TypeInfo typeInfo = typeCache.get(type);
+			if (typeInfo == null) {
+				typeInfo = new TypeInfo(pt);
+				typeCache.putIfAbsent(type, typeInfo);
+			}
+			if (typeInfo.genericArguments != null) {
+				try {
+					Object result = registration.biFactory.apply(caller, typeInfo.genericArguments);
+					return Either.success(result);
+				} catch (Exception ex) {
+					return Either.fail(ex);
+				}
+			}
 		}
 		return resolveRegistration(registration, caller);
 	}
@@ -380,7 +429,7 @@ final class SimpleContainer implements Container {
 	private Either<Object> resolveRegistration(Registration<?> registration, SimpleContainer caller) {
 		if (registration.instance != null) {
 			return Either.success(registration.instance);
-		} else if (registration.factory != null) {
+		} else if (registration.singleFactory != null) {
 			try {
 				//TODO match registration owner and caller
 				Object instance;
@@ -389,14 +438,14 @@ final class SimpleContainer implements Container {
 						if (registration.promoted) {
 							return Either.success(registration.instance);
 						}
-						instance = registration.factory.apply(this);
+						instance = registration.singleFactory.apply(this);
 						if (instance instanceof AutoCloseable) {
 							closeables.add((AutoCloseable) instance);
 						}
 						registration.promoteToSingleton(instance);
 					}
 				} else {
-					instance = registration.factory.apply(this);
+					instance = registration.singleFactory.apply(this);
 				}
 				return Either.success(instance);
 			} catch (Throwable ex) {
@@ -449,6 +498,11 @@ final class SimpleContainer implements Container {
 	@Override
 	public void registerFactory(Type type, Function<ServiceLocator, ?> factory, boolean singleton) {
 		addToRegistry(type, Registration.register(this, factory, singleton));
+	}
+
+	@Override
+	public <T> void registerGenerics(Class<T> container, BiFunction<ServiceLocator, Type[], T> factory) {
+		addToRegistry(container, Registration.register(this, factory, false));
 	}
 
 	@Override

@@ -1,17 +1,20 @@
 package org.revenj;
 
 import org.revenj.patterns.*;
+import rx.Observable;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 final class LocatorDataContext implements DataContext {
 	private final ServiceLocator locator;
 	private ConcurrentHashMap<Class<?>, SearchableRepository> repositories;
 	private ConcurrentHashMap<Class<?>, DomainEventStore> eventStores;
+	private DataChangeNotification changes;
 
 	public LocatorDataContext(ServiceLocator locator) {
 		this.locator = locator;
@@ -39,6 +42,11 @@ final class LocatorDataContext implements DataContext {
 				throw new RuntimeException("Domain event store is not registered for: " + manifest, ex);
 			}
 		});
+	}
+
+	@Override
+	public <T extends Identifiable> Optional<T> find(Class<T> manifest, String uri) {
+		return ((Repository) getRepository(manifest)).find(uri);
 	}
 
 	@Override
@@ -85,5 +93,16 @@ final class LocatorDataContext implements DataContext {
 		}
 		Class<?> manifest = events.iterator().next().getClass();
 		(getEventStore(manifest)).submit(events);
+	}
+
+	@Override
+	public <T> T populate(Report<T> report) {
+		return report.populate(locator);
+	}
+
+	@Override
+	public <T extends Identifiable> Observable<DataChangeNotification.TrackInfo<T>> track(Class<T> manifest) {
+		if (changes == null) changes = locator.resolve(DataChangeNotification.class);
+		return changes.track(manifest);
 	}
 }

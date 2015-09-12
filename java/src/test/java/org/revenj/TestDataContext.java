@@ -4,8 +4,11 @@ import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.test.*;
 import gen.model.test.repositories.*;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 
 import java.io.IOException;
@@ -16,9 +19,21 @@ import java.util.*;
 
 public class TestDataContext {
 
+	private Container container;
+
+	@Before
+	public void initContainer() throws IOException {
+		container = (Container) Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+	}
+
+	@After
+	public void closeContainer() throws Exception {
+		container.close();
+	}
+
 	@Test
 	public void canCreateAggregate() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DataContext context = locator.resolve(DataContext.class);
 		Composite co = new Composite();
 		UUID id = UUID.randomUUID();
@@ -38,7 +53,7 @@ public class TestDataContext {
 
 	@Test
 	public void canSubmitEvent() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DataContext context = locator.resolve(DataContext.class);
 		Clicked cl = new Clicked().setBigint(Long.MAX_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
 		context.submit(cl);
@@ -46,7 +61,7 @@ public class TestDataContext {
 
 	@Test
 	public void canQuery() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DataContext context = locator.resolve(DataContext.class);
 		context.create(Arrays.asList(new Next(), new Next()));
 		long total = context.query(Next.class).count();

@@ -1,15 +1,19 @@
 package org.revenj;
 
+import org.revenj.extensibility.Container;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
 import org.revenj.patterns.*;
-import org.revenj.postgres.PostgresDatabaseNotification;
+import org.revenj.security.PermissionManager;
 import org.revenj.serialization.RevenjSerialization;
 import org.revenj.server.ProcessingEngine;
+import rx.*;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -17,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -130,7 +135,7 @@ public abstract class Revenj {
 		}
 	}
 
-	public static ServiceLocator setup(
+	public static Container setup(
 			Function<ServiceLocator, Connection> connectionFactory,
 			Properties properties,
 			Optional<ClassLoader> classLoader,
@@ -149,14 +154,17 @@ public abstract class Revenj {
 				new PostgresDatabaseNotification(
 						connectionFactory,
 						Optional.of(domainModel),
+						properties,
 						container);
 		container.registerInstance(EagerNotification.class, databaseNotification, false);
-		container.registerInstance(DataChangeNotification.class, databaseNotification, false);
+		container.registerInstance(DataChangeNotification.class, databaseNotification, true);
+		ChangeNotification.registerContainer(container, databaseNotification);
 		try {
 			container.register(new ProcessingEngine(container, serialization, Optional.of(plugins)));
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
+		container.registerInstance(PermissionManager.class, new RevenjPermissionManager(container), false);
 		if (classLoader.isPresent()) {
 			container.registerInstance(ClassLoader.class, classLoader.get(), false);
 		}

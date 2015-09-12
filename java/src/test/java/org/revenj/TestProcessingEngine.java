@@ -3,8 +3,11 @@ package org.revenj;
 import gen.model.Boot;
 import gen.model.test.Composite;
 import gen.model.test.Simple;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.patterns.WireSerialization;
@@ -15,13 +18,25 @@ import org.revenj.server.ServerCommandDescription;
 import org.revenj.server.commands.CRUD.Create;
 import org.revenj.server.commands.CRUD.Read;
 
+import java.io.IOException;
 import java.util.UUID;
 
 public class TestProcessingEngine {
 
+	private Container container;
+
+	@Before
+	public void initContainer() throws IOException {
+		container = (Container) Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+	}
+
+	@After
+	public void closeContainer() throws Exception {
+		container.close();
+	}
+
 	@Test
 	public void passThroughEngine() throws Exception {
-		ServiceLocator container = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		ProcessingEngine engine = container.resolve(ProcessingEngine.class);
 		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
 		ServerCommandDescription cd = new ServerCommandDescription<>(
@@ -60,7 +75,6 @@ public class TestProcessingEngine {
 
 	@Test
 	public void jsonThroughEngine() throws Exception {
-		ServiceLocator container = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
 		ProcessingEngine engine = container.resolve(ProcessingEngine.class);
 		WireSerialization serialization = container.resolve(WireSerialization.class);
 		Serialization<String> json = serialization.find(String.class).get();

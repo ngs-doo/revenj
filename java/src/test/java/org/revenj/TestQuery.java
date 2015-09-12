@@ -5,8 +5,11 @@ import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
 import gen.model.test.*;
 import gen.model.test.repositories.*;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 
 import java.io.IOException;
@@ -16,9 +19,21 @@ import java.util.*;
 
 public class TestQuery {
 
+	private Container container;
+
+	@Before
+	public void initContainer() throws IOException {
+		container = (Container) Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+	}
+
+	@After
+	public void closeContainer() throws Exception {
+		container.close();
+	}
+
 	@Test
 	public void simpleQuery() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		repository.insert(new Next());
 		List<Next> search = repository.search();
@@ -29,7 +44,7 @@ public class TestQuery {
 
 	@Test
 	public void queryWithFilter() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
 		int id = Integer.parseInt(uri);
@@ -40,7 +55,7 @@ public class TestQuery {
 
 	@Test
 	public void queryWithFilterAndCount() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
 		int id = Integer.parseInt(uri);
@@ -54,7 +69,7 @@ public class TestQuery {
 
 	@Test
 	public void queryWithFilterAndFindAny() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
 		int id = Integer.parseInt(uri);
@@ -71,7 +86,7 @@ public class TestQuery {
 
 	@Test
 	public void collectionContainsQuery() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
 		int id = Integer.parseInt(uri);
@@ -83,7 +98,7 @@ public class TestQuery {
 
 	@Test
 	public void uuidFunctions() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		CompositeRepository repository = locator.resolve(CompositeRepository.class);
 		UUID id = UUID.randomUUID();
 		String uri = repository.insert(new Composite().setId(id));
@@ -95,7 +110,7 @@ public class TestQuery {
 
 	@Test
 	public void sendDomainObjectAsArgument() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		CompositeRepository repository = locator.resolve(CompositeRepository.class);
 		UUID id = UUID.randomUUID();
 		Random rnd = new Random();
@@ -108,7 +123,7 @@ public class TestQuery {
 
 	@Test
 	public void serchWithCustomSpec() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
 		int id = Integer.parseInt(uri);
@@ -119,7 +134,7 @@ public class TestQuery {
 
 	@Test
 	public void queryWithRegisteredSpecification() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
 		int id = Integer.parseInt(uri);
@@ -129,7 +144,7 @@ public class TestQuery {
 
 	@Test
 	public void toStringAndValueOf() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
 		int id = Integer.parseInt(uri);
@@ -140,7 +155,7 @@ public class TestQuery {
 
 	@Test
 	public void modOperator() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		long total = repository.query().count();
 		long totalEven = repository.query(it -> it.getID() % 2 == 0).count();
@@ -162,7 +177,7 @@ public class TestQuery {
 
 	@Test
 	public void queryWithNotFilter() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);
 		String uri = repository.insert(new Next());
 		int id = Integer.parseInt(uri);
@@ -175,7 +190,7 @@ public class TestQuery {
 
 	@Test
 	public void localDateFunctions() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DataContext db = locator.resolve(DataContext.class);
 		LocalDate ld = LocalDate.now();
 		Clicked cl = new Clicked().setDate(ld);
@@ -192,7 +207,7 @@ public class TestQuery {
 
 	@Test
 	public void offsetDateTimeFunctions() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DataContext db = locator.resolve(DataContext.class);
 		Clicked cl = new Clicked();
 		db.submit(cl);
@@ -206,7 +221,7 @@ public class TestQuery {
 
 	//@Test
 	public void numberFunctions() throws IOException {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = container;
 		DataContext db = locator.resolve(DataContext.class);
 		LocalDate ld = LocalDate.now();
 		Clicked cl = new Clicked().setDate(ld);

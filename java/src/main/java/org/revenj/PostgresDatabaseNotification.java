@@ -1,9 +1,9 @@
-package org.revenj.postgres;
+package org.revenj;
 
 import org.postgresql.PGNotification;
 import org.postgresql.core.BaseConnection;
-import org.revenj.Utils;
 import org.revenj.patterns.*;
+import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.converters.StringConverter;
 import rx.Observable;
 import rx.subjects.PublishSubject;
@@ -13,15 +13,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
-public class PostgresDatabaseNotification implements EagerNotification, Closeable {
+final class PostgresDatabaseNotification implements EagerNotification, Closeable {
 
 	private final Function<ServiceLocator, Connection> connectionFactory;
 	private final Optional<DomainModel> domainModel;
@@ -34,15 +31,30 @@ public class PostgresDatabaseNotification implements EagerNotification, Closeabl
 	private final ConcurrentMap<String, HashSet<Class<?>>> targets = new ConcurrentHashMap<>();
 
 	private int retryCount;
+	private final int timeout;
 
 	private Connection connection;
 	private boolean isClosed;
 
-	public PostgresDatabaseNotification(Function<ServiceLocator, Connection> connectionFactory, Optional<DomainModel> domainModel, ServiceLocator locator) {
+	public PostgresDatabaseNotification(
+			Function<ServiceLocator, Connection> connectionFactory,
+			Optional<DomainModel> domainModel,
+			Properties properties,
+			ServiceLocator locator) {
 		this.connectionFactory = connectionFactory;
 		this.domainModel = domainModel;
 		this.locator = locator;
 		notifications = subject.asObservable();
+		String timeoutValue = properties.getProperty("notificationTimeout");
+		if (timeoutValue != null) {
+			try {
+				timeout = Integer.parseInt(timeoutValue);
+			} catch (NumberFormatException e) {
+				throw new RuntimeException("Error parsing notificationTimeout setting");
+			}
+		} else {
+			timeout = 500;
+		}
 		setupConnection();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> isClosed = true));
 	}
@@ -61,13 +73,14 @@ public class PostgresDatabaseNotification implements EagerNotification, Closeabl
 				}
 			}
 			connection = connectionFactory.apply(locator);
-			if (connection instanceof BaseConnection == false) return;
-			BaseConnection bc = (BaseConnection) connection;
-			Statement stmt = bc.createStatement();
-			stmt.execute("LISTEN events; LISTEN aggregate_roots");
-			retryCount = 0;
-			Pooling pooling = new Pooling(bc, stmt);
-			new Thread(pooling).start();
+			if (connection instanceof BaseConnection) {
+				BaseConnection bc = (BaseConnection) connection;
+				Statement stmt = bc.createStatement();
+				stmt.execute("LISTEN events; LISTEN aggregate_roots");
+				retryCount = 0;
+				Pooling pooling = new Pooling(bc, stmt);
+				new Thread(pooling).start();
+			}
 		} catch (Exception ex) {
 			try {
 				Thread.sleep(1000 * retryCount);
@@ -91,11 +104,11 @@ public class PostgresDatabaseNotification implements EagerNotification, Closeabl
 			PostgresReader reader = new PostgresReader();
 			while (!isClosed) {
 				try {
-					ping.execute(";");
+					ping.execute("");
 					PGNotification[] notifications = connection.getNotifications();
 					if (notifications == null || notifications.length == 0) {
 						try {
-							Thread.sleep(500);
+							Thread.sleep(timeout);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}

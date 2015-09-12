@@ -3,6 +3,8 @@ package org.revenj.extensibility;
 import org.revenj.patterns.ServiceLocator;
 
 import java.lang.reflect.Type;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public interface Container extends ServiceLocator, AutoCloseable {
@@ -12,6 +14,8 @@ public interface Container extends ServiceLocator, AutoCloseable {
 	void registerInstance(Type type, Object service, boolean handleClose);
 
 	void registerFactory(Type type, Function<ServiceLocator, ?> factory, boolean singleton);
+
+	<T> void registerGenerics(Class<T> container, BiFunction<ServiceLocator, Type[], T> factory);
 
 	default <T> void register(Class<T> manifest, boolean singleton) {
 		registerClass(manifest, manifest, singleton);

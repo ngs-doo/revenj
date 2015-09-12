@@ -79,9 +79,9 @@ namespace Revenj.DomainPatterns
 				select v;
 		}
 
-		private IObservable<TSource> EagerChanges;
-		private IObservable<Lazy<TSource>> LazyChanges;
-		private IObservable<Lazy<TSource[]>> BulkChanges;
+		private readonly IObservable<TSource> EagerChanges;
+		private readonly IObservable<Lazy<TSource>> LazyChanges;
+		private readonly IObservable<Lazy<TSource[]>> BulkChanges;
 
 		public Func<IObserver<TSource>, IDisposable> SubscribeEager { get { return EagerChanges.Subscribe; } }
 		public Func<IObserver<Lazy<TSource>>, IDisposable> SubscribeLazy { get { return LazyChanges.Subscribe; } }
