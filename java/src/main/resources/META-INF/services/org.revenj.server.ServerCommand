@@ -1,9 +1,0 @@
-org.revenj.server.commands.CRUD.Create
-org.revenj.server.commands.CRUD.Read
-org.revenj.server.commands.CRUD.Update
-org.revenj.server.commands.CRUD.Delete
-org.revenj.server.commands.search.SearchDomainObject
-org.revenj.server.commands.CountDomainObject
-org.revenj.server.commands.DomainObjectExists
-org.revenj.server.commands.GetDomainObject
-org.revenj.server.commands.SubmitEvent

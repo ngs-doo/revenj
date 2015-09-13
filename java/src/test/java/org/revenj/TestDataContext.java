@@ -2,20 +2,23 @@ package org.revenj;
 
 import gen.model.Boot;
 import gen.model.Seq.Next;
-import gen.model.test.*;
-import gen.model.test.repositories.*;
+import gen.model.test.Clicked;
+import gen.model.test.Composite;
+import gen.model.test.Simple;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.patterns.*;
+import org.revenj.patterns.DataContext;
+import org.revenj.patterns.ServiceLocator;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.UUID;
 
 public class TestDataContext {
 
@@ -23,7 +26,7 @@ public class TestDataContext {
 
 	@Before
 	public void initContainer() throws IOException {
-		container = (Container) Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj");
 	}
 
 	@After

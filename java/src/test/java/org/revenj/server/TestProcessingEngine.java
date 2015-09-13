@@ -1,0 +1,149 @@
+package org.revenj.server;
+
+import gen.model.Boot;
+import gen.model.test.Composite;
+import gen.model.test.Simple;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.revenj.Revenj;
+import org.revenj.extensibility.Container;
+import org.revenj.extensibility.PluginLoader;
+import org.revenj.extensibility.SystemAspect;
+import org.revenj.patterns.Serialization;
+import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.WireSerialization;
+import org.revenj.server.CommandResultDescription;
+import org.revenj.server.ProcessingEngine;
+import org.revenj.server.ProcessingResult;
+import org.revenj.server.ServerCommandDescription;
+import org.revenj.server.commands.crud.Create;
+import org.revenj.server.commands.crud.Read;
+import org.revenj.server.servlet.Application;
+
+import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.UUID;
+import java.util.function.Function;
+
+public class TestProcessingEngine {
+
+	private Container container;
+
+	@Before
+	public void initContainer() throws Exception {
+		Properties properties = new Properties();
+		File revProps = new File("test.properties");
+		if (revProps.exists() && revProps.isFile()) {
+			properties.load(new FileReader(revProps));
+		}
+		Function<ServiceLocator, Connection> factory = locator -> {
+			try {
+				return DriverManager.getConnection("jdbc:postgresql://localhost/revenj", properties);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
+		container =
+				Revenj.setup(
+						factory,
+						properties,
+						Optional.<ClassLoader>empty(),
+						Arrays.asList((SystemAspect) new Boot()).iterator());
+		Optional<PluginLoader> plugins = container.tryResolve(PluginLoader.class);
+		WireSerialization serialization = container.resolve(WireSerialization.class);
+		container.register(new ProcessingEngine(container, serialization, plugins));
+	}
+
+	@After
+	public void closeContainer() throws Exception {
+		container.close();
+	}
+
+	@Test
+	public void passThroughEngine() throws Exception {
+		ProcessingEngine engine = container.resolve(ProcessingEngine.class);
+		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
+		ServerCommandDescription cd = new ServerCommandDescription<>(
+				null,
+				Create.class,
+				new Create.Argument<>("test.Composite", composite));
+		ProcessingResult<Object> result =
+				engine.execute(
+						Object.class,
+						Object.class,
+						new ServerCommandDescription[]{cd});
+		Assert.assertEquals(200, result.status);
+		Assert.assertEquals(1, result.executedCommandResults.length);
+		CommandResultDescription description = result.executedCommandResults[0];
+		Assert.assertEquals(201, description.result.status);
+		String uri = (String) description.result.data;
+		Assert.assertEquals(composite.getId().toString(), uri);
+		cd = new ServerCommandDescription<>(
+				null,
+				Read.class,
+				new Read.Argument("test.Composite", uri));
+		result =
+				engine.execute(
+						Object.class,
+						Object.class,
+						new ServerCommandDescription[]{cd});
+		Assert.assertEquals(200, result.status);
+		Assert.assertEquals(1, result.executedCommandResults.length);
+		description = result.executedCommandResults[0];
+		Assert.assertEquals(200, description.result.status);
+		Composite c2 = (Composite) description.result.data;
+		Assert.assertEquals(composite, c2);
+		Assert.assertEquals(composite.getId(), c2.getId());
+		Assert.assertEquals(composite.getSimple(), c2.getSimple());
+	}
+
+	@Test
+	public void jsonThroughEngine() throws Exception {
+		ProcessingEngine engine = container.resolve(ProcessingEngine.class);
+		WireSerialization serialization = container.resolve(WireSerialization.class);
+		Serialization<String> json = serialization.find(String.class).get();
+		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
+		ServerCommandDescription cd = new ServerCommandDescription<>(
+				null,
+				Create.class,
+				json.serialize(new Create.Argument<>("test.Composite", json.serialize(composite))));
+		ProcessingResult<String> result =
+				engine.execute(
+						String.class,
+						String.class,
+						new ServerCommandDescription[]{cd});
+		Assert.assertEquals(200, result.status);
+		Assert.assertEquals(1, result.executedCommandResults.length);
+		CommandResultDescription<String> description = result.executedCommandResults[0];
+		Assert.assertEquals(201, description.result.status);
+		String uri = json.deserialize(description.result.data, String.class);
+		Assert.assertEquals(composite.getId().toString(), uri);
+		cd = new ServerCommandDescription<>(
+				null,
+				Read.class,
+				json.serialize(new Read.Argument("test.Composite", uri)));
+		result =
+				engine.execute(
+						String.class,
+						String.class,
+						new ServerCommandDescription[]{cd});
+		Assert.assertEquals(200, result.status);
+		Assert.assertEquals(1, result.executedCommandResults.length);
+		description = result.executedCommandResults[0];
+		Assert.assertEquals(200, description.result.status);
+		Composite c2 = json.deserialize(description.result.data, Composite.class);
+		//Assert.assertEquals(composite, c2);//TODO
+		Assert.assertEquals(composite.getId(), c2.getId());
+		Assert.assertEquals(composite.getSimple(), c2.getSimple());
+	}
+}

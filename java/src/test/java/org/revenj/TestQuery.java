@@ -3,14 +3,20 @@ package org.revenj;
 import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
-import gen.model.test.*;
-import gen.model.test.repositories.*;
+import gen.model.test.Clicked;
+import gen.model.test.Composite;
+import gen.model.test.En;
+import gen.model.test.Simple;
+import gen.model.test.repositories.CompositeRepository;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.patterns.*;
+import org.revenj.patterns.DataContext;
+import org.revenj.patterns.Query;
+import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.Specification;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -23,7 +29,7 @@ public class TestQuery {
 
 	@Before
 	public void initContainer() throws IOException {
-		container = (Container) Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj");
 	}
 
 	@After

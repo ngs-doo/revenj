@@ -16,7 +16,7 @@ public class TestNotifications {
 
 	@Test
 	public void willRaiseNotification() throws Exception {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost/revenj");
 		DataContext context = locator.resolve(DataContext.class);
 		DataChangeNotification notification = locator.resolve(DataChangeNotification.class);
 		boolean[] hasRead = new boolean[1];

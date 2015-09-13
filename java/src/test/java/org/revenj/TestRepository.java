@@ -9,11 +9,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.patterns.*;
+import org.revenj.patterns.DomainEventStore;
+import org.revenj.patterns.Generic;
+import org.revenj.patterns.PersistableRepository;
+import org.revenj.patterns.ServiceLocator;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -23,7 +25,7 @@ public class TestRepository {
 
 	@Before
 	public void initContainer() throws IOException {
-		container = (Container) Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj");
 	}
 
 	@After
