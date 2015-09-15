@@ -9,8 +9,7 @@ public abstract class Guards {
 
 		int i = 0;
 		for (final T value : values) {
-			if (value == null)
-				throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+			if (value == null) throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
 			i++;
 		}
 	}
@@ -19,8 +18,7 @@ public abstract class Guards {
 		if (values == null) return;
 
 		for (int i = 0; i < values.length; i++) {
-			if (values[i] == null)
-				throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+			if (values[i] == null) throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
 		}
 	}
 
@@ -28,8 +26,17 @@ public abstract class Guards {
 		if (values == null) return;
 
 		for (int i = 0; i < values.size(); i++) {
-			if (values.get(i) == null)
-				throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+			if (values.get(i) == null) throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+		}
+	}
+
+	public static <T> void checkNulls(final LinkedList<T> values) {
+		if (values == null) return;
+
+		int i = 0;
+		for (final T value : values) {
+			if (value == null) throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+			i++;
 		}
 	}
 
@@ -38,7 +45,7 @@ public abstract class Guards {
 		try {
 			value.setScale(scale);
 		} catch (final ArithmeticException e) {
-			throw new IllegalArgumentException("Decimal places allowed:" + scale + ".Value:" + value, e);
+			throw new IllegalArgumentException("Decimal places allowed: " + scale + ". Value: " + value, e);
 		}
 	}
 
@@ -51,7 +58,7 @@ public abstract class Guards {
 			try {
 				value.setScale(scale);
 			} catch (final ArithmeticException e) {
-				throw new IllegalArgumentException("Invalid value for element at index " + i + ".Decimal places allowed:" + scale + ".Value:" + value, e);
+				throw new IllegalArgumentException("Invalid value for element at index " + i + ". Decimal places allowed: " + scale + ". Value: " + value, e);
 			}
 		}
 	}
@@ -65,8 +72,23 @@ public abstract class Guards {
 			try {
 				value.setScale(scale);
 			} catch (final ArithmeticException e) {
-				throw new IllegalArgumentException("Invalid value for element at index " + i + ".Decimal places allowed:" + scale + ".Value:" + value, e);
+				throw new IllegalArgumentException("Invalid value for element at index " + i + ". Decimal places allowed: " + scale + ". Value: " + value, e);
 			}
+		}
+	}
+
+	public static void checkScale(final LinkedList<BigDecimal> values, final int scale) {
+		if (values == null) return;
+
+		int i = 0;
+		for (final BigDecimal value : values) {
+			try {
+				if (value != null) value.setScale(scale);
+			} catch (final ArithmeticException e) {
+				throw new IllegalArgumentException(
+						"Invalid value for element at index " + i + ". Decimal places allowed: " + scale + ". Value: " + value, e);
+			}
+			i++;
 		}
 	}
 
@@ -79,7 +101,7 @@ public abstract class Guards {
 				if (value != null) value.setScale(scale);
 			} catch (final ArithmeticException e) {
 				throw new IllegalArgumentException(
-						"Invalid value for element at index " + i + ".Decimal places allowed:" + scale + ".Value: " + value, e);
+						"Invalid value for element at index " + i + ". Decimal places allowed: " + scale + ". Value: " + value, e);
 			}
 			i++;
 		}
@@ -141,14 +163,22 @@ public abstract class Guards {
 		return result;
 	}
 
+	public static Queue<BigDecimal> setScale(final Queue<BigDecimal> values, final int scale) {
+		if (values == null) return null;
+
+		final Queue<BigDecimal> result = new ArrayDeque<BigDecimal>();
+		for (final BigDecimal value : values) {
+			if (value == null) throw new NullPointerException("Default Queue implementation (java.util.ArrayDeque) does not support null elements!");
+			result.add(setScale(value, scale));
+		}
+		return result;
+	}
+
 	public static LinkedList<BigDecimal> setScale(final LinkedList<BigDecimal> values, final int scale) {
 		if (values == null) return null;
 
 		final LinkedList<BigDecimal> result = new LinkedList<BigDecimal>();
-		for (int i = 0; i < values.size(); i++) {
-			final BigDecimal value = values.get(i);
-			result.add(value != null ? setScale(value, scale) : null);
-		}
+		for (final BigDecimal value : values) result.add(value != null ? setScale(value, scale) : null);
 		return result;
 	}
 
@@ -188,20 +218,15 @@ public abstract class Guards {
 		}
 	}
 
-	public static <T> boolean compareQueue(final Queue<T> left, final Queue<T> right) {
-		if (left == null && right == null) return true;
-		if (left == null || right == null) return false;
+	public static void checkLength(final LinkedList<String> values, final int length) {
+		if (values == null) return;
 
-		final Iterator<T> leftIterator = left.iterator();
-		final Iterator<T> rightIterator = right.iterator();
-
-		while (leftIterator.hasNext() && rightIterator.hasNext()) {
-			final T l = leftIterator.next();
-			final T r = rightIterator.next();
-			if (!(l == r || l != null && r != null && l.equals(r))) return false;
+		int i = 0;
+		for (final String value : values) {
+			if (value != null && value.length() > length) throw new IllegalArgumentException(
+					"Invalid value for element at index " + i + ". Maximum length allowed: " + length + ". Value: " + value);
+			i++;
 		}
-
-		return leftIterator.hasNext() == rightIterator.hasNext();
 	}
 
 	public static boolean compareBigDecimal(final Iterable<BigDecimal> left, final Iterable<BigDecimal> right) {
@@ -238,7 +263,7 @@ public abstract class Guards {
 		public int compare(final BigDecimal left, final BigDecimal right) {
 			return left == null && right == null ? 0
 					: left == null ? -1
-					: right == null ? 1
+					: right == null? 1
 					: left.compareTo(right);
 		}
 	};
@@ -299,5 +324,21 @@ public abstract class Guards {
 			return false;
 		}
 		return true;
+	}
+
+	public static <T> boolean compareQueue(final Queue<T> left, final Queue<T> right) {
+		if (left == null && right == null) return true;
+		if (left == null || right == null) return false;
+
+		final Iterator<T> leftIterator = left.iterator();
+		final Iterator<T> rightIterator = right.iterator();
+
+		while (leftIterator.hasNext() && rightIterator.hasNext()) {
+			final T l = leftIterator.next();
+			final T r = rightIterator.next();
+			if (!(l == r || l != null && r != null && l.equals(r))) return false;
+		}
+
+		return leftIterator.hasNext() == rightIterator.hasNext();
 	}
 }

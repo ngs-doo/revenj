@@ -6,30 +6,35 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Revenj.DomainPatterns;
+using System.Diagnostics;
 
 namespace Revenj.SignalR2SelfHost
 {
 	public class NotifyHub : Hub
 	{
+		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
+
 		private static bool IsRunning = true;
 		internal static IDomainModel Model;
 		internal static IDataChangeNotification ChangeNotification;
-		private static ConcurrentDictionary<Type, ConcurrentDictionary<string, IDisposable>> Listeners =
+		private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, IDisposable>> Listeners =
 			new ConcurrentDictionary<Type, ConcurrentDictionary<string, IDisposable>>(1, 127);
 
-		private static ConcurrentDictionary<string, ConcurrentBag<Type>> Connections =
+		private static readonly ConcurrentDictionary<string, ConcurrentBag<Type>> Connections =
 			new ConcurrentDictionary<string, ConcurrentBag<Type>>();
 
-		private static BlockingCollection<Action> Messages = new BlockingCollection<Action>(new ConcurrentQueue<Action>());
+		private static readonly BlockingCollection<Action> Messages = new BlockingCollection<Action>(new ConcurrentQueue<Action>());
 
 		static NotifyHub()
 		{
+			TraceSource.TraceEvent(TraceEventType.Start, 1101);
 			var thread = new Thread(SendMessages);
 			thread.Start();
 		}
 
 		internal static void Stop()
 		{
+			TraceSource.TraceEvent(TraceEventType.Stop, 1101);
 			IsRunning = false;
 		}
 
@@ -44,6 +49,7 @@ namespace Revenj.SignalR2SelfHost
 				}
 				catch (Exception ex)
 				{
+					TraceSource.TraceEvent(TraceEventType.Error, 1104, "{0}", ex);
 					Console.Write(ex.Message);
 				}
 			} while (IsRunning || Messages.Count > 0);
@@ -51,6 +57,7 @@ namespace Revenj.SignalR2SelfHost
 
 		public override Task OnDisconnected(bool stopCalled)
 		{
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1102, "Disconnected: {0}", Context.ConnectionId);
 			ConcurrentBag<Type> types;
 			if (Connections.TryRemove(Context.ConnectionId, out types))
 			{
@@ -67,6 +74,8 @@ namespace Revenj.SignalR2SelfHost
 
 		public void Listen(string domainObject)
 		{
+			var cid = Context.ConnectionId;
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1111, "Listen request: {0} for {1}", cid, domainObject);
 			if (!IsRunning)
 			{
 				Clients.Caller.Error("In shutdown. Try again later");
@@ -80,15 +89,18 @@ namespace Revenj.SignalR2SelfHost
 				return;
 			}
 			var rl = (IListener)Activator.CreateInstance(typeof(DomainObjectListen<>).MakeGenericType(found));
-			var cid = Context.ConnectionId;
 			if (rl.Register(cid, ids => NotifyDomainObjectChanges(cid, domainObject, ids)))
+			{
+				TraceSource.TraceEvent(TraceEventType.Verbose, 1111, "Registered: {0} for {1}", cid, domainObject);
 				Clients.Caller.Success("Registered for " + domainObject);
-			else
-				Clients.Caller.Error("Error registering for " + domainObject);
+			}
+			else Clients.Caller.Error("Error registering for " + domainObject);
 		}
 
 		public void WatchSingle(string domainObject, string uri)
 		{
+			var cid = Context.ConnectionId;
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1112, "Watch single request: {0} for {1}", cid, domainObject);
 			if (!IsRunning)
 			{
 				Clients.Caller.Error("In shutdown. Try again later");
@@ -102,15 +114,19 @@ namespace Revenj.SignalR2SelfHost
 				return;
 			}
 			var rl = (IListener)Activator.CreateInstance(typeof(DomainObjectListen<>).MakeGenericType(found));
-			var cid = Context.ConnectionId;
 			if (rl.Register(cid, ids => { if (ids.Contains(uri)) NotifySingleUriChange(cid); }))
+			{
+				TraceSource.TraceEvent(TraceEventType.Verbose, 1112, "Registered: {0} for {1}", cid, domainObject);
 				Clients.Caller.Success("Registered for " + domainObject);
+			}
 			else
 				Clients.Caller.Error("Error registering for " + domainObject);
 		}
-		
+
 		public void WatchCollection(string domainObject, string[] uris)
 		{
+			var cid = Context.ConnectionId;
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1113, "Watch collection request: {0} for {1}", cid, domainObject);
 			if (!IsRunning)
 			{
 				Clients.Caller.Error("In shutdown. Try again later");
@@ -124,16 +140,20 @@ namespace Revenj.SignalR2SelfHost
 				return;
 			}
 			var rl = (IListener)Activator.CreateInstance(typeof(DomainObjectListen<>).MakeGenericType(found));
-			var cid = Context.ConnectionId;
 			var set = new HashSet<string>(uris);
 			if (rl.Register(cid, ids => { if (set.Overlaps(ids)) NotifyCollectionUriChange(cid, set.Intersect(uris).ToArray()); }))
+			{
+				TraceSource.TraceEvent(TraceEventType.Verbose, 1113, "Registered: {0} for {1}", cid, domainObject);
 				Clients.Caller.Success("Registered for " + domainObject);
+			}
 			else
 				Clients.Caller.Error("Error registering for " + domainObject);
 		}
 
 		public void WatchSpecification(string domainObject, string specification, string json)
 		{
+			var cid = Context.ConnectionId;
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1114, "Watch specification request: {0} for {1}", cid, domainObject);
 			if (!IsRunning)
 			{
 				Clients.Caller.Error("In shutdown. Try again later");
@@ -153,15 +173,19 @@ namespace Revenj.SignalR2SelfHost
 				return;
 			}
 			var rl = (IListener)Activator.CreateInstance(typeof(DomainObjectListen<>).MakeGenericType(found));
-			var cid = Context.ConnectionId;
 			if (rl.Register(cid, specType, json, id => NotifySpecificationMatch(cid, id)))
+			{
+				TraceSource.TraceEvent(TraceEventType.Verbose, 1114, "Registered: {0} for {1}", cid, domainObject);
 				Clients.Caller.Success("Registered for " + specification + " in " + domainObject);
+			}
 			else
 				Clients.Caller.Error("Error registering for " + domainObject);
 		}
 
 		public void UnListen(string domainObject)
 		{
+			var cid = Context.ConnectionId;
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1113, "Unlisten: {0} for {1}", cid, domainObject);
 			var found = Model.Find(domainObject);
 			if (found == null
 				|| !typeof(IAggregateRoot).IsAssignableFrom(found) && !typeof(IDomainEvent).IsAssignableFrom(found))
@@ -176,7 +200,7 @@ namespace Revenj.SignalR2SelfHost
 				return;
 			}
 			IDisposable registration;
-			if (dict.TryRemove(Context.ConnectionId, out registration) && registration != null)
+			if (dict.TryRemove(cid, out registration) && registration != null)
 				registration.Dispose();
 		}
 
@@ -256,21 +280,25 @@ namespace Revenj.SignalR2SelfHost
 
 		void NotifyDomainObjectChanges(string clientID, string name, string[] ids)
 		{
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1121, "Notify objects: {0} for {1}", clientID, name);
 			Messages.Add(() => Clients.Client(clientID).Notify(name, ids));
 		}
 
 		void NotifySingleUriChange(string clientID)
 		{
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1122, "Notify uri: {0}", clientID);
 			Messages.Add(() => Clients.Client(clientID).Changed());
 		}
 
 		void NotifyCollectionUriChange(string clientID, string[] ids)
 		{
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1123, "Notify uris: {0}", clientID);
 			Messages.Add(() => Clients.Client(clientID).Found(ids));
 		}
 
 		void NotifySpecificationMatch(string clientID, string id)
 		{
+			TraceSource.TraceEvent(TraceEventType.Verbose, 1124, "Notify specification: {0}", clientID);
 			Messages.Add(() => Clients.Client(clientID).Matched(id));
 		}
 	}
