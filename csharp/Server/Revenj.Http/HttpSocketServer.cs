@@ -26,7 +26,7 @@ namespace Revenj.Http
 		private readonly Routes Routes;
 		private readonly HttpAuth Authentication;
 
-		private readonly ConcurrentStack<HttpSocketContext> Contexts = new ConcurrentStack<HttpSocketContext>();
+		private readonly ThreadLocal<HttpSocketContext> Context;
 
 		public HttpSocketServer(IServiceProvider locator)
 		{
@@ -92,9 +92,8 @@ Please check settings: " + string.Join(", ", endpoints));
 				Authentication = locator.Resolve<HttpAuth>(authType);
 			}
 			else Authentication = locator.Resolve<HttpAuth>();
-			for (int i = 0; i < Environment.ProcessorCount * 3; i++)
-				Contexts.Push(new HttpSocketContext("http://127.0.0.1/", MessageSizeLimit));
-		}
+			Context = new ThreadLocal<HttpSocketContext>(() => new HttpSocketContext("http://127.0.0.1/", MessageSizeLimit));
+        }
 
 		public void Run()
 		{
@@ -140,10 +139,8 @@ Please check settings: " + string.Join(", ", endpoints));
 		{
 			var socket = (Socket)state;
 			socket.Blocking = true;
-			HttpSocketContext ctx;
 			IPrincipal previousPrincipal = null;
-			if (!Contexts.TryPop(out ctx))
-				ctx = new HttpSocketContext(socket.LocalEndPoint.ToString(), MessageSizeLimit);
+			var ctx = Context.Value;
 			ctx.Reset();
 			try
 			{
@@ -222,10 +219,6 @@ Please check settings: " + string.Join(", ", endpoints));
 					Console.WriteLine(ex2.Message);
 					TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex2);
 				}
-			}
-			finally
-			{
-				Contexts.Push(ctx);
 			}
 		}
 	}
