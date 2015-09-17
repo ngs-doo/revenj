@@ -42,6 +42,7 @@ public class TestProcessingEngine {
 	@Before
 	public void initContainer() throws Exception {
 		Properties properties = new Properties();
+		properties.setProperty("namespace", "gen.model");
 		File revProps = new File("test.properties");
 		if (revProps.exists() && revProps.isFile()) {
 			properties.load(new FileReader(revProps));

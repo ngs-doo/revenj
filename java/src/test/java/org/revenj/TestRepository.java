@@ -144,6 +144,18 @@ public class TestRepository {
 	}
 
 	@Test
+	public void specificationSnowflakeSearch() throws IOException {
+		ServiceLocator locator = container;
+		CompositeRepository repository = locator.resolve(CompositeRepository.class);
+		CompositeListRepository listRepository = locator.resolve(CompositeListRepository.class);
+		Random rnd = new Random();
+		Simple simple = new Simple().setNumber(rnd.nextInt(100000) + 2000);
+		repository.insert(new Composite().setSimple(simple));
+		List<CompositeList> found = listRepository.search(new CompositeList.ForSimple(Arrays.asList(simple)));
+		Assert.assertEquals(1, found.size());
+	}
+
+	@Test
 	public void specificationSnowflakeFind() throws IOException {
 		ServiceLocator locator = container;
 		CompositeRepository repository = locator.resolve(CompositeRepository.class);
