@@ -45,7 +45,7 @@ public abstract class Revenj {
 		if (jdbcUrl == null) {
 			throw new IOException("jdbcUrl is missing from revenj.properties");
 		}
-		String plugins = properties.getProperty("pluginsPath");
+		String plugins = properties.getProperty("revenj.pluginsPath");
 		File pluginsPath = null;
 		if (plugins != null) {
 			File pp = new File(plugins);

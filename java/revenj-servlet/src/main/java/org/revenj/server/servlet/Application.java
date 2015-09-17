@@ -22,7 +22,7 @@ public class Application implements ServletContextListener {
 		container = Revenj.setup();
 		Properties properties = container.resolve(Properties.class);
 		if ("0".equals(properties.getProperty("aspects-count"))) {
-			String pluginsPath = properties.getProperty("pluginsPath");
+			String pluginsPath = properties.getProperty("revenj.pluginsPath");
 			if (pluginsPath == null) {
 				throw new IOException("System aspects not configured. Probably an error in the configuration.\n" +
 						"Specify pluginsPath in Properties file (currently not set).");
@@ -31,7 +31,7 @@ public class Application implements ServletContextListener {
 						"Specified pluginsPath: " + pluginsPath + " is not an directory.");
 			}
 			throw new IOException("System aspects not configured. Probably an error in the configuration.\n" +
-					"Check if pluginsPath (" + pluginsPath + ") is correctly set in Properties file.");
+					"Check if revenj.pluginsPath (" + pluginsPath + ") is correctly set in the Properties file.");
 		}
 	}
 

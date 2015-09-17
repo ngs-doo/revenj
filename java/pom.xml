@@ -8,6 +8,7 @@
 	<modules>
 		<module>revenj-core</module>
 		<module>revenj-servlet</module>
+		<module>revenj-spring</module>
 	</modules>
 	<packaging>pom</packaging>
 	<version>0.2.0</version>
