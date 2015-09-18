@@ -85,7 +85,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		this.detailsURI = detailsURI == null ? new String[0] : detailsURI;
 	}
 
-	private static final long serialVersionUID = -4053638405587575291L;
+	private static final long serialVersionUID = 6821081716713315586L;
 	
 	private int ID;
 
@@ -190,7 +190,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 			agg -> { 
 				
 		SingleDetail _res = agg.__originalValue;
-		agg.__originalValue = new SingleDetail(agg);
+		agg.__originalValue = (SingleDetail)agg.clone();
 		if (_res != null) {
 			return _res;
 		}				
@@ -206,7 +206,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		}
 		URI = gen.model.test.converters.SingleDetailConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
-		this.__originalValue = new SingleDetail(this);
+		this.__originalValue = (SingleDetail)this.clone();
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<SingleDetail>[] readers, int __index___ID, int __index___detailsURI) {

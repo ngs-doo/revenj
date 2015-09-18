@@ -77,7 +77,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	private static final long serialVersionUID = -1081365706812442564L;
+	private static final long serialVersionUID = -116884395647336597L;
 	
 	private final java.util.UUID id;
 
@@ -150,7 +150,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 
 	
 
-public static class ForSimple   implements java.io.Serializable {
+public static class ForSimple   implements java.io.Serializable, org.revenj.patterns.Specification<CompositeList> {
 	
 	
 	
@@ -167,7 +167,7 @@ public static class ForSimple   implements java.io.Serializable {
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = -5281653591481471651L;
+	private static final long serialVersionUID = 9062634935260367620L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 
@@ -188,6 +188,10 @@ public static class ForSimple   implements java.io.Serializable {
 		return this;
 	}
 
+	
+		public boolean test(gen.model.test.CompositeList it) {
+			return (this.getSimples().contains(it.getSimple()));
+		}
 }
 
 }

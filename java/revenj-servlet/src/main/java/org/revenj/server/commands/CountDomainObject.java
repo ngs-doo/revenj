@@ -70,11 +70,7 @@ public class CountDomainObject implements ServerCommand {
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
-		try {
-			long found = repository.query(filter.orElse(null)).count();
-			return CommandResult.success(Long.toString(found), output.serialize(found));
-		} catch (IOException e) {
-			return CommandResult.badRequest("Error executing query. " + e.getMessage());
-		}
+		long found = repository.count(filter.orElse(null));
+		return CommandResult.success(Long.toString(found), output.serialize(found));
 	}
 }

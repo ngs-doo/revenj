@@ -80,6 +80,17 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		return "LazyLoad(" + URI + ')';
 	}
 	
+	
+	public LazyLoad(
+			final gen.model.test.Composite comp,
+			final gen.model.test.SingleDetail sd) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setComp(comp);
+		setSd(sd);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private LazyLoad(
@@ -99,7 +110,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		this.sdID = sdID;
 	}
 
-	private static final long serialVersionUID = -5396648296584140895L;
+	private static final long serialVersionUID = 5939722168242197240L;
 	
 	private int ID;
 
@@ -283,7 +294,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 			agg -> { 
 				
 		LazyLoad _res = agg.__originalValue;
-		agg.__originalValue = new LazyLoad(agg);
+		agg.__originalValue = (LazyLoad)agg.clone();
 		if (_res != null) {
 			return _res;
 		}				
@@ -299,7 +310,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		}
 		URI = gen.model.test.converters.LazyLoadConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
-		this.__originalValue = new LazyLoad(this);
+		this.__originalValue = (LazyLoad)this.clone();
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers, int __index___ID, int __index___compURI, int __index___compID, int __index___sdURI, int __index___sdID) {
@@ -319,14 +330,4 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		readers[__index__extended_sdURI] = (item, reader, context) -> { item.sdURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_sdID] = (item, reader, context) -> { item.sdID = org.revenj.postgres.converters.IntConverter.parseNullable(reader); };
 	}
-	
-	
-	public LazyLoad(
-			final gen.model.test.Composite comp,
-			final gen.model.test.SingleDetail sd) {
-			
-		setComp(comp);
-		setSd(sd);
-	}
-
 }

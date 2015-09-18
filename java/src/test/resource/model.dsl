@@ -12,7 +12,7 @@ module test {
 		Composite? *comp;
 		SingleDetail? *sd;
 	}
-	root SingleDetail {
+	root SingleDetail { 
 		detail<LazyLoad.sd> details;
 	}
 	root Composite(id) {
@@ -92,5 +92,15 @@ module mixinReference {
 	}
 	aggregate Author {
 		string name;
+		Person person;
+		Resident *rezident;
+		Child[] children;
 	}
+	struct Test {
+		int x;
+		Author author;
+	}
+	entity Person { date birth; }
+	entity Resident(id) { uuid id; date birth; }
+	entity Child { long version; }
 }

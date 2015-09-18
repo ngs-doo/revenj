@@ -39,8 +39,7 @@ public class AuthorRepository   implements org.revenj.patterns.Repository<gen.mo
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
-				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
-				reader.process(pgo.getValue());
+				reader.process(rs.getString(1));
 				result.add(converter.from(reader));
 			}
 		}
@@ -64,6 +63,7 @@ public class AuthorRepository   implements org.revenj.patterns.Repository<gen.mo
 				throw new RuntimeException(e);
 			}
 		}
+		final String selectType = "SELECT it";
 		org.revenj.patterns.Specification<gen.model.mixinReference.Author> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
@@ -97,6 +97,78 @@ public class AuthorRepository   implements org.revenj.patterns.Repository<gen.mo
 		}
 	}
 
+	@Override
+	public long count(java.util.Optional<org.revenj.patterns.Specification<gen.model.mixinReference.Author>> filter) {
+		if (filter == null || filter.orElse(null) == null) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM \"mixinReference\".\"Author_entity\" r");
+				java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				return rs.getLong(1);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		String sql = null;
+		final String selectType = "SELECT COUNT(*)";
+		org.revenj.patterns.Specification<gen.model.mixinReference.Author> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
+			if (sql != null) {
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+					applyFilters.accept(statement);
+					try (java.sql.ResultSet rs = statement.executeQuery()) {
+						rs.next();
+						return rs.getLong(1);
+					}
+				} catch (java.sql.SQLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try {
+				return query(specification).count();
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Override
+	public boolean exists(java.util.Optional<org.revenj.patterns.Specification<gen.model.mixinReference.Author>> filter) {
+		if (filter == null || filter.orElse(null) == null) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT exists(SELECT * FROM \"mixinReference\".\"Author_entity\" r)");
+				java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				return rs.getBoolean(1);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		String sql = null;
+		final String selectType = "SELECT exists(SELECT *";
+		org.revenj.patterns.Specification<gen.model.mixinReference.Author> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
+			if (sql != null) {
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
+					applyFilters.accept(statement);
+					try (java.sql.ResultSet rs = statement.executeQuery()) {
+						rs.next();
+						return rs.getBoolean(1);
+					}
+				} catch (java.sql.SQLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try {
+				return query(specification).any();
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
 	
 	@Override
 	public java.util.List<gen.model.mixinReference.Author> find(String[] uris) {
@@ -108,8 +180,7 @@ public class AuthorRepository   implements org.revenj.patterns.Repository<gen.mo
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
 				while (rs.next()) {
-					org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
-					reader.process(pgo.getValue());
+					reader.process(rs.getString(1));
 					result.add(converter.from(reader));
 				}
 			}
@@ -225,63 +296,6 @@ public class AuthorRepository   implements org.revenj.patterns.Repository<gen.mo
 				if (message != null) throw new java.io.IOException(message);
 			}
 			return result;
-		} catch (java.sql.SQLException e) {
-			throw new java.io.IOException(e);
-		}
-	}
-
-	
-	@Override
-	public String insert(gen.model.mixinReference.Author item) throws java.io.IOException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"mixinReference\".\"insert_Author\"(ARRAY[?])");
-			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
-			java.util.List<gen.model.mixinReference.Author> insert = java.util.Collections.singletonList(item);
-				assignSequenceID.accept(insert, connection);
-			if (insertLoop != null) insertLoop.accept(insert, sw);
-			sw.reset();
-			org.revenj.postgres.converters.PostgresTuple tuple = converter.to(item);
-			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
-			pgo.setType("\"mixinReference\".\"Author_entity\"");
-			sw.reset();
-			tuple.buildTuple(sw, false);
-			pgo.setValue(sw.toString());
-			statement.setObject(1, pgo);
-			statement.execute();
-			trackChanges.apply(item);
-			return item.getURI();
-		} catch (java.sql.SQLException e) {
-			throw new java.io.IOException(e);
-		}
-	}
-
-	@Override
-	public void update(gen.model.mixinReference.Author oldItem, gen.model.mixinReference.Author newItem) throws java.io.IOException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"mixinReference\".\"update_Author\"(ARRAY[?], ARRAY[?])");
-			 org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
-			if (oldItem == null) oldItem = trackChanges.apply(newItem);
-			else trackChanges.apply(newItem);
-			if (oldItem == null) oldItem = find(newItem.getURI()).get();
-			java.util.List<gen.model.mixinReference.Author> oldUpdate = java.util.Collections.singletonList(oldItem);
-			java.util.List<gen.model.mixinReference.Author> newUpdate = java.util.Collections.singletonList(newItem);
-			if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
-			org.revenj.postgres.converters.PostgresTuple tupleOld = converter.to(oldItem);
-			org.revenj.postgres.converters.PostgresTuple tupleNew = converter.to(newItem);
-			org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
-			org.postgresql.util.PGobject pgNew = new org.postgresql.util.PGobject();
-			pgOld.setType("\"mixinReference\".\"Author_entity\"");
-			pgNew.setType("\"mixinReference\".\"Author_entity\"");
-			tupleOld.buildTuple(sw, false);
-			pgOld.setValue(sw.toString());
-			sw.reset();
-			tupleNew.buildTuple(sw, false);
-			pgNew.setValue(sw.toString());
-			statement.setObject(1, pgOld);
-			statement.setObject(2, pgNew);
-			try (java.sql.ResultSet rs = statement.executeQuery()) {
-				rs.next();
-				String message = rs.getString(1);
-				if (message != null) throw new java.io.IOException(message);
-			}
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
 		}

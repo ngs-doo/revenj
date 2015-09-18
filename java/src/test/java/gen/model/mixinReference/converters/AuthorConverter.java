@@ -50,15 +50,50 @@ public class AuthorConverter implements ObjectConverter<gen.model.mixinReference
 		column = columnsExtended.stream().filter(it -> "name".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'name' column in mixinReference Author. Check if DB is in sync");
 		__index__extended_name = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "person".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'person' column in mixinReference Author_entity. Check if DB is in sync");
+		__index___person = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "person".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'person' column in mixinReference Author. Check if DB is in sync");
+		__index__extended_person = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "rezident".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'rezident' column in mixinReference Author_entity. Check if DB is in sync");
+		__index___rezident = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "rezident".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'rezident' column in mixinReference Author. Check if DB is in sync");
+		__index__extended_rezident = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "rezidentID".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'rezidentID' column in mixinReference Author_entity. Check if DB is in sync");
+		__index___rezidentID = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "rezidentID".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'rezidentID' column in mixinReference Author. Check if DB is in sync");
+		__index__extended_rezidentID = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "children".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'children' column in mixinReference Author_entity. Check if DB is in sync");
+		__index___children = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "children".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'children' column in mixinReference Author. Check if DB is in sync");
+		__index__extended_children = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
+		__converter_person = locator.resolve(gen.model.mixinReference.converters.PersonConverter.class);
+		__converter_rezident = locator.resolve(gen.model.mixinReference.converters.ResidentConverter.class);
+		__converter_children = locator.resolve(gen.model.mixinReference.converters.ChildConverter.class);
 		
 			
-		gen.model.mixinReference.Author.__configureConverter(readers, __index___ID, __index___name);
+		gen.model.mixinReference.Author.__configureConverter(readers, __index___ID, __index___name, __converter_person, __index___person, __converter_rezident, __index___rezident, __index___rezidentID, __converter_children, __index___children);
 			
-		gen.model.mixinReference.Author.__configureConverterExtended(readersExtended, __index__extended_ID, __index__extended_name);
+		gen.model.mixinReference.Author.__configureConverterExtended(readersExtended, __index__extended_ID, __index__extended_name, __converter_person, __index__extended_person, __converter_rezident, __index__extended_rezident, __index__extended_rezidentID, __converter_children, __index__extended_children);
 	}
 
 	@Override
@@ -85,6 +120,10 @@ public class AuthorConverter implements ObjectConverter<gen.model.mixinReference
 		
 		items[__index___ID] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getID());
 		items[__index___name] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getName());
+		items[__index___person] = __converter_person.to(instance.getPerson());
+		items[__index___rezident] = __converter_rezident.to(instance.getRezident());
+		items[__index___rezidentID] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getRezidentID());
+		items[__index___children] = org.revenj.postgres.converters.ArrayTuple.create(instance.getChildren(), __converter_children::to);
 		return RecordTuple.from(items);
 	}
 
@@ -110,6 +149,10 @@ public class AuthorConverter implements ObjectConverter<gen.model.mixinReference
 		
 		items[__index__extended_ID] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getID());
 		items[__index__extended_name] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getName());
+		items[__index__extended_person] = __converter_person.toExtended(instance.getPerson());
+		items[__index__extended_rezident] = __converter_rezident.toExtended(instance.getRezident());
+		items[__index__extended_rezidentID] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getRezidentID());
+		items[__index__extended_children] = org.revenj.postgres.converters.ArrayTuple.create(instance.getChildren(), __converter_children::toExtended);
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
@@ -137,4 +180,15 @@ public class AuthorConverter implements ObjectConverter<gen.model.mixinReference
 	}
 	private final int __index___name;
 	private final int __index__extended_name;
+	private gen.model.mixinReference.converters.PersonConverter __converter_person;
+	private final int __index___person;
+	private final int __index__extended_person;
+	private gen.model.mixinReference.converters.ResidentConverter __converter_rezident;
+	private final int __index___rezident;
+	private final int __index__extended_rezident;
+	private final int __index___rezidentID;
+	private final int __index__extended_rezidentID;
+	private gen.model.mixinReference.converters.ChildConverter __converter_children;
+	private final int __index___children;
+	private final int __index__extended_children;
 }

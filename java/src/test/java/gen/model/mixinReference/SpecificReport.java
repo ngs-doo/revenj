@@ -76,6 +76,15 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		return "SpecificReport(" + URI + ')';
 	}
 	
+	
+	public SpecificReport(
+			final gen.model.mixinReference.Author author) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setAuthor(author);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
@@ -91,7 +100,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		this.authorID = authorID;
 	}
 
-	private static final long serialVersionUID = 5705205896720223903L;
+	private static final long serialVersionUID = -1026941555917553614L;
 	
 	private int ID;
 
@@ -154,7 +163,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 			agg -> { 
 				
 		SpecificReport _res = agg.__originalValue;
-		agg.__originalValue = new SpecificReport(agg);
+		agg.__originalValue = (SpecificReport)agg.clone();
 		if (_res != null) {
 			return _res;
 		}				
@@ -227,7 +236,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		}
 		URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
-		this.__originalValue = new SpecificReport(this);
+		this.__originalValue = (SpecificReport)this.clone();
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<SpecificReport>[] readers, int __index___ID, int __index___authorURI, int __index___authorID) {
@@ -243,12 +252,4 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		readers[__index__extended_authorURI] = (item, reader, context) -> { item.authorURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_authorID] = (item, reader, context) -> { item.authorID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
-	
-	
-	public SpecificReport(
-			final gen.model.mixinReference.Author author) {
-			
-		setAuthor(author);
-	}
-
 }

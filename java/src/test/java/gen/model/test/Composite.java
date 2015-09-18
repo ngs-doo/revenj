@@ -81,7 +81,12 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		this.simple = other.simple == null ? null : (gen.model.test.Simple)(other.simple.clone());
 		this.change = other.change;
 		this.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(other.tsl);
-		this.entities = other.entities.stream().map(it -> (gen.model.test.Entity)it.clone()).collect(java.util.stream.Collectors.toList());
+		this.entities = new java.util.ArrayList<gen.model.test.Entity>(other.entities.size());
+			if (other.entities != null) {
+				for (gen.model.test.Entity it : other.entities) {
+					this.entities.add((gen.model.test.Entity)it.clone());
+				}
+			};
 		this.laziesURI = other.getLaziesURI();
 		this.__originalValue = other.__originalValue;
 	}
@@ -95,6 +100,25 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 	public String toString() {
 		return "Composite(" + URI + ')';
 	}
+	
+	
+	public Composite(
+			final java.util.UUID id,
+			final gen.model.test.En[] enn,
+			final gen.model.test.En en,
+			final gen.model.test.Simple simple,
+			final java.util.List<java.time.OffsetDateTime> tsl,
+			final java.util.List<gen.model.test.Entity> entities) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setId(id);
+		setEnn(enn);
+		setEn(en);
+		setSimple(simple);
+		setTsl(tsl);
+		setEntities(entities);
+	}
+
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
@@ -121,7 +145,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		this.laziesURI = laziesURI == null ? new String[0] : laziesURI;
 	}
 
-	private static final long serialVersionUID = 3820546927543476644L;
+	private static final long serialVersionUID = 1290878810100595875L;
 	
 	private java.util.UUID id;
 
@@ -326,7 +350,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = 4386091708159808589L;
+	private static final long serialVersionUID = 6720316184613466902L;
 	
 	private gen.model.test.Simple simple;
 
@@ -383,7 +407,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			agg -> { 
 				
 		Composite _res = agg.__originalValue;
-		agg.__originalValue = new Composite(agg);
+		agg.__originalValue = (Composite)agg.clone();
 		if (_res != null) {
 			return _res;
 		}				
@@ -399,18 +423,18 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		}
 		URI = gen.model.test.converters.CompositeConverter.buildURI(reader, id);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
-		this.__originalValue = new Composite(this);
+		this.__originalValue = (Composite)this.clone();
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, int __index___enn, int __index___en, gen.model.test.converters.SimpleConverter __converter_simple, int __index___simple, int __index___change, int __index___tsl, gen.model.test.converters.EntityConverter __converter_entities, int __index___entities, int __index___laziesURI) {
 		
 		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
-		readers[__index___enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) item.enn = __list.toArray(new gen.model.test.En[__list.size()]); else item.enn = new gen.model.test.En[] { }; }; };
+		readers[__index___enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) {item.enn = __list.toArray(new gen.model.test.En[__list.size()]);} else item.enn = new gen.model.test.En[] { }; }; };
 		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 		readers[__index___simple] = (item, reader, context) -> { item.simple = __converter_simple.from(reader, context); };
 		readers[__index___change] = (item, reader, context) -> { item.change = org.revenj.postgres.converters.DateConverter.parse(reader, false); };
-		readers[__index___tsl] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) item.tsl = __list; else item.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; };
-		readers[__index___entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) item.entities = __list; else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
+		readers[__index___tsl] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) {item.tsl = __list;} else item.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; };
+		readers[__index___entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) {item.entities = __list;} else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
 		readers[__index___laziesURI] = (item, reader, context) -> { { 
 			java.util.List<String> __list = org.revenj.postgres.converters.StringConverter.parseCollection(reader, context, true); 
 			if (__list != null) item.laziesURI = __list.toArray(new String[__list.size()]); else item.laziesURI = new String[0]; 
@@ -420,33 +444,15 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index__extended_id, int __index__extended_enn, int __index__extended_en, final gen.model.test.converters.SimpleConverter __converter_simple, int __index__extended_simple, int __index__extended_change, int __index__extended_tsl, final gen.model.test.converters.EntityConverter __converter_entities, int __index__extended_entities, int __index__extended_laziesURI) {
 		
 		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
-		readers[__index__extended_enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) item.enn = __list.toArray(new gen.model.test.En[__list.size()]); else item.enn = new gen.model.test.En[] { }; }; };
+		readers[__index__extended_enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) {item.enn = __list.toArray(new gen.model.test.En[__list.size()]);} else item.enn = new gen.model.test.En[] { }; }; };
 		readers[__index__extended_en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 		readers[__index__extended_simple] = (item, reader, context) -> { item.simple = __converter_simple.fromExtended(reader, context); };
 		readers[__index__extended_change] = (item, reader, context) -> { item.change = org.revenj.postgres.converters.DateConverter.parse(reader, false); };
-		readers[__index__extended_tsl] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) item.tsl = __list; else item.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; };
-		readers[__index__extended_entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::fromExtended); if (__list != null) item.entities = __list; else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
+		readers[__index__extended_tsl] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) {item.tsl = __list;} else item.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; };
+		readers[__index__extended_entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::fromExtended); if (__list != null) {item.entities = __list;} else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
 		readers[__index__extended_laziesURI] = (item, reader, context) -> { { 
 			java.util.List<String> __list = org.revenj.postgres.converters.StringConverter.parseCollection(reader, context, true); 
 			if (__list != null) item.laziesURI = __list.toArray(new String[__list.size()]); else item.laziesURI = new String[0]; 
 		}; };
 	}
-	
-	
-	public Composite(
-			final java.util.UUID id,
-			final gen.model.test.En[] enn,
-			final gen.model.test.En en,
-			final gen.model.test.Simple simple,
-			final java.util.List<java.time.OffsetDateTime> tsl,
-			final java.util.List<gen.model.test.Entity> entities) {
-			
-		setId(id);
-		setEnn(enn);
-		setEn(en);
-		setSimple(simple);
-		setTsl(tsl);
-		setEntities(entities);
-	}
-
 }

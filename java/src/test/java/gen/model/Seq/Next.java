@@ -79,7 +79,7 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.ID = ID;
 	}
 
-	private static final long serialVersionUID = -175021899563647565L;
+	private static final long serialVersionUID = 2589329286584431644L;
 	
 	private int ID;
 
@@ -135,7 +135,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = 2236511817071402401L;
+	private static final long serialVersionUID = -4642268786364072630L;
 	
 	private Integer min;
 
@@ -205,7 +205,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 			agg -> { 
 				
 		Next _res = agg.__originalValue;
-		agg.__originalValue = new Next(agg);
+		agg.__originalValue = (Next)agg.clone();
 		if (_res != null) {
 			return _res;
 		}				
@@ -221,7 +221,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		}
 		URI = gen.model.Seq.converters.NextConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
-		this.__originalValue = new Next(this);
+		this.__originalValue = (Next)this.clone();
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Next>[] readers, int __index___ID) {

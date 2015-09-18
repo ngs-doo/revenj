@@ -37,7 +37,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + 754965176;
+		result = prime * result + 1414295721;
 		result = prime * result + (this.number);
 		result = prime * result + (this.text.hashCode());
 		result = prime * result + (this.en != null ? this.en.hashCode() : 0);
@@ -112,7 +112,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 		this.ts = ts == null ? java.time.OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.UTC) : ts;
 	}
 
-	private static final long serialVersionUID = -1412572509986060564L;
+	private static final long serialVersionUID = 1067981449413330689L;
 	
 	private int number;
 

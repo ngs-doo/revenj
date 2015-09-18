@@ -6,6 +6,7 @@ import org.revenj.security.PermissionManager;
 import org.revenj.serialization.RevenjSerialization;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -56,23 +57,11 @@ public abstract class Revenj {
 				throw new RuntimeException(e);
 			}
 		};
-		return Revenj.setup(factory, properties, Optional.ofNullable(pluginsPath), Optional.ofNullable(Thread.currentThread().getContextClassLoader()));
-	}
-
-	public static Container setup(String jdbcUrl) throws IOException {
-		Properties properties = new Properties();
-		File revProps = new File("revenj.properties");
-		if (revProps.exists() && revProps.isFile()) {
-			properties.load(new FileReader(revProps));
-		}
-		Function<ServiceLocator, Connection> factory = locator -> {
-			try {
-				return DriverManager.getConnection(jdbcUrl, properties);
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
-		};
-		return setup(factory, properties, Optional.<File>empty(), Optional.<ClassLoader>empty());
+		return setup(
+				factory,
+				properties,
+				Optional.ofNullable(pluginsPath),
+				Optional.ofNullable(Thread.currentThread().getContextClassLoader()));
 	}
 
 	public static Container setup(

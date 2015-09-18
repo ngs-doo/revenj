@@ -82,6 +82,17 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable {
 		return "Detail2(" + URI + ')';
 	}
 	
+	
+	public Detail2(
+			final java.net.URI u,
+			final double[] dd) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setU(u);
+		setDd(dd);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail2(
@@ -101,7 +112,7 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable {
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = 1954934970069923439L;
+	private static final long serialVersionUID = -685680047917964312L;
 	
 	private java.net.URI u;
 
@@ -243,14 +254,4 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_EntityIndex] = (item, reader, context) -> { item.EntityIndex = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
-	
-	
-	public Detail2(
-			final java.net.URI u,
-			final double[] dd) {
-			
-		setU(u);
-		setDd(dd);
-	}
-
 }

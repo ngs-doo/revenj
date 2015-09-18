@@ -39,8 +39,7 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
-				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
-				reader.process(pgo.getValue());
+				reader.process(rs.getString(1));
 				result.add(converter.from(reader));
 			}
 		}
@@ -64,6 +63,7 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 				throw new RuntimeException(e);
 			}
 		}
+		final String selectType = "SELECT it";
 		org.revenj.patterns.Specification<gen.model.test.LazyLoad> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
@@ -97,6 +97,78 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 		}
 	}
 
+	@Override
+	public long count(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.LazyLoad>> filter) {
+		if (filter == null || filter.orElse(null) == null) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM \"test\".\"LazyLoad_entity\" r");
+				java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				return rs.getLong(1);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		String sql = null;
+		final String selectType = "SELECT COUNT(*)";
+		org.revenj.patterns.Specification<gen.model.test.LazyLoad> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
+			if (sql != null) {
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+					applyFilters.accept(statement);
+					try (java.sql.ResultSet rs = statement.executeQuery()) {
+						rs.next();
+						return rs.getLong(1);
+					}
+				} catch (java.sql.SQLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try {
+				return query(specification).count();
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Override
+	public boolean exists(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.LazyLoad>> filter) {
+		if (filter == null || filter.orElse(null) == null) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT exists(SELECT * FROM \"test\".\"LazyLoad_entity\" r)");
+				java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				return rs.getBoolean(1);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		String sql = null;
+		final String selectType = "SELECT exists(SELECT *";
+		org.revenj.patterns.Specification<gen.model.test.LazyLoad> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
+			if (sql != null) {
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
+					applyFilters.accept(statement);
+					try (java.sql.ResultSet rs = statement.executeQuery()) {
+						rs.next();
+						return rs.getBoolean(1);
+					}
+				} catch (java.sql.SQLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try {
+				return query(specification).any();
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
 	
 	@Override
 	public java.util.List<gen.model.test.LazyLoad> find(String[] uris) {
@@ -108,8 +180,7 @@ public class LazyLoadRepository   implements org.revenj.patterns.Repository<gen.
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
 				while (rs.next()) {
-					org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
-					reader.process(pgo.getValue());
+					reader.process(rs.getString(1));
 					result.add(converter.from(reader));
 				}
 			}

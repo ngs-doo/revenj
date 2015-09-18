@@ -6,7 +6,7 @@
     <groupId>org.revenj</groupId>
     <artifactId>revenj-spring</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

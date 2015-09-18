@@ -144,6 +144,20 @@ public class TestRepository {
 	}
 
 	@Test
+	public void specificationEventExists() throws IOException {
+		ServiceLocator locator = container;
+		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
+		Random rnd = new Random();
+		Long rndLong = rnd.nextLong();
+		BigDecimal rndDecimal = BigDecimal.valueOf(rnd.nextDouble());
+		Clicked cl = new Clicked().setBigint(rndLong).setDate(LocalDate.now()).setNumber(rndDecimal).setEn(En.B);
+		String[] uris = store.submit(Collections.singletonList(cl));
+		Assert.assertEquals(1, uris.length);
+		boolean found = store.exists(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal), En.B));
+		Assert.assertTrue(found);
+	}
+
+	@Test
 	public void specificationSnowflakeSearch() throws IOException {
 		ServiceLocator locator = container;
 		CompositeRepository repository = locator.resolve(CompositeRepository.class);
@@ -153,6 +167,18 @@ public class TestRepository {
 		repository.insert(new Composite().setSimple(simple));
 		List<CompositeList> found = listRepository.search(new CompositeList.ForSimple(Arrays.asList(simple)));
 		Assert.assertEquals(1, found.size());
+	}
+
+	@Test
+	public void specificationSnowflakeCount() throws IOException {
+		ServiceLocator locator = container;
+		CompositeRepository repository = locator.resolve(CompositeRepository.class);
+		CompositeListRepository listRepository = locator.resolve(CompositeListRepository.class);
+		Random rnd = new Random();
+		Simple simple = new Simple().setNumber(rnd.nextInt(100000) + 2000);
+		repository.insert(new Composite().setSimple(simple));
+		long total = listRepository.count(new CompositeList.ForSimple(Arrays.asList(simple)));
+		Assert.assertEquals(1L, total);
 	}
 
 	@Test

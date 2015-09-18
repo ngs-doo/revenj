@@ -70,11 +70,7 @@ public class DomainObjectExists implements ServerCommand {
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
-		try {
-			boolean found = repository.query().anyMatch(filter.orElse(null));
-			return CommandResult.success(Boolean.toString(found), output.serialize(found));
-		} catch (IOException e) {
-			return CommandResult.badRequest("Error executing query. " + e.getMessage());
-		}
+		boolean found = repository.exists(filter.orElse(null));
+		return CommandResult.success(Boolean.toString(found), output.serialize(found));
 	}
 }

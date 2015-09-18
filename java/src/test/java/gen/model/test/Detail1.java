@@ -82,6 +82,17 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable {
 		return "Detail1(" + URI + ')';
 	}
 	
+	
+	public Detail1(
+			final Float f,
+			final float ff) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setF(f);
+		setFf(ff);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail1(
@@ -101,7 +112,7 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable {
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = 2119597528166440590L;
+	private static final long serialVersionUID = -5910242476313149023L;
 	
 	private Float f;
 
@@ -230,14 +241,4 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_EntityIndex] = (item, reader, context) -> { item.EntityIndex = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
-	
-	
-	public Detail1(
-			final Float f,
-			final float ff) {
-			
-		setF(f);
-		setFf(ff);
-	}
-
 }

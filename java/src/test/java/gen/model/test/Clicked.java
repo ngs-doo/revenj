@@ -84,7 +84,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = -6549152950664106736L;
+	private static final long serialVersionUID = 4279210911943798335L;
 	
 	private java.time.LocalDate date;
 
@@ -202,7 +202,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.HashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = 1343500346550503133L;
+	private static final long serialVersionUID = 4873456051243303828L;
 	
 	private java.math.BigDecimal min;
 
@@ -287,24 +287,6 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 	}
 
 	
-	public Clicked(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers) throws java.io.IOException {
-		for (org.revenj.postgres.ObjectConverter.Reader<Clicked> rdr : readers) {
-			rdr.read(this, reader, context);
-		}
-	}
-
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers, int __index____event_id, int __index___QueuedAt, int __index___ProcessedAt, int __index___date, int __index___number, int __index___bigint, int __index___bool, int __index___en) {
-		
-		readers[__index____event_id] = (item, reader, context) -> { item.URI = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
-		readers[__index___QueuedAt] = (item, reader, context) -> { item.QueuedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, false, true); };
-		readers[__index___ProcessedAt] = (item, reader, context) -> { item.ProcessedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, true, true); };
-		readers[__index___date] = (item, reader, context) -> { item.date = org.revenj.postgres.converters.DateConverter.parse(reader, true); };
-		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
-		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };
-		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) item.bool = new java.util.HashSet<Boolean>(__list); else item.bool = new java.util.HashSet<Boolean>(4); }; };
-		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
-	}
-	
 	static {
 		gen.model.test.repositories.ClickedRepository.__configure(
 			events -> {
@@ -321,5 +303,23 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 				}
 			}
 		);
+	}
+	
+	public Clicked(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers) throws java.io.IOException {
+		for (org.revenj.postgres.ObjectConverter.Reader<Clicked> rdr : readers) {
+			rdr.read(this, reader, context);
+		}
+	}
+
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers, int __index____event_id, int __index___QueuedAt, int __index___ProcessedAt, int __index___date, int __index___number, int __index___bigint, int __index___bool, int __index___en) {
+		
+		readers[__index____event_id] = (item, reader, context) -> { item.URI = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
+		readers[__index___QueuedAt] = (item, reader, context) -> { item.QueuedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, false, true); };
+		readers[__index___ProcessedAt] = (item, reader, context) -> { item.ProcessedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, true, true); };
+		readers[__index___date] = (item, reader, context) -> { item.date = org.revenj.postgres.converters.DateConverter.parse(reader, true); };
+		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
+		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };
+		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {item.bool = new java.util.HashSet<Boolean>(__list);} else item.bool = new java.util.HashSet<Boolean>(4); }; };
+		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 	}
 }

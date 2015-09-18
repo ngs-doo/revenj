@@ -77,8 +77,18 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		this.id = other.id;
 		this.compositeURI = other.compositeURI;
 		this.compositeID = other.compositeID;
-		this.detail1 = other.detail1.stream().map(it -> (gen.model.test.Detail1)it.clone()).collect(java.util.stream.Collectors.toSet());
-		this.detail2 = other.detail2.stream().map(it -> (gen.model.test.Detail2)it.clone()).collect(java.util.stream.Collectors.toSet());
+		this.detail1 = new java.util.HashSet<gen.model.test.Detail1>(other.detail1.size());
+			if (other.detail1 != null) {
+				for (gen.model.test.Detail1 it : other.detail1) {
+					this.detail1.add((gen.model.test.Detail1)it.clone());
+				}
+			};
+		this.detail2 = new java.util.HashSet<gen.model.test.Detail2>(other.detail2.size());
+			if (other.detail2 != null) {
+				for (gen.model.test.Detail2 it : other.detail2) {
+					this.detail2.add((gen.model.test.Detail2)it.clone());
+				}
+			};
 		this.Compositeid = other.Compositeid;
 		this.Index = other.Index;
 	}
@@ -92,6 +102,23 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 	public String toString() {
 		return "Entity(" + URI + ')';
 	}
+	
+	
+	public Entity(
+			final java.math.BigDecimal money,
+			final String id,
+			final gen.model.test.Composite composite,
+			final java.util.Set<gen.model.test.Detail1> detail1,
+			final java.util.Set<gen.model.test.Detail2> detail2) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setMoney(money);
+		setId(id);
+		setComposite(composite);
+		setDetail1(detail1);
+		setDetail2(detail2);
+	}
+
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
@@ -118,7 +145,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = 7653665292156173192L;
+	private static final long serialVersionUID = 8799130154036125147L;
 	
 	private java.math.BigDecimal money;
 
@@ -336,8 +363,8 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index___compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index___compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
-		readers[__index___detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::from); if (__list != null) item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(__list); else item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4); }; };
-		readers[__index___detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::from); if (__list != null) item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(__list); else item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4); }; };
+		readers[__index___detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::from); if (__list != null) {item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4); }; };
+		readers[__index___detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::from); if (__list != null) {item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4); }; };
 		readers[__index___Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index___Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
@@ -348,25 +375,9 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index__extended_compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
-		readers[__index__extended_detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::fromExtended); if (__list != null) item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(__list); else item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4); }; };
-		readers[__index__extended_detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::fromExtended); if (__list != null) item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(__list); else item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4); }; };
+		readers[__index__extended_detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::fromExtended); if (__list != null) {item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4); }; };
+		readers[__index__extended_detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::fromExtended); if (__list != null) {item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4); }; };
 		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
-	
-	
-	public Entity(
-			final java.math.BigDecimal money,
-			final String id,
-			final gen.model.test.Composite composite,
-			final java.util.Set<gen.model.test.Detail1> detail1,
-			final java.util.Set<gen.model.test.Detail2> detail2) {
-			
-		setMoney(money);
-		setId(id);
-		setComposite(composite);
-		setDetail1(detail1);
-		setDetail2(detail2);
-	}
-
 }

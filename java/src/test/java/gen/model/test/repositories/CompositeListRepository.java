@@ -31,7 +31,13 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 	public org.revenj.patterns.Query<gen.model.test.CompositeList> query(org.revenj.patterns.Specification<gen.model.test.CompositeList> filter) {
 		org.revenj.patterns.Query<gen.model.test.CompositeList> query = queryProvider.query(connection, locator, gen.model.test.CompositeList.class);
 		if (filter == null) return query;
-				
+		
+		
+		if (filter instanceof gen.model.test.CompositeList.ForSimple) {
+			gen.model.test.CompositeList.ForSimple _spec_ = (gen.model.test.CompositeList.ForSimple)filter;
+			java.util.List<gen.model.test.Simple> _spec_simples_ = _spec_.getSimples();
+			return query.filter(it -> (_spec_simples_.contains(it.getSimple())));
+		}		
 		return query.filter(filter);
 	}
 
@@ -39,8 +45,7 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
-				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
-				reader.process(pgo.getValue());
+				reader.process(rs.getString(1));
 				result.add(converter.from(reader));
 			}
 		}
@@ -64,10 +69,38 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 				throw new RuntimeException(e);
 			}
 		}
+		final String selectType = "SELECT it";
 		org.revenj.patterns.Specification<gen.model.test.CompositeList> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			
+		
+		if (specification instanceof gen.model.test.CompositeList.ForSimple) {
+			gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
+			sql = selectType + " FROM \"test\".\"CompositeList.ForSimple\"(?) it";
+			
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					
+				Object[] __arr = new Object[spec.getSimples().size()];
+				if (__arr.length > 0) {
+					gen.model.test.converters.SimpleConverter __converter = locator.resolve(gen.model.test.converters.SimpleConverter.class);
+					int __ind = 0;
+					for (gen.model.test.Simple __it : spec.getSimples()) {
+						org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+						__pgo.setType("\"test\".\"Simple\"");
+						pgWriter.reset();
+						__converter.to(__it).buildTuple(pgWriter, false);
+						__pgo.setValue(pgWriter.toString());
+						__arr[__ind++] = __pgo;
+					}
+				}
+				ps.setArray(1, connection.createArrayOf("\"test\".\"Simple\"", __arr));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
 			if (sql != null) {
 				if (limit != null && limit.orElse(null) != null) {
 					sql += " LIMIT " + Integer.toString(limit.get());
@@ -91,6 +124,132 @@ public class CompositeListRepository   implements org.revenj.patterns.Repository
 			}
 			try {
 				return query.list();
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Override
+	public long count(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.CompositeList>> filter) {
+		if (filter == null || filter.orElse(null) == null) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM \"test\".\"CompositeList_snowflake\" r");
+				java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				return rs.getLong(1);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		String sql = null;
+		final String selectType = "SELECT COUNT(*)";
+		org.revenj.patterns.Specification<gen.model.test.CompositeList> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
+		
+		if (specification instanceof gen.model.test.CompositeList.ForSimple) {
+			gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
+			sql = selectType + " FROM \"test\".\"CompositeList.ForSimple\"(?) it";
+			
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					
+				Object[] __arr = new Object[spec.getSimples().size()];
+				if (__arr.length > 0) {
+					gen.model.test.converters.SimpleConverter __converter = locator.resolve(gen.model.test.converters.SimpleConverter.class);
+					int __ind = 0;
+					for (gen.model.test.Simple __it : spec.getSimples()) {
+						org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+						__pgo.setType("\"test\".\"Simple\"");
+						pgWriter.reset();
+						__converter.to(__it).buildTuple(pgWriter, false);
+						__pgo.setValue(pgWriter.toString());
+						__arr[__ind++] = __pgo;
+					}
+				}
+				ps.setArray(1, connection.createArrayOf("\"test\".\"Simple\"", __arr));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+			if (sql != null) {
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+					applyFilters.accept(statement);
+					try (java.sql.ResultSet rs = statement.executeQuery()) {
+						rs.next();
+						return rs.getLong(1);
+					}
+				} catch (java.sql.SQLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try {
+				return query(specification).count();
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Override
+	public boolean exists(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.CompositeList>> filter) {
+		if (filter == null || filter.orElse(null) == null) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT exists(SELECT * FROM \"test\".\"CompositeList_snowflake\" r)");
+				java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				return rs.getBoolean(1);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		String sql = null;
+		final String selectType = "SELECT exists(SELECT *";
+		org.revenj.patterns.Specification<gen.model.test.CompositeList> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
+		
+		if (specification instanceof gen.model.test.CompositeList.ForSimple) {
+			gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
+			sql = selectType + " FROM \"test\".\"CompositeList.ForSimple\"(?) it";
+			
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					
+				Object[] __arr = new Object[spec.getSimples().size()];
+				if (__arr.length > 0) {
+					gen.model.test.converters.SimpleConverter __converter = locator.resolve(gen.model.test.converters.SimpleConverter.class);
+					int __ind = 0;
+					for (gen.model.test.Simple __it : spec.getSimples()) {
+						org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+						__pgo.setType("\"test\".\"Simple\"");
+						pgWriter.reset();
+						__converter.to(__it).buildTuple(pgWriter, false);
+						__pgo.setValue(pgWriter.toString());
+						__arr[__ind++] = __pgo;
+					}
+				}
+				ps.setArray(1, connection.createArrayOf("\"test\".\"Simple\"", __arr));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+			if (sql != null) {
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
+					applyFilters.accept(statement);
+					try (java.sql.ResultSet rs = statement.executeQuery()) {
+						rs.next();
+						return rs.getBoolean(1);
+					}
+				} catch (java.sql.SQLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try {
+				return query(specification).any();
 			} catch (java.io.IOException e) {
 				throw new RuntimeException(e);
 			}

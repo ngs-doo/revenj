@@ -11,6 +11,9 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
 		this.name = "";
+		this.person = new gen.model.mixinReference.Person();
+		this.rezidentID = java.util.UUID.randomUUID();
+		this.children = new gen.model.mixinReference.Child[] { };
 	}
 
 	
@@ -51,6 +54,14 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 			return false;
 		if(!(this.name.equals(other.name)))
 			return false;
+		if(!(this.person == other.person || this.person != null && this.person.equals(other.person)))
+			return false;
+		if(!(this.rezident == other.rezident || this.rezident != null && this.rezident.equals(other.rezident)))
+			return false;
+		if(!(this.rezidentID.equals(other.rezidentID)))
+			return false;
+		if(!(java.util.Arrays.equals(this.children, other.children)))
+			return false;
 		return true;
 	}
 
@@ -59,6 +70,15 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 		this.__locator = other.__locator;
 		this.ID = other.ID;
 		this.name = other.name;
+		this.person = other.person == null ? null : (gen.model.mixinReference.Person)(other.person.clone());
+		this.rezident = other.rezident == null ? null : (gen.model.mixinReference.Resident)(other.rezident.clone());
+		this.rezidentID = other.rezidentID;
+		this.children = new gen.model.mixinReference.Child[other.children.length];
+			if (other.children != null) {
+				for (int _i = 0; _i < other.children.length; _i++) {
+					this.children[_i] = (gen.model.mixinReference.Child)other.children[_i].clone();
+				}
+			};
 		this.__originalValue = other.__originalValue;
 	}
 
@@ -72,20 +92,43 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 		return "Author(" + URI + ')';
 	}
 	
+	
+	public Author(
+			final String name,
+			final gen.model.mixinReference.Person person,
+			final gen.model.mixinReference.Resident rezident,
+			final gen.model.mixinReference.Child[] children) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setName(name);
+		setPerson(person);
+		setRezident(rezident);
+		setChildren(children);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
 			@com.fasterxml.jackson.annotation.JsonProperty("ID") final int ID,
-			@com.fasterxml.jackson.annotation.JsonProperty("name") final String name) {
+			@com.fasterxml.jackson.annotation.JsonProperty("name") final String name,
+			@com.fasterxml.jackson.annotation.JsonProperty("person") final gen.model.mixinReference.Person person,
+			@com.fasterxml.jackson.annotation.JsonProperty("rezident") final gen.model.mixinReference.Resident rezident,
+			@com.fasterxml.jackson.annotation.JsonProperty("rezidentID") final java.util.UUID rezidentID,
+			@com.fasterxml.jackson.annotation.JsonProperty("children") final gen.model.mixinReference.Child[] children) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
 		this.ID = ID;
 		this.name = name == null ? "" : name;
+		this.person = person;
+		this.rezident = rezident;
+		this.rezidentID = rezidentID == null ? new java.util.UUID(0L, 0L) : rezidentID;
+		this.children = children == null ? new gen.model.mixinReference.Child[] { } : children;
 	}
 
-	private static final long serialVersionUID = 8163416533335998160L;
+	private static final long serialVersionUID = -7381505887606312430L;
 	
 	private int ID;
 
@@ -140,12 +183,98 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 	}
 
 	
+	private gen.model.mixinReference.Person person;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("person")
+	public gen.model.mixinReference.Person getPerson()  {
+		
+		return person;
+	}
+
+	
+	public Author setPerson(final gen.model.mixinReference.Person value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"person\" cannot be null!");
+		this.person = value;
+		
+		return this;
+	}
+
+	
+	private gen.model.mixinReference.Resident rezident;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("rezident")
+	public gen.model.mixinReference.Resident getRezident()  {
+		
+		return rezident;
+	}
+
+	
+	public Author setRezident(final gen.model.mixinReference.Resident value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"rezident\" cannot be null!");
+		this.rezident = value;
+		
+		
+		this.rezidentID = value.getId();
+		return this;
+	}
+
+	
+	private java.util.UUID rezidentID;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("rezidentID")
+	public java.util.UUID getRezidentID()  {
+		
+		return rezidentID;
+	}
+
+	
+	private Author setRezidentID(final java.util.UUID value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"rezidentID\" cannot be null!");
+		this.rezidentID = value;
+		
+		return this;
+	}
+
+	
+	static void __bindTochildren(java.util.function.Consumer<gen.model.mixinReference.Author> binder) {
+		__binderchildren = binder;
+	}
+
+	private static java.util.function.Consumer<gen.model.mixinReference.Author> __binderchildren;
+	
+	private gen.model.mixinReference.Child[] children;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("children")
+	public gen.model.mixinReference.Child[] getChildren()  {
+		
+		return children;
+	}
+
+	
+	public Author setChildren(final gen.model.mixinReference.Child[] value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"children\" cannot be null!");
+		org.revenj.Guards.checkNulls(value);
+		this.children = value;
+		
+		return this;
+	}
+
+	
 	static {
 		gen.model.mixinReference.repositories.AuthorRepository.__setupPersist(
 			(aggregates, sw) -> {
 				try {
 					for (gen.model.mixinReference.Author agg : aggregates) {
-						 
+						
+						__binderchildren.accept(agg); 
 						agg.URI = gen.model.mixinReference.converters.AuthorConverter.buildURI(sw, agg.ID);
 					}
 				} catch (Exception ex) {
@@ -156,7 +285,8 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 				for (int i = 0; i < newAggregates.size(); i++) {
 					gen.model.mixinReference.Author oldAgg = oldAggregates.get(i);
 					gen.model.mixinReference.Author newAgg = newAggregates.get(i);
-					 
+					
+					__binderchildren.accept(newAgg); 
 				}
 			},
 			aggregates -> { 
@@ -166,7 +296,7 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 			agg -> { 
 				
 		Author _res = agg.__originalValue;
-		agg.__originalValue = new Author(agg);
+		agg.__originalValue = (Author)agg.clone();
 		if (_res != null) {
 			return _res;
 		}				
@@ -182,26 +312,26 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 		}
 		URI = gen.model.mixinReference.converters.AuthorConverter.buildURI(reader, ID);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
-		this.__originalValue = new Author(this);
+		this.__originalValue = (Author)this.clone();
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Author>[] readers, int __index___ID, int __index___name) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Author>[] readers, int __index___ID, int __index___name, gen.model.mixinReference.converters.PersonConverter __converter_person, int __index___person, gen.model.mixinReference.converters.ResidentConverter __converter_rezident, int __index___rezident, int __index___rezidentID, gen.model.mixinReference.converters.ChildConverter __converter_children, int __index___children) {
 		
 		readers[__index___ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index___name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
+		readers[__index___person] = (item, reader, context) -> { item.person = __converter_person.from(reader, context); };
+		readers[__index___rezident] = (item, reader, context) -> { item.rezident = __converter_rezident.from(reader, context); };
+		readers[__index___rezidentID] = (item, reader, context) -> { item.rezidentID = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
+		readers[__index___children] = (item, reader, context) -> { { java.util.List<gen.model.mixinReference.Child> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_children::from); if (__list != null) {item.children = __list.toArray(new gen.model.mixinReference.Child[__list.size()]);} else item.children = new gen.model.mixinReference.Child[] { }; }; };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Author>[] readers, int __index__extended_ID, int __index__extended_name) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Author>[] readers, int __index__extended_ID, int __index__extended_name, final gen.model.mixinReference.converters.PersonConverter __converter_person, int __index__extended_person, final gen.model.mixinReference.converters.ResidentConverter __converter_rezident, int __index__extended_rezident, int __index__extended_rezidentID, final gen.model.mixinReference.converters.ChildConverter __converter_children, int __index__extended_children) {
 		
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
+		readers[__index__extended_person] = (item, reader, context) -> { item.person = __converter_person.fromExtended(reader, context); };
+		readers[__index__extended_rezident] = (item, reader, context) -> { item.rezident = __converter_rezident.fromExtended(reader, context); };
+		readers[__index__extended_rezidentID] = (item, reader, context) -> { item.rezidentID = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
+		readers[__index__extended_children] = (item, reader, context) -> { { java.util.List<gen.model.mixinReference.Child> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_children::fromExtended); if (__list != null) {item.children = __list.toArray(new gen.model.mixinReference.Child[__list.size()]);} else item.children = new gen.model.mixinReference.Child[] { }; }; };
 	}
-	
-	
-	public Author(
-			final String name) {
-			
-		setName(name);
-	}
-
 }

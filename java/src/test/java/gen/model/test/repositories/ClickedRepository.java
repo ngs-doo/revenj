@@ -47,8 +47,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
-				org.postgresql.util.PGobject pgo = (org.postgresql.util.PGobject) rs.getObject(1);
-				reader.process(pgo.getValue());
+				reader.process(rs.getString(1));
 				result.add(converter.from(reader));
 			}
 		}
@@ -72,6 +71,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 				throw new RuntimeException(e);
 			}
 		}
+		final String selectType = "SELECT it";
 		org.revenj.patterns.Specification<gen.model.test.Clicked> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
@@ -79,7 +79,7 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 		
 		if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
 			gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
-			sql = "SELECT it FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
+			sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
 			
 			applyFilters = applyFilters.andThen(ps -> {
 				try {
@@ -136,6 +136,152 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 			}
 			try {
 				return query.list();
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Override
+	public long count(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.Clicked>> filter) {
+		if (filter == null || filter.orElse(null) == null) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM \"test\".\"Clicked_event\" r");
+				java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				return rs.getLong(1);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		String sql = null;
+		final String selectType = "SELECT COUNT(*)";
+		org.revenj.patterns.Specification<gen.model.test.Clicked> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
+		
+		if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
+			gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
+			sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
+			
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					ps.setBigDecimal(1, spec.getMin());
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					
+					Object[] __arr = new Object[spec.getInSet().size()];
+					int __ind = 0;
+					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
+					ps.setArray(2, connection.createArrayOf("numeric", __arr));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
+				else {
+					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+					__pgo.setType("\"test\".\"En\"");
+					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
+					ps.setObject(3, __pgo);
+				}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+			if (sql != null) {
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+					applyFilters.accept(statement);
+					try (java.sql.ResultSet rs = statement.executeQuery()) {
+						rs.next();
+						return rs.getLong(1);
+					}
+				} catch (java.sql.SQLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try {
+				return query(specification).count();
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Override
+	public boolean exists(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.Clicked>> filter) {
+		if (filter == null || filter.orElse(null) == null) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT exists(SELECT * FROM \"test\".\"Clicked_event\" r)");
+				java.sql.ResultSet rs = statement.executeQuery()) {
+				rs.next();
+				return rs.getBoolean(1);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		String sql = null;
+		final String selectType = "SELECT exists(SELECT *";
+		org.revenj.patterns.Specification<gen.model.test.Clicked> specification = filter.get();
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			
+		
+		if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
+			gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
+			sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
+			
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					ps.setBigDecimal(1, spec.getMin());
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					
+					Object[] __arr = new Object[spec.getInSet().size()];
+					int __ind = 0;
+					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
+					ps.setArray(2, connection.createArrayOf("numeric", __arr));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+			applyFilters = applyFilters.andThen(ps -> {
+				try {
+					if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
+				else {
+					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+					__pgo.setType("\"test\".\"En\"");
+					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
+					ps.setObject(3, __pgo);
+				}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+			if (sql != null) {
+				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
+					applyFilters.accept(statement);
+					try (java.sql.ResultSet rs = statement.executeQuery()) {
+						rs.next();
+						return rs.getBoolean(1);
+					}
+				} catch (java.sql.SQLException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try {
+				return query(specification).any();
 			} catch (java.io.IOException e) {
 				throw new RuntimeException(e);
 			}

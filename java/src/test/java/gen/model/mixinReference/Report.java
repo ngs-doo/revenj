@@ -6,6 +6,6 @@ package gen.model.mixinReference;
 public interface Report<T extends gen.model.mixinReference.Report<T>>  {
 	
 	
-				gen.model.mixinReference.Author getAuthor() throws java.io.IOException;
-				T setAuthor(final gen.model.mixinReference.Author value);
+	gen.model.mixinReference.Author getAuthor() throws java.io.IOException;
+	T setAuthor(final gen.model.mixinReference.Author value);
 }

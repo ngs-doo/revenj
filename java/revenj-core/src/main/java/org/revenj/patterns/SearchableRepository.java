@@ -25,10 +25,30 @@ public interface SearchableRepository<T extends DataSource> {
 	}
 
 	default List<T> search(Specification<T> specification) {
-		return search(Optional.of(specification), Optional.<Integer>empty(), Optional.<Integer>empty());
+		return search(Optional.ofNullable(specification), Optional.<Integer>empty(), Optional.<Integer>empty());
 	}
 
 	default List<T> search(Specification<T> specification, int limit) {
-		return search(Optional.of(specification), Optional.of(limit), Optional.<Integer>empty());
+		return search(Optional.ofNullable(specification), Optional.of(limit), Optional.<Integer>empty());
+	}
+
+	long count(Optional<Specification<T>> specification);
+
+	default long count(Specification<T> specification) {
+		return count(Optional.ofNullable(specification));
+	}
+
+	default long count() {
+		return count(Optional.empty());
+	}
+
+	boolean exists(Optional<Specification<T>> specification);
+
+	default boolean exists(Specification<T> specification) {
+		return exists(Optional.ofNullable(specification));
+	}
+
+	default boolean exists() {
+		return exists(Optional.empty());
 	}
 }

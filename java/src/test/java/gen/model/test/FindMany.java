@@ -58,7 +58,7 @@ public static class Result   {
 		this.ids = new java.util.HashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = -1989446630785496463L;
+	private static final long serialVersionUID = 818561382000985796L;
 	
 	private java.util.UUID id;
 
@@ -123,7 +123,8 @@ public static class Result   {
 			reader.read(2);
 			
 			java.util.List<gen.model.test.CompositeList> _list_composites = org.revenj.postgres.converters.ArrayTuple.parse(reader, 1, locator.resolve(gen.model.test.converters.CompositeListConverter.class)::from); 
-			java.util.List<gen.model.test.CompositeList> _composites_ = _list_composites != null ? _list_composites : null;
+			java.util.List<gen.model.test.CompositeList> _composites_ = null;
+			if (_list_composites != null) _composites_ = _list_composites;;
 			gen.model.test.Composite _found_ = locator.resolve(gen.model.test.converters.CompositeConverter.class).from(reader, 1);
 			return new Result(_composites_, _found_);
 		} catch (Exception e) {

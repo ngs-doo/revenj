@@ -11,7 +11,7 @@
 		<module>revenj-spring</module>
 	</modules>
 	<packaging>pom</packaging>
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -19,13 +19,13 @@
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>0.2.0</version>
+			<version>0.2.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-servlet</artifactId>
-			<version>0.2.0</version>
+			<version>0.2.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

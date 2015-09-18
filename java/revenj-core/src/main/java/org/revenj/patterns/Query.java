@@ -27,6 +27,10 @@ public interface Query<T extends DataSource> {
 
 	boolean anyMatch(Specification<? super T> predicate) throws IOException;
 
+	default boolean any() throws IOException {
+		return anyMatch(null);
+	}
+
 	boolean allMatch(Specification<? super T> predicate) throws IOException;
 
 	boolean noneMatch(Specification<? super T> predicate) throws IOException;
