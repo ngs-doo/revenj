@@ -39,9 +39,9 @@ public abstract class Revenj {
 				throw new IOException("Unable to find revenj.properties. Searching in: " + revProps.getAbsolutePath());
 			}
 		}
-		String jdbcUrl = properties.getProperty("jdbcUrl");
+		String jdbcUrl = properties.getProperty("revanj.jdbcUrl");
 		if (jdbcUrl == null) {
-			throw new IOException("jdbcUrl is missing from revenj.properties");
+			throw new IOException("revenj.jdbcUrl is missing from revenj.properties");
 		}
 		String plugins = properties.getProperty("revenj.pluginsPath");
 		File pluginsPath = null;
