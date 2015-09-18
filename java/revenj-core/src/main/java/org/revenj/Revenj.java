@@ -6,7 +6,6 @@ import org.revenj.security.PermissionManager;
 import org.revenj.serialization.RevenjSerialization;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,7 +21,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 public abstract class Revenj {
-
 	public static Container setup() throws IOException {
 		Properties properties = new Properties();
 		File revProps = new File("revenj.properties");
@@ -58,7 +56,7 @@ public abstract class Revenj {
 				throw new RuntimeException(e);
 			}
 		};
-		return Revenj.setup(factory, properties, Optional.ofNullable(pluginsPath), Optional.<ClassLoader>empty());
+		return Revenj.setup(factory, properties, Optional.ofNullable(pluginsPath), Optional.ofNullable(Thread.currentThread().getContextClassLoader()));
 	}
 
 	public static Container setup(String jdbcUrl) throws IOException {
@@ -108,10 +106,12 @@ public abstract class Revenj {
 	private static class SimpleDomainModel implements DomainModel {
 
 		private final String namespace;
+		private final ClassLoader loader;
 		private final ConcurrentMap<String, Class<?>> cache = new ConcurrentHashMap<>();
 
-		public SimpleDomainModel(String namespace) {
+		public SimpleDomainModel(String namespace, ClassLoader loader) {
 			this.namespace = namespace != null && namespace.length() > 0 ? namespace + "." : "";
+			this.loader = loader;
 		}
 
 		@Override
@@ -121,7 +121,7 @@ public abstract class Revenj {
 				return Optional.of(found);
 			}
 			try {
-				Class<?> manifest = Class.forName(namespace + name);
+				Class<?> manifest = Class.forName(namespace + name, true, loader);
 				cache.put(name, manifest);
 				return Optional.of(manifest);
 			} catch (ClassNotFoundException ignore) {
@@ -135,13 +135,14 @@ public abstract class Revenj {
 			Properties properties,
 			Optional<ClassLoader> classLoader,
 			Iterator<SystemAspect> aspects) throws IOException {
+		ClassLoader loader = classLoader.orElse(Thread.currentThread().getContextClassLoader());
 		SimpleContainer container = new SimpleContainer("true".equals(properties.getProperty("resolveUnknown")));
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
-		DomainModel domainModel = new SimpleDomainModel(properties.getProperty("namespace"));
+		DomainModel domainModel = new SimpleDomainModel(properties.getProperty("namespace"), loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
 		container.registerClass(DataContext.class, LocatorDataContext.class, false);
-		PluginLoader plugins = new ServicesPluginLoader(classLoader.orElse(Thread.currentThread().getContextClassLoader()));
+		PluginLoader plugins = new ServicesPluginLoader(loader);
 		container.registerInstance(PluginLoader.class, plugins, false);
 		WireSerialization serialization = new RevenjSerialization(container);
 		container.registerInstance(WireSerialization.class, serialization, false);
