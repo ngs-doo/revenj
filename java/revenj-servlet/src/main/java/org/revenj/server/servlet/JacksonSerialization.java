@@ -1,11 +1,11 @@
-package org.revenj.serialization;
+package org.revenj.server.servlet;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.revenj.patterns.Serialization;
+import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
 
 import java.io.IOException;

@@ -2,14 +2,14 @@ package org.revenj.server;
 
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.PluginLoader;
-import org.revenj.patterns.Serialization;
-import org.revenj.patterns.WireSerialization;
+import org.revenj.serialization.Serialization;
+import org.revenj.serialization.WireSerialization;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
-public class ProcessingEngine {
+public final class ProcessingEngine {
 
 	private final Container container;
 	private final Map<Class<?>, ServerCommand> serverCommands = new HashMap<>();

@@ -9,30 +9,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.revenj.Revenj;
 import org.revenj.extensibility.Container;
-import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
-import org.revenj.patterns.Serialization;
+import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
-import org.revenj.patterns.WireSerialization;
-import org.revenj.server.CommandResultDescription;
-import org.revenj.server.ProcessingEngine;
-import org.revenj.server.ProcessingResult;
-import org.revenj.server.ServerCommandDescription;
+import org.revenj.serialization.WireSerialization;
 import org.revenj.server.commands.crud.Create;
 import org.revenj.server.commands.crud.Read;
 import org.revenj.server.servlet.Application;
 
-import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class TestProcessingEngine {
@@ -42,7 +32,7 @@ public class TestProcessingEngine {
 	@Before
 	public void initContainer() throws Exception {
 		Properties properties = new Properties();
-		properties.setProperty("namespace", "gen.model");
+		properties.setProperty("revenj.namespace", "gen.model");
 		File revProps = new File("test.properties");
 		if (revProps.exists() && revProps.isFile()) {
 			properties.load(new FileReader(revProps));
@@ -59,10 +49,8 @@ public class TestProcessingEngine {
 						factory,
 						properties,
 						Optional.<ClassLoader>empty(),
-						Arrays.asList((SystemAspect) new Boot()).iterator());
-		Optional<PluginLoader> plugins = container.tryResolve(PluginLoader.class);
-		WireSerialization serialization = container.resolve(WireSerialization.class);
-		container.register(new ProcessingEngine(container, serialization, plugins));
+						Collections.singletonList((SystemAspect) new Boot()).iterator());
+		Application.setup(container);
 	}
 
 	@After

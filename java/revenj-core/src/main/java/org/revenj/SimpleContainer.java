@@ -377,7 +377,7 @@ final class SimpleContainer implements Container {
 					? Either.fail(type + " is not registered in the container.\n" +
 					"Since " + type + " is an interface, it must be registered into the container.")
 					: Either.fail(type + " is not registered in the container.\n" +
-					"If you wish to resolve types not registered in the container, specify resolveUnknown=true in Properties configuration.");
+					"If you wish to resolve types not registered in the container, specify revenj.resolveUnknown=true in Properties configuration.");
 		}
 		if (registration.biFactory != null && type instanceof ParameterizedType) {
 			ParameterizedType pt = (ParameterizedType) type;

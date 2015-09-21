@@ -1,9 +1,9 @@
-package org.revenj.serialization;
+package org.revenj.server.servlet;
 
 import org.revenj.patterns.Bytes;
-import org.revenj.patterns.Serialization;
+import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
-import org.revenj.patterns.WireSerialization;
+import org.revenj.serialization.WireSerialization;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
-public final class RevenjSerialization implements WireSerialization {
+final class RevenjSerialization implements WireSerialization {
 	private final JacksonSerialization json;
 	private final PassThroughSerialization passThrough;
 

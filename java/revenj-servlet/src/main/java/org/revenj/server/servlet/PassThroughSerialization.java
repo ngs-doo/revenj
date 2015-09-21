@@ -1,6 +1,6 @@
-package org.revenj.serialization;
+package org.revenj.server.servlet;
 
-import org.revenj.patterns.Serialization;
+import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

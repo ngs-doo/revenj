@@ -3,12 +3,12 @@ package org.revenj;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.security.GlobalPermission;
+import org.revenj.security.Principal;
 import org.revenj.security.RolePermission;
 import rx.Observable;
 import rx.Subscription;
 
 import java.io.Closeable;
-import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -54,8 +54,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	private boolean permissionsChanged = true;
 
 	public RevenjPermissionManager(ServiceLocator locator) {
-		this(locator,
-				locator.resolve(Properties.class),
+		this(locator.resolve(Properties.class),
 				new Generic<Observable<Callable<GlobalPermission>>>() {
 				}.resolve(locator),
 				new Generic<Observable<Callable<RolePermission>>>() {
@@ -67,14 +66,19 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	}
 
 	public RevenjPermissionManager(
-			ServiceLocator locator,
 			Properties properties,
 			Observable<Callable<GlobalPermission>> globalChanges,
 			Observable<Callable<RolePermission>> roleChanges,
 			Optional<SearchableRepository<GlobalPermission>> globalRepository,
 			Optional<SearchableRepository<RolePermission>> rolesRepository) {
-		String openByDefault = properties.getProperty("Permissions.OpenByDefault");
-		defaultPermissions = openByDefault == null || "true".equals(openByDefault);
+		String permissions = properties.getProperty("revenj.permissions");
+		if (permissions != null && permissions.length() > 0) {
+			if (!permissions.equalsIgnoreCase("open") || !permissions.equalsIgnoreCase("closed")) {
+				throw new RuntimeException("Invalid revenj.permission settings found: " + permissions + ".\n"
+						+ "Allowed values are open and closed");
+			}
+		}
+		defaultPermissions = permissions == null || "open".equals(permissions);
 		globalSubscription = globalChanges.subscribe(c -> permissionsChanged = true);
 		roleSubscription = roleChanges.subscribe(c -> permissionsChanged = true);
 		this.globalRepository = globalRepository;
@@ -126,10 +130,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 			String subName = String.join(".", Arrays.copyOf(parts, i));
 			permissions = rolePermissions.get(subName);
 			if (permissions != null) {
-				Optional<Pair> found =
-						permissions.stream().filter(it -> user.getName().equals(it.name)).findFirst();
-				//TODO: missing subject logic
-				//.flatMap(permissions.stream().filter(it -> user.implies(Subject..getSubject(it.Name))));
+				Optional<Pair> found = permissions.stream().filter(it -> user.implies(it.name)).findFirst();
 				if (found.isPresent()) {
 					isAllowed = found.get().isAllowed;
 					break;
@@ -148,9 +149,9 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 		if (registered != null) {
 			Query<T> result = data;
 			for (Filter r : registered) {
-				//TODO: use roles or subjects instead
-				if (user.getName().equals(r.role) != r.inverse)
+				if ((user.implies(r.role)) != r.inverse) {
 					result = result.filter(r.specification);
+				}
 			}
 			return result;
 		}
@@ -158,16 +159,18 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	}
 
 	@Override
-	public <T extends DataSource> Collection<T> applyFilters(Class<T> manifest, Principal user, Collection<T> data) {
+	public <T extends DataSource> List<T> applyFilters(Class<T> manifest, Principal user, List<T> data) {
 		List<Filter> registered = registeredFilters.get(manifest);
 		if (registered != null) {
 			Stream<T> result = data.stream();
+			boolean filtered = false;
 			for (Filter r : registered) {
-				//TODO: use roles or subjects instead
-				if (user.getName().equals(r.role) != r.inverse)
+				if (user.implies(r.role) != r.inverse) {
 					result = result.filter(r.specification);
+					filtered = true;
+				}
 			}
-			return result.collect(Collectors.toList());
+			return filtered ? result.collect(Collectors.toList()) : data;
 		}
 		return data;
 	}

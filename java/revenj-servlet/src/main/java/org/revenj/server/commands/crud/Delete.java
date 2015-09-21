@@ -4,6 +4,7 @@ import org.revenj.patterns.*;
 import org.revenj.Utils;
 import org.revenj.server.ServerCommand;
 import org.revenj.server.CommandResult;
+import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

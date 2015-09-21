@@ -3,6 +3,7 @@ package org.revenj.server.commands;
 import org.revenj.patterns.*;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
+import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
 import java.util.List;

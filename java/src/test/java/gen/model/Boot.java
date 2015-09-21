@@ -13,7 +13,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 	}
 
 	public static org.revenj.patterns.ServiceLocator configure(String jdbcUrl, java.util.Properties properties) throws java.io.IOException {
-		properties.setProperty("namespace", "gen.model");
+		properties.setProperty("revenj.namespace", "gen.model");
 		java.util.function.Function<org.revenj.patterns.ServiceLocator, java.sql.Connection> factory = c -> {
 			try {
 				return java.sql.DriverManager.getConnection(jdbcUrl, properties);
@@ -51,11 +51,11 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 
 	public void configure(org.revenj.extensibility.Container container) throws java.io.IOException {
 		java.util.Properties properties = container.resolve(java.util.Properties.class);
-		String prevNamespace = properties.getProperty("namespace");
+		String prevNamespace = properties.getProperty("revenj.namespace");
 		if (prevNamespace != null && !"gen.model".equals(prevNamespace)) {
 				throw new java.io.IOException("Different namespace already defined in Properties file. Trying to add namespace=gen.model. Found: " + prevNamespace);
 		}
-		properties.setProperty("namespace", "gen.model");
+		properties.setProperty("revenj.namespace", "gen.model");
 		java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> columns;
 		try {
 			columns = loadColumnsInfo(container, "SELECT * FROM \"-NGS-\".load_type_info()");

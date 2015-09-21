@@ -1,12 +1,13 @@
 package org.revenj.server.servlet;
 
 import org.revenj.patterns.*;
+import org.revenj.server.ProcessingEngine;
 import org.revenj.server.commands.CountDomainObject;
 import org.revenj.server.commands.GetDomainObject;
 import org.revenj.server.commands.search.SearchDomainObject;
-import org.revenj.server.ProcessingEngine;
 import org.revenj.server.commands.DomainObjectExists;
 import org.revenj.server.commands.SubmitEvent;
+import org.revenj.serialization.WireSerialization;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

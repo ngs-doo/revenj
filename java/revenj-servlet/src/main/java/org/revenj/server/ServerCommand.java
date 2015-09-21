@@ -1,6 +1,6 @@
 package org.revenj.server;
 
-import org.revenj.patterns.Serialization;
+import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
 
 public interface ServerCommand {

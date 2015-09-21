@@ -5,8 +5,7 @@ import org.revenj.patterns.Specification;
 import org.revenj.patterns.DataSource;
 
 import java.io.Closeable;
-import java.security.Principal;
-import java.util.Collection;
+import java.util.List;
 
 public interface PermissionManager {
 	boolean canAccess(String identifier, Principal user);
@@ -17,7 +16,15 @@ public interface PermissionManager {
 
 	<T extends DataSource> Query<T> applyFilters(Class<T> manifest, Principal user, Query<T> data);
 
-	<T extends DataSource> Collection<T> applyFilters(Class<T> manifest, Principal user, Collection<T> data);
+	<T extends DataSource> List<T> applyFilters(Class<T> manifest, Principal user, List<T> data);
 
 	<T extends DataSource> Closeable registerFilter(Class<T> manifest, Specification<T> filter, String role, boolean inverse);
+
+	default <T extends DataSource> Closeable registerForRole(Class<T> manifest, Specification<T> filter, String role) {
+		return registerFilter(manifest, filter, role, false);
+	}
+
+	default <T extends DataSource> Closeable registerWhenNotInRole(Class<T> manifest, Specification<T> filter, String role) {
+		return registerFilter(manifest, filter, role, true);
+	}
 }

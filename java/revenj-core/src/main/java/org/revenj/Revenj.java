@@ -3,7 +3,6 @@ package org.revenj;
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
-import org.revenj.serialization.RevenjSerialization;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
 
@@ -125,16 +124,14 @@ public abstract class Revenj {
 			Optional<ClassLoader> classLoader,
 			Iterator<SystemAspect> aspects) throws IOException {
 		ClassLoader loader = classLoader.orElse(Thread.currentThread().getContextClassLoader());
-		SimpleContainer container = new SimpleContainer("true".equals(properties.getProperty("resolveUnknown")));
+		SimpleContainer container = new SimpleContainer("true".equals(properties.getProperty("revenj.resolveUnknown")));
 		container.register(properties);
 		container.register(Connection.class, connectionFactory);
-		DomainModel domainModel = new SimpleDomainModel(properties.getProperty("namespace"), loader);
+		DomainModel domainModel = new SimpleDomainModel(properties.getProperty("revenj.namespace"), loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
 		container.registerClass(DataContext.class, LocatorDataContext.class, false);
 		PluginLoader plugins = new ServicesPluginLoader(loader);
 		container.registerInstance(PluginLoader.class, plugins, false);
-		WireSerialization serialization = new RevenjSerialization(container);
-		container.registerInstance(WireSerialization.class, serialization, false);
 		PostgresDatabaseNotification databaseNotification =
 				new PostgresDatabaseNotification(
 						connectionFactory,
@@ -148,15 +145,14 @@ public abstract class Revenj {
 		if (classLoader.isPresent()) {
 			container.registerInstance(ClassLoader.class, classLoader.get(), false);
 		}
-		if (aspects == null) {
-			throw new IOException("aspects not provided");
-		}
 		int total = 0;
-		while (aspects.hasNext()) {
-			aspects.next().configure(container);
-			total++;
+		if (aspects != null) {
+			while (aspects.hasNext()) {
+				aspects.next().configure(container);
+				total++;
+			}
 		}
-		properties.setProperty("aspects-count", Integer.toString(total));
+		properties.setProperty("revenj.aspectsCount", Integer.toString(total));
 		return container;
 	}
 }

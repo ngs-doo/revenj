@@ -1,6 +1,7 @@
-package org.revenj.patterns;
+package org.revenj.serialization;
 
 import org.revenj.Utils;
+import org.revenj.patterns.Bytes;
 
 import java.io.IOException;
 import java.io.InputStream;

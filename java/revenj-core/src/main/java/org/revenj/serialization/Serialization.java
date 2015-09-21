@@ -1,4 +1,4 @@
-package org.revenj.patterns;
+package org.revenj.serialization;
 
 import org.revenj.Utils;
 

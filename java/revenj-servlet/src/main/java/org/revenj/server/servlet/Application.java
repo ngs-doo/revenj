@@ -3,7 +3,7 @@ package org.revenj.server.servlet;
 import org.revenj.Revenj;
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.PluginLoader;
-import org.revenj.patterns.WireSerialization;
+import org.revenj.serialization.WireSerialization;
 import org.revenj.server.ProcessingEngine;
 
 import javax.servlet.ServletContext;
@@ -21,7 +21,7 @@ public class Application implements ServletContextListener {
 	public Application() throws IOException {
 		container = Revenj.setup();
 		Properties properties = container.resolve(Properties.class);
-		if ("0".equals(properties.getProperty("aspects-count"))) {
+		if ("0".equals(properties.getProperty("revenj.aspectsCount"))) {
 			String pluginsPath = properties.getProperty("revenj.pluginsPath");
 			if (pluginsPath == null) {
 				throw new IOException("System aspects not configured. Probably an error in the configuration.\n" +
@@ -41,11 +41,16 @@ public class Application implements ServletContextListener {
 		configure(context, container);
 	}
 
-	public static void configure(ServletContext context, Container container) {
+	public static void setup(Container container) throws Exception {
 		Optional<PluginLoader> plugins = container.tryResolve(PluginLoader.class);
-		WireSerialization serialization = container.resolve(WireSerialization.class);
+		WireSerialization serialization = new RevenjSerialization(container);
+		container.registerInstance(WireSerialization.class, serialization, false);
+		container.register(new ProcessingEngine(container, serialization, plugins));
+	}
+
+	public static void configure(ServletContext context, Container container) {
 		try {
-			container.register(new ProcessingEngine(container, serialization, plugins));
+			setup(container);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

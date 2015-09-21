@@ -11,7 +11,7 @@ public final class CommandResultDescription<TFormat> {
 		duration = (start - System.nanoTime()) / 1000;
 	}
 
-	static <TFormat> CommandResultDescription<TFormat> create(String requestID, CommandResult<TFormat> result, long start) {
+	public static <TFormat> CommandResultDescription<TFormat> create(String requestID, CommandResult<TFormat> result, long start) {
 		return new CommandResultDescription<>(requestID, result, start);
 	}
 }

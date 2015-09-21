@@ -104,5 +104,15 @@ namespace Revenj.Security
 
 			return manager.ApplyFilters(Thread.CurrentPrincipal, data);
 		}
+
+		public IDisposable RegisterForRole<T>(this IPermissionManager manager, Expression<Func<T, bool>> filter, string role)
+		{
+			return manager.RegisterFilter(filter, role, false);
+		}
+
+		public IDisposable RegisterWhenNotInRole<T>(this IPermissionManager manager, Expression<Func<T, bool>> filter, string role)
+		{
+			return manager.RegisterFilter(filter, role, false);
+		}
 	}
 }

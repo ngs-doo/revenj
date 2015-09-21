@@ -2,7 +2,7 @@ package org.revenj.server.commands.crud;
 
 import org.revenj.patterns.DomainModel;
 import org.revenj.patterns.Repository;
-import org.revenj.patterns.Serialization;
+import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;

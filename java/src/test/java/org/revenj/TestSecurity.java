@@ -8,10 +8,11 @@ import org.junit.Test;
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.security.PermissionManager;
+import org.revenj.security.Principal;
 import org.revenj.security.UserPrincipal;
 
 import java.io.IOException;
-import java.security.Principal;
+import java.util.HashSet;
 
 public class TestSecurity {
 
@@ -31,7 +32,7 @@ public class TestSecurity {
 	public void simpleAccessCheck() throws Exception {
 		ServiceLocator locator = container;
 		PermissionManager security = locator.resolve(PermissionManager.class);
-		Principal user = new UserPrincipal("user");
+		Principal user = new UserPrincipal("user", new HashSet<>());
 		Assert.assertTrue(security.canAccess("test", user));
 	}
 }

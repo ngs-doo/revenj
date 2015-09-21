@@ -15,7 +15,7 @@ public final class ProcessingResult<TFormat> {
 		this.duration = (start - System.nanoTime()) / 1000;
 	}
 
-	static <T> ProcessingResult<T> badRequest(String message, long start) {
+	public static <T> ProcessingResult<T> badRequest(String message, long start) {
 		return new ProcessingResult<>(message, 400, null, start);
 	}
 

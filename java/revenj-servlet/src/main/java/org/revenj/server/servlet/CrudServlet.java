@@ -1,13 +1,13 @@
 package org.revenj.server.servlet;
 
+import org.revenj.server.ProcessingEngine;
 import org.revenj.server.commands.crud.Read;
 import org.revenj.server.commands.crud.Update;
 import org.revenj.server.commands.crud.Create;
 import org.revenj.server.commands.crud.Delete;
 import org.revenj.patterns.DomainModel;
 import org.revenj.patterns.ServiceLocator;
-import org.revenj.patterns.WireSerialization;
-import org.revenj.server.ProcessingEngine;
+import org.revenj.serialization.WireSerialization;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
