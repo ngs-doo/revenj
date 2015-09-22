@@ -77,7 +77,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	private static final long serialVersionUID = -116884395647336597L;
+	private static final long serialVersionUID = 2831287608405378547L;
 	
 	private final java.util.UUID id;
 
@@ -167,7 +167,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = 9062634935260367620L;
+	private static final long serialVersionUID = -1788771987344139700L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 

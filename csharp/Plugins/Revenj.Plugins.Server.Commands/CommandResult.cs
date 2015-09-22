@@ -34,6 +34,16 @@ namespace Revenj.Plugins.Server.Commands
 			};
 		}
 
+		public static CommandResult<TFormat> Forbidden(string name)
+		{
+			return new CommandResult<TFormat>
+			{
+				Data = default(TFormat),
+				Message = "You don't have permission to access: " + name,
+				Status = HttpStatusCode.Forbidden
+			};
+		}
+
 		public static CommandResult<TFormat> Fail(string message, string details)
 		{
 			return Exceptions.DebugMode

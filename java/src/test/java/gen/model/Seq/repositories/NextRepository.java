@@ -2,7 +2,7 @@ package gen.model.Seq.repositories;
 
 
 
-public class NextRepository   implements org.revenj.patterns.Repository<gen.model.Seq.Next>, org.revenj.patterns.PersistableRepository<gen.model.Seq.Next> {
+public class NextRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.Seq.Next>, org.revenj.patterns.PersistableRepository<gen.model.Seq.Next> {
 	
 	
 	
@@ -30,19 +30,19 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	@Override
 	public org.revenj.patterns.Query<gen.model.Seq.Next> query(org.revenj.patterns.Specification<gen.model.Seq.Next> filter) {
 		org.revenj.patterns.Query<gen.model.Seq.Next> query = queryProvider.query(connection, locator, gen.model.Seq.Next.class);
-		if (filter == null) return query;
-		
-		
-		if (filter instanceof gen.model.Seq.Next.BetweenIds) {
+		if (filter == null) { }
+		else if (filter instanceof gen.model.Seq.Next.BetweenIds) {
 			gen.model.Seq.Next.BetweenIds _spec_ = (gen.model.Seq.Next.BetweenIds)filter;
 			Integer _spec_min_ = _spec_.getMin();
 			int _spec_max_ = _spec_.getMax();
-			return query.filter(it -> ( _spec_min_ == null ||  ( (it.getID() >= _spec_min_) &&  (it.getID() <= _spec_max_))));
-		}		
-		return query.filter(filter);
+			query = query.filter(it -> ( _spec_min_ == null ||  ( (it.getID() >= _spec_min_) &&  (it.getID() <= _spec_max_))));
+		}
+		else query = query.filter(filter);
+		
+		return query;
 	}
 
-	private java.util.ArrayList<gen.model.Seq.Next> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.Seq.Next> result) throws java.sql.SQLException, java.io.IOException {
+	private java.util.List<gen.model.Seq.Next> readFromDb(java.sql.PreparedStatement statement, java.util.List<gen.model.Seq.Next> result) throws java.sql.SQLException, java.io.IOException {
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
@@ -50,193 +50,166 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 				result.add(converter.from(reader));
 			}
 		}
+		
 		return result;
 	}
 
 	@Override
-	public java.util.List<gen.model.Seq.Next> search(java.util.Optional<org.revenj.patterns.Specification<gen.model.Seq.Next>> filter, java.util.Optional<Integer> limit, java.util.Optional<Integer> offset) {
-		String sql = null;
-		if (filter == null || filter.orElse(null) == null) {
-			sql = "SELECT r FROM \"Seq\".\"Next_entity\" r";
-			if (limit != null && limit.orElse(null) != null) {
-				sql += " LIMIT " + Integer.toString(limit.get());
+	public java.util.List<gen.model.Seq.Next> search(org.revenj.patterns.Specification<gen.model.Seq.Next> specification, Integer limit, Integer offset) {
+		final String selectType = "SELECT it";
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			String sql;
+			if (specification == null) {
+				sql = "SELECT r FROM \"Seq\".\"Next_entity\" r";
+			} 
+			else if (specification instanceof gen.model.Seq.Next.BetweenIds) {
+				gen.model.Seq.Next.BetweenIds spec = (gen.model.Seq.Next.BetweenIds)specification;
+				sql = selectType + " FROM \"Seq\".\"Next.BetweenIds\"(?, ?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						if (spec.getMin() == null) ps.setNull(1, java.sql.Types.INTEGER); 
+					else ps.setInt(1, spec.getMin());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setInt(2, spec.getMax());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
 			}
-			if (offset != null && offset.orElse(null) != null) {
-				sql += " OFFSET " + Integer.toString(offset.get());
+			else {
+				org.revenj.patterns.Query<gen.model.Seq.Next> query = query(specification);
+				if (offset != null) {
+					query = query.skip(offset);
+				}
+				if (limit != null) {
+					query = query.limit(limit);
+				}
+				try {
+					return query.list();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			if (limit != null) {
+				sql += " LIMIT " + Integer.toString(limit);
+			}
+			if (offset != null) {
+				sql += " OFFSET " + Integer.toString(offset);
 			}
 			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				applyFilters.accept(statement);
 				return readFromDb(statement, new java.util.ArrayList<>());
 			} catch (java.sql.SQLException | java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		final String selectType = "SELECT it";
-		org.revenj.patterns.Specification<gen.model.Seq.Next> specification = filter.get();
-		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
-		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-		
-		if (specification instanceof gen.model.Seq.Next.BetweenIds) {
-			gen.model.Seq.Next.BetweenIds spec = (gen.model.Seq.Next.BetweenIds)specification;
-			sql = selectType + " FROM \"Seq\".\"Next.BetweenIds\"(?, ?) it";
-			
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					if (spec.getMin() == null) ps.setNull(1, java.sql.Types.INTEGER); 
-					else ps.setInt(1, spec.getMin());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					ps.setInt(2, spec.getMax());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-			if (sql != null) {
-				if (limit != null && limit.orElse(null) != null) {
-					sql += " LIMIT " + Integer.toString(limit.get());
-				}
-				if (offset != null && offset.orElse(null) != null) {
-					sql += " OFFSET " + Integer.toString(offset.get());
-				}
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-					applyFilters.accept(statement);
-					return readFromDb(statement, new java.util.ArrayList<>());
-				} catch (java.sql.SQLException | java.io.IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			org.revenj.patterns.Query<gen.model.Seq.Next> query = query(specification);
-			if (offset != null && offset.orElse(null) != null) {
-				query = query.skip(offset.get());
-			}
-			if (limit != null && limit.orElse(null) != null) {
-				query = query.limit(limit.get());
-			}
-			try {
-				return query.list();
-			} catch (java.io.IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	@Override
-	public long count(java.util.Optional<org.revenj.patterns.Specification<gen.model.Seq.Next>> filter) {
-		if (filter == null || filter.orElse(null) == null) {
-			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM \"Seq\".\"Next_entity\" r");
-				java.sql.ResultSet rs = statement.executeQuery()) {
-				rs.next();
-				return rs.getLong(1);
-			} catch (java.sql.SQLException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		String sql = null;
+	public long count(org.revenj.patterns.Specification<gen.model.Seq.Next> specification) {
 		final String selectType = "SELECT COUNT(*)";
-		org.revenj.patterns.Specification<gen.model.Seq.Next> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-		
-		if (specification instanceof gen.model.Seq.Next.BetweenIds) {
-			gen.model.Seq.Next.BetweenIds spec = (gen.model.Seq.Next.BetweenIds)specification;
-			sql = selectType + " FROM \"Seq\".\"Next.BetweenIds\"(?, ?) it";
-			
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					if (spec.getMin() == null) ps.setNull(1, java.sql.Types.INTEGER); 
+			String sql;
+			if (specification == null) {
+				sql = "SELECT COUNT(*) FROM \"Seq\".\"Next_entity\" r";
+			} 
+			else if (specification instanceof gen.model.Seq.Next.BetweenIds) {
+				gen.model.Seq.Next.BetweenIds spec = (gen.model.Seq.Next.BetweenIds)specification;
+				sql = selectType + " FROM \"Seq\".\"Next.BetweenIds\"(?, ?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						if (spec.getMin() == null) ps.setNull(1, java.sql.Types.INTEGER); 
 					else ps.setInt(1, spec.getMin());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					ps.setInt(2, spec.getMax());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-			if (sql != null) {
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-					applyFilters.accept(statement);
-					try (java.sql.ResultSet rs = statement.executeQuery()) {
-						rs.next();
-						return rs.getLong(1);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
 					}
-				} catch (java.sql.SQLException e) {
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setInt(2, spec.getMax());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else {
+				try {
+					return query(specification).count();
+				} catch (java.io.IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
-			try {
-				return query(specification).count();
-			} catch (java.io.IOException e) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				applyFilters.accept(statement);
+				try (java.sql.ResultSet rs = statement.executeQuery()) {
+					rs.next();
+					return rs.getLong(1);
+				}
+			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
 		}
 	}
 
 	@Override
-	public boolean exists(java.util.Optional<org.revenj.patterns.Specification<gen.model.Seq.Next>> filter) {
-		if (filter == null || filter.orElse(null) == null) {
-			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT exists(SELECT * FROM \"Seq\".\"Next_entity\" r)");
-				java.sql.ResultSet rs = statement.executeQuery()) {
-				rs.next();
-				return rs.getBoolean(1);
+	public boolean exists(org.revenj.patterns.Specification<gen.model.Seq.Next> specification) {
+		final String selectType = "SELECT exists(SELECT *";
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			String sql = null;
+			if (specification == null) {
+				sql = "SELECT exists(SELECT * FROM \"Seq\".\"Next_entity\" r";
+			} 
+			else if (specification instanceof gen.model.Seq.Next.BetweenIds) {
+				gen.model.Seq.Next.BetweenIds spec = (gen.model.Seq.Next.BetweenIds)specification;
+				sql = selectType + " FROM \"Seq\".\"Next.BetweenIds\"(?, ?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						if (spec.getMin() == null) ps.setNull(1, java.sql.Types.INTEGER); 
+					else ps.setInt(1, spec.getMin());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setInt(2, spec.getMax());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else {
+				try {
+					return query(specification).any();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
+				applyFilters.accept(statement);
+				try (java.sql.ResultSet rs = statement.executeQuery()) {
+					rs.next();
+					return rs.getBoolean(1);
+				}
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		String sql = null;
-		final String selectType = "SELECT exists(SELECT *";
-		org.revenj.patterns.Specification<gen.model.Seq.Next> specification = filter.get();
-		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
-		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-		
-		if (specification instanceof gen.model.Seq.Next.BetweenIds) {
-			gen.model.Seq.Next.BetweenIds spec = (gen.model.Seq.Next.BetweenIds)specification;
-			sql = selectType + " FROM \"Seq\".\"Next.BetweenIds\"(?, ?) it";
-			
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					if (spec.getMin() == null) ps.setNull(1, java.sql.Types.INTEGER); 
-					else ps.setInt(1, spec.getMin());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					ps.setInt(2, spec.getMax());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-			if (sql != null) {
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
-					applyFilters.accept(statement);
-					try (java.sql.ResultSet rs = statement.executeQuery()) {
-						rs.next();
-						return rs.getBoolean(1);
-					}
-				} catch (java.sql.SQLException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			try {
-				return query(specification).any();
-			} catch (java.io.IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+	}
+
+	@Override
+	public void close() throws java.io.IOException { 
 	}
 
 	
@@ -244,7 +217,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 	public java.util.List<gen.model.Seq.Next> find(String[] uris) {
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
-			java.util.ArrayList<gen.model.Seq.Next> result = new java.util.ArrayList<>(uris.length);
+			java.util.List<gen.model.Seq.Next> result = new java.util.ArrayList<>(uris.length);
 			StringBuilder sb = new StringBuilder("SELECT r FROM \"Seq\".\"Next_entity\" r WHERE r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
@@ -254,6 +227,7 @@ public class NextRepository   implements org.revenj.patterns.Repository<gen.mode
 					result.add(converter.from(reader));
 				}
 			}
+			
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);

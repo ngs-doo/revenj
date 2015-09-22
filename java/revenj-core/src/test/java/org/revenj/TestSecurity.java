@@ -5,17 +5,18 @@ import org.junit.Test;
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.DataSource;
 import org.revenj.security.PermissionManager;
-import org.revenj.security.Principal;
 import org.revenj.security.UserPrincipal;
 
 import java.io.Closeable;
+import java.security.Principal;
 import java.util.*;
 
 public class TestSecurity {
 
 	@Test
 	public void simpleRoleCheck() throws Exception {
-		Principal user = new UserPrincipal("user", Collections.singleton("role"));
+		Set<String> roles = Collections.singleton("role");
+		UserPrincipal user = new UserPrincipal("user", roles::contains);
 		Assert.assertTrue(user.implies("user"));
 		Assert.assertTrue(user.implies("role"));
 		Assert.assertFalse(user.implies("role1"));

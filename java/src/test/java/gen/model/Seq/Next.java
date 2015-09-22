@@ -69,6 +69,7 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = -5716183155529821836L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Next(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -79,7 +80,6 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.ID = ID;
 	}
 
-	private static final long serialVersionUID = 2589329286584431644L;
 	
 	private int ID;
 
@@ -106,7 +106,7 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 				try (java.sql.ResultSet rs = st.executeQuery()) {
 					java.util.Iterator<Next> iterator = items.iterator();
 					while (rs.next()) {
-						iterator.next().ID = rs.getInt(1);
+						iterator.next().setID(rs.getInt(1));
 					}
 				}
 			} catch (java.sql.SQLException e) {
@@ -135,7 +135,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = -4642268786364072630L;
+	private static final long serialVersionUID = -29095485362745486L;
 	
 	private Integer min;
 
@@ -178,6 +178,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		}
 }
 
+	private transient Next __originalValue;
 	
 	static {
 		gen.model.Seq.repositories.NextRepository.__setupPersist(
@@ -213,7 +214,6 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 			}
 		);
 	}
-	private transient Next __originalValue;
 	
 	public Next(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Next>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Next> rdr : readers) {

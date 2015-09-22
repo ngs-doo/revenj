@@ -6,13 +6,13 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -79,14 +79,7 @@ namespace Revenj.Plugins.Server.Commands
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 
 			if (!Permissions.CanAccess(documentType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0} in {1}.",
-						argument.TemplaterName,
-						argument.CubeName);
-
+				return CommandResult<TOutput>.Forbidden("{0} in {1}.".With(argument.TemplaterName, argument.CubeName));
 			if (!typeof(IDocumentReport<DataTable>).IsAssignableFrom(documentType))
 				return
 					CommandResult<TOutput>.Fail(

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
-using System.Net;
 using System.Runtime.Serialization;
 using System.Security.Principal;
 using Revenj.DomainPatterns;
@@ -83,13 +82,7 @@ namespace Revenj.Plugins.Server.Commands
 Please check your arguments.".With(argument.Name), null);
 
 			if (!Permissions.CanAccess(rootType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.Name);
-
+				return CommandResult<TOutput>.Forbidden(argument.Name);
 			if (argument.Uri == null)
 				return CommandResult<TOutput>.Fail(
 					"Uri to delete not specified.",

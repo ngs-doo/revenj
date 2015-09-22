@@ -70,7 +70,8 @@ public class TestProcessingEngine {
 				engine.execute(
 						Object.class,
 						Object.class,
-						new ServerCommandDescription[]{cd});
+						new ServerCommandDescription[]{cd},
+						null);
 		Assert.assertEquals(200, result.status);
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		CommandResultDescription description = result.executedCommandResults[0];
@@ -85,7 +86,8 @@ public class TestProcessingEngine {
 				engine.execute(
 						Object.class,
 						Object.class,
-						new ServerCommandDescription[]{cd});
+						new ServerCommandDescription[]{cd},
+						null);
 		Assert.assertEquals(200, result.status);
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		description = result.executedCommandResults[0];
@@ -110,7 +112,8 @@ public class TestProcessingEngine {
 				engine.execute(
 						String.class,
 						String.class,
-						new ServerCommandDescription[]{cd});
+						new ServerCommandDescription[]{cd},
+						null);
 		Assert.assertEquals(200, result.status);
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		CommandResultDescription<String> description = result.executedCommandResults[0];
@@ -125,7 +128,8 @@ public class TestProcessingEngine {
 				engine.execute(
 						String.class,
 						String.class,
-						new ServerCommandDescription[]{cd});
+						new ServerCommandDescription[]{cd},
+						null);
 		Assert.assertEquals(200, result.status);
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		description = result.executedCommandResults[0];

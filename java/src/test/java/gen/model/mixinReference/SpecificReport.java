@@ -11,7 +11,6 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 			
 		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
-		this.authorID = 0;
 	}
 
 	
@@ -86,6 +85,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = -7109746652338275702L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -100,7 +100,6 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		this.authorID = authorID;
 	}
 
-	private static final long serialVersionUID = -1026941555917553614L;
 	
 	private int ID;
 
@@ -127,7 +126,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 				try (java.sql.ResultSet rs = st.executeQuery()) {
 					java.util.Iterator<SpecificReport> iterator = items.iterator();
 					while (rs.next()) {
-						iterator.next().ID = rs.getInt(1);
+						iterator.next().setID(rs.getInt(1));
 					}
 				}
 			} catch (java.sql.SQLException e) {
@@ -136,6 +135,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		});
 	}
 	
+	private transient SpecificReport __originalValue;
 	
 	static {
 		gen.model.mixinReference.repositories.SpecificReportRepository.__setupPersist(
@@ -171,7 +171,6 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 			}
 		);
 	}
-	private transient SpecificReport __originalValue;
 	
 	private gen.model.mixinReference.Author author;
 

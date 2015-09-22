@@ -1,15 +1,22 @@
 package org.revenj.security;
 
+import java.security.Principal;
 import java.util.Set;
+import java.util.function.Function;
 
 public final class UserPrincipal implements Principal {
 
 	private final String name;
-	private final Set<String> roles;
+	private final Function<String, Boolean> isInRole;
+
+	public UserPrincipal(String name, Function<String, Boolean> isInRole) {
+		this.name = name;
+		this.isInRole = isInRole;
+	}
 
 	public UserPrincipal(String name, Set<String> roles) {
 		this.name = name;
-		this.roles = roles;
+		this.isInRole = roles::contains;
 	}
 
 	@Override
@@ -17,8 +24,7 @@ public final class UserPrincipal implements Principal {
 		return name;
 	}
 
-	@Override
 	public boolean implies(String role) {
-		return name.equals(role) || roles.contains(role);
+		return name.equals(role) || isInRole.apply(role);
 	}
 }

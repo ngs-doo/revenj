@@ -3,12 +3,13 @@ package org.revenj;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.security.GlobalPermission;
-import org.revenj.security.Principal;
 import org.revenj.security.RolePermission;
+import org.revenj.security.UserPrincipal;
 import rx.Observable;
 import rx.Subscription;
 
 import java.io.Closeable;
+import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -108,14 +109,20 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 		if (len < 1) {
 			return defaultPermissions;
 		}
-		boolean isOpen;
 		String name = String.join(".", Arrays.copyOf(parts, len));
 		Boolean found = globalPermissions.get(name);
 		return found != null ? found : checkOpen(parts, len - 1);
 	}
 
+	private boolean implies(Principal principal, String role) {
+		return principal instanceof UserPrincipal
+				? ((UserPrincipal) principal).implies(role)
+				: role.equals(principal.getName());
+	}
+
 	@Override
 	public boolean canAccess(String identifier, Principal user) {
+		if (user == null) return defaultPermissions;
 		checkPermissions();
 		String target = identifier != null ? identifier : "";
 		String id = user.getName() + ":" + target;
@@ -130,7 +137,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 			String subName = String.join(".", Arrays.copyOf(parts, i));
 			permissions = rolePermissions.get(subName);
 			if (permissions != null) {
-				Optional<Pair> found = permissions.stream().filter(it -> user.implies(it.name)).findFirst();
+				Optional<Pair> found = permissions.stream().filter(it -> implies(user, it.name)).findFirst();
 				if (found.isPresent()) {
 					isAllowed = found.get().isAllowed;
 					break;
@@ -144,12 +151,13 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	}
 
 	@Override
-	public <T extends DataSource> Query<T> applyFilters(Class<T> manifest, Principal user, Query<T> data) {
+	public <T extends DataSource, S extends T> Query<S> applyFilters(Class<T> manifest, Principal user, Query<S> data) {
+		if (user == null) return data.filter(it -> defaultPermissions);
 		List<Filter> registered = registeredFilters.get(manifest);
 		if (registered != null) {
-			Query<T> result = data;
+			Query<S> result = data;
 			for (Filter r : registered) {
-				if ((user.implies(r.role)) != r.inverse) {
+				if ((implies(user, r.role)) != r.inverse) {
 					result = result.filter(r.specification);
 				}
 			}
@@ -159,13 +167,14 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	}
 
 	@Override
-	public <T extends DataSource> List<T> applyFilters(Class<T> manifest, Principal user, List<T> data) {
+	public <T extends DataSource, S extends T> List<S> applyFilters(Class<T> manifest, Principal user, List<S> data) {
+		if (user == null) return defaultPermissions ? data : Collections.EMPTY_LIST;
 		List<Filter> registered = registeredFilters.get(manifest);
 		if (registered != null) {
-			Stream<T> result = data.stream();
+			Stream<S> result = data.stream();
 			boolean filtered = false;
 			for (Filter r : registered) {
-				if (user.implies(r.role) != r.inverse) {
+				if (implies(user, r.role) != r.inverse) {
 					result = result.filter(r.specification);
 					filtered = true;
 				}

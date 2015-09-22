@@ -2,7 +2,6 @@
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net;
 using System.Runtime.Serialization;
 using System.Security.Principal;
 using Revenj.DomainPatterns;
@@ -73,14 +72,7 @@ namespace Revenj.Plugins.Server.Commands
 Please check your arguments.".With(argument.ReportName), null);
 			}
 			if (!Permissions.CanAccess(reportType.FullName, principal))
-			{
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.ReportName);
-			}
+				return CommandResult<TOutput>.Forbidden(argument.ReportName);
 			try
 			{
 				var commandType = typeof(PopulateReportCommand<,>).MakeGenericType(reportType, ri.GetGenericArguments()[0]);

@@ -165,6 +165,11 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.mixinReference.converters.ChildConverter mixinReference$converter$ChildConverter = new gen.model.mixinReference.converters.ChildConverter(columns);
 		container.register(mixinReference$converter$ChildConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.Child>>(){}.type, mixinReference$converter$ChildConverter, false);
+		
+		gen.model.mixinReference.converters.UserFilterConverter mixinReference$converter$UserFilterConverter = new gen.model.mixinReference.converters.UserFilterConverter(columns);
+		container.register(mixinReference$converter$UserFilterConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.UserFilter>>(){}.type, mixinReference$converter$UserFilterConverter, false);
+		org.revenj.security.PermissionManager permissions = container.resolve(org.revenj.security.PermissionManager.class);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"");
@@ -213,14 +218,14 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Composite.class, "getTsl", "\"tsl\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"");
+		test$converter$CompositeListConverter.configure(container);
+		metamodel.registerDataSource(gen.model.test.CompositeList.class, "\"test\".\"CompositeList_snowflake\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getURI", "\"URI\"");
 		
 		container.register(gen.model.test.repositories.CompositeListRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
-		test$converter$CompositeListConverter.configure(container);
-		metamodel.registerDataSource(gen.model.test.CompositeList.class, "\"test\".\"CompositeList_snowflake\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEnn", "\"enn\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEn", "\"en\"");
@@ -247,17 +252,17 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Detail2.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.test.Detail2.class, "getU", "\"u\"");
 		metamodel.registerProperty(gen.model.test.Detail2.class, "getDd", "\"dd\"");
+		test$converter$ClickedConverter.configure(container);
+		metamodel.registerDataSource(gen.model.test.Clicked.class, "\"test\".\"Clicked_event\"");
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getQueuedAt", "\"QueuedAt\"");
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getProcessedAt", "\"ProcessedAt\"");
 		
 		container.register(gen.model.test.repositories.ClickedRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventStore<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
-		test$converter$ClickedConverter.configure(container);
-		metamodel.registerDataSource(gen.model.test.Clicked.class, "\"test\".\"Clicked_event\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getQueuedAt", "\"QueuedAt\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getProcessedAt", "\"ProcessedAt\"");
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getDate", "\"date\"");
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getNumber", "\"number\"");
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getBigint", "\"bigint\"");
@@ -308,6 +313,17 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerDataSource(gen.model.mixinReference.Child.class, "\"mixinReference\".\"Child_entity\"");
 		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getVersion", "\"version\"");
+		mixinReference$converter$UserFilterConverter.configure(container);
+		metamodel.registerDataSource(gen.model.mixinReference.UserFilter.class, "\"mixinReference\".\"UserFilter_entity\"");
+		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getID", "\"ID\"");
+		
+		container.register(gen.model.mixinReference.repositories.UserFilterRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
+		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getName", "\"name\"");
+		permissions.registerFilter(gen.model.mixinReference.UserFilter.class, it -> it.getName().equals(org.revenj.security.PermissionManager.boundPrincipal.get().getName()), "RegularUser", false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -320,6 +336,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.mixinReference.SpecificReport>>(){}.type, gen.model.mixinReference.repositories.SpecificReportRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"");

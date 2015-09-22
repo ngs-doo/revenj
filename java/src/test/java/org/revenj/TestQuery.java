@@ -60,6 +60,17 @@ public class TestQuery {
 	}
 
 	@Test
+	public void searchWithFilter() throws IOException {
+		ServiceLocator locator = container;
+		NextRepository repository = locator.resolve(NextRepository.class);
+		String uri = repository.insert(new Next());
+		int id = Integer.parseInt(uri);
+		List<Next> found = repository.search(next -> next.getID() == id);
+		Assert.assertEquals(1, found.size());
+		Assert.assertEquals(id, found.get(0).getID());
+	}
+
+	@Test
 	public void queryWithFilterAndCount() throws IOException {
 		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);

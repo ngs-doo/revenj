@@ -70,13 +70,7 @@ namespace Revenj.Plugins.Server.Commands
 				return CommandResult<TOutput>.Fail("Couldn't find domain object type {0}.".With(argument.Name), null);
 
 			if (!Permissions.CanAccess(objectType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.Name);
-
+				return CommandResult<TOutput>.Forbidden(argument.Name);
 			if (argument.Uri == null)
 				return CommandResult<TOutput>.Fail(
 					"Uri to read not specified.",

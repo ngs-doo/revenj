@@ -2,7 +2,7 @@ package gen.model.test.repositories;
 
 
 
-public class SingleDetailRepository   implements org.revenj.patterns.Repository<gen.model.test.SingleDetail>, org.revenj.patterns.PersistableRepository<gen.model.test.SingleDetail> {
+public class SingleDetailRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.test.SingleDetail>, org.revenj.patterns.PersistableRepository<gen.model.test.SingleDetail> {
 	
 	
 	
@@ -30,12 +30,13 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.SingleDetail> query(org.revenj.patterns.Specification<gen.model.test.SingleDetail> filter) {
 		org.revenj.patterns.Query<gen.model.test.SingleDetail> query = queryProvider.query(connection, locator, gen.model.test.SingleDetail.class);
-		if (filter == null) return query;
-				
-		return query.filter(filter);
+		if (filter == null) { }
+		else query = query.filter(filter);
+		
+		return query;
 	}
 
-	private java.util.ArrayList<gen.model.test.SingleDetail> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.SingleDetail> result) throws java.sql.SQLException, java.io.IOException {
+	private java.util.List<gen.model.test.SingleDetail> readFromDb(java.sql.PreparedStatement statement, java.util.List<gen.model.test.SingleDetail> result) throws java.sql.SQLException, java.io.IOException {
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
@@ -43,130 +44,106 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 				result.add(converter.from(reader));
 			}
 		}
+		
 		return result;
 	}
 
 	@Override
-	public java.util.List<gen.model.test.SingleDetail> search(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.SingleDetail>> filter, java.util.Optional<Integer> limit, java.util.Optional<Integer> offset) {
-		String sql = null;
-		if (filter == null || filter.orElse(null) == null) {
-			sql = "SELECT r FROM \"test\".\"SingleDetail_entity\" r";
-			if (limit != null && limit.orElse(null) != null) {
-				sql += " LIMIT " + Integer.toString(limit.get());
+	public java.util.List<gen.model.test.SingleDetail> search(org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification, Integer limit, Integer offset) {
+		final String selectType = "SELECT it";
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			String sql;
+			if (specification == null) {
+				sql = "SELECT r FROM \"test\".\"SingleDetail_entity\" r";
+			} 
+			else {
+				org.revenj.patterns.Query<gen.model.test.SingleDetail> query = query(specification);
+				if (offset != null) {
+					query = query.skip(offset);
+				}
+				if (limit != null) {
+					query = query.limit(limit);
+				}
+				try {
+					return query.list();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
-			if (offset != null && offset.orElse(null) != null) {
-				sql += " OFFSET " + Integer.toString(offset.get());
+			if (limit != null) {
+				sql += " LIMIT " + Integer.toString(limit);
+			}
+			if (offset != null) {
+				sql += " OFFSET " + Integer.toString(offset);
 			}
 			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				applyFilters.accept(statement);
 				return readFromDb(statement, new java.util.ArrayList<>());
 			} catch (java.sql.SQLException | java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		final String selectType = "SELECT it";
-		org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification = filter.get();
-		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
-		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-			if (sql != null) {
-				if (limit != null && limit.orElse(null) != null) {
-					sql += " LIMIT " + Integer.toString(limit.get());
-				}
-				if (offset != null && offset.orElse(null) != null) {
-					sql += " OFFSET " + Integer.toString(offset.get());
-				}
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-					applyFilters.accept(statement);
-					return readFromDb(statement, new java.util.ArrayList<>());
-				} catch (java.sql.SQLException | java.io.IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			org.revenj.patterns.Query<gen.model.test.SingleDetail> query = query(specification);
-			if (offset != null && offset.orElse(null) != null) {
-				query = query.skip(offset.get());
-			}
-			if (limit != null && limit.orElse(null) != null) {
-				query = query.limit(limit.get());
-			}
-			try {
-				return query.list();
-			} catch (java.io.IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	@Override
-	public long count(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.SingleDetail>> filter) {
-		if (filter == null || filter.orElse(null) == null) {
-			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM \"test\".\"SingleDetail_entity\" r");
-				java.sql.ResultSet rs = statement.executeQuery()) {
-				rs.next();
-				return rs.getLong(1);
-			} catch (java.sql.SQLException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		String sql = null;
+	public long count(org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification) {
 		final String selectType = "SELECT COUNT(*)";
-		org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-			if (sql != null) {
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-					applyFilters.accept(statement);
-					try (java.sql.ResultSet rs = statement.executeQuery()) {
-						rs.next();
-						return rs.getLong(1);
-					}
-				} catch (java.sql.SQLException e) {
+			String sql;
+			if (specification == null) {
+				sql = "SELECT COUNT(*) FROM \"test\".\"SingleDetail_entity\" r";
+			} 
+			else {
+				try {
+					return query(specification).count();
+				} catch (java.io.IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
-			try {
-				return query(specification).count();
-			} catch (java.io.IOException e) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				applyFilters.accept(statement);
+				try (java.sql.ResultSet rs = statement.executeQuery()) {
+					rs.next();
+					return rs.getLong(1);
+				}
+			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
 		}
 	}
 
 	@Override
-	public boolean exists(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.SingleDetail>> filter) {
-		if (filter == null || filter.orElse(null) == null) {
-			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT exists(SELECT * FROM \"test\".\"SingleDetail_entity\" r)");
-				java.sql.ResultSet rs = statement.executeQuery()) {
-				rs.next();
-				return rs.getBoolean(1);
+	public boolean exists(org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification) {
+		final String selectType = "SELECT exists(SELECT *";
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			String sql = null;
+			if (specification == null) {
+				sql = "SELECT exists(SELECT * FROM \"test\".\"SingleDetail_entity\" r";
+			} 
+			else {
+				try {
+					return query(specification).any();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
+				applyFilters.accept(statement);
+				try (java.sql.ResultSet rs = statement.executeQuery()) {
+					rs.next();
+					return rs.getBoolean(1);
+				}
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		String sql = null;
-		final String selectType = "SELECT exists(SELECT *";
-		org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification = filter.get();
-		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
-		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-			if (sql != null) {
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
-					applyFilters.accept(statement);
-					try (java.sql.ResultSet rs = statement.executeQuery()) {
-						rs.next();
-						return rs.getBoolean(1);
-					}
-				} catch (java.sql.SQLException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			try {
-				return query(specification).any();
-			} catch (java.io.IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+	}
+
+	@Override
+	public void close() throws java.io.IOException { 
 	}
 
 	
@@ -174,7 +151,7 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 	public java.util.List<gen.model.test.SingleDetail> find(String[] uris) {
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
-			java.util.ArrayList<gen.model.test.SingleDetail> result = new java.util.ArrayList<>(uris.length);
+			java.util.List<gen.model.test.SingleDetail> result = new java.util.ArrayList<>(uris.length);
 			StringBuilder sb = new StringBuilder("SELECT r FROM \"test\".\"SingleDetail_entity\" r WHERE r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
@@ -184,6 +161,7 @@ public class SingleDetailRepository   implements org.revenj.patterns.Repository<
 					result.add(converter.from(reader));
 				}
 			}
+			
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);

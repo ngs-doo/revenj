@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net;
 using System.Runtime.Serialization;
 using System.Security.Principal;
 using Revenj.Common;
@@ -92,13 +91,7 @@ namespace Revenj.Plugins.Server.Commands
 Please check your arguments.".With(argument.RootName), null);
 
 			if (!Permissions.CanAccess(rootType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.RootName);
-
+				return CommandResult<TOutput>.Forbidden(argument.RootName);
 			if (argument.ToInsert == null && argument.ToUpdate == null && argument.ToDelete == null)
 				return CommandResult<TOutput>.Fail("Data to persist not specified.", @"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output, rootType)));

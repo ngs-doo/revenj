@@ -1,15 +1,14 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
-using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -69,13 +68,7 @@ namespace Revenj.Plugins.Server.Commands
 Please check your arguments.".With(argument.Name), null);
 
 			if (!Permissions.CanAccess(rootType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.Name);
-
+				return CommandResult<TOutput>.Forbidden(argument.Name);
 			if (argument.Uri == null || argument.Uri.Length == 0)
 				return CommandResult<TOutput>.Fail(
 					"Uri not specified.",

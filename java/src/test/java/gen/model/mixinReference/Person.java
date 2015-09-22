@@ -81,6 +81,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = 9210756571025609050L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Person(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -93,7 +94,6 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 		this.AuthorID = AuthorID;
 	}
 
-	private static final long serialVersionUID = 8627679831992267208L;
 	
 	private java.time.LocalDate birth;
 
@@ -131,6 +131,16 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 		return this;
 	}
 
+	
+	static {
+		gen.model.mixinReference.Author.__bindToperson(parent -> {
+			int i = 0;
+			gen.model.mixinReference.Person _r = parent.getPerson();
+			if (_r != null) {
+				_r.AuthorID = parent.getID();
+			}
+		});
+	}
 	
 	public Person(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Person>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Person> rdr : readers) {

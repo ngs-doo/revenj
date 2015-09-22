@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -12,7 +13,6 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -72,14 +72,8 @@ namespace Revenj.Plugins.Server.Commands
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 
 			if (!Permissions.CanAccess(domainType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.DomainObjectName);
-
-			Type validationType = DomainModel.FindNested(domainType.FullName, argument.ValidationName);
+				return CommandResult<TOutput>.Forbidden(argument.DomainObjectName);
+			var validationType = DomainModel.FindNested(domainType.FullName, argument.ValidationName);
 			if (validationType == null)
 				return
 					CommandResult<TOutput>.Fail(
@@ -96,7 +90,7 @@ namespace Revenj.Plugins.Server.Commands
 						"You don't have permission to access: {0}.",
 						argument.ValidationName);
 
-			Type bindingType = string.IsNullOrWhiteSpace(argument.BindingObjectName) ? null : DomainModel.Find(argument.BindingObjectName);
+			var bindingType = string.IsNullOrWhiteSpace(argument.BindingObjectName) ? null : DomainModel.Find(argument.BindingObjectName);
 
 			try
 			{

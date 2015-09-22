@@ -73,6 +73,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = 1665507667070757914L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -85,7 +86,6 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		this.detailsURI = detailsURI == null ? new String[0] : detailsURI;
 	}
 
-	private static final long serialVersionUID = 6821081716713315586L;
 	
 	private int ID;
 
@@ -112,7 +112,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 				try (java.sql.ResultSet rs = st.executeQuery()) {
 					java.util.Iterator<SingleDetail> iterator = items.iterator();
 					while (rs.next()) {
-						iterator.next().ID = rs.getInt(1);
+						iterator.next().setID(rs.getInt(1));
 					}
 				}
 			} catch (java.sql.SQLException e) {
@@ -163,6 +163,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		return this.detailsURI;
 	}
 
+	private transient SingleDetail __originalValue;
 	
 	static {
 		gen.model.test.repositories.SingleDetailRepository.__setupPersist(
@@ -198,7 +199,6 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 			}
 		);
 	}
-	private transient SingleDetail __originalValue;
 	
 	public SingleDetail(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SingleDetail>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<SingleDetail> rdr : readers) {

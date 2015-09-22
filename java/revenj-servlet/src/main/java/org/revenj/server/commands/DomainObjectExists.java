@@ -1,20 +1,26 @@
 package org.revenj.server.commands;
 
 import org.revenj.patterns.*;
+import org.revenj.security.PermissionManager;
 import org.revenj.server.ServerCommand;
 import org.revenj.server.CommandResult;
 import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.security.Principal;
 import java.util.Optional;
 
 public class DomainObjectExists implements ServerCommand {
 
 	private final DomainModel domainModel;
+	private final PermissionManager permissions;
 
-	public DomainObjectExists(DomainModel domainModel) {
+	public DomainObjectExists(
+			DomainModel domainModel,
+			PermissionManager permissions) {
 		this.domainModel = domainModel;
+		this.permissions = permissions;
 	}
 
 	public static final class Argument<TFormat> {
@@ -34,7 +40,12 @@ public class DomainObjectExists implements ServerCommand {
 	}
 
 	@Override
-	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
+	public <TInput, TOutput> CommandResult<TOutput> execute(
+			ServiceLocator locator,
+			Serialization<TInput> input,
+			Serialization<TOutput> output,
+			TInput data,
+			Principal principal) {
 		Argument<TInput> arg;
 		try {
 			arg = input.deserialize(data, Argument.class, data.getClass());
@@ -45,7 +56,10 @@ public class DomainObjectExists implements ServerCommand {
 		if (!manifest.isPresent()) {
 			return CommandResult.badRequest("Unable to find specified domain object: " + arg.Name);
 		}
-		Optional<Specification> filter;
+		if (!permissions.canAccess(manifest.get(), principal)) {
+			return CommandResult.forbidden(arg.Name);
+		}
+		final Specification specification;
 		if (arg.SpecificationName != null && arg.SpecificationName.length() > 0) {
 			Optional<Class<?>> specType = domainModel.find(arg.Name + "$" + arg.SpecificationName);
 			if (!specType.isPresent()) {
@@ -55,15 +69,14 @@ public class DomainObjectExists implements ServerCommand {
 				return CommandResult.badRequest("Couldn't find specification: " + arg.SpecificationName);
 			}
 			try {
-				Specification specification = (Specification) input.deserialize((Type) specType.get(), arg.Specification);
-				filter = Optional.ofNullable(specification);
+				specification = (Specification) input.deserialize((Type) specType.get(), arg.Specification);
 			} catch (IOException e) {
 				return CommandResult.badRequest("Error deserializing specification: " + arg.SpecificationName);
 			}
 		} else if (arg.Specification instanceof Specification) {
-			filter = Optional.ofNullable((Specification) arg.Specification);
+			specification = (Specification) arg.Specification;
 		} else {
-			filter = Optional.empty();
+			specification = null;
 		}
 		SearchableRepository repository;
 		try {
@@ -71,7 +84,7 @@ public class DomainObjectExists implements ServerCommand {
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
-		boolean found = repository.exists(filter.orElse(null));
+		boolean found = repository.exists(specification);
 		return CommandResult.success(Boolean.toString(found), output.serialize(found));
 	}
 }

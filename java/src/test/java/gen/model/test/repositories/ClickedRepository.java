@@ -2,7 +2,7 @@ package gen.model.test.repositories;
 
 
 
-public class ClickedRepository   implements org.revenj.patterns.DomainEventStore<gen.model.test.Clicked> {
+public class ClickedRepository   implements java.io.Closeable, org.revenj.patterns.DomainEventStore<gen.model.test.Clicked> {
 	
 	
 	
@@ -30,20 +30,20 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.Clicked> query(org.revenj.patterns.Specification<gen.model.test.Clicked> filter) {
 		org.revenj.patterns.Query<gen.model.test.Clicked> query = queryProvider.query(connection, locator, gen.model.test.Clicked.class);
-		if (filter == null) return query;
-		
-		
-		if (filter instanceof gen.model.test.Clicked.BetweenNumbers) {
+		if (filter == null) { }
+		else if (filter instanceof gen.model.test.Clicked.BetweenNumbers) {
 			gen.model.test.Clicked.BetweenNumbers _spec_ = (gen.model.test.Clicked.BetweenNumbers)filter;
 			java.math.BigDecimal _spec_min_ = _spec_.getMin();
 			java.util.Set<java.math.BigDecimal> _spec_inSet_ = _spec_.getInSet();
 			gen.model.test.En _spec_en_ = _spec_.getEn();
-			return query.filter(it -> ( ( it.getNumber().compareTo(_spec_min_) >= 0 && (_spec_inSet_.contains(it.getNumber()))) &&  it.getEn().equals(_spec_en_)));
-		}		
-		return query.filter(filter);
+			query = query.filter(it -> ( ( it.getNumber().compareTo(_spec_min_) >= 0 && (_spec_inSet_.contains(it.getNumber()))) &&  it.getEn().equals(_spec_en_)));
+		}
+		else query = query.filter(filter);
+		
+		return query;
 	}
 
-	private java.util.ArrayList<gen.model.test.Clicked> readFromDb(java.sql.PreparedStatement statement, java.util.ArrayList<gen.model.test.Clicked> result) throws java.sql.SQLException, java.io.IOException {
+	private java.util.List<gen.model.test.Clicked> readFromDb(java.sql.PreparedStatement statement, java.util.List<gen.model.test.Clicked> result) throws java.sql.SQLException, java.io.IOException {
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
@@ -51,241 +51,214 @@ public class ClickedRepository   implements org.revenj.patterns.DomainEventStore
 				result.add(converter.from(reader));
 			}
 		}
+		
 		return result;
 	}
 
 	@Override
-	public java.util.List<gen.model.test.Clicked> search(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.Clicked>> filter, java.util.Optional<Integer> limit, java.util.Optional<Integer> offset) {
-		String sql = null;
-		if (filter == null || filter.orElse(null) == null) {
-			sql = "SELECT r FROM \"test\".\"Clicked_event\" r";
-			if (limit != null && limit.orElse(null) != null) {
-				sql += " LIMIT " + Integer.toString(limit.get());
+	public java.util.List<gen.model.test.Clicked> search(org.revenj.patterns.Specification<gen.model.test.Clicked> specification, Integer limit, Integer offset) {
+		final String selectType = "SELECT it";
+		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
+			String sql;
+			if (specification == null) {
+				sql = "SELECT r FROM \"test\".\"Clicked_event\" r";
+			} 
+			else if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
+				gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
+				sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setBigDecimal(1, spec.getMin());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						
+					Object[] __arr = new Object[spec.getInSet().size()];
+					int __ind = 0;
+					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
+					ps.setArray(2, connection.createArrayOf("numeric", __arr));
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
+				else {
+					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+					__pgo.setType("\"test\".\"En\"");
+					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
+					ps.setObject(3, __pgo);
+				}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
 			}
-			if (offset != null && offset.orElse(null) != null) {
-				sql += " OFFSET " + Integer.toString(offset.get());
+			else {
+				org.revenj.patterns.Query<gen.model.test.Clicked> query = query(specification);
+				if (offset != null) {
+					query = query.skip(offset);
+				}
+				if (limit != null) {
+					query = query.limit(limit);
+				}
+				try {
+					return query.list();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			if (limit != null) {
+				sql += " LIMIT " + Integer.toString(limit);
+			}
+			if (offset != null) {
+				sql += " OFFSET " + Integer.toString(offset);
 			}
 			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				applyFilters.accept(statement);
 				return readFromDb(statement, new java.util.ArrayList<>());
 			} catch (java.sql.SQLException | java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		final String selectType = "SELECT it";
-		org.revenj.patterns.Specification<gen.model.test.Clicked> specification = filter.get();
-		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
-		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-		
-		if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
-			gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
-			sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
-			
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					ps.setBigDecimal(1, spec.getMin());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					
-					Object[] __arr = new Object[spec.getInSet().size()];
-					int __ind = 0;
-					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
-					ps.setArray(2, connection.createArrayOf("numeric", __arr));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
-				else {
-					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
-					__pgo.setType("\"test\".\"En\"");
-					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
-					ps.setObject(3, __pgo);
-				}
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-			if (sql != null) {
-				if (limit != null && limit.orElse(null) != null) {
-					sql += " LIMIT " + Integer.toString(limit.get());
-				}
-				if (offset != null && offset.orElse(null) != null) {
-					sql += " OFFSET " + Integer.toString(offset.get());
-				}
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-					applyFilters.accept(statement);
-					return readFromDb(statement, new java.util.ArrayList<>());
-				} catch (java.sql.SQLException | java.io.IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			org.revenj.patterns.Query<gen.model.test.Clicked> query = query(specification);
-			if (offset != null && offset.orElse(null) != null) {
-				query = query.skip(offset.get());
-			}
-			if (limit != null && limit.orElse(null) != null) {
-				query = query.limit(limit.get());
-			}
-			try {
-				return query.list();
-			} catch (java.io.IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	@Override
-	public long count(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.Clicked>> filter) {
-		if (filter == null || filter.orElse(null) == null) {
-			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM \"test\".\"Clicked_event\" r");
-				java.sql.ResultSet rs = statement.executeQuery()) {
-				rs.next();
-				return rs.getLong(1);
-			} catch (java.sql.SQLException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		String sql = null;
+	public long count(org.revenj.patterns.Specification<gen.model.test.Clicked> specification) {
 		final String selectType = "SELECT COUNT(*)";
-		org.revenj.patterns.Specification<gen.model.test.Clicked> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-		
-		if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
-			gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
-			sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
-			
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					ps.setBigDecimal(1, spec.getMin());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					
+			String sql;
+			if (specification == null) {
+				sql = "SELECT COUNT(*) FROM \"test\".\"Clicked_event\" r";
+			} 
+			else if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
+				gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
+				sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setBigDecimal(1, spec.getMin());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						
 					Object[] __arr = new Object[spec.getInSet().size()];
 					int __ind = 0;
 					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
 					ps.setArray(2, connection.createArrayOf("numeric", __arr));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
 				else {
 					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
 					__pgo.setType("\"test\".\"En\"");
 					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
 					ps.setObject(3, __pgo);
 				}
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-			if (sql != null) {
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
-					applyFilters.accept(statement);
-					try (java.sql.ResultSet rs = statement.executeQuery()) {
-						rs.next();
-						return rs.getLong(1);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
 					}
-				} catch (java.sql.SQLException e) {
+				});
+			}
+			else {
+				try {
+					return query(specification).count();
+				} catch (java.io.IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
-			try {
-				return query(specification).count();
-			} catch (java.io.IOException e) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql)) {
+				applyFilters.accept(statement);
+				try (java.sql.ResultSet rs = statement.executeQuery()) {
+					rs.next();
+					return rs.getLong(1);
+				}
+			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
 		}
 	}
 
 	@Override
-	public boolean exists(java.util.Optional<org.revenj.patterns.Specification<gen.model.test.Clicked>> filter) {
-		if (filter == null || filter.orElse(null) == null) {
-			try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT exists(SELECT * FROM \"test\".\"Clicked_event\" r)");
-				java.sql.ResultSet rs = statement.executeQuery()) {
-				rs.next();
-				return rs.getBoolean(1);
-			} catch (java.sql.SQLException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		String sql = null;
+	public boolean exists(org.revenj.patterns.Specification<gen.model.test.Clicked> specification) {
 		final String selectType = "SELECT exists(SELECT *";
-		org.revenj.patterns.Specification<gen.model.test.Clicked> specification = filter.get();
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
-			
-		
-		if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
-			gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
-			sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
-			
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					ps.setBigDecimal(1, spec.getMin());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					
+			String sql = null;
+			if (specification == null) {
+				sql = "SELECT exists(SELECT * FROM \"test\".\"Clicked_event\" r";
+			} 
+			else if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
+				gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
+				sql = selectType + " FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setBigDecimal(1, spec.getMin());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						
 					Object[] __arr = new Object[spec.getInSet().size()];
 					int __ind = 0;
 					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
 					ps.setArray(2, connection.createArrayOf("numeric", __arr));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-			applyFilters = applyFilters.andThen(ps -> {
-				try {
-					if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						if (spec.getEn() == null) ps.setNull(3, java.sql.Types.OTHER); 
 				else {
 					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
 					__pgo.setType("\"test\".\"En\"");
 					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
 					ps.setObject(3, __pgo);
 				}
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-			if (sql != null) {
-				try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
-					applyFilters.accept(statement);
-					try (java.sql.ResultSet rs = statement.executeQuery()) {
-						rs.next();
-						return rs.getBoolean(1);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
 					}
-				} catch (java.sql.SQLException e) {
+				});
+			}
+			else {
+				try {
+					return query(specification).any();
+				} catch (java.io.IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
-			try {
-				return query(specification).any();
-			} catch (java.io.IOException e) {
+			try (java.sql.PreparedStatement statement = connection.prepareStatement(sql + ")")) {
+				applyFilters.accept(statement);
+				try (java.sql.ResultSet rs = statement.executeQuery()) {
+					rs.next();
+					return rs.getBoolean(1);
+				}
+			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
 		}
+	}
+
+	@Override
+	public void close() throws java.io.IOException { 
 	}
 
 	

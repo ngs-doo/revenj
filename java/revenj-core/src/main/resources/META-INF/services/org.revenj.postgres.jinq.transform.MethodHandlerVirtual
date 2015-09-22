@@ -5,6 +5,7 @@ org.revenj.postgres.jinq.transform.handlers.LocalDateTimeCompareHandler
 org.revenj.postgres.jinq.transform.handlers.ObjectEqualsHandler
 org.revenj.postgres.jinq.transform.handlers.OffsetDateTimeCompareHandler
 org.revenj.postgres.jinq.transform.handlers.StringIndexOfHandler
+org.revenj.postgres.jinq.transform.handlers.PrincipalGetName
 org.revenj.postgres.jinq.transform.handlers.SubstringHandler
 org.revenj.postgres.jinq.transform.handlers.ToLowerHandler
 org.revenj.postgres.jinq.transform.handlers.ToStringHandler

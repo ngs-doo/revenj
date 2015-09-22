@@ -81,14 +81,7 @@ namespace Revenj.Plugins.Server.Commands
 						"{0} must implement {1} to be executed as a service call".With(argument.Name, typeof(IServerService<,>).FullName));
 
 			if (!Permissions.CanAccess(serviceType.FullName, principal))
-			{
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.Name);
-			}
+				return CommandResult<TOutput>.Forbidden(argument.Name);
 			try
 			{
 				IExecuteCommand command;

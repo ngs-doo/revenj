@@ -46,7 +46,7 @@ public class DomainServlet extends HttpServlet {
 					Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
 					Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
 					SearchDomainObject.Argument arg = new SearchDomainObject.Argument(name.get(), null, null, offset, limit, null);
-					Utility.executeJson(engine, res, SearchDomainObject.class, arg);
+					Utility.executeJson(engine, req, res, SearchDomainObject.class, arg);
 				}
 			} else res.sendError(405, "Invalid URL path: " + path);
 		} else if (path.startsWith("/count/")) {
@@ -57,7 +57,7 @@ public class DomainServlet extends HttpServlet {
 					res.sendError(405, "Parsing specification from URL argument not yet supported. Use PUT method instead");
 				} else {
 					CountDomainObject.Argument arg = new CountDomainObject.Argument(name.get(), null, null);
-					Utility.executeJson(engine, res, CountDomainObject.class, arg);
+					Utility.executeJson(engine, req, res, CountDomainObject.class, arg);
 				}
 			} else res.sendError(405, "Invalid URL path: " + path);
 		} else if (path.startsWith("/exists/")) {
@@ -68,7 +68,7 @@ public class DomainServlet extends HttpServlet {
 					res.sendError(405, "Parsing specification from URL argument not yet supported. Use PUT method instead");
 				} else {
 					DomainObjectExists.Argument arg = new DomainObjectExists.Argument(name.get(), null, null);
-					Utility.executeJson(engine, res, DomainObjectExists.class, arg);
+					Utility.executeJson(engine, req, res, DomainObjectExists.class, arg);
 				}
 			} else res.sendError(405, "Invalid URL path: " + path);
 		} else {
@@ -88,7 +88,7 @@ public class DomainServlet extends HttpServlet {
 			String[] uris = serialization.deserialize(req.getInputStream(), req.getContentType(), String[].class);
 			findType(path, "/find/", res).ifPresent(name -> {
 				GetDomainObject.Argument arg = new GetDomainObject.Argument(name, uris, "match".equals(req.getParameter("order")));
-				Utility.executeJson(engine, res, GetDomainObject.class, arg);
+				Utility.executeJson(engine, req, res, GetDomainObject.class, arg);
 			});
 		} else if (path.startsWith("/search/")) {
 			final Optional<String> name = findType(path, "/search/", res);
@@ -135,7 +135,7 @@ public class DomainServlet extends HttpServlet {
 			}
 			DomainEvent domainEvent = (DomainEvent) serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
 			SubmitEvent.Argument arg = new SubmitEvent.Argument<>(name, domainEvent, "instance".equals(req.getParameter("return")));
-			Utility.executeJson(engine, res, SubmitEvent.class, arg);
+			Utility.executeJson(engine, req, res, SubmitEvent.class, arg);
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);
 		}
@@ -168,7 +168,7 @@ public class DomainServlet extends HttpServlet {
 		} else {
 			arg = buildArgument.apply(null);
 		}
-		Utility.executeJson(engine, res, target, arg);
+		Utility.executeJson(engine, req, res, target, arg);
 	}
 
 	@Override

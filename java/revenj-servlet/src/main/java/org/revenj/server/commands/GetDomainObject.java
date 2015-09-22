@@ -1,20 +1,26 @@
 package org.revenj.server.commands;
 
 import org.revenj.patterns.*;
+import org.revenj.security.PermissionManager;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
 import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 public class GetDomainObject implements ServerCommand {
 
 	private final DomainModel domainModel;
+	private final PermissionManager permissions;
 
-	public GetDomainObject(DomainModel domainModel) {
+	public GetDomainObject(
+			DomainModel domainModel,
+	        PermissionManager permissions) {
 		this.domainModel = domainModel;
+		this.permissions = permissions;
 	}
 
 	public static final class Argument {
@@ -34,7 +40,12 @@ public class GetDomainObject implements ServerCommand {
 	}
 
 	@Override
-	public <TInput, TOutput> CommandResult<TOutput> execute(ServiceLocator locator, Serialization<TInput> input, Serialization<TOutput> output, TInput data) {
+	public <TInput, TOutput> CommandResult<TOutput> execute(
+			ServiceLocator locator,
+			Serialization<TInput> input,
+			Serialization<TOutput> output,
+			TInput data,
+			Principal principal) {
 		Argument arg;
 		try {
 			arg = input.deserialize(data, Argument.class);
@@ -47,6 +58,9 @@ public class GetDomainObject implements ServerCommand {
 		}
 		if (arg.Uri == null || arg.Uri.length == 0) {
 			return CommandResult.badRequest("Uri not specified.");
+		}
+		if (!permissions.canAccess(manifest.get(), principal)) {
+			return CommandResult.forbidden(arg.Name);
 		}
 		Repository repository;
 		try {

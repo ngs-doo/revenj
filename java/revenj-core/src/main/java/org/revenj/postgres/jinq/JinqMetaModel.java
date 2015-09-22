@@ -1,5 +1,6 @@
 package org.revenj.postgres.jinq;
 
+import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodSignature;
 import org.revenj.postgres.jinq.transform.MetamodelUtil;
 
 import java.io.IOException;
@@ -9,6 +10,10 @@ public class JinqMetaModel extends MetamodelUtil {
 
 	private static final HashMap<Class<?>, String> classSources = new HashMap<>();
 	private static final HashMap<String, String> stringSources = new HashMap<>();
+
+	public JinqMetaModel() {
+		safeMethods.add(new MethodSignature("java/lang/ThreadLocal", "get", "()Ljava/lang/Object;"));
+	}
 
 	public void registerProperty(Class<?> clazz, String methodName, String property) throws IOException {
 		try {

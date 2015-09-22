@@ -92,13 +92,7 @@ namespace Revenj.Plugins.Server.Commands
 Please check your arguments.".With(argument.Name), null);
 
 			if (!Permissions.CanAccess(rootType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.Name);
-
+				return CommandResult<TOutput>.Forbidden(argument.Name);
 			if (argument.Data == null)
 				return CommandResult<TOutput>.Fail("Data to create not specified.", @"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output, rootType)));

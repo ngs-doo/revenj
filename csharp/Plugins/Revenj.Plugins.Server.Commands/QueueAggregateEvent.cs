@@ -83,23 +83,9 @@ namespace Revenj.Plugins.Server.Commands
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 
 			if (!Permissions.CanAccess(eventType.FullName, principal))
-			{
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						eventType.FullName);
-			}
+				return CommandResult<TOutput>.Forbidden(eventType.FullName);
 			if (!Permissions.CanAccess(aggregateType.FullName, principal))
-			{
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						aggregateType.FullName);
-			}
+				return CommandResult<TOutput>.Forbidden(aggregateType.FullName);
 			try
 			{
 				IQueueCommand command;

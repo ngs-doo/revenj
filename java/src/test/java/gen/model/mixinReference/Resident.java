@@ -83,6 +83,7 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable {
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = 6637695471569394916L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Resident(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -95,7 +96,6 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable {
 		this.birth = birth == null ? java.time.LocalDate.of(1, 1, 1) : birth;
 	}
 
-	private static final long serialVersionUID = -16978227076783828L;
 	
 	private java.util.UUID id;
 

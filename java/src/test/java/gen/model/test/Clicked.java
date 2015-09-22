@@ -84,7 +84,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = 4279210911943798335L;
+	private static final long serialVersionUID = -1278734538690474089L;
 	
 	private java.time.LocalDate date;
 
@@ -202,7 +202,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.HashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = 4873456051243303828L;
+	private static final long serialVersionUID = -8634359300874941012L;
 	
 	private java.math.BigDecimal min;
 
@@ -287,24 +287,6 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 	}
 
 	
-	static {
-		gen.model.test.repositories.ClickedRepository.__configure(
-			events -> {
-				java.time.OffsetDateTime now = java.time.OffsetDateTime.now();
-				for (gen.model.test.Clicked eve : events) {
-					eve.URI = null;
-					eve.QueuedAt = now;eve.ProcessedAt = now;
-				}
-			},
-			(events, uris) -> {
-				int _i = 0;
-				for (gen.model.test.Clicked eve : events) {
-					eve.URI = uris[_i++];
-				}
-			}
-		);
-	}
-	
 	public Clicked(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Clicked> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -321,5 +303,23 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };
 		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {item.bool = new java.util.HashSet<Boolean>(__list);} else item.bool = new java.util.HashSet<Boolean>(4); }; };
 		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
+	}
+	
+	static {
+		gen.model.test.repositories.ClickedRepository.__configure(
+			events -> {
+				java.time.OffsetDateTime now = java.time.OffsetDateTime.now();
+				for (gen.model.test.Clicked eve : events) {
+					eve.URI = null;
+					eve.QueuedAt = now;eve.ProcessedAt = now;
+				}
+			},
+			(events, uris) -> {
+				int _i = 0;
+				for (gen.model.test.Clicked eve : events) {
+					eve.URI = uris[_i++];
+				}
+			}
+		);
 	}
 }

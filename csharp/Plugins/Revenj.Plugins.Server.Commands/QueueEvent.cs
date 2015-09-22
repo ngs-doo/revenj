@@ -77,14 +77,7 @@ namespace Revenj.Plugins.Server.Commands
 Please check your arguments.".With(argument.Name), null);
 			}
 			if (!Permissions.CanAccess(eventType.FullName, principal))
-			{
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.Name);
-			}
+				return CommandResult<TOutput>.Forbidden(argument.Name);
 			try
 			{
 				IQueueCommand command;

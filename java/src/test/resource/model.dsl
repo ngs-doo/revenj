@@ -103,4 +103,16 @@ module mixinReference {
 	entity Person { date birth; }
 	entity Resident(id) { uuid id; date birth; }
 	entity Child { long version; }
+
+	aggregate UserFilter {
+		string name;
+	}
+
+	permissions {
+		filter UserFilter 'it -> it.getName().equals(org.revenj.security.PermissionManager.boundPrincipal.get().getName())' for RegularUser {
+			repository;
+		}
+	}
 }
+defaults { external permissions disabled; }
+role RegularUser;

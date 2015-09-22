@@ -15,6 +15,10 @@ public final class CommandResult<TFormat> {
 		return new CommandResult<>(null, message, 400);
 	}
 
+	public static <TFormat> CommandResult<TFormat> forbidden(String name) {
+		return new CommandResult<>(null, "You don't have permissions to access:" + name, 403);
+	}
+
 	public static <TFormat> CommandResult<TFormat> success(String message, TFormat value) {
 		return new CommandResult<>(value, message, 200);
 	}

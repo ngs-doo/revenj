@@ -5,13 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -74,13 +74,7 @@ namespace Revenj.Plugins.Server.Commands
 Please check your arguments.".With(argument.ReportName), null);
 
 			if (!Permissions.CanAccess(reportType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0}.",
-						argument.ReportName);
-
+				return CommandResult<TOutput>.Forbidden(argument.ReportName);
 			var documentType = DomainModel.FindNested(argument.ReportName, argument.TemplaterName);
 			if (documentType == null)
 				return
@@ -90,14 +84,7 @@ Please check your arguments.".With(argument.ReportName), null);
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 
 			if (!Permissions.CanAccess(documentType.FullName, principal))
-				return
-					CommandResult<TOutput>.Return(
-						HttpStatusCode.Forbidden,
-						default(TOutput),
-						"You don't have permission to access: {0} in {1}.",
-						argument.TemplaterName,
-						argument.ReportName);
-
+				return CommandResult<TOutput>.Forbidden("{0} in {1}.".With(argument.TemplaterName, argument.ReportName));
 			if (!typeof(IDocumentReport<>).MakeGenericType(reportType).IsAssignableFrom(documentType))
 				return
 					CommandResult<TOutput>.Fail(

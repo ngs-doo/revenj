@@ -3,6 +3,7 @@ package org.revenj.server.servlet;
 import org.revenj.Revenj;
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.PluginLoader;
+import org.revenj.security.PermissionManager;
 import org.revenj.serialization.WireSerialization;
 import org.revenj.server.ProcessingEngine;
 
@@ -43,9 +44,10 @@ public class Application implements ServletContextListener {
 
 	public static void setup(Container container) throws Exception {
 		Optional<PluginLoader> plugins = container.tryResolve(PluginLoader.class);
+		PermissionManager permissions = container.resolve(PermissionManager.class);
 		WireSerialization serialization = new RevenjSerialization(container);
 		container.registerInstance(WireSerialization.class, serialization, false);
-		container.register(new ProcessingEngine(container, serialization, plugins));
+		container.register(new ProcessingEngine(container, serialization, permissions, plugins));
 	}
 
 	public static void configure(ServletContext context, Container container) {
