@@ -170,6 +170,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.register(mixinReference$converter$UserFilterConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.UserFilter>>(){}.type, mixinReference$converter$UserFilterConverter, false);
 		org.revenj.security.PermissionManager permissions = container.resolve(org.revenj.security.PermissionManager.class);
+		
+		gen.model.binaries.converters.DocumentConverter binaries$converter$DocumentConverter = new gen.model.binaries.converters.DocumentConverter(columns);
+		container.register(binaries$converter$DocumentConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.binaries.Document>>(){}.type, binaries$converter$DocumentConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"");
@@ -324,6 +328,17 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
 		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getName", "\"name\"");
 		permissions.registerFilter(gen.model.mixinReference.UserFilter.class, it -> it.getName().equals(org.revenj.security.PermissionManager.boundPrincipal.get().getName()), "RegularUser", false);
+		binaries$converter$DocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.Document.class, "\"binaries\".\"Document_entity\"");
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getID", "\"ID\"");
+		
+		container.register(gen.model.binaries.repositories.DocumentRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"");
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"");
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -338,6 +353,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"");

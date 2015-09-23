@@ -2,6 +2,7 @@ package org.revenj;
 
 import gen.model.Boot;
 import gen.model.Seq.Next;
+import gen.model.binaries.Document;
 import gen.model.test.*;
 import gen.model.test.repositories.*;
 import org.junit.After;
@@ -241,7 +242,6 @@ public class TestRepository {
 		Assert.assertEquals(3, co2.getEntities().size());
 	}
 
-
 	@Test
 	public void nestedCollectionReference() throws IOException {
 		ServiceLocator locator = container;
@@ -267,5 +267,19 @@ public class TestRepository {
 		Assert.assertEquals(2, co2.getEntities().size());
 		Assert.assertEquals(2, co2.getEntities().get(0).getDetail1().size());
 		Assert.assertEquals(3, co2.getEntities().get(1).getDetail1().size());
+	}
+
+	@Test
+	public void persistBinaries() throws Exception {
+		ServiceLocator locator = container;
+		PersistableRepository<Document> repository = locator.resolve(PersistableRepository.class, Document.class);
+		byte[] bytes = new byte[256];
+		for (int i = 0; i < bytes.length; i++) {
+			bytes[i] = (byte) i;
+		}
+		String uri = repository.insert(new Document().setContent(bytes).setName("file.bin"));
+		Optional<Document> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Assert.assertArrayEquals(bytes, found.get().getContent());
 	}
 }

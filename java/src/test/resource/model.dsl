@@ -116,3 +116,9 @@ module mixinReference {
 }
 defaults { external permissions disabled; }
 role RegularUser;
+module binaries {
+	guid root Document {
+		string(20) name;
+		binary content;
+	}
+}

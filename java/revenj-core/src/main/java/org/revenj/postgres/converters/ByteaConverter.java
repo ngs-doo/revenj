@@ -121,7 +121,7 @@ public abstract class ByteaConverter {
 
 		private void buildArray(PostgresWriter sw) {
 			for (byte b : value) {
-				sw.write(CharMap[b >> 4]);
+				sw.write(CharMap[(b >> 4) & 0xf]);
 				sw.write(CharMap[b & 0xf]);
 			}
 		}
