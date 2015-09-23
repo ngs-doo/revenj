@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.DataContext;
 import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.UnitOfWork;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -69,5 +70,30 @@ public class TestDataContext {
 		context.create(Arrays.asList(new Next(), new Next()));
 		long total = context.query(Next.class).count();
 		Assert.assertTrue(total > 1);
+	}
+
+	@Test
+	public void unitOfWork() throws IOException {
+		ServiceLocator locator = container;
+		try (UnitOfWork uow = locator.resolve(UnitOfWork.class)) {
+			Next next = new Next();
+			uow.create(next);
+			Optional<Next> find = uow.find(Next.class, next.getURI());
+			Assert.assertEquals(next, find.get());
+		}
+	}
+
+	@Test
+	public void transactionsWithUnitOfWork() throws IOException {
+		ServiceLocator locator = container;
+		try (UnitOfWork uow1 = locator.resolve(UnitOfWork.class);
+			UnitOfWork uow2 = locator.resolve(UnitOfWork.class)) {
+			Next next = new Next();
+			uow1.create(next);
+			Optional<Next> find1 = uow1.find(Next.class, next.getURI());
+			Optional<Next> find2 = uow2.find(Next.class, next.getURI());
+			Assert.assertEquals(next, find1.get());
+			Assert.assertFalse(find2.isPresent());
+		}
 	}
 }

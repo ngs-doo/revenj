@@ -1,7 +1,6 @@
 package org.revenj;
 
 import org.revenj.extensibility.Container;
-import org.revenj.patterns.ServiceLocator;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -17,16 +16,16 @@ final class SimpleContainer implements Container {
 		public final SimpleContainer owner;
 		public final Class<T> manifest;
 		public T instance;
-		public final Function<ServiceLocator, T> singleFactory;
-		public final BiFunction<ServiceLocator, Type[], T> biFactory;
+		public final Function<Container, T> singleFactory;
+		public final BiFunction<Container, Type[], T> biFactory;
 		public final boolean singleton;
 
 		private Registration(
 				SimpleContainer owner,
 				Class<T> manifest,
 				T instance,
-				Function<ServiceLocator, T> singleFactory,
-				BiFunction<ServiceLocator, Type[], T> biFactory,
+				Function<Container, T> singleFactory,
+				BiFunction<Container, Type[], T> biFactory,
 				boolean singleton) {
 			this.owner = owner;
 			this.manifest = manifest;
@@ -44,11 +43,11 @@ final class SimpleContainer implements Container {
 			return new Registration<>(owner, null, instance, null, null, true);
 		}
 
-		static <T> Registration<T> register(SimpleContainer owner, Function<ServiceLocator, T> factory, boolean singleton) {
+		static <T> Registration<T> register(SimpleContainer owner, Function<Container, T> factory, boolean singleton) {
 			return new Registration<>(owner, null, null, factory, null, singleton);
 		}
 
-		static <T> Registration<T> register(SimpleContainer owner, BiFunction<ServiceLocator, Type[], T> factory, boolean singleton) {
+		static <T> Registration<T> register(SimpleContainer owner, BiFunction<Container, Type[], T> factory, boolean singleton) {
 			return new Registration<>(owner, null, null, null, factory, singleton);
 		}
 
@@ -495,12 +494,12 @@ final class SimpleContainer implements Container {
 	}
 
 	@Override
-	public void registerFactory(Type type, Function<ServiceLocator, ?> factory, boolean singleton) {
+	public void registerFactory(Type type, Function<Container, ?> factory, boolean singleton) {
 		addToRegistry(type, Registration.register(this, factory, singleton));
 	}
 
 	@Override
-	public <T> void registerGenerics(Class<T> container, BiFunction<ServiceLocator, Type[], T> factory) {
+	public <T> void registerGenerics(Class<T> container, BiFunction<Container, Type[], T> factory) {
 		addToRegistry(container, Registration.register(this, factory, false));
 	}
 

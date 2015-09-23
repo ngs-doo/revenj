@@ -126,10 +126,11 @@ public abstract class Revenj {
 		ClassLoader loader = classLoader.orElse(Thread.currentThread().getContextClassLoader());
 		SimpleContainer container = new SimpleContainer("true".equals(properties.getProperty("revenj.resolveUnknown")));
 		container.register(properties);
-		container.register(Connection.class, connectionFactory);
+		container.register(Connection.class, connectionFactory::apply);
 		DomainModel domainModel = new SimpleDomainModel(properties.getProperty("revenj.namespace"), loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
-		container.registerClass(DataContext.class, LocatorDataContext.class, false);
+		container.registerFactory(DataContext.class, LocatorDataContext::asDataContext, false);
+		container.registerFactory(UnitOfWork.class, LocatorDataContext::asUnitOfWork, false);
 		PluginLoader plugins = new ServicesPluginLoader(loader);
 		container.registerInstance(PluginLoader.class, plugins, false);
 		PostgresDatabaseNotification databaseNotification =

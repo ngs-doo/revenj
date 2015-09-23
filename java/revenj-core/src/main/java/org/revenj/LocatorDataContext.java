@@ -1,26 +1,59 @@
 package org.revenj;
 
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 import rx.Observable;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-final class LocatorDataContext implements DataContext {
-	private final ServiceLocator locator;
+final class LocatorDataContext implements UnitOfWork {
+	private final Container locator;
 	private ConcurrentHashMap<Class<?>, SearchableRepository> repositories;
 	private ConcurrentHashMap<Class<?>, DomainEventStore> eventStores;
 	private DataChangeNotification changes;
+	private final Connection connection;
+	private boolean hasChanges;
+	private boolean closed;
 
-	public LocatorDataContext(ServiceLocator locator) {
+	LocatorDataContext(Container locator, Connection connection) {
 		this.locator = locator;
+		this.connection = connection;
+	}
+
+	static DataContext asDataContext(Container container) {
+		return new LocatorDataContext(container, null);
+	}
+
+	static UnitOfWork asUnitOfWork(Container container) {
+		Container locator = container.createScope();
+		Connection connection = locator.resolve(Connection.class);
+		try {
+			connection.setAutoCommit(false);
+		} catch (SQLException e) {
+			try {
+				connection.close();
+			} catch (SQLException ignore) {
+			}
+			connection = locator.resolve(Connection.class);
+			try {
+				connection.setAutoCommit(false);
+			} catch (SQLException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		locator.registerInstance(Connection.class, connection, false);
+		return new LocatorDataContext(locator, connection);
 	}
 
 	private SearchableRepository getRepository(Class<?> manifest) {
+		if (closed) throw new RuntimeException("Unit of work has been closed");
 		if (repositories == null) repositories = new ConcurrentHashMap<>();
 		return repositories.computeIfAbsent(manifest, clazz ->
 		{
@@ -33,6 +66,7 @@ final class LocatorDataContext implements DataContext {
 	}
 
 	private DomainEventStore getEventStore(Class<?> manifest) {
+		if (closed) throw new RuntimeException("Unit of work has been closed");
 		if (eventStores == null) eventStores = new ConcurrentHashMap<>();
 		return eventStores.computeIfAbsent(manifest, clazz ->
 		{
@@ -56,7 +90,7 @@ final class LocatorDataContext implements DataContext {
 
 	@Override
 	public <T extends DataSource> Query<T> query(Class<T> manifest, Specification<T> filter) {
-		return (getRepository(manifest)).query(filter);
+		return getRepository(manifest).query(filter);
 	}
 
 	@Override
@@ -66,6 +100,7 @@ final class LocatorDataContext implements DataContext {
 		}
 		Class<?> manifest = aggregates.iterator().next().getClass();
 		((PersistableRepository) getRepository(manifest)).insert(aggregates);
+		hasChanges = true;
 	}
 
 	@Override
@@ -75,6 +110,7 @@ final class LocatorDataContext implements DataContext {
 		}
 		Class<?> manifest = pairs.iterator().next().getValue().getClass();
 		((PersistableRepository) getRepository(manifest)).update(pairs);
+		hasChanges = true;
 	}
 
 	@Override
@@ -84,6 +120,7 @@ final class LocatorDataContext implements DataContext {
 		}
 		Class<?> manifest = aggregates.iterator().next().getClass();
 		((PersistableRepository) getRepository(manifest)).insert(aggregates);
+		hasChanges = true;
 	}
 
 	@Override
@@ -92,7 +129,8 @@ final class LocatorDataContext implements DataContext {
 			return;
 		}
 		Class<?> manifest = events.iterator().next().getClass();
-		(getEventStore(manifest)).submit(events);
+		getEventStore(manifest).submit(events);
+		hasChanges = true;
 	}
 
 	@Override
@@ -104,5 +142,49 @@ final class LocatorDataContext implements DataContext {
 	public <T extends Identifiable> Observable<DataChangeNotification.TrackInfo<T>> track(Class<T> manifest) {
 		if (changes == null) changes = locator.resolve(DataChangeNotification.class);
 		return changes.track(manifest);
+	}
+
+	@Override
+	public void commit() {
+		if (hasChanges) {
+			try {
+				connection.commit();
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		hasChanges = false;
+	}
+
+	@Override
+	public void rollback() {
+		try {
+			connection.rollback();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		hasChanges = false;
+	}
+
+	@Override
+	public void close() throws IOException {
+		if (closed) {
+			return;
+		}
+		if (hasChanges) {
+			rollback();
+		}
+		try {
+			connection.setAutoCommit(true);
+			connection.close();
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
+		try {
+			locator.close();
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+		closed = true;
 	}
 }
