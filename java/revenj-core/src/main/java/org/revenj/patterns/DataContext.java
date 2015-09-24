@@ -23,6 +23,32 @@ public interface DataContext {
 		return query(manifest, null);
 	}
 
+	<T extends DataSource> List<T> search(Class<T> manifest, Specification<T> filter, Integer limit, Integer offset);
+
+	default <T extends DataSource> List<T> search(Class<T> manifest) {
+		return search(manifest, null, null, null);
+	}
+
+	default <T extends DataSource> List<T> search(Class<T> manifest, Specification<T> filter) {
+		return search(manifest, filter, null, null);
+	}
+
+	default <T extends DataSource> List<T> search(Class<T> manifest, Specification<T> filter, int limit) {
+		return search(manifest, filter, limit, null);
+	}
+
+	<T extends DataSource> long count(Class<T> manifest, Specification<T> filter);
+
+	default <T extends DataSource> long count(Class<T> manifest) {
+		return count(manifest, null);
+	}
+
+	<T extends DataSource> boolean exists(Class<T> manifest, Specification<T> filter);
+
+	default <T extends DataSource> boolean exists(Class<T> manifest) {
+		return exists(manifest, null);
+	}
+
 	<T extends AggregateRoot> void create(Collection<T> aggregates) throws IOException;
 
 	default <T extends AggregateRoot> void create(T aggregate) throws IOException {

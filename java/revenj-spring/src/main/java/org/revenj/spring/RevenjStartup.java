@@ -4,11 +4,13 @@ import org.revenj.Revenj;
 import org.revenj.patterns.DataChangeNotification;
 import org.revenj.patterns.DataContext;
 import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.UnitOfWork;
 import org.revenj.security.PermissionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -61,4 +63,11 @@ public class RevenjStartup {
 	public PermissionManager permissionManager(ServiceLocator locator) {
 		return locator.resolve(PermissionManager.class);
 	}
+
+	@Bean
+	@Scope("prototype")
+	public UnitOfWork unitOfWork(ServiceLocator locator) {
+		return locator.resolve(UnitOfWork.class);
+	}
+
 }

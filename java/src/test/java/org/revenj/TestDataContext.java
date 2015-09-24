@@ -67,9 +67,30 @@ public class TestDataContext {
 	public void canQuery() throws IOException {
 		ServiceLocator locator = container;
 		DataContext context = locator.resolve(DataContext.class);
+		long total1 = context.query(Next.class).count();
 		context.create(Arrays.asList(new Next(), new Next()));
-		long total = context.query(Next.class).count();
-		Assert.assertTrue(total > 1);
+		long total2 = context.query(Next.class).count();
+		Assert.assertEquals(total1 + 2, total2);
+	}
+
+	@Test
+	public void canSearch() throws IOException {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		long total1 = context.search(Next.class).size();
+		context.create(Arrays.asList(new Next(), new Next()));
+		long total2 = context.search(Next.class).size();
+		Assert.assertEquals(total1 + 2, total2);
+	}
+
+	@Test
+	public void canCount() throws IOException {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		long total1 = context.count(Next.class);
+		context.create(Arrays.asList(new Next(), new Next()));
+		long total2 = context.count(Next.class);
+		Assert.assertEquals(total1 + 2, total2);
 	}
 
 	@Test

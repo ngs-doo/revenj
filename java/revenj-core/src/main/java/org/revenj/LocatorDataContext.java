@@ -94,6 +94,21 @@ final class LocatorDataContext implements UnitOfWork {
 	}
 
 	@Override
+	public <T extends DataSource> List<T> search(Class<T> manifest, Specification<T> filter, Integer limit, Integer offset) {
+		return getRepository(manifest).search(filter, limit, offset);
+	}
+
+	@Override
+	public <T extends DataSource> long count(Class<T> manifest, Specification<T> filter) {
+		return getRepository(manifest).count(filter);
+	}
+
+	@Override
+	public <T extends DataSource> boolean exists(Class<T> manifest, Specification<T> filter) {
+		return getRepository(manifest).exists(filter);
+	}
+
+	@Override
 	public <T extends AggregateRoot> void create(Collection<T> aggregates) throws IOException {
 		if (aggregates.size() == 0) {
 			return;
