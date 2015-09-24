@@ -27,7 +27,7 @@ public abstract class Utils {
 		private final Type raw;
 		private final Type[] arguments;
 
-		public GenericType(String name, Type raw, Type... arguments) {
+		public GenericType(String name, Type raw, Type[] arguments) {
 			this.name = name;
 			this.raw = raw;
 			this.arguments = arguments;
@@ -67,7 +67,12 @@ public abstract class Utils {
 		String name = sb.toString();
 		GenericType found = typeCache.get(name);
 		if (found == null) {
-			found = new GenericType(name, container, arguments);
+			Type[] genericArgs = new Type[arguments.length + 1];
+			genericArgs[0] = argument;
+			for (int i = 0; i < arguments.length; i++) {
+				genericArgs[i + 1] = arguments[i];
+			}
+			found = new GenericType(name, container, genericArgs);
 			typeCache.put(name, found);
 		}
 		return found;

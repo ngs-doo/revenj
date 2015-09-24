@@ -97,7 +97,7 @@ namespace Revenj.Wcf
 
 			var commandType = CommandsRepository.Find(command);
 			if (commandType == null)
-				return response.ReturnError("Unknown command " + command, HttpStatusCode.NotFound);
+				return response.ReturnError("Unknown command: " + command, HttpStatusCode.NotFound);
 
 			var start = Stopwatch.GetTimestamp();
 

@@ -56,6 +56,7 @@ public class Application implements ServletContextListener {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+		context.addServlet("rpc", new RpcServlet(container)).addMapping("/RestApplication.svc/*");
 		context.addServlet("crud", new CrudServlet(container)).addMapping("/Crud.svc/*");
 		context.addServlet("domain", new DomainServlet(container)).addMapping("/Domain.svc/*");
 	}

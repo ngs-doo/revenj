@@ -6,4 +6,5 @@ org.revenj.server.commands.search.SearchDomainObject
 org.revenj.server.commands.CountDomainObject
 org.revenj.server.commands.DomainObjectExists
 org.revenj.server.commands.GetDomainObject
+org.revenj.server.commands.PersistAggregateRoot
 org.revenj.server.commands.SubmitEvent

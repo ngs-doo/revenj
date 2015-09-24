@@ -43,39 +43,20 @@ public final class ProcessingEngine {
 		}
 	}
 
-	public CommandResult<String> executeJson(Class<?> command, Object argument, Principal principal) {
-		try {
-			ServerCommandDescription[] scd = new ServerCommandDescription[]{
-					new ServerCommandDescription<>(null, command, argument)
-			};
-			ProcessingResult<String> result = execute(Object.class, String.class, scd, principal);
-			return result.executedCommandResults[0].result;
-		} catch (SQLException e) {
-			return new CommandResult(null, e.getMessage(), 409);
-		} catch (Exception e) {
-			return new CommandResult(null, e.getMessage(), 500);
+	public Optional<Class<?>> findCommand(String name) {
+		for (Class<?> command : serverCommands.keySet()) {
+			if (command.getName().equals(name) || command.getSimpleName().equals(name)) {
+				return Optional.of(command);
+			}
 		}
-	}
-
-	public CommandResult<Object> passThrough(Class<?> command, Object argument, Principal principal) {
-		try {
-			ServerCommandDescription[] scd = new ServerCommandDescription[]{
-					new ServerCommandDescription<>(null, command, argument)
-			};
-			ProcessingResult<Object> result = execute(Object.class, Object.class, scd, principal);
-			return result.executedCommandResults[0].result;
-		} catch (SQLException e) {
-			return new CommandResult(null, e.getMessage(), 409);
-		} catch (Exception e) {
-			return new CommandResult(null, e.getMessage(), 500);
-		}
+		return Optional.empty();
 	}
 
 	public <TInput, TOutput> ProcessingResult<TOutput> execute(
 			Class<TInput> input,
 			Class<TOutput> output,
 			ServerCommandDescription<TInput>[] commandDescriptions,
-			Principal principal) throws SQLException {
+			Principal principal) {
 		long startProcessing = System.nanoTime();
 
 		PermissionManager.boundPrincipal.set(principal);
@@ -101,46 +82,54 @@ public final class ProcessingEngine {
 			}
 		}
 		ArrayList<CommandResultDescription<TOutput>> executedCommands = new ArrayList<>(commandDescriptions.length);
-		Connection connection = container.resolve(Connection.class);
+		Connection connection;
 		try {
-			try (Container scope = container.createScope()) {
-				scope.registerInstance(Connection.class, connection, false);
-				connection.setAutoCommit(false);
-				for (ServerCommandDescription<TInput> cd : commandDescriptions) {
-					long startCommand = System.nanoTime();
-					ServerCommand command = serverCommands.get(cd.commandClass);
-					if (command == null) {
-						throw new RuntimeException("Command not registered: " + cd.commandClass);
-					}
-					CommandResult<TOutput> result = command.execute(scope, inputSerializer, outputSerializer, cd.data, principal);
-					if (result == null) {
-						throw new RuntimeException("Result returned null for: " + cd.commandClass);
-					}
-					executedCommands.add(CommandResultDescription.create(cd.requestID, result, startCommand));
-					if (result.status >= 400) {
-						connection.rollback();
-						return new ProcessingResult<>(result.message, result.status, executedCommands, startProcessing);
-					}
-				}
-				connection.commit();
-				connection.setAutoCommit(true);
-				return ProcessingResult.success(executedCommands, startProcessing);
-			}
-		} catch (IOException e) {
-			connection.rollback();
-			connection.setAutoCommit(true);
-			if (e.getCause() instanceof SQLException) {
-				return new ProcessingResult<>(e.getCause().getMessage(), 409, executedCommands, startProcessing);
-			}
-			return new ProcessingResult<>(e.getMessage(), 403, executedCommands, startProcessing);
-		} catch (SecurityException e) {
-			connection.rollback();
-			connection.setAutoCommit(true);
-			return new ProcessingResult<>(e.getMessage(), 403, executedCommands, startProcessing);
+			connection = container.resolve(Connection.class);
 		} catch (Exception e) {
-			connection.rollback();
-			connection.setAutoCommit(true);
-			return new ProcessingResult<>(e.getMessage(), 500, executedCommands, startProcessing);
+			return new ProcessingResult<>("Unable to create database connection", 503, null, startProcessing);
+		}
+		try {
+			try {
+				try (Container scope = container.createScope()) {
+					scope.registerInstance(Connection.class, connection, false);
+					connection.setAutoCommit(false);
+					for (ServerCommandDescription<TInput> cd : commandDescriptions) {
+						long startCommand = System.nanoTime();
+						ServerCommand command = serverCommands.get(cd.commandClass);
+						if (command == null) {
+							throw new RuntimeException("Command not registered: " + cd.commandClass);
+						}
+						CommandResult<TOutput> result = command.execute(scope, inputSerializer, outputSerializer, cd.data, principal);
+						if (result == null) {
+							throw new RuntimeException("Result returned null for: " + cd.commandClass);
+						}
+						executedCommands.add(CommandResultDescription.create(cd.requestID, result, startCommand));
+						if (result.status >= 400) {
+							connection.rollback();
+							return new ProcessingResult<>(result.message, result.status, null, startProcessing);
+						}
+					}
+					connection.commit();
+					return ProcessingResult.success(executedCommands, startProcessing);
+				}
+			} catch (IOException e) {
+				connection.rollback();
+				if (e.getCause() instanceof SQLException) {
+					return new ProcessingResult<>(e.getCause().getMessage(), 409, null, startProcessing);
+				}
+				return new ProcessingResult<>(e.getMessage(), 500, null, startProcessing);
+			} catch (SecurityException e) {
+				connection.rollback();
+				return new ProcessingResult<>(e.getMessage(), 403, null, startProcessing);
+			} catch (Exception e) {
+				connection.rollback();
+				return ProcessingResult.error(e, startProcessing);
+			} finally {
+				connection.setAutoCommit(true);
+				connection.close();
+			}
+		} catch (SQLException ex) {
+			return ProcessingResult.error(ex, startProcessing);
 		}
 	}
 }

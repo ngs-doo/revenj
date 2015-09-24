@@ -15,7 +15,7 @@ public class TestReflection {
 		Type generated = Utils.makeGenericType(Map.class, String.class, Object.class);
 		Type original = new Generic<Map<String, Object>>() {	}.type;
 		Assert.assertEquals(original.getTypeName(), generated.getTypeName());
-		Assert.assertNotEquals(original, generated);
+		Assert.assertEquals(original, generated);
 	}
 
 	@Test

@@ -83,7 +83,7 @@ namespace Revenj.Plugins.Server.Commands
 
 			var rootType = DomainModel.Find(argument.RootName);
 			if (rootType == null)
-				return CommandResult<TOutput>.Fail("Couldn't find root type {0}.".With(argument.RootName), @"Example argument: 
+				return CommandResult<TOutput>.Fail("Couldn't find root type: {0}".With(argument.RootName), @"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 
 			if (!typeof(IAggregateRoot).IsAssignableFrom(rootType))
