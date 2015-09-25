@@ -143,9 +143,7 @@ public abstract class Revenj {
 		container.registerInstance(DataChangeNotification.class, databaseNotification, true);
 		ChangeNotification.registerContainer(container, databaseNotification);
 		container.registerInstance(PermissionManager.class, new RevenjPermissionManager(container), false);
-		if (classLoader.isPresent()) {
-			container.registerInstance(ClassLoader.class, classLoader.get(), false);
-		}
+		container.registerInstance(ClassLoader.class, loader, false);
 		int total = 0;
 		if (aspects != null) {
 			while (aspects.hasNext()) {

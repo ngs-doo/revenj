@@ -37,7 +37,7 @@ public class DomainServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String path = req.getPathInfo();
 		if (path.startsWith("/search/")) {
-			Optional<String> name = findType(path, "/search/", res);
+			Optional<String> name = Utility.findName(model, path, "/search/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
 				if (spec != null) {
@@ -48,9 +48,9 @@ public class DomainServlet extends HttpServlet {
 					SearchDomainObject.Argument arg = new SearchDomainObject.Argument(name.get(), null, null, offset, limit, null);
 					Utility.executeJson(engine, req, res, SearchDomainObject.class, arg);
 				}
-			} else res.sendError(405, "Invalid URL path: " + path);
+			}
 		} else if (path.startsWith("/count/")) {
-			Optional<String> name = findType(path, "/count/", res);
+			Optional<String> name = Utility.findName(model, path, "/count/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
 				if (spec != null) {
@@ -59,9 +59,9 @@ public class DomainServlet extends HttpServlet {
 					CountDomainObject.Argument arg = new CountDomainObject.Argument(name.get(), null, null);
 					Utility.executeJson(engine, req, res, CountDomainObject.class, arg);
 				}
-			} else res.sendError(405, "Invalid URL path: " + path);
+			}
 		} else if (path.startsWith("/exists/")) {
-			Optional<String> name = findType(path, "/exists/", res);
+			Optional<String> name = Utility.findName(model, path, "/exists/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
 				if (spec != null) {
@@ -70,15 +70,10 @@ public class DomainServlet extends HttpServlet {
 					DomainObjectExists.Argument arg = new DomainObjectExists.Argument(name.get(), null, null);
 					Utility.executeJson(engine, req, res, DomainObjectExists.class, arg);
 				}
-			} else res.sendError(405, "Invalid URL path: " + path);
+			}
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);
 		}
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		res.setContentType("application/json");
 	}
 
 	@Override
@@ -86,12 +81,12 @@ public class DomainServlet extends HttpServlet {
 		String path = req.getPathInfo();
 		if (path.startsWith("/find/")) {
 			String[] uris = serialization.deserialize(req.getInputStream(), req.getContentType(), String[].class);
-			findType(path, "/find/", res).ifPresent(name -> {
+			Utility.findName(model, path, "/find/", res).ifPresent(name -> {
 				GetDomainObject.Argument arg = new GetDomainObject.Argument(name, uris, "match".equals(req.getParameter("order")));
 				Utility.executeJson(engine, req, res, GetDomainObject.class, arg);
 			});
 		} else if (path.startsWith("/search/")) {
-			final Optional<String> name = findType(path, "/search/", res);
+			final Optional<String> name = Utility.findName(model, path, "/search/", res);
 			if (name.isPresent()) {
 				Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
 				Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
@@ -103,7 +98,7 @@ public class DomainServlet extends HttpServlet {
 						spec -> new SearchDomainObject.Argument(name.get(), null, spec, offset, limit, null));
 			} else res.sendError(405, "Invalid URL path: " + path);
 		} else if (path.startsWith("/count/")) {
-			Optional<String> name = findType(path, "/count/", res);
+			Optional<String> name = Utility.findName(model, path, "/count/", res);
 			if (name.isPresent()) {
 				executeWithSpecification(
 						CountDomainObject.class,
@@ -113,7 +108,7 @@ public class DomainServlet extends HttpServlet {
 						spec -> new CountDomainObject.Argument(name.get(), null, spec));
 			} else res.sendError(405, "Invalid URL path: " + path);
 		} else if (path.startsWith("/exists/")) {
-			Optional<String> name = findType(path, "/exists/", res);
+			Optional<String> name = Utility.findName(model, path, "/exists/", res);
 			if (name.isPresent()) {
 				executeWithSpecification(
 						DomainObjectExists.class,
@@ -169,20 +164,5 @@ public class DomainServlet extends HttpServlet {
 			arg = buildArgument.apply(null);
 		}
 		Utility.executeJson(engine, req, res, target, arg);
-	}
-
-	@Override
-	protected void doDelete(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		res.setContentType("application/json");
-	}
-
-	private Optional<String> findType(String path, String prefix, HttpServletResponse res) throws IOException {
-		String name = path.substring(prefix.length(), path.length());
-		Optional<Class<?>> manifest = model.find(name);
-		if (!manifest.isPresent()) {
-			res.sendError(400, "Unknown domain object: " + name);
-			return Optional.empty();
-		}
-		return Optional.of(name);
 	}
 }

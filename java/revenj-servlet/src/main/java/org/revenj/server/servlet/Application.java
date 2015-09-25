@@ -39,7 +39,11 @@ public class Application implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		ServletContext context = sce.getServletContext();
-		configure(context, container);
+		try {
+			configure(context, container);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static void setup(Container container) throws Exception {
@@ -50,15 +54,12 @@ public class Application implements ServletContextListener {
 		container.register(new ProcessingEngine(container, serialization, permissions, plugins));
 	}
 
-	public static void configure(ServletContext context, Container container) {
-		try {
-			setup(container);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	public static void configure(ServletContext context, Container container) throws Exception {
+		setup(container);
 		context.addServlet("rpc", new RpcServlet(container)).addMapping("/RestApplication.svc/*");
 		context.addServlet("crud", new CrudServlet(container)).addMapping("/Crud.svc/*");
 		context.addServlet("domain", new DomainServlet(container)).addMapping("/Domain.svc/*");
+		context.addServlet("standard", new StandardServlet(container)).addMapping("/Commands.svc/*");
 	}
 
 	@Override

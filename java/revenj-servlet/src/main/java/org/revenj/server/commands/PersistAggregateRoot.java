@@ -28,11 +28,31 @@ public class PersistAggregateRoot implements ServerCommand {
 		public TFormat ToInsert;
 		public TFormat ToUpdate;
 		public TFormat ToDelete;
+
+		public Argument(String rootName, TFormat toInsert, TFormat toUpdate, TFormat toDelete) {
+			this.RootName = rootName;
+			this.ToInsert = toInsert;
+			this.ToUpdate = toUpdate;
+			this.ToDelete = toDelete;
+		}
+
+		@SuppressWarnings("unused")
+		private Argument() {
+		}
 	}
 
-	static class Pair<T> {
+	public static class Pair<T> {
 		public T Key;
 		public T Value;
+
+		public Pair(T key, T value) {
+			this.Key = key;
+			this.Value = value;
+		}
+
+		@SuppressWarnings("unused")
+		private Pair() {
+		}
 	}
 
 	@Override

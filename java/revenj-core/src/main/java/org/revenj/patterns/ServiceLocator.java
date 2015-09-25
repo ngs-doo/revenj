@@ -2,6 +2,7 @@ package org.revenj.patterns;
 
 import org.revenj.Utils;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
@@ -30,5 +31,14 @@ public interface ServiceLocator {
 	@SuppressWarnings("unchecked")
 	default <T> T resolve(Class<T> container, Type argument, Type... arguments) throws ReflectiveOperationException {
 		return (T) resolve(Utils.makeGenericType(container, argument, arguments));
+	}
+
+	default <T> T create(Constructor<T> ctor) throws ReflectiveOperationException {
+		Type[] types = ctor.getGenericParameterTypes();
+		Object[] dependencies = new Object[types.length];
+		for (int i = 0; i < types.length; i++) {
+			dependencies[i] = resolve(types[i]);
+		}
+		return ctor.newInstance(dependencies);
 	}
 }

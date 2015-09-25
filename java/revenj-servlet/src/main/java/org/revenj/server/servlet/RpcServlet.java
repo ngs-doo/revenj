@@ -37,18 +37,7 @@ public class RpcServlet extends HttpServlet {
 			res.sendError(404, "Unknown command: " + name);
 			return;
 		}
-		String argument;
-		if (stream == null) {
-			argument = null;
-		} else {
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			final byte[] buffer = new byte[1024];
-			int len;
-			while ((len = stream.read(buffer)) != -1) {
-				baos.write(buffer, 0, len);
-			}
-			argument = new String(baos.toByteArray(), req.getCharacterEncoding() != null ? req.getCharacterEncoding() : "UTF-8");
-		}
+		String argument = Utility.readString(stream, req.getCharacterEncoding());
 		ServerCommandDescription[] scd = new ServerCommandDescription[]{
 				new ServerCommandDescription<>(null, command.get(), argument)
 		};
