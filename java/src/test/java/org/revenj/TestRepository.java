@@ -3,6 +3,7 @@ package org.revenj;
 import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.binaries.Document;
+import gen.model.egzotics.pks;
 import gen.model.test.*;
 import gen.model.test.repositories.*;
 import org.junit.After;
@@ -281,5 +282,19 @@ public class TestRepository {
 		Optional<Document> found = repository.find(uri);
 		Assert.assertTrue(found.isPresent());
 		Assert.assertArrayEquals(bytes, found.get().getContent());
+	}
+
+	@Test
+	public void listIntPks() throws Exception {
+		ServiceLocator locator = container;
+		PersistableRepository<pks> repository = locator.resolve(PersistableRepository.class, pks.class);
+		pks pks = new pks().setId(Arrays.asList(0, Integer.MIN_VALUE, Integer.MAX_VALUE, -1000000000, -1000000000, 1000000000, 100000000, Integer.MIN_VALUE + 1));
+		String uri = repository.insert(pks);
+		Optional<pks> found = repository.find(uri);
+		repository.delete(found.get());
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals(uri, found.get().getURI());
+		Assert.assertTrue(pks.deepEquals(found.get()));
+		Assert.assertTrue(uri.contains("-1000000000"));
 	}
 }

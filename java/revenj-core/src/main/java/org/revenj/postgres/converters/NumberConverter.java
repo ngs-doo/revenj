@@ -94,7 +94,15 @@ public abstract class NumberConverter {
 	public static int serialize(int value, char[] buf) {
 		int q, r;
 		int charPos = 10;
-		int i = value < 0 ? -value : value;
+		int offset;
+		int i;
+		if (value < 0) {
+			i = -value;
+			offset = 0;
+		} else {
+			i = value;
+			offset = 1;
+		}
 		int v = 0;
 		while (charPos > 0) {
 			q = i / 100;
@@ -106,7 +114,7 @@ public abstract class NumberConverter {
 			if (i == 0) break;
 		}
 		buf[charPos] = '-';
-		return charPos + 1 + (v >> 24);
+		return charPos + offset + (v >> 24);
 	}
 
 	/**
@@ -120,7 +128,15 @@ public abstract class NumberConverter {
 		long q;
 		int r;
 		int charPos = 20;
-		long i = value < 0 ? -value : value;
+		int offset;
+		long i;
+		if (value < 0) {
+			i = -value;
+			offset = 0;
+		} else {
+			i = value;
+			offset = 1;
+		}
 
 		int v = 0;
 		while (charPos > 0) {
@@ -133,7 +149,7 @@ public abstract class NumberConverter {
 			if (i == 0) break;
 		}
 		buf[charPos] = '-';
-		return charPos + 1 + (v >> 24);
+		return charPos + offset + (v >> 24);
 	}
 
 

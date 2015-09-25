@@ -122,3 +122,22 @@ module binaries {
 		binary content;
 	}
 }
+module security {
+	role Admin;
+	mixin IsActive {
+		bool deactivated;
+		with mixin Document;
+	}
+	mixin Dummy { with mixin Document; }
+	root Document {
+		map data;
+	}
+	permissions {
+		filter IsActive 'it -> !it.getDeactivated()' except Admin;
+	}
+}
+module egzotics {
+	root pks(id) {
+		list<int> id;
+	}
+}

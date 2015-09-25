@@ -95,7 +95,7 @@ public abstract class IntConverter {
 		return list;
 	}
 
-	private static final PostgresTuple MAX_TUPLE = new ValueTuple("-2147483648", false, false);
+	private static final PostgresTuple MIN_TUPLE = new ValueTuple("-2147483648", false, false);
 
 	public static PostgresTuple toTuple(Integer value) {
 		if (value == null) return null;
@@ -104,7 +104,7 @@ public abstract class IntConverter {
 
 	public static PostgresTuple toTuple(int value) {
 		if (value == Integer.MIN_VALUE) {
-			return MAX_TUPLE;
+			return MIN_TUPLE;
 		}
 		return new IntTuple(value);
 	}
