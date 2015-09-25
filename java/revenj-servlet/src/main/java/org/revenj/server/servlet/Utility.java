@@ -50,9 +50,9 @@ abstract class Utility {
 	}
 
 	static void returnJSON(HttpServletResponse response, ProcessingResult<String> result) {
-		response.setStatus(result.status);
 		if (result.executedCommandResults.length == 1) {
 			CommandResult<String> command = result.executedCommandResults[0].result;
+			response.setStatus(command.status);
 			if (command.data != null) {
 				response.setContentType("application/json");
 				try {
@@ -68,6 +68,7 @@ abstract class Utility {
 				}
 			}
 		} else if (result.message != null) {
+			response.setStatus(result.status);
 			try {
 				response.getOutputStream().write(result.message.getBytes(UTF8));
 			} catch (IOException e) {
