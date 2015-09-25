@@ -117,7 +117,7 @@ public class PersistAggregateRoot implements ServerCommand {
 
 		if ((insertData == null || insertData.size() == 0)
 				&& (updateData == null || updateData.size() == 0)
-				&& (updateData == null || updateData.size() == 0)) {
+				&& (deleteData == null || deleteData.size() == 0)) {
 			return CommandResult.badRequest("Data not sent or deserialized unsuccessfully.");
 		}
 
