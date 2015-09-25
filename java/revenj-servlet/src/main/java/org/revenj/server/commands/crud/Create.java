@@ -72,8 +72,8 @@ public final class Create implements ServerCommand {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
 		try {
-			String uri = repository.insert(instance);
-			return new CommandResult<>(output.serialize(uri), "Object created", 201);
+			repository.insert(instance);
+			return new CommandResult<>(output.serialize(instance), "Object created", 201);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
