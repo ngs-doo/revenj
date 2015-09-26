@@ -128,13 +128,13 @@ public abstract class UuidConverter {
 		if (cur == ',' || cur == ')') {
 			return nullable ? null : MIN_UUID;
 		}
-		return parseUuid(reader, cur);
-	}
-
-	private static UUID parseUuid(PostgresReader reader, int cur) throws IOException {
 		char[] buf = reader.tmp;
 		buf[0] = (char) cur;
 		reader.fillTotal(buf, 1, 36);
+		return toUuid(buf);
+	}
+
+	private static UUID toUuid(char[] buf) throws IOException {
 		try {
 			long hi = 0;
 			for (int i = 0; i < 8; i++)
@@ -159,13 +159,13 @@ public abstract class UuidConverter {
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur != '{';
-		if (espaced) {
+		boolean escaped = cur != '{';
+		if (escaped) {
 			reader.read(context);
 		}
 		cur = reader.peek();
 		if (cur == '}') {
-			if (espaced) {
+			if (escaped) {
 				reader.read(context + 2);
 			} else {
 				reader.read(2);
@@ -174,17 +174,20 @@ public abstract class UuidConverter {
 		}
 		ArrayList<UUID> list = new ArrayList<>();
 		UUID defaultValue = nullable ? null : MIN_UUID;
+		char[] buf = reader.tmp;
 		do {
 			cur = reader.read();
 			if (cur == 'N') {
 				cur = reader.read(4);
 				list.add(defaultValue);
 			} else {
-				list.add(parseUuid(reader, cur));
+				buf[0] = (char) cur;
+				reader.fillTotal(buf, 1, 35);
+				list.add(toUuid(buf));
 				cur = reader.read();
 			}
 		} while (cur == ',');
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();
