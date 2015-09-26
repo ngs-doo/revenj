@@ -88,11 +88,11 @@ namespace Revenj.DatabasePersistence.Postgres
 				}
 				else
 				{
-					escaped = cur != '(';
-					if (escaped)
+					var innerEscaped = cur != '(';
+					if (innerEscaped)
 						reader.Read(arrayContext);
 					list.Add(parseItem(reader, 0, recordContext, locator));
-					if (escaped)
+					if (innerEscaped)
 						cur = reader.Read(arrayContext + 1);
 					else
 						cur = reader.Read();

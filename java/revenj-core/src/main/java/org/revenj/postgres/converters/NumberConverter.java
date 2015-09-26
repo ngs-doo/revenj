@@ -113,8 +113,9 @@ public abstract class NumberConverter {
 			buf[charPos--] = (char) (v >> 8);
 			if (i == 0) break;
 		}
-		buf[charPos] = '-';
-		return charPos + offset + (v >> 24);
+		int zeroBased = v >> 24;
+		buf[charPos + zeroBased] = '-';
+		return charPos + offset + zeroBased;
 	}
 
 	/**
@@ -148,8 +149,9 @@ public abstract class NumberConverter {
 			buf[charPos--] = (char) (v >> 8);
 			if (i == 0) break;
 		}
-		buf[charPos] = '-';
-		return charPos + offset + (v >> 24);
+		int zeroBased = v >> 24;
+		buf[charPos + zeroBased] = '-';
+		return charPos + offset + zeroBased;
 	}
 
 

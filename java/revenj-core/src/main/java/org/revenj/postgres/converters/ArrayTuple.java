@@ -223,12 +223,12 @@ public class ArrayTuple extends PostgresTuple {
 				cur = reader.read(4);
 				list.add(null);
 			} else {
-				escaped = cur != '(';
-				if (escaped) {
+				boolean innerEscaped = cur != '(';
+				if (innerEscaped) {
 					reader.read(arrayContext);
 				}
 				list.add(converter.parse(reader, 0, recordContext));
-				if (escaped) {
+				if (innerEscaped) {
 					cur = reader.read(arrayContext + 1);
 				} else {
 					cur = reader.read();
