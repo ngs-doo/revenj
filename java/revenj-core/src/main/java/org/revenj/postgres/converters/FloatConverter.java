@@ -68,8 +68,14 @@ public abstract class FloatConverter {
 		do {
 			cur = reader.read();
 			if (cur == 'N') {
-				list.add(defaultValue);
-				cur = reader.read(4);
+				cur = reader.read();
+				if (cur == 'U') {
+					cur = reader.read(3);
+					list.add(defaultValue);
+				} else {
+					list.add(Float.NaN);
+					cur = reader.read(2);
+				}
 			} else {
 				list.add(parseFloat(reader, cur, '}'));
 				cur = reader.read();
