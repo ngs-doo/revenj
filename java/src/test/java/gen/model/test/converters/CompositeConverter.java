@@ -134,7 +134,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
 		items[__index___id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
-		items[__index___enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), it -> gen.model.test.converters.EnConverter.toTuple(it));
+		items[__index___enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), gen.model.test.converters.EnConverter::toTuple);
 		items[__index___en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		items[__index___simple] = __converter_simple.to(instance.getSimple());
 		items[__index___change] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getChange());
@@ -165,7 +165,7 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		PostgresTuple[] items = new PostgresTuple[columnCountExtended];
 		
 		items[__index__extended_id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
-		items[__index__extended_enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), it -> gen.model.test.converters.EnConverter.toTuple(it));
+		items[__index__extended_enn] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEnn(), gen.model.test.converters.EnConverter::toTuple);
 		items[__index__extended_en] = gen.model.test.converters.EnConverter.toTuple(instance.getEn());
 		items[__index__extended_simple] = __converter_simple.toExtended(instance.getSimple());
 		items[__index__extended_change] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getChange());
@@ -189,10 +189,10 @@ public class CompositeConverter implements ObjectConverter<gen.model.test.Compos
 		return from(reader, outerContext, context, readersExtended);
 	}
 	
-	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, java.util.UUID id) throws java.io.IOException {
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, gen.model.test.Composite instance) throws java.io.IOException {
 		_sw.initBuffer();
 		String _tmp;
-		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, id);
+		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, instance.getId());
 		return _sw.bufferToString();
 	}
 	private final int __index___id;

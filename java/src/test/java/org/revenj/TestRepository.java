@@ -3,7 +3,10 @@ package org.revenj;
 import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.binaries.Document;
+import gen.model.egzotics.E;
+import gen.model.egzotics.PksV;
 import gen.model.egzotics.pks;
+import gen.model.egzotics.v;
 import gen.model.test.*;
 import gen.model.test.repositories.*;
 import org.junit.After;
@@ -15,7 +18,10 @@ import org.revenj.patterns.DomainEventStore;
 import org.revenj.patterns.Generic;
 import org.revenj.patterns.PersistableRepository;
 import org.revenj.patterns.ServiceLocator;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -288,7 +294,7 @@ public class TestRepository {
 	public void listIntPks() throws Exception {
 		ServiceLocator locator = container;
 		PersistableRepository<pks> repository = locator.resolve(PersistableRepository.class, pks.class);
-		pks pks = new pks().setId(Arrays.asList(0, Integer.MIN_VALUE, Integer.MAX_VALUE, -1000000000, -1000000000, 1000000000, 100000000, Integer.MIN_VALUE + 1));
+		pks pks = new pks().setId(Arrays.asList(0, Integer.MIN_VALUE, Integer.MAX_VALUE, -105102223, -1000000000, -1000000000, 1000000000, 100000000, Integer.MIN_VALUE + 1));
 		String uri = repository.insert(pks);
 		Optional<pks> found = repository.find(uri);
 		repository.delete(found.get());
@@ -296,5 +302,41 @@ public class TestRepository {
 		Assert.assertEquals(uri, found.get().getURI());
 		Assert.assertTrue(pks.deepEquals(found.get()));
 		Assert.assertTrue(uri.contains("-1000000000"));
+	}
+
+	@Test
+	public void canWorkWithXml() throws Exception {
+		ServiceLocator locator = container;
+		PersistableRepository<pks> repository = locator.resolve(PersistableRepository.class, pks.class);
+		Random rnd = new Random();
+		pks pks = new pks().setId(Arrays.asList(rnd.nextInt(), rnd.nextInt(), rnd.nextInt()));
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = dbf.newDocumentBuilder();
+		org.w3c.dom.Document doc = builder.newDocument();
+		Element el = doc.createElement("test");
+		el.setTextContent("me now");
+		pks.setXml(el);
+		String uri = repository.insert(pks);
+		Optional<pks> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals(pks, found.get());
+		Assert.assertEquals("test", found.get().getXml().getTagName());
+		Assert.assertEquals("me now", found.get().getXml().getTextContent());
+	}
+
+	@Test
+	public void complexCompositePk() throws Exception {
+		ServiceLocator locator = container;
+		PersistableRepository<PksV> repository = locator.resolve(PersistableRepository.class, PksV.class);
+		Random rnd = new Random();
+		PksV pks = new PksV().setE(E.B).setV(new v().setX(rnd.nextInt())).setVv(new v[] { new v(rnd.nextInt()), new v().setX(55)});
+		pks.getEe().add(E.C);
+		pks.getEe().add(E.B);
+		String uri = repository.insert(pks);
+		Optional<PksV> found = repository.find(uri);
+		repository.delete(found.get());
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals(uri, found.get().getURI());
+		Assert.assertTrue(pks.deepEquals(found.get()));
 	}
 }

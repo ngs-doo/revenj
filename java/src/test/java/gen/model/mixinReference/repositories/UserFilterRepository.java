@@ -24,7 +24,7 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public UserFilterRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.UserFilter>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.UserFilterConverter.class), locator);
 	}
 	
 	@Override

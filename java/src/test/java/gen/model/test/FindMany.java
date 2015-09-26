@@ -58,7 +58,7 @@ public static class Result   {
 		this.ids = new java.util.HashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = 6144908604871519084L;
+	private static final long serialVersionUID = -3960459822884295846L;
 	
 	private java.util.UUID id;
 

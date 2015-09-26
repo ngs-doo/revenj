@@ -24,7 +24,7 @@ public class NextRepository   implements java.io.Closeable, org.revenj.patterns.
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public NextRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.Seq.Next>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.Seq.converters.NextConverter.class), locator);
 	}
 	
 	@Override

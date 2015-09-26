@@ -24,7 +24,7 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public ClickedRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Clicked>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.ClickedConverter.class), locator);
 	}
 	
 	@Override

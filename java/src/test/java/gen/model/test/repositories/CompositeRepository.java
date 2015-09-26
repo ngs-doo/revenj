@@ -24,7 +24,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public CompositeRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.CompositeConverter.class), locator);
 	}
 	
 	@Override

@@ -82,19 +82,7 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable {
 		return "Detail1(" + URI + ')';
 	}
 	
-	
-	public Detail1(
-			final Float f,
-			final float ff) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setF(f);
-		setFf(ff);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -738259099534030581L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail1(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -113,6 +101,7 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable {
 		this.Index = Index;
 	}
 
+	private static final long serialVersionUID = 1489607405037623607L;
 	
 	private Float f;
 
@@ -220,7 +209,7 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable {
 		for (org.revenj.postgres.ObjectConverter.Reader<Detail1> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.test.converters.Detail1Converter.buildURI(reader, EntityCompositeid, EntityIndex, Index);
+		URI = gen.model.test.converters.Detail1Converter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -241,4 +230,15 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_EntityIndex] = (item, reader, context) -> { item.EntityIndex = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
+	
+	
+	public Detail1(
+			final Float f,
+			final float ff) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setF(f);
+		setFf(ff);
+	}
+
 }

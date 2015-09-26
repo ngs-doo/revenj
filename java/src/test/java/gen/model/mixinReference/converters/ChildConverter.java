@@ -143,11 +143,11 @@ public class ChildConverter implements ObjectConverter<gen.model.mixinReference.
 	private final int __index___Index;
 	private final int __index__extended_Index;
 	
-	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, int AuthorID, int Index) throws java.io.IOException {
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, gen.model.mixinReference.Child instance) throws java.io.IOException {
 		_sw.initBuffer();
 		String _tmp;
-		org.revenj.postgres.converters.IntConverter.serializeURI(_sw, AuthorID);
-		_sw.addToBuffer('/');org.revenj.postgres.converters.IntConverter.serializeURI(_sw, Index);
+		org.revenj.postgres.converters.IntConverter.serializeURI(_sw, instance.getAuthorID());
+		_sw.addToBuffer('/');org.revenj.postgres.converters.IntConverter.serializeURI(_sw, instance.getIndex());
 		return _sw.bufferToString();
 	}
 }

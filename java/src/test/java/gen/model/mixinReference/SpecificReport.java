@@ -1,7 +1,6 @@
 package gen.model.mixinReference;
 
 
-
 @com.fasterxml.jackson.annotation.JsonTypeName("mixinReference.SpecificReport")
 public class SpecificReport   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, gen.model.mixinReference.Report<gen.model.mixinReference.SpecificReport> {
 	
@@ -75,17 +74,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		return "SpecificReport(" + URI + ')';
 	}
 	
-	
-	public SpecificReport(
-			final gen.model.mixinReference.Author author) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setAuthor(author);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -7109746652338275702L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -100,6 +89,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		this.authorID = authorID;
 	}
 
+	private static final long serialVersionUID = -3467073543674981612L;
 	
 	private int ID;
 
@@ -135,15 +125,13 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		});
 	}
 	
-	private transient SpecificReport __originalValue;
-	
 	static {
 		gen.model.mixinReference.repositories.SpecificReportRepository.__setupPersist(
-			(aggregates, sw) -> {
+			(aggregates, arg) -> {
 				try {
 					for (gen.model.mixinReference.SpecificReport agg : aggregates) {
 						 
-						agg.URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(sw, agg.ID);
+						agg.URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(arg, agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -166,11 +154,12 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		agg.__originalValue = (SpecificReport)agg.clone();
 		if (_res != null) {
 			return _res;
-		}				
+		}
 				return null;
 			}
 		);
 	}
+	private transient SpecificReport __originalValue;
 	
 	private gen.model.mixinReference.Author author;
 
@@ -233,7 +222,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		for (org.revenj.postgres.ObjectConverter.Reader<SpecificReport> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(reader, ID);
+		URI = gen.model.mixinReference.converters.SpecificReportConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (SpecificReport)this.clone();
 	}
@@ -251,4 +240,13 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		readers[__index__extended_authorURI] = (item, reader, context) -> { item.authorURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_authorID] = (item, reader, context) -> { item.authorID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
+	
+	
+	public SpecificReport(
+			final gen.model.mixinReference.Author author) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setAuthor(author);
+	}
+
 }

@@ -71,19 +71,7 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable {
 		return "Resident(" + URI + ')';
 	}
 	
-	
-	public Resident(
-			final java.util.UUID id,
-			final java.time.LocalDate birth) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setId(id);
-		setBirth(birth);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 6637695471569394916L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Resident(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -96,6 +84,7 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable {
 		this.birth = birth == null ? java.time.LocalDate.of(1, 1, 1) : birth;
 	}
 
+	private static final long serialVersionUID = -6120264864521536154L;
 	
 	private java.util.UUID id;
 
@@ -139,7 +128,7 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable {
 		for (org.revenj.postgres.ObjectConverter.Reader<Resident> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.mixinReference.converters.ResidentConverter.buildURI(reader, id);
+		URI = gen.model.mixinReference.converters.ResidentConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -154,4 +143,15 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_birth] = (item, reader, context) -> { item.birth = org.revenj.postgres.converters.DateConverter.parse(reader, false); };
 	}
+	
+	
+	public Resident(
+			final java.util.UUID id,
+			final java.time.LocalDate birth) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setId(id);
+		setBirth(birth);
+	}
+
 }

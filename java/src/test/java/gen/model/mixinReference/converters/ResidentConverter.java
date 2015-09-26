@@ -127,10 +127,10 @@ public class ResidentConverter implements ObjectConverter<gen.model.mixinReferen
 		return from(reader, outerContext, context, readersExtended);
 	}
 	
-	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, java.util.UUID id) throws java.io.IOException {
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, gen.model.mixinReference.Resident instance) throws java.io.IOException {
 		_sw.initBuffer();
 		String _tmp;
-		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, id);
+		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, instance.getId());
 		return _sw.bufferToString();
 	}
 	private final int __index___id;

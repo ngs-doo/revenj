@@ -24,7 +24,7 @@ public class LazyLoadRepository   implements java.io.Closeable, org.revenj.patte
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public LazyLoadRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.LazyLoad>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.LazyLoadConverter.class), locator);
 	}
 	
 	@Override

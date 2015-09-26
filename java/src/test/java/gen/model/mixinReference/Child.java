@@ -75,17 +75,7 @@ public class Child   implements java.lang.Cloneable, java.io.Serializable {
 		return "Child(" + URI + ')';
 	}
 	
-	
-	public Child(
-			final long version) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setVersion(version);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 5175672670084921409L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Child(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -100,6 +90,7 @@ public class Child   implements java.lang.Cloneable, java.io.Serializable {
 		this.Index = Index;
 	}
 
+	private static final long serialVersionUID = -4861345868240523535L;
 	
 	private long version;
 
@@ -169,7 +160,7 @@ public class Child   implements java.lang.Cloneable, java.io.Serializable {
 		for (org.revenj.postgres.ObjectConverter.Reader<Child> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.mixinReference.converters.ChildConverter.buildURI(reader, AuthorID, Index);
+		URI = gen.model.mixinReference.converters.ChildConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -186,4 +177,13 @@ public class Child   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_AuthorID] = (item, reader, context) -> { item.AuthorID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
+	
+	
+	public Child(
+			final long version) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setVersion(version);
+	}
+
 }

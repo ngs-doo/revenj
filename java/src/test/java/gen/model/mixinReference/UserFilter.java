@@ -72,17 +72,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		return "UserFilter(" + URI + ')';
 	}
 	
-	
-	public UserFilter(
-			final String name) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setName(name);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 4201742488838114835L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private UserFilter(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -95,6 +85,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		this.name = name == null ? "" : name;
 	}
 
+	private static final long serialVersionUID = -4668965649899643135L;
 	
 	private int ID;
 
@@ -148,15 +139,14 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		return this;
 	}
 
-	private transient UserFilter __originalValue;
 	
 	static {
 		gen.model.mixinReference.repositories.UserFilterRepository.__setupPersist(
-			(aggregates, sw) -> {
+			(aggregates, arg) -> {
 				try {
 					for (gen.model.mixinReference.UserFilter agg : aggregates) {
 						 
-						agg.URI = gen.model.mixinReference.converters.UserFilterConverter.buildURI(sw, agg.ID);
+						agg.URI = gen.model.mixinReference.converters.UserFilterConverter.buildURI(arg, agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -179,17 +169,18 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		agg.__originalValue = (UserFilter)agg.clone();
 		if (_res != null) {
 			return _res;
-		}				
+		}
 				return null;
 			}
 		);
 	}
+	private transient UserFilter __originalValue;
 	
 	public UserFilter(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<UserFilter>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<UserFilter> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.mixinReference.converters.UserFilterConverter.buildURI(reader, ID);
+		URI = gen.model.mixinReference.converters.UserFilterConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (UserFilter)this.clone();
 	}
@@ -205,4 +196,13 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 	}
+	
+	
+	public UserFilter(
+			final String name) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setName(name);
+	}
+
 }

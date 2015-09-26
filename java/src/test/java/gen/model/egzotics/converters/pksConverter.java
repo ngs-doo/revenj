@@ -42,15 +42,23 @@ public class pksConverter implements ObjectConverter<gen.model.egzotics.pks> {
 		column = columnsExtended.stream().filter(it -> "id".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'id' column in egzotics pks. Check if DB is in sync");
 		__index__extended_id = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "xml".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'xml' column in egzotics pks_entity. Check if DB is in sync");
+		__index___xml = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "xml".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'xml' column in egzotics pks. Check if DB is in sync");
+		__index__extended_xml = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		
 			
-		gen.model.egzotics.pks.__configureConverter(readers, __index___id);
+		gen.model.egzotics.pks.__configureConverter(readers, __index___id, __index___xml);
 			
-		gen.model.egzotics.pks.__configureConverterExtended(readersExtended, __index__extended_id);
+		gen.model.egzotics.pks.__configureConverterExtended(readersExtended, __index__extended_id, __index__extended_xml);
 	}
 
 	@Override
@@ -76,6 +84,7 @@ public class pksConverter implements ObjectConverter<gen.model.egzotics.pks> {
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
 		items[__index___id] = org.revenj.postgres.converters.ArrayTuple.create(instance.getId(), org.revenj.postgres.converters.IntConverter::toTuple);
+		items[__index___xml] = org.revenj.postgres.converters.XmlConverter.toTuple(instance.getXml());
 		return RecordTuple.from(items);
 	}
 
@@ -100,6 +109,7 @@ public class pksConverter implements ObjectConverter<gen.model.egzotics.pks> {
 		PostgresTuple[] items = new PostgresTuple[columnCountExtended];
 		
 		items[__index__extended_id] = org.revenj.postgres.converters.ArrayTuple.create(instance.getId(), org.revenj.postgres.converters.IntConverter::toTuple);
+		items[__index__extended_xml] = org.revenj.postgres.converters.XmlConverter.toTuple(instance.getXml());
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
@@ -117,14 +127,16 @@ public class pksConverter implements ObjectConverter<gen.model.egzotics.pks> {
 		return from(reader, outerContext, context, readersExtended);
 	}
 	
-	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, java.util.List<Integer> id) throws java.io.IOException {
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, gen.model.egzotics.pks instance) throws java.io.IOException {
 		_sw.initBuffer();
 		String _tmp;
 		
-			_tmp = org.revenj.postgres.converters.ArrayTuple.create(id, org.revenj.postgres.converters.IntConverter::toTuple).buildTuple(false);
+			_tmp = org.revenj.postgres.converters.ArrayTuple.create(instance.getId(), org.revenj.postgres.converters.IntConverter::toTuple).buildTuple(false);
 			_sw.addToBuffer(_tmp);
 		return _sw.bufferToString();
 	}
 	private final int __index___id;
 	private final int __index__extended_id;
+	private final int __index___xml;
+	private final int __index__extended_xml;
 }

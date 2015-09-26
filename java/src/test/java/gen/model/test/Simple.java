@@ -112,7 +112,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 		this.ts = ts == null ? java.time.OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.UTC) : ts;
 	}
 
-	private static final long serialVersionUID = 5148947147486081193L;
+	private static final long serialVersionUID = 1675082603100134519L;
 	
 	private int number;
 

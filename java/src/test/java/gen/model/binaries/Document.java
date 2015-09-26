@@ -76,19 +76,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		return "Document(" + URI + ')';
 	}
 	
-	
-	public Document(
-			final String name,
-			final byte[] content) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setName(name);
-		setContent(content);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 9188367175990980724L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Document(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -103,6 +91,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		this.content = content == null ? new byte[0] : content;
 	}
 
+	private static final long serialVersionUID = 7175413008986483272L;
 	
 	private java.util.UUID ID;
 
@@ -161,15 +150,14 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		return this;
 	}
 
-	private transient Document __originalValue;
 	
 	static {
 		gen.model.binaries.repositories.DocumentRepository.__setupPersist(
-			(aggregates, sw) -> {
+			(aggregates, arg) -> {
 				try {
 					for (gen.model.binaries.Document agg : aggregates) {
 						 
-						agg.URI = gen.model.binaries.converters.DocumentConverter.buildURI(sw, agg.ID);
+						agg.URI = gen.model.binaries.converters.DocumentConverter.buildURI(arg, agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -192,17 +180,18 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		agg.__originalValue = (Document)agg.clone();
 		if (_res != null) {
 			return _res;
-		}				
+		}
 				return null;
 			}
 		);
 	}
+	private transient Document __originalValue;
 	
 	public Document(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Document>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Document> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.binaries.converters.DocumentConverter.buildURI(reader, ID);
+		URI = gen.model.binaries.converters.DocumentConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (Document)this.clone();
 	}
@@ -220,4 +209,15 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index__extended_content] = (item, reader, context) -> { item.content = org.revenj.postgres.converters.ByteaConverter.parse(reader, context); };
 	}
+	
+	
+	public Document(
+			final String name,
+			final byte[] content) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setName(name);
+		setContent(content);
+	}
+
 }

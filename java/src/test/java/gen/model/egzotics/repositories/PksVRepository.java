@@ -2,14 +2,14 @@ package gen.model.egzotics.repositories;
 
 
 
-public class pksRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.egzotics.pks>, org.revenj.patterns.PersistableRepository<gen.model.egzotics.pks> {
+public class PksVRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.egzotics.PksV>, org.revenj.patterns.PersistableRepository<gen.model.egzotics.PksV> {
 	
 	
 	
-	public pksRepository(
+	public PksVRepository(
 			 final java.sql.Connection connection,
 			 final org.revenj.postgres.QueryProvider queryProvider,
-			 final org.revenj.postgres.ObjectConverter<gen.model.egzotics.pks> converter,
+			 final gen.model.egzotics.converters.PksVConverter converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
 		this.connection = connection;
@@ -20,23 +20,23 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 
 	private final java.sql.Connection connection;
 	private final org.revenj.postgres.QueryProvider queryProvider;
-	private final org.revenj.postgres.ObjectConverter<gen.model.egzotics.pks> converter;
+	private final gen.model.egzotics.converters.PksVConverter converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
-	public pksRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.egzotics.converters.pksConverter.class), locator);
+	public PksVRepository(org.revenj.patterns.ServiceLocator locator) {
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.egzotics.converters.PksVConverter.class), locator);
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.egzotics.pks> query(org.revenj.patterns.Specification<gen.model.egzotics.pks> filter) {
-		org.revenj.patterns.Query<gen.model.egzotics.pks> query = queryProvider.query(connection, locator, gen.model.egzotics.pks.class);
+	public org.revenj.patterns.Query<gen.model.egzotics.PksV> query(org.revenj.patterns.Specification<gen.model.egzotics.PksV> filter) {
+		org.revenj.patterns.Query<gen.model.egzotics.PksV> query = queryProvider.query(connection, locator, gen.model.egzotics.PksV.class);
 		if (filter == null) { }
 		else query = query.filter(filter);
 		
 		return query;
 	}
 
-	private java.util.List<gen.model.egzotics.pks> readFromDb(java.sql.PreparedStatement statement, java.util.List<gen.model.egzotics.pks> result) throws java.sql.SQLException, java.io.IOException {
+	private java.util.List<gen.model.egzotics.PksV> readFromDb(java.sql.PreparedStatement statement, java.util.List<gen.model.egzotics.PksV> result) throws java.sql.SQLException, java.io.IOException {
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
@@ -49,16 +49,16 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 	}
 
 	@Override
-	public java.util.List<gen.model.egzotics.pks> search(org.revenj.patterns.Specification<gen.model.egzotics.pks> specification, Integer limit, Integer offset) {
+	public java.util.List<gen.model.egzotics.PksV> search(org.revenj.patterns.Specification<gen.model.egzotics.PksV> specification, Integer limit, Integer offset) {
 		final String selectType = "SELECT it";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
-				sql = "SELECT r FROM \"egzotics\".\"pks_entity\" r";
+				sql = "SELECT r FROM \"egzotics\".\"PksV_entity\" r";
 			} 
 			else {
-				org.revenj.patterns.Query<gen.model.egzotics.pks> query = query(specification);
+				org.revenj.patterns.Query<gen.model.egzotics.PksV> query = query(specification);
 				if (offset != null) {
 					query = query.skip(offset);
 				}
@@ -87,13 +87,13 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 	}
 
 	@Override
-	public long count(org.revenj.patterns.Specification<gen.model.egzotics.pks> specification) {
+	public long count(org.revenj.patterns.Specification<gen.model.egzotics.PksV> specification) {
 		final String selectType = "SELECT COUNT(*)";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
-				sql = "SELECT COUNT(*) FROM \"egzotics\".\"pks_entity\" r";
+				sql = "SELECT COUNT(*) FROM \"egzotics\".\"PksV_entity\" r";
 			} 
 			else {
 				try {
@@ -115,13 +115,13 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 	}
 
 	@Override
-	public boolean exists(org.revenj.patterns.Specification<gen.model.egzotics.pks> specification) {
+	public boolean exists(org.revenj.patterns.Specification<gen.model.egzotics.PksV> specification) {
 		final String selectType = "SELECT exists(SELECT *";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql = null;
 			if (specification == null) {
-				sql = "SELECT exists(SELECT * FROM \"egzotics\".\"pks_entity\" r";
+				sql = "SELECT exists(SELECT * FROM \"egzotics\".\"PksV_entity\" r";
 			} 
 			else {
 				try {
@@ -148,12 +148,12 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 
 	
 	@Override
-	public java.util.List<gen.model.egzotics.pks> find(String[] uris) {
+	public java.util.List<gen.model.egzotics.PksV> find(String[] uris) {
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
-			java.util.List<gen.model.egzotics.pks> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT r FROM \"egzotics\".\"pks_entity\" r WHERE r.\"id\" IN (");
-			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
+			java.util.List<gen.model.egzotics.PksV> result = new java.util.ArrayList<>(uris.length);
+			StringBuilder sb = new StringBuilder("SELECT r FROM \"egzotics\".\"PksV_entity\" r WHERE (r.\"vv\", r.\"e\", r.\"ee\") IN (");
+			org.revenj.postgres.PostgresWriter.writeCompositeUriList(sb, uris);
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
 				while (rs.next()) {
@@ -169,44 +169,44 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 	}
 	
 	public static void __setupPersist(
-			java.util.function.BiConsumer<java.util.Collection<gen.model.egzotics.pks>, org.revenj.postgres.PostgresWriter> insert, 
-			java.util.function.BiConsumer<java.util.List<gen.model.egzotics.pks>, java.util.List<gen.model.egzotics.pks>> update,
-			java.util.function.Consumer<java.util.Collection<gen.model.egzotics.pks>> delete,
-			java.util.function.Function<gen.model.egzotics.pks, gen.model.egzotics.pks> track) {
+			java.util.function.BiConsumer<java.util.Collection<gen.model.egzotics.PksV>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, gen.model.egzotics.converters.PksVConverter>> insert, 
+			java.util.function.BiConsumer<java.util.List<gen.model.egzotics.PksV>, java.util.List<gen.model.egzotics.PksV>> update,
+			java.util.function.Consumer<java.util.Collection<gen.model.egzotics.PksV>> delete,
+			java.util.function.Function<gen.model.egzotics.PksV, gen.model.egzotics.PksV> track) {
 		insertLoop = insert;
 		updateLoop = update;
 		deleteLoop = delete;
 		trackChanges = track;
 	}
 
-	private static java.util.function.BiConsumer<java.util.Collection<gen.model.egzotics.pks>, org.revenj.postgres.PostgresWriter> insertLoop;
-	private static java.util.function.BiConsumer<java.util.List<gen.model.egzotics.pks>, java.util.List<gen.model.egzotics.pks>> updateLoop;
-	private static java.util.function.Consumer<java.util.Collection<gen.model.egzotics.pks>> deleteLoop;
-	private static java.util.function.Function<gen.model.egzotics.pks, gen.model.egzotics.pks> trackChanges;
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.egzotics.PksV>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, gen.model.egzotics.converters.PksVConverter>> insertLoop;
+	private static java.util.function.BiConsumer<java.util.List<gen.model.egzotics.PksV>, java.util.List<gen.model.egzotics.PksV>> updateLoop;
+	private static java.util.function.Consumer<java.util.Collection<gen.model.egzotics.PksV>> deleteLoop;
+	private static java.util.function.Function<gen.model.egzotics.PksV, gen.model.egzotics.PksV> trackChanges;
 
 	private static final String[] EMPTY_URI = new String[0];
 
 	@Override
 	public String[] persist(
-			java.util.Collection<gen.model.egzotics.pks> insert,
-			java.util.Collection<java.util.Map.Entry<gen.model.egzotics.pks, gen.model.egzotics.pks>> update,
-			java.util.Collection<gen.model.egzotics.pks> delete) throws java.io.IOException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"egzotics\".\"persist_pks\"(?, ?, ?, ?)");
+			java.util.Collection<gen.model.egzotics.PksV> insert,
+			java.util.Collection<java.util.Map.Entry<gen.model.egzotics.PksV, gen.model.egzotics.PksV>> update,
+			java.util.Collection<gen.model.egzotics.PksV> delete) throws java.io.IOException {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"egzotics\".\"persist_PksV\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {
-				insertLoop.accept(insert, sw);
+				insertLoop.accept(insert, new java.util.AbstractMap.SimpleEntry<>(sw, converter));
 				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
-				pgo.setType("\"egzotics\".\"pks_entity\"[]");
+				pgo.setType("\"egzotics\".\"PksV_entity\"[]");
 				sw.reset();
 				tuple.buildTuple(sw, false);
 				pgo.setValue(sw.toString());
 				statement.setObject(1, pgo);
 				result = new String[insert.size()];
 				int i = 0;
-				for (gen.model.egzotics.pks it : insert) {
+				for (gen.model.egzotics.PksV it : insert) {
 					result[i++] = it.getURI();
 					trackChanges.apply(it);
 				}
@@ -215,12 +215,12 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 				result = EMPTY_URI;
 			}
 			if (update != null && !update.isEmpty()) {
-				java.util.List<gen.model.egzotics.pks> oldUpdate = new java.util.ArrayList<>(update.size());
-				java.util.List<gen.model.egzotics.pks> newUpdate = new java.util.ArrayList<>(update.size());
+				java.util.List<gen.model.egzotics.PksV> oldUpdate = new java.util.ArrayList<>(update.size());
+				java.util.List<gen.model.egzotics.PksV> newUpdate = new java.util.ArrayList<>(update.size());
 				java.util.Map<String, Integer> missing = new java.util.HashMap<>();
 				int cnt = 0;
-				for (java.util.Map.Entry<gen.model.egzotics.pks, gen.model.egzotics.pks> it : update) {
-					gen.model.egzotics.pks oldValue = trackChanges.apply(it.getValue());
+				for (java.util.Map.Entry<gen.model.egzotics.PksV, gen.model.egzotics.PksV> it : update) {
+					gen.model.egzotics.PksV oldValue = trackChanges.apply(it.getValue());
 					if (it.getKey() != null) {
 						oldValue = it.getKey();
 					}
@@ -232,8 +232,8 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 					cnt++;
 				}
 				if (!missing.isEmpty()) {
-					java.util.List<gen.model.egzotics.pks> found = find(missing.keySet().toArray(new String[missing.size()]));
-					for (gen.model.egzotics.pks it : found) {
+					java.util.List<gen.model.egzotics.PksV> found = find(missing.keySet().toArray(new String[missing.size()]));
+					for (gen.model.egzotics.PksV it : found) {
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
@@ -242,8 +242,8 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
 				org.postgresql.util.PGobject pgNew = new org.postgresql.util.PGobject();
-				pgOld.setType("\"egzotics\".\"pks_entity\"[]");
-				pgNew.setType("\"egzotics\".\"pks_entity\"[]");
+				pgOld.setType("\"egzotics\".\"PksV_entity\"[]");
+				pgNew.setType("\"egzotics\".\"PksV_entity\"[]");
 				tupleOld.buildTuple(sw, false);
 				pgOld.setValue(sw.toString());
 				sw.reset();
@@ -260,7 +260,7 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 				deleteLoop.accept(delete);
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(delete, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
-				pgo.setType("\"egzotics\".\"pks_entity\"[]");
+				pgo.setType("\"egzotics\".\"PksV_entity\"[]");
 				tuple.buildTuple(sw, false);
 				pgo.setValue(sw.toString());
 				statement.setObject(4, pgo);
@@ -280,15 +280,15 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 
 	
 	@Override
-	public String insert(gen.model.egzotics.pks item) throws java.io.IOException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"egzotics\".\"insert_pks\"(ARRAY[?])");
+	public String insert(gen.model.egzotics.PksV item) throws java.io.IOException {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"egzotics\".\"insert_PksV\"(ARRAY[?])");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
-			java.util.List<gen.model.egzotics.pks> insert = java.util.Collections.singletonList(item);
-			if (insertLoop != null) insertLoop.accept(insert, sw);
+			java.util.List<gen.model.egzotics.PksV> insert = java.util.Collections.singletonList(item);
+			if (insertLoop != null) insertLoop.accept(insert, new java.util.AbstractMap.SimpleEntry<>(sw, converter));
 			sw.reset();
 			org.revenj.postgres.converters.PostgresTuple tuple = converter.to(item);
 			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
-			pgo.setType("\"egzotics\".\"pks_entity\"");
+			pgo.setType("\"egzotics\".\"PksV_entity\"");
 			sw.reset();
 			tuple.buildTuple(sw, false);
 			pgo.setValue(sw.toString());
@@ -302,21 +302,21 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 	}
 
 	@Override
-	public void update(gen.model.egzotics.pks oldItem, gen.model.egzotics.pks newItem) throws java.io.IOException {
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"egzotics\".\"update_pks\"(ARRAY[?], ARRAY[?])");
+	public void update(gen.model.egzotics.PksV oldItem, gen.model.egzotics.PksV newItem) throws java.io.IOException {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"egzotics\".\"update_PksV\"(ARRAY[?], ARRAY[?])");
 			 org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			if (oldItem == null) oldItem = trackChanges.apply(newItem);
 			else trackChanges.apply(newItem);
 			if (oldItem == null) oldItem = find(newItem.getURI()).get();
-			java.util.List<gen.model.egzotics.pks> oldUpdate = java.util.Collections.singletonList(oldItem);
-			java.util.List<gen.model.egzotics.pks> newUpdate = java.util.Collections.singletonList(newItem);
+			java.util.List<gen.model.egzotics.PksV> oldUpdate = java.util.Collections.singletonList(oldItem);
+			java.util.List<gen.model.egzotics.PksV> newUpdate = java.util.Collections.singletonList(newItem);
 			if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
 			org.revenj.postgres.converters.PostgresTuple tupleOld = converter.to(oldItem);
 			org.revenj.postgres.converters.PostgresTuple tupleNew = converter.to(newItem);
 			org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
 			org.postgresql.util.PGobject pgNew = new org.postgresql.util.PGobject();
-			pgOld.setType("\"egzotics\".\"pks_entity\"");
-			pgNew.setType("\"egzotics\".\"pks_entity\"");
+			pgOld.setType("\"egzotics\".\"PksV_entity\"");
+			pgNew.setType("\"egzotics\".\"PksV_entity\"");
 			tupleOld.buildTuple(sw, false);
 			pgOld.setValue(sw.toString());
 			sw.reset();

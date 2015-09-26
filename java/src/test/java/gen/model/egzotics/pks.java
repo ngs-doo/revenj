@@ -48,6 +48,8 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 		
 		if(!((this.id == other.id || this.id != null && this.id.equals(other.id))))
 			return false;
+		if(!(this.xml == other.xml || this.xml != null && this.xml.equals(other.xml)))
+			return false;
 		return true;
 	}
 
@@ -55,6 +57,7 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 		this.URI = other.URI;
 		this.__locator = other.__locator;
 		this.id = new java.util.ArrayList<Integer>(other.id);
+		this.xml = other.xml != null ? (org.w3c.dom.Element)other.xml.cloneNode(true) : null;
 		this.__originalValue = other.__originalValue;
 	}
 
@@ -68,27 +71,20 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 		return "pks(" + URI + ')';
 	}
 	
-	
-	public pks(
-			final java.util.List<Integer> id) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setId(id);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 2220090785750092308L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private pks(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
-			@com.fasterxml.jackson.annotation.JsonProperty("id") final java.util.List<Integer> id) {
+			@com.fasterxml.jackson.annotation.JsonProperty("id") final java.util.List<Integer> id,
+			@com.fasterxml.jackson.annotation.JsonProperty("xml") final org.w3c.dom.Element xml) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
 		this.id = id == null ? new java.util.ArrayList<Integer>(4) : id;
+		this.xml = xml;
 	}
 
+	private static final long serialVersionUID = -4088068281737540287L;
 	
 	private java.util.List<Integer> id;
 
@@ -109,15 +105,32 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 		return this;
 	}
 
-	private transient pks __originalValue;
+	
+	private org.w3c.dom.Element xml;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("xml")
+	public org.w3c.dom.Element getXml()  {
+		
+		return xml;
+	}
+
+	
+	public pks setXml(final org.w3c.dom.Element value) {
+		
+		this.xml = value;
+		
+		return this;
+	}
+
 	
 	static {
 		gen.model.egzotics.repositories.pksRepository.__setupPersist(
-			(aggregates, sw) -> {
+			(aggregates, arg) -> {
 				try {
 					for (gen.model.egzotics.pks agg : aggregates) {
 						 
-						agg.URI = gen.model.egzotics.converters.pksConverter.buildURI(sw, agg.id);
+						agg.URI = gen.model.egzotics.converters.pksConverter.buildURI(arg, agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -140,28 +153,42 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 		agg.__originalValue = (pks)agg.clone();
 		if (_res != null) {
 			return _res;
-		}				
+		}
 				return null;
 			}
 		);
 	}
+	private transient pks __originalValue;
 	
 	public pks(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<pks>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<pks> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.egzotics.converters.pksConverter.buildURI(reader, id);
+		URI = gen.model.egzotics.converters.pksConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (pks)this.clone();
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<pks>[] readers, int __index___id) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<pks>[] readers, int __index___id, int __index___xml) {
 		
 		readers[__index___id] = (item, reader, context) -> { { java.util.List<Integer> __list = org.revenj.postgres.converters.IntConverter.parseCollection(reader, context, false); if(__list != null) {item.id = __list;} else item.id = new java.util.ArrayList<Integer>(4); }; };
+		readers[__index___xml] = (item, reader, context) -> { item.xml = org.revenj.postgres.converters.XmlConverter.parse(reader, context); };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<pks>[] readers, int __index__extended_id) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<pks>[] readers, int __index__extended_id, int __index__extended_xml) {
 		
 		readers[__index__extended_id] = (item, reader, context) -> { { java.util.List<Integer> __list = org.revenj.postgres.converters.IntConverter.parseCollection(reader, context, false); if(__list != null) {item.id = __list;} else item.id = new java.util.ArrayList<Integer>(4); }; };
+		readers[__index__extended_xml] = (item, reader, context) -> { item.xml = org.revenj.postgres.converters.XmlConverter.parse(reader, context); };
 	}
+	
+	
+	public pks(
+			final java.util.List<Integer> id,
+			final org.w3c.dom.Element xml) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setId(id);
+		setXml(xml);
+	}
+
 }

@@ -207,11 +207,11 @@ public class EntityConverter implements ObjectConverter<gen.model.test.Entity> {
 	private final int __index___Index;
 	private final int __index__extended_Index;
 	
-	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, java.util.UUID Compositeid, int Index) throws java.io.IOException {
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, gen.model.test.Entity instance) throws java.io.IOException {
 		_sw.initBuffer();
 		String _tmp;
-		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, Compositeid);
-		_sw.addToBuffer('/');org.revenj.postgres.converters.IntConverter.serializeURI(_sw, Index);
+		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, instance.getCompositeid());
+		_sw.addToBuffer('/');org.revenj.postgres.converters.IntConverter.serializeURI(_sw, instance.getIndex());
 		return _sw.bufferToString();
 	}
 }

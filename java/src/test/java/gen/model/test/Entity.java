@@ -103,25 +103,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		return "Entity(" + URI + ')';
 	}
 	
-	
-	public Entity(
-			final java.math.BigDecimal money,
-			final String id,
-			final gen.model.test.Composite composite,
-			final java.util.Set<gen.model.test.Detail1> detail1,
-			final java.util.Set<gen.model.test.Detail2> detail2) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setMoney(money);
-		setId(id);
-		setComposite(composite);
-		setDetail1(detail1);
-		setDetail2(detail2);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 4277437181072806119L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -146,6 +128,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		this.Index = Index;
 	}
 
+	private static final long serialVersionUID = -2750391643816533019L;
 	
 	private java.math.BigDecimal money;
 
@@ -353,7 +336,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		for (org.revenj.postgres.ObjectConverter.Reader<Entity> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.test.converters.EntityConverter.buildURI(reader, Compositeid, Index);
+		URI = gen.model.test.converters.EntityConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -380,4 +363,21 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
+	
+	
+	public Entity(
+			final java.math.BigDecimal money,
+			final String id,
+			final gen.model.test.Composite composite,
+			final java.util.Set<gen.model.test.Detail1> detail1,
+			final java.util.Set<gen.model.test.Detail2> detail2) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setMoney(money);
+		setId(id);
+		setComposite(composite);
+		setDetail1(detail1);
+		setDetail2(detail2);
+	}
+
 }

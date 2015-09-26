@@ -172,10 +172,10 @@ public class AuthorConverter implements ObjectConverter<gen.model.mixinReference
 	private final int __index___ID;
 	private final int __index__extended_ID;
 	
-	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, int ID) throws java.io.IOException {
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, gen.model.mixinReference.Author instance) throws java.io.IOException {
 		_sw.initBuffer();
 		String _tmp;
-		org.revenj.postgres.converters.IntConverter.serializeURI(_sw, ID);
+		org.revenj.postgres.converters.IntConverter.serializeURI(_sw, instance.getID());
 		return _sw.bufferToString();
 	}
 	private final int __index___name;

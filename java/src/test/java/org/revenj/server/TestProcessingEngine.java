@@ -76,12 +76,12 @@ public class TestProcessingEngine {
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		CommandResultDescription description = result.executedCommandResults[0];
 		Assert.assertEquals(201, description.result.status);
-		String uri = (String) description.result.data;
-		Assert.assertEquals(composite.getId().toString(), uri);
+		Composite saved = (Composite) description.result.data;
+		Assert.assertEquals(composite.getId().toString(), saved.getURI());
 		cd = new ServerCommandDescription<>(
 				null,
 				Read.class,
-				new Read.Argument("test.Composite", uri));
+				new Read.Argument("test.Composite", saved.getURI()));
 		result =
 				engine.execute(
 						Object.class,
@@ -118,12 +118,12 @@ public class TestProcessingEngine {
 		Assert.assertEquals(1, result.executedCommandResults.length);
 		CommandResultDescription<String> description = result.executedCommandResults[0];
 		Assert.assertEquals(201, description.result.status);
-		String uri = json.deserialize(description.result.data, String.class);
-		Assert.assertEquals(composite.getId().toString(), uri);
+		Composite saved = json.deserialize(description.result.data, Composite.class);
+		Assert.assertEquals(composite.getId().toString(), saved.getURI());
 		cd = new ServerCommandDescription<>(
 				null,
 				Read.class,
-				json.serialize(new Read.Argument("test.Composite", uri)));
+				json.serialize(new Read.Argument("test.Composite", saved.getURI())));
 		result =
 				engine.execute(
 						String.class,

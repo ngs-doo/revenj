@@ -24,7 +24,7 @@ public class AuthorRepository   implements java.io.Closeable, org.revenj.pattern
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public AuthorRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.Author>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.AuthorConverter.class), locator);
 	}
 	
 	@Override

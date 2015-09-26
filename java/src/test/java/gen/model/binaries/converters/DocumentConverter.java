@@ -139,10 +139,10 @@ public class DocumentConverter implements ObjectConverter<gen.model.binaries.Doc
 	private final int __index___ID;
 	private final int __index__extended_ID;
 	
-	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, java.util.UUID ID) throws java.io.IOException {
+	public static String buildURI(org.revenj.postgres.PostgresBuffer _sw, gen.model.binaries.Document instance) throws java.io.IOException {
 		_sw.initBuffer();
 		String _tmp;
-		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, ID);
+		org.revenj.postgres.converters.UuidConverter.serializeURI(_sw, instance.getID());
 		return _sw.bufferToString();
 	}
 	private final int __index___name;

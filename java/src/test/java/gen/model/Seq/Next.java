@@ -69,7 +69,6 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -5716183155529821836L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Next(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -80,6 +79,7 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.ID = ID;
 	}
 
+	private static final long serialVersionUID = -1392216392953867550L;
 	
 	private int ID;
 
@@ -135,7 +135,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = -29095485362745486L;
+	private static final long serialVersionUID = -329639643626038628L;
 	
 	private Integer min;
 
@@ -178,15 +178,14 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		}
 }
 
-	private transient Next __originalValue;
 	
 	static {
 		gen.model.Seq.repositories.NextRepository.__setupPersist(
-			(aggregates, sw) -> {
+			(aggregates, arg) -> {
 				try {
 					for (gen.model.Seq.Next agg : aggregates) {
 						 
-						agg.URI = gen.model.Seq.converters.NextConverter.buildURI(sw, agg.ID);
+						agg.URI = gen.model.Seq.converters.NextConverter.buildURI(arg, agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -209,17 +208,18 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		agg.__originalValue = (Next)agg.clone();
 		if (_res != null) {
 			return _res;
-		}				
+		}
 				return null;
 			}
 		);
 	}
+	private transient Next __originalValue;
 	
 	public Next(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Next>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Next> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.Seq.converters.NextConverter.buildURI(reader, ID);
+		URI = gen.model.Seq.converters.NextConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (Next)this.clone();
 	}

@@ -101,27 +101,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		return "Composite(" + URI + ')';
 	}
 	
-	
-	public Composite(
-			final java.util.UUID id,
-			final gen.model.test.En[] enn,
-			final gen.model.test.En en,
-			final gen.model.test.Simple simple,
-			final java.util.List<java.time.OffsetDateTime> tsl,
-			final java.util.List<gen.model.test.Entity> entities) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setId(id);
-		setEnn(enn);
-		setEn(en);
-		setSimple(simple);
-		setTsl(tsl);
-		setEntities(entities);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -2886973653219813317L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -146,6 +126,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		this.laziesURI = laziesURI == null ? new String[0] : laziesURI;
 	}
 
+	private static final long serialVersionUID = -791424202417332767L;
 	
 	private java.util.UUID id;
 
@@ -350,7 +331,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = -6320307043158866258L;
+	private static final long serialVersionUID = -3475896705255350092L;
 	
 	private gen.model.test.Simple simple;
 
@@ -376,17 +357,16 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		}
 }
 
-	private transient Composite __originalValue;
 	
 	static {
 		gen.model.test.repositories.CompositeRepository.__setupPersist(
-			(aggregates, sw) -> {
+			(aggregates, arg) -> {
 				try {
 					for (gen.model.test.Composite agg : aggregates) {
 						
 						agg.change = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
 						__binderentities.accept(agg); 
-						agg.URI = gen.model.test.converters.CompositeConverter.buildURI(sw, agg.id);
+						agg.URI = gen.model.test.converters.CompositeConverter.buildURI(arg, agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -411,17 +391,18 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		agg.__originalValue = (Composite)agg.clone();
 		if (_res != null) {
 			return _res;
-		}				
+		}
 				return null;
 			}
 		);
 	}
+	private transient Composite __originalValue;
 	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.test.converters.CompositeConverter.buildURI(reader, id);
+		URI = gen.model.test.converters.CompositeConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (Composite)this.clone();
 	}
@@ -455,4 +436,23 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			if (__list != null) item.laziesURI = __list.toArray(new String[__list.size()]); else item.laziesURI = new String[0]; 
 		}; };
 	}
+	
+	
+	public Composite(
+			final java.util.UUID id,
+			final gen.model.test.En[] enn,
+			final gen.model.test.En en,
+			final gen.model.test.Simple simple,
+			final java.util.List<java.time.OffsetDateTime> tsl,
+			final java.util.List<gen.model.test.Entity> entities) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setId(id);
+		setEnn(enn);
+		setEn(en);
+		setSimple(simple);
+		setTsl(tsl);
+		setEntities(entities);
+	}
+
 }

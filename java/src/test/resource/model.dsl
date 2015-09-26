@@ -139,5 +139,14 @@ module security {
 module egzotics {
 	root pks(id) {
 		list<int> id;
+		xml? xml;
 	}
+	value v { int x; }
+	root PksV(vv, e, ee) {
+		v v;
+		v[] vv;
+		E e;
+		Set<E> ee;
+	}
+	enum E { A; B; C; }
 }

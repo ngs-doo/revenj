@@ -24,7 +24,7 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	public DocumentRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.security.Document>>(){}.resolve(locator), locator);
+		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.security.converters.DocumentConverter.class), locator);
 	}
 	
 	@Override

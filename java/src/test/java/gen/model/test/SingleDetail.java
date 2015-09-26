@@ -73,7 +73,6 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 1665507667070757914L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -86,6 +85,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		this.detailsURI = detailsURI == null ? new String[0] : detailsURI;
 	}
 
+	private static final long serialVersionUID = -8803378799397112144L;
 	
 	private int ID;
 
@@ -163,15 +163,14 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		return this.detailsURI;
 	}
 
-	private transient SingleDetail __originalValue;
 	
 	static {
 		gen.model.test.repositories.SingleDetailRepository.__setupPersist(
-			(aggregates, sw) -> {
+			(aggregates, arg) -> {
 				try {
 					for (gen.model.test.SingleDetail agg : aggregates) {
 						 
-						agg.URI = gen.model.test.converters.SingleDetailConverter.buildURI(sw, agg.ID);
+						agg.URI = gen.model.test.converters.SingleDetailConverter.buildURI(arg, agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -194,17 +193,18 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		agg.__originalValue = (SingleDetail)agg.clone();
 		if (_res != null) {
 			return _res;
-		}				
+		}
 				return null;
 			}
 		);
 	}
+	private transient SingleDetail __originalValue;
 	
 	public SingleDetail(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SingleDetail>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<SingleDetail> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.test.converters.SingleDetailConverter.buildURI(reader, ID);
+		URI = gen.model.test.converters.SingleDetailConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (SingleDetail)this.clone();
 	}

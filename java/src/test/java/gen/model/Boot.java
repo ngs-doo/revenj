@@ -182,6 +182,18 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.egzotics.converters.pksConverter egzotics$converter$pksConverter = new gen.model.egzotics.converters.pksConverter(columns);
 		container.register(egzotics$converter$pksConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.pks>>(){}.type, egzotics$converter$pksConverter, false);
+		
+		gen.model.egzotics.converters.vConverter egzotics$converter$vConverter = new gen.model.egzotics.converters.vConverter(columns);
+		container.register(egzotics$converter$vConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.v>>(){}.type, egzotics$converter$vConverter, false);
+		
+		gen.model.egzotics.converters.PksVConverter egzotics$converter$PksVConverter = new gen.model.egzotics.converters.PksVConverter(columns);
+		container.register(egzotics$converter$PksVConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.PksV>>(){}.type, egzotics$converter$PksVConverter, false);
+		
+		gen.model.egzotics.converters.EConverter egzotics$converter$EConverter = new gen.model.egzotics.converters.EConverter();
+		container.register(egzotics$converter$EConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.E>>(){}.type, egzotics$converter$EConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"");
@@ -367,6 +379,23 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getId", "\"id\"");
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getXml", "\"xml\"");
+		egzotics$converter$vConverter.configure(container);
+		metamodel.registerDataSource(gen.model.egzotics.v.class, "\"egzotics\".\"v\"");
+		metamodel.registerProperty(gen.model.egzotics.v.class, "getX", "\"x\"");
+		egzotics$converter$PksVConverter.configure(container);
+		metamodel.registerDataSource(gen.model.egzotics.PksV.class, "\"egzotics\".\"PksV_entity\"");
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getURI", "\"URI\"");
+		
+		container.register(gen.model.egzotics.repositories.PksVRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getV", "\"v\"");
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getVv", "\"vv\"");
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getE", "\"e\"");
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getEe", "\"ee\"");
+		metamodel.registerEnum(gen.model.egzotics.E.class, "\"egzotics\".\"E\"");
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -387,6 +416,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.security.Document>>(){}.type, gen.model.security.repositories.DocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"");

@@ -71,17 +71,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 		return "Person(" + URI + ')';
 	}
 	
-	
-	public Person(
-			final java.time.LocalDate birth) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setBirth(birth);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 9210756571025609050L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Person(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -94,6 +84,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 		this.AuthorID = AuthorID;
 	}
 
+	private static final long serialVersionUID = -1329163589583678634L;
 	
 	private java.time.LocalDate birth;
 
@@ -146,7 +137,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 		for (org.revenj.postgres.ObjectConverter.Reader<Person> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.mixinReference.converters.PersonConverter.buildURI(reader, AuthorID);
+		URI = gen.model.mixinReference.converters.PersonConverter.buildURI(reader, this);
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
@@ -161,4 +152,13 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_birth] = (item, reader, context) -> { item.birth = org.revenj.postgres.converters.DateConverter.parse(reader, false); };
 		readers[__index__extended_AuthorID] = (item, reader, context) -> { item.AuthorID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
+	
+	
+	public Person(
+			final java.time.LocalDate birth) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setBirth(birth);
+	}
+
 }
