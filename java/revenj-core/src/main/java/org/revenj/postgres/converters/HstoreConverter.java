@@ -139,7 +139,7 @@ public abstract class HstoreConverter {
 		if (escaped) {
 			reader.read(context);
 		}
-		int innerContext = context << 1;
+		int innerContext = context == 0 ? 1 : context << 1;
 		ArrayList<Map<String, String>> list = new ArrayList<>();
 		cur = reader.peek();
 		if (cur == '}') {

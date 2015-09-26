@@ -179,7 +179,12 @@ public final class PostgresReader implements PostgresBuffer, AutoCloseable {
 
 	@Override
 	public String bufferToString() {
-		return new String(buffer, 0, positionInBuffer);
+		int len = positionInBuffer;
+		positionInBuffer = 0;
+		if (len == 0) {
+			return "";
+		}
+		return new String(buffer, 0, len);
 	}
 
 	public interface ConvertToValue<T> {

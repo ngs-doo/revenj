@@ -159,7 +159,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var escaped = cur != '{';
 			if (escaped)
 				reader.Read(context);
-			var innerContext = context << 1;
+			int innerContext = context == 0 ? 1 : context << 1;
 			var list = new List<Dictionary<string, string>>();
 			cur = reader.Peek();
 			if (cur == '}')

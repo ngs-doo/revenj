@@ -4,15 +4,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
-import org.revenj.postgres.converters.ArrayTuple;
-import org.revenj.postgres.converters.FloatConverter;
-import org.revenj.postgres.converters.PostgresTuple;
-import org.revenj.postgres.converters.UuidConverter;
+import org.revenj.postgres.converters.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class TestPostgres {
 
@@ -36,5 +31,24 @@ public class TestPostgres {
 		reader.process(value);
 		List<UUID> result = UuidConverter.parseCollection(reader, 0, false);
 		Assert.assertEquals(uuids, result);
+	}
+
+	@Test
+	public void mapIssue() throws IOException {
+		PostgresReader reader = new PostgresReader();
+		List<Map<String, String>> maps = new ArrayList<>();
+		maps.add(null);
+		maps.add(new HashMap<>());
+		Map<String, String> ab = new HashMap<>();
+		ab.put("a", "b");
+		maps.add(ab);
+		Map<String, String> cplx = new HashMap<>();
+		cplx.put("a ' \\ x", "\" b \\ '");
+		maps.add(cplx);
+		PostgresTuple tuple = ArrayTuple.create(maps, HstoreConverter::toTuple);
+		String value = tuple.buildTuple(false);
+		reader.process(value);
+		List<Map<String, String>> result = HstoreConverter.parseCollection(reader, 0, true);
+		Assert.assertEquals(maps, result);
 	}
 }
