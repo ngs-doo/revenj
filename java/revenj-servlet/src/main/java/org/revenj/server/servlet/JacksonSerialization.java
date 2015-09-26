@@ -23,7 +23,8 @@ final class JacksonSerialization implements Serialization<String> {
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 				.setInjectableValues(new InjectableValues.Std().addValue("__locator", locator))
 				.registerModule(new Jdk8Module())
-				.registerModule(new JavaTimeModule());
+				.registerModule(new JavaTimeModule())
+				.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 	}
 
 	byte[] serializeAsBytes(Object value) throws IOException {
