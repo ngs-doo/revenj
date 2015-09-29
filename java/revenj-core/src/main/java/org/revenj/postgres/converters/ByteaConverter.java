@@ -26,7 +26,7 @@ public abstract class ByteaConverter {
 	public static void serializeURI(PostgresBuffer sw, byte[] value) {
 		sw.addToBuffer(XX);
 		for (byte b : value) {
-			sw.addToBuffer(CharMap[b >> 4]);
+			sw.addToBuffer(CharMap[(b >> 4) & 0xf]);
 			sw.addToBuffer(CharMap[b & 0xf]);
 		}
 	}

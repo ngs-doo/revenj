@@ -51,4 +51,13 @@ public class TestPostgres {
 		List<Map<String, String>> result = HstoreConverter.parseCollection(reader, 0, true);
 		Assert.assertEquals(maps, result);
 	}
+
+	@Test
+	public void binaryIssue() throws IOException {
+		PostgresReader reader = new PostgresReader();
+		byte[] bytes = Base64.getDecoder().decode("gAB/");
+		ByteaConverter.serializeURI(reader, bytes);
+		String uri = reader.bufferToString();
+		Assert.assertEquals("\\x80007f", uri);
+	}
 }

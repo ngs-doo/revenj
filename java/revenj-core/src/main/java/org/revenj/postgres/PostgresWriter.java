@@ -229,6 +229,8 @@ public final class PostgresWriter implements PostgresBuffer, AutoCloseable {
 
 	@Override
 	public String bufferToString() {
-		return toString();
+		String result = toString();
+		position = 0;
+		return result;
 	}
 }
