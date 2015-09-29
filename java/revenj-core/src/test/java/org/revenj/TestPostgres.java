@@ -7,6 +7,7 @@ import org.revenj.postgres.PostgresWriter;
 import org.revenj.postgres.converters.*;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 public class TestPostgres {
@@ -59,5 +60,14 @@ public class TestPostgres {
 		ByteaConverter.serializeURI(reader, bytes);
 		String uri = reader.bufferToString();
 		Assert.assertEquals("\\x80007f", uri);
+	}
+
+	@Test
+	public void zoneRange() throws IOException {
+		PostgresReader reader = new PostgresReader();
+		reader.process("[NULL,\"2015-09-28 13:35:42.973+02:00\",\"1970-01-01 01:00:00+01:00\",\"0001-01-01 00:00:00Z\",\"2038-02-13 00:45:30.647+01:00\"]");
+		List<OffsetDateTime> values = TimestampConverter.parseOffsetCollection(reader, 0, true, true);
+		Assert.assertEquals(5, values.size());
+		Assert.assertNull(values.get(0));
 	}
 }

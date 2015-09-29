@@ -1,6 +1,6 @@
 package org.revenj.server.servlet;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;

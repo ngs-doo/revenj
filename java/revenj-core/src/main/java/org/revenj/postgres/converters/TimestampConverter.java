@@ -236,7 +236,7 @@ public abstract class TimestampConverter {
 		if (escaped) {
 			reader.read(context);
 		}
-		int innerContext = context << 1;
+		int innerContext = context == 0 ? 1 : context << 1;
 		cur = reader.peek();
 		if (cur == '}') {
 			if (escaped) {
@@ -279,7 +279,7 @@ public abstract class TimestampConverter {
 		if (escaped) {
 			reader.read(context);
 		}
-		int innerContext = context << 1;
+		int innerContext = context == 0 ? 1 : context << 1;
 		cur = reader.peek();
 		if (cur == '}') {
 			if (escaped) {
