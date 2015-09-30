@@ -45,11 +45,8 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 		}		
 	}
 
-	private static final org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>> genericOptionalConnection = 
-		new org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>>(){};
-
 	public SingleDetailRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(genericOptionalConnection.resolve(locator), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.SingleDetailConverter.class), locator);
+		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.SingleDetailConverter.class), locator);
 	}
 	
 	@Override

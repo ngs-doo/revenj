@@ -58,7 +58,7 @@ public static class Result   {
 		this.ids = new java.util.HashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = -6821691057223471271L;
+	private static final long serialVersionUID = -6776614570428865364L;
 	
 	private java.util.UUID id;
 
@@ -115,11 +115,8 @@ public static class Result   {
 		}		
 	}
 
-	private static final org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>> genericOptionalConnection = 
-		new org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>>(){};
-
 	public Result populate(org.revenj.patterns.ServiceLocator locator) {
-		java.util.Optional<java.sql.Connection> tryConnection = genericOptionalConnection.resolve(locator);
+		java.util.Optional<java.sql.Connection> tryConnection = locator.tryResolve(java.sql.Connection.class);
 		if (tryConnection.isPresent()) return populate(tryConnection.get(), locator);
 		java.sql.Connection connection = getConnection(locator);
 		try {

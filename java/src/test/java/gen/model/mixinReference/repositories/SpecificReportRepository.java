@@ -45,11 +45,8 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 		}		
 	}
 
-	private static final org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>> genericOptionalConnection = 
-		new org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>>(){};
-
 	public SpecificReportRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(genericOptionalConnection.resolve(locator), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.SpecificReportConverter.class), locator);
+		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.SpecificReportConverter.class), locator);
 	}
 	
 	@Override
