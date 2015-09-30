@@ -2,6 +2,7 @@ package org.revenj;
 
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
+import org.revenj.patterns.DataSource;
 import rx.Observable;
 
 import java.io.IOException;
@@ -32,17 +33,19 @@ final class LocatorDataContext implements UnitOfWork {
 	}
 
 	static UnitOfWork asUnitOfWork(Container container) {
+		javax.sql.DataSource dataSource = container.resolve(javax.sql.DataSource.class);
 		Container locator = container.createScope();
-		Connection connection = locator.resolve(Connection.class);
+		java.sql.Connection connection = null;
 		try {
+			connection = dataSource.getConnection();
 			connection.setAutoCommit(false);
 		} catch (SQLException e) {
 			try {
-				connection.close();
+				if (connection != null) connection.close();
 			} catch (SQLException ignore) {
 			}
-			connection = locator.resolve(Connection.class);
 			try {
+				connection = dataSource.getConnection();
 				connection.setAutoCommit(false);
 			} catch (SQLException ex) {
 				throw new RuntimeException(ex);

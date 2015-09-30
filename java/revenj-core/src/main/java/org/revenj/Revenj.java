@@ -1,24 +1,22 @@
 package org.revenj;
 
+import org.postgresql.ds.PGPoolingDataSource;
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 
 public abstract class Revenj {
 	public static Container setup() throws IOException {
@@ -49,22 +47,31 @@ public abstract class Revenj {
 			File pp = new File(plugins);
 			pluginsPath = pp.isDirectory() ? pp : null;
 		}
-		Function<ServiceLocator, Connection> factory = c -> {
-			try {
-				return DriverManager.getConnection(jdbcUrl, properties);
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
-		};
+		org.postgresql.ds.PGPoolingDataSource dataSource = new PGPoolingDataSource();
+		dataSource.setUrl(jdbcUrl);
+		String user = properties.getProperty("user");
+		String revUser = properties.getProperty("revenj.user");
+		if (revUser != null && revUser.length() > 0) {
+			dataSource.setUser(revUser);
+		} else if (user != null && user.length() > 0) {
+			dataSource.setUser(user);
+		}
+		String password = properties.getProperty("password");
+		String revPassword = properties.getProperty("revenj.password");
+		if (revPassword != null && revPassword.length() > 0) {
+			dataSource.setPassword(revPassword);
+		} else if (password != null && password.length() > 0) {
+			dataSource.setPassword(password);
+		}
 		return setup(
-				factory,
+				dataSource,
 				properties,
 				Optional.ofNullable(pluginsPath),
 				Optional.ofNullable(Thread.currentThread().getContextClassLoader()));
 	}
 
 	public static Container setup(
-			Function<ServiceLocator, Connection> connectionFactory,
+			DataSource dataSource,
 			Properties properties,
 			Optional<File> pluginsPath,
 			Optional<ClassLoader> classLoader) throws IOException {
@@ -88,18 +95,22 @@ public abstract class Revenj {
 			loader = Thread.currentThread().getContextClassLoader();
 		}
 		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class, loader);
-		return setup(connectionFactory, properties, Optional.of(loader), aspects.iterator());
+		return setup(dataSource, properties, Optional.of(loader), aspects.iterator());
 	}
 
 	private static class SimpleDomainModel implements DomainModel {
 
-		private final String namespace;
+		private String namespace;
 		private final ClassLoader loader;
 		private final ConcurrentMap<String, Class<?>> cache = new ConcurrentHashMap<>();
 
 		public SimpleDomainModel(String namespace, ClassLoader loader) {
 			this.namespace = namespace != null && namespace.length() > 0 ? namespace + "." : "";
 			this.loader = loader;
+		}
+
+		void updateNamespace(String namespace) {
+			this.namespace = namespace != null && namespace.length() > 0 ? namespace + "." : "";
 		}
 
 		@Override
@@ -119,15 +130,17 @@ public abstract class Revenj {
 	}
 
 	public static Container setup(
-			Function<ServiceLocator, Connection> connectionFactory,
+			DataSource dataSource,
 			Properties properties,
 			Optional<ClassLoader> classLoader,
 			Iterator<SystemAspect> aspects) throws IOException {
 		ClassLoader loader = classLoader.orElse(Thread.currentThread().getContextClassLoader());
 		SimpleContainer container = new SimpleContainer("true".equals(properties.getProperty("revenj.resolveUnknown")));
 		container.register(properties);
-		container.register(Connection.class, connectionFactory::apply);
-		DomainModel domainModel = new SimpleDomainModel(properties.getProperty("revenj.namespace"), loader);
+		container.registerInstance(ServiceLocator.class, container, false);
+		container.registerInstance(DataSource.class, dataSource, false);
+		String ns = properties.getProperty("revenj.namespace");
+		SimpleDomainModel domainModel = new SimpleDomainModel(ns, loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
 		container.registerFactory(DataContext.class, LocatorDataContext::asDataContext, false);
 		container.registerFactory(UnitOfWork.class, LocatorDataContext::asUnitOfWork, false);
@@ -135,7 +148,7 @@ public abstract class Revenj {
 		container.registerInstance(PluginLoader.class, plugins, false);
 		PostgresDatabaseNotification databaseNotification =
 				new PostgresDatabaseNotification(
-						connectionFactory,
+						dataSource,
 						Optional.of(domainModel),
 						properties,
 						container);
@@ -150,6 +163,10 @@ public abstract class Revenj {
 				aspects.next().configure(container);
 				total++;
 			}
+		}
+		String nsAfter = properties.getProperty("revenj.namespace");
+		if (!Objects.equals(ns, nsAfter)) {
+			domainModel.updateNamespace(nsAfter);
 		}
 		properties.setProperty("revenj.aspectsCount", Integer.toString(total));
 		return container;

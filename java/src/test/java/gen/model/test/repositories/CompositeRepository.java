@@ -7,29 +7,54 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 	
 	
 	public CompositeRepository(
-			 final java.sql.Connection connection,
+			 final java.util.Optional<java.sql.Connection> transactionContext,
+			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.test.Composite> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
-		this.connection = connection;
+		this.transactionContext = transactionContext;
+		this.dataSource = dataSource;
 		this.queryProvider = queryProvider;
+		this.transactionConnection = transactionContext.orElse(null);
 		this.converter = converter;
 		this.locator = locator;
 	}
 
-	private final java.sql.Connection connection;
+	private final java.util.Optional<java.sql.Connection> transactionContext;
+	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
+	private final java.sql.Connection transactionConnection;
 	private final org.revenj.postgres.ObjectConverter<gen.model.test.Composite> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
+	private java.sql.Connection getConnection() {
+		if (transactionConnection != null) return transactionConnection;
+		try {
+			return dataSource.getConnection();
+		} catch (java.sql.SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void releaseConnection(java.sql.Connection connection) {
+		if (this.transactionConnection != null) return;
+		try {
+			connection.close();
+		} catch (java.sql.SQLException ignore) {
+		}		
+	}
+
+	private static final org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>> genericOptionalConnection = 
+		new org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>>(){};
+
 	public CompositeRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.CompositeConverter.class), locator);
+		this(genericOptionalConnection.resolve(locator), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.CompositeConverter.class), locator);
 	}
 	
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.Composite> query(org.revenj.patterns.Specification<gen.model.test.Composite> filter) {
-		org.revenj.patterns.Query<gen.model.test.Composite> query = queryProvider.query(connection, locator, gen.model.test.Composite.class);
+		org.revenj.patterns.Query<gen.model.test.Composite> query = queryProvider.query(transactionConnection, locator, gen.model.test.Composite.class);
 		if (filter == null) { }
 		else if (filter instanceof gen.model.test.Composite.ForSimple) {
 			gen.model.test.Composite.ForSimple _spec_ = (gen.model.test.Composite.ForSimple)filter;
@@ -57,6 +82,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 	public java.util.List<gen.model.test.Composite> search(org.revenj.patterns.Specification<gen.model.test.Composite> specification, Integer limit, Integer offset) {
 		final String selectType = "SELECT it";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -107,6 +133,8 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 			} catch (java.sql.SQLException | java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
+		} finally {
+			releaseConnection(connection);
 		}
 	}
 
@@ -114,6 +142,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 	public long count(org.revenj.patterns.Specification<gen.model.test.Composite> specification) {
 		final String selectType = "SELECT COUNT(*)";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -154,6 +183,8 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -161,6 +192,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 	public boolean exists(org.revenj.patterns.Specification<gen.model.test.Composite> specification) {
 		final String selectType = "SELECT exists(SELECT *";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql = null;
 			if (specification == null) {
@@ -201,6 +233,8 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -211,6 +245,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 	
 	@Override
 	public java.util.List<gen.model.test.Composite> find(String[] uris) {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.test.Composite> result = new java.util.ArrayList<>(uris.length);
@@ -227,6 +262,8 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 	
@@ -253,6 +290,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 			java.util.Collection<gen.model.test.Composite> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.test.Composite, gen.model.test.Composite>> update,
 			java.util.Collection<gen.model.test.Composite> delete) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"test\".\"persist_Composite\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
@@ -337,6 +375,8 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 			return result;
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 

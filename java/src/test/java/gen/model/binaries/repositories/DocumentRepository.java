@@ -7,29 +7,54 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 	
 	
 	public DocumentRepository(
-			 final java.sql.Connection connection,
+			 final java.util.Optional<java.sql.Connection> transactionContext,
+			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.binaries.Document> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
-		this.connection = connection;
+		this.transactionContext = transactionContext;
+		this.dataSource = dataSource;
 		this.queryProvider = queryProvider;
+		this.transactionConnection = transactionContext.orElse(null);
 		this.converter = converter;
 		this.locator = locator;
 	}
 
-	private final java.sql.Connection connection;
+	private final java.util.Optional<java.sql.Connection> transactionContext;
+	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
+	private final java.sql.Connection transactionConnection;
 	private final org.revenj.postgres.ObjectConverter<gen.model.binaries.Document> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
+	private java.sql.Connection getConnection() {
+		if (transactionConnection != null) return transactionConnection;
+		try {
+			return dataSource.getConnection();
+		} catch (java.sql.SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void releaseConnection(java.sql.Connection connection) {
+		if (this.transactionConnection != null) return;
+		try {
+			connection.close();
+		} catch (java.sql.SQLException ignore) {
+		}		
+	}
+
+	private static final org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>> genericOptionalConnection = 
+		new org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>>(){};
+
 	public DocumentRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.binaries.converters.DocumentConverter.class), locator);
+		this(genericOptionalConnection.resolve(locator), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.binaries.converters.DocumentConverter.class), locator);
 	}
 	
 	@Override
 	public org.revenj.patterns.Query<gen.model.binaries.Document> query(org.revenj.patterns.Specification<gen.model.binaries.Document> filter) {
-		org.revenj.patterns.Query<gen.model.binaries.Document> query = queryProvider.query(connection, locator, gen.model.binaries.Document.class);
+		org.revenj.patterns.Query<gen.model.binaries.Document> query = queryProvider.query(transactionConnection, locator, gen.model.binaries.Document.class);
 		if (filter == null) { }
 		else query = query.filter(filter);
 		
@@ -52,6 +77,7 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 	public java.util.List<gen.model.binaries.Document> search(org.revenj.patterns.Specification<gen.model.binaries.Document> specification, Integer limit, Integer offset) {
 		final String selectType = "SELECT it";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -83,6 +109,8 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 			} catch (java.sql.SQLException | java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
+		} finally {
+			releaseConnection(connection);
 		}
 	}
 
@@ -90,6 +118,7 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 	public long count(org.revenj.patterns.Specification<gen.model.binaries.Document> specification) {
 		final String selectType = "SELECT COUNT(*)";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -111,6 +140,8 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -118,6 +149,7 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 	public boolean exists(org.revenj.patterns.Specification<gen.model.binaries.Document> specification) {
 		final String selectType = "SELECT exists(SELECT *";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql = null;
 			if (specification == null) {
@@ -139,6 +171,8 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -149,6 +183,7 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 	
 	@Override
 	public java.util.List<gen.model.binaries.Document> find(String[] uris) {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.binaries.Document> result = new java.util.ArrayList<>(uris.length);
@@ -165,6 +200,8 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 	
@@ -191,6 +228,7 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 			java.util.Collection<gen.model.binaries.Document> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.binaries.Document, gen.model.binaries.Document>> update,
 			java.util.Collection<gen.model.binaries.Document> delete) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"binaries\".\"persist_Document\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
@@ -275,12 +313,15 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 			return result;
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
 	
 	@Override
 	public String insert(gen.model.binaries.Document item) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"binaries\".\"insert_Document\"(ARRAY[?])");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			java.util.List<gen.model.binaries.Document> insert = java.util.Collections.singletonList(item);
@@ -298,11 +339,14 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 			return item.getURI();
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
 	@Override
 	public void update(gen.model.binaries.Document oldItem, gen.model.binaries.Document newItem) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"binaries\".\"update_Document\"(ARRAY[?], ARRAY[?])");
 			 org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			if (oldItem == null) oldItem = trackChanges.apply(newItem);
@@ -331,6 +375,8 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 			}
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 

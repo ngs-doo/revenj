@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.postgresql.util.PGobject;
+import org.revenj.patterns.DataSource;
 import org.revenj.postgres.ObjectConverter;
 import org.revenj.postgres.PostgresWriter;
 import org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter;
@@ -35,7 +36,7 @@ import org.revenj.postgres.jinq.transform.WhereTransform;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.patterns.ServiceLocator;
 
-final class RevenjQueryComposer<T> {
+public final class RevenjQueryComposer<T> {
 
 	private static final Map<Class<?>, String> typeMapping = new HashMap<>();
 
@@ -55,11 +56,22 @@ final class RevenjQueryComposer<T> {
 		typeMapping.put(byte[].class, "bytea");
 	}
 
+	@FunctionalInterface
+	public interface GetConnection {
+		Connection get() throws SQLException;
+	}
+
+	@FunctionalInterface
+	public interface ReleaseConnection {
+		void release(Connection connection) throws SQLException;
+	}
 
 	private final MetamodelUtil metamodel;
 	private final RevenjQueryComposerCache cachedQueries;
 	private final Connection connection;
 	private final ServiceLocator locator;
+	private final GetConnection getConnection;
+	private final ReleaseConnection releaseConnection;
 	private final JinqPostgresQuery<T> query;
 	private final Class<T> manifest;
 
@@ -71,16 +83,33 @@ final class RevenjQueryComposer<T> {
 	 */
 	private final List<LambdaInfo> lambdas = new ArrayList<>();
 
-	private RevenjQueryComposer(RevenjQueryComposer<?> base, Class<T> manifest, JinqPostgresQuery<T> query, List<LambdaInfo> chainedLambdas, LambdaInfo... additionalLambdas) {
-		this(base.metamodel, manifest, base.cachedQueries, base.connection, base.locator, query, chainedLambdas, additionalLambdas);
+	private RevenjQueryComposer(
+			RevenjQueryComposer<?> base,
+			Class<T> manifest,
+			JinqPostgresQuery<T> query,
+			List<LambdaInfo> chainedLambdas,
+			LambdaInfo... additionalLambdas) {
+		this(base.metamodel, manifest, base.cachedQueries, base.connection, base.locator, base.getConnection, base.releaseConnection, query, chainedLambdas, additionalLambdas);
 	}
 
-	private RevenjQueryComposer(MetamodelUtil metamodel, Class<T> manifest, RevenjQueryComposerCache cachedQueries, Connection connection, ServiceLocator locator, JinqPostgresQuery<T> query, List<LambdaInfo> chainedLambdas, LambdaInfo... additionalLambdas) {
+	private RevenjQueryComposer(
+			MetamodelUtil metamodel,
+			Class<T> manifest,
+			RevenjQueryComposerCache cachedQueries,
+			Connection connection,
+			ServiceLocator locator,
+			GetConnection getConnection,
+			ReleaseConnection releaseConnection,
+			JinqPostgresQuery<T> query,
+			List<LambdaInfo> chainedLambdas,
+			LambdaInfo... additionalLambdas) {
 		this.metamodel = metamodel;
 		this.manifest = manifest;
 		this.cachedQueries = cachedQueries;
 		this.connection = connection;
 		this.locator = locator;
+		this.getConnection = getConnection;
+		this.releaseConnection = releaseConnection;
 		this.query = query;
 		lambdas.addAll(chainedLambdas);
 		for (LambdaInfo newLambda : additionalLambdas) {
@@ -88,14 +117,34 @@ final class RevenjQueryComposer<T> {
 		}
 	}
 
-	public static <T> RevenjQueryComposer<T> findAll(
+	public static <T extends DataSource> RevenjQuery<T> findAll(
 			MetamodelUtil metamodel,
 			Class<T> manifest,
 			RevenjQueryComposerCache cachedQueries,
 			Connection conn,
 			ServiceLocator locator,
-			JinqPostgresQuery<T> findAllQuery) {
-		return new RevenjQueryComposer<>(metamodel, manifest, cachedQueries, conn, locator, findAllQuery, new ArrayList<>());
+			GetConnection getConnection,
+			ReleaseConnection releaseConnection) {
+		String sqlSource = metamodel.dataSourceNameFromClass(manifest);
+		Optional<JinqPostgresQuery<?>> cachedQuery = cachedQueries.findCachedFindAll(sqlSource);
+		if (cachedQuery == null) {
+			JinqPostgresQuery<T> query = JinqPostgresQuery.findAll(sqlSource);
+			cachedQuery = Optional.of(query);
+			cachedQuery = cachedQueries.cacheFindAll(sqlSource, cachedQuery);
+		}
+		JinqPostgresQuery<T> findAllQuery = (JinqPostgresQuery<T>) cachedQuery.get();
+		RevenjQueryComposer<T> queryComposer =
+				new RevenjQueryComposer(
+						metamodel,
+						manifest,
+						cachedQueries,
+						conn,
+						locator,
+						getConnection,
+						releaseConnection,
+						findAllQuery,
+						new ArrayList<>());
+		return new RevenjQuery<>(queryComposer);
 	}
 
 	private static String getTypeFor(Class<?> manifest) {
@@ -114,7 +163,7 @@ final class RevenjQueryComposer<T> {
 		return "unknown";
 	}
 
-	private void fillQueryParameters(PreparedStatement ps, List<GeneratedQueryParameter> parameters) throws SQLException {
+	private void fillQueryParameters(Connection connection, PreparedStatement ps, List<GeneratedQueryParameter> parameters) throws SQLException {
 		PostgresWriter writer = null;
 		for (int i = 0; i < parameters.size(); i++) {
 			GeneratedQueryParameter param = parameters.get(i);
@@ -213,31 +262,49 @@ final class RevenjQueryComposer<T> {
 		});
 	}
 
+	private Connection getConnection() throws SQLException {
+		if (connection != null) return connection;
+		return getConnection.get();
+	}
+
+	private void releaseConnection(Connection connection) throws SQLException {
+		if (this.connection == null) releaseConnection.release(connection);
+	}
+
 	public long count() throws SQLException {
 		final String queryString = query.getQueryString();
-		PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM (" + queryString + ") sq");
-		fillQueryParameters(ps, query.getQueryParameters());
-		try (final ResultSet rs = ps.executeQuery()) {
-			if (rs.next()) {
-				return rs.getLong(1);
+		Connection connection = getConnection();
+		try (PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM (" + queryString + ") sq")) {
+			fillQueryParameters(connection, ps, query.getQueryParameters());
+			try (final ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return rs.getLong(1);
+				}
 			}
+		} finally {
+			releaseConnection(connection);
 		}
 		return 0;
 	}
 
 	public boolean any() throws SQLException {
 		final String queryString = query.getQueryString();
-		PreparedStatement ps = connection.prepareStatement("SELECT EXISTS(" + queryString + ")");
-		fillQueryParameters(ps, query.getQueryParameters());
-		try (final ResultSet rs = ps.executeQuery()) {
-			if (rs.next()) {
-				return rs.getBoolean(1);
+		Connection connection = getConnection();
+		try (PreparedStatement ps = connection.prepareStatement("SELECT EXISTS(" + queryString + ")")) {
+			fillQueryParameters(connection, ps, query.getQueryParameters());
+			try (final ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return rs.getBoolean(1);
+				}
 			}
+		} finally {
+			releaseConnection(connection);
 		}
 		return false;
 	}
 
 	//TODO: optimize
+
 	public boolean all(Object lambda) throws SQLException {
 		long filter = this.where(lambda).count();
 		long all = this.count();
@@ -246,56 +313,69 @@ final class RevenjQueryComposer<T> {
 
 	public boolean none() throws SQLException {
 		final String queryString = query.getQueryString();
-		PreparedStatement ps = connection.prepareStatement("SELECT NOT EXISTS(" + queryString + ")");
-		fillQueryParameters(ps, query.getQueryParameters());
-		try (final ResultSet rs = ps.executeQuery()) {
-			if (rs.next()) {
-				return rs.getBoolean(1);
+		Connection connection = getConnection();
+		try (PreparedStatement ps = connection.prepareStatement("SELECT NOT EXISTS(" + queryString + ")")) {
+			fillQueryParameters(connection, ps, query.getQueryParameters());
+			try (final ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return rs.getBoolean(1);
+				}
 			}
+		} finally {
+			releaseConnection(connection);
 		}
 		return true;
 	}
 
 	public Optional<T> first() throws SQLException {
 		final String queryString = query.getQueryString();
-		PreparedStatement ps = connection.prepareStatement(queryString);
-		fillQueryParameters(ps, query.getQueryParameters());
-		final PostgresReader pr = new PostgresReader(locator);
-		try {
-			final ObjectConverter<T> converter = getConverterFor(manifest).get();
-			try (final ResultSet rs = ps.executeQuery()) {
-				if (rs.next()) {
-					pr.process(rs.getString(1));
-					return Optional.of(converter.from(pr));
+		Connection connection = getConnection();
+		try (PreparedStatement ps = connection.prepareStatement(queryString)) {
+			fillQueryParameters(connection, ps, query.getQueryParameters());
+			final PostgresReader pr = new PostgresReader(locator);
+			try {
+				final ObjectConverter<T> converter = getConverterFor(manifest).get();
+				try (final ResultSet rs = ps.executeQuery()) {
+					if (rs.next()) {
+						pr.process(rs.getString(1));
+						return Optional.of(converter.from(pr));
+					}
 				}
+			} catch (IOException e) {
+				throw new SQLException(e);
+			} finally {
+				releaseConnection(connection);
 			}
-		} catch (IOException e) {
-			throw new SQLException(e);
+			return Optional.empty();
 		}
-		return Optional.empty();
 	}
 
 	public List<T> toList() throws SQLException {
 		final String queryString = query.getQueryString();
-		PreparedStatement ps = connection.prepareStatement(queryString);
-		fillQueryParameters(ps, query.getQueryParameters());
-		final PostgresReader pr = new PostgresReader(locator);
-		final ArrayList<T> result = new ArrayList<>();
-		try {
-			final ObjectConverter<T> converter = getConverterFor(manifest).get();
-			try (final ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
-					pr.process(rs.getString(1));
-					result.add(converter.from(pr));
+		Connection connection = getConnection();
+		try (PreparedStatement ps = connection.prepareStatement(queryString)) {
+			fillQueryParameters(connection, ps, query.getQueryParameters());
+			final PostgresReader pr = new PostgresReader(locator);
+			final ArrayList<T> result = new ArrayList<>();
+			try {
+				final ObjectConverter<T> converter = getConverterFor(manifest).get();
+				try (final ResultSet rs = ps.executeQuery()) {
+					while (rs.next()) {
+						pr.process(rs.getString(1));
+						result.add(converter.from(pr));
+					}
 				}
+			} catch (IOException e) {
+				throw new SQLException(e);
+			} finally {
+				releaseConnection(connection);
 			}
-		} catch (IOException e) {
-			throw new SQLException(e);
+			return result;
 		}
-		return result;
 	}
 
-	private <U> RevenjQueryComposer<U> applyTransformWithLambda(Class<U> newManifest, RevenjNoLambdaQueryTransform transform) {
+	private <U> RevenjQueryComposer<U> applyTransformWithLambda
+			(Class<U> newManifest, RevenjNoLambdaQueryTransform transform) {
 		Optional<JinqPostgresQuery<?>> cachedQuery = cachedQueries.findInCache(query, transform.getTransformationTypeCachingTag(), null);
 		if (cachedQuery == null) {
 			cachedQuery = Optional.empty();
@@ -316,7 +396,8 @@ final class RevenjQueryComposer<T> {
 		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas);
 	}
 
-	public <U> RevenjQueryComposer<U> applyTransformWithLambda(Class<U> newManifest, RevenjOneLambdaQueryTransform transform, Object lambda) {
+	public <U> RevenjQueryComposer<U> applyTransformWithLambda
+			(Class<U> newManifest, RevenjOneLambdaQueryTransform transform, Object lambda) {
 		LambdaInfo lambdaInfo = LambdaInfo.analyze(lambda, lambdas.size(), true);
 		if (lambdaInfo == null) {
 			return null;
@@ -349,7 +430,8 @@ final class RevenjQueryComposer<T> {
 		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas, lambdaInfo);
 	}
 
-	public <U> RevenjQueryComposer<U> applyTransformWithLambdas(Class<U> newManifest, RevenjMultiLambdaQueryTransform transform, Object[] groupingLambdas) {
+	public <U> RevenjQueryComposer<U> applyTransformWithLambdas
+			(Class<U> newManifest, RevenjMultiLambdaQueryTransform transform, Object[] groupingLambdas) {
 		LambdaInfo[] lambdaInfos = new LambdaInfo[groupingLambdas.length];
 		String[] lambdaSources = new String[lambdaInfos.length];
 		for (int n = 0; n < groupingLambdas.length; n++) {

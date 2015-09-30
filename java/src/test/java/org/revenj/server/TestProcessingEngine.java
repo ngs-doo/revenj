@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.postgresql.ds.PGSimpleDataSource;
 import org.revenj.Revenj;
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.SystemAspect;
@@ -37,16 +38,13 @@ public class TestProcessingEngine {
 		if (revProps.exists() && revProps.isFile()) {
 			properties.load(new FileReader(revProps));
 		}
-		Function<ServiceLocator, Connection> factory = locator -> {
-			try {
-				return DriverManager.getConnection("jdbc:postgresql://localhost/revenj", properties);
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
-		};
+		PGSimpleDataSource dataSource = new PGSimpleDataSource();
+		dataSource.setUrl("jdbc:postgresql://localhost/revenj");
+		dataSource.setUser(properties.getProperty("user"));
+		dataSource.setPassword(properties.getProperty("password"));
 		container =
 				Revenj.setup(
-						factory,
+						dataSource,
 						properties,
 						Optional.<ClassLoader>empty(),
 						Collections.singletonList((SystemAspect) new Boot()).iterator());

@@ -34,7 +34,7 @@ public class TestSecurity {
 	public void filterCheck() throws Exception {
 		Principal user1 = new UserPrincipal("user1", Collections.singleton("role"));
 		Principal user2 = new UserPrincipal("user2", Collections.singleton("not-in-role"));
-		Container container = Revenj.setup(l -> null, new Properties(), Optional.<ClassLoader>empty(), null);
+		Container container = Revenj.setup(null, new Properties(), Optional.<ClassLoader>empty(), null);
 		PermissionManager permissions = container.resolve(PermissionManager.class);
 		List<Model> values = Arrays.asList(new Model(1), new Model(5), new Model(7));
 

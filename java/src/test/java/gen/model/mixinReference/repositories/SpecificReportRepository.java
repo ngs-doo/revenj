@@ -7,29 +7,54 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 	
 	
 	public SpecificReportRepository(
-			 final java.sql.Connection connection,
+			 final java.util.Optional<java.sql.Connection> transactionContext,
+			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.mixinReference.SpecificReport> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
-		this.connection = connection;
+		this.transactionContext = transactionContext;
+		this.dataSource = dataSource;
 		this.queryProvider = queryProvider;
+		this.transactionConnection = transactionContext.orElse(null);
 		this.converter = converter;
 		this.locator = locator;
 	}
 
-	private final java.sql.Connection connection;
+	private final java.util.Optional<java.sql.Connection> transactionContext;
+	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
+	private final java.sql.Connection transactionConnection;
 	private final org.revenj.postgres.ObjectConverter<gen.model.mixinReference.SpecificReport> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
+	private java.sql.Connection getConnection() {
+		if (transactionConnection != null) return transactionConnection;
+		try {
+			return dataSource.getConnection();
+		} catch (java.sql.SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void releaseConnection(java.sql.Connection connection) {
+		if (this.transactionConnection != null) return;
+		try {
+			connection.close();
+		} catch (java.sql.SQLException ignore) {
+		}		
+	}
+
+	private static final org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>> genericOptionalConnection = 
+		new org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>>(){};
+
 	public SpecificReportRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.SpecificReportConverter.class), locator);
+		this(genericOptionalConnection.resolve(locator), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.SpecificReportConverter.class), locator);
 	}
 	
 	@Override
 	public org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query(org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport> filter) {
-		org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query = queryProvider.query(connection, locator, gen.model.mixinReference.SpecificReport.class);
+		org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query = queryProvider.query(transactionConnection, locator, gen.model.mixinReference.SpecificReport.class);
 		if (filter == null) { }
 		else query = query.filter(filter);
 		
@@ -52,6 +77,7 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 	public java.util.List<gen.model.mixinReference.SpecificReport> search(org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport> specification, Integer limit, Integer offset) {
 		final String selectType = "SELECT it";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -83,6 +109,8 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 			} catch (java.sql.SQLException | java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
+		} finally {
+			releaseConnection(connection);
 		}
 	}
 
@@ -90,6 +118,7 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 	public long count(org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport> specification) {
 		final String selectType = "SELECT COUNT(*)";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -111,6 +140,8 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -118,6 +149,7 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 	public boolean exists(org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport> specification) {
 		final String selectType = "SELECT exists(SELECT *";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql = null;
 			if (specification == null) {
@@ -139,6 +171,8 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -149,6 +183,7 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 	
 	@Override
 	public java.util.List<gen.model.mixinReference.SpecificReport> find(String[] uris) {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.mixinReference.SpecificReport> result = new java.util.ArrayList<>(uris.length);
@@ -165,6 +200,8 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 	
@@ -191,6 +228,7 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 			java.util.Collection<gen.model.mixinReference.SpecificReport> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.mixinReference.SpecificReport, gen.model.mixinReference.SpecificReport>> update,
 			java.util.Collection<gen.model.mixinReference.SpecificReport> delete) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"mixinReference\".\"persist_SpecificReport\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
@@ -276,12 +314,15 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 			return result;
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
 	
 	@Override
 	public String insert(gen.model.mixinReference.SpecificReport item) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"mixinReference\".\"insert_SpecificReport\"(ARRAY[?])");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			java.util.List<gen.model.mixinReference.SpecificReport> insert = java.util.Collections.singletonList(item);
@@ -300,11 +341,14 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 			return item.getURI();
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
 	@Override
 	public void update(gen.model.mixinReference.SpecificReport oldItem, gen.model.mixinReference.SpecificReport newItem) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"mixinReference\".\"update_SpecificReport\"(ARRAY[?], ARRAY[?])");
 			 org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			if (oldItem == null) oldItem = trackChanges.apply(newItem);
@@ -333,6 +377,8 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 			}
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 

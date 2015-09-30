@@ -6,6 +6,7 @@ import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.serialization.WireSerialization;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.security.Principal;
 import java.sql.Connection;
@@ -15,16 +16,19 @@ import java.util.*;
 public final class ProcessingEngine {
 
 	private final Container container;
+	private final DataSource dataSource;
 	private final Map<Class<?>, ServerCommand> serverCommands = new HashMap<>();
 	private final WireSerialization serialization;
 	private final PermissionManager permissions;
 
 	public ProcessingEngine(
 			Container container,
+			DataSource dataSource,
 			WireSerialization serialization,
 			PermissionManager permissions,
 			Optional<PluginLoader> extensibility) throws Exception {
 		this(container,
+				dataSource,
 				serialization,
 				permissions,
 				extensibility.isPresent() ? extensibility.get().resolve(container, ServerCommand.class) : new ServerCommand[0]);
@@ -32,10 +36,12 @@ public final class ProcessingEngine {
 
 	public ProcessingEngine(
 			Container container,
+			DataSource dataSource,
 			WireSerialization serialization,
 			PermissionManager permissions,
 			ServerCommand[] commands) {
 		this.container = container;
+		this.dataSource = dataSource;
 		this.serialization = serialization;
 		this.permissions = permissions;
 		for (ServerCommand com : commands) {
@@ -84,7 +90,7 @@ public final class ProcessingEngine {
 		ArrayList<CommandResultDescription<TOutput>> executedCommands = new ArrayList<>(commandDescriptions.length);
 		Connection connection;
 		try {
-			connection = container.resolve(Connection.class);
+			connection = dataSource.getConnection();
 		} catch (Exception e) {
 			return new ProcessingResult<>("Unable to create database connection", 503, null, startProcessing);
 		}

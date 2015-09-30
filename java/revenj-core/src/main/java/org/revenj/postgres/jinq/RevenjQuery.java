@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 final class RevenjQuery<T extends DataSource> implements Query<T> {
-	final RevenjQueryComposer<T> queryComposer;
+	private final RevenjQueryComposer<T> queryComposer;
 
 	public RevenjQuery(RevenjQueryComposer<T> query) {
 		queryComposer = query;

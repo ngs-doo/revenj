@@ -7,29 +7,54 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 	
 	
 	public UserFilterRepository(
-			 final java.sql.Connection connection,
+			 final java.util.Optional<java.sql.Connection> transactionContext,
+			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.mixinReference.UserFilter> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
-		this.connection = connection;
+		this.transactionContext = transactionContext;
+		this.dataSource = dataSource;
 		this.queryProvider = queryProvider;
+		this.transactionConnection = transactionContext.orElse(null);
 		this.converter = converter;
 		this.locator = locator;
 	}
 
-	private final java.sql.Connection connection;
+	private final java.util.Optional<java.sql.Connection> transactionContext;
+	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
+	private final java.sql.Connection transactionConnection;
 	private final org.revenj.postgres.ObjectConverter<gen.model.mixinReference.UserFilter> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
+	private java.sql.Connection getConnection() {
+		if (transactionConnection != null) return transactionConnection;
+		try {
+			return dataSource.getConnection();
+		} catch (java.sql.SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void releaseConnection(java.sql.Connection connection) {
+		if (this.transactionConnection != null) return;
+		try {
+			connection.close();
+		} catch (java.sql.SQLException ignore) {
+		}		
+	}
+
+	private static final org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>> genericOptionalConnection = 
+		new org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>>(){};
+
 	public UserFilterRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.UserFilterConverter.class), locator);
+		this(genericOptionalConnection.resolve(locator), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.UserFilterConverter.class), locator);
 	}
 	
 	@Override
 	public org.revenj.patterns.Query<gen.model.mixinReference.UserFilter> query(org.revenj.patterns.Specification<gen.model.mixinReference.UserFilter> filter) {
-		org.revenj.patterns.Query<gen.model.mixinReference.UserFilter> query = queryProvider.query(connection, locator, gen.model.mixinReference.UserFilter.class);
+		org.revenj.patterns.Query<gen.model.mixinReference.UserFilter> query = queryProvider.query(transactionConnection, locator, gen.model.mixinReference.UserFilter.class);
 		if (filter == null) { }
 		else query = query.filter(filter);
 		
@@ -60,6 +85,7 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 	public java.util.List<gen.model.mixinReference.UserFilter> search(org.revenj.patterns.Specification<gen.model.mixinReference.UserFilter> specification, Integer limit, Integer offset) {
 		final String selectType = "SELECT it";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -91,6 +117,8 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 			} catch (java.sql.SQLException | java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
+		} finally {
+			releaseConnection(connection);
 		}
 	}
 
@@ -98,6 +126,7 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 	public long count(org.revenj.patterns.Specification<gen.model.mixinReference.UserFilter> specification) {
 		final String selectType = "SELECT COUNT(*)";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -119,6 +148,8 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -126,6 +157,7 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 	public boolean exists(org.revenj.patterns.Specification<gen.model.mixinReference.UserFilter> specification) {
 		final String selectType = "SELECT exists(SELECT *";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql = null;
 			if (specification == null) {
@@ -147,6 +179,8 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -157,6 +191,7 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 	
 	@Override
 	public java.util.List<gen.model.mixinReference.UserFilter> find(String[] uris) {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.mixinReference.UserFilter> result = new java.util.ArrayList<>(uris.length);
@@ -177,6 +212,8 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 	
@@ -203,6 +240,7 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 			java.util.Collection<gen.model.mixinReference.UserFilter> insert,
 			java.util.Collection<java.util.Map.Entry<gen.model.mixinReference.UserFilter, gen.model.mixinReference.UserFilter>> update,
 			java.util.Collection<gen.model.mixinReference.UserFilter> delete) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"mixinReference\".\"persist_UserFilter\"(?, ?, ?, ?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
@@ -288,12 +326,15 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 			return result;
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
 	
 	@Override
 	public String insert(gen.model.mixinReference.UserFilter item) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"mixinReference\".\"insert_UserFilter\"(ARRAY[?])");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			java.util.List<gen.model.mixinReference.UserFilter> insert = java.util.Collections.singletonList(item);
@@ -312,11 +353,14 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 			return item.getURI();
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
 	@Override
 	public void update(gen.model.mixinReference.UserFilter oldItem, gen.model.mixinReference.UserFilter newItem) throws java.io.IOException {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"mixinReference\".\"update_UserFilter\"(ARRAY[?], ARRAY[?])");
 			 org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			if (oldItem == null) oldItem = trackChanges.apply(newItem);
@@ -345,6 +389,8 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 			}
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 

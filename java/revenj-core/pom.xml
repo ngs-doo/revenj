@@ -6,7 +6,7 @@
 	<groupId>org.revenj</groupId>
 	<artifactId>revenj-core</artifactId>
 	<packaging>jar</packaging>
-	<version>0.3.0</version>
+	<version>0.5.0</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4-1202-jdbc42</version>
+			<version>9.4-1203-jdbc42</version>
 		</dependency>
 		<dependency>
 			<groupId>io.reactivex</groupId>

@@ -7,29 +7,54 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 	
 	
 	public CompositeListRepository(
-			 final java.sql.Connection connection,
+			 final java.util.Optional<java.sql.Connection> transactionContext,
+			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
-		this.connection = connection;
+		this.transactionContext = transactionContext;
+		this.dataSource = dataSource;
 		this.queryProvider = queryProvider;
+		this.transactionConnection = transactionContext.orElse(null);
 		this.converter = converter;
 		this.locator = locator;
 	}
 
-	private final java.sql.Connection connection;
+	private final java.util.Optional<java.sql.Connection> transactionContext;
+	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
+	private final java.sql.Connection transactionConnection;
 	private final org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
+	private java.sql.Connection getConnection() {
+		if (transactionConnection != null) return transactionConnection;
+		try {
+			return dataSource.getConnection();
+		} catch (java.sql.SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void releaseConnection(java.sql.Connection connection) {
+		if (this.transactionConnection != null) return;
+		try {
+			connection.close();
+		} catch (java.sql.SQLException ignore) {
+		}		
+	}
+
+	private static final org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>> genericOptionalConnection = 
+		new org.revenj.patterns.Generic<java.util.Optional<java.sql.Connection>>(){};
+
 	public CompositeListRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.resolve(java.sql.Connection.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.CompositeListConverter.class), locator);
+		this(genericOptionalConnection.resolve(locator), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.CompositeListConverter.class), locator);
 	}
 	
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.CompositeList> query(org.revenj.patterns.Specification<gen.model.test.CompositeList> filter) {
-		org.revenj.patterns.Query<gen.model.test.CompositeList> query = queryProvider.query(connection, locator, gen.model.test.CompositeList.class);
+		org.revenj.patterns.Query<gen.model.test.CompositeList> query = queryProvider.query(transactionConnection, locator, gen.model.test.CompositeList.class);
 		if (filter == null) { }
 		else if (filter instanceof gen.model.test.CompositeList.ForSimple) {
 			gen.model.test.CompositeList.ForSimple _spec_ = (gen.model.test.CompositeList.ForSimple)filter;
@@ -57,6 +82,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 	public java.util.List<gen.model.test.CompositeList> search(org.revenj.patterns.Specification<gen.model.test.CompositeList> specification, Integer limit, Integer offset) {
 		final String selectType = "SELECT it";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -114,6 +140,8 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 			} catch (java.sql.SQLException | java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
+		} finally {
+			releaseConnection(connection);
 		}
 	}
 
@@ -121,6 +149,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 	public long count(org.revenj.patterns.Specification<gen.model.test.CompositeList> specification) {
 		final String selectType = "SELECT COUNT(*)";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
@@ -168,6 +197,8 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -175,6 +206,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 	public boolean exists(org.revenj.patterns.Specification<gen.model.test.CompositeList> specification) {
 		final String selectType = "SELECT exists(SELECT *";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
+		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql = null;
 			if (specification == null) {
@@ -222,6 +254,8 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 			} catch (java.sql.SQLException e) {
 				throw new RuntimeException(e);
 			}
+		} finally { 
+			releaseConnection(connection); 
 		}
 	}
 
@@ -232,11 +266,14 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 	
 	@Override
 	public java.util.List<gen.model.test.CompositeList> find(String[] uris) {
+		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"CompositeList_snowflake\" r WHERE r.\"URI\" = ANY(?)")) {
 			statement.setArray(1, connection.createArrayOf("text", uris));
 			return readFromDb(statement, new java.util.ArrayList<>(uris.length));			
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			releaseConnection(connection);
 		}
 	}
 

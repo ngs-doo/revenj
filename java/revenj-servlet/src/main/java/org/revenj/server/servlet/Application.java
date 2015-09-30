@@ -10,6 +10,7 @@ import org.revenj.server.ProcessingEngine;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -49,9 +50,10 @@ public class Application implements ServletContextListener {
 	public static void setup(Container container) throws Exception {
 		Optional<PluginLoader> plugins = container.tryResolve(PluginLoader.class);
 		PermissionManager permissions = container.resolve(PermissionManager.class);
+		DataSource dataSource = container.resolve(DataSource.class);
 		WireSerialization serialization = new RevenjSerialization(container);
 		container.registerInstance(WireSerialization.class, serialization, false);
-		container.register(new ProcessingEngine(container, serialization, permissions, plugins));
+		container.register(new ProcessingEngine(container, dataSource, serialization, permissions, plugins));
 	}
 
 	public static void configure(ServletContext context, Container container) throws Exception {

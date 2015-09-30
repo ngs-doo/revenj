@@ -2,6 +2,8 @@ package org.revenj;
 
 import org.postgresql.PGNotification;
 import org.postgresql.core.BaseConnection;
+import org.postgresql.ds.PGPooledConnection;
+import org.postgresql.ds.PGPoolingDataSource;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.converters.StringConverter;
 import org.revenj.patterns.DomainModel;
@@ -11,19 +13,20 @@ import org.revenj.patterns.ServiceLocator;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
+import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 
 final class PostgresDatabaseNotification implements EagerNotification, Closeable {
 
-	private final Function<ServiceLocator, Connection> connectionFactory;
+	private final DataSource dataSource;
 	private final Optional<DomainModel> domainModel;
 	private final ServiceLocator locator;
 
@@ -40,11 +43,11 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 	private boolean isClosed;
 
 	public PostgresDatabaseNotification(
-			Function<ServiceLocator, Connection> connectionFactory,
+			DataSource dataSource,
 			Optional<DomainModel> domainModel,
 			Properties properties,
 			ServiceLocator locator) {
-		this.connectionFactory = connectionFactory;
+		this.dataSource = dataSource;
 		this.domainModel = domainModel;
 		this.locator = locator;
 		notifications = subject.asObservable();
@@ -79,9 +82,29 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 					ex.printStackTrace();
 				}
 			}
-			connection = connectionFactory.apply(locator);
+			connection = dataSource.getConnection();
+			BaseConnection bc = null;
 			if (connection instanceof BaseConnection) {
-				BaseConnection bc = (BaseConnection) connection;
+				bc = (BaseConnection) connection;
+			} else if (connection instanceof PGPooledConnection) {
+				PGPooledConnection pgpc = (PGPooledConnection) connection;
+				if (pgpc.getConnection() instanceof BaseConnection) {
+					bc = (BaseConnection) pgpc.getConnection();
+				}
+			} else if (dataSource instanceof PGPoolingDataSource) {
+				PGPoolingDataSource pgpds = (PGPoolingDataSource) dataSource;
+				connection.close();
+				connection = DriverManager.getConnection(pgpds.getUrl(), pgpds.getUser(), pgpds.getPassword());
+				if (connection instanceof BaseConnection) {
+					bc = (BaseConnection) connection;
+				} else if (connection instanceof PGPooledConnection) {
+					PGPooledConnection pgpc = (PGPooledConnection) connection;
+					if (pgpc.getConnection() instanceof BaseConnection) {
+						bc = (BaseConnection) pgpc.getConnection();
+					}
+				}
+			}
+			if (bc != null) {
 				Statement stmt = bc.createStatement();
 				stmt.execute("LISTEN events; LISTEN aggregate_roots");
 				retryCount = 0;

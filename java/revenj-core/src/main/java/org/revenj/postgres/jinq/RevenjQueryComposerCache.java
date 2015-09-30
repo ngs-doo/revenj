@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class RevenjQueryComposerCache {
+public final class RevenjQueryComposerCache {
     private static class CacheKey {
         @Override
         public int hashCode() {

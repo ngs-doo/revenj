@@ -6,7 +6,7 @@
 	<groupId>org.revenj</groupId>
 	<artifactId>revenj-spring</artifactId>
 	<packaging>jar</packaging>
-	<version>0.3.0</version>
+	<version>0.5.0</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -14,7 +14,7 @@
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>0.3.0</version>
+			<version>0.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

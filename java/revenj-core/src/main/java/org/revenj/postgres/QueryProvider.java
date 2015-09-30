@@ -7,5 +7,5 @@ import org.revenj.patterns.ServiceLocator;
 import java.sql.Connection;
 
 public interface QueryProvider {
-    <T extends DataSource> Query<T> query(Connection connection, ServiceLocator locator, Class<T> dataSource);
+    <T extends DataSource> Query<T> query(Connection connection, ServiceLocator locator, Class<T> manifest);
 }

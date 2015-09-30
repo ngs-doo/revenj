@@ -14,21 +14,30 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 
 	public static org.revenj.patterns.ServiceLocator configure(String jdbcUrl, java.util.Properties properties) throws java.io.IOException {
 		properties.setProperty("revenj.namespace", "gen.model");
-		java.util.function.Function<org.revenj.patterns.ServiceLocator, java.sql.Connection> factory = c -> {
-			try {
-				return java.sql.DriverManager.getConnection(jdbcUrl, properties);
-			} catch (java.sql.SQLException e) {
-				throw new RuntimeException(e);
-			}
-		};
-		return org.revenj.Revenj.setup(factory, properties, java.util.Optional.<ClassLoader>empty(), java.util.Collections.singletonList((org.revenj.extensibility.SystemAspect) new Boot()).iterator());
+		org.postgresql.ds.PGPoolingDataSource dataSource = new org.postgresql.ds.PGPoolingDataSource();
+		dataSource.setUrl(jdbcUrl);
+		String user = properties.getProperty("user");
+		String revUser = properties.getProperty("revenj.user");
+		if (revUser != null && revUser.length() > 0) {
+			dataSource.setUser(revUser);
+		} else if (user != null && user.length() > 0) {
+			dataSource.setUser(user);
+		}
+		String password = properties.getProperty("password");
+		String revPassword = properties.getProperty("revenj.password");
+		if (revPassword != null && revPassword.length() > 0) {
+			dataSource.setPassword(revPassword);
+		} else if (password != null && password.length() > 0) {
+			dataSource.setPassword(password);
+		}
+		return org.revenj.Revenj.setup(dataSource, properties, java.util.Optional.<ClassLoader>empty(), java.util.Collections.singletonList((org.revenj.extensibility.SystemAspect) new Boot()).iterator());
 	}
 
 	private java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> loadColumnsInfo(
 			org.revenj.extensibility.Container container,
 			String query) throws java.sql.SQLException {
 		java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> columns = new java.util.ArrayList<>();
-		try (java.sql.Connection connection = container.resolve(java.sql.Connection.class);
+		try (java.sql.Connection connection = container.resolve(javax.sql.DataSource.class).getConnection();
 				java.sql.Statement statement = connection.createStatement();
 				java.sql.ResultSet rs = statement.executeQuery(query)) {
 			while (rs.next()) {
@@ -95,11 +104,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 				throw new java.io.IOException(e);
 			}
 		}
-		container.registerInstance(org.revenj.patterns.ServiceLocator.class, container, false);
-		org.revenj.postgres.jinq.JinqMetaModel metamodel = new org.revenj.postgres.jinq.JinqMetaModel();
-		container.registerInstance(org.revenj.patterns.ServiceLocator.class, container, false);
-		container.registerInstance(org.revenj.postgres.jinq.transform.MetamodelUtil.class, metamodel, false);
-		container.registerInstance(org.revenj.postgres.QueryProvider.class, new org.revenj.postgres.jinq.RevenjQueryProvider(metamodel), false);
+		org.revenj.postgres.jinq.JinqMetaModel metamodel = org.revenj.postgres.jinq.JinqMetaModel.configure(container);
 		
 		
 		gen.model.test.converters.SimpleConverter test$converter$SimpleConverter = new gen.model.test.converters.SimpleConverter(columns);
