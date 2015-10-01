@@ -267,5 +267,3 @@ Revenj can be also used as a NoSQL database through a REST API and consumed from
  * [Scala](https://github.com/ngs-doo/dsl-client-scala)
 
 [Command line client](https://github.com/ngs-doo/dsl-compiler-client) and Eclipse plugin can be used to automate various aspects of the process or have IDE support on the *nix environments.
-
-Java version is work in progress. Not suitable for production use yet. 
