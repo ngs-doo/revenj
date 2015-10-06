@@ -3,7 +3,9 @@ package org.revenj.server.servlet;
 import org.revenj.Revenj;
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.PluginLoader;
+import org.revenj.patterns.Generic;
 import org.revenj.security.PermissionManager;
+import org.revenj.serialization.Serialization;
 import org.revenj.serialization.WireSerialization;
 import org.revenj.server.ProcessingEngine;
 
@@ -53,6 +55,8 @@ public class Application implements ServletContextListener {
 		DataSource dataSource = container.resolve(DataSource.class);
 		WireSerialization serialization = new RevenjSerialization(container);
 		container.registerInstance(WireSerialization.class, serialization, false);
+		container.registerInstance(new Generic<Serialization<String>>() {
+		}.type, serialization.find(String.class).get(), false);
 		container.register(new ProcessingEngine(container, dataSource, serialization, permissions, plugins));
 	}
 

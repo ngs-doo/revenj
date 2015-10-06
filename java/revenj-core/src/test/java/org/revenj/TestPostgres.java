@@ -70,4 +70,19 @@ public class TestPostgres {
 		Assert.assertEquals(5, values.size());
 		Assert.assertNull(values.get(0));
 	}
+
+	@Test
+	public void timestampWithTimeOffset() throws IOException {
+		PostgresReader reader = new PostgresReader();
+		reader.process("[\"0001-01-01 00:00:00+01:22\"]");
+		List<OffsetDateTime> values = TimestampConverter.parseOffsetCollection(reader, 0, true, false);
+		Assert.assertEquals(1, values.size());
+		Assert.assertEquals(4920, values.get(0).getOffset().getTotalSeconds());
+		Assert.assertEquals(0, values.get(0).getMinute());
+		reader.process("[\"0001-01-01 00:00:00+01:22\"]");
+		values = TimestampConverter.parseOffsetCollection(reader, 0, true, true);
+		Assert.assertEquals(1, values.size());
+		Assert.assertEquals(0, values.get(0).getOffset().getTotalSeconds());
+		Assert.assertEquals(38, values.get(0).getMinute());
+	}
 }

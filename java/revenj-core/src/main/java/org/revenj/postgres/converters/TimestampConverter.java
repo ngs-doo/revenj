@@ -5,7 +5,6 @@ import org.revenj.postgres.PostgresBuffer;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.PostgresWriter;
 
-import javax.swing.text.Segment;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -156,7 +155,7 @@ public abstract class TimestampConverter {
 		int len = reader.fillUntil(buf, 1, '\\', '"') + 1;
 		reader.read(context);
 		if (buf[10] != ' ') {
-			return LocalDateTime.parse(new Segment(buf, 0, len));
+			return LocalDateTime.parse(new String(buf, 0, len));
 		}
 		int year = NumberConverter.read4(buf, 0);
 		int month = NumberConverter.read2(buf, 5);
@@ -175,12 +174,24 @@ public abstract class TimestampConverter {
 			return offset != 0
 					? LocalDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000).plusHours(pos ? -offset : offset)
 					: LocalDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000);
-		} else {
+		} else if (len == 20 && buf[19] == 'Z') {
+			return LocalDateTime.of(year, month, date, hour, minutes, seconds, 0);
+		} else if (len == 22) {
 			boolean pos = buf[len - 3] == '+';
 			int offset = NumberConverter.read2(buf, len - 2);
 			return offset != 0
 					? LocalDateTime.of(year, month, date, hour, minutes, seconds).plusHours(pos ? -offset : offset)
 					: LocalDateTime.of(year, month, date, hour, minutes, seconds);
+		} else if (len == 25) {
+			boolean pos = buf[19] == '+';
+			int offsetHours = NumberConverter.read2(buf, 20);
+			int offsetMin = NumberConverter.read2(buf, 23);
+			return LocalDateTime.of(year, month, date, hour, minutes, seconds, 0)
+					.plusHours(pos ? -offsetHours : offsetHours)
+					.plusMinutes(pos ? -offsetMin : offsetMin);
+		} else {
+			buf[10] = 'T';
+			return LocalDateTime.parse(new String(buf, 0 , len));
 		}
 	}
 
@@ -192,7 +203,7 @@ public abstract class TimestampConverter {
 		int len = reader.fillUntil(buf, 1, '\\', '"') + 1;
 		reader.read(context);
 		if (buf[10] != ' ') {
-			return OffsetDateTime.parse(new Segment(buf, 0, len));
+			return OffsetDateTime.parse(new String(buf, 0, len));
 		}
 		int year = NumberConverter.read4(buf, 0);
 		int month = NumberConverter.read2(buf, 5);
@@ -209,18 +220,32 @@ public abstract class TimestampConverter {
 			boolean pos = buf[len - 3] == '+';
 			int offset = NumberConverter.read2(buf, len - 2);
 			return asUtc
-					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC).plusHours(pos ? -offset : +offset)
+					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC).plusHours(pos ? -offset : offset)
 					: offset != 0
 					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.ofHours(pos ? offset : -offset))
 					: OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC);
-		} else {
-			boolean pos = buf[len - 3] == '+';
-			int offset = NumberConverter.read2(buf, len - 2);
+		} else if (len == 20 && buf[19] == 'Z') {
+			return OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC);
+		} else if (len == 22) {
+			boolean pos = buf[19] == '+';
+			int offset = NumberConverter.read2(buf, 20);
 			return asUtc
-					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC).plusHours(pos ? -offset : +offset)
+					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC).plusHours(pos ? -offset : offset)
 					: offset != 0
 					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.ofHours(pos ? offset : -offset))
 					: OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC);
+		} else if (len == 25) {
+			boolean pos = buf[19] == '+';
+			int offsetHours = NumberConverter.read2(buf, 20);
+			int offsetMin = NumberConverter.read2(buf, 23);
+			return asUtc
+					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC)
+						.plusHours(pos ? -offsetHours : offsetHours)
+						.plusMinutes(pos ? -offsetMin : offsetMin)
+					: OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.ofHoursMinutes(pos ? offsetHours : -offsetHours, pos ? offsetMin : -offsetMin));
+		} else {
+			buf[10] = 'T';
+			return OffsetDateTime.parse(new String(buf, 0 , len));
 		}
 	}
 

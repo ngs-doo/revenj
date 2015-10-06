@@ -151,13 +151,31 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 					: new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
 				return new DateTime(dt.Ticks + nano, DateTimeKind.Utc);
 			}
-			else
+			else if (len == 20 && buf[19] == 'Z')
 			{
-				var pos = buf[len - 3] == '+';
-				var offset = NumberConverter.Read2(buf, len - 2);
+				return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
+			}
+			else if (len == 22)
+			{
+				var pos = buf[19] == '+';
+				var offset = NumberConverter.Read2(buf, 20);
 				if (offset != 0)
 					return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc).AddHours(pos ? -offset : offset);
 				return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc);
+			}
+			else if (len == 25)
+			{
+				var pos = buf[19] == '+';
+				var offsetHour = NumberConverter.Read2(buf, 20);
+				var offsetMin = NumberConverter.Read2(buf, 23);
+				return new DateTime(year, month, date, hour, minutes, seconds, DateTimeKind.Utc)
+					.AddHours(pos ? -offsetHour : offsetHour)
+					.AddMinutes(pos ? -offsetMin : offsetMin);
+			}
+			else
+			{
+				buf[10] = 'T';
+				return DateTime.Parse(new string(buf, 0, len));
 			}
 		}
 
