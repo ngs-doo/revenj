@@ -33,6 +33,7 @@ public abstract class StringConverter {
 		if (cur != '"' && cur != '\\') {
 			reader.initBuffer();
 			reader.fillUntil(',', ')');
+			reader.read();
 		} else {
 			cur = reader.read(context);
 			while (cur != -1) {

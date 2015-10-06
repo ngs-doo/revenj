@@ -7,6 +7,8 @@ import gen.model.egzotics.E;
 import gen.model.egzotics.PksV;
 import gen.model.egzotics.pks;
 import gen.model.egzotics.v;
+import gen.model.mixinReference.Author;
+import gen.model.mixinReference.repositories.AuthorRepository;
 import gen.model.test.*;
 import gen.model.test.repositories.*;
 import org.junit.After;
@@ -338,5 +340,16 @@ public class TestRepository {
 		Assert.assertTrue(found.isPresent());
 		Assert.assertEquals(uri, found.get().getURI());
 		Assert.assertTrue(pks.deepEquals(found.get()));
+	}
+
+	@Test
+	public void entityReferenceWithoutAssignment() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<Author> repository = locator.resolve(AuthorRepository.class);
+		String uri = repository.insert(new Author());
+		Optional<Author> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Author au2 = found.get();
+		Assert.assertEquals(uri, au2.getURI());
 	}
 }

@@ -16,6 +16,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			{
 				reader.InitBuffer();
 				reader.FillUntil(',', ')');
+				reader.Read();
 			}
 			else
 			{
