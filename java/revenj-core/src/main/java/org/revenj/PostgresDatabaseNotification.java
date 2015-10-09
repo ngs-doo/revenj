@@ -2,8 +2,6 @@ package org.revenj;
 
 import org.postgresql.PGNotification;
 import org.postgresql.core.BaseConnection;
-import org.postgresql.ds.PGPooledConnection;
-import org.postgresql.ds.PGPoolingDataSource;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.converters.StringConverter;
 import org.revenj.patterns.DomainModel;
@@ -17,7 +15,6 @@ import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -86,23 +83,8 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			BaseConnection bc = null;
 			if (connection instanceof BaseConnection) {
 				bc = (BaseConnection) connection;
-			} else if (connection instanceof PGPooledConnection) {
-				PGPooledConnection pgpc = (PGPooledConnection) connection;
-				if (pgpc.getConnection() instanceof BaseConnection) {
-					bc = (BaseConnection) pgpc.getConnection();
-				}
-			} else if (dataSource instanceof PGPoolingDataSource) {
-				PGPoolingDataSource pgpds = (PGPoolingDataSource) dataSource;
-				connection.close();
-				connection = DriverManager.getConnection(pgpds.getUrl(), pgpds.getUser(), pgpds.getPassword());
-				if (connection instanceof BaseConnection) {
-					bc = (BaseConnection) connection;
-				} else if (connection instanceof PGPooledConnection) {
-					PGPooledConnection pgpc = (PGPooledConnection) connection;
-					if (pgpc.getConnection() instanceof BaseConnection) {
-						bc = (BaseConnection) pgpc.getConnection();
-					}
-				}
+			} else if (connection.isWrapperFor(BaseConnection.class)) {
+				bc = connection.unwrap(BaseConnection.class);
 			}
 			if (bc != null) {
 				Statement stmt = bc.createStatement();
@@ -184,8 +166,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 	}
 
 	private Repository getRepository(Class<?> manifest) {
-		return repositories.computeIfAbsent(manifest, clazz ->
-		{
+		return repositories.computeIfAbsent(manifest, clazz -> {
 			try {
 				return (Repository) locator.resolve(Utils.makeGenericType(Repository.class, manifest));
 			} catch (ReflectiveOperationException ex) {
