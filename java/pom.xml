@@ -16,6 +16,7 @@
 		<module>revenj-servlet</module>
 		<module>revenj-spring</module>
 		<module>revenj-test</module>
+		<module>revenj-storage</module>
 	</modules>
 
 	<licenses>

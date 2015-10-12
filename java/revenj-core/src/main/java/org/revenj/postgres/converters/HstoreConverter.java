@@ -165,6 +165,7 @@ public abstract class HstoreConverter {
 
 	public static PostgresTuple toTuple(Map<String, String> value) {
 		if (value == null) return null;
+		//TODO empty map
 		return new MapTuple(value);
 	}
 

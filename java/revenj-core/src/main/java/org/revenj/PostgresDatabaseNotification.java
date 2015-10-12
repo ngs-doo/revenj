@@ -36,7 +36,6 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 	private int retryCount;
 	private final int timeout;
 
-	private Connection connection;
 	private boolean isClosed;
 
 	public PostgresDatabaseNotification(
@@ -61,25 +60,18 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		if ("disabled".equals(properties.getProperty("revenj.notifications.status"))) {
 			isClosed = true;
 		} else {
-			setupConnection();
+			setupPooling();
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> isClosed = true));
 		}
 	}
 
-	private void setupConnection() {
+	private void setupPooling() {
 		retryCount++;
 		if (retryCount > 60) {
 			retryCount = 30;
 		}
 		try {
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-			connection = dataSource.getConnection();
+			Connection connection = dataSource.getConnection();
 			BaseConnection bc = null;
 			if (connection instanceof BaseConnection) {
 				bc = (BaseConnection) connection;
@@ -92,7 +84,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 				retryCount = 0;
 				Pooling pooling = new Pooling(bc, stmt);
 				new Thread(pooling).start();
-			}
+			} else cleanupConnection(connection);
 		} catch (Exception ex) {
 			try {
 				Thread.sleep(1000 * retryCount);
@@ -158,10 +150,12 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					setupConnection();
+					cleanupConnection(connection);
+					setupPooling();
 					return;
 				}
 			}
+			cleanupConnection(connection);
 		}
 	}
 
@@ -202,11 +196,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		}).map(it -> new TrackInfo<T>(it.uris, () -> getRepository(manifest).find(it.uris)));
 	}
 
-	public void close() {
-		if (isClosed) {
-			return;
-		}
-		isClosed = true;
+	private synchronized void cleanupConnection(Connection connection) {
 		try {
 			if (connection != null && !connection.isClosed()) {
 				connection.close();
@@ -214,6 +204,9 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		connection = null;
+	}
+
+	public void close() {
+		isClosed = true;
 	}
 }

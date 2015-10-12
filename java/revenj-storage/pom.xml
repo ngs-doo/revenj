@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.revenj</groupId>
+		<artifactId>revenj</artifactId>
+		<version>0.0.0</version>
+	</parent>
+	<artifactId>revenj-storage</artifactId>
+	<name>Revenj Storage</name>
+	<packaging>jar</packaging>
+	<version>0.5.1</version>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.revenj</groupId>
+			<artifactId>revenj-core</artifactId>
+			<version>0.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.10.26</version>
+		</dependency>
+	</dependencies>
+
+</project>

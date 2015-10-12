@@ -10,7 +10,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		{
 			public string Bucket;
 			public string Key;
-			public int Length;
+			public long Length;
 			public string Name;
 			public string MimeType;
 			public Dictionary<string, string> Metadata;
@@ -21,7 +21,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			var cur = reader.Read();
 			if (cur == ',' || cur == ')')
 				return null;
-			var s3 = ParseS3(reader, context, context << 1, null);
+			var s3 = ParseS3(reader, context, context == 0 ? 1 : context << 1, null);
 			reader.Read();
 			return s3;
 		}
@@ -32,7 +32,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				reader.Read();
 			var bucket = StringConverter.Parse(reader, innerContext);
 			var key = StringConverter.Parse(reader, innerContext);
-			var length = IntConverter.Parse(reader);
+			var length = LongConverter.Parse(reader);
 			var name = StringConverter.Parse(reader, innerContext);
 			var mimeType = StringConverter.Parse(reader, innerContext);
 			var metadata = HstoreConverter.Parse(reader, innerContext);
