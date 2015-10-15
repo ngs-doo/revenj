@@ -12,7 +12,6 @@ import org.revenj.Revenj;
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.SystemAspect;
 import org.revenj.serialization.Serialization;
-import org.revenj.patterns.ServiceLocator;
 import org.revenj.serialization.WireSerialization;
 import org.revenj.server.commands.crud.Create;
 import org.revenj.server.commands.crud.Read;
@@ -20,11 +19,7 @@ import org.revenj.server.servlet.Application;
 
 import java.io.File;
 import java.io.FileReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.*;
-import java.util.function.Function;
 
 public class TestProcessingEngine {
 
