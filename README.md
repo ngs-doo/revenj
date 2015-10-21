@@ -2,7 +2,7 @@ Revenj
 ======
 
 Revenj is a *fast* framework for .NET/JVM with advanced LINQ support for Postgres and Oracle databases. 
-It's ideal to use a REST-like service, but can also be used as a library from other frameworks such as ASP.NET, Spring...
+It's ideal to use as a REST-like service, but can also be used as a library from other frameworks such as ASP.NET, Spring...
 
 DSL Platform will use Invasive software composition to integrate with Revenj, so 
 developers can focus on rich modeling (NoSQL/ER hybrid on top of ORDBMS).
@@ -183,7 +183,7 @@ results in same objects which can be consumed through IDataContext:
 
     DataContext context = ...
     String matchingKey = ...
-    List<ComplexObject> matchingObjects = context.query(ComplexObject.class).filter(co -> co.getVersions().anyMatch(v => v.getDictionary().containsKey(matchingKey))).list();
+    List<ComplexObject> matchingObjects = context.query(ComplexObject.class).filter(co -> co.getVersions().anyMatch(v -> v.getDictionary().containsKey(matchingKey))).list();
     Stream<Legacy> legacyObjects = context.query(Legacy.class).filter(l -> l.name.startsWith(matchingKey)).stream();
     ...
     context.update(matchingObjects);
@@ -207,18 +207,32 @@ URI is a string version of primary key; which mostly differs on composite primar
 
 ####Listening for change:
 
-LISTEN/NOTIFY from Postgres is utilized to provide on commit information about data change.
+LISTEN/NOTIFY from Postgres and Advanced Queueing in Oracle are utilized to provide on commit information about data change.
+
+#####C&#35;
 
     IDataContext context = ...
     context.Track<CapturedAction>().Select(ca => ...);
+
+#####Java
+
+    DataContext context = ...
+    context.track(CapturedAction.class).doOnNext(ca -> ...);
 
 ####Populating report object:
 
 Report can be used to capture various data sources at once and provide it as a single object.
 
+#####C&#35;
+
     var report = new Aggregation { inputs = new [] { 1, 2, 3}, maxActions = 100 };
     var result = report.Populate(locator); //provide access to various dependencies
 
+#####Java
+
+    Aggregation report = new Aggregation().setInputs(new int[] { 1, 2, 3}).setMaxActions(100);
+    Aggregation.Result result = report.populate(locator); //provide access to dependencies
+	
 ####No abstractions, using ADO.NET:
 
     IDatabaseQuery query = ...
@@ -253,9 +267,16 @@ To add a custom REST service it's enough to implement specialized typesafe signa
 By default permissions are checked against the singleton IPermissionManager.
 Custom permissions can be registered by hand if they don't really belong to the DSL.
 
+#####C&#35;
+
     IPermissionManager permissions = ...
     permissions.RegisterFilter<CapturedAction>(it => false, "Admin", false); //return empty results for everybody who are not in Admin role
-    
+
+#####Java
+
+    PermissionManager permissions = ...
+    permissions.registerFilter(CapturedAction.class, it -> false, "Admin", false); //return empty results for everybody who are not in Admin role
+
 ##External tools and libraries
 
 DSL can be written in Visual studio with the help of [DDD for DSL](http://visualstudiogallery.msdn.microsoft.com/5b8a140c-5c84-40fc-a551-b255ba7676f4) plugin.
