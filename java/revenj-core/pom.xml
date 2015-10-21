@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.revenj</groupId>
 		<artifactId>revenj</artifactId>
-		<version>0.0.0</version>
+		<version>0.5.2</version>
 	</parent>
 	<artifactId>revenj-core</artifactId>
 	<name>Revenj Core</name>
 	<packaging>jar</packaging>
-	<version>0.5.1</version>
+	<version>0.5.2</version>
 
 	<dependencies>
 		<dependency>
