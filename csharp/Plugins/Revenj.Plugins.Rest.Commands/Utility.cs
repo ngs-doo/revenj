@@ -94,7 +94,16 @@ Error: " + ex.Message;
 
 		private static string EmptyInstanceString(this IWireSerialization serializer, Type target)
 		{
-			return SerializeToString(serializer, Revenj.Utility.TemporaryResources.CreateRandomObject(target));
+			try
+			{
+				return SerializeToString(serializer, Revenj.Utility.TemporaryResources.CreateRandomObject(target));
+			}
+			catch (Exception ex)
+			{
+				return Exceptions.DebugMode
+					? "Error creating instance example: " + ex.Message
+					: "Error creating instance example ;(";
+			}
 		}
 
 		private static string SerializeToString(this IWireSerialization serializer, object instance)

@@ -196,42 +196,49 @@ namespace Revenj.Utility
 		{
 			var ctor = target.GetConstructor(EmptyTypes);
 			//baked in serialization doesn't like uninitialized objects.
-			object instance = ctor != null ? ctor.Invoke(null) : FormatterServices.GetUninitializedObject(target);
-			var rnd = new Random();
-			foreach (var p in instance.GetType().GetProperties())
+			try
 			{
-				var sm = p.GetSetMethod();
-				if (sm != null && sm.IsPublic)
+				object instance = ctor != null ? ctor.Invoke(null) : FormatterServices.GetUninitializedObject(target);
+				var rnd = new Random();
+				foreach (var p in instance.GetType().GetProperties())
 				{
-					var pt = p.PropertyType;
-					if (pt == typeof(string))
+					var sm = p.GetSetMethod();
+					if (sm != null && sm.IsPublic)
 					{
-						var sb = new StringBuilder();
-						for (int i = 0; i < 10; i++)
-							sb.Append((char)rnd.Next(65, 92));
-						p.SetValue(instance, sb.ToString(), null);
-					}
-					else if (pt == typeof(DateTime))
-						p.SetValue(instance, DateTime.Today, null);
-					else if (pt == typeof(int))
-						p.SetValue(instance, rnd.Next(1000, 10000), null);
-					else if (pt == typeof(long))
-						p.SetValue(instance, (long)rnd.Next(1000, 10000), null);
-					else if (pt == typeof(decimal))
-						p.SetValue(instance, rnd.Next(1000, 10000) / 10m, null);
-					else if (pt == typeof(double))
-						p.SetValue(instance, rnd.NextDouble() * 1000, null);
-					else if (pt == typeof(float))
-						p.SetValue(instance, rnd.Next(1000, 10000) / 10f, null);
-					else if (pt == typeof(byte[]))
-					{
-						var buf = new byte[rnd.Next(1, 5)];
-						rnd.NextBytes(buf);
-						p.SetValue(instance, buf, null);
+						var pt = p.PropertyType;
+						if (pt == typeof(string))
+						{
+							var sb = new StringBuilder();
+							for (int i = 0; i < 10; i++)
+								sb.Append((char)rnd.Next(65, 92));
+							p.SetValue(instance, sb.ToString(), null);
+						}
+						else if (pt == typeof(DateTime))
+							p.SetValue(instance, DateTime.Today, null);
+						else if (pt == typeof(int))
+							p.SetValue(instance, rnd.Next(1000, 10000), null);
+						else if (pt == typeof(long))
+							p.SetValue(instance, (long)rnd.Next(1000, 10000), null);
+						else if (pt == typeof(decimal))
+							p.SetValue(instance, rnd.Next(1000, 10000) / 10m, null);
+						else if (pt == typeof(double))
+							p.SetValue(instance, rnd.NextDouble() * 1000, null);
+						else if (pt == typeof(float))
+							p.SetValue(instance, rnd.Next(1000, 10000) / 10f, null);
+						else if (pt == typeof(byte[]))
+						{
+							var buf = new byte[rnd.Next(1, 5)];
+							rnd.NextBytes(buf);
+							p.SetValue(instance, buf, null);
+						}
 					}
 				}
+				return instance;
 			}
-			return instance;
+			catch
+			{
+				return ctor != null ? ctor.Invoke(null) : FormatterServices.GetUninitializedObject(target);
+			}
 		}
 	}
 }
