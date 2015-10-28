@@ -11,7 +11,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = java.util.UUID.randomUUID();
 		this.name = "";
-		this.content = new byte[0];
+		this.content = org.revenj.Utils.EMPTY_BINARY;
 	}
 
 	
@@ -76,7 +76,19 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		return "Document(" + URI + ')';
 	}
 	
+	
+	public Document(
+			final String name,
+			final byte[] content) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setName(name);
+		setContent(content);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = -6216349435805651936L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Document(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -86,12 +98,11 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 			@com.fasterxml.jackson.annotation.JsonProperty("content") final byte[] content) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
-		this.ID = ID == null ? new java.util.UUID(0L, 0L) : ID;
+		this.ID = ID == null ? org.revenj.Utils.MIN_UUID : ID;
 		this.name = name == null ? "" : name;
-		this.content = content == null ? new byte[0] : content;
+		this.content = content == null ? org.revenj.Utils.EMPTY_BINARY : content;
 	}
 
-	private static final long serialVersionUID = 7175413008986483272L;
 	
 	private java.util.UUID ID;
 
@@ -150,6 +161,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		return this;
 	}
 
+	private transient Document __originalValue;
 	
 	static {
 		gen.model.binaries.repositories.DocumentRepository.__setupPersist(
@@ -185,7 +197,6 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		);
 	}
-	private transient Document __originalValue;
 	
 	public Document(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Document>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Document> rdr : readers) {
@@ -209,15 +220,4 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index__extended_content] = (item, reader, context) -> { item.content = org.revenj.postgres.converters.ByteaConverter.parse(reader, context); };
 	}
-	
-	
-	public Document(
-			final String name,
-			final byte[] content) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setName(name);
-		setContent(content);
-	}
-
 }

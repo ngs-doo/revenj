@@ -17,13 +17,13 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 			@com.fasterxml.jackson.annotation.JsonProperty("simple")  final gen.model.test.Simple simple) {
 			
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
-		this.id = id != null ? id : new java.util.UUID(0L, 0L);
+		this.id = id != null ? id : org.revenj.Utils.MIN_UUID;
 		this.enn = enn != null ? enn : new gen.model.test.En[] { };
 		org.revenj.Guards.checkNulls(enn);
 		this.en = en != null ? en : gen.model.test.En.A;
 		this.tsl = tsl != null ? tsl : new java.util.ArrayList<java.time.OffsetDateTime>(4);
 		org.revenj.Guards.checkNulls(tsl);
-		this.change = change != null ? change : java.time.LocalDate.of(1, 1, 1);
+		this.change = change != null ? change : org.revenj.Utils.MIN_LOCAL_DATE;
 		this.entities = entities != null ? entities : new java.util.ArrayList<gen.model.test.Entity>(4);
 		org.revenj.Guards.checkNulls(entities);
 		this.simple = simple != null ? simple : new gen.model.test.Simple();
@@ -77,7 +77,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	private static final long serialVersionUID = 4725101763819715429L;
+	private static final long serialVersionUID = -6645105371931340958L;
 	
 	private final java.util.UUID id;
 
@@ -149,6 +149,17 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	}
 
 	
+	private java.util.UUID id2;
+
+	
+	public java.util.UUID getId2()  {
+		
+		this.id2 = __calculated_id2.apply(this);
+		return this.id2;
+	}
+
+	private static final java.util.function.Function<gen.model.test.CompositeList, java.util.UUID> __calculated_id2 = it -> it.getId();
+	
 
 public static class ForSimple   implements java.io.Serializable, org.revenj.patterns.Specification<CompositeList> {
 	
@@ -167,7 +178,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = -6890494611897344354L;
+	private static final long serialVersionUID = -5503625816067492778L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 

@@ -80,7 +80,19 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		return "LazyLoad(" + URI + ')';
 	}
 	
+	
+	public LazyLoad(
+			final gen.model.test.Composite comp,
+			final gen.model.test.SingleDetail sd) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setComp(comp);
+		setSd(sd);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = -3289424908018295842L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private LazyLoad(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -99,7 +111,6 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		this.sdID = sdID;
 	}
 
-	private static final long serialVersionUID = 1403889306096219318L;
 	
 	private int ID;
 
@@ -141,12 +152,12 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	@com.fasterxml.jackson.annotation.JsonIgnore
 	public gen.model.test.Composite getComp()  {
 		
-	
+		
 		if (__locator.isPresent() && (comp != null && !comp.getURI().equals(compURI) || comp == null && compURI != null)) {
 			gen.model.test.repositories.CompositeRepository repository = __locator.get().resolve(gen.model.test.repositories.CompositeRepository.class);
 			comp = repository.find(compURI).orElse(null);
 		}
-	if (this.compURI == null && this.comp != null) this.comp = null;
+		if (this.compURI == null && this.comp != null) this.comp = null;
 		return comp;
 	}
 
@@ -174,6 +185,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	@com.fasterxml.jackson.annotation.JsonProperty("compURI")
 	public String getCompURI()  {
 		
+		if (this.comp != null) this.compURI = this.comp.getURI();
 		return this.compURI;
 	}
 
@@ -184,6 +196,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	@com.fasterxml.jackson.annotation.JsonProperty("compID")
 	public java.util.UUID getCompID()  {
 		
+		if (this.comp != null) this.compID = this.comp.getId();
 		return compID;
 	}
 
@@ -202,12 +215,12 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	@com.fasterxml.jackson.annotation.JsonIgnore
 	public gen.model.test.SingleDetail getSd()  {
 		
-	
+		
 		if (__locator.isPresent() && (sd != null && !sd.getURI().equals(sdURI) || sd == null && sdURI != null)) {
 			gen.model.test.repositories.SingleDetailRepository repository = __locator.get().resolve(gen.model.test.repositories.SingleDetailRepository.class);
 			sd = repository.find(sdURI).orElse(null);
 		}
-	if (this.sdURI == null && this.sd != null) this.sd = null;
+		if (this.sdURI == null && this.sd != null) this.sd = null;
 		return sd;
 	}
 
@@ -235,6 +248,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	@com.fasterxml.jackson.annotation.JsonProperty("sdURI")
 	public String getSdURI()  {
 		
+		if (this.sd != null) this.sdURI = this.sd.getURI();
 		return this.sdURI;
 	}
 
@@ -245,6 +259,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	@com.fasterxml.jackson.annotation.JsonProperty("sdID")
 	public Integer getSdID()  {
 		
+		if (this.sd != null) this.sdID = this.sd.getID();
 		return sdID;
 	}
 
@@ -256,6 +271,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		return this;
 	}
 
+	private transient LazyLoad __originalValue;
 	
 	static {
 		gen.model.test.repositories.LazyLoadRepository.__setupPersist(
@@ -291,7 +307,6 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		);
 	}
-	private transient LazyLoad __originalValue;
 	
 	public LazyLoad(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<LazyLoad> rdr : readers) {
@@ -319,15 +334,4 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		readers[__index__extended_sdURI] = (item, reader, context) -> { item.sdURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_sdID] = (item, reader, context) -> { item.sdID = org.revenj.postgres.converters.IntConverter.parseNullable(reader); };
 	}
-	
-	
-	public LazyLoad(
-			final gen.model.test.Composite comp,
-			final gen.model.test.SingleDetail sd) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setComp(comp);
-		setSd(sd);
-	}
-
 }

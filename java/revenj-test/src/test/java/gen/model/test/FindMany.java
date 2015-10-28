@@ -47,7 +47,7 @@ public static class Result   {
 			@com.fasterxml.jackson.annotation.JsonProperty("ids")  final java.util.Set<java.util.UUID> ids) {
 			
 		if(id != null) setId(id); else this.id = java.util.UUID.randomUUID();
-		if(ids != null) setIds(ids); else this.ids = new java.util.HashSet<java.util.UUID>(4);
+		if(ids != null) setIds(ids); else this.ids = new java.util.LinkedHashSet<java.util.UUID>(4);
 	}
 
 	
@@ -55,10 +55,10 @@ public static class Result   {
 	public FindMany() {
 			
 		this.id = java.util.UUID.randomUUID();
-		this.ids = new java.util.HashSet<java.util.UUID>(4);
+		this.ids = new java.util.LinkedHashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = -6776614570428865364L;
+	private static final long serialVersionUID = 8281182607475947506L;
 	
 	private java.util.UUID id;
 

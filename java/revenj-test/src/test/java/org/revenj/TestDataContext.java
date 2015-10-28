@@ -2,6 +2,8 @@ package org.revenj;
 
 import gen.model.Boot;
 import gen.model.Seq.Next;
+import gen.model.mixinReference.Author;
+import gen.model.mixinReference.SpecificReport;
 import gen.model.test.Clicked;
 import gen.model.test.Composite;
 import gen.model.test.Simple;
@@ -116,5 +118,20 @@ public class TestDataContext {
 			Assert.assertEquals(next, find1.get());
 			Assert.assertFalse(find2.isPresent());
 		}
+	}
+
+	@Test
+	public void referenceIDUpdate() throws Exception {
+		ServiceLocator locator = container;
+		SpecificReport report = new SpecificReport();
+		Author author = new Author();
+		report.setAuthor(author);
+		Assert.assertEquals(author.getURI(), report.getAuthorURI());
+		Assert.assertEquals(author.getID(), report.getAuthorID());
+		DataContext context = locator.resolve(DataContext.class);
+		context.create(author);
+		Assert.assertEquals(author.getURI(), report.getAuthorURI());
+		Assert.assertEquals(author.getID(), report.getAuthorID());
+		context.create(report);
 	}
 }

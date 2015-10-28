@@ -9,10 +9,10 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 	public Entity() {
 			
 		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		this.money = java.math.BigDecimal.ZERO.setScale(2);
+		this.money = org.revenj.Utils.ZERO_2;
 		this.id = "";
-		this.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4);
-		this.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4);
+		this.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(4);
+		this.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(4);
 		this.Compositeid = java.util.UUID.randomUUID();
 		this.Index = 0;
 	}
@@ -77,13 +77,13 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		this.id = other.id;
 		this.compositeURI = other.compositeURI;
 		this.compositeID = other.compositeID;
-		this.detail1 = new java.util.HashSet<gen.model.test.Detail1>(other.detail1.size());
+		this.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(other.detail1.size());
 			if (other.detail1 != null) {
 				for (gen.model.test.Detail1 it : other.detail1) {
 					this.detail1.add((gen.model.test.Detail1)it.clone());
 				}
 			};
-		this.detail2 = new java.util.HashSet<gen.model.test.Detail2>(other.detail2.size());
+		this.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(other.detail2.size());
 			if (other.detail2 != null) {
 				for (gen.model.test.Detail2 it : other.detail2) {
 					this.detail2.add((gen.model.test.Detail2)it.clone());
@@ -103,7 +103,25 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		return "Entity(" + URI + ')';
 	}
 	
+	
+	public Entity(
+			final java.math.BigDecimal money,
+			final String id,
+			final gen.model.test.Composite composite,
+			final java.util.Set<gen.model.test.Detail1> detail1,
+			final java.util.Set<gen.model.test.Detail2> detail2) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setMoney(money);
+		setId(id);
+		setComposite(composite);
+		setDetail1(detail1);
+		setDetail2(detail2);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = 553660015979821681L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -118,17 +136,16 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 			@com.fasterxml.jackson.annotation.JsonProperty("Index") final int Index) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
-		this.money = money == null ? java.math.BigDecimal.ZERO.setScale(2) : money;
+		this.money = money == null ? org.revenj.Utils.ZERO_2 : money;
 		this.id = id == null ? "" : id;
 		this.compositeURI = compositeURI;
 		this.compositeID = compositeID;
-		this.detail1 = detail1 == null ? new java.util.HashSet<gen.model.test.Detail1>(4) : detail1;
-		this.detail2 = detail2 == null ? new java.util.HashSet<gen.model.test.Detail2>(4) : detail2;
-		this.Compositeid = Compositeid == null ? new java.util.UUID(0L, 0L) : Compositeid;
+		this.detail1 = detail1 == null ? new java.util.LinkedHashSet<gen.model.test.Detail1>(4) : detail1;
+		this.detail2 = detail2 == null ? new java.util.LinkedHashSet<gen.model.test.Detail2>(4) : detail2;
+		this.Compositeid = Compositeid == null ? org.revenj.Utils.MIN_UUID : Compositeid;
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = -2750391643816533019L;
 	
 	private java.math.BigDecimal money;
 
@@ -176,12 +193,12 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 	@com.fasterxml.jackson.annotation.JsonIgnore
 	public gen.model.test.Composite getComposite()  {
 		
-	
+		
 		if (__locator.isPresent() && (composite != null && !composite.getURI().equals(compositeURI) || composite == null && compositeURI != null)) {
 			gen.model.test.repositories.CompositeRepository repository = __locator.get().resolve(gen.model.test.repositories.CompositeRepository.class);
 			composite = repository.find(compositeURI).orElse(null);
 		}
-	if (this.compositeURI == null && this.composite != null) this.composite = null;
+		if (this.compositeURI == null && this.composite != null) this.composite = null;
 		return composite;
 	}
 
@@ -209,6 +226,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 	@com.fasterxml.jackson.annotation.JsonProperty("compositeURI")
 	public String getCompositeURI()  {
 		
+		if (this.composite != null) this.compositeURI = this.composite.getURI();
 		return this.compositeURI;
 	}
 
@@ -219,6 +237,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 	@com.fasterxml.jackson.annotation.JsonProperty("compositeID")
 	public java.util.UUID getCompositeID()  {
 		
+		if (this.composite != null) this.compositeID = this.composite.getId();
 		return compositeID;
 	}
 
@@ -346,8 +365,8 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index___compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index___compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
-		readers[__index___detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::from); if (__list != null) {item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4); }; };
-		readers[__index___detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::from); if (__list != null) {item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4); }; };
+		readers[__index___detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::from); if (__list != null) {item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(4); }; };
+		readers[__index___detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::from); if (__list != null) {item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(4); }; };
 		readers[__index___Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index___Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
@@ -358,26 +377,9 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
 		readers[__index__extended_compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
-		readers[__index__extended_detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::fromExtended); if (__list != null) {item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.HashSet<gen.model.test.Detail1>(4); }; };
-		readers[__index__extended_detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::fromExtended); if (__list != null) {item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.HashSet<gen.model.test.Detail2>(4); }; };
+		readers[__index__extended_detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::fromExtended); if (__list != null) {item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(4); }; };
+		readers[__index__extended_detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::fromExtended); if (__list != null) {item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(4); }; };
 		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
-	
-	
-	public Entity(
-			final java.math.BigDecimal money,
-			final String id,
-			final gen.model.test.Composite composite,
-			final java.util.Set<gen.model.test.Detail1> detail1,
-			final java.util.Set<gen.model.test.Detail2> detail2) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setMoney(money);
-		setId(id);
-		setComposite(composite);
-		setDetail1(detail1);
-		setDetail2(detail2);
-	}
-
 }

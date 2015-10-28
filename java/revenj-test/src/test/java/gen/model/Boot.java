@@ -199,6 +199,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.egzotics.converters.EConverter egzotics$converter$EConverter = new gen.model.egzotics.converters.EConverter();
 		container.register(egzotics$converter$EConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.E>>(){}.type, egzotics$converter$EConverter, false);
+		
+		gen.model.issues.converters.DateListConverter issues$converter$DateListConverter = new gen.model.issues.converters.DateListConverter(columns);
+		container.register(issues$converter$DateListConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.issues.DateList>>(){}.type, issues$converter$DateListConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"");
@@ -385,6 +389,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getXml", "\"xml\"");
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getS3", "\"s3\"");
 		egzotics$converter$vConverter.configure(container);
 		metamodel.registerDataSource(gen.model.egzotics.v.class, "\"egzotics\".\"v\"");
 		metamodel.registerProperty(gen.model.egzotics.v.class, "getX", "\"x\"");
@@ -401,6 +406,16 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getE", "\"e\"");
 		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getEe", "\"ee\"");
 		metamodel.registerEnum(gen.model.egzotics.E.class, "\"egzotics\".\"E\"");
+		issues$converter$DateListConverter.configure(container);
+		metamodel.registerDataSource(gen.model.issues.DateList.class, "\"issues\".\"DateList_entity\"");
+		metamodel.registerProperty(gen.model.issues.DateList.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.issues.DateList.class, "getID", "\"ID\"");
+		
+		container.register(gen.model.issues.repositories.DateListRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
+		metamodel.registerProperty(gen.model.issues.DateList.class, "getList", "\"list\"");
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -423,6 +438,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"");

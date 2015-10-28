@@ -12,7 +12,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.v = new gen.model.egzotics.v();
 		this.vv = new gen.model.egzotics.v[] { };
 		this.e = gen.model.egzotics.E.A;
-		this.ee = new java.util.HashSet<gen.model.egzotics.E>(4);
+		this.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(4);
 	}
 
 	
@@ -71,7 +71,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 				}
 			};
 		this.e = other.e;
-		this.ee = new java.util.HashSet<gen.model.egzotics.E>(other.ee);
+		this.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(other.ee);
 		this.__originalValue = other.__originalValue;
 	}
 
@@ -85,7 +85,23 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return "PksV(" + URI + ')';
 	}
 	
+	
+	public PksV(
+			final gen.model.egzotics.v v,
+			final gen.model.egzotics.v[] vv,
+			final gen.model.egzotics.E e,
+			final java.util.Set<gen.model.egzotics.E> ee) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setV(v);
+		setVv(vv);
+		setE(e);
+		setEe(ee);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = 5936676525876737035L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private PksV(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -99,10 +115,9 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.v = v == null ? new gen.model.egzotics.v() : v;
 		this.vv = vv == null ? new gen.model.egzotics.v[] { } : vv;
 		this.e = e == null ? gen.model.egzotics.E.A : e;
-		this.ee = ee == null ? new java.util.HashSet<gen.model.egzotics.E>(4) : ee;
+		this.ee = ee == null ? new java.util.LinkedHashSet<gen.model.egzotics.E>(4) : ee;
 	}
 
-	private static final long serialVersionUID = -2545546561469625373L;
 	
 	private gen.model.egzotics.v v;
 
@@ -181,6 +196,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return this;
 	}
 
+	private transient PksV __originalValue;
 	
 	static {
 		gen.model.egzotics.repositories.PksVRepository.__setupPersist(
@@ -216,7 +232,6 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 			}
 		);
 	}
-	private transient PksV __originalValue;
 	
 	public PksV(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<PksV>[] readers, gen.model.egzotics.converters.PksVConverter converter) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<PksV> rdr : readers) {
@@ -232,7 +247,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		readers[__index___v] = (item, reader, context) -> { item.v = __converter_v.from(reader, context); };
 		readers[__index___vv] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.v> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_vv::from); if (__list != null) {item.vv = __list.toArray(new gen.model.egzotics.v[__list.size()]);} else item.vv = new gen.model.egzotics.v[] { }; }; };
 		readers[__index___e] = (item, reader, context) -> { item.e = gen.model.egzotics.converters.EConverter.fromReader(reader); };
-		readers[__index___ee] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.E> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.egzotics.E.A, gen.model.egzotics.converters.EConverter::convertEnum); if (__list != null) {item.ee = new java.util.HashSet<gen.model.egzotics.E>(__list);} else item.ee = new java.util.HashSet<gen.model.egzotics.E>(4); }; };
+		readers[__index___ee] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.E> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.egzotics.E.A, gen.model.egzotics.converters.EConverter::convertEnum); if (__list != null) {item.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(__list);} else item.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(4); }; };
 	}
 	
 	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<PksV>[] readers, final gen.model.egzotics.converters.vConverter __converter_v, int __index__extended_v, final gen.model.egzotics.converters.vConverter __converter_vv, int __index__extended_vv, int __index__extended_e, int __index__extended_ee) {
@@ -240,21 +255,6 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		readers[__index__extended_v] = (item, reader, context) -> { item.v = __converter_v.fromExtended(reader, context); };
 		readers[__index__extended_vv] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.v> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_vv::fromExtended); if (__list != null) {item.vv = __list.toArray(new gen.model.egzotics.v[__list.size()]);} else item.vv = new gen.model.egzotics.v[] { }; }; };
 		readers[__index__extended_e] = (item, reader, context) -> { item.e = gen.model.egzotics.converters.EConverter.fromReader(reader); };
-		readers[__index__extended_ee] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.E> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.egzotics.E.A, gen.model.egzotics.converters.EConverter::convertEnum); if (__list != null) {item.ee = new java.util.HashSet<gen.model.egzotics.E>(__list);} else item.ee = new java.util.HashSet<gen.model.egzotics.E>(4); }; };
+		readers[__index__extended_ee] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.E> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.egzotics.E.A, gen.model.egzotics.converters.EConverter::convertEnum); if (__list != null) {item.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(__list);} else item.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(4); }; };
 	}
-	
-	
-	public PksV(
-			final gen.model.egzotics.v v,
-			final gen.model.egzotics.v[] vv,
-			final gen.model.egzotics.E e,
-			final java.util.Set<gen.model.egzotics.E> ee) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setV(v);
-		setVv(vv);
-		setE(e);
-		setEe(ee);
-	}
-
 }

@@ -100,7 +100,13 @@ module mixinReference {
 		int x;
 		Author author;
 	}
-	entity Person { date birth; }
+	entity Person {
+		date birth;
+		calculated int yearOfBirth from 'it => it.birth.Year';
+		calculated int dayOfBirth from 'it => it.birth.Day' { persisted; }
+		calculated bornOnOddDay from 'it => it.birth.Day % 2 == 1';
+		calculated bornOnEvenDay from 'it => it.birth.Day % 2 == 0' { persisted; }
+	}
 	entity Resident(id) { uuid id; date birth; }
 	entity Child { long version; }
 
@@ -140,6 +146,7 @@ module egzotics {
 	root pks(id) {
 		list<int> id;
 		xml? xml;
+		s3? s3;
 	}
 	value v { int x; }
 	root PksV(vv, e, ee) {
@@ -149,4 +156,9 @@ module egzotics {
 		Set<E> ee;
 	}
 	enum E { A; B; C; }
+}
+module issues {
+	big root DateList {
+		List<Timestamp?> list;
+	}
 }

@@ -109,10 +109,10 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 		this.en = en;
 		this.en2 = en2 == null ? gen.model.test.En.A : en2;
 		this.nb = nb;
-		this.ts = ts == null ? java.time.OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.UTC) : ts;
+		this.ts = ts == null ? org.revenj.Utils.MIN_DATE_TIME : ts;
 	}
 
-	private static final long serialVersionUID = 1675082603100134519L;
+	private static final long serialVersionUID = 5772902852503841583L;
 	
 	private int number;
 

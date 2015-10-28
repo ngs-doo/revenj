@@ -15,10 +15,8 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 			
 		setDate(date);
 		setNumber(number);
-		this.number = java.math.BigDecimal.ZERO;
 		setBigint(bigint);
 		setBool(bool);
-		this.bool = new java.util.HashSet<Boolean>(4);
 		setEn(en);
 	}
 
@@ -27,7 +25,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public Clicked() {
 			
 		this.number = java.math.BigDecimal.ZERO;
-		this.bool = new java.util.HashSet<Boolean>(4);
+		this.bool = new java.util.LinkedHashSet<Boolean>(4);
 	}
 
 	
@@ -84,7 +82,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = 3171358592044584057L;
+	private static final long serialVersionUID = -4266280817476143871L;
 	
 	private java.time.LocalDate date;
 
@@ -199,10 +197,10 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 	public BetweenNumbers() {
 			
 		this.min = java.math.BigDecimal.ZERO;
-		this.inSet = new java.util.HashSet<java.math.BigDecimal>(4);
+		this.inSet = new java.util.LinkedHashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = 5828877995379142738L;
+	private static final long serialVersionUID = 6255409403494972986L;
 	
 	private java.math.BigDecimal min;
 
@@ -282,7 +280,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.date = date;
 		this.number = number == null ? java.math.BigDecimal.ZERO : number;
 		this.bigint = bigint;
-		this.bool = bool == null ? new java.util.HashSet<Boolean>(4) : bool;
+		this.bool = bool == null ? new java.util.LinkedHashSet<Boolean>(4) : bool;
 		this.en = en;
 	}
 
@@ -301,7 +299,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		readers[__index___date] = (item, reader, context) -> { item.date = org.revenj.postgres.converters.DateConverter.parse(reader, true); };
 		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
 		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };
-		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {item.bool = new java.util.HashSet<Boolean>(__list);} else item.bool = new java.util.HashSet<Boolean>(4); }; };
+		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {item.bool = new java.util.LinkedHashSet<Boolean>(__list);} else item.bool = new java.util.LinkedHashSet<Boolean>(4); }; };
 		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
 	}
 	

@@ -43,6 +43,22 @@ public class PersonConverter implements ObjectConverter<gen.model.mixinReference
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'birth' column in mixinReference Person. Check if DB is in sync");
 		__index__extended_birth = (int)column.get().order - 1;
 			
+		column = columns.stream().filter(it -> "dayOfBirth".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'dayOfBirth' column in mixinReference Person_entity. Check if DB is in sync");
+		__index___dayOfBirth = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "dayOfBirth".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'dayOfBirth' column in mixinReference Person. Check if DB is in sync");
+		__index__extended_dayOfBirth = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "bornOnEvenDay".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'bornOnEvenDay' column in mixinReference Person_entity. Check if DB is in sync");
+		__index___bornOnEvenDay = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "bornOnEvenDay".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'bornOnEvenDay' column in mixinReference Person. Check if DB is in sync");
+		__index__extended_bornOnEvenDay = (int)column.get().order - 1;
+			
 		column = columns.stream().filter(it -> "AuthorID".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'AuthorID' column in mixinReference Person_entity. Check if DB is in sync");
 		__index___AuthorID = (int)column.get().order - 1;
@@ -56,9 +72,9 @@ public class PersonConverter implements ObjectConverter<gen.model.mixinReference
 		
 		
 			
-		gen.model.mixinReference.Person.__configureConverter(readers, __index___birth, __index___AuthorID);
+		gen.model.mixinReference.Person.__configureConverter(readers, __index___birth, __index___dayOfBirth, __index___bornOnEvenDay, __index___AuthorID);
 			
-		gen.model.mixinReference.Person.__configureConverterExtended(readersExtended, __index__extended_birth, __index__extended_AuthorID);
+		gen.model.mixinReference.Person.__configureConverterExtended(readersExtended, __index__extended_birth, __index__extended_dayOfBirth, __index__extended_bornOnEvenDay, __index__extended_AuthorID);
 	}
 
 	@Override
@@ -84,6 +100,8 @@ public class PersonConverter implements ObjectConverter<gen.model.mixinReference
 		PostgresTuple[] items = new PostgresTuple[columnCount];
 		
 		items[__index___birth] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getBirth());
+		items[__index___dayOfBirth] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getDayOfBirth());
+		items[__index___bornOnEvenDay] = org.revenj.postgres.converters.BoolConverter.toTuple(instance.getBornOnEvenDay());
 		items[__index___AuthorID] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getAuthorID());
 		return RecordTuple.from(items);
 	}
@@ -109,6 +127,8 @@ public class PersonConverter implements ObjectConverter<gen.model.mixinReference
 		PostgresTuple[] items = new PostgresTuple[columnCountExtended];
 		
 		items[__index__extended_birth] = org.revenj.postgres.converters.DateConverter.toTuple(instance.getBirth());
+		items[__index__extended_dayOfBirth] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getDayOfBirth());
+		items[__index__extended_bornOnEvenDay] = org.revenj.postgres.converters.BoolConverter.toTuple(instance.getBornOnEvenDay());
 		items[__index__extended_AuthorID] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getAuthorID());
 		return RecordTuple.from(items);
 	}
@@ -128,6 +148,10 @@ public class PersonConverter implements ObjectConverter<gen.model.mixinReference
 	}
 	private final int __index___birth;
 	private final int __index__extended_birth;
+	private final int __index___dayOfBirth;
+	private final int __index__extended_dayOfBirth;
+	private final int __index___bornOnEvenDay;
+	private final int __index__extended_bornOnEvenDay;
 	private final int __index___AuthorID;
 	private final int __index__extended_AuthorID;
 	

@@ -101,7 +101,27 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		return "Composite(" + URI + ')';
 	}
 	
+	
+	public Composite(
+			final java.util.UUID id,
+			final gen.model.test.En[] enn,
+			final gen.model.test.En en,
+			final gen.model.test.Simple simple,
+			final java.util.List<java.time.OffsetDateTime> tsl,
+			final java.util.List<gen.model.test.Entity> entities) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setId(id);
+		setEnn(enn);
+		setEn(en);
+		setSimple(simple);
+		setTsl(tsl);
+		setEntities(entities);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = -4988792854303319639L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -116,17 +136,16 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 			@com.fasterxml.jackson.annotation.JsonProperty("laziesURI") final String[] laziesURI) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
-		this.id = id == null ? new java.util.UUID(0L, 0L) : id;
+		this.id = id == null ? org.revenj.Utils.MIN_UUID : id;
 		this.enn = enn == null ? new gen.model.test.En[] { } : enn;
 		this.en = en == null ? gen.model.test.En.A : en;
 		this.simple = simple == null ? new gen.model.test.Simple() : simple;
-		this.change = change == null ? java.time.LocalDate.of(1, 1, 1) : change;
+		this.change = change == null ? org.revenj.Utils.MIN_LOCAL_DATE : change;
 		this.tsl = tsl == null ? new java.util.ArrayList<java.time.OffsetDateTime>(4) : tsl;
 		this.entities = entities == null ? new java.util.ArrayList<gen.model.test.Entity>(4) : entities;
 		this.laziesURI = laziesURI == null ? new String[0] : laziesURI;
 	}
 
-	private static final long serialVersionUID = -791424202417332767L;
 	
 	private java.util.UUID id;
 
@@ -276,13 +295,13 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 	@com.fasterxml.jackson.annotation.JsonIgnore
 	public gen.model.test.LazyLoad[] getLazies()  {
 		
-	
+		
 		if(this.laziesURI != null && this.laziesURI.length == 0)
 		{
 			this.lazies = new gen.model.test.LazyLoad[] { };
 			this.laziesURI = null;
 		}
-	
+		
 		if (this.__locator.isPresent() && (this.laziesURI != null && (this.lazies == null || this.lazies.length != this.laziesURI.length))) {
 			gen.model.test.repositories.LazyLoadRepository repository = this.__locator.get().resolve(gen.model.test.repositories.LazyLoadRepository.class);
 			java.util.List<gen.model.test.LazyLoad> __list = repository.find(this.laziesURI);
@@ -299,7 +318,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 	@com.fasterxml.jackson.annotation.JsonProperty("laziesURI")
 	public String[] getLaziesURI()  {
 		
-	
+		
 			if (this.lazies != null) {
 				final String[] _result = new String[this.lazies.length];
 				int _i = 0;
@@ -331,7 +350,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = -3475896705255350092L;
+	private static final long serialVersionUID = 5984785891948638748L;
 	
 	private gen.model.test.Simple simple;
 
@@ -357,6 +376,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		}
 }
 
+	private transient Composite __originalValue;
 	
 	static {
 		gen.model.test.repositories.CompositeRepository.__setupPersist(
@@ -396,7 +416,6 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			}
 		);
 	}
-	private transient Composite __originalValue;
 	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
@@ -436,23 +455,4 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			if (__list != null) item.laziesURI = __list.toArray(new String[__list.size()]); else item.laziesURI = new String[0]; 
 		}; };
 	}
-	
-	
-	public Composite(
-			final java.util.UUID id,
-			final gen.model.test.En[] enn,
-			final gen.model.test.En en,
-			final gen.model.test.Simple simple,
-			final java.util.List<java.time.OffsetDateTime> tsl,
-			final java.util.List<gen.model.test.Entity> entities) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setId(id);
-		setEnn(enn);
-		setEn(en);
-		setSimple(simple);
-		setTsl(tsl);
-		setEntities(entities);
-	}
-
 }

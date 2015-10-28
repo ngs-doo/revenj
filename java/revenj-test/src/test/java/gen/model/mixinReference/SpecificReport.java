@@ -74,7 +74,17 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		return "SpecificReport(" + URI + ')';
 	}
 	
+	
+	public SpecificReport(
+			final gen.model.mixinReference.Author author) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setAuthor(author);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
+	private static final long serialVersionUID = -5290048153587623428L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -89,7 +99,6 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		this.authorID = authorID;
 	}
 
-	private static final long serialVersionUID = -3467073543674981612L;
 	
 	private int ID;
 
@@ -124,6 +133,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 			}
 		});
 	}
+	private transient SpecificReport __originalValue;
 	
 	static {
 		gen.model.mixinReference.repositories.SpecificReportRepository.__setupPersist(
@@ -159,7 +169,6 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 			}
 		);
 	}
-	private transient SpecificReport __originalValue;
 	
 	private gen.model.mixinReference.Author author;
 
@@ -167,7 +176,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 	@com.fasterxml.jackson.annotation.JsonIgnore
 	public gen.model.mixinReference.Author getAuthor()  {
 		
-	
+		
 		if (__locator.isPresent() && (author != null && !author.getURI().equals(authorURI) || author == null && authorURI != null)) {
 			gen.model.mixinReference.repositories.AuthorRepository repository = __locator.get().resolve(gen.model.mixinReference.repositories.AuthorRepository.class);
 			author = repository.find(authorURI).orElse(null);
@@ -196,6 +205,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 	@com.fasterxml.jackson.annotation.JsonProperty("authorURI")
 	public String getAuthorURI()  {
 		
+		if (this.author != null) this.authorURI = this.author.getURI();
 		return this.authorURI;
 	}
 
@@ -206,6 +216,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 	@com.fasterxml.jackson.annotation.JsonProperty("authorID")
 	public int getAuthorID()  {
 		
+		if (this.author != null) this.authorID = this.author.getID();
 		return authorID;
 	}
 
@@ -240,13 +251,4 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		readers[__index__extended_authorURI] = (item, reader, context) -> { item.authorURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
 		readers[__index__extended_authorID] = (item, reader, context) -> { item.authorID = org.revenj.postgres.converters.IntConverter.parse(reader); };
 	}
-	
-	
-	public SpecificReport(
-			final gen.model.mixinReference.Author author) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setAuthor(author);
-	}
-
 }
