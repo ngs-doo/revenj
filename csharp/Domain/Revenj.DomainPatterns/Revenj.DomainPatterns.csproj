@@ -91,7 +91,6 @@
     <Compile Include="DomainTypeResolver.cs" />
     <Compile Include="History.cs" />
     <Compile Include="DomainModel.cs" />
-    <Compile Include="Counters\NumberCounter.cs" />
     <Compile Include="Signature\DomainEvent.cs" />
     <Compile Include="Signature\DomainObjects.cs" />
     <Compile Include="SingleDomainEventSource.cs" />
