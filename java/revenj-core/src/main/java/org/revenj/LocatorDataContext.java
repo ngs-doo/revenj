@@ -189,14 +189,16 @@ final class LocatorDataContext implements UnitOfWork {
 		if (closed) {
 			return;
 		}
-		if (hasChanges) {
-			rollback();
-		}
-		try {
-			connection.setAutoCommit(true);
-			connection.close();
-		} catch (SQLException e) {
-			throw new IOException(e);
+		if (connection != null) {
+			if (hasChanges) {
+				rollback();
+			}
+			try {
+				connection.setAutoCommit(true);
+				connection.close();
+			} catch (SQLException e) {
+				throw new IOException(e);
+			}
 		}
 		try {
 			locator.close();
