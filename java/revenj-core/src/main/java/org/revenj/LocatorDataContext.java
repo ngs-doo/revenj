@@ -127,7 +127,7 @@ final class LocatorDataContext implements UnitOfWork {
 			return;
 		}
 		Class<?> manifest = pairs.iterator().next().getValue().getClass();
-		((PersistableRepository) getRepository(manifest)).update(pairs);
+		((PersistableRepository) getRepository(manifest)).persist(null, pairs, null);
 		hasChanges = true;
 	}
 
