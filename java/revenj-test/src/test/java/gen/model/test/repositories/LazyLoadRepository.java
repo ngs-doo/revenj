@@ -184,7 +184,7 @@ public class LazyLoadRepository   implements java.io.Closeable, org.revenj.patte
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.test.LazyLoad> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT r FROM \"test\".\"LazyLoad_entity\" r WHERE r.\"ID\" IN (");
+			StringBuilder sb = new StringBuilder("SELECT _r FROM \"test\".\"LazyLoad_entity\" _r WHERE _r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {

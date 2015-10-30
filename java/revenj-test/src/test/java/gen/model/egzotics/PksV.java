@@ -101,7 +101,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 5936676525876737035L;
+	private static final long serialVersionUID = -3825643539294556711L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private PksV(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

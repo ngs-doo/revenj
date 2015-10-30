@@ -1,16 +1,16 @@
-package gen.model.test.repositories;
+package gen.model.binaries.repositories;
 
 
 
-public class SingleDetailRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.test.SingleDetail>, org.revenj.patterns.PersistableRepository<gen.model.test.SingleDetail> {
+public class WritableDocumentRepository   implements java.io.Closeable, org.revenj.patterns.SearchableRepository<gen.model.binaries.WritableDocument>, org.revenj.patterns.Repository<gen.model.binaries.WritableDocument>, org.revenj.patterns.PersistableRepository<gen.model.binaries.WritableDocument> {
 	
 	
 	
-	public SingleDetailRepository(
+	public WritableDocumentRepository(
 			 final java.util.Optional<java.sql.Connection> transactionContext,
 			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
-			 final org.revenj.postgres.ObjectConverter<gen.model.test.SingleDetail> converter,
+			 final org.revenj.postgres.ObjectConverter<gen.model.binaries.WritableDocument> converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
 		this.transactionContext = transactionContext;
@@ -25,7 +25,7 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
 	private final java.sql.Connection transactionConnection;
-	private final org.revenj.postgres.ObjectConverter<gen.model.test.SingleDetail> converter;
+	private final org.revenj.postgres.ObjectConverter<gen.model.binaries.WritableDocument> converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	private java.sql.Connection getConnection() {
@@ -45,20 +45,20 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 		}		
 	}
 
-	public SingleDetailRepository(org.revenj.patterns.ServiceLocator locator) {
-		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.SingleDetailConverter.class), locator);
+	public WritableDocumentRepository(org.revenj.patterns.ServiceLocator locator) {
+		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.binaries.converters.WritableDocumentConverter.class), locator);
 	}
 	
 	@Override
-	public org.revenj.patterns.Query<gen.model.test.SingleDetail> query(org.revenj.patterns.Specification<gen.model.test.SingleDetail> filter) {
-		org.revenj.patterns.Query<gen.model.test.SingleDetail> query = queryProvider.query(transactionConnection, locator, gen.model.test.SingleDetail.class);
+	public org.revenj.patterns.Query<gen.model.binaries.WritableDocument> query(org.revenj.patterns.Specification<gen.model.binaries.WritableDocument> filter) {
+		org.revenj.patterns.Query<gen.model.binaries.WritableDocument> query = queryProvider.query(transactionConnection, locator, gen.model.binaries.WritableDocument.class);
 		if (filter == null) { }
 		else query = query.filter(filter);
 		
 		return query;
 	}
 
-	private java.util.List<gen.model.test.SingleDetail> readFromDb(java.sql.PreparedStatement statement, java.util.List<gen.model.test.SingleDetail> result) throws java.sql.SQLException, java.io.IOException {
+	private java.util.List<gen.model.binaries.WritableDocument> readFromDb(java.sql.PreparedStatement statement, java.util.List<gen.model.binaries.WritableDocument> result) throws java.sql.SQLException, java.io.IOException {
 		try (java.sql.ResultSet rs = statement.executeQuery();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			while (rs.next()) {
@@ -71,17 +71,17 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 	}
 
 	@Override
-	public java.util.List<gen.model.test.SingleDetail> search(org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification, Integer limit, Integer offset) {
+	public java.util.List<gen.model.binaries.WritableDocument> search(org.revenj.patterns.Specification<gen.model.binaries.WritableDocument> specification, Integer limit, Integer offset) {
 		final String selectType = "SELECT it";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
-				sql = "SELECT r FROM \"test\".\"SingleDetail_entity\" r";
+				sql = "SELECT r FROM \"binaries\".\"Document\" r";
 			} 
 			else {
-				org.revenj.patterns.Query<gen.model.test.SingleDetail> query = query(specification);
+				org.revenj.patterns.Query<gen.model.binaries.WritableDocument> query = query(specification);
 				if (offset != null) {
 					query = query.skip(offset);
 				}
@@ -112,14 +112,14 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 	}
 
 	@Override
-	public long count(org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification) {
+	public long count(org.revenj.patterns.Specification<gen.model.binaries.WritableDocument> specification) {
 		final String selectType = "SELECT COUNT(*)";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
-				sql = "SELECT COUNT(*) FROM \"test\".\"SingleDetail_entity\" r";
+				sql = "SELECT COUNT(*) FROM \"binaries\".\"Document\" r";
 			} 
 			else {
 				try {
@@ -143,14 +143,14 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 	}
 
 	@Override
-	public boolean exists(org.revenj.patterns.Specification<gen.model.test.SingleDetail> specification) {
+	public boolean exists(org.revenj.patterns.Specification<gen.model.binaries.WritableDocument> specification) {
 		final String selectType = "SELECT exists(SELECT *";
 		java.util.function.Consumer<java.sql.PreparedStatement> applyFilters = ps -> {};
 		java.sql.Connection connection = getConnection();
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql = null;
 			if (specification == null) {
-				sql = "SELECT exists(SELECT * FROM \"test\".\"SingleDetail_entity\" r";
+				sql = "SELECT exists(SELECT * FROM \"binaries\".\"Document\" r";
 			} 
 			else {
 				try {
@@ -179,12 +179,12 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 
 	
 	@Override
-	public java.util.List<gen.model.test.SingleDetail> find(String[] uris) {
+	public java.util.List<gen.model.binaries.WritableDocument> find(String[] uris) {
 		java.sql.Connection connection = getConnection();
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
-			java.util.List<gen.model.test.SingleDetail> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT _r FROM \"test\".\"SingleDetail_entity\" _r WHERE _r.\"ID\" IN (");
+			java.util.List<gen.model.binaries.WritableDocument> result = new java.util.ArrayList<>(uris.length);
+			StringBuilder sb = new StringBuilder("SELECT _r FROM \"binaries\".\"Document\" _r WHERE _r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
@@ -202,84 +202,62 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 		}
 	}
 	
-	public static void __setupPersist(
-			java.util.function.BiConsumer<java.util.Collection<gen.model.test.SingleDetail>, org.revenj.postgres.PostgresWriter> insert, 
-			java.util.function.BiConsumer<java.util.List<gen.model.test.SingleDetail>, java.util.List<gen.model.test.SingleDetail>> update,
-			java.util.function.Consumer<java.util.Collection<gen.model.test.SingleDetail>> delete,
-			java.util.function.Function<gen.model.test.SingleDetail, gen.model.test.SingleDetail> track) {
+	public static void __setupPersist(java.util.function.BiConsumer<java.util.Collection<gen.model.binaries.WritableDocument>, org.revenj.postgres.PostgresWriter> insert) {
 		insertLoop = insert;
-		updateLoop = update;
-		deleteLoop = delete;
-		trackChanges = track;
 	}
 
-	private static java.util.function.BiConsumer<java.util.Collection<gen.model.test.SingleDetail>, org.revenj.postgres.PostgresWriter> insertLoop;
-	private static java.util.function.BiConsumer<java.util.List<gen.model.test.SingleDetail>, java.util.List<gen.model.test.SingleDetail>> updateLoop;
-	private static java.util.function.Consumer<java.util.Collection<gen.model.test.SingleDetail>> deleteLoop;
-	private static java.util.function.Function<gen.model.test.SingleDetail, gen.model.test.SingleDetail> trackChanges;
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.binaries.WritableDocument>, org.revenj.postgres.PostgresWriter> insertLoop;
 
 	private static final String[] EMPTY_URI = new String[0];
 
+	private static final org.postgresql.util.PGobject EMPTY_PGO = new org.postgresql.util.PGobject();
+	static {
+		EMPTY_PGO.setType("\"binaries\".\"Document\"[]");
+		try { EMPTY_PGO.setValue("{}"); } catch (java.sql.SQLException ignore) {}
+	}
+
 	@Override
 	public String[] persist(
-			java.util.Collection<gen.model.test.SingleDetail> insert,
-			java.util.Collection<java.util.Map.Entry<gen.model.test.SingleDetail, gen.model.test.SingleDetail>> update,
-			java.util.Collection<gen.model.test.SingleDetail> delete) throws java.io.IOException {
+			java.util.Collection<gen.model.binaries.WritableDocument> insert,
+			java.util.Collection<java.util.Map.Entry<gen.model.binaries.WritableDocument, gen.model.binaries.WritableDocument>> update,
+			java.util.Collection<gen.model.binaries.WritableDocument> delete) throws java.io.IOException {
 		java.sql.Connection connection = getConnection();
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"test\".\"persist_SingleDetail\"(?, ?, ?, ?)");
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("WITH ins AS (INSERT INTO \"binaries\".\"Document\" SELECT * FROM unnest(?)), upd AS (UPDATE \"binaries\".\"Document\" AS _t SET \"ID\" = (_sq._new).\"ID\", \"name\" = (_sq._new).\"name\" FROM (SELECT unnest(?) as _old, unnest(?) as _new) _sq  WHERE _t.\"ID\" = (_sq._old).\"ID\") DELETE FROM \"binaries\".\"Document\" WHERE (\"ID\") IN (SELECT \"ID\" FROM unnest(?))");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {
-				assignSequenceID.accept(insert, connection);
 				insertLoop.accept(insert, sw);
 				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
-				pgo.setType("\"test\".\"SingleDetail_entity\"[]");
+				pgo.setType("\"binaries\".\"Document\"[]");
 				sw.reset();
 				tuple.buildTuple(sw, false);
 				pgo.setValue(sw.toString());
 				statement.setObject(1, pgo);
 				result = new String[insert.size()];
 				int i = 0;
-				for (gen.model.test.SingleDetail it : insert) {
+				for (gen.model.binaries.WritableDocument it : insert) {
 					result[i++] = it.getURI();
-					trackChanges.apply(it);
 				}
 			} else {
-				statement.setArray(1, null);
+				statement.setObject(1, EMPTY_PGO);
 				result = EMPTY_URI;
 			}
 			if (update != null && !update.isEmpty()) {
-				java.util.List<gen.model.test.SingleDetail> oldUpdate = new java.util.ArrayList<>(update.size());
-				java.util.List<gen.model.test.SingleDetail> newUpdate = new java.util.ArrayList<>(update.size());
+				java.util.List<gen.model.binaries.WritableDocument> oldUpdate = new java.util.ArrayList<>(update.size());
+				java.util.List<gen.model.binaries.WritableDocument> newUpdate = new java.util.ArrayList<>(update.size());
 				java.util.Map<String, Integer> missing = new java.util.HashMap<>();
-				int cnt = 0;
-				for (java.util.Map.Entry<gen.model.test.SingleDetail, gen.model.test.SingleDetail> it : update) {
-					gen.model.test.SingleDetail oldValue = trackChanges.apply(it.getValue());
-					if (it.getKey() != null) {
-						oldValue = it.getKey();
-					}
-					oldUpdate.add(oldValue);
-					if (oldValue == null) {
-						missing.put(it.getValue().getURI(), cnt);
-					}
+				for (java.util.Map.Entry<gen.model.binaries.WritableDocument, gen.model.binaries.WritableDocument> it : update) {
+					oldUpdate.add(it.getKey() != null ? it.getKey() : it.getValue());
 					newUpdate.add(it.getValue());
-					cnt++;
 				}
-				if (!missing.isEmpty()) {
-					java.util.List<gen.model.test.SingleDetail> found = find(missing.keySet().toArray(new String[missing.size()]));
-					for (gen.model.test.SingleDetail it : found) {
-						oldUpdate.set(missing.get(it.getURI()), it);
-					}
-				}
-				updateLoop.accept(oldUpdate, newUpdate);
 				org.revenj.postgres.converters.PostgresTuple tupleOld = org.revenj.postgres.converters.ArrayTuple.create(oldUpdate, converter::to);
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
 				org.postgresql.util.PGobject pgNew = new org.postgresql.util.PGobject();
-				pgOld.setType("\"test\".\"SingleDetail_entity\"[]");
-				pgNew.setType("\"test\".\"SingleDetail_entity\"[]");
+				pgOld.setType("\"binaries\".\"Document\"[]");
+				pgNew.setType("\"binaries\".\"Document\"[]");
 				tupleOld.buildTuple(sw, false);
 				pgOld.setValue(sw.toString());
 				sw.reset();
@@ -289,25 +267,20 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 				statement.setObject(2, pgOld);
 				statement.setObject(3, pgNew);
 			} else {
-				statement.setArray(2, null);
-				statement.setArray(3, null);
+				statement.setObject(2, EMPTY_PGO);
+				statement.setObject(3, EMPTY_PGO);
 			}
 			if (delete != null && !delete.isEmpty()) {
-				deleteLoop.accept(delete);
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(delete, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
-				pgo.setType("\"test\".\"SingleDetail_entity\"[]");
+				pgo.setType("\"binaries\".\"Document\"[]");
 				tuple.buildTuple(sw, false);
 				pgo.setValue(sw.toString());
 				statement.setObject(4, pgo);
 			} else {
-				statement.setArray(4, null);
+				statement.setObject(4, EMPTY_PGO);
 			}
-			try (java.sql.ResultSet rs = statement.executeQuery()) {
-				rs.next();
-				String message = rs.getString(1);
-				if (message != null) throw new java.io.IOException(message);
-			}
+			statement.executeUpdate();
 			return result;
 		} catch (java.sql.SQLException e) {
 			throw new java.io.IOException(e);
@@ -316,10 +289,4 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 		}
 	}
 
-	
-	public static void __setupSequenceID(java.util.function.BiConsumer<java.util.Collection<gen.model.test.SingleDetail>, java.sql.Connection> sequence) {
-		assignSequenceID = sequence;
-	}
-
-	private static java.util.function.BiConsumer<java.util.Collection<gen.model.test.SingleDetail>, java.sql.Connection> assignSequenceID;
 }

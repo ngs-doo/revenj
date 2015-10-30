@@ -8,9 +8,9 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 	
 	public Person() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.birth = java.time.LocalDate.now();
 		this.AuthorID = 0;
+		this.URI = java.lang.Integer.toString(this.AuthorID);
 	}
 
 	
@@ -81,7 +81,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable {
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 3075734252076015918L;
+	private static final long serialVersionUID = 8392175065152126156L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Person(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

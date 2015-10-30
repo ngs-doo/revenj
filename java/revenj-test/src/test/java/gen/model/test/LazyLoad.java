@@ -8,8 +8,9 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	
 	public LazyLoad() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
+		this.ID = --__SequenceCounterID__;
+		this.URI = java.lang.Integer.toString(this.ID);
 	}
 
 	
@@ -92,7 +93,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -3289424908018295842L;
+	private static final long serialVersionUID = -4230822391408954452L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private LazyLoad(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -145,6 +146,8 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		});
 	}
+	
+	private static int __SequenceCounterID__;
 	
 	private gen.model.test.Composite comp;
 

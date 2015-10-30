@@ -8,12 +8,13 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 	
 	public Author() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
+		this.ID = --__SequenceCounterID__;
 		this.name = "";
 		this.setPerson(new gen.model.mixinReference.Person());
 		this.setRezident(new gen.model.mixinReference.Resident());
 		this.children = new gen.model.mixinReference.Child[] { };
+		this.URI = java.lang.Integer.toString(this.ID);
 	}
 
 	
@@ -108,7 +109,7 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 311380563930816784L;
+	private static final long serialVersionUID = -6946336124716876850L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -163,6 +164,8 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 			}
 		});
 	}
+	
+	private static int __SequenceCounterID__;
 	
 	private String name;
 

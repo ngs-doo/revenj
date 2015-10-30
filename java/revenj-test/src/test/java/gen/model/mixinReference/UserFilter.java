@@ -8,9 +8,10 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 	
 	public UserFilter() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
+		this.ID = --__SequenceCounterID__;
 		this.name = "";
+		this.URI = java.lang.Integer.toString(this.ID);
 	}
 
 	
@@ -82,7 +83,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -6671846376500650535L;
+	private static final long serialVersionUID = -5889493999132495449L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private UserFilter(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -129,6 +130,8 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 			}
 		});
 	}
+	
+	private static int __SequenceCounterID__;
 	
 	private String name;
 

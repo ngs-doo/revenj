@@ -94,7 +94,7 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable {
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 4437631325942301664L;
+	private static final long serialVersionUID = 6795575433615980862L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail2(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

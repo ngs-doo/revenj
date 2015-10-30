@@ -192,7 +192,7 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.mixinReference.UserFilter> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT r FROM \"mixinReference\".\"UserFilter_entity\" r WHERE r.\"ID\" IN (");
+			StringBuilder sb = new StringBuilder("SELECT _r FROM \"mixinReference\".\"UserFilter_entity\" _r WHERE _r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {

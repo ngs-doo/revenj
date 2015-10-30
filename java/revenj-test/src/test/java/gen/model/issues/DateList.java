@@ -10,6 +10,7 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 			
 		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0L;
+		this.ID = --__SequenceCounterID__;
 		this.list = new java.util.ArrayList<java.time.OffsetDateTime>(4);
 	}
 
@@ -82,7 +83,7 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 6494749951644914160L;
+	private static final long serialVersionUID = 7866065455683476606L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private DateList(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -129,6 +130,8 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		});
 	}
+	
+	private static long __SequenceCounterID__;
 	
 	private java.util.List<java.time.OffsetDateTime> list;
 

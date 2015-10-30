@@ -8,9 +8,10 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 	
 	public SingleDetail() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
+		this.ID = --__SequenceCounterID__;
 		this.details = new gen.model.test.LazyLoad[] { };
+		this.URI = java.lang.Integer.toString(this.ID);
 	}
 
 	
@@ -73,7 +74,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -8238212556288794984L;
+	private static final long serialVersionUID = 1667498828671224126L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -120,6 +121,8 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 			}
 		});
 	}
+	
+	private static int __SequenceCounterID__;
 	
 	private gen.model.test.LazyLoad[] details;
 

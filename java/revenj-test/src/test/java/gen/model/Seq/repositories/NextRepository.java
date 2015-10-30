@@ -250,7 +250,7 @@ public class NextRepository   implements java.io.Closeable, org.revenj.patterns.
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.Seq.Next> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT r FROM \"Seq\".\"Next_entity\" r WHERE r.\"ID\" IN (");
+			StringBuilder sb = new StringBuilder("SELECT _r FROM \"Seq\".\"Next_entity\" _r WHERE _r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {

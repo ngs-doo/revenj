@@ -36,6 +36,7 @@ module test {
 		change;
 		entities;
 		simple;
+		calculated guid id2 from 'it => it.id';
 		specification ForSimple 'it => simples.Contains(it.simple)' {
 			List<Simple> simples;
 		}
@@ -100,8 +101,8 @@ module mixinReference {
 		int x;
 		Author author;
 	}
-	entity Person {
-		date birth;
+	entity Person { 
+		date birth; 
 		calculated int yearOfBirth from 'it => it.birth.Year';
 		calculated int dayOfBirth from 'it => it.birth.Day' { persisted; }
 		calculated bornOnOddDay from 'it => it.birth.Day % 2 == 1';
@@ -126,6 +127,16 @@ module binaries {
 	guid root Document {
 		string(20) name;
 		binary content;
+	}
+	sql WritableDocument binaries.Document(id)
+	{
+		guid id from ID;
+		string name;
+	}
+	sql ReadOnlyDocument 'SELECT ""ID"", name from binaries.""Document""'
+	{
+		guid ID;
+		string Name from name;
 	}
 }
 module security {

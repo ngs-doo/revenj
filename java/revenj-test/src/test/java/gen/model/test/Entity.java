@@ -121,7 +121,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 553660015979821681L;
+	private static final long serialVersionUID = 8349626202223983459L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

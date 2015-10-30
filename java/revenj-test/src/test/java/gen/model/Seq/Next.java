@@ -8,8 +8,9 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 	
 	public Next() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
+		this.ID = --__SequenceCounterID__;
+		this.URI = java.lang.Integer.toString(this.ID);
 	}
 
 	
@@ -69,7 +70,7 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 7536785902491168010L;
+	private static final long serialVersionUID = 2171179118054500800L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Next(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -115,6 +116,8 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 		});
 	}
 	
+	private static int __SequenceCounterID__;
+	
 
 public static class BetweenIds   implements java.io.Serializable, org.revenj.patterns.Specification<Next> {
 	
@@ -135,7 +138,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = 96351219303696884L;
+	private static final long serialVersionUID = 3848366226739958478L;
 	
 	private Integer min;
 

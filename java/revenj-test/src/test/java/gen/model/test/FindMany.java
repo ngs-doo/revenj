@@ -58,7 +58,7 @@ public static class Result   {
 		this.ids = new java.util.LinkedHashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = 8281182607475947506L;
+	private static final long serialVersionUID = 8308550219818556472L;
 	
 	private java.util.UUID id;
 

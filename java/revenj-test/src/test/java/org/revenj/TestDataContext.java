@@ -2,6 +2,9 @@ package org.revenj;
 
 import gen.model.Boot;
 import gen.model.Seq.Next;
+import gen.model.binaries.Document;
+import gen.model.binaries.ReadOnlyDocument;
+import gen.model.binaries.WritableDocument;
 import gen.model.mixinReference.Author;
 import gen.model.mixinReference.SpecificReport;
 import gen.model.test.Clicked;
@@ -12,14 +15,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.patterns.DataContext;
-import org.revenj.patterns.ServiceLocator;
-import org.revenj.patterns.UnitOfWork;
+import org.revenj.patterns.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -133,5 +135,41 @@ public class TestDataContext {
 		Assert.assertEquals(author.getURI(), report.getAuthorURI());
 		Assert.assertEquals(author.getID(), report.getAuthorID());
 		context.create(report);
+	}
+
+	@Test
+	public void readOnlySqlConcept() throws Exception {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		Document document = new Document().setName("test me");
+		context.create(document);
+		UUID id = document.getID();
+		Optional<ReadOnlyDocument> found =
+				context.query(ReadOnlyDocument.class)
+						.filter(it -> it.getID().equals(id))
+						.findAny();
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals("test me", found.get().getName());
+	}
+
+	@Test
+	public void writableSqlConcept() throws Exception {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		Document document = new Document().setName("test me now");
+		context.create(document);
+		UUID id = document.getID();
+		Optional<WritableDocument> found =
+				context.query(WritableDocument.class)
+						.filter(it -> it.getId().equals(id))
+						.findAny();
+		Assert.assertTrue(found.isPresent());
+		WritableDocument wd = found.get();
+		Assert.assertEquals("test me now", wd.getName());
+		wd.setName("test me later");
+		context.update(wd);
+		Optional<Document> changed = context.find(Document.class, document.getURI());
+		Assert.assertTrue(changed.isPresent());
+		Assert.assertEquals("test me later", changed.get().getName());
 	}
 }

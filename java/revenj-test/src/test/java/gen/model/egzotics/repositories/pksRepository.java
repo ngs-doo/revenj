@@ -184,7 +184,7 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.egzotics.pks> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT r FROM \"egzotics\".\"pks_entity\" r WHERE r.\"id\" IN (");
+			StringBuilder sb = new StringBuilder("SELECT _r FROM \"egzotics\".\"pks_entity\" _r WHERE _r.\"id\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {

@@ -8,9 +8,9 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable {
 	
 	public Resident() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.id = java.util.UUID.randomUUID();
 		this.birth = java.time.LocalDate.now();
+		this.URI = this.id.toString();
 	}
 
 	
@@ -83,7 +83,7 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable {
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 4526776157055372110L;
+	private static final long serialVersionUID = -5685606523225635128L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Resident(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

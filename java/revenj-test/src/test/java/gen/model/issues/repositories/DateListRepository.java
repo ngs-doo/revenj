@@ -184,7 +184,7 @@ public class DateListRepository   implements java.io.Closeable, org.revenj.patte
 		try (java.sql.Statement statement = connection.createStatement();
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
 			java.util.List<gen.model.issues.DateList> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT r FROM \"issues\".\"DateList_entity\" r WHERE r.\"ID\" IN (");
+			StringBuilder sb = new StringBuilder("SELECT _r FROM \"issues\".\"DateList_entity\" _r WHERE _r.\"ID\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {

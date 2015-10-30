@@ -180,6 +180,14 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.register(binaries$converter$DocumentConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.binaries.Document>>(){}.type, binaries$converter$DocumentConverter, false);
 		
+		gen.model.binaries.converters.WritableDocumentConverter binaries$converter$WritableDocumentConverter = new gen.model.binaries.converters.WritableDocumentConverter(loadQueryInfo(container, "SELECT * FROM \"binaries\".\"Document\" sq LIMIT 0", "binaries", "WritableDocument"));
+		container.register(binaries$converter$WritableDocumentConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.binaries.WritableDocument>>(){}.type, binaries$converter$WritableDocumentConverter, false);
+		
+		gen.model.binaries.converters.ReadOnlyDocumentConverter binaries$converter$ReadOnlyDocumentConverter = new gen.model.binaries.converters.ReadOnlyDocumentConverter(loadQueryInfo(container, "SELECT * FROM (SELECT \"ID\", name from binaries.\"Document\") sq LIMIT 0", "binaries", "ReadOnlyDocument"));
+		container.register(binaries$converter$ReadOnlyDocumentConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.binaries.ReadOnlyDocument>>(){}.type, binaries$converter$ReadOnlyDocumentConverter, false);
+		
 		gen.model.security.converters.DocumentConverter security$converter$DocumentConverter = new gen.model.security.converters.DocumentConverter(columns);
 		container.register(security$converter$DocumentConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.security.Document>>(){}.type, security$converter$DocumentConverter, false);
@@ -368,6 +376,24 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"");
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"");
+		binaries$converter$WritableDocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
+		
+		container.register(gen.model.binaries.repositories.WritableDocumentRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
+		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getId", "\"ID\"");
+		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getName", "\"name\"");
+		binaries$converter$ReadOnlyDocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.ReadOnlyDocument.class, "(SELECT \"ID\", name from binaries.\"Document\")");
+		
+		container.register(gen.model.binaries.repositories.ReadOnlyDocumentRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.ReadOnlyDocument>>(){}.type, gen.model.binaries.repositories.ReadOnlyDocumentRepository::new, false);
+		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getName", "\"name\"");
 		security$converter$DocumentConverter.configure(container);
 		metamodel.registerDataSource(gen.model.security.Document.class, "\"security\".\"Document_entity\"");
 		metamodel.registerProperty(gen.model.security.Document.class, "getURI", "\"URI\"");
@@ -455,4 +481,36 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthorID", "\"authorID\"");
 		metamodel.registerProperty(gen.model.security.Document.class, "getDeactivated", "\"deactivated\"");
 	}
+	
+	private java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> loadQueryInfo(
+			org.revenj.extensibility.Container container,
+			String query,
+			String module,
+			String name) throws java.io.IOException {
+		java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> columns = new java.util.ArrayList<>();
+		try (java.sql.Connection connection = container.resolve(javax.sql.DataSource.class).getConnection();
+				java.sql.Statement statement = connection.createStatement();
+				java.sql.ResultSet rs = statement.executeQuery(query)) {
+			int cols = rs.getMetaData().getColumnCount();
+			for(int i = 0; i < cols; i++) {
+				String[] columnType = rs.getMetaData().getColumnTypeName(i + 1).split("\\.");
+				columns.add(
+						new org.revenj.postgres.ObjectConverter.ColumnInfo(
+								module,
+								name,
+								rs.getMetaData().getColumnLabel(i + 1),
+								columnType.length == 1 ? "pg_catalog" : columnType[0],
+								columnType[columnType.length - 1],
+								(short)(i + 1),
+								false,
+								false
+						)
+				);
+			}
+		} catch (java.sql.SQLException e) {
+			throw new java.io.IOException(e);
+		}
+		return columns;
+	}
+
 }

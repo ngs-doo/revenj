@@ -8,8 +8,9 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 	
 	public SpecificReport() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
+		this.ID = --__SequenceCounterID__;
+		this.URI = java.lang.Integer.toString(this.ID);
 	}
 
 	
@@ -84,7 +85,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -5290048153587623428L;
+	private static final long serialVersionUID = -2769097811699255026L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -133,6 +134,8 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 			}
 		});
 	}
+	
+	private static int __SequenceCounterID__;
 	private transient SpecificReport __originalValue;
 	
 	static {

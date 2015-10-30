@@ -112,7 +112,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 		this.ts = ts == null ? org.revenj.Utils.MIN_DATE_TIME : ts;
 	}
 
-	private static final long serialVersionUID = 5772902852503841583L;
+	private static final long serialVersionUID = -7149324934465483403L;
 	
 	private int number;
 

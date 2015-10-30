@@ -8,7 +8,6 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 	
 	public Composite() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.id = java.util.UUID.randomUUID();
 		this.enn = new gen.model.test.En[] { };
 		this.en = gen.model.test.En.A;
@@ -17,6 +16,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		this.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4);
 		this.entities = new java.util.ArrayList<gen.model.test.Entity>(4);
 		this.lazies = new gen.model.test.LazyLoad[] { };
+		this.URI = this.id.toString();
 	}
 
 	
@@ -121,7 +121,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -4988792854303319639L;
+	private static final long serialVersionUID = -247804894728326801L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -350,7 +350,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = 5984785891948638748L;
+	private static final long serialVersionUID = -2332339125747376982L;
 	
 	private gen.model.test.Simple simple;
 

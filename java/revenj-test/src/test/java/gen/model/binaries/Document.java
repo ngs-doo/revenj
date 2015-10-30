@@ -8,10 +8,10 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 	
 	public Document() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = java.util.UUID.randomUUID();
 		this.name = "";
 		this.content = org.revenj.Utils.EMPTY_BINARY;
+		this.URI = this.ID.toString();
 	}
 
 	
@@ -88,7 +88,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -6216349435805651936L;
+	private static final long serialVersionUID = -3175514767241011722L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Document(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,

@@ -8,10 +8,11 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 	
 	public Document() {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		this.ID = 0;
+		this.ID = --__SequenceCounterID__;
 		this.data = new java.util.LinkedHashMap<String, String>();
 		this.deactivated = false;
+		this.URI = java.lang.Integer.toString(this.ID);
 	}
 
 	
@@ -88,7 +89,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 6673814813813836845L;
+	private static final long serialVersionUID = -321843742121611565L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Document(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -137,6 +138,8 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		});
 	}
+	
+	private static int __SequenceCounterID__;
 	
 	private java.util.Map<String, String> data;
 
