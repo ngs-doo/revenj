@@ -60,6 +60,18 @@ public class TestQuery {
 	}
 
 	@Test
+	public void queryWithLimit() throws IOException {
+		ServiceLocator locator = container;
+		NextRepository repository = locator.resolve(NextRepository.class);
+		String[] uris = repository.insert(Arrays.asList(new Next(), new Next()));
+		Assert.assertEquals(2, uris.length);
+		int id1 = Integer.parseInt(uris[0]);
+		int id2 = Integer.parseInt(uris[1]);
+		List<Next> found = repository.query(next -> next.getID() == id1 || next.getID() == id2).limit(1).list();
+		Assert.assertEquals(1, found.size());
+	}
+
+	@Test
 	public void searchWithFilter() throws IOException {
 		ServiceLocator locator = container;
 		NextRepository repository = locator.resolve(NextRepository.class);

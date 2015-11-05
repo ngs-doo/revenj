@@ -62,6 +62,7 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
 	protected String generateQueryContents(QueryGenerationState queryState) {
 		generateSelectFromWhere(queryState);
 		generateSort(queryState);
+		generateLimitOffset(queryState);
 		return queryState.buildQueryString();
 	}
 
@@ -113,6 +114,17 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
 					// Special handling of subquery parantheses
 					queryState.appendQuery(")");
 			}
+		}
+	}
+
+	protected void generateLimitOffset(QueryGenerationState queryState) {
+		if (limit >= 0) {
+			queryState.appendQuery(" LIMIT ");
+			queryState.appendQuery(Long.toString(limit));
+		}
+		if (skip >= 0) {
+			queryState.appendQuery(" OFFSET ");
+			queryState.appendQuery(Long.toString(skip));
 		}
 	}
 
