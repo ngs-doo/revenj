@@ -21,17 +21,8 @@ public class WhereTransform extends RevenjOneLambdaQueryTransform {
 	public <U, V> JinqPostgresQuery<U> apply(JinqPostgresQuery<V> query, LambdaAnalysis where, SymbExArgumentHandler parentArgumentScope) throws QueryTransformException {
 		try {
 			if (query.isSelectFromWhere()) {
-				SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;
-				Expression methodExpr = computeWhereReturnExpr(where, sfw, parentArgumentScope);
-
-				// Create the new query, merging in the analysis of the method
-				SelectFromWhere<U> toReturn = (SelectFromWhere<U>) sfw.shallowCopy();
-				if (sfw.where == null) {
-					toReturn.where = methodExpr;
-				} else {
-					toReturn.where = new BinaryExpression(sfw.where, "AND", methodExpr);
-				}
-				return toReturn;
+				SelectFromWhere<U> sfw = (SelectFromWhere<U>) query;
+				return apply(where, parentArgumentScope, sfw);
 			} else if (query.isSelectFromWhereGroupHaving()) {
 				GroupedSelectFromWhere<V, ?> sfw = (GroupedSelectFromWhere<V, ?>) query;
 				Expression methodExpr = computeWhereReturnExpr(where, sfw, parentArgumentScope);
@@ -49,6 +40,22 @@ public class WhereTransform extends RevenjOneLambdaQueryTransform {
 		} catch (TypedValueVisitorException e) {
 			throw new QueryTransformException(e);
 		}
+	}
+
+	public <T> SelectFromWhere<T> apply(
+			LambdaAnalysis where,
+			SymbExArgumentHandler parentArgumentScope,
+			SelectFromWhere<T> sfw) throws TypedValueVisitorException, QueryTransformException {
+		Expression methodExpr = computeWhereReturnExpr(where, sfw, parentArgumentScope);
+
+		// Create the new query, merging in the analysis of the method
+		SelectFromWhere<T> toReturn = sfw.shallowCopy();
+		if (sfw.where == null) {
+			toReturn.where = methodExpr;
+		} else {
+			toReturn.where = new BinaryExpression(sfw.where, "AND", methodExpr);
+		}
+		return toReturn;
 	}
 
 	private <V> Expression computeWhereReturnExpr(

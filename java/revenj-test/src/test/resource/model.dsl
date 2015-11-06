@@ -36,10 +36,17 @@ module test {
 		change;
 		entities;
 		simple;
+		simple.number;
 		calculated guid id2 from 'it => it.id';
 		specification ForSimple 'it => simples.Contains(it.simple)' {
 			List<Simple> simples;
 		}
+		order by id desc;
+	}
+	cube<CompositeList> CompositeCube {
+		dimension number;
+		max change max;
+		min change min;
 	}
 	entity Entity {
 		money money;

@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4-1204-jdbc42</version>
+			<version>9.4-1205-jdbc42</version>
 		</dependency>
 		<dependency>
 			<groupId>io.reactivex</groupId>
@@ -38,6 +38,11 @@
 			<groupId>org.jinq</groupId>
 			<artifactId>jinq-asm-rebased</artifactId>
 			<version>1.8.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.dslplatform</groupId>
+			<artifactId>dsl-json</artifactId>
+			<version>0.9.0</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -14,7 +14,8 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 			@com.fasterxml.jackson.annotation.JsonProperty("tsl")  final java.util.List<java.time.OffsetDateTime> tsl,
 			@com.fasterxml.jackson.annotation.JsonProperty("change")  final java.time.LocalDate change,
 			@com.fasterxml.jackson.annotation.JsonProperty("entities")  final java.util.List<gen.model.test.Entity> entities,
-			@com.fasterxml.jackson.annotation.JsonProperty("simple")  final gen.model.test.Simple simple) {
+			@com.fasterxml.jackson.annotation.JsonProperty("simple")  final gen.model.test.Simple simple,
+			@com.fasterxml.jackson.annotation.JsonProperty("number")  final int number) {
 			
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.id = id != null ? id : org.revenj.Utils.MIN_UUID;
@@ -27,6 +28,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 		this.entities = entities != null ? entities : new java.util.ArrayList<gen.model.test.Entity>(4);
 		org.revenj.Guards.checkNulls(entities);
 		this.simple = simple != null ? simple : new gen.model.test.Simple();
+		this.number = number;
 	}
 
 	
@@ -41,6 +43,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 		this.change = java.time.LocalDate.now();
 		this.entities = new java.util.ArrayList<gen.model.test.Entity>(4);
 		this.simple = new gen.model.test.Simple();
+		this.number = 0;
 	}
 
 	
@@ -77,7 +80,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	private static final long serialVersionUID = 6101124285802706216L;
+	private static final long serialVersionUID = 2001347036889366980L;
 	
 	private final java.util.UUID id;
 
@@ -88,6 +91,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 		return this.id;
 	}
 
+	private static final gen.model.test.En[] _defaultenn = new gen.model.test.En[] { };
 	
 	private final gen.model.test.En[] enn;
 
@@ -149,6 +153,16 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	}
 
 	
+	private final int number;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("number")
+	public int getNumber()  {
+		
+		return this.number;
+	}
+
+	
 	private java.util.UUID id2;
 
 	
@@ -178,7 +192,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = -2095214799597149880L;
+	private static final long serialVersionUID = -8558524122313572091L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 

@@ -274,6 +274,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getChange", "\"change\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getSimple", "\"simple\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getNumber", "\"number\"");
+		container.register(gen.model.test.CompositeCube.class, false);
 		test$converter$EntityConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Entity.class, "\"test\".\"Entity_entity\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getURI", "\"URI\"");
@@ -376,22 +378,22 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"");
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"");
-		binaries$converter$WritableDocumentConverter.configure(container);
-		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
 		
 		container.register(gen.model.binaries.repositories.WritableDocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
+		binaries$converter$WritableDocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getId", "\"ID\"");
 		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getName", "\"name\"");
-		binaries$converter$ReadOnlyDocumentConverter.configure(container);
-		metamodel.registerDataSource(gen.model.binaries.ReadOnlyDocument.class, "(SELECT \"ID\", name from binaries.\"Document\")");
 		
 		container.register(gen.model.binaries.repositories.ReadOnlyDocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.ReadOnlyDocument>>(){}.type, gen.model.binaries.repositories.ReadOnlyDocumentRepository::new, false);
+		binaries$converter$ReadOnlyDocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.ReadOnlyDocument.class, "(SELECT \"ID\", name from binaries.\"Document\")");
 		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getID", "\"ID\"");
 		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getName", "\"name\"");
 		security$converter$DocumentConverter.configure(container);

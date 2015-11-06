@@ -38,6 +38,17 @@ public class SelectFromWhere<T> extends SelectOnly<T> {
 		queryParameters = queryState.parameters;
 	}
 
+	public boolean generateWhere(String alias) {
+		QueryGenerationState queryState = new QueryGenerationState();
+		if (where == null) return false;
+		queryState.fromAliases.put(froms.get(0), alias);
+		where.prepareQueryGeneration(Expression.QueryGenerationPreparationPhase.FROM, queryState);
+		where.generateQuery(queryState, OperatorPrecedenceLevel.JPQL_UNRESTRICTED_OPERATOR_PRECEDENCE);
+		queryString = queryState.buildQueryString();
+		queryParameters = queryState.parameters;
+		return queryString.length() > 0;
+	}
+
 	protected void prepareQueryGeneration(QueryGenerationState queryState) {
 		prepareQueryGeneration(Expression.QueryGenerationPreparationPhase.FROM, queryState);
 	}

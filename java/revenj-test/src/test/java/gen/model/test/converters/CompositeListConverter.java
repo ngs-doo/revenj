@@ -88,6 +88,14 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		column = columnsExtended.stream().filter(it -> "simple".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'simple' column in test CompositeList. Check if DB is in sync");
 		__index__extended_simple = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "number".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'number' column in test CompositeList_snowflake. Check if DB is in sync");
+		__index___number = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "number".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'number' column in test CompositeList. Check if DB is in sync");
+		__index__extended_number = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
@@ -134,6 +142,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		java.time.LocalDate _change_ = null;
 		java.util.List<gen.model.test.Entity> _entities_ = null;
 		gen.model.test.Simple _simple_ = null;
+		int _number_ = 0;
 		for(int x = 0; x < columnCount && i < columnCount; x++) {
 			
 			if (__index___URI == i) { _URI_ = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); i++; }
@@ -144,8 +153,9 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 			if (__index___change == i) { _change_ = org.revenj.postgres.converters.DateConverter.parse(reader, false); i++; }
 			if (__index___entities == i) { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) {_entities_ = __list;} else _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4); }; i++; }
 			if (__index___simple == i) { _simple_ = __converter_simple.from(reader, context); i++; }
+			if (__index___number == i) { _number_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
 		}
-		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_);
+		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_);
 		reader.read(outerContext);
 		return instance;
 	}
@@ -179,6 +189,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		java.time.LocalDate _change_ = null;
 		java.util.List<gen.model.test.Entity> _entities_ = null;
 		gen.model.test.Simple _simple_ = null;
+		int _number_ = 0;
 		for(int x = 0; x < columnCountExtended && i < columnCountExtended; x++) {
 			
 			if (__index__extended_URI == i) { _URI_ = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); i++; }
@@ -189,8 +200,9 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 			if (__index__extended_change == i) { _change_ = org.revenj.postgres.converters.DateConverter.parse(reader, false); i++; }
 			if (__index__extended_entities == i) { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) {_entities_ = __list;} else _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4); }; i++; }
 			if (__index__extended_simple == i) { _simple_ = __converter_simple.fromExtended(reader, context); i++; }
+			if (__index__extended_number == i) { _number_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
 		}
-		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_);
+		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_);
 		reader.read(outerContext);
 		return instance;
 	}
@@ -211,4 +223,6 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 	private gen.model.test.converters.SimpleConverter __converter_simple;
 	private final int __index___simple;
 	private final int __index__extended_simple;
+	private final int __index___number;
+	private final int __index__extended_number;
 }

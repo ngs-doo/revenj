@@ -163,7 +163,12 @@ public final class RevenjQueryComposer<T> {
 		return "unknown";
 	}
 
-	private void fillQueryParameters(Connection connection, PreparedStatement ps, List<GeneratedQueryParameter> parameters) throws SQLException {
+	public static void fillQueryParameters(
+			Connection connection,
+			ServiceLocator locator,
+			PreparedStatement ps,
+			List<GeneratedQueryParameter> parameters,
+			List<LambdaInfo> lambdas) throws SQLException {
 		PostgresWriter writer = null;
 		for (int i = 0; i < parameters.size(); i++) {
 			GeneratedQueryParameter param = parameters.get(i);
@@ -190,7 +195,7 @@ public final class RevenjQueryComposer<T> {
 			}
 			if (elements == null) {
 				Class<?> manifest = value.getClass();
-				Optional<ObjectConverter> converter = getConverterFor(manifest);
+				Optional<ObjectConverter> converter = getConverterFor(locator, manifest);
 				if (converter.isPresent()) {
 					PGobject pgo = new PGobject();
 					if (writer == null) writer = PostgresWriter.create();
@@ -221,7 +226,7 @@ public final class RevenjQueryComposer<T> {
 						break;
 					}
 				}
-				Optional<ObjectConverter> converter = manifest != null ? getConverterFor(manifest) : Optional.<ObjectConverter>empty();
+				Optional<ObjectConverter> converter = manifest != null ? getConverterFor(locator, manifest) : Optional.<ObjectConverter>empty();
 				if (converter.isPresent()) {
 					ObjectConverter oc = converter.get();
 					Object[] pgos = new Object[elements.length];
@@ -250,7 +255,7 @@ public final class RevenjQueryComposer<T> {
 
 	private static final ConcurrentMap<Class<?>, Optional<ObjectConverter>> objectConverters = new ConcurrentHashMap<>();
 
-	private Optional<ObjectConverter> getConverterFor(Class<?> manifest) {
+	private static Optional<ObjectConverter> getConverterFor(ServiceLocator locator, Class<?> manifest) {
 		return objectConverters.computeIfAbsent(manifest, clazz ->
 		{
 			try {
@@ -275,7 +280,7 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM (" + queryString + ") sq")) {
-			fillQueryParameters(connection, ps, query.getQueryParameters());
+			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
 			try (final ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					return rs.getLong(1);
@@ -291,7 +296,7 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement("SELECT EXISTS(" + queryString + ")")) {
-			fillQueryParameters(connection, ps, query.getQueryParameters());
+			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
 			try (final ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					return rs.getBoolean(1);
@@ -315,7 +320,7 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement("SELECT NOT EXISTS(" + queryString + ")")) {
-			fillQueryParameters(connection, ps, query.getQueryParameters());
+			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
 			try (final ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					return rs.getBoolean(1);
@@ -331,10 +336,10 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement(queryString)) {
-			fillQueryParameters(connection, ps, query.getQueryParameters());
+			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
 			final PostgresReader pr = new PostgresReader(locator);
 			try {
-				final ObjectConverter<T> converter = getConverterFor(manifest).get();
+				final ObjectConverter<T> converter = getConverterFor(locator, manifest).get();
 				try (final ResultSet rs = ps.executeQuery()) {
 					if (rs.next()) {
 						pr.process(rs.getString(1));
@@ -354,11 +359,11 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement(queryString)) {
-			fillQueryParameters(connection, ps, query.getQueryParameters());
+			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
 			final PostgresReader pr = new PostgresReader(locator);
 			final ArrayList<T> result = new ArrayList<>();
 			try {
-				final ObjectConverter<T> converter = getConverterFor(manifest).get();
+				final ObjectConverter<T> converter = getConverterFor(locator, manifest).get();
 				try (final ResultSet rs = ps.executeQuery()) {
 					while (rs.next()) {
 						pr.process(rs.getString(1));
@@ -374,8 +379,9 @@ public final class RevenjQueryComposer<T> {
 		}
 	}
 
-	private <U> RevenjQueryComposer<U> applyTransformWithLambda
-			(Class<U> newManifest, RevenjNoLambdaQueryTransform transform) {
+	private <U> RevenjQueryComposer<U> applyTransformWithLambda(
+			Class<U> newManifest,
+			RevenjNoLambdaQueryTransform transform) {
 		Optional<JinqPostgresQuery<?>> cachedQuery = cachedQueries.findInCache(query, transform.getTransformationTypeCachingTag(), null);
 		if (cachedQuery == null) {
 			cachedQuery = Optional.empty();
@@ -396,8 +402,10 @@ public final class RevenjQueryComposer<T> {
 		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas);
 	}
 
-	public <U> RevenjQueryComposer<U> applyTransformWithLambda
-			(Class<U> newManifest, RevenjOneLambdaQueryTransform transform, Object lambda) {
+	public <U> RevenjQueryComposer<U> applyTransformWithLambda(
+			Class<U> newManifest,
+			RevenjOneLambdaQueryTransform transform,
+			Object lambda) {
 		LambdaInfo lambdaInfo = LambdaInfo.analyze(lambda, lambdas.size(), true);
 		if (lambdaInfo == null) {
 			return null;
@@ -430,8 +438,10 @@ public final class RevenjQueryComposer<T> {
 		return new RevenjQueryComposer<>(this, newManifest, (JinqPostgresQuery<U>) cachedQuery.get(), lambdas, lambdaInfo);
 	}
 
-	public <U> RevenjQueryComposer<U> applyTransformWithLambdas
-			(Class<U> newManifest, RevenjMultiLambdaQueryTransform transform, Object[] groupingLambdas) {
+	public <U> RevenjQueryComposer<U> applyTransformWithLambdas(
+			Class<U> newManifest,
+			RevenjMultiLambdaQueryTransform transform,
+			Object[] groupingLambdas) {
 		LambdaInfo[] lambdaInfos = new LambdaInfo[groupingLambdas.length];
 		String[] lambdaSources = new String[lambdaInfos.length];
 		for (int n = 0; n < groupingLambdas.length; n++) {

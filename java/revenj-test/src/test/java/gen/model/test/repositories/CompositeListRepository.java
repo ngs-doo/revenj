@@ -60,7 +60,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		}
 		else query = query.filter(filter);
 		
-		return query;
+		return query.sortedDescendingBy(it -> it.getId());
 	}
 
 	private java.util.List<gen.model.test.CompositeList> readFromDb(java.sql.PreparedStatement statement, java.util.List<gen.model.test.CompositeList> result) throws java.sql.SQLException, java.io.IOException {
@@ -125,6 +125,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 					throw new RuntimeException(e);
 				}
 			}
+			sql += " ORDER BY \"id\" DESC";
 			if (limit != null) {
 				sql += " LIMIT " + Integer.toString(limit);
 			}
