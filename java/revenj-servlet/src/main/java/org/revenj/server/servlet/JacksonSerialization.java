@@ -36,12 +36,13 @@ final class JacksonSerialization implements Serialization<String> {
 	}
 
 	@Override
-	public String serialize(Object value) {
-		try {
-			return mapper.writeValueAsString(value);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+	public String serialize(Object value) throws IOException {
+		return mapper.writeValueAsString(value);
+	}
+
+	@Override
+	public void serialize(Object value, OutputStream stream) throws IOException {
+		mapper.writeValue(stream, value);
 	}
 
 	Object deserialize(Type type, byte[] content, int length) throws IOException {
@@ -49,7 +50,8 @@ final class JacksonSerialization implements Serialization<String> {
 		return mapper.readValue(content, 0, length, javaType);
 	}
 
-	Object deserialize(Type type, InputStream stream) throws IOException {
+	@Override
+	public Object deserialize(Type type, InputStream stream) throws IOException {
 		JavaType javaType = mapper.getTypeFactory().constructType(type);
 		return mapper.readValue(stream, javaType);
 	}

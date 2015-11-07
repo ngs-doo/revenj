@@ -93,6 +93,10 @@ public class SearchDomainObject implements ServerCommand {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
 		List<AggregateRoot> found = repository.search(specification, arg.Limit, arg.Offset);
-		return CommandResult.success("Found " + found.size() + " items", output.serialize(found));
+		try {
+			return CommandResult.success("Found " + found.size() + " items", output.serialize(found));
+		} catch (IOException e) {
+			return new CommandResult<>(null, "Error serializing result.", 500);
+		}
 	}
 }

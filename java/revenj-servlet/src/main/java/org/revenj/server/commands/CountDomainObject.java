@@ -85,6 +85,10 @@ public class CountDomainObject implements ServerCommand {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
 		long found = repository.count(specification);
-		return CommandResult.success(Long.toString(found), output.serialize(found));
+		try {
+			return CommandResult.success(Long.toString(found), output.serialize(found));
+		} catch (IOException e) {
+			return new CommandResult<>(null, "Error serializing result.", 500);
+		}
 	}
 }

@@ -4,6 +4,7 @@ import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.JsonWriter;
 import org.junit.Assert;
 import org.junit.Test;
+import org.revenj.json.DslJsonSerialization;
 import org.revenj.json.JavaTimeConverter;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.converters.*;
@@ -35,5 +36,12 @@ public class TestJson {
 		jr.read();
 		LocalDateTime value = JavaTimeConverter.deserializeLocalDateTime(jr);
 		Assert.assertEquals(now, value);
+	}
+
+	@Test
+	public void jsonSerialization() throws IOException {
+		DslJsonSerialization json = new DslJsonSerialization(null);
+		Assert.assertEquals("3", json.serialize(3));
+		Assert.assertEquals(3, (int) json.deserialize("3", int.class));
 	}
 }

@@ -98,6 +98,10 @@ public class ExecuteService implements ServerCommand {
 			}
 		}
 		Object result = service.execute(argument);
-		return CommandResult.success("Service executed", output.serialize(result));
+		try {
+			return CommandResult.success("Service executed", output.serialize(result));
+		} catch (IOException e) {
+			return new CommandResult<>(null, "Error serializing result.", 500);
+		}
 	}
 }

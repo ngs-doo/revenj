@@ -85,6 +85,10 @@ public class DomainObjectExists implements ServerCommand {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
 		boolean found = repository.exists(specification);
-		return CommandResult.success(Boolean.toString(found), output.serialize(found));
+		try {
+			return CommandResult.success(Boolean.toString(found), output.serialize(found));
+		} catch (IOException e) {
+			return new CommandResult<>(null, "Error serializing result.", 500);
+		}
 	}
 }

@@ -68,6 +68,10 @@ public final class Read implements ServerCommand {
 		if (!found.isPresent()) {
 			return CommandResult.success("Object not found", null);
 		}
-		return CommandResult.success("Object found", output.serialize(found.get()));
+		try {
+			return CommandResult.success("Object found", output.serialize(found.get()));
+		} catch (IOException e) {
+			return new CommandResult<>(null, "Error serializing result.", 500);
+		}
 	}
 }

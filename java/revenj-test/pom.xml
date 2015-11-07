@@ -6,30 +6,30 @@
 	<parent>
 		<groupId>org.revenj</groupId>
 		<artifactId>revenj</artifactId>
-		<version>0.5.2</version>
+		<version>0.6.0</version>
 	</parent>
 	<artifactId>revenj-test</artifactId>
 	<name>Revenj Test</name>
 	<packaging>jar</packaging>
-	<version>0.5.2</version>
+	<version>0.6.0</version>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>0.5.2</version>
+			<version>0.6.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-servlet</artifactId>
-			<version>0.5.2</version>
+			<version>0.6.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-storage</artifactId>
-			<version>0.5.2</version>
+			<version>0.6.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

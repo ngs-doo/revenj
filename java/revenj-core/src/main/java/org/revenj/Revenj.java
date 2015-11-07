@@ -2,10 +2,12 @@ package org.revenj;
 
 import org.postgresql.ds.PGPoolingDataSource;
 import org.revenj.extensibility.Container;
+import org.revenj.json.DslJsonSerialization;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
+import org.revenj.serialization.Serialization;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -157,6 +159,8 @@ public abstract class Revenj {
 		ChangeNotification.registerContainer(container, databaseNotification);
 		container.registerInstance(PermissionManager.class, new RevenjPermissionManager(container), false);
 		container.registerInstance(ClassLoader.class, loader, false);
+		container.registerClass(new Generic<Serialization<String>>() {
+		}.type, DslJsonSerialization.class, false);
 		int total = 0;
 		if (aspects != null) {
 			while (aspects.hasNext()) {

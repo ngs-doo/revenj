@@ -18,7 +18,7 @@ public class GetDomainObject implements ServerCommand {
 
 	public GetDomainObject(
 			DomainModel domainModel,
-	        PermissionManager permissions) {
+			PermissionManager permissions) {
 		this.domainModel = domainModel;
 		this.permissions = permissions;
 	}
@@ -69,6 +69,10 @@ public class GetDomainObject implements ServerCommand {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
 		List<AggregateRoot> found = repository.find(arg.Uri);
-		return new CommandResult<>(output.serialize(found), "Found " + found.size() + " items", 200);
+		try {
+			return new CommandResult<>(output.serialize(found), "Found " + found.size() + " items", 200);
+		} catch (IOException e) {
+			return new CommandResult<>(null, "Error serializing result.", 500);
+		}
 	}
 }

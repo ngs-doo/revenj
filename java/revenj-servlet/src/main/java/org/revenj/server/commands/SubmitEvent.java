@@ -74,6 +74,10 @@ public class SubmitEvent implements ServerCommand {
 			return CommandResult.badRequest("Error resolving event store for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
 		String uri = store.submit(instance);
-		return new CommandResult<>(Boolean.TRUE.equals(arg.ReturnInstance) ? output.serialize(store) : output.serialize(uri), "Event stored", 201);
+		try {
+			return new CommandResult<>(Boolean.TRUE.equals(arg.ReturnInstance) ? output.serialize(store) : output.serialize(uri), "Event stored", 201);
+		} catch (IOException e) {
+			return new CommandResult<>(null, "Error serializing result.", 500);
+		}
 	}
 }
