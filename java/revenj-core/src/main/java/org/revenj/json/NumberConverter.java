@@ -35,6 +35,14 @@ public abstract class NumberConverter {
 		buf[pos + 1] = (byte) v;
 	}
 
+	static void write3(final int number, final byte[] buf, int pos) {
+		final int hi = number / 100;
+		buf[pos] = (byte)(hi + '0');
+		final int pair = Digits[number - hi * 100];
+		buf[pos + 1] = (byte) (pair >> 8);
+		buf[pos + 2] = (byte) pair;
+	}
+
 	static int read2(final char[] buf, final int pos) {
 		final int v1 = buf[pos] - 48;
 		return (v1 << 3) + (v1 << 1) + buf[pos + 1] - 48;
