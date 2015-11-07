@@ -4,6 +4,7 @@ import org.revenj.extensibility.Container;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -157,6 +158,7 @@ final class SimpleContainer implements Container {
 					}
 				}
 		);
+		registerGenerics(Callable.class, (locator, args) -> () -> locator.resolve(args[0]));
 	}
 
 	private SimpleContainer(SimpleContainer parent) {

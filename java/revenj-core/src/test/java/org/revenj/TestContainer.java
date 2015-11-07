@@ -7,6 +7,7 @@ import org.revenj.patterns.Generic;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 public class TestContainer {
 
@@ -192,5 +193,45 @@ public class TestContainer {
 		Assert.assertEquals(A.class, cg.generics.instance1.getClass());
 		Assert.assertTrue(cg.generics.instance2 instanceof B);
 		Assert.assertEquals(B.class, cg.generics.instance2.getClass());
+	}
+
+	static class Later {
+		private final Callable<A> aCallable;
+
+		public Later(Callable<A> aCallable) {
+			this.aCallable = aCallable;
+		}
+		public A getA() throws Exception {
+			return aCallable.call();
+		}
+	}
+
+	@Test
+	public void resolveLater() throws Exception {
+		Container container = new SimpleContainer(true);
+		Later l = container.resolve(Later.class);
+		Assert.assertNotNull(l);
+		A a = l.getA();
+		Assert.assertNotNull(a);
+	}
+
+	static class SelfReference {
+		private final Callable<SelfReference> self;
+
+		public SelfReference(Callable<SelfReference> self) {
+			this.self = self;
+		}
+		public SelfReference getSelf() throws Exception {
+			return self.call();
+		}
+	}
+
+	@Test
+	public void selfReferenceSingleton() throws Exception {
+		Container container = new SimpleContainer(false);
+		container.register(SelfReference.class, true);
+		SelfReference sr = container.resolve(SelfReference.class);
+		SelfReference sr2 = sr.getSelf();
+		Assert.assertEquals(sr, sr2);
 	}
 }
