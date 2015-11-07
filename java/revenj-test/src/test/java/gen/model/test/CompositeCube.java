@@ -19,6 +19,11 @@ public class CompositeCube  extends org.revenj.postgres.PostgresOlapCubeQuery<ge
 
 	
 	@Override
+	protected org.revenj.patterns.Specification<gen.model.test.CompositeList> rewriteSpecification(org.revenj.patterns.Specification<gen.model.test.CompositeList> specification) {
+		return gen.model.test.repositories.CompositeListRepository.rewriteSpecificationToLambda(specification);
+	}
+
+	@Override
 	protected String getSource() { return "\"test\".\"CompositeList_snowflake\""; }
 	public static final Class<?> DataSource = gen.model.test.CompositeList.class;
 }

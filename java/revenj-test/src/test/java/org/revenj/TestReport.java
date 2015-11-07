@@ -65,7 +65,7 @@ public class TestReport {
 	}
 
 	@Test
-	public void canFilterCube() throws IOException {
+	public void canFilterCubeWithLambda() throws IOException {
 		ServiceLocator locator = container;
 		DataContext context = locator.resolve(DataContext.class);
 		Composite co = new Composite();
@@ -77,7 +77,22 @@ public class TestReport {
 						.use(CompositeCube.min)
 						.use(CompositeCube.max)
 						.analyze(it -> it.getNumber() > 10 && it.getNumber() < 100);
-		Assert.assertNotEquals(0, results.size());
-		Assert.assertTrue(results.size() < 11);
+		Assert.assertEquals(1, results.size());
+	}
+
+	@Test
+	public void canFilterCubeWithSpecification() throws IOException {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		Composite co = new Composite();
+		co.getSimple().setNumber(100);
+		context.create(co);
+		CompositeCube cube = new CompositeCube(locator);
+		List<Map<String, Object>> results =
+				cube.builder()
+						.use(CompositeCube.min)
+						.use(CompositeCube.max)
+						.analyze(new CompositeList.ForSimple());
+		Assert.assertEquals(1, results.size());
 	}
 }

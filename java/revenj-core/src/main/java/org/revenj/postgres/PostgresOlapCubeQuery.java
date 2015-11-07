@@ -87,41 +87,40 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		}
 	}
 
-	private RevenjQueryTransformConfiguration transformationConfig = null;
-
-	public RevenjQueryTransformConfiguration getConfig() {
-		if (transformationConfig == null) {
-			transformationConfig = new RevenjQueryTransformConfiguration();
-			transformationConfig.metamodel = metamodel;
-			transformationConfig.alternateClassLoader = null;
-			transformationConfig.isObjectEqualsSafe = true;
-			transformationConfig.isCollectionContainsSafe = true;
-		}
-		return transformationConfig;
+	private static RevenjQueryTransformConfiguration buildConfig(MetamodelUtil metamodel) {
+		RevenjQueryTransformConfiguration config = new RevenjQueryTransformConfiguration();
+		config.metamodel = metamodel;
+		config.alternateClassLoader = null;
+		config.isObjectEqualsSafe = true;
+		config.isCollectionContainsSafe = true;
+		return config;
 	}
 
-	public SelectFromWhere<TSource> applyTransformWithLambda(
-			String name,
-			WhereTransform where,
-			LambdaInfo lambdaInfo) {
+	private SelectFromWhere<TSource> applyTransformWithLambda(String name, LambdaInfo lambdaInfo) {
 		if (lambdaInfo == null) {
 			return null;
 		}
 		try {
+			RevenjQueryTransformConfiguration config = buildConfig(metamodel);
 			LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, null, true, true, true);
 			if (lambdaAnalysis == null) {
 				return null;
 			}
-			getConfig().checkLambdaSideEffects(lambdaAnalysis);
+			config.checkLambdaSideEffects(lambdaAnalysis);
 			SelectFromWhere<TSource> query = new SelectFromWhere<>();
 			From.FromDataSource from = new From.FromDataSource();
 			from.name = name;
 			query.cols = ColumnExpressions.singleColumn(SimpleRowReader.READER, new FromAliasExpression(from));
 			query.froms.add(from);
+			WhereTransform where = new WhereTransform(config, false);
 			return where.apply(lambdaAnalysis, null, query);
 		} catch (QueryTransformException | TypedValueVisitorException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	protected Specification<TSource> rewriteSpecification(Specification<TSource> specification) {
+		return specification;
 	}
 
 	@Override
@@ -153,7 +152,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		validateInput(usedDimensions, usedFacts, customOrder.keySet());
 
 		StringBuilder sb = new StringBuilder();
-		String alias = filter != null ? getLambdaAlias(filter) : "it";
+		String alias = filter != null ? getLambdaAlias(filter) : "_it";
 		sb.append("SELECT ");
 		for (String d : usedDimensions) {
 			sb.append(cubeDimensions.get(d).apply(alias)).append(" AS \"").append(d).append("\", ");
@@ -169,9 +168,9 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		SelectFromWhere<TSource> sfw = null;
 		LambdaInfo lambdaInfo = null;
 		if (filter != null) {
-			lambdaInfo = LambdaInfo.analyze(filter, 0, true);
-			sfw = applyTransformWithLambda(alias, new WhereTransform(getConfig(), false), lambdaInfo);
-			if (sfw != null && sfw.generateWhere(alias)) {
+			lambdaInfo = LambdaInfo.analyze(rewriteSpecification(filter), 0, true);
+			sfw = applyTransformWithLambda(alias, lambdaInfo);
+			if (sfw != null && sfw.generateWhere("\"" + alias + "\"")) {
 				sb.append("WHERE\n");
 				sb.append(sfw.getQueryString());
 			}
@@ -232,7 +231,6 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		} catch (SQLException ex) {
 			throw new RuntimeException(ex);
 		}
-
 		return result;
 	}
 }

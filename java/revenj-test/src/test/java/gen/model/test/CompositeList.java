@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public final class CompositeList   implements java.io.Serializable, org.revenj.patterns.Identifiable {
+public final class CompositeList   implements java.io.Serializable, com.dslplatform.json.JsonObject, org.revenj.patterns.Identifiable {
 	
 	
 	@com.fasterxml.jackson.annotation.JsonCreator 
@@ -80,7 +80,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	private static final long serialVersionUID = 2001347036889366980L;
+	private static final long serialVersionUID = -8754153939875225063L;
 	
 	private final java.util.UUID id;
 
@@ -175,7 +175,7 @@ public final class CompositeList   implements java.io.Serializable, org.revenj.p
 	private static final java.util.function.Function<gen.model.test.CompositeList, java.util.UUID> __calculated_id2 = it -> it.getId();
 	
 
-public static class ForSimple   implements java.io.Serializable, org.revenj.patterns.Specification<CompositeList> {
+public static class ForSimple   implements java.io.Serializable, org.revenj.patterns.Specification<CompositeList>, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -192,7 +192,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = -8558524122313572091L;
+	private static final long serialVersionUID = -8374200267488922318L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 
@@ -217,6 +217,604 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		public boolean test(gen.model.test.CompositeList it) {
 			return (this.getSimples().contains(it.getSimple()));
 		}
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final ForSimple self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+		if(self.simples.size() != 0) {
+			hasWrittenProperty = true;
+			sw.writeAscii("\"simples\":[", 11);
+			gen.model.test.Simple item = self.simples.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Simple.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < self.simples.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.simples.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Simple.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+	}
+
+	static void __serializeJsonObjectFull(final ForSimple self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+		if(self.simples.size() != 0) {
+			sw.writeAscii("\"simples\":[", 11);
+			gen.model.test.Simple item = self.simples.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Simple.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < self.simples.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.simples.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Simple.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii("\"simples\":[]", 12);
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<ForSimple> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<ForSimple>() {
+		@Override
+		public ForSimple deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.CompositeList.ForSimple(reader);
+		}
+	};
+
+	private ForSimple(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		java.util.List<gen.model.test.Simple> _simples_ = new java.util.ArrayList<gen.model.test.Simple>(4);
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 1331401444:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Simple.JSON_READER, _simples_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 1331401444:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Simple.JSON_READER, _simples_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.simples = _simples_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.CompositeList.ForSimple(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
 }
 
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final CompositeList self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+		com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+			if (!(self.id.getMostSignificantBits() == 0 && self.id.getLeastSignificantBits() == 0)) {
+				sw.writeAscii(",\"id\":", 6);
+				com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
+			}
+		
+		if(self.enn.length != 0) {
+			sw.writeAscii(",\"enn\":[", 8);
+			gen.model.test.En item = self.enn[0];
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+				sw.writeAscii(item.name());
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+			for(int i = 1; i < self.enn.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.enn[i];
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+				sw.writeAscii(item.name());
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		if(self.en != gen.model.test.En.A) {
+			sw.writeAscii(",\"en\":\"B\"", 9);
+		}
+		
+		if(self.tsl.size() != 0) {
+			sw.writeAscii(",\"tsl\":[", 8);
+			org.revenj.json.JavaTimeConverter.serializeNullable(self.tsl.get(0), sw);
+			for(int i = 1; i < self.tsl.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				org.revenj.json.JavaTimeConverter.serializeNullable(self.tsl.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+			if (!(self.change.getYear() == 1 && self.change.getMonthValue() == 1 && self.change.getDayOfMonth() == 1)) {
+				sw.writeAscii(",\"change\":", 10);
+				org.revenj.json.JavaTimeConverter.serialize(self.change, sw);
+			}
+		
+		if(self.entities.size() != 0) {
+			sw.writeAscii(",\"entities\":[", 13);
+			gen.model.test.Entity item = self.entities.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Entity.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < self.entities.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.entities.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Entity.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		
+		sw.writeAscii(",\"simple\":{", 11);
+		
+					gen.model.test.Simple.__serializeJsonObjectMinimal(self.simple, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		
+			if (self.number != 0) {
+				sw.writeAscii(",\"number\":", 10);
+				com.dslplatform.json.NumberConverter.serialize(self.number, sw);
+			}
+		
+			if (!(self.id2.getMostSignificantBits() == 0 && self.id2.getLeastSignificantBits() == 0)) {
+				sw.writeAscii(",\"id2\":", 7);
+				com.dslplatform.json.UUIDConverter.serialize(self.id2, sw);
+			}
+	}
+
+	static void __serializeJsonObjectFull(final CompositeList self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+		com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+			
+			sw.writeAscii(",\"id\":", 6);
+			com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
+		
+		if(self.enn.length != 0) {
+			sw.writeAscii(",\"enn\":[", 8);
+			gen.model.test.En item = self.enn[0];
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+				sw.writeAscii(item.name());
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+			for(int i = 1; i < self.enn.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.enn[i];
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+				sw.writeAscii(item.name());
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"enn\":[]", 9);
+		
+		
+		sw.writeAscii(",\"en\":\"", 7);
+		sw.writeAscii(self.en.name());
+		sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+		
+		if(self.tsl.size() != 0) {
+			sw.writeAscii(",\"tsl\":[", 8);
+			org.revenj.json.JavaTimeConverter.serializeNullable(self.tsl.get(0), sw);
+			for(int i = 1; i < self.tsl.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				org.revenj.json.JavaTimeConverter.serializeNullable(self.tsl.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"tsl\":[]", 9);
+		
+			
+			sw.writeAscii(",\"change\":", 10);
+			org.revenj.json.JavaTimeConverter.serialize(self.change, sw);
+		
+		if(self.entities.size() != 0) {
+			sw.writeAscii(",\"entities\":[", 13);
+			gen.model.test.Entity item = self.entities.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Entity.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < self.entities.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.entities.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Entity.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"entities\":[]", 14);
+		
+		
+		sw.writeAscii(",\"simple\":{", 11);
+		
+					gen.model.test.Simple.__serializeJsonObjectFull(self.simple, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		
+			
+			sw.writeAscii(",\"number\":", 10);
+			com.dslplatform.json.NumberConverter.serialize(self.number, sw);
+		
+			
+			sw.writeAscii(",\"id2\":", 7);
+			com.dslplatform.json.UUIDConverter.serialize(self.id2, sw);
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<CompositeList> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<CompositeList>() {
+		@Override
+		public CompositeList deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.CompositeList(reader);
+		}
+	};
+
+	private CompositeList(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		String _URI_ = "";
+		java.util.UUID _id_ = org.revenj.Utils.MIN_UUID;
+		gen.model.test.En[] _enn_ = _defaultenn;
+		gen.model.test.En _en_ = gen.model.test.En.A;
+		java.util.List<java.time.OffsetDateTime> _tsl_ = new java.util.ArrayList<java.time.OffsetDateTime>(4);
+		java.time.LocalDate _change_ = org.revenj.Utils.MIN_LOCAL_DATE;
+		java.util.List<gen.model.test.Entity> _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4);
+		gen.model.test.Simple _simple_ = null;
+		int _number_ = 0;
+		java.util.UUID _id2_ = org.revenj.Utils.MIN_UUID;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case 926444256:
+						_id_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 1619944940:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken == ']') {
+							_enn_ = new gen.model.test.En[] { };
+						} else {
+							java.util.ArrayList<gen.model.test.En> __res = new java.util.ArrayList<gen.model.test.En>(4);
+							gen.model.test.En __inst;
+							String __val;
+							
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: __inst = gen.model.test.En.A; break;
+							case -955516027: __inst = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						__res.add(__inst);
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+							while ((nextToken = reader.getNextToken()) == ',') {
+								nextToken = reader.getNextToken();
+								
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: __inst = gen.model.test.En.A; break;
+							case -955516027: __inst = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						__res.add(__inst);
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+							}
+							if (nextToken != ']') throw new java.io.IOException("Expecting ']' at position " + reader.positionInStream() + ". Found " + (char) nextToken);
+							_enn_ = __res.toArray(new gen.model.test.En[__res.size()]);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1092248970:
+						
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: _en_ = gen.model.test.En.A; break;
+							case -955516027: _en_ = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -1155926508:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							org.revenj.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _tsl_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1922892221:
+						_change_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -922096406:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Entity.JSON_READER, _entities_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 375816319:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_simple_ = gen.model.test.Simple.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 467038368:
+						_number_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1076877162:
+						_id2_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case 926444256:
+						_id_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 1619944940:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken == ']') {
+							_enn_ = new gen.model.test.En[] { };
+						} else {
+							java.util.ArrayList<gen.model.test.En> __res = new java.util.ArrayList<gen.model.test.En>(4);
+							gen.model.test.En __inst;
+							String __val;
+							
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: __inst = gen.model.test.En.A; break;
+							case -955516027: __inst = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						__res.add(__inst);
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+							while ((nextToken = reader.getNextToken()) == ',') {
+								nextToken = reader.getNextToken();
+								
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: __inst = gen.model.test.En.A; break;
+							case -955516027: __inst = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						__res.add(__inst);
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+							}
+							if (nextToken != ']') throw new java.io.IOException("Expecting ']' at position " + reader.positionInStream() + ". Found " + (char) nextToken);
+							_enn_ = __res.toArray(new gen.model.test.En[__res.size()]);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1092248970:
+						
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: _en_ = gen.model.test.En.A; break;
+							case -955516027: _en_ = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -1155926508:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							org.revenj.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _tsl_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1922892221:
+						_change_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -922096406:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Entity.JSON_READER, _entities_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 375816319:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_simple_ = gen.model.test.Simple.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 467038368:
+						_number_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1076877162:
+						_id2_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.URI = _URI_;
+		this.id = _id_;
+		this.enn = _enn_;
+		this.en = _en_;
+		this.tsl = _tsl_;
+		this.change = _change_;
+		this.entities = _entities_;
+		this.simple = _simple_;
+		this.number = _number_;
+		this.id2 = _id2_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.CompositeList(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
 }

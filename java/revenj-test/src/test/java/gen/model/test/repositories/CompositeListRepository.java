@@ -49,16 +49,23 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.CompositeListConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.test.CompositeList> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.test.CompositeList> filter) {
+		
+		if (filter instanceof gen.model.test.CompositeList.ForSimple) {
+			gen.model.test.CompositeList.ForSimple _spec_ = (gen.model.test.CompositeList.ForSimple)filter;
+			java.util.List<gen.model.test.Simple> _spec_simples_ = _spec_.getSimples();
+			return it -> (_spec_simples_.contains(it.getSimple()));
+		}
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.CompositeList> query(org.revenj.patterns.Specification<gen.model.test.CompositeList> filter) {
 		org.revenj.patterns.Query<gen.model.test.CompositeList> query = queryProvider.query(transactionConnection, locator, gen.model.test.CompositeList.class);
-		if (filter == null) { }
-		else if (filter instanceof gen.model.test.CompositeList.ForSimple) {
-			gen.model.test.CompositeList.ForSimple _spec_ = (gen.model.test.CompositeList.ForSimple)filter;
-			java.util.List<gen.model.test.Simple> _spec_simples_ = _spec_.getSimples();
-			query = query.filter(it -> (_spec_simples_.contains(it.getSimple())));
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
 		}
-		else query = query.filter(filter);
 		
 		return query.sortedDescendingBy(it -> it.getId());
 	}

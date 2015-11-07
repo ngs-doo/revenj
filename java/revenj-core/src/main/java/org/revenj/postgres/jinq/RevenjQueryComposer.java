@@ -163,6 +163,17 @@ public final class RevenjQueryComposer<T> {
 		return "unknown";
 	}
 
+	private static final PGobject EMPTY_ARRAY;
+
+	static {
+		EMPTY_ARRAY = new PGobject();
+		EMPTY_ARRAY.setType("record[]");
+		try {
+			EMPTY_ARRAY.setValue("{}");
+		} catch (SQLException ignore) {
+		}
+	}
+
 	public static void fillQueryParameters(
 			Connection connection,
 			ServiceLocator locator,
@@ -245,8 +256,12 @@ public final class RevenjQueryComposer<T> {
 					java.sql.Array array = connection.createArrayOf(oc.getDbName(), pgos);
 					ps.setArray(i + 1, array);
 				} else {
-					java.sql.Array array = connection.createArrayOf(getElementTypeFor(elements), elements);
-					ps.setArray(i + 1, array);
+					if (elements.length == 0) {
+						ps.setObject(i + 1, EMPTY_ARRAY);
+					} else {
+						java.sql.Array array = connection.createArrayOf(getElementTypeFor(elements), elements);
+						ps.setArray(i + 1, array);
+					}
 				}
 			}
 		}
