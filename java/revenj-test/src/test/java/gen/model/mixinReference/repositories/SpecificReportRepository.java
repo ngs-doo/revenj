@@ -49,11 +49,18 @@ public class SpecificReportRepository   implements java.io.Closeable, org.revenj
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.SpecificReportConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query(org.revenj.patterns.Specification<gen.model.mixinReference.SpecificReport> filter) {
 		org.revenj.patterns.Query<gen.model.mixinReference.SpecificReport> query = queryProvider.query(transactionConnection, locator, gen.model.mixinReference.SpecificReport.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

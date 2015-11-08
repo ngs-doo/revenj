@@ -211,6 +211,38 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.issues.converters.DateListConverter issues$converter$DateListConverter = new gen.model.issues.converters.DateListConverter(columns);
 		container.register(issues$converter$DateListConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.issues.DateList>>(){}.type, issues$converter$DateListConverter, false);
+		
+		gen.model.md.converters.MasterConverter md$converter$MasterConverter = new gen.model.md.converters.MasterConverter(columns);
+		container.register(md$converter$MasterConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Master>>(){}.type, md$converter$MasterConverter, false);
+		
+		gen.model.md.converters.DetailConverter md$converter$DetailConverter = new gen.model.md.converters.DetailConverter(columns);
+		container.register(md$converter$DetailConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Detail>>(){}.type, md$converter$DetailConverter, false);
+		
+		gen.model.adt.converters.AuthConverter adt$converter$AuthConverter = new gen.model.adt.converters.AuthConverter(columns);
+		container.register(adt$converter$AuthConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.Auth>>(){}.type, adt$converter$AuthConverter, false);
+		
+		gen.model.adt.converters.BasicSecurityConverter adt$converter$BasicSecurityConverter = new gen.model.adt.converters.BasicSecurityConverter(columns);
+		container.register(adt$converter$BasicSecurityConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.BasicSecurity>>(){}.type, adt$converter$BasicSecurityConverter, false);
+		
+		gen.model.adt.converters.TokenConverter adt$converter$TokenConverter = new gen.model.adt.converters.TokenConverter(columns);
+		container.register(adt$converter$TokenConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.Token>>(){}.type, adt$converter$TokenConverter, false);
+		
+		gen.model.adt.converters.AnonymousConverter adt$converter$AnonymousConverter = new gen.model.adt.converters.AnonymousConverter(columns);
+		container.register(adt$converter$AnonymousConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.Anonymous>>(){}.type, adt$converter$AnonymousConverter, false);
+		
+		gen.model.adt.converters.DigestSecurityConverter adt$converter$DigestSecurityConverter = new gen.model.adt.converters.DigestSecurityConverter(columns);
+		container.register(adt$converter$DigestSecurityConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.DigestSecurity>>(){}.type, adt$converter$DigestSecurityConverter, false);
+		
+		gen.model.adt.converters.UserConverter adt$converter$UserConverter = new gen.model.adt.converters.UserConverter(columns);
+		container.register(adt$converter$UserConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.User>>(){}.type, adt$converter$UserConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"");
@@ -444,6 +476,45 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
 		metamodel.registerProperty(gen.model.issues.DateList.class, "getList", "\"list\"");
+		md$converter$MasterConverter.configure(container);
+		metamodel.registerDataSource(gen.model.md.Master.class, "\"md\".\"Master_entity\"");
+		metamodel.registerProperty(gen.model.md.Master.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.md.Master.class, "getID", "\"ID\"");
+		
+		container.register(gen.model.md.repositories.MasterRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
+		metamodel.registerProperty(gen.model.md.Master.class, "getDetails", "\"details\"");
+		md$converter$DetailConverter.configure(container);
+		metamodel.registerDataSource(gen.model.md.Detail.class, "\"md\".\"Detail_entity\"");
+		metamodel.registerProperty(gen.model.md.Detail.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.md.Detail.class, "getId", "\"id\"");
+		metamodel.registerProperty(gen.model.md.Detail.class, "getMasterId", "\"masterId\"");
+		adt$converter$AuthConverter.configure(container);
+		adt$converter$BasicSecurityConverter.configure(container);
+		metamodel.registerDataSource(gen.model.adt.BasicSecurity.class, "\"adt\".\"BasicSecurity\"");
+		metamodel.registerProperty(gen.model.adt.BasicSecurity.class, "getUsername", "\"username\"");
+		metamodel.registerProperty(gen.model.adt.BasicSecurity.class, "getPassword", "\"password\"");
+		adt$converter$TokenConverter.configure(container);
+		metamodel.registerDataSource(gen.model.adt.Token.class, "\"adt\".\"Token\"");
+		metamodel.registerProperty(gen.model.adt.Token.class, "getToken", "\"token\"");
+		adt$converter$AnonymousConverter.configure(container);
+		metamodel.registerDataSource(gen.model.adt.Anonymous.class, "\"adt\".\"Anonymous\"");
+		adt$converter$DigestSecurityConverter.configure(container);
+		metamodel.registerDataSource(gen.model.adt.DigestSecurity.class, "\"adt\".\"DigestSecurity\"");
+		metamodel.registerProperty(gen.model.adt.DigestSecurity.class, "getUsername", "\"username\"");
+		metamodel.registerProperty(gen.model.adt.DigestSecurity.class, "getPasswordHash", "\"passwordHash\"");
+		adt$converter$UserConverter.configure(container);
+		metamodel.registerDataSource(gen.model.adt.User.class, "\"adt\".\"User_entity\"");
+		metamodel.registerProperty(gen.model.adt.User.class, "getURI", "\"URI\"");
+		
+		container.register(gen.model.adt.repositories.UserRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
+		metamodel.registerProperty(gen.model.adt.User.class, "getUsername", "\"username\"");
+		metamodel.registerProperty(gen.model.adt.User.class, "getAuthentication", "\"authentication\"");
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -468,6 +539,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"");

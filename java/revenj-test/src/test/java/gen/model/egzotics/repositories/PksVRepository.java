@@ -49,11 +49,18 @@ public class PksVRepository   implements java.io.Closeable, org.revenj.patterns.
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.egzotics.converters.PksVConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.egzotics.PksV> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.egzotics.PksV> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.egzotics.PksV> query(org.revenj.patterns.Specification<gen.model.egzotics.PksV> filter) {
 		org.revenj.patterns.Query<gen.model.egzotics.PksV> query = queryProvider.query(transactionConnection, locator, gen.model.egzotics.PksV.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

@@ -49,11 +49,18 @@ public class AuthorRepository   implements java.io.Closeable, org.revenj.pattern
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.AuthorConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.mixinReference.Author> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.mixinReference.Author> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.mixinReference.Author> query(org.revenj.patterns.Specification<gen.model.mixinReference.Author> filter) {
 		org.revenj.patterns.Query<gen.model.mixinReference.Author> query = queryProvider.query(transactionConnection, locator, gen.model.mixinReference.Author.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

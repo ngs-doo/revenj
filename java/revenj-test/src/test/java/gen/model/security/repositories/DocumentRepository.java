@@ -49,11 +49,18 @@ public class DocumentRepository   implements java.io.Closeable, org.revenj.patte
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.security.converters.DocumentConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.security.Document> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.security.Document> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.security.Document> query(org.revenj.patterns.Specification<gen.model.security.Document> filter) {
 		org.revenj.patterns.Query<gen.model.security.Document> query = queryProvider.query(transactionConnection, locator, gen.model.security.Document.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

@@ -16,7 +16,7 @@ public interface ObjectConverter<T> {
 	String getDbName();
 
 	interface Reader<T> {
-		void read(T instance, PostgresReader reader, int context) throws IOException;
+		T read(T instance, PostgresReader reader, int context) throws IOException;
 	}
 
 	class ColumnInfo {

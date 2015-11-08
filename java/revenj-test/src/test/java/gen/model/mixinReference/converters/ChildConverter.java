@@ -22,7 +22,7 @@ public class ChildConverter implements ObjectConverter<gen.model.mixinReference.
 			
 		readers = new ObjectConverter.Reader[columnCount];
 		for (int i = 0; i < readers.length; i++) {
-			readers[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
+			readers[i] = (instance, rdr, ctx) -> { StringConverter.skip(rdr, ctx); return instance; };
 		}
 			
 		final java.util.List<ObjectConverter.ColumnInfo> columnsExtended =
@@ -32,7 +32,7 @@ public class ChildConverter implements ObjectConverter<gen.model.mixinReference.
 			
 		readersExtended = new ObjectConverter.Reader[columnCountExtended];
 		for (int i = 0; i < readersExtended.length; i++) {
-			readersExtended[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
+			readersExtended[i] = (instance, rdr, ctx) -> { StringConverter.skip(rdr, ctx); return instance; };
 		}
 			
 		column = columns.stream().filter(it -> "version".equals(it.columnName)).findAny();

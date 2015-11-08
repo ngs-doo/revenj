@@ -256,12 +256,18 @@ public final class RevenjQueryComposer<T> {
 					java.sql.Array array = connection.createArrayOf(oc.getDbName(), pgos);
 					ps.setArray(i + 1, array);
 				} else {
-					if (elements.length == 0) {
-						ps.setObject(i + 1, EMPTY_ARRAY);
-					} else {
-						java.sql.Array array = connection.createArrayOf(getElementTypeFor(elements), elements);
-						ps.setArray(i + 1, array);
+					String type = getElementTypeFor(elements);
+					if ("unknown".equals(type)) {
+						if (elements.length == 0) {
+							//TODO: provide null instead !?
+							ps.setObject(i + 1, EMPTY_ARRAY);
+							continue;
+						} else {
+							// throw meaningfull error!?
+						}
 					}
+					java.sql.Array array = connection.createArrayOf(type, elements);
+					ps.setArray(i + 1, array);
 				}
 			}
 		}

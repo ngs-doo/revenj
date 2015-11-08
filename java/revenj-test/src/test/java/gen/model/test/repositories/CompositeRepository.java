@@ -49,16 +49,23 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.CompositeConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.test.Composite> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.test.Composite> filter) {
+		
+		if (filter instanceof gen.model.test.Composite.ForSimple) {
+			gen.model.test.Composite.ForSimple _spec_ = (gen.model.test.Composite.ForSimple)filter;
+			gen.model.test.Simple _spec_simple_ = _spec_.getSimple();
+			return it -> (it.getSimple().getNumber() == _spec_simple_.getNumber());
+		}
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.Composite> query(org.revenj.patterns.Specification<gen.model.test.Composite> filter) {
 		org.revenj.patterns.Query<gen.model.test.Composite> query = queryProvider.query(transactionConnection, locator, gen.model.test.Composite.class);
-		if (filter == null) { }
-		else if (filter instanceof gen.model.test.Composite.ForSimple) {
-			gen.model.test.Composite.ForSimple _spec_ = (gen.model.test.Composite.ForSimple)filter;
-			gen.model.test.Simple _spec_simple_ = _spec_.getSimple();
-			query = query.filter(it -> (it.getSimple().getNumber() == _spec_simple_.getNumber()));
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
 		}
-		else query = query.filter(filter);
 		
 		return query;
 	}

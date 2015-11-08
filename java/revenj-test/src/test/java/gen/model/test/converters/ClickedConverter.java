@@ -22,7 +22,7 @@ public class ClickedConverter implements ObjectConverter<gen.model.test.Clicked>
 			
 		readers = new ObjectConverter.Reader[columnCount];
 		for (int i = 0; i < readers.length; i++) {
-			readers[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
+			readers[i] = (instance, rdr, ctx) -> { StringConverter.skip(rdr, ctx); return instance; };
 		}
 			
 		column = columns.stream().filter(it -> "_event_id".equals(it.columnName)).findAny();

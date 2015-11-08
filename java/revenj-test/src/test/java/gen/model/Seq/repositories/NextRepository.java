@@ -49,17 +49,24 @@ public class NextRepository   implements java.io.Closeable, org.revenj.patterns.
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.Seq.converters.NextConverter.class), locator);
 	}
 	
-	@Override
-	public org.revenj.patterns.Query<gen.model.Seq.Next> query(org.revenj.patterns.Specification<gen.model.Seq.Next> filter) {
-		org.revenj.patterns.Query<gen.model.Seq.Next> query = queryProvider.query(transactionConnection, locator, gen.model.Seq.Next.class);
-		if (filter == null) { }
-		else if (filter instanceof gen.model.Seq.Next.BetweenIds) {
+
+	public static org.revenj.patterns.Specification<gen.model.Seq.Next> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.Seq.Next> filter) {
+		
+		if (filter instanceof gen.model.Seq.Next.BetweenIds) {
 			gen.model.Seq.Next.BetweenIds _spec_ = (gen.model.Seq.Next.BetweenIds)filter;
 			Integer _spec_min_ = _spec_.getMin();
 			int _spec_max_ = _spec_.getMax();
-			query = query.filter(it -> ( _spec_min_ == null ||  ( (it.getID() >= _spec_min_) &&  (it.getID() <= _spec_max_))));
+			return it -> ( _spec_min_ == null ||  ( (it.getID() >= _spec_min_) &&  (it.getID() <= _spec_max_)));
 		}
-		else query = query.filter(filter);
+		return filter;
+	}
+
+	@Override
+	public org.revenj.patterns.Query<gen.model.Seq.Next> query(org.revenj.patterns.Specification<gen.model.Seq.Next> filter) {
+		org.revenj.patterns.Query<gen.model.Seq.Next> query = queryProvider.query(transactionConnection, locator, gen.model.Seq.Next.class);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

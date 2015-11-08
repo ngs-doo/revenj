@@ -49,11 +49,18 @@ public class LazyLoadRepository   implements java.io.Closeable, org.revenj.patte
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.LazyLoadConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.test.LazyLoad> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.test.LazyLoad> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.LazyLoad> query(org.revenj.patterns.Specification<gen.model.test.LazyLoad> filter) {
 		org.revenj.patterns.Query<gen.model.test.LazyLoad> query = queryProvider.query(transactionConnection, locator, gen.model.test.LazyLoad.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

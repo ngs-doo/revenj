@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public final class Clicked   implements java.io.Serializable, org.revenj.patterns.DomainEvent {
+public final class Clicked   implements java.io.Serializable, com.dslplatform.json.JsonObject, org.revenj.patterns.DomainEvent {
 	
 	
 	
@@ -82,7 +82,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = -2469007042623435909L;
+	private static final long serialVersionUID = -1504215252746157032L;
 	
 	private java.time.LocalDate date;
 
@@ -178,7 +178,7 @@ public final class Clicked   implements java.io.Serializable, org.revenj.pattern
 
 	
 
-public static class BetweenNumbers   implements java.io.Serializable, org.revenj.patterns.Specification<Clicked> {
+public static class BetweenNumbers   implements java.io.Serializable, org.revenj.patterns.Specification<Clicked>, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -200,7 +200,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.LinkedHashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = -2145443646904726480L;
+	private static final long serialVersionUID = -3256380616136132251L;
 	
 	private java.math.BigDecimal min;
 
@@ -262,8 +262,509 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		public boolean test(gen.model.test.Clicked it) {
 			return ( ( it.getNumber().compareTo(this.getMin()) >= 0 && (this.getInSet().contains(it.getNumber()))) &&  it.getEn().equals(this.getEn()));
 		}
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final BetweenNumbers self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			if (!(java.math.BigDecimal.ZERO.compareTo(self.min) == 0)) {
+			hasWrittenProperty = true;
+				sw.writeAscii("\"min\":", 6);
+				com.dslplatform.json.NumberConverter.serialize(self.min, sw);
+			}
+		
+		if(self.inSet.size() != 0) {
+			if(hasWrittenProperty) sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+			hasWrittenProperty = true;
+			sw.writeAscii("\"inSet\":[", 9);
+			java.math.BigDecimal item;
+			java.util.Iterator<java.math.BigDecimal> iterator = self.inSet.iterator();
+			int total = self.inSet.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();com.dslplatform.json.NumberConverter.serialize(item, sw);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();com.dslplatform.json.NumberConverter.serialize(item, sw);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		if(self.en != null) {
+			if(hasWrittenProperty) sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+			hasWrittenProperty = true;
+			sw.writeAscii("\"en\":\"", 6);
+			sw.writeAscii(self.en.name());
+			sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+		}
+	}
+
+	static void __serializeJsonObjectFull(final BetweenNumbers self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			
+			sw.writeAscii("\"min\":", 6);
+			com.dslplatform.json.NumberConverter.serialize(self.min, sw);
+		
+		if(self.inSet.size() != 0) {
+			sw.writeAscii(",\"inSet\":[", 10);
+			java.math.BigDecimal item;
+			java.util.Iterator<java.math.BigDecimal> iterator = self.inSet.iterator();
+			int total = self.inSet.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();com.dslplatform.json.NumberConverter.serialize(item, sw);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();com.dslplatform.json.NumberConverter.serialize(item, sw);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"inSet\":[]", 11);
+		
+		
+		if(self.en != null) {
+			sw.writeAscii(",\"en\":\"", 7);
+			sw.writeAscii(self.en.name());
+			sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+		} else {
+			sw.writeAscii(",\"en\":null", 10);
+		}
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<BetweenNumbers> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<BetweenNumbers>() {
+		@Override
+		public BetweenNumbers deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.Clicked.BetweenNumbers(reader);
+		}
+	};
+
+	private BetweenNumbers(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		java.math.BigDecimal _min_ = java.math.BigDecimal.ZERO;
+		java.util.Set<java.math.BigDecimal> _inSet_ = new java.util.LinkedHashSet<java.math.BigDecimal>(4);
+		gen.model.test.En _en_ = null;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case -913357481:
+						_min_ = com.dslplatform.json.NumberConverter.deserializeDecimal(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -505761338:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.NumberConverter.deserializeDecimalCollection(reader, _inSet_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1092248970:
+						
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: _en_ = gen.model.test.En.A; break;
+							case -955516027: _en_ = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case -913357481:
+						_min_ = com.dslplatform.json.NumberConverter.deserializeDecimal(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -505761338:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.NumberConverter.deserializeDecimalCollection(reader, _inSet_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1092248970:
+						
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: _en_ = gen.model.test.En.A; break;
+							case -955516027: _en_ = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.min = _min_;
+		this.inSet = _inSet_;
+		this.en = _en_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.Clicked.BetweenNumbers(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
 }
 
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final Clicked self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+		com.dslplatform.json.StringConverter.serializeShortNullable(self.URI, sw);
+		if (self.ProcessedAt != null) {
+			sw.writeAscii(",\"ProcessedAt\":");
+			org.revenj.json.JavaTimeConverter.serialize(self.ProcessedAt, sw);
+		}
+		if (self.QueuedAt != null) {
+			sw.writeAscii(",\"QueuedAt\":");
+			org.revenj.json.JavaTimeConverter.serialize(self.QueuedAt, sw);
+		}
+		
+			if (self.date != null) {
+				sw.writeAscii(",\"date\":", 8);
+				org.revenj.json.JavaTimeConverter.serialize(self.date, sw);
+			}
+		
+			if (!(java.math.BigDecimal.ZERO.compareTo(self.number) == 0)) {
+				sw.writeAscii(",\"number\":", 10);
+				com.dslplatform.json.NumberConverter.serialize(self.number, sw);
+			}
+		
+			if (self.bigint != null) {
+				sw.writeAscii(",\"bigint\":", 10);
+				com.dslplatform.json.NumberConverter.serialize(self.bigint, sw);
+			}
+		
+		if(self.bool.size() != 0) {
+			sw.writeAscii(",\"bool\":[", 9);
+			Boolean item;
+			java.util.Iterator<Boolean> iterator = self.bool.iterator();
+			int total = self.bool.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();com.dslplatform.json.BoolConverter.serialize(item, sw);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();com.dslplatform.json.BoolConverter.serialize(item, sw);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		if(self.en != null) {
+			sw.writeAscii(",\"en\":\"", 7);
+			sw.writeAscii(self.en.name());
+			sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+		}
+	}
+
+	static void __serializeJsonObjectFull(final Clicked self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+		com.dslplatform.json.StringConverter.serializeShortNullable(self.URI, sw);
+		if (self.ProcessedAt != null) {
+			sw.writeAscii(",\"ProcessedAt\":");
+			org.revenj.json.JavaTimeConverter.serialize(self.ProcessedAt, sw);
+		} else {
+			sw.writeAscii(",\"ProcessedAt\":null");
+		}
+		if (self.QueuedAt != null) {
+			sw.writeAscii(",\"QueuedAt\":");
+			org.revenj.json.JavaTimeConverter.serialize(self.QueuedAt, sw);
+		} else {
+			sw.writeAscii(",\"QueuedAt\":null");
+		}
+		
+			
+			if (self.date != null) {
+				sw.writeAscii(",\"date\":", 8);
+				org.revenj.json.JavaTimeConverter.serialize(self.date, sw);
+			} else {
+				sw.writeAscii(",\"date\":null", 12);
+			}
+		
+			
+			sw.writeAscii(",\"number\":", 10);
+			com.dslplatform.json.NumberConverter.serialize(self.number, sw);
+		
+			
+			if (self.bigint != null) {
+				sw.writeAscii(",\"bigint\":", 10);
+				com.dslplatform.json.NumberConverter.serialize(self.bigint, sw);
+			} else {
+				sw.writeAscii(",\"bigint\":null", 14);
+			}
+		
+		if(self.bool.size() != 0) {
+			sw.writeAscii(",\"bool\":[", 9);
+			Boolean item;
+			java.util.Iterator<Boolean> iterator = self.bool.iterator();
+			int total = self.bool.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();com.dslplatform.json.BoolConverter.serialize(item, sw);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();com.dslplatform.json.BoolConverter.serialize(item, sw);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"bool\":[]", 10);
+		
+		
+		if(self.en != null) {
+			sw.writeAscii(",\"en\":\"", 7);
+			sw.writeAscii(self.en.name());
+			sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+		} else {
+			sw.writeAscii(",\"en\":null", 10);
+		}
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Clicked> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Clicked>() {
+		@Override
+		public Clicked deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.Clicked(reader);
+		}
+	};
+
+	private Clicked(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		String _URI_ = "";
+			java.time.OffsetDateTime _ProcessedAt_ = null;
+			java.time.OffsetDateTime _QueuedAt_ = null;
+		java.time.LocalDate _date_ = null;
+		java.math.BigDecimal _number_ = java.math.BigDecimal.ZERO;
+		Long _bigint_ = null;
+		java.util.Set<Boolean> _bool_ = new java.util.LinkedHashSet<Boolean>(4);
+		gen.model.test.En _en_ = null;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case -497530082:
+						_ProcessedAt_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+				nextToken = reader.getNextToken();
+						break;
+					case -1790398591:
+						_QueuedAt_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+				nextToken = reader.getNextToken();
+						break;
+					case -730669991:
+						_date_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 467038368:
+						_number_ = com.dslplatform.json.NumberConverter.deserializeDecimal(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1972918838:
+						_bigint_ = com.dslplatform.json.NumberConverter.deserializeLong(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -929786563:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.BoolConverter.deserializeCollection(reader, _bool_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1092248970:
+						
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: _en_ = gen.model.test.En.A; break;
+							case -955516027: _en_ = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case -497530082:
+						_ProcessedAt_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+				nextToken = reader.getNextToken();
+						break;
+					case -1790398591:
+						_QueuedAt_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+				nextToken = reader.getNextToken();
+						break;
+					case -730669991:
+						_date_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 467038368:
+						_number_ = com.dslplatform.json.NumberConverter.deserializeDecimal(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1972918838:
+						_bigint_ = com.dslplatform.json.NumberConverter.deserializeLong(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -929786563:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.BoolConverter.deserializeCollection(reader, _bool_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1092248970:
+						
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: _en_ = gen.model.test.En.A; break;
+							case -955516027: _en_ = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.URI = _URI_;
+			this.ProcessedAt = _ProcessedAt_;
+			this.QueuedAt = _QueuedAt_;
+		this.date = _date_;
+		this.number = _number_;
+		this.bigint = _bigint_;
+		this.bool = _bool_;
+		this.en = _en_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.Clicked(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Clicked(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -293,14 +794,14 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers, int __index____event_id, int __index___QueuedAt, int __index___ProcessedAt, int __index___date, int __index___number, int __index___bigint, int __index___bool, int __index___en) {
 		
-		readers[__index____event_id] = (item, reader, context) -> { item.URI = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
-		readers[__index___QueuedAt] = (item, reader, context) -> { item.QueuedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, false, true); };
-		readers[__index___ProcessedAt] = (item, reader, context) -> { item.ProcessedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, true, true); };
-		readers[__index___date] = (item, reader, context) -> { item.date = org.revenj.postgres.converters.DateConverter.parse(reader, true); };
-		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
-		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); };
-		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {item.bool = new java.util.LinkedHashSet<Boolean>(__list);} else item.bool = new java.util.LinkedHashSet<Boolean>(4); }; };
-		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
+		readers[__index____event_id] = (item, reader, context) -> { item.URI = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
+		readers[__index___QueuedAt] = (item, reader, context) -> { item.QueuedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, false, true); return item; };
+		readers[__index___ProcessedAt] = (item, reader, context) -> { item.ProcessedAt = org.revenj.postgres.converters.TimestampConverter.parseOffset(reader, context, true, true); return item; };
+		readers[__index___date] = (item, reader, context) -> { item.date = org.revenj.postgres.converters.DateConverter.parse(reader, true); return item; };
+		readers[__index___number] = (item, reader, context) -> { item.number = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); return item; };
+		readers[__index___bigint] = (item, reader, context) -> { item.bigint = org.revenj.postgres.converters.LongConverter.parseNullable(reader); return item; };
+		readers[__index___bool] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {item.bool = new java.util.LinkedHashSet<Boolean>(__list);} else item.bool = new java.util.LinkedHashSet<Boolean>(4); }; return item; };
+		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); return item; };
 	}
 	
 	static {

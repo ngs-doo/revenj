@@ -2,11 +2,17 @@ package org.revenj;
 
 import gen.model.Boot;
 import gen.model.Seq.Next;
+import gen.model.adt.BasicSecurity;
+import gen.model.adt.User;
+import gen.model.adt.repositories.UserRepository;
 import gen.model.binaries.Document;
 import gen.model.egzotics.E;
 import gen.model.egzotics.PksV;
 import gen.model.egzotics.pks;
 import gen.model.egzotics.v;
+import gen.model.md.Detail;
+import gen.model.md.Master;
+import gen.model.md.repositories.MasterRepository;
 import gen.model.mixinReference.Author;
 import gen.model.mixinReference.repositories.AuthorRepository;
 import gen.model.test.*;
@@ -351,5 +357,30 @@ public class TestRepository {
 		Assert.assertTrue(found.isPresent());
 		Author au2 = found.get();
 		Assert.assertEquals(uri, au2.getURI());
+	}
+
+	@Test
+	public void testMasterDetailEntityReferenceUpdate() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<Master> repository = locator.resolve(MasterRepository.class);
+		String uri = repository.insert(new Master(new Detail[]{new Detail(), new Detail()}));
+		Optional<Master> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals(2, found.get().getDetails().length);
+	}
+
+	@Test
+	public void canReadWriteInterfaceProperty() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<User> repository = locator.resolve(UserRepository.class);
+		Random rnd = new Random();
+		User user = new User().setUsername("user" + Long.toString(rnd.nextLong()))
+				.setAuthentication(new BasicSecurity().setUsername("username").setPassword("password"));
+		String uri = repository.insert(user);
+		Optional<User> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		BasicSecurity bs = (BasicSecurity) found.get().getAuthentication();
+		Assert.assertEquals("username", bs.getUsername());
+		Assert.assertEquals("password", bs.getPassword());
 	}
 }

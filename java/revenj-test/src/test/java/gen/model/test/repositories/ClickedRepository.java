@@ -49,18 +49,25 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.ClickedConverter.class), locator);
 	}
 	
-	@Override
-	public org.revenj.patterns.Query<gen.model.test.Clicked> query(org.revenj.patterns.Specification<gen.model.test.Clicked> filter) {
-		org.revenj.patterns.Query<gen.model.test.Clicked> query = queryProvider.query(transactionConnection, locator, gen.model.test.Clicked.class);
-		if (filter == null) { }
-		else if (filter instanceof gen.model.test.Clicked.BetweenNumbers) {
+
+	public static org.revenj.patterns.Specification<gen.model.test.Clicked> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.test.Clicked> filter) {
+		
+		if (filter instanceof gen.model.test.Clicked.BetweenNumbers) {
 			gen.model.test.Clicked.BetweenNumbers _spec_ = (gen.model.test.Clicked.BetweenNumbers)filter;
 			java.math.BigDecimal _spec_min_ = _spec_.getMin();
 			java.util.Set<java.math.BigDecimal> _spec_inSet_ = _spec_.getInSet();
 			gen.model.test.En _spec_en_ = _spec_.getEn();
-			query = query.filter(it -> ( ( it.getNumber().compareTo(_spec_min_) >= 0 && (_spec_inSet_.contains(it.getNumber()))) &&  it.getEn().equals(_spec_en_)));
+			return it -> ( ( it.getNumber().compareTo(_spec_min_) >= 0 && (_spec_inSet_.contains(it.getNumber()))) &&  it.getEn().equals(_spec_en_));
 		}
-		else query = query.filter(filter);
+		return filter;
+	}
+
+	@Override
+	public org.revenj.patterns.Query<gen.model.test.Clicked> query(org.revenj.patterns.Specification<gen.model.test.Clicked> filter) {
+		org.revenj.patterns.Query<gen.model.test.Clicked> query = queryProvider.query(transactionConnection, locator, gen.model.test.Clicked.class);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

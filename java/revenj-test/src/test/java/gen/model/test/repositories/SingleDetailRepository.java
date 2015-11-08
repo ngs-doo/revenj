@@ -49,11 +49,18 @@ public class SingleDetailRepository   implements java.io.Closeable, org.revenj.p
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.test.converters.SingleDetailConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.test.SingleDetail> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.test.SingleDetail> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.SingleDetail> query(org.revenj.patterns.Specification<gen.model.test.SingleDetail> filter) {
 		org.revenj.patterns.Query<gen.model.test.SingleDetail> query = queryProvider.query(transactionConnection, locator, gen.model.test.SingleDetail.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

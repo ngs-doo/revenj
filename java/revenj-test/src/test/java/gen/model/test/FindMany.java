@@ -2,11 +2,11 @@ package gen.model.test;
 
 
 
-public final class FindMany   implements java.io.Serializable, org.revenj.patterns.Report<FindMany.Result> {
+public final class FindMany   implements java.io.Serializable, org.revenj.patterns.Report<FindMany.Result>, com.dslplatform.json.JsonObject {
 	
 	
 
-public static class Result   {
+public static class Result   implements com.dslplatform.json.JsonObject {
 	
 	
 	@com.fasterxml.jackson.annotation.JsonCreator 
@@ -38,6 +38,187 @@ public static class Result   {
 		return this.found;
 	}
 
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final Result self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+		if(self.composites.size() != 0) {
+			if(hasWrittenProperty) sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+			hasWrittenProperty = true;
+			sw.writeAscii("\"composites\":[", 14);
+			gen.model.test.CompositeList item = self.composites.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.CompositeList.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < self.composites.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.composites.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.CompositeList.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		if(self.found != null) {
+			if(hasWrittenProperty) sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+			hasWrittenProperty = true;
+			sw.writeAscii("\"found\":{", 9);
+			
+					gen.model.test.Composite.__serializeJsonObjectMinimal(self.found, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		}
+	}
+
+	static void __serializeJsonObjectFull(final Result self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+		if(self.composites.size() != 0) {
+			sw.writeAscii(",\"composites\":[", 15);
+			gen.model.test.CompositeList item = self.composites.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.CompositeList.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < self.composites.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.composites.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.CompositeList.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"composites\":[]", 16);
+		
+		
+		if(self.found != null) {
+			sw.writeAscii(",\"found\":{", 10);
+			
+					gen.model.test.Composite.__serializeJsonObjectFull(self.found, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		} else {
+			sw.writeAscii(",\"found\":null", 13);
+		}
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Result> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Result>() {
+		@Override
+		public Result deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.FindMany.Result(reader);
+		}
+	};
+
+	private Result(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		java.util.List<gen.model.test.CompositeList> _composites_ = new java.util.ArrayList<gen.model.test.CompositeList>(4);
+		gen.model.test.Composite _found_ = null;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 1131107909:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.CompositeList.JSON_READER, _composites_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1694464927:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_found_ = gen.model.test.Composite.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 1131107909:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.CompositeList.JSON_READER, _composites_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1694464927:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_found_ = gen.model.test.Composite.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.composites = _composites_;
+		this.found = _found_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.FindMany.Result(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
 }
 
 	
@@ -58,7 +239,7 @@ public static class Result   {
 		this.ids = new java.util.LinkedHashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = 8308550219818556472L;
+	private static final long serialVersionUID = 8933720349785970089L;
 	
 	private java.util.UUID id;
 
@@ -155,6 +336,166 @@ public static class Result   {
 			return new Result(_composites_, _found_);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final FindMany self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			if (!(self.id.getMostSignificantBits() == 0 && self.id.getLeastSignificantBits() == 0)) {
+			hasWrittenProperty = true;
+				sw.writeAscii("\"id\":", 5);
+				com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
+			}
+		
+		if(self.ids.size() != 0) {
+			if(hasWrittenProperty) sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+			hasWrittenProperty = true;
+			sw.writeAscii("\"ids\":[", 7);
+			java.util.UUID item;
+			java.util.Iterator<java.util.UUID> iterator = self.ids.iterator();
+			int total = self.ids.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();com.dslplatform.json.UUIDConverter.serialize(item, sw);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();com.dslplatform.json.UUIDConverter.serialize(item, sw);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+	}
+
+	static void __serializeJsonObjectFull(final FindMany self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			
+			sw.writeAscii("\"id\":", 5);
+			com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
+		
+		if(self.ids.size() != 0) {
+			sw.writeAscii(",\"ids\":[", 8);
+			java.util.UUID item;
+			java.util.Iterator<java.util.UUID> iterator = self.ids.iterator();
+			int total = self.ids.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();com.dslplatform.json.UUIDConverter.serialize(item, sw);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();com.dslplatform.json.UUIDConverter.serialize(item, sw);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"ids\":[]", 9);
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<FindMany> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<FindMany>() {
+		@Override
+		public FindMany deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.FindMany(reader);
+		}
+	};
+
+	private FindMany(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		java.util.UUID _id_ = org.revenj.Utils.MIN_UUID;
+		java.util.Set<java.util.UUID> _ids_ = new java.util.LinkedHashSet<java.util.UUID>(4);
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 926444256:
+						_id_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -2133867159:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.UUIDConverter.deserializeCollection(reader, _ids_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 926444256:
+						_id_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -2133867159:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.UUIDConverter.deserializeCollection(reader, _ids_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.id = _id_;
+		this.ids = _ids_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.FindMany(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
 		}
 	}
 }

@@ -49,11 +49,18 @@ public class DateListRepository   implements java.io.Closeable, org.revenj.patte
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.issues.converters.DateListConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.issues.DateList> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.issues.DateList> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.issues.DateList> query(org.revenj.patterns.Specification<gen.model.issues.DateList> filter) {
 		org.revenj.patterns.Query<gen.model.issues.DateList> query = queryProvider.query(transactionConnection, locator, gen.model.issues.DateList.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

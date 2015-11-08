@@ -2,7 +2,7 @@ package gen.model.issues;
 
 
 
-public class DateList   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot {
+public class DateList   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -78,12 +78,13 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 			final java.util.List<java.time.OffsetDateTime> list) {
 			
 		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		this.ID = --__SequenceCounterID__;
 		setList(list);
 	}
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 7866065455683476606L;
+	private static final long serialVersionUID = 1668388286549550763L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private DateList(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -188,6 +189,172 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 		);
 	}
 	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final DateList self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+			if (self.ID != 0L) {
+				sw.writeAscii(",\"ID\":", 6);
+				com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
+			}
+		
+		if(self.list.size() != 0) {
+			sw.writeAscii(",\"list\":[", 9);
+			org.revenj.json.JavaTimeConverter.serializeNullable(self.list.get(0), sw);
+			for(int i = 1; i < self.list.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				org.revenj.json.JavaTimeConverter.serializeNullable(self.list.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+	}
+
+	static void __serializeJsonObjectFull(final DateList self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+			
+			sw.writeAscii(",\"ID\":", 6);
+			com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
+		
+		if(self.list.size() != 0) {
+			sw.writeAscii(",\"list\":[", 9);
+			org.revenj.json.JavaTimeConverter.serializeNullable(self.list.get(0), sw);
+			for(int i = 1; i < self.list.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				org.revenj.json.JavaTimeConverter.serializeNullable(self.list.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"list\":[]", 10);
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<DateList> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<DateList>() {
+		@Override
+		public DateList deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.issues.DateList(reader);
+		}
+	};
+
+	private DateList(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		String _URI_ = "";
+		this.__locator = java.util.Optional.ofNullable(reader.context);
+		long _ID_ = 0L;
+		java.util.List<java.time.OffsetDateTime> _list_ = new java.util.ArrayList<java.time.OffsetDateTime>(4);
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case 1458105184:
+						_ID_ = com.dslplatform.json.NumberConverter.deserializeLong(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 217798785:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							org.revenj.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _list_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case 1458105184:
+						_ID_ = com.dslplatform.json.NumberConverter.deserializeLong(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 217798785:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							org.revenj.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _list_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.URI = _URI_;
+		this.ID = _ID_;
+		this.list = _list_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.issues.DateList(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
+	
 	public DateList(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<DateList>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<DateList> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -199,13 +366,13 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<DateList>[] readers, int __index___ID, int __index___list) {
 		
-		readers[__index___ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.LongConverter.parse(reader); };
-		readers[__index___list] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, true, true); if(__list != null) {item.list = __list;} else item.list = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; };
+		readers[__index___ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.LongConverter.parse(reader); return item; };
+		readers[__index___list] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, true, true); if(__list != null) {item.list = __list;} else item.list = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; return item; };
 	}
 	
 	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<DateList>[] readers, int __index__extended_ID, int __index__extended_list) {
 		
-		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.LongConverter.parse(reader); };
-		readers[__index__extended_list] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, true, true); if(__list != null) {item.list = __list;} else item.list = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; };
+		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.LongConverter.parse(reader); return item; };
+		readers[__index__extended_list] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, true, true); if(__list != null) {item.list = __list;} else item.list = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; return item; };
 	}
 }

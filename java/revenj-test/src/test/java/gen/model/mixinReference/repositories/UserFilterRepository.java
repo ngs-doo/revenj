@@ -49,11 +49,18 @@ public class UserFilterRepository   implements java.io.Closeable, org.revenj.pat
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.mixinReference.converters.UserFilterConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.mixinReference.UserFilter> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.mixinReference.UserFilter> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.mixinReference.UserFilter> query(org.revenj.patterns.Specification<gen.model.mixinReference.UserFilter> filter) {
 		org.revenj.patterns.Query<gen.model.mixinReference.UserFilter> query = queryProvider.query(transactionConnection, locator, gen.model.mixinReference.UserFilter.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		
 		if(org.revenj.security.PermissionManager.implies("RegularUser") == true) {

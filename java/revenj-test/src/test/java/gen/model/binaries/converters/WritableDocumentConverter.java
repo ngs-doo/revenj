@@ -22,7 +22,7 @@ public class WritableDocumentConverter implements ObjectConverter<gen.model.bina
 			
 		readers = new ObjectConverter.Reader[columnCount];
 		for (int i = 0; i < readers.length; i++) {
-			readers[i] = (instance, rdr, ctx) -> StringConverter.skip(rdr, ctx);
+			readers[i] = (instance, rdr, ctx) -> { StringConverter.skip(rdr, ctx); return instance; };
 		}
 			
 		column = columns.stream().filter(it -> "ID".equals(it.columnName)).findAny();

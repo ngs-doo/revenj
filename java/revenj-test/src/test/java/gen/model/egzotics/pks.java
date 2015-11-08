@@ -2,7 +2,7 @@ package gen.model.egzotics;
 
 
 
-public class pks   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot {
+public class pks   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -88,7 +88,7 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 286142059521038956L;
+	private static final long serialVersionUID = 7839942795053209597L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private pks(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -196,6 +196,199 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 		);
 	}
 	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final pks self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+		if(self.id.size() != 0) {
+			sw.writeAscii(",\"id\":[", 7);
+			com.dslplatform.json.NumberConverter.serialize(self.id.get(0), sw);
+			for(int i = 1; i < self.id.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.NumberConverter.serialize(self.id.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+			if (self.xml != null) {
+				sw.writeAscii(",\"xml\":", 7);
+				com.dslplatform.json.XmlConverter.serialize(self.xml, sw);
+			}
+		
+			if (self.s3 != null) {
+				sw.writeAscii(",\"s3\":", 6);
+				org.revenj.json.StorageConverter.serialize(self.s3, sw);
+			}
+	}
+
+	static void __serializeJsonObjectFull(final pks self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+		if(self.id.size() != 0) {
+			sw.writeAscii(",\"id\":[", 7);
+			com.dslplatform.json.NumberConverter.serialize(self.id.get(0), sw);
+			for(int i = 1; i < self.id.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.NumberConverter.serialize(self.id.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"id\":[]", 8);
+		
+			
+			if (self.xml != null) {
+				sw.writeAscii(",\"xml\":", 7);
+				com.dslplatform.json.XmlConverter.serialize(self.xml, sw);
+			} else {
+				sw.writeAscii(",\"xml\":null", 11);
+			}
+		
+			
+			if (self.s3 != null) {
+				sw.writeAscii(",\"s3\":", 6);
+				org.revenj.json.StorageConverter.serialize(self.s3, sw);
+			} else {
+				sw.writeAscii(",\"s3\":null", 10);
+			}
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<pks> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<pks>() {
+		@Override
+		public pks deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.egzotics.pks(reader);
+		}
+	};
+
+	private pks(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		String _URI_ = "";
+		this.__locator = java.util.Optional.ofNullable(reader.context);
+		java.util.List<Integer> _id_ = new java.util.ArrayList<Integer>(4);
+		org.w3c.dom.Element _xml_ = null;
+		org.revenj.storage.S3 _s3_ = null;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case 926444256:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.NumberConverter.deserializeIntCollection(reader, _id_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -630165834:
+						_xml_ = com.dslplatform.json.XmlConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 106018211:
+						_s3_ = org.revenj.json.StorageConverter.deserializeS3(reader);
+					nextToken = reader.getNextToken();
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case 926444256:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.NumberConverter.deserializeIntCollection(reader, _id_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -630165834:
+						_xml_ = com.dslplatform.json.XmlConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 106018211:
+						_s3_ = org.revenj.json.StorageConverter.deserializeS3(reader);
+					nextToken = reader.getNextToken();
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.URI = _URI_;
+		this.id = _id_;
+		this.xml = _xml_;
+		this.s3 = _s3_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.egzotics.pks(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
+	
 	public pks(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<pks>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<pks> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -207,15 +400,15 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<pks>[] readers, int __index___id, int __index___xml, int __index___s3) {
 		
-		readers[__index___id] = (item, reader, context) -> { { java.util.List<Integer> __list = org.revenj.postgres.converters.IntConverter.parseCollection(reader, context, false); if(__list != null) {item.id = __list;} else item.id = new java.util.ArrayList<Integer>(4); }; };
-		readers[__index___xml] = (item, reader, context) -> { item.xml = org.revenj.postgres.converters.XmlConverter.parse(reader, context); };
-		readers[__index___s3] = (item, reader, context) -> { item.s3 = org.revenj.postgres.converters.S3Converter.parse(reader, context); };
+		readers[__index___id] = (item, reader, context) -> { { java.util.List<Integer> __list = org.revenj.postgres.converters.IntConverter.parseCollection(reader, context, false); if(__list != null) {item.id = __list;} else item.id = new java.util.ArrayList<Integer>(4); }; return item; };
+		readers[__index___xml] = (item, reader, context) -> { item.xml = org.revenj.postgres.converters.XmlConverter.parse(reader, context); return item; };
+		readers[__index___s3] = (item, reader, context) -> { item.s3 = org.revenj.postgres.converters.S3Converter.parse(reader, context); return item; };
 	}
 	
 	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<pks>[] readers, int __index__extended_id, int __index__extended_xml, int __index__extended_s3) {
 		
-		readers[__index__extended_id] = (item, reader, context) -> { { java.util.List<Integer> __list = org.revenj.postgres.converters.IntConverter.parseCollection(reader, context, false); if(__list != null) {item.id = __list;} else item.id = new java.util.ArrayList<Integer>(4); }; };
-		readers[__index__extended_xml] = (item, reader, context) -> { item.xml = org.revenj.postgres.converters.XmlConverter.parse(reader, context); };
-		readers[__index__extended_s3] = (item, reader, context) -> { item.s3 = org.revenj.postgres.converters.S3Converter.parse(reader, context); };
+		readers[__index__extended_id] = (item, reader, context) -> { { java.util.List<Integer> __list = org.revenj.postgres.converters.IntConverter.parseCollection(reader, context, false); if(__list != null) {item.id = __list;} else item.id = new java.util.ArrayList<Integer>(4); }; return item; };
+		readers[__index__extended_xml] = (item, reader, context) -> { item.xml = org.revenj.postgres.converters.XmlConverter.parse(reader, context); return item; };
+		readers[__index__extended_s3] = (item, reader, context) -> { item.s3 = org.revenj.postgres.converters.S3Converter.parse(reader, context); return item; };
 	}
 }

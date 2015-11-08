@@ -49,11 +49,18 @@ public class ReadOnlyDocumentRepository   implements java.io.Closeable, org.reve
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.binaries.converters.ReadOnlyDocumentConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.binaries.ReadOnlyDocument> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.binaries.ReadOnlyDocument> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.binaries.ReadOnlyDocument> query(org.revenj.patterns.Specification<gen.model.binaries.ReadOnlyDocument> filter) {
 		org.revenj.patterns.Query<gen.model.binaries.ReadOnlyDocument> query = queryProvider.query(transactionConnection, locator, gen.model.binaries.ReadOnlyDocument.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

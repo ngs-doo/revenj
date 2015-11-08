@@ -49,11 +49,18 @@ public class WritableDocumentRepository   implements java.io.Closeable, org.reve
 		this(locator.tryResolve(java.sql.Connection.class), locator.resolve(javax.sql.DataSource.class), locator.resolve(org.revenj.postgres.QueryProvider.class), locator.resolve(gen.model.binaries.converters.WritableDocumentConverter.class), locator);
 	}
 	
+
+	public static org.revenj.patterns.Specification<gen.model.binaries.WritableDocument> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.binaries.WritableDocument> filter) {
+		
+		return filter;
+	}
+
 	@Override
 	public org.revenj.patterns.Query<gen.model.binaries.WritableDocument> query(org.revenj.patterns.Specification<gen.model.binaries.WritableDocument> filter) {
 		org.revenj.patterns.Query<gen.model.binaries.WritableDocument> query = queryProvider.query(transactionConnection, locator, gen.model.binaries.WritableDocument.class);
-		if (filter == null) { }
-		else query = query.filter(filter);
+		if (filter != null) {
+			query = query.filter(rewriteSpecificationToLambda(filter));
+		}
 		
 		return query;
 	}

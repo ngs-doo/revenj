@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public class Entity   implements java.lang.Cloneable, java.io.Serializable {
+public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -121,7 +121,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 8349626202223983459L;
+	private static final long serialVersionUID = -4637599345080999368L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -351,6 +351,347 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 		});
 	}
 	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final Entity self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+			if (!(java.math.BigDecimal.ZERO.compareTo(self.money) == 0)) {
+				sw.writeAscii(",\"money\":", 9);
+				com.dslplatform.json.NumberConverter.serialize(self.money, sw);
+			}
+		
+			if (!(self.id.length() == 0)) {
+				sw.writeAscii(",\"id\":", 6);
+				com.dslplatform.json.StringConverter.serializeShort(self.id, sw);
+			}
+		
+			if(self.compositeURI != null) {
+				sw.writeAscii(",\"compositeURI\":");
+				com.dslplatform.json.StringConverter.serializeShort(self.compositeURI, sw);
+			}
+		
+			if (self.compositeID != null) {
+				sw.writeAscii(",\"compositeID\":", 15);
+				com.dslplatform.json.UUIDConverter.serialize(self.compositeID, sw);
+			}
+		
+		if(self.detail1.size() != 0) {
+			sw.writeAscii(",\"detail1\":[", 12);
+			gen.model.test.Detail1 item;
+			java.util.Iterator<gen.model.test.Detail1> iterator = self.detail1.iterator();
+			int total = self.detail1.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Detail1.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Detail1.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		if(self.detail2.size() != 0) {
+			sw.writeAscii(",\"detail2\":[", 12);
+			gen.model.test.Detail2 item;
+			java.util.Iterator<gen.model.test.Detail2> iterator = self.detail2.iterator();
+			int total = self.detail2.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Detail2.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Detail2.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+			if (!(self.Compositeid.getMostSignificantBits() == 0 && self.Compositeid.getLeastSignificantBits() == 0)) {
+				sw.writeAscii(",\"Compositeid\":", 15);
+				com.dslplatform.json.UUIDConverter.serialize(self.Compositeid, sw);
+			}
+		
+			if (self.Index != 0) {
+				sw.writeAscii(",\"Index\":", 9);
+				com.dslplatform.json.NumberConverter.serialize(self.Index, sw);
+			}
+	}
+
+	static void __serializeJsonObjectFull(final Entity self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+			
+			sw.writeAscii(",\"money\":", 9);
+			com.dslplatform.json.NumberConverter.serialize(self.money, sw);
+		
+			
+			sw.writeAscii(",\"id\":", 6);
+			com.dslplatform.json.StringConverter.serializeShort(self.id, sw);
+		
+			sw.writeAscii(",\"compositeURI\":");
+			com.dslplatform.json.StringConverter.serializeShortNullable(self.compositeURI, sw);
+		
+			
+			if (self.compositeID != null) {
+				sw.writeAscii(",\"compositeID\":", 15);
+				com.dslplatform.json.UUIDConverter.serialize(self.compositeID, sw);
+			} else {
+				sw.writeAscii(",\"compositeID\":null", 19);
+			}
+		
+		if(self.detail1.size() != 0) {
+			sw.writeAscii(",\"detail1\":[", 12);
+			gen.model.test.Detail1 item;
+			java.util.Iterator<gen.model.test.Detail1> iterator = self.detail1.iterator();
+			int total = self.detail1.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Detail1.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Detail1.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"detail1\":[]", 13);
+		
+		if(self.detail2.size() != 0) {
+			sw.writeAscii(",\"detail2\":[", 12);
+			gen.model.test.Detail2 item;
+			java.util.Iterator<gen.model.test.Detail2> iterator = self.detail2.iterator();
+			int total = self.detail2.size() - 1;
+			for(int i = 0; i < total; i++) {
+				item = iterator.next();
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Detail2.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+			}
+			item = iterator.next();
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Detail2.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"detail2\":[]", 13);
+		
+			
+			sw.writeAscii(",\"Compositeid\":", 15);
+			com.dslplatform.json.UUIDConverter.serialize(self.Compositeid, sw);
+		
+			
+			sw.writeAscii(",\"Index\":", 9);
+			com.dslplatform.json.NumberConverter.serialize(self.Index, sw);
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Entity> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Entity>() {
+		@Override
+		public Entity deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.Entity(reader);
+		}
+	};
+
+	private Entity(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		String _URI_ = "";
+		this.__locator = java.util.Optional.ofNullable(reader.context);
+		java.math.BigDecimal _money_ = org.revenj.Utils.ZERO_2;
+		String _id_ = "";
+		String _compositeURI_ = null;
+		java.util.UUID _compositeID_ = null;
+		java.util.Set<gen.model.test.Detail1> _detail1_ = new java.util.LinkedHashSet<gen.model.test.Detail1>(4);
+		java.util.Set<gen.model.test.Detail2> _detail2_ = new java.util.LinkedHashSet<gen.model.test.Detail2>(4);
+		java.util.UUID _Compositeid_ = org.revenj.Utils.MIN_UUID;
+		int _Index_ = 0;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case -514799281:
+						_money_ = com.dslplatform.json.NumberConverter.deserializeDecimal(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 926444256:
+						_id_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 932046990:
+						_compositeURI_ = com.dslplatform.json.StringConverter.deserialize(reader);
+							nextToken = reader.getNextToken();
+						break;
+					case 662582713:
+						_compositeID_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 392661951:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Detail1.JSON_READER, _detail1_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 409439570:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Detail2.JSON_READER, _detail2_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -1611357223:
+						_Compositeid_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1362645429:
+						_Index_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
+					nextToken = reader.getNextToken();
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case -514799281:
+						_money_ = com.dslplatform.json.NumberConverter.deserializeDecimal(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 926444256:
+						_id_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 932046990:
+						_compositeURI_ = com.dslplatform.json.StringConverter.deserialize(reader);
+							nextToken = reader.getNextToken();
+						break;
+					case 662582713:
+						_compositeID_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 392661951:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Detail1.JSON_READER, _detail1_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 409439570:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Detail2.JSON_READER, _detail2_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -1611357223:
+						_Compositeid_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1362645429:
+						_Index_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
+					nextToken = reader.getNextToken();
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.URI = _URI_;
+		this.money = _money_;
+		this.id = _id_;
+		this.compositeURI = _compositeURI_;
+		this.compositeID = _compositeID_;
+		this.detail1 = _detail1_;
+		this.detail2 = _detail2_;
+		this.Compositeid = _Compositeid_;
+		this.Index = _Index_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.Entity(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
+	
 	public Entity(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Entity> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -361,25 +702,25 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable {
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers, int __index___money, int __index___id, int __index___compositeURI, int __index___compositeID, gen.model.test.converters.Detail1Converter __converter_detail1, int __index___detail1, gen.model.test.converters.Detail2Converter __converter_detail2, int __index___detail2, int __index___Compositeid, int __index___Index) {
 		
-		readers[__index___money] = (item, reader, context) -> { item.money = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
-		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
-		readers[__index___compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
-		readers[__index___compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
-		readers[__index___detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::from); if (__list != null) {item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(4); }; };
-		readers[__index___detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::from); if (__list != null) {item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(4); }; };
-		readers[__index___Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
-		readers[__index___Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
+		readers[__index___money] = (item, reader, context) -> { item.money = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); return item; };
+		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
+		readers[__index___compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); return item; };
+		readers[__index___compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); return item; };
+		readers[__index___detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::from); if (__list != null) {item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(4); }; return item; };
+		readers[__index___detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::from); if (__list != null) {item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(4); }; return item; };
+		readers[__index___Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
+		readers[__index___Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
 	
 	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers, int __index__extended_money, int __index__extended_id, int __index__extended_compositeURI, int __index__extended_compositeID, final gen.model.test.converters.Detail1Converter __converter_detail1, int __index__extended_detail1, final gen.model.test.converters.Detail2Converter __converter_detail2, int __index__extended_detail2, int __index__extended_Compositeid, int __index__extended_Index) {
 		
-		readers[__index__extended_money] = (item, reader, context) -> { item.money = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); };
-		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
-		readers[__index__extended_compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); };
-		readers[__index__extended_compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); };
-		readers[__index__extended_detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::fromExtended); if (__list != null) {item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(4); }; };
-		readers[__index__extended_detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::fromExtended); if (__list != null) {item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(4); }; };
-		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
-		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); };
+		readers[__index__extended_money] = (item, reader, context) -> { item.money = org.revenj.postgres.converters.DecimalConverter.parse(reader, false); return item; };
+		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
+		readers[__index__extended_compositeURI] = (item, reader, context) -> { item.compositeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); return item; };
+		readers[__index__extended_compositeID] = (item, reader, context) -> { item.compositeID = org.revenj.postgres.converters.UuidConverter.parse(reader, true); return item; };
+		readers[__index__extended_detail1] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail1> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail1::fromExtended); if (__list != null) {item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(__list);} else item.detail1 = new java.util.LinkedHashSet<gen.model.test.Detail1>(4); }; return item; };
+		readers[__index__extended_detail2] = (item, reader, context) -> { { java.util.List<gen.model.test.Detail2> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_detail2::fromExtended); if (__list != null) {item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(__list);} else item.detail2 = new java.util.LinkedHashSet<gen.model.test.Detail2>(4); }; return item; };
+		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
+		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
 }

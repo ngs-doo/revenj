@@ -180,3 +180,32 @@ module issues {
 		List<Timestamp?> list;
 	}
 }
+module md {
+	root Master {
+		detail<Detail.master> details;
+	}
+	entity Detail(id) {
+		guid id;
+		int masterId;
+		relationship master(masterId) Master;
+	}
+}
+module adt {
+	mixin Auth { apply on module values; }
+	value BasicSecurity {
+		string username;
+		string password;
+	}
+	value Token {
+		string token;
+	}
+	value Anonymous;
+	value DigestSecurity {
+		string username;
+		binary passwordHash;
+	}
+	root User(username) {
+		string username;
+		Auth authentication;
+	}
+}

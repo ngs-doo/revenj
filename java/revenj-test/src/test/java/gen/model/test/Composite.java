@@ -2,7 +2,7 @@ package gen.model.test;
 
 
 
-public class Composite   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot {
+public class Composite   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -110,18 +110,18 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 			final java.util.List<java.time.OffsetDateTime> tsl,
 			final java.util.List<gen.model.test.Entity> entities) {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		setId(id);
 		setEnn(enn);
 		setEn(en);
 		setSimple(simple);
 		setTsl(tsl);
 		setEntities(entities);
+		this.URI = this.id.toString();
 	}
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -247804894728326801L;
+	private static final long serialVersionUID = -7931154843698534420L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -165,6 +165,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		return this;
 	}
 
+	private static final gen.model.test.En[] _defaultenn = new gen.model.test.En[] { };
 	
 	private gen.model.test.En[] enn;
 
@@ -288,6 +289,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		return this;
 	}
 
+	private static final String[] _defaultlaziesURI = new String[0];
 	
 	private gen.model.test.LazyLoad[] lazies;
 
@@ -333,7 +335,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 
 	
 
-public static class ForSimple   implements java.io.Serializable, org.revenj.patterns.Specification<Composite> {
+public static class ForSimple   implements java.io.Serializable, org.revenj.patterns.Specification<Composite>, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -350,7 +352,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = -2332339125747376982L;
+	private static final long serialVersionUID = -4745688126631197643L;
 	
 	private gen.model.test.Simple simple;
 
@@ -374,6 +376,123 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		public boolean test(gen.model.test.Composite it) {
 			return (it.getSimple().getNumber() == this.getSimple().getNumber());
 		}
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final ForSimple self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+		
+		sw.writeAscii("\"simple\":{", 10);
+		
+					gen.model.test.Simple.__serializeJsonObjectMinimal(self.simple, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectFull(final ForSimple self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+		
+		sw.writeAscii("\"simple\":{", 10);
+		
+					gen.model.test.Simple.__serializeJsonObjectFull(self.simple, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<ForSimple> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<ForSimple>() {
+		@Override
+		public ForSimple deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.Composite.ForSimple(reader);
+		}
+	};
+
+	private ForSimple(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		gen.model.test.Simple _simple_ = null;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 375816319:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_simple_ = gen.model.test.Simple.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 375816319:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_simple_ = gen.model.test.Simple.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.simple = _simple_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.Composite.ForSimple(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
 }
 
 	private transient Composite __originalValue;
@@ -417,6 +536,479 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		);
 	}
 	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final Composite self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+			if (!(self.id.getMostSignificantBits() == 0 && self.id.getLeastSignificantBits() == 0)) {
+				sw.writeAscii(",\"id\":", 6);
+				com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
+			}
+		
+		if(self.enn.length != 0) {
+			sw.writeAscii(",\"enn\":[", 8);
+			gen.model.test.En item = self.enn[0];
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+				sw.writeAscii(item.name());
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+			for(int i = 1; i < self.enn.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.enn[i];
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+				sw.writeAscii(item.name());
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		if(self.en != gen.model.test.En.A) {
+			sw.writeAscii(",\"en\":\"B\"", 9);
+		}
+		
+		
+		sw.writeAscii(",\"simple\":{", 11);
+		
+					gen.model.test.Simple.__serializeJsonObjectMinimal(self.simple, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		
+			if (!(self.change.getYear() == 1 && self.change.getMonthValue() == 1 && self.change.getDayOfMonth() == 1)) {
+				sw.writeAscii(",\"change\":", 10);
+				org.revenj.json.JavaTimeConverter.serialize(self.change, sw);
+			}
+		
+		if(self.tsl.size() != 0) {
+			sw.writeAscii(",\"tsl\":[", 8);
+			org.revenj.json.JavaTimeConverter.serialize(self.tsl.get(0), sw);
+			for(int i = 1; i < self.tsl.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				org.revenj.json.JavaTimeConverter.serialize(self.tsl.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		if(self.entities.size() != 0) {
+			sw.writeAscii(",\"entities\":[", 13);
+			gen.model.test.Entity item = self.entities.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Entity.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < self.entities.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.entities.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Entity.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+			if(self.laziesURI != null && self.laziesURI.length != 0) {
+				sw.writeAscii(",\"laziesURI\":[");
+				com.dslplatform.json.StringConverter.serializeShort(self.laziesURI[0], sw);
+				for(int i = 1; i < self.laziesURI.length; i++) {
+					sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+					com.dslplatform.json.StringConverter.serializeShort(self.laziesURI[i], sw);
+				}
+				sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+			}
+	}
+
+	static void __serializeJsonObjectFull(final Composite self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		sw.writeAscii("\"URI\":");
+			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
+		
+			
+			sw.writeAscii(",\"id\":", 6);
+			com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
+		
+		if(self.enn.length != 0) {
+			sw.writeAscii(",\"enn\":[", 8);
+			gen.model.test.En item = self.enn[0];
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+				sw.writeAscii(item.name());
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+			for(int i = 1; i < self.enn.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.enn[i];
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+				sw.writeAscii(item.name());
+				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"enn\":[]", 9);
+		
+		
+		sw.writeAscii(",\"en\":\"", 7);
+		sw.writeAscii(self.en.name());
+		sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
+		
+		
+		sw.writeAscii(",\"simple\":{", 11);
+		
+					gen.model.test.Simple.__serializeJsonObjectFull(self.simple, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		
+			
+			sw.writeAscii(",\"change\":", 10);
+			org.revenj.json.JavaTimeConverter.serialize(self.change, sw);
+		
+		if(self.tsl.size() != 0) {
+			sw.writeAscii(",\"tsl\":[", 8);
+			org.revenj.json.JavaTimeConverter.serialize(self.tsl.get(0), sw);
+			for(int i = 1; i < self.tsl.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				org.revenj.json.JavaTimeConverter.serialize(self.tsl.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"tsl\":[]", 9);
+		
+		if(self.entities.size() != 0) {
+			sw.writeAscii(",\"entities\":[", 13);
+			gen.model.test.Entity item = self.entities.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Entity.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < self.entities.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = self.entities.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.test.Entity.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"entities\":[]", 14);
+		
+			if(self.laziesURI != null && self.laziesURI.length != 0) {
+				sw.writeAscii(",\"laziesURI\":[");
+				com.dslplatform.json.StringConverter.serializeShort(self.laziesURI[0], sw);
+				for(int i = 1; i < self.laziesURI.length; i++) {
+					sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+					com.dslplatform.json.StringConverter.serializeShort(self.laziesURI[i], sw);
+				}
+				sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+			} else if(self.laziesURI != null) {
+				sw.writeAscii(",\"laziesURI\":[]");
+			} else {
+				sw.writeAscii(",\"laziesURI\":null");
+			}
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Composite> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Composite>() {
+		@Override
+		public Composite deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.test.Composite(reader);
+		}
+	};
+
+	private Composite(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		String _URI_ = "";
+		this.__locator = java.util.Optional.ofNullable(reader.context);
+		java.util.UUID _id_ = org.revenj.Utils.MIN_UUID;
+		gen.model.test.En[] _enn_ = _defaultenn;
+		gen.model.test.En _en_ = gen.model.test.En.A;
+		gen.model.test.Simple _simple_ = null;
+		java.time.LocalDate _change_ = org.revenj.Utils.MIN_LOCAL_DATE;
+		java.util.List<java.time.OffsetDateTime> _tsl_ = new java.util.ArrayList<java.time.OffsetDateTime>(4);
+		java.util.List<gen.model.test.Entity> _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4);
+		String[] _laziesURI_ = _defaultlaziesURI;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case 926444256:
+						_id_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 1619944940:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken == ']') {
+							_enn_ = new gen.model.test.En[] { };
+						} else {
+							java.util.ArrayList<gen.model.test.En> __res = new java.util.ArrayList<gen.model.test.En>(4);
+							gen.model.test.En __inst;
+							String __val;
+							
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: __inst = gen.model.test.En.A; break;
+							case -955516027: __inst = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						__res.add(__inst);
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+							while ((nextToken = reader.getNextToken()) == ',') {
+								nextToken = reader.getNextToken();
+								
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: __inst = gen.model.test.En.A; break;
+							case -955516027: __inst = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						__res.add(__inst);
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+							}
+							if (nextToken != ']') throw new java.io.IOException("Expecting ']' at position " + reader.positionInStream() + ". Found " + (char) nextToken);
+							_enn_ = __res.toArray(new gen.model.test.En[__res.size()]);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1092248970:
+						
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: _en_ = gen.model.test.En.A; break;
+							case -955516027: _en_ = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 375816319:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_simple_ = gen.model.test.Simple.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1922892221:
+						_change_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1155926508:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							org.revenj.json.JavaTimeConverter.deserializeDateTimeCollection(reader, _tsl_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -922096406:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Entity.JSON_READER, _entities_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -63442465:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken == ']') {
+							_laziesURI_ = new String[0];
+						} else {
+							java.util.ArrayList<String> _tmplaziesURI_ = com.dslplatform.json.StringConverter.deserializeCollection(reader);
+							_laziesURI_ = _tmplaziesURI_.toArray(new String[_tmplaziesURI_.size()]);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = reader.readString();
+				nextToken = reader.getNextToken();
+						break;
+					case 926444256:
+						_id_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 1619944940:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken == ']') {
+							_enn_ = new gen.model.test.En[] { };
+						} else {
+							java.util.ArrayList<gen.model.test.En> __res = new java.util.ArrayList<gen.model.test.En>(4);
+							gen.model.test.En __inst;
+							String __val;
+							
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: __inst = gen.model.test.En.A; break;
+							case -955516027: __inst = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						__res.add(__inst);
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+							while ((nextToken = reader.getNextToken()) == ',') {
+								nextToken = reader.getNextToken();
+								
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: __inst = gen.model.test.En.A; break;
+							case -955516027: __inst = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						__res.add(__inst);
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+							}
+							if (nextToken != ']') throw new java.io.IOException("Expecting ']' at position " + reader.positionInStream() + ". Found " + (char) nextToken);
+							_enn_ = __res.toArray(new gen.model.test.En[__res.size()]);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1092248970:
+						
+					if (nextToken == '"') {
+						switch(reader.calcHash()) {
+							case -1005848884: _en_ = gen.model.test.En.A; break;
+							case -955516027: _en_ = gen.model.test.En.B; break;
+							default:
+								throw new java.io.IOException("Unknown enum value: '" + reader.getLastName() + "' at position " + reader.positionInStream());
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '\"' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 375816319:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_simple_ = gen.model.test.Simple.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case 1922892221:
+						_change_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1155926508:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							org.revenj.json.JavaTimeConverter.deserializeDateTimeCollection(reader, _tsl_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -922096406:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.test.Entity.JSON_READER, _entities_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -63442465:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken == ']') {
+							_laziesURI_ = new String[0];
+						} else {
+							java.util.ArrayList<String> _tmplaziesURI_ = com.dslplatform.json.StringConverter.deserializeCollection(reader);
+							_laziesURI_ = _tmplaziesURI_.toArray(new String[_tmplaziesURI_.size()]);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.URI = _URI_;
+		this.id = _id_;
+		this.enn = _enn_;
+		this.en = _en_;
+		if(_simple_ == null) throw new java.io.IOException("In entity test.Composite, property simple can't be null");
+		this.simple = _simple_;
+		this.change = _change_;
+		this.tsl = _tsl_;
+		this.entities = _entities_;
+		this.laziesURI = _laziesURI_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.test.Composite(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
+	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
@@ -428,31 +1020,31 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index___id, int __index___enn, int __index___en, gen.model.test.converters.SimpleConverter __converter_simple, int __index___simple, int __index___change, int __index___tsl, gen.model.test.converters.EntityConverter __converter_entities, int __index___entities, int __index___laziesURI) {
 		
-		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
-		readers[__index___enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) {item.enn = __list.toArray(new gen.model.test.En[__list.size()]);} else item.enn = new gen.model.test.En[] { }; }; };
-		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
-		readers[__index___simple] = (item, reader, context) -> { item.simple = __converter_simple.from(reader, context); };
-		readers[__index___change] = (item, reader, context) -> { item.change = org.revenj.postgres.converters.DateConverter.parse(reader, false); };
-		readers[__index___tsl] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) {item.tsl = __list;} else item.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; };
-		readers[__index___entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) {item.entities = __list;} else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
+		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
+		readers[__index___enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) {item.enn = __list.toArray(new gen.model.test.En[__list.size()]);} else item.enn = new gen.model.test.En[] { }; }; return item; };
+		readers[__index___en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); return item; };
+		readers[__index___simple] = (item, reader, context) -> { item.simple = __converter_simple.from(reader, context); return item; };
+		readers[__index___change] = (item, reader, context) -> { item.change = org.revenj.postgres.converters.DateConverter.parse(reader, false); return item; };
+		readers[__index___tsl] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) {item.tsl = __list;} else item.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; return item; };
+		readers[__index___entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) {item.entities = __list;} else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; return item; };
 		readers[__index___laziesURI] = (item, reader, context) -> { { 
 			java.util.List<String> __list = org.revenj.postgres.converters.StringConverter.parseCollection(reader, context, true); 
 			if (__list != null) item.laziesURI = __list.toArray(new String[__list.size()]); else item.laziesURI = new String[0]; 
-		}; };
+		}; return item; };
 	}
 	
 	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers, int __index__extended_id, int __index__extended_enn, int __index__extended_en, final gen.model.test.converters.SimpleConverter __converter_simple, int __index__extended_simple, int __index__extended_change, int __index__extended_tsl, final gen.model.test.converters.EntityConverter __converter_entities, int __index__extended_entities, int __index__extended_laziesURI) {
 		
-		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
-		readers[__index__extended_enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) {item.enn = __list.toArray(new gen.model.test.En[__list.size()]);} else item.enn = new gen.model.test.En[] { }; }; };
-		readers[__index__extended_en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); };
-		readers[__index__extended_simple] = (item, reader, context) -> { item.simple = __converter_simple.fromExtended(reader, context); };
-		readers[__index__extended_change] = (item, reader, context) -> { item.change = org.revenj.postgres.converters.DateConverter.parse(reader, false); };
-		readers[__index__extended_tsl] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) {item.tsl = __list;} else item.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; };
-		readers[__index__extended_entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::fromExtended); if (__list != null) {item.entities = __list;} else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; };
+		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
+		readers[__index__extended_enn] = (item, reader, context) -> { { java.util.List<gen.model.test.En> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.test.En.A, gen.model.test.converters.EnConverter::convertEnum); if (__list != null) {item.enn = __list.toArray(new gen.model.test.En[__list.size()]);} else item.enn = new gen.model.test.En[] { }; }; return item; };
+		readers[__index__extended_en] = (item, reader, context) -> { item.en = gen.model.test.converters.EnConverter.fromReader(reader); return item; };
+		readers[__index__extended_simple] = (item, reader, context) -> { item.simple = __converter_simple.fromExtended(reader, context); return item; };
+		readers[__index__extended_change] = (item, reader, context) -> { item.change = org.revenj.postgres.converters.DateConverter.parse(reader, false); return item; };
+		readers[__index__extended_tsl] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, false, true); if(__list != null) {item.tsl = __list;} else item.tsl = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; return item; };
+		readers[__index__extended_entities] = (item, reader, context) -> { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::fromExtended); if (__list != null) {item.entities = __list;} else item.entities = new java.util.ArrayList<gen.model.test.Entity>(4); }; return item; };
 		readers[__index__extended_laziesURI] = (item, reader, context) -> { { 
 			java.util.List<String> __list = org.revenj.postgres.converters.StringConverter.parseCollection(reader, context, true); 
 			if (__list != null) item.laziesURI = __list.toArray(new String[__list.size()]); else item.laziesURI = new String[0]; 
-		}; };
+		}; return item; };
 	}
 }

@@ -2,7 +2,7 @@ package gen.model.binaries;
 
 
 
-public final class WritableDocument   implements java.io.Serializable, org.revenj.patterns.AggregateRoot, org.revenj.patterns.DataSource {
+public final class WritableDocument   implements java.io.Serializable, org.revenj.patterns.AggregateRoot, org.revenj.patterns.DataSource, com.dslplatform.json.JsonObject {
 	
 	
 	@com.fasterxml.jackson.annotation.JsonCreator 
@@ -15,7 +15,7 @@ public final class WritableDocument   implements java.io.Serializable, org.reven
 		setName(name);
 	}
 
-	private static final long serialVersionUID = -4747680349767553050L;
+	private static final long serialVersionUID = 392268041754983565L;
 	
 	private String URI;
 
@@ -87,7 +87,135 @@ public final class WritableDocument   implements java.io.Serializable, org.reven
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<WritableDocument>[] readers, int __index___id, int __index___name) {
 		
-		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); };
-		readers[__index___name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); };
+		readers[__index___id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
+		readers[__index___name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
+	}
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final WritableDocument self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			if (!(self.id.getMostSignificantBits() == 0 && self.id.getLeastSignificantBits() == 0)) {
+			hasWrittenProperty = true;
+				sw.writeAscii("\"id\":", 5);
+				com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
+			}
+		
+			if (!(self.name.length() == 0)) {
+			if(hasWrittenProperty) sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+			hasWrittenProperty = true;
+				sw.writeAscii("\"name\":", 7);
+				sw.writeString(self.name);
+			}
+	}
+
+	static void __serializeJsonObjectFull(final WritableDocument self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			
+			sw.writeAscii("\"id\":", 5);
+			com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
+		
+			
+			sw.writeAscii(",\"name\":", 8);
+			sw.writeString(self.name);
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<WritableDocument> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<WritableDocument>() {
+		@Override
+		public WritableDocument deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.binaries.WritableDocument(reader);
+		}
+	};
+
+	private WritableDocument(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		java.util.UUID _id_ = org.revenj.Utils.MIN_UUID;
+		String _name_ = "";
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 926444256:
+						_id_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1925595674:
+						_name_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 926444256:
+						_id_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1925595674:
+						_name_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.id = _id_;
+		this.name = _name_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.binaries.WritableDocument(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
 	}
 }
