@@ -3,6 +3,7 @@ package org.revenj.postgres.jinq;
 import org.revenj.patterns.Specification;
 import org.revenj.patterns.DataSource;
 import org.revenj.patterns.Query;
+import org.revenj.postgres.jinq.transform.LambdaInfo;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -20,10 +21,16 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 		return new RevenjQuery<>(query);
 	}
 
+	interface AnalysisSpecification<T> extends Specification<T> {
+		LambdaInfo getAnalysisLambda(int index);
+	}
+
 	@Override
 	public Query<T> filter(Specification<T> predicate) {
 		if (predicate == null) return this;
-		RevenjQueryComposer newComposer = this.queryComposer.where(predicate);
+		RevenjQueryComposer newComposer = predicate instanceof AnalysisSpecification
+				? queryComposer.where(((AnalysisSpecification) predicate).getAnalysisLambda(queryComposer.getLambdaCount()))
+				: queryComposer.where(predicate);
 		return makeQueryStream(newComposer);
 	}
 

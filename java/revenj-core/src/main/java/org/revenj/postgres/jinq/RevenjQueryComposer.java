@@ -83,6 +83,8 @@ public final class RevenjQueryComposer<T> {
 	 */
 	private final List<LambdaInfo> lambdas = new ArrayList<>();
 
+	public int getLambdaCount() { return lambdas.size(); }
+
 	private RevenjQueryComposer(
 			RevenjQueryComposer<?> base,
 			Class<T> manifest,
@@ -426,8 +428,7 @@ public final class RevenjQueryComposer<T> {
 	public <U> RevenjQueryComposer<U> applyTransformWithLambda(
 			Class<U> newManifest,
 			RevenjOneLambdaQueryTransform transform,
-			Object lambda) {
-		LambdaInfo lambdaInfo = LambdaInfo.analyze(lambda, lambdas.size(), true);
+			LambdaInfo lambdaInfo) {
 		if (lambdaInfo == null) {
 			return null;
 		}
@@ -503,7 +504,7 @@ public final class RevenjQueryComposer<T> {
 
 	/**
 	 * Holds configuration information used when transforming this composer to a new composer.
-	 * Since a JPAQueryComposer can only be transformed once, we only need one transformationConfig
+	 * Since a RevenjQueryComposer can only be transformed once, we only need one transformationConfig
 	 * (and it is instantiated lazily).
 	 */
 	private RevenjQueryTransformConfiguration transformationConfig = null;
@@ -520,12 +521,21 @@ public final class RevenjQueryComposer<T> {
 	}
 
 	public <E extends Exception> RevenjQueryComposer<T> where(Object testLambda) {
-		return applyTransformWithLambda(manifest, new WhereTransform(getConfig(), false), testLambda);
+		LambdaInfo lambdaInfo = LambdaInfo.analyze(testLambda, lambdas.size(), true);
+		return applyTransformWithLambda(manifest, new WhereTransform(getConfig(), false), lambdaInfo);
 	}
 
-	public <V extends Comparable<V>> RevenjQueryComposer<T> sortedBy(
-			Object sorter, boolean isAscending) {
-		return applyTransformWithLambda(manifest, new SortingTransform(getConfig(), isAscending), sorter);
+	public <E extends Exception> RevenjQueryComposer<T> where(LambdaInfo lambdaInfo) {
+		return applyTransformWithLambda(manifest, new WhereTransform(getConfig(), false), lambdaInfo);
+	}
+
+	public <V extends Comparable<V>> RevenjQueryComposer<T> sortedBy(Object sorter, boolean isAscending) {
+		LambdaInfo lambdaInfo = LambdaInfo.analyze(sorter, lambdas.size(), true);
+		return applyTransformWithLambda(manifest, new SortingTransform(getConfig(), isAscending), lambdaInfo);
+	}
+
+	public <V extends Comparable<V>> RevenjQueryComposer<T> sortedBy(LambdaInfo lambdaInfo, boolean isAscending) {
+		return applyTransformWithLambda(manifest, new SortingTransform(getConfig(), isAscending), lambdaInfo);
 	}
 
 	public RevenjQueryComposer<T> limit(long n) {
