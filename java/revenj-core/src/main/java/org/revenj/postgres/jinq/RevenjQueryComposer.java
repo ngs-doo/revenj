@@ -333,7 +333,7 @@ public final class RevenjQueryComposer<T> {
 
 	//TODO: optimize
 
-	public boolean all(Object lambda) throws SQLException {
+	public boolean all(LambdaInfo lambda) throws SQLException {
 		long filter = this.where(lambda).count();
 		long all = this.count();
 		return filter == all && all > 0;
@@ -520,18 +520,8 @@ public final class RevenjQueryComposer<T> {
 		return transformationConfig;
 	}
 
-	public <E extends Exception> RevenjQueryComposer<T> where(Object testLambda) {
-		LambdaInfo lambdaInfo = LambdaInfo.analyze(testLambda, lambdas.size(), true);
-		return applyTransformWithLambda(manifest, new WhereTransform(getConfig(), false), lambdaInfo);
-	}
-
 	public <E extends Exception> RevenjQueryComposer<T> where(LambdaInfo lambdaInfo) {
 		return applyTransformWithLambda(manifest, new WhereTransform(getConfig(), false), lambdaInfo);
-	}
-
-	public <V extends Comparable<V>> RevenjQueryComposer<T> sortedBy(Object sorter, boolean isAscending) {
-		LambdaInfo lambdaInfo = LambdaInfo.analyze(sorter, lambdas.size(), true);
-		return applyTransformWithLambda(manifest, new SortingTransform(getConfig(), isAscending), lambdaInfo);
 	}
 
 	public <V extends Comparable<V>> RevenjQueryComposer<T> sortedBy(LambdaInfo lambdaInfo, boolean isAscending) {

@@ -249,6 +249,17 @@ public class TestQuery {
 	}
 
 	//@Test
+	public void floatAndStreamType() throws IOException {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		//TODO: does not work yet
+		boolean notFound =
+				db.query(Composite.class)
+				.anyMatch(it -> it.getEntities().stream().anyMatch(e -> e.getDetail1().stream().anyMatch(d -> d.getFf() == 4.2f)));
+		Assert.assertFalse(notFound);
+	}
+
+	//@Test
 	public void numberFunctions() throws IOException {
 		ServiceLocator locator = container;
 		DataContext db = locator.resolve(DataContext.class);

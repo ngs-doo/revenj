@@ -8,8 +8,7 @@ import org.revenj.extensibility.Container
 
 import org.junit._
 import org.revenj.patterns._
-import org.revenj.postgres.jinq.ScalaSpecification
-import org.revenj.postgres.jinq.transform.{LambdaAnalysis, MetamodelUtil, LambdaInfo}
+import org.revenj.postgres.jinq.{ScalaSort, ScalaSpecification}
 
 class TestLambda {
 
@@ -37,5 +36,18 @@ class TestLambda {
     val ctx = container.resolve(classOf[DataContext])
     val result = ctx.query(classOf[User]).where(it => it.getUsername == "doesn't exists").findAny()
     Assert.assertFalse(result.isPresent)
+  }
+
+  class RichSort[T <: DataSource, V <: java.lang.Comparable[V]](query: Query[T]) {
+    def orderBy(fn: T => V)= query.sortedBy(new ScalaSort[T, V](fn))
+  }
+
+  implicit def orderBy[T <: DataSource, V <: java.lang.Comparable[V]](query: Query[T]): RichSort[T, V] = new RichSort[T, V](query)
+
+  @Test
+  def testSimpleOrder {
+    val ctx = container.resolve(classOf[DataContext])
+    val result = ctx.query(classOf[User]).orderBy(it => it.getUsername).findAny()
+    Assert.assertNotNull(result)
   }
 }

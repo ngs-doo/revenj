@@ -6,18 +6,18 @@
 	<parent>
 		<groupId>org.revenj</groupId>
 		<artifactId>revenj</artifactId>
-		<version>0.6.0</version>
+		<version>0.6.1</version>
 	</parent>
 	<artifactId>revenj-storage</artifactId>
 	<name>Revenj Storage</name>
 	<packaging>jar</packaging>
-	<version>0.6.0</version>
+	<version>0.6.1</version>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>0.6.0</version>
+			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.amazonaws</groupId>

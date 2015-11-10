@@ -25,13 +25,29 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 		LambdaInfo getAnalysisLambda(int index);
 	}
 
+	interface AnalysisOrder<T, V extends Comparable<V>> extends Compare<T, V> {
+		LambdaInfo getAnalysisLambda(int index);
+	}
+
+	private RevenjQueryComposer applyWhere(Specification predicate) {
+		if (predicate == null) {
+			return queryComposer;
+		}
+		return predicate instanceof AnalysisSpecification
+				? queryComposer.where(((AnalysisSpecification) predicate).getAnalysisLambda(queryComposer.getLambdaCount()))
+				: queryComposer.where(LambdaInfo.analyze(predicate, queryComposer.getLambdaCount(), true));
+	}
+
+	private RevenjQueryComposer applyOrder(Compare order, boolean ascending) {
+		return order instanceof AnalysisOrder
+				? queryComposer.sortedBy(((AnalysisOrder) order).getAnalysisLambda(queryComposer.getLambdaCount()), ascending)
+				: queryComposer.sortedBy(LambdaInfo.analyze(order, queryComposer.getLambdaCount(), true), ascending);
+	}
+
 	@Override
 	public Query<T> filter(Specification<T> predicate) {
 		if (predicate == null) return this;
-		RevenjQueryComposer newComposer = predicate instanceof AnalysisSpecification
-				? queryComposer.where(((AnalysisSpecification) predicate).getAnalysisLambda(queryComposer.getLambdaCount()))
-				: queryComposer.where(predicate);
-		return makeQueryStream(newComposer);
+		return makeQueryStream(applyWhere(predicate));
 	}
 
 	@Override
@@ -48,14 +64,12 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 
 	@Override
 	public <V extends Comparable<V>> Query<T> sortedBy(Compare<T, V> order) {
-		RevenjQueryComposer newComposer = this.queryComposer.sortedBy(order, true);
-		return makeQueryStream(newComposer);
+		return makeQueryStream(applyOrder(order, true));
 	}
 
 	@Override
 	public <V extends Comparable<V>> Query<T> sortedDescendingBy(Compare<T, V> order) {
-		RevenjQueryComposer newComposer = this.queryComposer.sortedBy(order, false);
-		return makeQueryStream(newComposer);
+		return makeQueryStream(applyOrder(order, false));
 	}
 
 	@Override
@@ -70,7 +84,7 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 	@Override
 	public boolean anyMatch(Specification<? super T> predicate) throws IOException {
 		try {
-			return predicate != null ? this.queryComposer.where(predicate).any() : this.queryComposer.any();
+			return applyWhere(predicate).any();
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
@@ -79,7 +93,10 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 	@Override
 	public boolean allMatch(Specification<? super T> predicate) throws IOException {
 		try {
-			return queryComposer.all(predicate);
+			LambdaInfo lambda = predicate instanceof AnalysisSpecification
+					? ((AnalysisSpecification) predicate).getAnalysisLambda(queryComposer.getLambdaCount())
+					: LambdaInfo.analyze(predicate, queryComposer.getLambdaCount(), true);
+			return queryComposer.all(lambda);
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
@@ -88,7 +105,7 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 	@Override
 	public boolean noneMatch(Specification<? super T> predicate) throws IOException {
 		try {
-			return predicate != null ? this.queryComposer.where(predicate).none() : this.queryComposer.none();
+			return applyWhere(predicate).none();
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
