@@ -216,7 +216,7 @@ namespace Revenj.DomainPatterns
 			{
 				var agg = aggregates[i];
 				var ct = agg as IChangeTracking<T>;
-				pairs[i++] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), agg);
+				pairs[i] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), agg);
 			}
 			context.Update(pairs);
 		}
@@ -235,7 +235,7 @@ namespace Revenj.DomainPatterns
 			{
 				var agg = aggregates[i];
 				var ct = agg as IChangeTracking<T>;
-				pairs[i++] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), agg);
+				pairs[i] = new KeyValuePair<T, T>(ct != null ? ct.GetOriginalValue() : default(T), agg);
 			}
 			context.Update(pairs);
 		}
