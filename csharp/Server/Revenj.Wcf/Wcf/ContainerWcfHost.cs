@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Revenj.Api;
+using System;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
@@ -7,7 +8,6 @@ using System.ServiceModel.Activation;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
-using Revenj.Api;
 
 namespace Revenj.Wcf
 {
@@ -28,6 +28,8 @@ namespace Revenj.Wcf
 			var att = (ServiceBehaviorAttribute[])serviceType.GetCustomAttributes(typeof(ServiceBehaviorAttribute), false);
 			if (att.Length == 1 && att[0].InstanceContextMode == InstanceContextMode.Single)
 			{
+				if (Resolver == null)
+					throw new ConfigurationErrorsException("Resolver not configured. If you are running inside IIS check if Global.asax file is missing.");
 				var instance = Resolver(serviceType);
 				//TODO: investigate castle issue with aspect for rest application
 				//var ith = instance as Castle.DynamicProxy.IProxyTargetAccessor;
@@ -107,11 +109,15 @@ namespace Revenj.Wcf
 
 			public object GetInstance(InstanceContext instanceContext, Message message)
 			{
+				if (Resolver == null)
+					throw new ConfigurationErrorsException("Resolver not configured. If you are running inside IIS check if Global.asax file is missing.");
 				return Resolver(Target);
 			}
 
 			public object GetInstance(InstanceContext instanceContext)
 			{
+				if (Resolver == null)
+					throw new ConfigurationErrorsException("Resolver not configured. If you are running inside IIS check if Global.asax file is missing.");
 				return Resolver(Target);
 			}
 
