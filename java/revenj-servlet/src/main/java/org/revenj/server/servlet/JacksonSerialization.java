@@ -12,13 +12,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.util.Optional;
 
 final class JacksonSerialization implements Serialization<String> {
 
 	private final ObjectMapper mapper;
 
-	public JacksonSerialization(ServiceLocator locator) {
-		mapper = new ObjectMapper()
+	public JacksonSerialization(ServiceLocator locator, Optional<ObjectMapper> jackson) {
+		mapper = jackson.orElse(new ObjectMapper())
 				.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 				.setInjectableValues(new InjectableValues.Std().addValue("__locator", locator))
@@ -40,7 +41,6 @@ final class JacksonSerialization implements Serialization<String> {
 		return mapper.writeValueAsString(value);
 	}
 
-	@Override
 	public void serialize(Object value, OutputStream stream) throws IOException {
 		mapper.writeValue(stream, value);
 	}
@@ -50,7 +50,6 @@ final class JacksonSerialization implements Serialization<String> {
 		return mapper.readValue(content, 0, length, javaType);
 	}
 
-	@Override
 	public Object deserialize(Type type, InputStream stream) throws IOException {
 		JavaType javaType = mapper.getTypeFactory().constructType(type);
 		return mapper.readValue(stream, javaType);

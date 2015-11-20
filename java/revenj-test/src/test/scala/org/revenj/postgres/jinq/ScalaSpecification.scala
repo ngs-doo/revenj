@@ -3,12 +3,19 @@ package org.revenj.postgres.jinq
 import org.revenj.postgres.jinq.transform.{LambdaAnalysis, MetamodelUtil, LambdaInfo}
 
 case class ScalaSpecification[T](lambda: T => Boolean) extends RevenjQuery.AnalysisSpecification[T] {
-  def getAnalysisLambda(index: Int): LambdaInfo = new ScalaLambdaInfo(lambda, index)
+
+  def getAnalysisLambda(index: Int): LambdaInfo = {
+    lambda match {
+      case _: Function1[_, _] => new ScalaLambdaInfo(lambda, index, 0, 1)
+      case _: Function2[_, _, _] => new ScalaLambdaInfo(lambda, index, 0, 2)
+      case _ => LambdaInfo.analyze(lambda, index, true)
+    }
+  }
 
   def test(t: T): Boolean = lambda.apply(t)
 
-  private class ScalaLambdaInfo(lambdaObject: AnyRef, lambdaIndex: Int)
-    extends LambdaInfo(lambdaIndex, 0, 1) {
+  private class ScalaLambdaInfo(lambdaObject: AnyRef, lambdaIndex: Int, capturedArgs: Int, lambdaArgs: Int)
+    extends LambdaInfo(lambdaIndex, capturedArgs, lambdaArgs) {
     Lambda = lambdaObject
 
     val className = lambdaObject.getClass.getName

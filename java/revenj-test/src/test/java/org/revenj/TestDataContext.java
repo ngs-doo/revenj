@@ -5,6 +5,9 @@ import gen.model.Seq.Next;
 import gen.model.binaries.Document;
 import gen.model.binaries.ReadOnlyDocument;
 import gen.model.binaries.WritableDocument;
+import gen.model.calc.Info;
+import gen.model.calc.Realm;
+import gen.model.calc.Type;
 import gen.model.mixinReference.Author;
 import gen.model.mixinReference.SpecificReport;
 import gen.model.test.Clicked;
@@ -20,10 +23,7 @@ import org.revenj.patterns.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class TestDataContext {
 
@@ -171,5 +171,21 @@ public class TestDataContext {
 		Optional<Document> changed = context.find(Document.class, document.getURI());
 		Assert.assertTrue(changed.isPresent());
 		Assert.assertEquals("test me later", changed.get().getName());
+	}
+
+	@Test
+	public void persistableCalculatedPrimaryKey() throws Exception {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		Random rnd = new Random();
+		Type t = new Type().setSuffix("ab" + rnd.nextInt(10000)).setDescription("desc");
+		context.create(t);
+		Info i = new Info().setCode("xx" + rnd.nextInt(100000)).setName("abcdef" + rnd.nextInt(100000));
+		context.create(i);
+		Realm r = new Realm().setInfo(i).setRefType(t);
+		context.create(r);
+		Optional<Realm> found = context.find(Realm.class, r.getURI());
+		Assert.assertTrue(found.isPresent());
+		Assert.assertTrue(r.deepEquals(found.get()));
 	}
 }

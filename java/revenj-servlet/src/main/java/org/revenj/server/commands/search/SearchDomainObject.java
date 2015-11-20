@@ -1,5 +1,6 @@
 package org.revenj.server.commands.search;
 
+import com.dslplatform.json.CompiledJson;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.server.CommandResult;
@@ -25,6 +26,7 @@ public class SearchDomainObject implements ServerCommand {
 		this.permissions = permissions;
 	}
 
+	@CompiledJson
 	public static final class Argument<TFormat> {
 		public String Name;
 		public String SpecificationName;

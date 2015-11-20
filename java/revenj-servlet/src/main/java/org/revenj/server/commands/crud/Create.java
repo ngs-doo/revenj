@@ -1,5 +1,6 @@
 package org.revenj.server.commands.crud;
 
+import com.dslplatform.json.*;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.server.CommandResult;
@@ -8,6 +9,7 @@ import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Map;
 import java.util.Optional;
 
 public final class Create implements ServerCommand {
@@ -22,6 +24,7 @@ public final class Create implements ServerCommand {
 		this.permissions = permissions;
 	}
 
+	@CompiledJson
 	public static final class Argument<TFormat> {
 		public String Name;
 		public TFormat Data;

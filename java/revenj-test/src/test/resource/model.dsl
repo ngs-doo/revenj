@@ -155,6 +155,7 @@ module security {
 	mixin Dummy { with mixin Document; }
 	root Document {
 		map data;
+		static MEANING_OF_LIFE '42';
 	}
 	permissions {
 		filter IsActive 'it -> !it.getDeactivated()' except Admin;
@@ -207,5 +208,26 @@ module adt {
 	root User(username) {
 		string username;
 		Auth authentication;
+	}
+}
+module calc {
+	root Info(code) {
+		String  code;
+		String  name { unique; }
+	}
+
+	root Type(suffix) {
+		String	suffix;
+		String  description;
+	}
+
+	root Realm(id) {
+		Info *info;
+
+		Type(type) *refType;
+		String type;
+
+		calculated String id from 'it => it.info.code + it.type' { persistable; } //TODO: bad practice navigating over root
+		calculated String name from 'it => it.info.name + " (" + it.refType.description + ")"';
 	}
 }

@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -52,8 +53,9 @@ public class StandardServlet extends HttpServlet {
 			String name = path.substring("/execute/".length(), path.length());
 			String argument = Utility.readString(req.getInputStream(), req.getCharacterEncoding());
 			ExecuteService.Argument<String> arg = new ExecuteService.Argument<>(name, argument);
+			ByteArrayOutputStream os = serialization.serialize(arg, "application/json");
 			ServerCommandDescription[] scd = new ServerCommandDescription[]{
-					new ServerCommandDescription<>(null, ExecuteService.class, serialization.serialize(arg, "application/json").toUtf8())
+					new ServerCommandDescription<>(null, ExecuteService.class, os.toString("UTF-8"))
 			};
 			ProcessingResult<String> result = engine.execute(String.class, String.class, scd, Utility.toPrincipal(req));
 			Utility.returnJSON(res, result);

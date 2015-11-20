@@ -1,6 +1,8 @@
 package org.revenj.server.servlet;
 
-import org.revenj.patterns.Bytes;
+import com.dslplatform.json.DslJson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.revenj.json.DslJsonSerialization;
 import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.serialization.WireSerialization;
@@ -12,41 +14,33 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 final class RevenjSerialization implements WireSerialization {
-	private final JacksonSerialization json;
+	private final DslJsonSerialization json;
 	private final PassThroughSerialization passThrough;
 
 	public RevenjSerialization(ServiceLocator locator) {
-		this.json = new JacksonSerialization(locator);
+		JacksonSerialization jackson = new JacksonSerialization(locator, locator.tryResolve(ObjectMapper.class));
+		this.json = new DslJsonSerialization(locator, Optional.of(new DslJson.Fallback<ServiceLocator>() {
+			@Override
+			public void serialize(Object instance, OutputStream stream) throws IOException {
+				jackson.serialize(instance, stream);
+			}
+
+			@Override
+			public Object deserialize(ServiceLocator serviceLocator, Type manifest, byte[] body, int size) throws IOException {
+				return jackson.deserialize(manifest, body, size);
+			}
+		}));
 		this.passThrough = new PassThroughSerialization();
 	}
 
 	@Override
-	public Bytes serialize(Object value, String contentType) {
-		try {
-			//if (contentType == null || "application/json".equals(contentType)) {
-			byte[] content = json.serializeAsBytes(value);
-			return new Bytes(content, content.length);
-			//}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
 	public void serialize(Object value, OutputStream stream, String contentType) throws IOException {
-		json.serializeTo(value, stream);
-	}
-
-	@Override
-	public Object deserialize(Type type, Bytes data, String accept) throws IOException {
-		return json.deserialize(type, data.content, data.length);
+		json.serialize(value, stream);
 	}
 
 	@Override
 	public Object deserialize(Type type, InputStream stream, String accept) throws IOException {
-		//if (contentType == null || "application/json".equals(contentType)) {
 		return json.deserialize(type, stream);
-		//}
 	}
 
 	@Override

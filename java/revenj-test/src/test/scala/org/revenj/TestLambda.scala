@@ -1,14 +1,17 @@
 package org.revenj
 
 import java.io.IOException
+import java.util.Optional
 
 import _root_.gen.model.Boot
-import gen.model.adt.User
+import gen.model.adt.{Anonymous, User}
 import org.revenj.extensibility.Container
 
 import org.junit._
 import org.revenj.patterns._
 import org.revenj.postgres.jinq.{ScalaSort, ScalaSpecification}
+
+import scala.util.Random
 
 class TestLambda {
 
@@ -34,8 +37,17 @@ class TestLambda {
   @Test
   def testSimpleLambda {
     val ctx = container.resolve(classOf[DataContext])
-    val result = ctx.query(classOf[User]).where(it => it.getUsername == "doesn't exists").findAny()
-    Assert.assertFalse(result.isPresent)
+    val name = "random_user"
+    val found = ctx.find(classOf[User], name)
+    if (found.isPresent) {
+      ctx.delete(found.get)
+    }
+    val user = new User().setUsername(name).setAuthentication(new Anonymous)
+    ctx.create(user)
+    //TODO: variable arguments are not working ;(
+    val result = ctx.query(classOf[User]).where(it => it.getUsername == "random_user").findAny()
+    Assert.assertTrue(result.isPresent)
+    Assert.assertTrue(result.get().deepEquals(user))
   }
 
   class RichSort[T <: DataSource, V <: java.lang.Comparable[V]](query: Query[T]) {

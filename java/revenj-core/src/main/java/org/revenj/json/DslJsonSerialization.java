@@ -4,18 +4,22 @@ import com.dslplatform.json.*;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.serialization.Serialization;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.ServiceLoader;
 
 public class DslJsonSerialization extends DslJson<ServiceLocator> implements Serialization<String> {
 
-	public DslJsonSerialization(final ServiceLocator locator) {
-		super(locator, false, true, false, null);
+	public DslJsonSerialization(final ServiceLocator locator, Optional<Fallback<ServiceLocator>> fallback) {
+		super(locator, false, true, false, fallback.orElse(null), ServiceLoader.load(Configuration.class));
 
 		registerReader(LocalDate.class, JavaTimeConverter.LocalDateReader);
 		registerWriter(LocalDate.class, JavaTimeConverter.LocalDateWriter);
@@ -31,6 +35,11 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 		final JsonWriter jw = new JsonWriter();
 		final Class<?> manifest = value.getClass();
 		if (!serialize(jw, manifest, value)) {
+			if (fallback != null) {
+				ByteArrayOutputStream os = new ByteArrayOutputStream();
+				fallback.serialize(value, os);
+				return os.toString("UTF-8");
+			}
 			throw new IOException("Unable to serialize provided object. Failed to find serializer for: " + manifest);
 		}
 		return jw.toString();
@@ -39,14 +48,9 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 	@Override
 	public Object deserialize(Type type, String data) throws IOException {
 		byte[] bytes = data.getBytes("UTF-8");
-		if (type instanceof Class<?>) {
-			return super.deserialize((Class<?>) type, bytes, bytes.length);
-		} else {
-			throw new IOException("Provided type is not an instace of Class. Unable to deserialize provided object.");
-		}
+		return super.deserialize(type, bytes, bytes.length);
 	}
 
-	@Override
 	public Object deserialize(Type type, InputStream stream) throws IOException {
 		byte[] bytes = new byte[512];
 		int size = 0;
@@ -57,10 +61,7 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 				bytes = Arrays.copyOf(bytes, bytes.length * 2);
 			}
 		}
-		if (type instanceof Class<?>) {
-			return super.deserialize((Class<?>) type, bytes, size);
-		} else {
-			throw new IOException("Provided type is not an instace of Class. Unable to deserialize provided object.");
-		}
+		//TODO: use underlying stream deserializer when it starts supporting autogrowing buffer
+		return super.deserialize(type, bytes, size);
 	}
 }
