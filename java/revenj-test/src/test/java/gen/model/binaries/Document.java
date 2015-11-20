@@ -88,7 +88,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -421130014345712195L;
+	private static final long serialVersionUID = -3031263800571179441L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Document(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -358,11 +358,11 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 	}
 	
 	public Document(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Document>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<Document> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.binaries.converters.DocumentConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (Document)this.clone();
 	}
 

@@ -82,7 +82,7 @@ public final class Clicked   implements java.io.Serializable, com.dslplatform.js
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = -1504215252746157032L;
+	private static final long serialVersionUID = 3772050730925276574L;
 	
 	private java.time.LocalDate date;
 
@@ -200,7 +200,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.LinkedHashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = -3256380616136132251L;
+	private static final long serialVersionUID = 5314919332592362271L;
 	
 	private java.math.BigDecimal min;
 

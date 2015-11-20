@@ -94,7 +94,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 3990865305262503785L;
+	private static final long serialVersionUID = -804667638902718349L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private LazyLoad(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -516,11 +516,11 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	}
 	
 	public LazyLoad(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<LazyLoad> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.test.converters.LazyLoadConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (LazyLoad)this.clone();
 	}
 

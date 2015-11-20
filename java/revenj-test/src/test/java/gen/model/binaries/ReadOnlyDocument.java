@@ -14,7 +14,7 @@ public final class ReadOnlyDocument   implements java.io.Serializable, org.reven
 		this.Name = Name == null ? "" : Name;
 	}
 
-	private static final long serialVersionUID = 7989554278425564423L;
+	private static final long serialVersionUID = 6942982387979454501L;
 	
 	private final java.util.UUID ID;
 

@@ -15,7 +15,7 @@ public final class WritableDocument   implements java.io.Serializable, org.reven
 		setName(name);
 	}
 
-	private static final long serialVersionUID = 392268041754983565L;
+	private static final long serialVersionUID = -7999248117825422581L;
 	
 	private String URI;
 

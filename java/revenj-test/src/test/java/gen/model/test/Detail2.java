@@ -94,7 +94,7 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 7314932077351767341L;
+	private static final long serialVersionUID = -738609038996226961L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail2(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -454,11 +454,11 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 	}
 	
 	public Detail2(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Detail2>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<Detail2> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.test.converters.Detail2Converter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Detail2>[] readers, int __index___u, int __index___dd, int __index___EntityCompositeid, int __index___EntityIndex, int __index___Index) {

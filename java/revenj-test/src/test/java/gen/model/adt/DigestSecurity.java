@@ -78,7 +78,7 @@ public final class DigestSecurity   implements java.lang.Cloneable, java.io.Seri
 		this.passwordHash = passwordHash == null ? org.revenj.Utils.EMPTY_BINARY : passwordHash;
 	}
 
-	private static final long serialVersionUID = 2952493694935287017L;
+	private static final long serialVersionUID = -3341068610988875393L;
 	
 	private String username;
 

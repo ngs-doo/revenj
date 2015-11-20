@@ -70,7 +70,7 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 8358354269631389691L;
+	private static final long serialVersionUID = 2645999705424899677L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Next(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -138,7 +138,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = -6595073311794175271L;
+	private static final long serialVersionUID = -1211191532285895881L;
 	
 	private Integer min;
 
@@ -472,11 +472,11 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 	}
 	
 	public Next(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Next>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<Next> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.Seq.converters.NextConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (Next)this.clone();
 	}
 

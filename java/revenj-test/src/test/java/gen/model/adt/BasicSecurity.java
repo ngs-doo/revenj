@@ -78,7 +78,7 @@ public final class BasicSecurity   implements java.lang.Cloneable, java.io.Seria
 		this.password = password == null ? "" : password;
 	}
 
-	private static final long serialVersionUID = 7942454187008821981L;
+	private static final long serialVersionUID = 2222402199653271839L;
 	
 	private String username;
 

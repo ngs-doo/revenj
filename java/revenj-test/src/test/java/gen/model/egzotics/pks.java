@@ -88,7 +88,7 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 7839942795053209597L;
+	private static final long serialVersionUID = -8393779363809524065L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private pks(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -390,11 +390,11 @@ public class pks   implements java.lang.Cloneable, java.io.Serializable, org.rev
 	}
 	
 	public pks(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<pks>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<pks> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.egzotics.converters.pksConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (pks)this.clone();
 	}
 

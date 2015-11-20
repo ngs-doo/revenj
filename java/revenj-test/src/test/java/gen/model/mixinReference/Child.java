@@ -85,7 +85,7 @@ public class Child   implements java.lang.Cloneable, java.io.Serializable, com.d
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 3359366713468716978L;
+	private static final long serialVersionUID = 8651246877741743872L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Child(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -325,11 +325,11 @@ public class Child   implements java.lang.Cloneable, java.io.Serializable, com.d
 	}
 	
 	public Child(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Child>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<Child> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.mixinReference.converters.ChildConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Child>[] readers, int __index___version, int __index___AuthorID, int __index___Index) {

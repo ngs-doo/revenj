@@ -76,14 +76,14 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 			final String username,
 			final gen.model.adt.Auth authentication) {
 			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
 		setUsername(username);
 		setAuthentication(authentication);
+		this.URI = this.username;
 	}
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 7297297971212078352L;
+	private static final long serialVersionUID = 9160148138591628874L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private User(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -195,19 +195,19 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 		if(self.authentication != null) {
 			sw.writeAscii(",\"authentication\":{", 19);
 			if (self.authentication instanceof gen.model.adt.DigestSecurity) {
-				sw.writeAscii("{\"$type\":\"adt.DigestSecurity\"");
+				sw.writeAscii("\"$type\":\"adt.DigestSecurity\"");
 				gen.model.adt.DigestSecurity.__serializeJsonObjectMinimal((gen.model.adt.DigestSecurity)self.authentication, sw, true);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 			} else if (self.authentication instanceof gen.model.adt.Anonymous) {
-				sw.writeAscii("{\"$type\":\"adt.Anonymous\"");
+				sw.writeAscii("\"$type\":\"adt.Anonymous\"");
 				gen.model.adt.Anonymous.__serializeJsonObjectMinimal((gen.model.adt.Anonymous)self.authentication, sw, true);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 			} else if (self.authentication instanceof gen.model.adt.Token) {
-				sw.writeAscii("{\"$type\":\"adt.Token\"");
+				sw.writeAscii("\"$type\":\"adt.Token\"");
 				gen.model.adt.Token.__serializeJsonObjectMinimal((gen.model.adt.Token)self.authentication, sw, true);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 			} else if (self.authentication instanceof gen.model.adt.BasicSecurity) {
-				sw.writeAscii("{\"$type\":\"adt.BasicSecurity\"");
+				sw.writeAscii("\"$type\":\"adt.BasicSecurity\"");
 				gen.model.adt.BasicSecurity.__serializeJsonObjectMinimal((gen.model.adt.BasicSecurity)self.authentication, sw, true);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 			}
@@ -227,19 +227,19 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 		if(self.authentication != null) {
 			sw.writeAscii(",\"authentication\":{", 19);
 			if (self.authentication instanceof gen.model.adt.DigestSecurity) {
-				sw.writeAscii("{\"$type\":\"adt.DigestSecurity\"");
+				sw.writeAscii("\"$type\":\"adt.DigestSecurity\"");
 				gen.model.adt.DigestSecurity.__serializeJsonObjectFull((gen.model.adt.DigestSecurity)self.authentication, sw, true);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 			} else if (self.authentication instanceof gen.model.adt.Anonymous) {
-				sw.writeAscii("{\"$type\":\"adt.Anonymous\"");
+				sw.writeAscii("\"$type\":\"adt.Anonymous\"");
 				gen.model.adt.Anonymous.__serializeJsonObjectFull((gen.model.adt.Anonymous)self.authentication, sw, true);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 			} else if (self.authentication instanceof gen.model.adt.Token) {
-				sw.writeAscii("{\"$type\":\"adt.Token\"");
+				sw.writeAscii("\"$type\":\"adt.Token\"");
 				gen.model.adt.Token.__serializeJsonObjectFull((gen.model.adt.Token)self.authentication, sw, true);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 			} else if (self.authentication instanceof gen.model.adt.BasicSecurity) {
-				sw.writeAscii("{\"$type\":\"adt.BasicSecurity\"");
+				sw.writeAscii("\"$type\":\"adt.BasicSecurity\"");
 				gen.model.adt.BasicSecurity.__serializeJsonObjectFull((gen.model.adt.BasicSecurity)self.authentication, sw, true);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 			}
@@ -388,11 +388,11 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	public User(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<User>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<User> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.adt.converters.UserConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (User)this.clone();
 	}
 

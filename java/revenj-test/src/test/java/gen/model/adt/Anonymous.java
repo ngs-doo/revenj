@@ -54,7 +54,7 @@ public final class Anonymous   implements java.lang.Cloneable, java.io.Serializa
 		
 	}
 
-	private static final long serialVersionUID = -4730076906495712955L;
+	private static final long serialVersionUID = 9157866186759608291L;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);

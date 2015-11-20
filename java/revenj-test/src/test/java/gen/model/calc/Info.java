@@ -1,17 +1,16 @@
-package gen.model.mixinReference;
+package gen.model.calc;
 
 
 
-public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, com.dslplatform.json.JsonObject {
+public class Info   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, com.dslplatform.json.JsonObject {
 	
 	
 	
-	public UserFilter() {
+	public Info() {
 			
-		this.ID = 0;
-		this.ID = --__SequenceCounterID__;
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		this.code = "";
 		this.name = "";
-		this.URI = java.lang.Integer.toString(this.ID);
 	}
 
 	
@@ -34,13 +33,13 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null || obj instanceof UserFilter == false)
+		if (obj == null || obj instanceof Info == false)
 			return false;
-		final UserFilter other = (UserFilter) obj;
+		final Info other = (Info) obj;
 		return URI.equals(other.URI);
 	}
 
-	public boolean deepEquals(final UserFilter other) {
+	public boolean deepEquals(final Info other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -48,91 +47,75 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		if (!URI.equals(other.URI))
 			return false;
 		
-		if(!(this.ID == other.ID))
+		if(!(this.code.equals(other.code)))
 			return false;
 		if(!(this.name.equals(other.name)))
 			return false;
 		return true;
 	}
 
-	private UserFilter(UserFilter other) {
+	private Info(Info other) {
 		this.URI = other.URI;
 		this.__locator = other.__locator;
-		this.ID = other.ID;
+		this.code = other.code;
 		this.name = other.name;
 		this.__originalValue = other.__originalValue;
 	}
 
 	@Override
 	public Object clone() {
-		return new UserFilter(this);
+		return new Info(this);
 	}
 
 	@Override
 	public String toString() {
-		return "UserFilter(" + URI + ')';
+		return "Info(" + URI + ')';
 	}
 	
 	
-	public UserFilter(
+	public Info(
+			final String code,
 			final String name) {
 			
-		this.ID = --__SequenceCounterID__;
+		setCode(code);
 		setName(name);
-		this.URI = java.lang.Integer.toString(this.ID);
+		this.URI = this.code;
 	}
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 1283706184832869404L;
+	private static final long serialVersionUID = 1927762743157549920L;
 	
-	@com.fasterxml.jackson.annotation.JsonCreator private UserFilter(
+	@com.fasterxml.jackson.annotation.JsonCreator private Info(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
-			@com.fasterxml.jackson.annotation.JsonProperty("ID") final int ID,
+			@com.fasterxml.jackson.annotation.JsonProperty("code") final String code,
 			@com.fasterxml.jackson.annotation.JsonProperty("name") final String name) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
-		this.ID = ID;
+		this.code = code == null ? "" : code;
 		this.name = name == null ? "" : name;
 	}
 
 	
-	private int ID;
+	private String code;
 
 	
-	@com.fasterxml.jackson.annotation.JsonProperty("ID")
-	public int getID()  {
+	@com.fasterxml.jackson.annotation.JsonProperty("code")
+	public String getCode()  {
 		
-		return ID;
+		return code;
 	}
 
 	
-	private UserFilter setID(final int value) {
+	public Info setCode(final String value) {
 		
-		this.ID = value;
+		if(value == null) throw new IllegalArgumentException("Property \"code\" cannot be null!");
+		this.code = value;
 		
 		return this;
 	}
 
-	
-	static {
-		gen.model.mixinReference.repositories.UserFilterRepository.__setupSequenceID((items, connection) -> {
-			try (java.sql.PreparedStatement st = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT nextval('\"mixinReference\".\"UserFilter_ID_seq\"'::regclass)::int FROM generate_series(1, ?)")) {
-				st.setInt(1, items.size());
-				try (java.sql.ResultSet rs = st.executeQuery()) {
-					java.util.Iterator<UserFilter> iterator = items.iterator();
-					while (rs.next()) {
-						iterator.next().setID(rs.getInt(1));
-					}
-				}
-			} catch (java.sql.SQLException e) {
-				throw new RuntimeException(e);
-			}
-		});
-	}
-	
-	private static int __SequenceCounterID__;
 	
 	private String name;
 
@@ -144,7 +127,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 	}
 
 	
-	public UserFilter setName(final String value) {
+	public Info setName(final String value) {
 		
 		if(value == null) throw new IllegalArgumentException("Property \"name\" cannot be null!");
 		this.name = value;
@@ -152,15 +135,15 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		return this;
 	}
 
-	private transient UserFilter __originalValue;
+	private transient Info __originalValue;
 	
 	static {
-		gen.model.mixinReference.repositories.UserFilterRepository.__setupPersist(
+		gen.model.calc.repositories.InfoRepository.__setupPersist(
 			(aggregates, arg) -> {
 				try {
-					for (gen.model.mixinReference.UserFilter agg : aggregates) {
+					for (gen.model.calc.Info agg : aggregates) {
 						 
-						agg.URI = gen.model.mixinReference.converters.UserFilterConverter.buildURI(arg, agg);
+						agg.URI = gen.model.calc.converters.InfoConverter.buildURI(arg, agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
@@ -168,19 +151,19 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 			},
 			(oldAggregates, newAggregates) -> {
 				for (int i = 0; i < newAggregates.size(); i++) {
-					gen.model.mixinReference.UserFilter oldAgg = oldAggregates.get(i);
-					gen.model.mixinReference.UserFilter newAgg = newAggregates.get(i);
+					gen.model.calc.Info oldAgg = oldAggregates.get(i);
+					gen.model.calc.Info newAgg = newAggregates.get(i);
 					 
 				}
 			},
 			aggregates -> { 
-				for (gen.model.mixinReference.UserFilter agg : aggregates) { 
+				for (gen.model.calc.Info agg : aggregates) { 
 				}
 			},
 			agg -> { 
 				
-		UserFilter _res = agg.__originalValue;
-		agg.__originalValue = (UserFilter)agg.clone();
+		Info _res = agg.__originalValue;
+		agg.__originalValue = (Info)agg.clone();
 		if (_res != null) {
 			return _res;
 		}
@@ -199,14 +182,14 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
 	}
 
-	static void __serializeJsonObjectMinimal(final UserFilter self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+	static void __serializeJsonObjectMinimal(final Info self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
 		
 		sw.writeAscii("\"URI\":");
 			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
 		
-			if (self.ID != 0) {
-				sw.writeAscii(",\"ID\":", 6);
-				com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
+			if (!(self.code.length() == 0)) {
+				sw.writeAscii(",\"code\":", 8);
+				sw.writeString(self.code);
 			}
 		
 			if (!(self.name.length() == 0)) {
@@ -215,32 +198,32 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 			}
 	}
 
-	static void __serializeJsonObjectFull(final UserFilter self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+	static void __serializeJsonObjectFull(final Info self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
 		
 		sw.writeAscii("\"URI\":");
 			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
 		
 			
-			sw.writeAscii(",\"ID\":", 6);
-			com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
+			sw.writeAscii(",\"code\":", 8);
+			sw.writeString(self.code);
 		
 			
 			sw.writeAscii(",\"name\":", 8);
 			sw.writeString(self.name);
 	}
 
-	public static final com.dslplatform.json.JsonReader.ReadJsonObject<UserFilter> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<UserFilter>() {
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Info> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Info>() {
 		@Override
-		public UserFilter deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
-			return new gen.model.mixinReference.UserFilter(reader);
+		public Info deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.calc.Info(reader);
 		}
 	};
 
-	private UserFilter(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+	private Info(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
 		
 		String _URI_ = "";
 		this.__locator = java.util.Optional.ofNullable(reader.context);
-		int _ID_ = 0;
+		String _code_ = "";
 		String _name_ = "";
 		byte nextToken = reader.last();
 		if(nextToken != '}') {
@@ -259,8 +242,8 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 						_URI_ = reader.readString();
 				nextToken = reader.getNextToken();
 						break;
-					case 1458105184:
-						_ID_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
+					case -114201356:
+						_code_ = com.dslplatform.json.StringConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case -1925595674:
@@ -290,8 +273,8 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 						_URI_ = reader.readString();
 				nextToken = reader.getNextToken();
 						break;
-					case 1458105184:
-						_ID_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
+					case -114201356:
+						_code_ = com.dslplatform.json.StringConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case -1925595674:
@@ -309,7 +292,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		}
 		
 		this.URI = _URI_;
-		this.ID = _ID_;
+		this.code = _code_;
 		this.name = _name_;
 	}
 
@@ -321,7 +304,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
 			case '{':
 				reader.getNextToken();
-				return new gen.model.mixinReference.UserFilter(reader);
+				return new gen.model.calc.Info(reader);
 			case '[':
 				return reader.deserializeNullableCollection(JSON_READER);
 			default:
@@ -329,24 +312,24 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		}
 	}
 	
-	public UserFilter(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<UserFilter>[] readers) throws java.io.IOException {
+	public Info(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Info>[] readers) throws java.io.IOException {
 		this.__locator = java.util.Optional.ofNullable(reader.locator);
-		for (org.revenj.postgres.ObjectConverter.Reader<UserFilter> rdr : readers) {
+		for (org.revenj.postgres.ObjectConverter.Reader<Info> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
-		URI = gen.model.mixinReference.converters.UserFilterConverter.buildURI(reader, this);
-		this.__originalValue = (UserFilter)this.clone();
+		URI = gen.model.calc.converters.InfoConverter.buildURI(reader, this);
+		this.__originalValue = (Info)this.clone();
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<UserFilter>[] readers, int __index___ID, int __index___name) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Info>[] readers, int __index___code, int __index___name) {
 		
-		readers[__index___ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
+		readers[__index___code] = (item, reader, context) -> { item.code = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 		readers[__index___name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<UserFilter>[] readers, int __index__extended_ID, int __index__extended_name) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Info>[] readers, int __index__extended_code, int __index__extended_name) {
 		
-		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
+		readers[__index__extended_code] = (item, reader, context) -> { item.code = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 	}
 }

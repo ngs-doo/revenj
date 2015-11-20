@@ -89,7 +89,7 @@ public class Master   implements java.lang.Cloneable, java.io.Serializable, org.
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -8774658649377755231L;
+	private static final long serialVersionUID = -7529526981451028581L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Master(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -387,11 +387,11 @@ public class Master   implements java.lang.Cloneable, java.io.Serializable, org.
 	}
 	
 	public Master(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Master>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<Master> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.md.converters.MasterConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (Master)this.clone();
 	}
 

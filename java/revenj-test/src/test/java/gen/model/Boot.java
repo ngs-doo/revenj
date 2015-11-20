@@ -243,6 +243,18 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.adt.converters.UserConverter adt$converter$UserConverter = new gen.model.adt.converters.UserConverter(columns);
 		container.register(adt$converter$UserConverter);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.User>>(){}.type, adt$converter$UserConverter, false);
+		
+		gen.model.calc.converters.InfoConverter calc$converter$InfoConverter = new gen.model.calc.converters.InfoConverter(columns);
+		container.register(calc$converter$InfoConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.calc.Info>>(){}.type, calc$converter$InfoConverter, false);
+		
+		gen.model.calc.converters.TypeConverter calc$converter$TypeConverter = new gen.model.calc.converters.TypeConverter(columns);
+		container.register(calc$converter$TypeConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.calc.Type>>(){}.type, calc$converter$TypeConverter, false);
+		
+		gen.model.calc.converters.RealmConverter calc$converter$RealmConverter = new gen.model.calc.converters.RealmConverter(columns);
+		container.register(calc$converter$RealmConverter);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.calc.Realm>>(){}.type, calc$converter$RealmConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"");
@@ -515,6 +527,38 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
 		metamodel.registerProperty(gen.model.adt.User.class, "getUsername", "\"username\"");
 		metamodel.registerProperty(gen.model.adt.User.class, "getAuthentication", "\"authentication\"");
+		calc$converter$InfoConverter.configure(container);
+		metamodel.registerDataSource(gen.model.calc.Info.class, "\"calc\".\"Info_entity\"");
+		metamodel.registerProperty(gen.model.calc.Info.class, "getURI", "\"URI\"");
+		
+		container.register(gen.model.calc.repositories.InfoRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
+		metamodel.registerProperty(gen.model.calc.Info.class, "getCode", "\"code\"");
+		metamodel.registerProperty(gen.model.calc.Info.class, "getName", "\"name\"");
+		calc$converter$TypeConverter.configure(container);
+		metamodel.registerDataSource(gen.model.calc.Type.class, "\"calc\".\"Type_entity\"");
+		metamodel.registerProperty(gen.model.calc.Type.class, "getURI", "\"URI\"");
+		
+		container.register(gen.model.calc.repositories.TypeRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
+		metamodel.registerProperty(gen.model.calc.Type.class, "getSuffix", "\"suffix\"");
+		metamodel.registerProperty(gen.model.calc.Type.class, "getDescription", "\"description\"");
+		calc$converter$RealmConverter.configure(container);
+		metamodel.registerDataSource(gen.model.calc.Realm.class, "\"calc\".\"Realm_entity\"");
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getURI", "\"URI\"");
+		
+		container.register(gen.model.calc.repositories.RealmRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getInfo", "\"info\"");
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getInfoID", "\"infoID\"");
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getRefType", "\"refType\"");
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getType", "\"type\"");
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -543,6 +587,12 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"");
@@ -557,6 +607,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthor", "\"author\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthorID", "\"authorID\"");
 		metamodel.registerProperty(gen.model.security.Document.class, "getDeactivated", "\"deactivated\"");
+		gen.model.security.Document.configureStaticMeaningOfLife(container);
 	}
 	
 	private java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> loadQueryInfo(

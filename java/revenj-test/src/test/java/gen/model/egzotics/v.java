@@ -69,7 +69,7 @@ public final class v   implements java.lang.Cloneable, java.io.Serializable, com
 		this.x = x;
 	}
 
-	private static final long serialVersionUID = 8007033454915514736L;
+	private static final long serialVersionUID = -3534290355464694034L;
 	
 	private int x;
 

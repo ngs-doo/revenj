@@ -121,7 +121,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -7931154843698534420L;
+	private static final long serialVersionUID = -7984739140160913186L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -352,7 +352,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = -4745688126631197643L;
+	private static final long serialVersionUID = -6105675541171235089L;
 	
 	private gen.model.test.Simple simple;
 
@@ -1010,11 +1010,11 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 	}
 	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.test.converters.CompositeConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (Composite)this.clone();
 	}
 

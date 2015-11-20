@@ -68,7 +68,7 @@ public final class Test   implements java.lang.Cloneable, java.io.Serializable, 
 	public String toString() {
 		return "Test(" + x + ',' + author + ')';
 	}
-	private static final long serialVersionUID = -4247240526313610745L;
+	private static final long serialVersionUID = -6134736604820179263L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Test(
 			@com.fasterxml.jackson.annotation.JsonProperty("_helper") final boolean _helper ,

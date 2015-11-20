@@ -69,7 +69,7 @@ public final class Token   implements java.lang.Cloneable, java.io.Serializable,
 		this.token = token == null ? "" : token;
 	}
 
-	private static final long serialVersionUID = 3506179341387785009L;
+	private static final long serialVersionUID = -678018533115816613L;
 	
 	private String token;
 

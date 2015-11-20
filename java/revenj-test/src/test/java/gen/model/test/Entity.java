@@ -121,7 +121,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -4637599345080999368L;
+	private static final long serialVersionUID = -8174753071824152546L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -693,11 +693,11 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.
 	}
 	
 	public Entity(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<Entity> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.test.converters.EntityConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 	}
 
 	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Entity>[] readers, int __index___money, int __index___id, int __index___compositeURI, int __index___compositeID, gen.model.test.converters.Detail1Converter __converter_detail1, int __index___detail1, gen.model.test.converters.Detail2Converter __converter_detail2, int __index___detail2, int __index___Compositeid, int __index___Index) {

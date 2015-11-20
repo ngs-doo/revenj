@@ -239,7 +239,7 @@ public static class Result   implements com.dslplatform.json.JsonObject {
 		this.ids = new java.util.LinkedHashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = 8933720349785970089L;
+	private static final long serialVersionUID = -8254386882548458005L;
 	
 	private java.util.UUID id;
 

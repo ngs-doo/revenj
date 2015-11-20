@@ -110,7 +110,7 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -7739446208407496473L;
+	private static final long serialVersionUID = 588308627123519337L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -613,11 +613,11 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 	}
 	
 	public Author(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Author>[] readers) throws java.io.IOException {
+		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		for (org.revenj.postgres.ObjectConverter.Reader<Author> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
 		URI = gen.model.mixinReference.converters.AuthorConverter.buildURI(reader, this);
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
 		this.__originalValue = (Author)this.clone();
 	}
 
