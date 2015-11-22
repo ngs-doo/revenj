@@ -6,9 +6,9 @@ using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
 using Remotion.Linq.Parsing;
 using Revenj.Common;
+using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DomainPatterns;
-using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 {
@@ -241,14 +241,24 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp)))
 					return expression;
 
-			//TODO query parts context!?
-			if (!string.IsNullOrEmpty(ContextName))
-				SqlExpression.Append('(');
-			VisitExpression(expression.Expression);
-			if (!string.IsNullOrEmpty(ContextName))
-				SqlExpression.Append(')');
-			SqlExpression.AppendFormat(".\"{0}\"", expression.Member.Name);
-
+			if (expression.Expression == null)
+			{
+				var member = expression.Member;
+				SqlExpression.AppendFormat("\"{0}\".\"{1}.{2}\"()",
+					member.DeclaringType.Namespace,
+					member.DeclaringType.Name,
+					member.Name);
+			}
+			else
+			{
+				//TODO query parts context!?
+				if (!string.IsNullOrEmpty(ContextName))
+					SqlExpression.Append('(');
+				VisitExpression(expression.Expression);
+				if (!string.IsNullOrEmpty(ContextName))
+					SqlExpression.Append(')');
+				SqlExpression.AppendFormat(".\"{0}\"", expression.Member.Name);
+			}
 			return expression;
 		}
 
