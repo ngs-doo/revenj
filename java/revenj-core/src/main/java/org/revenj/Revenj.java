@@ -138,7 +138,7 @@ public abstract class Revenj {
 			Iterator<SystemAspect> aspects) throws IOException {
 		ClassLoader loader = classLoader.orElse(Thread.currentThread().getContextClassLoader());
 		SimpleContainer container = new SimpleContainer("true".equals(properties.getProperty("revenj.resolveUnknown")));
-		container.register(properties);
+		container.registerInstance(properties);
 		container.registerInstance(ServiceLocator.class, container, false);
 		container.registerInstance(DataSource.class, dataSource, false);
 		String ns = properties.getProperty("revenj.namespace");

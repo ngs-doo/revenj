@@ -18,11 +18,28 @@ public interface WireSerialization {
 		return os;
 	}
 
+	Object deserialize(Type type, byte[] content, int length, String accept) throws IOException;
+
 	Object deserialize(Type type, InputStream stream, String accept) throws IOException;
+
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(byte[] content, int length, String accept, Class<T> manifest) throws IOException {
+		return (T) deserialize(manifest, content, length, accept);
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(byte[] content, String accept, Class<T> manifest) throws IOException {
+		return (T) deserialize(manifest, content, content.length, accept);
+	}
 
 	@SuppressWarnings("unchecked")
 	default <T> T deserialize(InputStream stream, String accept, Class<T> manifest) throws IOException {
 		return (T) deserialize(manifest, stream, accept);
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T> T deserialize(byte[] content, int length, String accept, Class<T> container, Type argument, Type... arguments) throws IOException {
+		return (T) deserialize(Utils.makeGenericType(container, argument, arguments), content, length, accept);
 	}
 
 	@SuppressWarnings("unchecked")

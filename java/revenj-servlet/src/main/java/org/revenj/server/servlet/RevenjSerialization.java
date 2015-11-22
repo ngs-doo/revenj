@@ -39,6 +39,11 @@ final class RevenjSerialization implements WireSerialization {
 	}
 
 	@Override
+	public Object deserialize(Type type, byte[] content, int length, String accept) throws IOException {
+		return json.deserialize(type, content, length);
+	}
+
+	@Override
 	public Object deserialize(Type type, InputStream stream, String accept) throws IOException {
 		return json.deserialize(type, stream);
 	}

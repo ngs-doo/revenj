@@ -57,7 +57,7 @@ public class Application implements ServletContextListener {
 		container.registerInstance(WireSerialization.class, serialization, false);
 		container.registerInstance(new Generic<Serialization<String>>() {
 		}.type, serialization.find(String.class).get(), false);
-		container.register(new ProcessingEngine(container, dataSource, serialization, permissions, plugins));
+		container.registerInstance(new ProcessingEngine(container, dataSource, serialization, permissions, plugins));
 	}
 
 	public static void configure(ServletContext context, Container container) throws Exception {
