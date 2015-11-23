@@ -3,6 +3,7 @@ package org.revenj;
 import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
+import gen.model.security.Document;
 import gen.model.test.Clicked;
 import gen.model.test.Composite;
 import gen.model.test.En;
@@ -278,5 +279,14 @@ public class TestQuery {
 		Assert.assertTrue(found2);
 		Assert.assertTrue(found3);
 		Assert.assertTrue(found4);
+	}
+
+	@Test
+	public void staticMemberAccess() throws IOException {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		Query<Document> query = db.query(Document.class);
+		boolean found = query.anyMatch(it -> it.equals(Document.MEANING_OF_LIFE()));
+		Assert.assertFalse(found);
 	}
 }

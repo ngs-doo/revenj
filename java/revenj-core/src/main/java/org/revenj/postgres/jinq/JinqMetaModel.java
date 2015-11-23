@@ -1,6 +1,8 @@
 package org.revenj.postgres.jinq;
 
 import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodSignature;
+import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValue;
+import org.jinq.rebased.org.objectweb.asm.Type;
 import org.revenj.extensibility.Container;
 import org.revenj.postgres.QueryProvider;
 import org.revenj.postgres.jinq.transform.MetamodelUtil;
@@ -34,9 +36,23 @@ public class JinqMetaModel extends MetamodelUtil {
 		}
 	}
 
+	public void registerStatic(Class<?> clazz, String methodName, String function) throws IOException {
+		try {
+			addStatic(clazz.getMethod(methodName), function);
+		} catch (NoSuchMethodException e) {
+			throw new IOException(e);
+		}
+	}
+
 	public void registerDataSource(Class<?> clazz, String dataSource) {
 		classSources.put(clazz, dataSource);
 		stringSources.put(clazz.getCanonicalName(), dataSource);
+		String sourceTypeName = Type.getInternalName(clazz);
+		MethodSignature eqMethod = new MethodSignature(sourceTypeName, "equals", "(Ljava/lang/Object;)Z");
+		comparisonMethods.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
+		comparisonMethodsWithObjectEquals.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
+		safeMethods.add(eqMethod);
+
 	}
 
 	@Override

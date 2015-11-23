@@ -108,152 +108,152 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		
 		
 		gen.model.test.converters.SimpleConverter test$converter$SimpleConverter = new gen.model.test.converters.SimpleConverter(columns);
-		container.registerInstance(test$converter$SimpleConverter);
+		container.registerInstance(gen.model.test.converters.SimpleConverter.class, test$converter$SimpleConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Simple>>(){}.type, test$converter$SimpleConverter, false);
 		
 		gen.model.test.converters.EnConverter test$converter$EnConverter = new gen.model.test.converters.EnConverter();
-		container.registerInstance(test$converter$EnConverter);
+		container.registerInstance(gen.model.test.converters.EnConverter.class, test$converter$EnConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.En>>(){}.type, test$converter$EnConverter, false);
 		
 		gen.model.test.converters.LazyLoadConverter test$converter$LazyLoadConverter = new gen.model.test.converters.LazyLoadConverter(columns);
-		container.registerInstance(test$converter$LazyLoadConverter);
+		container.registerInstance(gen.model.test.converters.LazyLoadConverter.class, test$converter$LazyLoadConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.LazyLoad>>(){}.type, test$converter$LazyLoadConverter, false);
 		
 		gen.model.test.converters.SingleDetailConverter test$converter$SingleDetailConverter = new gen.model.test.converters.SingleDetailConverter(columns);
-		container.registerInstance(test$converter$SingleDetailConverter);
+		container.registerInstance(gen.model.test.converters.SingleDetailConverter.class, test$converter$SingleDetailConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.SingleDetail>>(){}.type, test$converter$SingleDetailConverter, false);
 		
 		gen.model.test.converters.CompositeConverter test$converter$CompositeConverter = new gen.model.test.converters.CompositeConverter(columns);
-		container.registerInstance(test$converter$CompositeConverter);
+		container.registerInstance(gen.model.test.converters.CompositeConverter.class, test$converter$CompositeConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Composite>>(){}.type, test$converter$CompositeConverter, false);
 		
 		gen.model.test.converters.CompositeListConverter test$converter$CompositeListConverter = new gen.model.test.converters.CompositeListConverter(columns);
-		container.registerInstance(test$converter$CompositeListConverter);
+		container.registerInstance(gen.model.test.converters.CompositeListConverter.class, test$converter$CompositeListConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList>>(){}.type, test$converter$CompositeListConverter, false);
 		
 		gen.model.test.converters.EntityConverter test$converter$EntityConverter = new gen.model.test.converters.EntityConverter(columns);
-		container.registerInstance(test$converter$EntityConverter);
+		container.registerInstance(gen.model.test.converters.EntityConverter.class, test$converter$EntityConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Entity>>(){}.type, test$converter$EntityConverter, false);
 		
 		gen.model.test.converters.Detail1Converter test$converter$Detail1Converter = new gen.model.test.converters.Detail1Converter(columns);
-		container.registerInstance(test$converter$Detail1Converter);
+		container.registerInstance(gen.model.test.converters.Detail1Converter.class, test$converter$Detail1Converter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Detail1>>(){}.type, test$converter$Detail1Converter, false);
 		
 		gen.model.test.converters.Detail2Converter test$converter$Detail2Converter = new gen.model.test.converters.Detail2Converter(columns);
-		container.registerInstance(test$converter$Detail2Converter);
+		container.registerInstance(gen.model.test.converters.Detail2Converter.class, test$converter$Detail2Converter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Detail2>>(){}.type, test$converter$Detail2Converter, false);
 		
 		gen.model.test.converters.ClickedConverter test$converter$ClickedConverter = new gen.model.test.converters.ClickedConverter(columns);
-		container.registerInstance(test$converter$ClickedConverter);
+		container.registerInstance(gen.model.test.converters.ClickedConverter.class, test$converter$ClickedConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Clicked>>(){}.type, test$converter$ClickedConverter, false);
 		
 		gen.model.Seq.converters.NextConverter Seq$converter$NextConverter = new gen.model.Seq.converters.NextConverter(columns);
-		container.registerInstance(Seq$converter$NextConverter);
+		container.registerInstance(gen.model.Seq.converters.NextConverter.class, Seq$converter$NextConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.Seq.Next>>(){}.type, Seq$converter$NextConverter, false);
 		
 		gen.model.mixinReference.converters.SpecificReportConverter mixinReference$converter$SpecificReportConverter = new gen.model.mixinReference.converters.SpecificReportConverter(columns);
-		container.registerInstance(mixinReference$converter$SpecificReportConverter);
+		container.registerInstance(gen.model.mixinReference.converters.SpecificReportConverter.class, mixinReference$converter$SpecificReportConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.SpecificReport>>(){}.type, mixinReference$converter$SpecificReportConverter, false);
 		
 		gen.model.mixinReference.converters.AuthorConverter mixinReference$converter$AuthorConverter = new gen.model.mixinReference.converters.AuthorConverter(columns);
-		container.registerInstance(mixinReference$converter$AuthorConverter);
+		container.registerInstance(gen.model.mixinReference.converters.AuthorConverter.class, mixinReference$converter$AuthorConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.Author>>(){}.type, mixinReference$converter$AuthorConverter, false);
 		
 		gen.model.mixinReference.converters.PersonConverter mixinReference$converter$PersonConverter = new gen.model.mixinReference.converters.PersonConverter(columns);
-		container.registerInstance(mixinReference$converter$PersonConverter);
+		container.registerInstance(gen.model.mixinReference.converters.PersonConverter.class, mixinReference$converter$PersonConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.Person>>(){}.type, mixinReference$converter$PersonConverter, false);
 		
 		gen.model.mixinReference.converters.ResidentConverter mixinReference$converter$ResidentConverter = new gen.model.mixinReference.converters.ResidentConverter(columns);
-		container.registerInstance(mixinReference$converter$ResidentConverter);
+		container.registerInstance(gen.model.mixinReference.converters.ResidentConverter.class, mixinReference$converter$ResidentConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.Resident>>(){}.type, mixinReference$converter$ResidentConverter, false);
 		
 		gen.model.mixinReference.converters.ChildConverter mixinReference$converter$ChildConverter = new gen.model.mixinReference.converters.ChildConverter(columns);
-		container.registerInstance(mixinReference$converter$ChildConverter);
+		container.registerInstance(gen.model.mixinReference.converters.ChildConverter.class, mixinReference$converter$ChildConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.Child>>(){}.type, mixinReference$converter$ChildConverter, false);
 		
 		gen.model.mixinReference.converters.UserFilterConverter mixinReference$converter$UserFilterConverter = new gen.model.mixinReference.converters.UserFilterConverter(columns);
-		container.registerInstance(mixinReference$converter$UserFilterConverter);
+		container.registerInstance(gen.model.mixinReference.converters.UserFilterConverter.class, mixinReference$converter$UserFilterConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.mixinReference.UserFilter>>(){}.type, mixinReference$converter$UserFilterConverter, false);
 		org.revenj.security.PermissionManager permissions = container.resolve(org.revenj.security.PermissionManager.class);
 		
 		gen.model.binaries.converters.DocumentConverter binaries$converter$DocumentConverter = new gen.model.binaries.converters.DocumentConverter(columns);
-		container.registerInstance(binaries$converter$DocumentConverter);
+		container.registerInstance(gen.model.binaries.converters.DocumentConverter.class, binaries$converter$DocumentConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.binaries.Document>>(){}.type, binaries$converter$DocumentConverter, false);
 		
 		gen.model.binaries.converters.WritableDocumentConverter binaries$converter$WritableDocumentConverter = new gen.model.binaries.converters.WritableDocumentConverter(loadQueryInfo(container, "SELECT * FROM \"binaries\".\"Document\" sq LIMIT 0", "binaries", "WritableDocument"));
-		container.registerInstance(binaries$converter$WritableDocumentConverter);
+		container.registerInstance(gen.model.binaries.converters.WritableDocumentConverter.class, binaries$converter$WritableDocumentConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.binaries.WritableDocument>>(){}.type, binaries$converter$WritableDocumentConverter, false);
 		
 		gen.model.binaries.converters.ReadOnlyDocumentConverter binaries$converter$ReadOnlyDocumentConverter = new gen.model.binaries.converters.ReadOnlyDocumentConverter(loadQueryInfo(container, "SELECT * FROM (SELECT \"ID\", name from binaries.\"Document\") sq LIMIT 0", "binaries", "ReadOnlyDocument"));
-		container.registerInstance(binaries$converter$ReadOnlyDocumentConverter);
+		container.registerInstance(gen.model.binaries.converters.ReadOnlyDocumentConverter.class, binaries$converter$ReadOnlyDocumentConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.binaries.ReadOnlyDocument>>(){}.type, binaries$converter$ReadOnlyDocumentConverter, false);
 		
 		gen.model.security.converters.DocumentConverter security$converter$DocumentConverter = new gen.model.security.converters.DocumentConverter(columns);
-		container.registerInstance(security$converter$DocumentConverter);
+		container.registerInstance(gen.model.security.converters.DocumentConverter.class, security$converter$DocumentConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.security.Document>>(){}.type, security$converter$DocumentConverter, false);
 		
 		gen.model.egzotics.converters.pksConverter egzotics$converter$pksConverter = new gen.model.egzotics.converters.pksConverter(columns);
-		container.registerInstance(egzotics$converter$pksConverter);
+		container.registerInstance(gen.model.egzotics.converters.pksConverter.class, egzotics$converter$pksConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.pks>>(){}.type, egzotics$converter$pksConverter, false);
 		
 		gen.model.egzotics.converters.vConverter egzotics$converter$vConverter = new gen.model.egzotics.converters.vConverter(columns);
-		container.registerInstance(egzotics$converter$vConverter);
+		container.registerInstance(gen.model.egzotics.converters.vConverter.class, egzotics$converter$vConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.v>>(){}.type, egzotics$converter$vConverter, false);
 		
 		gen.model.egzotics.converters.PksVConverter egzotics$converter$PksVConverter = new gen.model.egzotics.converters.PksVConverter(columns);
-		container.registerInstance(egzotics$converter$PksVConverter);
+		container.registerInstance(gen.model.egzotics.converters.PksVConverter.class, egzotics$converter$PksVConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.PksV>>(){}.type, egzotics$converter$PksVConverter, false);
 		
 		gen.model.egzotics.converters.EConverter egzotics$converter$EConverter = new gen.model.egzotics.converters.EConverter();
-		container.registerInstance(egzotics$converter$EConverter);
+		container.registerInstance(gen.model.egzotics.converters.EConverter.class, egzotics$converter$EConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.egzotics.E>>(){}.type, egzotics$converter$EConverter, false);
 		
 		gen.model.issues.converters.DateListConverter issues$converter$DateListConverter = new gen.model.issues.converters.DateListConverter(columns);
-		container.registerInstance(issues$converter$DateListConverter);
+		container.registerInstance(gen.model.issues.converters.DateListConverter.class, issues$converter$DateListConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.issues.DateList>>(){}.type, issues$converter$DateListConverter, false);
 		
 		gen.model.md.converters.MasterConverter md$converter$MasterConverter = new gen.model.md.converters.MasterConverter(columns);
-		container.registerInstance(md$converter$MasterConverter);
+		container.registerInstance(gen.model.md.converters.MasterConverter.class, md$converter$MasterConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Master>>(){}.type, md$converter$MasterConverter, false);
 		
 		gen.model.md.converters.DetailConverter md$converter$DetailConverter = new gen.model.md.converters.DetailConverter(columns);
-		container.registerInstance(md$converter$DetailConverter);
+		container.registerInstance(gen.model.md.converters.DetailConverter.class, md$converter$DetailConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Detail>>(){}.type, md$converter$DetailConverter, false);
 		
 		gen.model.adt.converters.AuthConverter adt$converter$AuthConverter = new gen.model.adt.converters.AuthConverter(columns);
-		container.registerInstance(adt$converter$AuthConverter);
+		container.registerInstance(gen.model.adt.converters.AuthConverter.class, adt$converter$AuthConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.Auth>>(){}.type, adt$converter$AuthConverter, false);
 		
 		gen.model.adt.converters.BasicSecurityConverter adt$converter$BasicSecurityConverter = new gen.model.adt.converters.BasicSecurityConverter(columns);
-		container.registerInstance(adt$converter$BasicSecurityConverter);
+		container.registerInstance(gen.model.adt.converters.BasicSecurityConverter.class, adt$converter$BasicSecurityConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.BasicSecurity>>(){}.type, adt$converter$BasicSecurityConverter, false);
 		
 		gen.model.adt.converters.TokenConverter adt$converter$TokenConverter = new gen.model.adt.converters.TokenConverter(columns);
-		container.registerInstance(adt$converter$TokenConverter);
+		container.registerInstance(gen.model.adt.converters.TokenConverter.class, adt$converter$TokenConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.Token>>(){}.type, adt$converter$TokenConverter, false);
 		
 		gen.model.adt.converters.AnonymousConverter adt$converter$AnonymousConverter = new gen.model.adt.converters.AnonymousConverter(columns);
-		container.registerInstance(adt$converter$AnonymousConverter);
+		container.registerInstance(gen.model.adt.converters.AnonymousConverter.class, adt$converter$AnonymousConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.Anonymous>>(){}.type, adt$converter$AnonymousConverter, false);
 		
 		gen.model.adt.converters.DigestSecurityConverter adt$converter$DigestSecurityConverter = new gen.model.adt.converters.DigestSecurityConverter(columns);
-		container.registerInstance(adt$converter$DigestSecurityConverter);
+		container.registerInstance(gen.model.adt.converters.DigestSecurityConverter.class, adt$converter$DigestSecurityConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.DigestSecurity>>(){}.type, adt$converter$DigestSecurityConverter, false);
 		
 		gen.model.adt.converters.UserConverter adt$converter$UserConverter = new gen.model.adt.converters.UserConverter(columns);
-		container.registerInstance(adt$converter$UserConverter);
+		container.registerInstance(gen.model.adt.converters.UserConverter.class, adt$converter$UserConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.User>>(){}.type, adt$converter$UserConverter, false);
 		
 		gen.model.calc.converters.InfoConverter calc$converter$InfoConverter = new gen.model.calc.converters.InfoConverter(columns);
-		container.registerInstance(calc$converter$InfoConverter);
+		container.registerInstance(gen.model.calc.converters.InfoConverter.class, calc$converter$InfoConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.calc.Info>>(){}.type, calc$converter$InfoConverter, false);
 		
 		gen.model.calc.converters.TypeConverter calc$converter$TypeConverter = new gen.model.calc.converters.TypeConverter(columns);
-		container.registerInstance(calc$converter$TypeConverter);
+		container.registerInstance(gen.model.calc.converters.TypeConverter.class, calc$converter$TypeConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.calc.Type>>(){}.type, calc$converter$TypeConverter, false);
 		
 		gen.model.calc.converters.RealmConverter calc$converter$RealmConverter = new gen.model.calc.converters.RealmConverter(columns);
-		container.registerInstance(calc$converter$RealmConverter);
+		container.registerInstance(gen.model.calc.converters.RealmConverter.class, calc$converter$RealmConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.calc.Realm>>(){}.type, calc$converter$RealmConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
@@ -607,6 +607,9 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthor", "\"author\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthorID", "\"authorID\"");
 		metamodel.registerProperty(gen.model.security.Document.class, "getDeactivated", "\"deactivated\"");
+		
+		gen.model.security.Document.configureStaticMEANING_OF_LIFE(container);
+		metamodel.registerStatic(gen.model.security.Document.class, "MEANING_OF_LIFE", "\"security\".\"Document.MEANING_OF_LIFE\"");
 	}
 	
 	private java.util.List<org.revenj.postgres.ObjectConverter.ColumnInfo> loadQueryInfo(

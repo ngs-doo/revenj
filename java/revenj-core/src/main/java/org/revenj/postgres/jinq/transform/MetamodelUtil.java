@@ -19,6 +19,7 @@ public abstract class MetamodelUtil {
 	protected final Set<MethodSignature> safeMethods;
 	protected final Set<MethodSignature> safeStaticMethods;
 	protected final Map<String, String> enums;
+	protected final Map<MethodSignature, String> statics;
 	protected final Set<String> knownEmbeddedtypes = new HashSet<>();
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> comparisonMethods;
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> comparisonMethodsWithObjectEquals;
@@ -77,6 +78,7 @@ public abstract class MetamodelUtil {
 
 	public MetamodelUtil() {
 		enums = new HashMap<>();
+		statics = new HashMap<>();
 		comparisonMethods = new HashMap<>();
 		safeMethodAnnotations = new HashSet<>();
 		safeMethodAnnotations.addAll(TransformationClassAnalyzer.SafeMethodAnnotations);
@@ -100,8 +102,15 @@ public abstract class MetamodelUtil {
 	}
 
 	protected void addProperty(Method method, String property) {
-		fieldMethods.put(MethodSignature.fromMethod(method), new MetamodelUtilAttribute(property, false));
-		safeMethods.add(MethodSignature.fromMethod(method));
+		MethodSignature signature = MethodSignature.fromMethod(method);
+		fieldMethods.put(signature, new MetamodelUtilAttribute(property, false));
+		safeMethods.add(signature);
+	}
+
+	protected void addStatic(Method method, String function) {
+		MethodSignature signature = MethodSignature.fromMethod(method);
+		statics.put(signature, function);
+		safeStaticMethods.add(signature);
 	}
 
 	private void insertNLinkMethod(String className, String methodName, String returnType, MetamodelUtilAttribute pluralAttribute) {

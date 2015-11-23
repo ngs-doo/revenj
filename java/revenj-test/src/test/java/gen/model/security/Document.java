@@ -90,7 +90,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 5399639315694177710L;
+	private static final long serialVersionUID = 4812989081784555380L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Document(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -161,15 +161,15 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 	}
 
 	
-	private static Document __StaticInstanceMeaningOfLife__;
+	private static Document __StaticInstanceMEANING_OF_LIFE__;
 
-	public static Document getMeaningOfLife() {
-		return __StaticInstanceMeaningOfLife__; 
+	public static Document MEANING_OF_LIFE() {
+		return __StaticInstanceMEANING_OF_LIFE__; 
 	}
 
-	public static void configureStaticMeaningOfLife(org.revenj.patterns.ServiceLocator locator) throws java.io.IOException {
+	public static void configureStaticMEANING_OF_LIFE(org.revenj.patterns.ServiceLocator locator) throws java.io.IOException {
 		try {
-			__StaticInstanceMeaningOfLife__ = (Document)locator.resolve(org.revenj.patterns.Repository.class, Document.class).find("42").orElse(null);
+			__StaticInstanceMEANING_OF_LIFE__ = (Document)locator.resolve(org.revenj.patterns.Repository.class, Document.class).find("42").orElse(null);
 		} catch (java.lang.ReflectiveOperationException e) {
 			throw new java.io.IOException(e);
 		}

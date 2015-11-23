@@ -457,8 +457,13 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			return base;
 		} else if (sig.equals(TransformationClassAnalyzer.bigIntegerValueOfLong)) {
 			throw new TypedValueVisitorException("New BigIntegers can only be created in the context of numeric promotion");
+			//TODO this needs to be changed to an instance check, not static check ;(
 		} else if ((handler = MethodChecker.jpqlFunctionStaticMethods.get(sig)) != null) {
 			return handler.handle(val, in, this);
+			//TODO: temporarly hardcode logic for static conversion
+		} else if (sig.getOwnerType().equals(sig.getReturnType()) && val.args.size() == 0) {
+			String[] names = sig.owner.split("/");
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression("\"" + names[names.length - 2] + "\".\"" + names[names.length - 1] + "." + val.name + "\"()"));
 		} else {
 			return super.staticMethodCallValue(val, in);
 		}
