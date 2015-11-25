@@ -178,9 +178,9 @@ public class TestDataContext {
 		ServiceLocator locator = container;
 		DataContext context = locator.resolve(DataContext.class);
 		Random rnd = new Random();
-		Type t = new Type().setSuffix("ab" + rnd.nextInt(10000)).setDescription("desc");
+		Type t = new Type().setSuffix("ab" + rnd.nextInt(100000)).setDescription("desc");
 		context.create(t);
-		Info i = new Info().setCode("xx" + rnd.nextInt(100000)).setName("abcdef" + rnd.nextInt(100000));
+		Info i = new Info().setCode("xx" + rnd.nextInt(1000000)).setName("abcdef" + rnd.nextInt(1000000));
 		context.create(i);
 		Realm r = new Realm().setInfo(i).setRefType(t);
 		context.create(r);

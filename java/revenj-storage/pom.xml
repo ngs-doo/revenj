@@ -6,6 +6,7 @@
 	<groupId>org.revenj</groupId>
 	<artifactId>revenj-storage</artifactId>
 	<name>Revenj Storage</name>
+	<description> DSL Platform compatible backend - S3 integration (https://dsl-platform.com)</description>
 	<packaging>jar</packaging>
 	<version>0.7.0</version>
 

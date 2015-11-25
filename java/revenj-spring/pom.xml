@@ -6,6 +6,7 @@
 	<groupId>org.revenj</groupId>
 	<artifactId>revenj-spring</artifactId>
 	<name>Revenj Spring</name>
+	<description> DSL Platform compatible backend for Spring (https://dsl-platform.com)</description>
 	<packaging>jar</packaging>
 	<version>0.7.0</version>
 
