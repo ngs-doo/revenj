@@ -96,7 +96,7 @@ final class SimpleContainer implements Container {
 		}
 	}
 
-	static class CtorInfo {
+	private static class CtorInfo {
 
 		final Constructor<?> ctor;
 		final Type[] rawTypes;
@@ -159,6 +159,7 @@ final class SimpleContainer implements Container {
 				}
 		);
 		registerGenerics(Callable.class, (locator, args) -> () -> locator.resolve(args[0]));
+		registerFactory(Container.class, Container::createScope, false);
 	}
 
 	private SimpleContainer(SimpleContainer parent) {
@@ -357,7 +358,12 @@ final class SimpleContainer implements Container {
 			} else if (type instanceof GenericArrayType) {
 				GenericArrayType gat = (GenericArrayType) type;
 				if (gat.getGenericComponentType() instanceof Class<?>) {
-					return tryResolveCollection((Class<?>) gat.getGenericComponentType(), caller);
+					return tryResolveCollection((Class<?>) gat.getGenericComponentType(), gat.getGenericComponentType(), caller);
+				} else if (gat.getGenericComponentType() instanceof ParameterizedType) {
+					ParameterizedType pt = (ParameterizedType) gat.getGenericComponentType();
+					if (pt.getRawType() instanceof Class<?>) {
+						return tryResolveCollection((Class<?>) pt.getRawType(), pt, caller);
+					}
 				}
 			}
 			if (type instanceof Class<?> == false) {
@@ -365,7 +371,7 @@ final class SimpleContainer implements Container {
 			}
 			Class<?> target = (Class<?>) type;
 			if (target.isArray()) {
-				return tryResolveCollection(target.getComponentType(), caller);
+				return tryResolveCollection(target.getComponentType(), target.getComponentType(), caller);
 			}
 			if (resolveUnknown) {
 				if (target.isInterface()) {
@@ -399,7 +405,7 @@ final class SimpleContainer implements Container {
 		return resolveRegistration(registration, caller);
 	}
 
-	private Either<Object> tryResolveCollection(Class<?> element, SimpleContainer caller) {
+	private Either<Object> tryResolveCollection(Class<?> container, Type element, SimpleContainer caller) {
 		List<Registration<?>> registrations = new ArrayList<>();
 		SimpleContainer current = caller;
 		do {
@@ -410,7 +416,7 @@ final class SimpleContainer implements Container {
 			current = current.parent;
 		} while (current != null);
 		if (registrations.isEmpty()) {
-			return Either.success(Array.newInstance(element, 0));
+			return Either.success(Array.newInstance(container, 0));
 		}
 		List<Object> result = new ArrayList<>(registrations.size());
 		for (int i = 0; i < registrations.size(); i++) {
@@ -419,7 +425,7 @@ final class SimpleContainer implements Container {
 				result.add(item.value);
 			}
 		}
-		Object[] instance = (Object[]) Array.newInstance(element, result.size());
+		Object[] instance = (Object[]) Array.newInstance(container, result.size());
 		for (int i = 0; i < instance.length; i++) {
 			instance[i] = result.get(i);
 		}

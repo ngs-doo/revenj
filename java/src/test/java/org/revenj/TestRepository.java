@@ -22,18 +22,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.patterns.DomainEventStore;
-import org.revenj.patterns.Generic;
-import org.revenj.patterns.PersistableRepository;
-import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.*;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 public class TestRepository {
 
@@ -82,12 +81,57 @@ public class TestRepository {
 		Assert.assertFalse(found.isPresent());
 	}
 
+	@EventHandler
+	public static class ClickedEventHandler implements DomainEventHandler<Clicked> {
+		public static int COUNT;
+
+		public void handle(Clicked event) {
+			COUNT++;
+		}
+	}
+
+	@EventHandler
+	public static class ClickedCollectionEventHandler implements DomainEventHandler<Clicked[]> {
+		public static int COUNT;
+
+		public void handle(Clicked[] events) {
+			COUNT++;
+		}
+	}
+
+	@EventHandler
+	public static class ClickedLazyEventHandler implements DomainEventHandler<Callable<Clicked>> {
+		public static int COUNT;
+
+		public void handle(Callable<Clicked> event) {
+			COUNT++;
+		}
+	}
+
+	@EventHandler
+	public static class ClickedLazyCollectionEventHandler implements DomainEventHandler<Callable<Clicked[]>> {
+		public static int COUNT;
+		private final Connection connection;
+		public ClickedLazyCollectionEventHandler(Connection connection) {
+			this.connection = connection;
+		}
+
+		public void handle(Callable<Clicked[]> events) {
+			COUNT++;
+		}
+	}
+
 	@Test
 	public void eventTest() throws IOException {
 		ServiceLocator locator = container;
 		DomainEventStore<Clicked> store = locator.resolve(ClickedRepository.class);
 		Clicked cl = new Clicked().setBigint(Long.MAX_VALUE).setDate(LocalDate.now()).setNumber(BigDecimal.valueOf(11.22));
+		ClickedEventHandler.COUNT = ClickedCollectionEventHandler.COUNT = ClickedLazyEventHandler.COUNT = ClickedLazyCollectionEventHandler.COUNT = 0;
 		String uri = store.submit(cl);
+		Assert.assertEquals(1, ClickedEventHandler.COUNT);
+		Assert.assertEquals(1, ClickedCollectionEventHandler.COUNT);
+		Assert.assertEquals(1, ClickedLazyEventHandler.COUNT);
+		Assert.assertEquals(1, ClickedLazyCollectionEventHandler.COUNT);
 		Optional<Clicked> cl2o = store.find(uri);
 		Assert.assertTrue(cl2o.isPresent());
 		Clicked cl2 = cl2o.get();
@@ -337,7 +381,7 @@ public class TestRepository {
 		ServiceLocator locator = container;
 		PersistableRepository<PksV> repository = locator.resolve(PersistableRepository.class, PksV.class);
 		Random rnd = new Random();
-		PksV pks = new PksV().setE(E.B).setV(new v().setX(rnd.nextInt())).setVv(new v[] { new v(rnd.nextInt()), new v().setX(55)});
+		PksV pks = new PksV().setE(E.B).setV(new v().setX(rnd.nextInt())).setVv(new v[]{new v(rnd.nextInt()), new v().setX(55)});
 		pks.getEe().add(E.C);
 		pks.getEe().add(E.B);
 		String uri = repository.insert(pks);

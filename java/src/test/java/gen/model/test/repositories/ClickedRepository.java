@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.23157 
+*/
+
 package gen.model.test.repositories;
 
 
@@ -11,7 +16,11 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
 			 final org.revenj.postgres.ObjectConverter<gen.model.test.Clicked> converter,
-			 final org.revenj.patterns.ServiceLocator locator) {
+			 final org.revenj.patterns.ServiceLocator locator,
+			 final org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked>[] singleHandlers,
+			 final org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked[]>[] collectionHandlers,
+			 final org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked>>[] lazyHandlers,
+			 final org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked[]>>[] collectionLazyHandlers) {
 			
 		this.transactionContext = transactionContext;
 		this.dataSource = dataSource;
@@ -19,6 +28,10 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 		this.transactionConnection = transactionContext.orElse(null);
 		this.converter = converter;
 		this.locator = locator;
+		this.singleHandlers = singleHandlers;
+		this.collectionHandlers = collectionHandlers;
+		this.lazyHandlers = lazyHandlers;
+		this.collectionLazyHandlers = collectionLazyHandlers;
 	}
 
 	private final java.util.Optional<java.sql.Connection> transactionContext;
@@ -299,7 +312,29 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 	public void close() throws java.io.IOException { 
 	}
 
+	private final org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked>[] singleHandlers;
+	private final org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked[]>[] collectionHandlers;
+	private final org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked>>[] lazyHandlers;
+	private final org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked[]>>[] collectionLazyHandlers;
 	
+	public ClickedRepository(
+			final java.util.Optional<java.sql.Connection> transactionContext,
+			final javax.sql.DataSource dataSource,
+			final org.revenj.postgres.QueryProvider queryProvider,
+			final org.revenj.postgres.ObjectConverter<gen.model.test.Clicked> converter,
+			final org.revenj.patterns.ServiceLocator locator) {
+		this(transactionContext,
+				dataSource,
+				queryProvider,
+				converter,
+				locator,
+				transactionContext.isPresent() ? new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked>[]>() {}.resolve(locator) : null,
+				transactionContext.isPresent() ? new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked[]>[]>() {}.resolve(locator) : null,
+				transactionContext.isPresent() ? new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked>>[]>() {}.resolve(locator) : null,
+				transactionContext.isPresent() ? new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked[]>>[]>() {}.resolve(locator) : null
+		);
+	}
+
 	@Override
 	public java.util.List<gen.model.test.Clicked> find(String[] uris) {
 		java.sql.Connection connection = getConnection();
@@ -317,14 +352,69 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 		}
 	}
 
+	private org.revenj.extensibility.Container executeBefore(java.sql.Connection connection, gen.model.test.Clicked[] events) {
+		final org.revenj.extensibility.Container context;
+		final org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked>[] sh;
+		final org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked[]>[] ch;
+		if (transactionContext.isPresent()) {
+			context = null;
+			sh = singleHandlers;
+			ch = collectionHandlers;
+		} else {
+			context = locator.resolve(org.revenj.extensibility.Container.class);
+			context.registerInstance(java.sql.Connection.class, connection, false);
+			sh = new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked>[]>(){}.resolve(context);
+			ch = new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked[]>[]>(){}.resolve(context);
+		}
+		if (sh != null) {
+			for (org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked> s : sh) {
+				for (gen.model.test.Clicked c : events) {
+					s.handle(c);
+				}
+			}
+		}
+		if (ch != null) {
+			for (org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked[]> s : ch) {
+				s.handle(events);
+			}
+		}
+		return context;
+	}
+
+	private void executeAfter(org.revenj.patterns.ServiceLocator context, gen.model.test.Clicked[] events) {
+		final org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked>>[] sh;
+		final org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked[]>>[] ch;
+		if (context == null) {
+			sh = lazyHandlers;
+			ch = collectionLazyHandlers;
+		} else {
+			sh = new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked>>[]>(){}.resolve(context);
+			ch = new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked[]>>[]>(){}.resolve(context);
+		}
+		if (sh != null) {
+			for (org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked>> s : sh) {
+				for (gen.model.test.Clicked c : events) {
+					s.handle(() -> c);
+				}
+			}
+		}
+		if (ch != null) {
+			for (org.revenj.patterns.DomainEventHandler<java.util.concurrent.Callable<gen.model.test.Clicked[]>> s : ch) {
+				s.handle(() -> events);
+			}
+		}
+	}
+
 	@Override
 	public String[] submit(java.util.Collection<gen.model.test.Clicked> domainEvents) {
 		java.sql.Connection connection = getConnection();
+		gen.model.test.Clicked[] events = domainEvents.toArray(new gen.model.test.Clicked[domainEvents.size()]);
+		org.revenj.extensibility.Container context = executeBefore(connection, events);
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"URI\" FROM \"test\".\"submit_Clicked\"(?)");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			if (prepareEvents != null) prepareEvents.accept(domainEvents);
-			String[] result = new String[domainEvents.size()];
-			org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(domainEvents, converter::to);
+			String[] result = new String[events.length];
+			org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(events, converter::to);
 			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
 			pgo.setType("\"test\".\"Clicked_event\"[]");
 			tuple.buildTuple(sw, false);
@@ -337,10 +427,15 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 				}
 			}
 			if (assignUris != null) assignUris.accept(domainEvents, result);
+			executeAfter(context, events);
 			return result;
 		} catch (java.sql.SQLException e) {
 			throw new RuntimeException(e);
 		} finally {
+			if (context != null) {
+				try { context.close(); }
+				catch (Exception e) { e.printStackTrace(); }
+			}
 			releaseConnection(connection);
 		}
 	}

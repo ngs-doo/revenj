@@ -13,10 +13,13 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -174,5 +177,34 @@ public abstract class Revenj {
 		}
 		properties.setProperty("revenj.aspectsCount", Integer.toString(total));
 		return container;
+	}
+
+	public static <T extends DomainEvent> void registerEvents(Container container, PluginLoader plugins, Class<T> manifest, Class<T[]> arrayManifest) throws Exception {
+		Type gt = Utils.makeGenericType(DomainEventHandler.class, manifest);
+		List<Class<DomainEventHandler>> eventHandlers = plugins.find(DomainEventHandler.class, manifest);
+		for (Class<DomainEventHandler> h : eventHandlers) {
+			container.registerClass(h, h, false);
+			container.registerClass(gt, h, false);
+		}
+		gt = Utils.makeGenericType(DomainEventHandler.class, arrayManifest);
+		eventHandlers = plugins.find(DomainEventHandler.class, arrayManifest);
+		for (Class<DomainEventHandler> h : eventHandlers) {
+			container.registerClass(h, h, false);
+			container.registerClass(gt, h, false);
+		}
+		Type ct = Utils.makeGenericType(Callable.class, manifest);
+		gt = Utils.makeGenericType(DomainEventHandler.class, ct);
+		eventHandlers = plugins.find(DomainEventHandler.class, ct);
+		for (Class<DomainEventHandler> h : eventHandlers) {
+			container.registerClass(h, h, false);
+			container.registerClass(gt, h, false);
+		}
+		ct = Utils.makeGenericType(Callable.class, arrayManifest);
+		gt = Utils.makeGenericType(DomainEventHandler.class, ct);
+		eventHandlers = plugins.find(DomainEventHandler.class, ct);
+		for (Class<DomainEventHandler> h : eventHandlers) {
+			container.registerClass(h, h, false);
+			container.registerClass(gt, h, false);
+		}
 	}
 }

@@ -1,10 +1,11 @@
 package org.revenj.extensibility;
 
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Type;
 import java.util.List;
 
 public interface PluginLoader {
-	<T> List<Class<T>> find(Class<T> manifest) throws Exception;
+	<T> List<Class<T>> find(Class<T> manifest, Type... types) throws Exception;
 
 	@SuppressWarnings("unchecked")
 	default <T> T[] resolve(Container container, Class<T> manifest) throws Exception {

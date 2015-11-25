@@ -34,6 +34,20 @@ public abstract class Utils {
 		}
 
 		@Override
+		public int hashCode() {
+			return Arrays.hashCode(arguments) ^ raw.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (other instanceof ParameterizedType) {
+				ParameterizedType pt = (ParameterizedType) other;
+				return raw.equals(pt.getRawType()) && Arrays.equals(arguments, pt.getActualTypeArguments());
+			}
+			return false;
+		}
+
+		@Override
 		public Type[] getActualTypeArguments() {
 			return arguments;
 		}

@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.23157 
+*/
+
 package gen.model;
 
 
@@ -105,6 +110,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 			}
 		}
 		org.revenj.postgres.jinq.JinqMetaModel metamodel = org.revenj.postgres.jinq.JinqMetaModel.configure(container);
+		org.revenj.extensibility.PluginLoader plugins = container.resolve(org.revenj.extensibility.PluginLoader.class);
 		
 		
 		gen.model.test.converters.SimpleConverter test$converter$SimpleConverter = new gen.model.test.converters.SimpleConverter(columns);
@@ -350,6 +356,11 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventStore<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
+		try {
+			org.revenj.Revenj.registerEvents(container, plugins, gen.model.test.Clicked.class, gen.model.test.Clicked[].class);
+		} catch (java.lang.Exception e) {
+			throw new java.io.IOException(e);
+		}
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getDate", "\"date\"");
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getNumber", "\"number\"");
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getBigint", "\"bigint\"");

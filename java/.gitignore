@@ -10,3 +10,5 @@ out/
 .classpath
 .project
 .settings
+
+revenj-core/org.revenj.patterns.DomainEventHandler*
