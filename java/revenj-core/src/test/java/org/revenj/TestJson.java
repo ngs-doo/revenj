@@ -10,10 +10,7 @@ import org.revenj.json.JavaTimeConverter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.*;
 
 public class TestJson {
@@ -100,5 +97,40 @@ public class TestJson {
 		Assert.assertEquals(LocalDate.of(2015, 9, 16), date);
 		date = json.deserialize("\"2015-10-6\"", LocalDate.class);
 		Assert.assertEquals(LocalDate.of(2015, 10, 6), date);
+	}
+
+	@Test
+	public void canSerializeSqlDate() throws IOException {
+		Map<String, Object> result = new LinkedHashMap<>();
+		result.put("number", 42);
+		result.put("min", java.sql.Date.valueOf(LocalDate.of(2015, 11, 25)));
+		result.put("max", java.sql.Date.valueOf(LocalDate.of(2015, 11, 26)));
+		List<Map<String, Object>> list = new ArrayList<>();
+		list.add(result);
+		DslJsonSerialization json = new DslJsonSerialization(null, Optional.empty());
+		String serialized = json.serialize(list);
+		Assert.assertEquals("[{\"number\":42,\"min\":\"2015-11-25\",\"max\":\"2015-11-26\"}]", serialized);
+	}
+
+	@Test
+	public void dateConversion() throws IOException {
+		DslJsonSerialization json = new DslJsonSerialization(null, Optional.empty());
+		OffsetDateTime odt = OffsetDateTime.now();
+		java.util.Date date = java.util.Date.from(odt.toInstant());
+		String serialized = json.serialize(date);
+		java.util.Date deserialized = json.deserialize(serialized, java.util.Date.class);
+		Assert.assertEquals(deserialized, date);
+		Assert.assertEquals(deserialized.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime(), odt);
+	}
+
+	@Test
+	public void timestampConversion() throws IOException {
+		DslJsonSerialization json = new DslJsonSerialization(null, Optional.empty());
+		OffsetDateTime odt = OffsetDateTime.now();
+		java.sql.Timestamp ts = java.sql.Timestamp.from(odt.toInstant());
+		String serialized = json.serialize(ts);
+		java.sql.Timestamp deserialized = json.deserialize(serialized, java.sql.Timestamp.class);
+		Assert.assertEquals(deserialized, ts);
+		Assert.assertEquals(deserialized.toInstant(), odt.toInstant());
 	}
 }

@@ -61,8 +61,7 @@ public class TestReport {
 		Assert.assertTrue(first.containsKey("number"));
 		Assert.assertTrue(first.containsKey("min"));
 		Assert.assertTrue(first.containsKey("max"));
-		final int number = (int) first.get("number");
-		Assert.assertTrue(number > 0);
+		Assert.assertEquals(Integer.class, first.get("number").getClass());
 		Assert.assertTrue(results.size() < 11);
 	}
 

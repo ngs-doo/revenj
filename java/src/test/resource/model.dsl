@@ -140,7 +140,7 @@ module binaries {
 		guid id from ID;
 		string name;
 	}
-	sql ReadOnlyDocument 'SELECT ""ID"", name from binaries.""Document""'
+	sql ReadOnlyDocument 'SELECT "ID", name from binaries."Document"'
 	{
 		guid ID;
 		string Name from name;
