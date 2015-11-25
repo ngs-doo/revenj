@@ -39,9 +39,9 @@ public class TestReport {
 		UUID id = UUID.randomUUID();
 		co.setId(id);
 		context.create(co);
-        FindMany fm = new FindMany(id, new HashSet<>(Arrays.asList(id)));
-        FindMany.Result result = fm.populate(locator);
-        Assert.assertEquals(id, result.getFound().getId());
+		FindMany fm = new FindMany(id, new HashSet<>(Arrays.asList(id)));
+		FindMany.Result result = fm.populate(locator);
+		Assert.assertEquals(id, result.getFound().getId());
 	}
 
 	@Test
@@ -61,6 +61,8 @@ public class TestReport {
 		Assert.assertTrue(first.containsKey("number"));
 		Assert.assertTrue(first.containsKey("min"));
 		Assert.assertTrue(first.containsKey("max"));
+		final int number = (int) first.get("number");
+		Assert.assertTrue(number > 0);
 		Assert.assertTrue(results.size() < 11);
 	}
 
