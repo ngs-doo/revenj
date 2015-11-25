@@ -51,6 +51,11 @@ public abstract class TimestampConverter {
 		sw.addToBuffer(sw.getTempBuffer(), len);
 	}
 
+	public static void serializeURI(PostgresBuffer sw, OffsetDateTime value) {
+		int len = serialize(sw.getTempBuffer(), 0, value);
+		sw.addToBuffer(sw.getTempBuffer(), len);
+	}
+
 	private static int serialize(char[] buffer, int pos, LocalDateTime value) {
 		//TODO: Java supports wider range of dates
 		buffer[pos + 4] = '-';
