@@ -223,7 +223,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 			while (rs.next()) {
 				Map<String, Object> item = new LinkedHashMap<>();
 				for (int i = 0; i < columns; i++) {
-					item.put(columnNames[i], rs.getObject(1 + 1));
+					item.put(columnNames[i], rs.getObject(1 + i));
 				}
 				result.add(item);
 			}
