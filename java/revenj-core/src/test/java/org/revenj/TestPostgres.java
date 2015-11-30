@@ -85,4 +85,11 @@ public class TestPostgres {
 		Assert.assertEquals(0, values.get(0).getOffset().getTotalSeconds());
 		Assert.assertEquals(38, values.get(0).getMinute());
 	}
+
+	@Test
+	public void timestampURIIssue() throws IOException {
+		PostgresWriter writer = new PostgresWriter();
+		TimestampConverter.serializeURI(writer, OffsetDateTime.parse("0001-01-01T00:00:00+01:22"));
+		Assert.assertEquals("0001-01-01 00:00:00+01:22", writer.bufferToString());
+	}
 }
