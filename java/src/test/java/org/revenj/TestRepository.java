@@ -10,6 +10,8 @@ import gen.model.egzotics.E;
 import gen.model.egzotics.PksV;
 import gen.model.egzotics.pks;
 import gen.model.egzotics.v;
+import gen.model.issues.TimestampPk;
+import gen.model.issues.repositories.TimestampPkRepository;
 import gen.model.md.Detail;
 import gen.model.md.Master;
 import gen.model.md.repositories.MasterRepository;
@@ -31,6 +33,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -426,5 +430,21 @@ public class TestRepository {
 		BasicSecurity bs = (BasicSecurity) found.get().getAuthentication();
 		Assert.assertEquals("username", bs.getUsername());
 		Assert.assertEquals("password", bs.getPassword());
+	}
+
+	@Test
+	public void datesBefore1884() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<TimestampPk> repository = locator.resolve(TimestampPkRepository.class);
+		OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+		TimestampPk after = new TimestampPk(now, BigDecimal.valueOf(2.22));
+		TimestampPk before = new TimestampPk(now.minusYears(now.getYear() - 100), BigDecimal.valueOf(3.333));
+		String[] uris = repository.insert(Arrays.asList(before, after));
+		Assert.assertTrue(uris[0].endsWith("+01:22"));
+		List<TimestampPk> found = repository.find(uris);
+		found.sort((a, b) -> a.getTs().compareTo(b.getTs()));
+		Assert.assertEquals(2, found.size());
+		Assert.assertTrue(before.deepEquals(found.get(0)));
+		Assert.assertTrue(after.deepEquals(found.get(1)));
 	}
 }

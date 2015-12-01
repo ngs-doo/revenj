@@ -87,9 +87,20 @@ public class TestPostgres {
 	}
 
 	@Test
-	public void timestampURIIssue() throws IOException {
+	public void specialTimestampUri() throws IOException {
 		PostgresWriter writer = new PostgresWriter();
-		TimestampConverter.serializeURI(writer, OffsetDateTime.parse("0001-01-01T00:00:00+01:22"));
-		Assert.assertEquals("0001-01-01 00:00:00+01:22", writer.bufferToString());
+		OffsetDateTime zero = OffsetDateTime.parse("0001-01-01T00:00:00+01:22");
+		TimestampConverter.serializeURI(writer, zero);
+		String value = writer.bufferToString();
+		Assert.assertEquals("0001-01-01 00:00:00+01:22", value);
+	}
+
+	@Test
+	public void timestampUriNormalization() throws IOException {
+		PostgresWriter writer = new PostgresWriter();
+		OffsetDateTime zero = OffsetDateTime.parse("2001-01-01T00:00:00+01:22");
+		TimestampConverter.serializeURI(writer, zero);
+		String value = writer.bufferToString();
+		Assert.assertEquals("2000-12-31 23:38:00+01", value);
 	}
 }

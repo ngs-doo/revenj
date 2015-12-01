@@ -88,11 +88,29 @@ public abstract class TimestampConverter {
 		return end + 3;
 	}
 
+	//TODO: check if 1:22 is universal or must be adjusted to local zone
+	private static final ZoneOffset ZERO_OFFSET = ZoneOffset.ofHoursMinutes(1, 22);
+
 	public static int serialize(char[] buffer, int pos, OffsetDateTime value) {
+		if (value.getYear() < 1884) {
+			LocalDateTime at122 = value.toLocalDateTime().plusSeconds(ZERO_OFFSET.getTotalSeconds() - value.getOffset().getTotalSeconds());
+			pos = serialize(buffer, pos, at122);
+			buffer[pos - 1] = '1';
+			buffer[pos] = ':';
+			buffer[pos + 1] = '2';
+			buffer[pos + 2] = '2';
+			return pos + 3;
+		}
 		final int offset = value.getOffset().getTotalSeconds();
 		final int offsetHours = offset / 3600;
 		final int offsetDiff = offset - offsetHours * 3600;
-		if (offsetDiff != 0) return serialize(buffer, pos, value.plusSeconds(offsetDiff));
+		if (offsetDiff != 0) {
+			return serializeNormalized(buffer, pos, value.toLocalDateTime().minusSeconds(offsetDiff), offsetHours);
+		}
+		return serializeNormalized(buffer, pos, value.toLocalDateTime(), offsetHours);
+	}
+
+	private static int serializeNormalized(char[] buffer, int pos, LocalDateTime value, int offsetHours) {
 		//TODO: Java supports wider range of dates
 		buffer[pos + 4] = '-';
 		buffer[pos + 7] = '-';
@@ -171,13 +189,25 @@ public abstract class TimestampConverter {
 		if (buf[19] == '.') {
 			int nano = 0;
 			int max = len - 3;
+			int offsetSeconds = NumberConverter.read2(buf, len - 2);
+			if (buf[max] == ':') {
+				max = max - 3;
+				offsetSeconds = NumberConverter.read2(buf, len - 5) * 60 + offsetSeconds;
+				if (buf[max] == ':') {
+					max = max - 3;
+					offsetSeconds = NumberConverter.read2(buf, len - 8) * 3600 + offsetSeconds;
+				} else {
+					offsetSeconds = offsetSeconds * 60;
+				}
+			} else {
+				offsetSeconds = offsetSeconds * 3600;
+			}
 			for (int i = 20, r = 0; i < max && r < TIMESTAMP_REMINDER.length; i++, r++) {
 				nano += TIMESTAMP_REMINDER[r] * (buf[i] - 48);
 			}
-			boolean pos = buf[len - 3] == '+';
-			int offset = NumberConverter.read2(buf, len - 2);
-			return offset != 0
-					? LocalDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000).plusHours(pos ? -offset : offset)
+			boolean pos = buf[max] == '+';
+			return offsetSeconds != 0
+					? LocalDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000).plusSeconds(pos ? -offsetSeconds : offsetSeconds)
 					: LocalDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000);
 		} else if (len == 20 && buf[19] == 'Z') {
 			return LocalDateTime.of(year, month, date, hour, minutes, seconds, 0);
@@ -189,11 +219,8 @@ public abstract class TimestampConverter {
 					: LocalDateTime.of(year, month, date, hour, minutes, seconds);
 		} else if (len == 25) {
 			boolean pos = buf[19] == '+';
-			int offsetHours = NumberConverter.read2(buf, 20);
-			int offsetMin = NumberConverter.read2(buf, 23);
-			return LocalDateTime.of(year, month, date, hour, minutes, seconds, 0)
-					.plusHours(pos ? -offsetHours : offsetHours)
-					.plusMinutes(pos ? -offsetMin : offsetMin);
+			int offsetSeconds = NumberConverter.read2(buf, 20) * 3600 + NumberConverter.read2(buf, 23) * 60;
+			return LocalDateTime.of(year, month, date, hour, minutes, seconds, 0).plusSeconds(pos ? -offsetSeconds : offsetSeconds);
 		} else {
 			buf[10] = 'T';
 			return LocalDateTime.parse(new String(buf, 0 , len));
@@ -219,15 +246,27 @@ public abstract class TimestampConverter {
 		if (buf[19] == '.') {
 			int nano = 0;
 			int max = len - 3;
+			int offsetSeconds = NumberConverter.read2(buf, len - 2);
+			if (buf[max] == ':') {
+				max = max - 3;
+				offsetSeconds = NumberConverter.read2(buf, len - 5) * 60 + offsetSeconds;
+				if (buf[max] == ':') {
+					max = max - 3;
+					offsetSeconds = NumberConverter.read2(buf, len - 8) * 3600 + offsetSeconds;
+				} else {
+					offsetSeconds = offsetSeconds * 60;
+				}
+			} else {
+				offsetSeconds = offsetSeconds * 3600;
+			}
 			for (int i = 20, r = 0; i < max && r < TIMESTAMP_REMINDER.length; i++, r++) {
 				nano += TIMESTAMP_REMINDER[r] * (buf[i] - 48);
 			}
-			boolean pos = buf[len - 3] == '+';
-			int offset = NumberConverter.read2(buf, len - 2);
+			boolean pos = buf[max] == '+';
 			return asUtc
-					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC).plusHours(pos ? -offset : offset)
-					: offset != 0
-					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.ofHours(pos ? offset : -offset))
+					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC).plusSeconds(pos ? -offsetSeconds : offsetSeconds)
+					: offsetSeconds != 0
+					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.ofTotalSeconds(pos ? offsetSeconds : -offsetSeconds))
 					: OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC);
 		} else if (len == 20 && buf[19] == 'Z') {
 			return OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC);
@@ -241,13 +280,10 @@ public abstract class TimestampConverter {
 					: OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC);
 		} else if (len == 25) {
 			boolean pos = buf[19] == '+';
-			int offsetHours = NumberConverter.read2(buf, 20);
-			int offsetMin = NumberConverter.read2(buf, 23);
+			int offsetSeconds = NumberConverter.read2(buf, 20) * 3600 + NumberConverter.read2(buf, 23) * 60;
 			return asUtc
-					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC)
-						.plusHours(pos ? -offsetHours : offsetHours)
-						.plusMinutes(pos ? -offsetMin : offsetMin)
-					: OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.ofHoursMinutes(pos ? offsetHours : -offsetHours, pos ? offsetMin : -offsetMin));
+					? OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC).plusSeconds(pos ? -offsetSeconds : offsetSeconds)
+					: OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.ofTotalSeconds(pos ? offsetSeconds : -offsetSeconds));
 		} else {
 			buf[10] = 'T';
 			return OffsetDateTime.parse(new String(buf, 0 , len));

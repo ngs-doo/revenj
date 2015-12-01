@@ -180,6 +180,11 @@ module issues {
 	big root DateList {
 		List<Timestamp?> list;
 	}
+	root TimestampPk(ts) {
+        Timestamp ts;
+        decimal(9) d;
+        persistence { history; }
+    }
 }
 module md {
 	root Master {

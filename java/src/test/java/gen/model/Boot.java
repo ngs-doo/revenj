@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.23157 
+* v1.0.0.24260 
 */
 
 package gen.model;
@@ -218,6 +218,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerInstance(gen.model.issues.converters.DateListConverter.class, issues$converter$DateListConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.issues.DateList>>(){}.type, issues$converter$DateListConverter, false);
 		
+		gen.model.issues.converters.TimestampPkConverter issues$converter$TimestampPkConverter = new gen.model.issues.converters.TimestampPkConverter(columns);
+		container.registerInstance(gen.model.issues.converters.TimestampPkConverter.class, issues$converter$TimestampPkConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.issues.TimestampPk>>(){}.type, issues$converter$TimestampPkConverter, false);
+		
 		gen.model.md.converters.MasterConverter md$converter$MasterConverter = new gen.model.md.converters.MasterConverter(columns);
 		container.registerInstance(gen.model.md.converters.MasterConverter.class, md$converter$MasterConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Master>>(){}.type, md$converter$MasterConverter, false);
@@ -433,22 +437,22 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"");
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"");
+		binaries$converter$WritableDocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
 		
 		container.register(gen.model.binaries.repositories.WritableDocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
-		binaries$converter$WritableDocumentConverter.configure(container);
-		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getId", "\"ID\"");
 		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getName", "\"name\"");
+		binaries$converter$ReadOnlyDocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.ReadOnlyDocument.class, "(SELECT \"ID\", name from binaries.\"Document\")");
 		
 		container.register(gen.model.binaries.repositories.ReadOnlyDocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.ReadOnlyDocument>>(){}.type, gen.model.binaries.repositories.ReadOnlyDocumentRepository::new, false);
-		binaries$converter$ReadOnlyDocumentConverter.configure(container);
-		metamodel.registerDataSource(gen.model.binaries.ReadOnlyDocument.class, "(SELECT \"ID\", name from binaries.\"Document\")");
 		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getID", "\"ID\"");
 		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getName", "\"name\"");
 		security$converter$DocumentConverter.configure(container);
@@ -499,6 +503,18 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
 		metamodel.registerProperty(gen.model.issues.DateList.class, "getList", "\"list\"");
+		issues$converter$TimestampPkConverter.configure(container);
+		metamodel.registerDataSource(gen.model.issues.TimestampPk.class, "\"issues\".\"TimestampPk_entity\"");
+		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getURI", "\"URI\"");
+		
+		container.register(gen.model.issues.repositories.TimestampPkRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
+		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getTs", "\"ts\"");
+		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getD", "\"d\"");
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
 		md$converter$MasterConverter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Master.class, "\"md\".\"Master_entity\"");
 		metamodel.registerProperty(gen.model.md.Master.class, "getURI", "\"URI\"");
