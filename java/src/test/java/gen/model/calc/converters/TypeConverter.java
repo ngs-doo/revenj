@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.25187 
+*/
+
 package gen.model.calc.converters;
 
 
@@ -50,15 +55,23 @@ public class TypeConverter implements ObjectConverter<gen.model.calc.Type> {
 		column = columnsExtended.stream().filter(it -> "description".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'description' column in calc Type. Check if DB is in sync");
 		__index__extended_description = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "xml".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'xml' column in calc Type_entity. Check if DB is in sync");
+		__index___xml = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "xml".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'xml' column in calc Type. Check if DB is in sync");
+		__index__extended_xml = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		
 			
-		gen.model.calc.Type.__configureConverter(readers, __index___suffix, __index___description);
+		gen.model.calc.Type.__configureConverter(readers, __index___suffix, __index___description, __index___xml);
 			
-		gen.model.calc.Type.__configureConverterExtended(readersExtended, __index__extended_suffix, __index__extended_description);
+		gen.model.calc.Type.__configureConverterExtended(readersExtended, __index__extended_suffix, __index__extended_description, __index__extended_xml);
 	}
 
 	@Override
@@ -85,6 +98,7 @@ public class TypeConverter implements ObjectConverter<gen.model.calc.Type> {
 		
 		items[__index___suffix] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getSuffix());
 		items[__index___description] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getDescription());
+		items[__index___xml] = org.revenj.postgres.converters.XmlConverter.toTuple(instance.getXml());
 		return RecordTuple.from(items);
 	}
 
@@ -110,6 +124,7 @@ public class TypeConverter implements ObjectConverter<gen.model.calc.Type> {
 		
 		items[__index__extended_suffix] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getSuffix());
 		items[__index__extended_description] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getDescription());
+		items[__index__extended_xml] = org.revenj.postgres.converters.XmlConverter.toTuple(instance.getXml());
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
@@ -137,4 +152,6 @@ public class TypeConverter implements ObjectConverter<gen.model.calc.Type> {
 	private final int __index__extended_suffix;
 	private final int __index___description;
 	private final int __index__extended_description;
+	private final int __index___xml;
+	private final int __index__extended_xml;
 }

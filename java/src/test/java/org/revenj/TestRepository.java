@@ -447,4 +447,26 @@ public class TestRepository {
 		Assert.assertTrue(before.deepEquals(found.get(0)));
 		Assert.assertTrue(after.deepEquals(found.get(1)));
 	}
+
+	@Test
+	public void canReadWriteXml() throws Exception {
+		ServiceLocator locator = container;
+		PersistableRepository<gen.model.calc.Type> repository = locator.resolve(PersistableRepository.class, gen.model.calc.Type.class);
+		Random rnd = new Random();
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		org.w3c.dom.Document doc = dBuilder.newDocument();
+		org.w3c.dom.Element rootElement = doc.createElement("test");
+		doc.appendChild(rootElement);
+		rootElement.setAttribute("a", "b");
+		gen.model.calc.Type t = new gen.model.calc.Type()
+				.setDescription(rnd.nextLong() + "")
+				.setSuffix(rnd.nextLong() + "")
+				.setXml(rootElement);
+		String uri = repository.insert(t);
+		Optional<gen.model.calc.Type> found = repository.find(uri);
+		Assert.assertTrue(t.deepEquals(found.get()));
+		Assert.assertEquals("test", found.get().getXml().getNodeName());
+		Assert.assertEquals("b", found.get().getXml().getAttribute("a"));
+	}
 }

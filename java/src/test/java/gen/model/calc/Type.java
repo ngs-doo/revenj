@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.25187 
+*/
+
 package gen.model.calc;
 
 
@@ -51,6 +56,8 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 			return false;
 		if(!(this.description.equals(other.description)))
 			return false;
+		if(!(this.xml == other.xml || this.xml != null && other.xml != null && this.xml.isEqualNode(other.xml)))
+			return false;
 		return true;
 	}
 
@@ -59,6 +66,7 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.__locator = other.__locator;
 		this.suffix = other.suffix;
 		this.description = other.description;
+		this.xml = other.xml != null ? (org.w3c.dom.Element)other.xml.cloneNode(true) : null;
 		this.__originalValue = other.__originalValue;
 	}
 
@@ -72,31 +80,22 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return "Type(" + URI + ')';
 	}
 	
-	
-	public Type(
-			final String suffix,
-			final String description) {
-			
-		setSuffix(suffix);
-		setDescription(description);
-		this.URI = this.suffix;
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 1595406200646842539L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Type(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
 			@com.fasterxml.jackson.annotation.JsonProperty("suffix") final String suffix,
-			@com.fasterxml.jackson.annotation.JsonProperty("description") final String description) {
+			@com.fasterxml.jackson.annotation.JsonProperty("description") final String description,
+			@com.fasterxml.jackson.annotation.JsonProperty("xml") final org.w3c.dom.Element xml) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
 		this.suffix = suffix == null ? "" : suffix;
 		this.description = description == null ? "" : description;
+		this.xml = xml;
 	}
 
+	private static final long serialVersionUID = 2424813563748896511L;
 	
 	private String suffix;
 
@@ -135,7 +134,24 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return this;
 	}
 
-	private transient Type __originalValue;
+	
+	private org.w3c.dom.Element xml;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("xml")
+	public org.w3c.dom.Element getXml()  {
+		
+		return xml;
+	}
+
+	
+	public Type setXml(final org.w3c.dom.Element value) {
+		
+		this.xml = value;
+		
+		return this;
+	}
+
 	
 	static {
 		gen.model.calc.repositories.TypeRepository.__setupPersist(
@@ -171,6 +187,7 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 			}
 		);
 	}
+	private transient Type __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -196,6 +213,11 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 				sw.writeAscii(",\"description\":", 15);
 				sw.writeString(self.description);
 			}
+		
+			if (self.xml != null) {
+				sw.writeAscii(",\"xml\":", 7);
+				com.dslplatform.json.XmlConverter.serialize(self.xml, sw);
+			}
 	}
 
 	static void __serializeJsonObjectFull(final Type self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
@@ -210,6 +232,14 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 			
 			sw.writeAscii(",\"description\":", 15);
 			sw.writeString(self.description);
+		
+			
+			if (self.xml != null) {
+				sw.writeAscii(",\"xml\":", 7);
+				com.dslplatform.json.XmlConverter.serialize(self.xml, sw);
+			} else {
+				sw.writeAscii(",\"xml\":null", 11);
+			}
 	}
 
 	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Type> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Type>() {
@@ -225,6 +255,7 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.__locator = java.util.Optional.ofNullable(reader.context);
 		String _suffix_ = "";
 		String _description_ = "";
+		org.w3c.dom.Element _xml_ = null;
 		byte nextToken = reader.last();
 		if(nextToken != '}') {
 			int nameHash = reader.fillName();
@@ -248,6 +279,10 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 						break;
 					case 879704937:
 						_description_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -630165834:
+						_xml_ = com.dslplatform.json.XmlConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
 						break;
 					default:
@@ -281,6 +316,10 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 						_description_ = com.dslplatform.json.StringConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
 						break;
+					case -630165834:
+						_xml_ = com.dslplatform.json.XmlConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
 					default:
 						nextToken = reader.skip();
 						break;
@@ -294,6 +333,7 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.URI = _URI_;
 		this.suffix = _suffix_;
 		this.description = _description_;
+		this.xml = _xml_;
 	}
 
 	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
@@ -321,15 +361,30 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.__originalValue = (Type)this.clone();
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Type>[] readers, int __index___suffix, int __index___description) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Type>[] readers, int __index___suffix, int __index___description, int __index___xml) {
 		
 		readers[__index___suffix] = (item, reader, context) -> { item.suffix = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 		readers[__index___description] = (item, reader, context) -> { item.description = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
+		readers[__index___xml] = (item, reader, context) -> { item.xml = org.revenj.postgres.converters.XmlConverter.parse(reader, context); return item; };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Type>[] readers, int __index__extended_suffix, int __index__extended_description) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Type>[] readers, int __index__extended_suffix, int __index__extended_description, int __index__extended_xml) {
 		
 		readers[__index__extended_suffix] = (item, reader, context) -> { item.suffix = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 		readers[__index__extended_description] = (item, reader, context) -> { item.description = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
+		readers[__index__extended_xml] = (item, reader, context) -> { item.xml = org.revenj.postgres.converters.XmlConverter.parse(reader, context); return item; };
 	}
+	
+	
+	public Type(
+			final String suffix,
+			final String description,
+			final org.w3c.dom.Element xml) {
+			
+		setSuffix(suffix);
+		setDescription(description);
+		setXml(xml);
+		this.URI = this.suffix;
+	}
+
 }

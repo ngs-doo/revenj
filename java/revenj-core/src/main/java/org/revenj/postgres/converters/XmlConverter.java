@@ -74,7 +74,7 @@ public abstract class XmlConverter {
 		}
 	}
 
-	public static List<Element> parseCollection(PostgresReader reader, int context, boolean allowNull) throws IOException {
+	public static List<Element> parseCollection(PostgresReader reader, int context) throws IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') {
 			return null;

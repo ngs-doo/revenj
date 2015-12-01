@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.24260 
+* v1.0.0.25187 
 */
 
 package gen.model;
@@ -574,6 +574,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
 		metamodel.registerProperty(gen.model.calc.Type.class, "getSuffix", "\"suffix\"");
 		metamodel.registerProperty(gen.model.calc.Type.class, "getDescription", "\"description\"");
+		metamodel.registerProperty(gen.model.calc.Type.class, "getXml", "\"xml\"");
 		calc$converter$RealmConverter.configure(container);
 		metamodel.registerDataSource(gen.model.calc.Realm.class, "\"calc\".\"Realm_entity\"");
 		metamodel.registerProperty(gen.model.calc.Realm.class, "getURI", "\"URI\"");

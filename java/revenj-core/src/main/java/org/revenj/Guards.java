@@ -1,5 +1,7 @@
 package org.revenj;
 
+import org.w3c.dom.Element;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -340,5 +342,50 @@ public abstract class Guards {
 		}
 
 		return leftIterator.hasNext() == rightIterator.hasNext();
+	}
+
+	public static boolean compareXml(final Iterable<Element> left, final Iterable<Element> right) {
+		if (left == null && right == null) return true;
+		if (left == null || right == null) return false;
+
+		final Iterator<Element> leftIterator = left.iterator();
+		final Iterator<Element> rightIterator = right.iterator();
+
+		while (leftIterator.hasNext() && rightIterator.hasNext()) {
+			final Element l = leftIterator.next();
+			final Element r = rightIterator.next();
+			if (!(l == r || l != null && r != null && l.isEqualNode(r))) return false;
+		}
+
+		return leftIterator.hasNext() == rightIterator.hasNext();
+	}
+
+	public static boolean compareXml(final Element[] left, final Element[] right) {
+		if (left == null && right == null) return true;
+		if (left == null || right == null) return false;
+
+		if (left.length != right.length) return false;
+		for (int i = 0; i < left.length; i++) {
+			final Element l = left[i];
+			final Element r = right[i];
+			if (!(l == r || l != null && r != null && l.isEqualNode(r))) return false;
+		}
+		return true;
+	}
+
+	public static boolean compareXml(final Set<Element> left, final Set<Element> right) {
+		if (left == null && right == null) return true;
+		if (left == null || right == null) return false;
+
+		if (left.size() != right.size()) return false;
+
+		loop:
+		for (final Element l : left) {
+			for (final Element r : right) {
+				if (l == r || l != null && r != null && l.isEqualNode(r)) continue loop;
+			}
+			return false;
+		}
+		return true;
 	}
 }

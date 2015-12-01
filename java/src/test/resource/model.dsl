@@ -224,6 +224,7 @@ module calc {
 	root Type(suffix) {
 		String	suffix;
 		String  description;
+		xml? xml;
 	}
 
 	root Realm(id) {
