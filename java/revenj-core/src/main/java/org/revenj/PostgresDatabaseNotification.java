@@ -26,6 +26,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 	private final DataSource dataSource;
 	private final Optional<DomainModel> domainModel;
 	private final ServiceLocator locator;
+	private final Properties properties;
 
 	private final PublishSubject<NotifyInfo> subject = PublishSubject.create();
 	private final Observable<NotifyInfo> notifications;
@@ -45,6 +46,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			ServiceLocator locator) {
 		this.dataSource = dataSource;
 		this.domainModel = domainModel;
+		this.properties = properties;
 		this.locator = locator;
 		notifications = subject.asObservable();
 		String timeoutValue = properties.getProperty("revenj.notifications.timeout");
@@ -71,12 +73,32 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			retryCount = 30;
 		}
 		try {
-			Connection connection = dataSource.getConnection();
+			Connection connection = dataSource != null ? dataSource.getConnection() : null;
 			BaseConnection bc = null;
 			if (connection instanceof BaseConnection) {
 				bc = (BaseConnection) connection;
-			} else if (connection.isWrapperFor(BaseConnection.class)) {
-				bc = connection.unwrap(BaseConnection.class);
+			} else {
+				try {
+					if (connection != null && connection.isWrapperFor(BaseConnection.class)) {
+						bc = connection.unwrap(BaseConnection.class);
+					}
+				} catch (AbstractMethodError ignore) {
+				}
+				if (bc == null && properties.containsKey("revenj.jdbcUrl")) {
+					String user = properties.getProperty("revenj.user");
+					String pass = properties.getProperty("revenj.password");
+					org.postgresql.Driver driver = new org.postgresql.Driver();
+					Properties connProps = new Properties(properties);
+					if (user != null && pass != null) {
+						connProps.setProperty("user", user);
+						connProps.setProperty("password", pass);
+					}
+					cleanupConnection(connection);
+					connection = driver.connect(properties.getProperty("revenj.jdbcUrl"), connProps);
+					if (connection instanceof BaseConnection) {
+						bc = (BaseConnection) connection;
+					}
+				}
 			}
 			if (bc != null) {
 				Statement stmt = bc.createStatement();

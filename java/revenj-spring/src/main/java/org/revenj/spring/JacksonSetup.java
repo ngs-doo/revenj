@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import javax.annotation.PostConstruct;
+import java.util.Optional;
 
 @Component
 public class JacksonSetup {
@@ -18,16 +19,22 @@ public class JacksonSetup {
 	@Autowired
 	private ServiceLocator locator;
 
-	@PostConstruct
-	public void init() {
+	public static Optional<MappingJackson2HttpMessageConverter> findJackson(RequestMappingHandlerAdapter handlerAdapter) {
 		for (HttpMessageConverter<?> messageConverter : handlerAdapter.getMessageConverters()) {
 			if (messageConverter instanceof MappingJackson2HttpMessageConverter) {
-				MappingJackson2HttpMessageConverter m = (MappingJackson2HttpMessageConverter) messageConverter;
-				ObjectMapper mapper = m.getObjectMapper();
-				if (mapper == null) mapper = new ObjectMapper();
-				mapper.setInjectableValues(new InjectableValues.Std().addValue("__locator", locator));
-				m.setObjectMapper(mapper);
+				return Optional.of((MappingJackson2HttpMessageConverter) messageConverter);
 			}
 		}
+		return Optional.empty();
+	}
+
+	@PostConstruct
+	public void init() {
+		findJackson(handlerAdapter).ifPresent(m -> {
+			ObjectMapper mapper = m.getObjectMapper();
+			if (mapper == null) mapper = new ObjectMapper();
+			mapper.setInjectableValues(new InjectableValues.Std().addValue("__locator", locator));
+			m.setObjectMapper(mapper);
+		});
 	}
 }

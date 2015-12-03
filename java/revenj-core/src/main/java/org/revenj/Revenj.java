@@ -42,15 +42,23 @@ public abstract class Revenj {
 				throw new IOException("Unable to find revenj.properties. Searching in: " + revProps.getAbsolutePath());
 			}
 		}
-		String jdbcUrl = properties.getProperty("revenj.jdbcUrl");
-		if (jdbcUrl == null) {
-			throw new IOException("revenj.jdbcUrl is missing from revenj.properties");
-		}
 		String plugins = properties.getProperty("revenj.pluginsPath");
 		File pluginsPath = null;
 		if (plugins != null) {
 			File pp = new File(plugins);
 			pluginsPath = pp.isDirectory() ? pp : null;
+		}
+		return setup(
+				dataSource(properties),
+				properties,
+				Optional.ofNullable(pluginsPath),
+				Optional.ofNullable(Thread.currentThread().getContextClassLoader()));
+	}
+
+	public static DataSource dataSource(Properties properties) throws IOException {
+		String jdbcUrl = properties.getProperty("revenj.jdbcUrl");
+		if (jdbcUrl == null) {
+			throw new IOException("revenj.jdbcUrl is missing from Properties");
 		}
 		org.postgresql.ds.PGPoolingDataSource dataSource = new PGPoolingDataSource();
 		dataSource.setUrl(jdbcUrl);
@@ -68,11 +76,7 @@ public abstract class Revenj {
 		} else if (password != null && password.length() > 0) {
 			dataSource.setPassword(password);
 		}
-		return setup(
-				dataSource,
-				properties,
-				Optional.ofNullable(pluginsPath),
-				Optional.ofNullable(Thread.currentThread().getContextClassLoader()));
+		return dataSource;
 	}
 
 	public static Container setup(

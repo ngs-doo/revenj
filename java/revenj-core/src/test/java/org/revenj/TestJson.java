@@ -65,7 +65,7 @@ public class TestJson {
 		Assert.assertEquals('4', result[0]);
 		Assert.assertEquals('2', result[1]);
 		ByteArrayInputStream is = new ByteArrayInputStream(result);
-		int value = (int)json.deserialize(int.class, is);
+		int value = (int)json.deserialize(new byte[512], int.class, is);
 		Assert.assertEquals(42, value);
 	}
 
@@ -82,7 +82,7 @@ public class TestJson {
 		}
 		Assert.assertEquals('"', result[513]);
 		ByteArrayInputStream is = new ByteArrayInputStream(result);
-		String value = (String)json.deserialize(String.class, is);
+		String value = (String)json.deserialize(new byte[512], String.class, is);
 		Assert.assertEquals(new String(new char[512]).replace('\0', 'x'), value);
 	}
 

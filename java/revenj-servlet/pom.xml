@@ -9,7 +9,7 @@
 	<description> DSL Platform compatible backend - servlet (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
-	<version>0.7.0</version>
+	<version>0.7.1</version>
 
 	<repositories>
 		<repository>
@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>0.7.0</version>
+			<version>0.7.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -50,7 +50,6 @@
 			<groupId>hr.ngs.templater</groupId>
 			<artifactId>templater</artifactId>
 			<version>2.1.5</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

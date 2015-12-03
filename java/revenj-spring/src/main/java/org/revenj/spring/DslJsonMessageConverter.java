@@ -1,6 +1,5 @@
 package org.revenj.spring;
 
-import com.dslplatform.json.JsonObject;
 import com.dslplatform.json.JsonWriter;
 import org.revenj.json.DslJsonSerialization;
 import org.springframework.http.HttpInputMessage;
@@ -13,7 +12,6 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Collection;
 
 public class DslJsonMessageConverter extends AbstractGenericHttpMessageConverter<Object> implements GenericHttpMessageConverter<Object> {
 	private final DslJsonSerialization serializer;
@@ -32,41 +30,42 @@ public class DslJsonMessageConverter extends AbstractGenericHttpMessageConverter
 	private static final ThreadLocal<byte[]> threadBuffer = new ThreadLocal<byte[]>() {
 		@Override
 		protected byte[] initialValue() {
-			return new byte[1024 * 1024];
+			return new byte[65536];
 		}
 	};
 
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return JsonObject.class.isAssignableFrom(clazz) && canRead(mediaType);
+		return serializer.canDeserialize(clazz) && canRead(mediaType);
 	}
 
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		//TODO: check if reader for type exists
-		return type instanceof Class<?> && JsonObject.class.isAssignableFrom((Class<?>) type)
-				&& (contextClass == null || contextClass.isArray() || Collection.class.isAssignableFrom(contextClass));
+		return serializer.canDeserialize(type) && canRead(mediaType);
+	}
+
+	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
+		return serializer.canSerialize(type) && canWrite(mediaType);
 	}
 
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		//TODO: check if writer for type exists
-		return JsonObject.class.isAssignableFrom(clazz) && canWrite(mediaType);
+		return serializer.canSerialize(clazz) && canWrite(mediaType);
 	}
 
 	protected boolean supports(Class<?> clazz) {
-		return JsonObject.class.isAssignableFrom(clazz);
+		return serializer.canSerialize(clazz);
 	}
 
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-		return serializer.deserialize(clazz, inputMessage.getBody(), threadBuffer.get());
+		return serializer.deserialize(threadBuffer.get(), clazz, inputMessage.getBody());
 	}
 
 	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-		return serializer.deserialize(contextClass, inputMessage.getBody(), threadBuffer.get());
+		return serializer.deserialize(threadBuffer.get(), type, inputMessage.getBody());
 	}
 
-	protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+	protected void writeInternal(Object instance, Type type, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
 		JsonWriter writer = threadWriter.get();
 		writer.reset();
-		serializer.serialize(writer, type, object);
+		serializer.serialize(writer, type, instance);
 		writer.toStream(outputMessage.getBody());
 	}
 

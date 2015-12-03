@@ -57,17 +57,17 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 		return super.deserialize(type, bytes, bytes.length);
 	}
 
-	public Object deserialize(Type type, InputStream stream) throws IOException {
-		byte[] bytes = new byte[512];
+	@Deprecated
+	public Object deserialize(byte[] tmp, Type type, InputStream stream) throws IOException {
 		int size = 0;
 		int read;
-		while ((read = stream.read(bytes, size, bytes.length - size)) != -1) {
+		while ((read = stream.read(tmp, size, tmp.length - size)) != -1) {
 			size += read;
-			if (size == read) {
-				bytes = Arrays.copyOf(bytes, bytes.length * 2);
+			if (size == tmp.length) {
+				tmp = Arrays.copyOf(tmp, tmp.length * 2);
 			}
 		}
 		//TODO: use underlying stream deserializer when it starts supporting autogrowing buffer
-		return super.deserialize(type, bytes, size);
+		return super.deserialize(type, tmp, size);
 	}
 }
