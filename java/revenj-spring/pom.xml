@@ -7,6 +7,7 @@
 	<artifactId>revenj-spring</artifactId>
 	<name>Revenj Spring</name>
 	<description> DSL Platform compatible backend for Spring (https://dsl-platform.com)</description>
+	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
 	<version>0.7.1</version>
 
