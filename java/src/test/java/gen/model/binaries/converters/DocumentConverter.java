@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.27897 
+*/
+
 package gen.model.binaries.converters;
 
 
@@ -58,15 +63,23 @@ public class DocumentConverter implements ObjectConverter<gen.model.binaries.Doc
 		column = columnsExtended.stream().filter(it -> "content".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'content' column in binaries Document. Check if DB is in sync");
 		__index__extended_content = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "bools".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'bools' column in binaries Document_entity. Check if DB is in sync");
+		__index___bools = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "bools".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'bools' column in binaries Document. Check if DB is in sync");
+		__index__extended_bools = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		
 			
-		gen.model.binaries.Document.__configureConverter(readers, __index___ID, __index___name, __index___content);
+		gen.model.binaries.Document.__configureConverter(readers, __index___ID, __index___name, __index___content, __index___bools);
 			
-		gen.model.binaries.Document.__configureConverterExtended(readersExtended, __index__extended_ID, __index__extended_name, __index__extended_content);
+		gen.model.binaries.Document.__configureConverterExtended(readersExtended, __index__extended_ID, __index__extended_name, __index__extended_content, __index__extended_bools);
 	}
 
 	@Override
@@ -94,6 +107,7 @@ public class DocumentConverter implements ObjectConverter<gen.model.binaries.Doc
 		items[__index___ID] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getID());
 		items[__index___name] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getName());
 		items[__index___content] = org.revenj.postgres.converters.ByteaConverter.toTuple(instance.getContent());
+		items[__index___bools] = org.revenj.postgres.converters.ArrayTuple.create(instance.getBools(), org.revenj.postgres.converters.BoolConverter::toTuple);
 		return RecordTuple.from(items);
 	}
 
@@ -120,6 +134,7 @@ public class DocumentConverter implements ObjectConverter<gen.model.binaries.Doc
 		items[__index__extended_ID] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getID());
 		items[__index__extended_name] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getName());
 		items[__index__extended_content] = org.revenj.postgres.converters.ByteaConverter.toTuple(instance.getContent());
+		items[__index__extended_bools] = org.revenj.postgres.converters.ArrayTuple.create(instance.getBools(), org.revenj.postgres.converters.BoolConverter::toTuple);
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
@@ -149,4 +164,6 @@ public class DocumentConverter implements ObjectConverter<gen.model.binaries.Doc
 	private final int __index__extended_name;
 	private final int __index___content;
 	private final int __index__extended_content;
+	private final int __index___bools;
+	private final int __index__extended_bools;
 }

@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29353 
+*/
+
 package gen.model.test;
 
 
@@ -15,7 +20,9 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 			@com.fasterxml.jackson.annotation.JsonProperty("change")  final java.time.LocalDate change,
 			@com.fasterxml.jackson.annotation.JsonProperty("entities")  final java.util.List<gen.model.test.Entity> entities,
 			@com.fasterxml.jackson.annotation.JsonProperty("simple")  final gen.model.test.Simple simple,
-			@com.fasterxml.jackson.annotation.JsonProperty("number")  final int number) {
+			@com.fasterxml.jackson.annotation.JsonProperty("number")  final int number,
+			@com.fasterxml.jackson.annotation.JsonProperty("entitiesCount")  final int entitiesCount,
+			@com.fasterxml.jackson.annotation.JsonProperty("hasEntities")  final boolean hasEntities) {
 			
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.id = id != null ? id : org.revenj.Utils.MIN_UUID;
@@ -29,6 +36,8 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 		org.revenj.Guards.checkNulls(entities);
 		this.simple = simple != null ? simple : new gen.model.test.Simple();
 		this.number = number;
+		this.entitiesCount = entitiesCount;
+		this.hasEntities = hasEntities;
 	}
 
 	
@@ -44,6 +53,8 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 		this.entities = new java.util.ArrayList<gen.model.test.Entity>(4);
 		this.simple = new gen.model.test.Simple();
 		this.number = 0;
+		this.entitiesCount = 0;
+		this.hasEntities = false;
 	}
 
 	
@@ -80,7 +91,7 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	private static final long serialVersionUID = 2411529856073946252L;
+	private static final long serialVersionUID = -3360289858768152866L;
 	
 	private final java.util.UUID id;
 
@@ -163,6 +174,26 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 	}
 
 	
+	private final int entitiesCount;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("entitiesCount")
+	public int getEntitiesCount()  {
+		
+		return this.entitiesCount;
+	}
+
+	
+	private final boolean hasEntities;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("hasEntities")
+	public boolean getHasEntities()  {
+		
+		return this.hasEntities;
+	}
+
+	
 	private java.util.UUID id2;
 
 	
@@ -192,7 +223,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = 3744237028765983341L;
+	private static final long serialVersionUID = 1674382353985508024L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 
@@ -445,6 +476,15 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 				com.dslplatform.json.NumberConverter.serialize(self.number, sw);
 			}
 		
+			if (self.entitiesCount != 0) {
+				sw.writeAscii(",\"entitiesCount\":", 17);
+				com.dslplatform.json.NumberConverter.serialize(self.entitiesCount, sw);
+			}
+		
+			if (self.hasEntities) {
+				sw.writeAscii(",\"hasEntities\":true");
+			}
+		
 			if (!(self.id2.getMostSignificantBits() == 0 && self.id2.getLeastSignificantBits() == 0)) {
 				sw.writeAscii(",\"id2\":", 7);
 				com.dslplatform.json.UUIDConverter.serialize(self.id2, sw);
@@ -525,6 +565,16 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			com.dslplatform.json.NumberConverter.serialize(self.number, sw);
 		
 			
+			sw.writeAscii(",\"entitiesCount\":", 17);
+			com.dslplatform.json.NumberConverter.serialize(self.entitiesCount, sw);
+		
+			if (self.hasEntities) {
+				sw.writeAscii(",\"hasEntities\":true");
+			} else {
+				sw.writeAscii(",\"hasEntities\":false");
+			}
+		
+			
 			sw.writeAscii(",\"id2\":", 7);
 			com.dslplatform.json.UUIDConverter.serialize(self.id2, sw);
 	}
@@ -547,6 +597,8 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		java.util.List<gen.model.test.Entity> _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4);
 		gen.model.test.Simple _simple_ = null;
 		int _number_ = 0;
+		int _entitiesCount_ = 0;
+		boolean _hasEntities_ = false;
 		java.util.UUID _id2_ = org.revenj.Utils.MIN_UUID;
 		byte nextToken = reader.last();
 		if(nextToken != '}') {
@@ -656,6 +708,13 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 					case 467038368:
 						_number_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
 					nextToken = reader.getNextToken();
+						break;
+					case -39305343:
+						_entitiesCount_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1925893080:
+						_hasEntities_ = com.dslplatform.json.BoolConverter.deserialize(reader); nextToken = reader.getNextToken();
 						break;
 					case -1076877162:
 						_id2_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
@@ -776,6 +835,13 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 						_number_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
 					nextToken = reader.getNextToken();
 						break;
+					case -39305343:
+						_entitiesCount_ = com.dslplatform.json.NumberConverter.deserializeInt(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -1925893080:
+						_hasEntities_ = com.dslplatform.json.BoolConverter.deserialize(reader); nextToken = reader.getNextToken();
+						break;
 					case -1076877162:
 						_id2_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
@@ -799,6 +865,8 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.entities = _entities_;
 		this.simple = _simple_;
 		this.number = _number_;
+		this.entitiesCount = _entitiesCount_;
+		this.hasEntities = _hasEntities_;
 		this.id2 = _id2_;
 	}
 

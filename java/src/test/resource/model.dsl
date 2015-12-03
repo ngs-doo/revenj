@@ -24,6 +24,8 @@ module test {
 		List<timestamp> tsl;
 		List<Entity> entities;
 		detail<LazyLoad.comp> lazies;
+		calculated int entitiesCount from 'it => it.entities.Count';
+		calculated hasEntities from 'it => it.entities.Count > 0';
 		specification ForSimple 'it => it.simple.number == simple.number' {
 			Simple simple;
 		}
@@ -37,6 +39,8 @@ module test {
 		entities;
 		simple;
 		simple.number;
+		entitiesCount;
+		hasEntities;
 		calculated guid id2 from 'it => it.id';
 		specification ForSimple 'it => simples.Contains(it.simple)' {
 			List<Simple> simples;
@@ -134,6 +138,8 @@ module binaries {
 	guid root Document {
 		string(20) name;
 		binary content;
+		Array<Boolean>? bools;
+		calculated Array<Boolean>? boolsCalc from 'it => it.bools';
 	}
 	sql WritableDocument binaries.Document(id)
 	{
@@ -193,8 +199,16 @@ module md {
 	entity Detail(id) {
 		guid id;
 		int masterId;
+		Child1[] children1;
+		Child2[] children2;
+		Reference1 reference1;
+		Reference2 reference2;
 		relationship master(masterId) Master;
 	}
+	entity Child1 { int i; }
+	entity Child2 { double d; }
+	entity Reference1 { long l; }
+	entity Reference2 { decimal x; }
 }
 module adt {
 	mixin Auth { apply on module values; }

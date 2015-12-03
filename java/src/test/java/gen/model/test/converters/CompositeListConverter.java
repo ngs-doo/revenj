@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29353 
+*/
+
 package gen.model.test.converters;
 
 
@@ -96,6 +101,22 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		column = columnsExtended.stream().filter(it -> "number".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'number' column in test CompositeList. Check if DB is in sync");
 		__index__extended_number = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "entitiesCount".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entitiesCount' column in test CompositeList_snowflake. Check if DB is in sync");
+		__index___entitiesCount = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "entitiesCount".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entitiesCount' column in test CompositeList. Check if DB is in sync");
+		__index__extended_entitiesCount = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "hasEntities".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'hasEntities' column in test CompositeList_snowflake. Check if DB is in sync");
+		__index___hasEntities = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "hasEntities".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'hasEntities' column in test CompositeList. Check if DB is in sync");
+		__index__extended_hasEntities = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
@@ -143,6 +164,8 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		java.util.List<gen.model.test.Entity> _entities_ = null;
 		gen.model.test.Simple _simple_ = null;
 		int _number_ = 0;
+		int _entitiesCount_ = 0;
+		boolean _hasEntities_ = false;
 		for(int x = 0; x < columnCount && i < columnCount; x++) {
 			
 			if (__index___URI == i) { _URI_ = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); i++; }
@@ -154,8 +177,10 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 			if (__index___entities == i) { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) {_entities_ = __list;} else _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4); }; i++; }
 			if (__index___simple == i) { _simple_ = __converter_simple.from(reader, context); i++; }
 			if (__index___number == i) { _number_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
+			if (__index___entitiesCount == i) { _entitiesCount_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
+			if (__index___hasEntities == i) { _hasEntities_ = org.revenj.postgres.converters.BoolConverter.parse(reader); i++; }
 		}
-		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_);
+		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_, _entitiesCount_, _hasEntities_);
 		reader.read(outerContext);
 		return instance;
 	}
@@ -190,6 +215,8 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		java.util.List<gen.model.test.Entity> _entities_ = null;
 		gen.model.test.Simple _simple_ = null;
 		int _number_ = 0;
+		int _entitiesCount_ = 0;
+		boolean _hasEntities_ = false;
 		for(int x = 0; x < columnCountExtended && i < columnCountExtended; x++) {
 			
 			if (__index__extended_URI == i) { _URI_ = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); i++; }
@@ -201,8 +228,10 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 			if (__index__extended_entities == i) { { java.util.List<gen.model.test.Entity> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_entities::from); if (__list != null) {_entities_ = __list;} else _entities_ = new java.util.ArrayList<gen.model.test.Entity>(4); }; i++; }
 			if (__index__extended_simple == i) { _simple_ = __converter_simple.fromExtended(reader, context); i++; }
 			if (__index__extended_number == i) { _number_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
+			if (__index__extended_entitiesCount == i) { _entitiesCount_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
+			if (__index__extended_hasEntities == i) { _hasEntities_ = org.revenj.postgres.converters.BoolConverter.parse(reader); i++; }
 		}
-		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_);
+		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_, _entitiesCount_, _hasEntities_);
 		reader.read(outerContext);
 		return instance;
 	}
@@ -225,4 +254,8 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 	private final int __index__extended_simple;
 	private final int __index___number;
 	private final int __index__extended_number;
+	private final int __index___entitiesCount;
+	private final int __index__extended_entitiesCount;
+	private final int __index___hasEntities;
+	private final int __index__extended_hasEntities;
 }

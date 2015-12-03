@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.25187 
+* v1.0.0.27897 
 */
 
 package gen.model;
@@ -230,6 +230,22 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerInstance(gen.model.md.converters.DetailConverter.class, md$converter$DetailConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Detail>>(){}.type, md$converter$DetailConverter, false);
 		
+		gen.model.md.converters.Child1Converter md$converter$Child1Converter = new gen.model.md.converters.Child1Converter(columns);
+		container.registerInstance(gen.model.md.converters.Child1Converter.class, md$converter$Child1Converter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Child1>>(){}.type, md$converter$Child1Converter, false);
+		
+		gen.model.md.converters.Child2Converter md$converter$Child2Converter = new gen.model.md.converters.Child2Converter(columns);
+		container.registerInstance(gen.model.md.converters.Child2Converter.class, md$converter$Child2Converter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Child2>>(){}.type, md$converter$Child2Converter, false);
+		
+		gen.model.md.converters.Reference1Converter md$converter$Reference1Converter = new gen.model.md.converters.Reference1Converter(columns);
+		container.registerInstance(gen.model.md.converters.Reference1Converter.class, md$converter$Reference1Converter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Reference1>>(){}.type, md$converter$Reference1Converter, false);
+		
+		gen.model.md.converters.Reference2Converter md$converter$Reference2Converter = new gen.model.md.converters.Reference2Converter(columns);
+		container.registerInstance(gen.model.md.converters.Reference2Converter.class, md$converter$Reference2Converter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.md.Reference2>>(){}.type, md$converter$Reference2Converter, false);
+		
 		gen.model.adt.converters.AuthConverter adt$converter$AuthConverter = new gen.model.adt.converters.AuthConverter(columns);
 		container.registerInstance(gen.model.adt.converters.AuthConverter.class, adt$converter$AuthConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.adt.Auth>>(){}.type, adt$converter$AuthConverter, false);
@@ -329,6 +345,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getSimple", "\"simple\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getNumber", "\"number\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntitiesCount", "\"entitiesCount\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getHasEntities", "\"hasEntities\"");
 		container.register(gen.model.test.CompositeCube.class, false);
 		test$converter$EntityConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Entity.class, "\"test\".\"Entity_entity\"");
@@ -437,6 +455,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"");
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"");
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getBools", "\"bools\"");
 		binaries$converter$WritableDocumentConverter.configure(container);
 		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
 		
@@ -530,6 +549,26 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.md.Detail.class, "getURI", "\"URI\"");
 		metamodel.registerProperty(gen.model.md.Detail.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.md.Detail.class, "getMasterId", "\"masterId\"");
+		metamodel.registerProperty(gen.model.md.Detail.class, "getChildren1", "\"children1\"");
+		metamodel.registerProperty(gen.model.md.Detail.class, "getChildren2", "\"children2\"");
+		metamodel.registerProperty(gen.model.md.Detail.class, "getReference1", "\"reference1\"");
+		metamodel.registerProperty(gen.model.md.Detail.class, "getReference2", "\"reference2\"");
+		md$converter$Child1Converter.configure(container);
+		metamodel.registerDataSource(gen.model.md.Child1.class, "\"md\".\"Child1_entity\"");
+		metamodel.registerProperty(gen.model.md.Child1.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.md.Child1.class, "getI", "\"i\"");
+		md$converter$Child2Converter.configure(container);
+		metamodel.registerDataSource(gen.model.md.Child2.class, "\"md\".\"Child2_entity\"");
+		metamodel.registerProperty(gen.model.md.Child2.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.md.Child2.class, "getD", "\"d\"");
+		md$converter$Reference1Converter.configure(container);
+		metamodel.registerDataSource(gen.model.md.Reference1.class, "\"md\".\"Reference1_entity\"");
+		metamodel.registerProperty(gen.model.md.Reference1.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.md.Reference1.class, "getL", "\"l\"");
+		md$converter$Reference2Converter.configure(container);
+		metamodel.registerDataSource(gen.model.md.Reference2.class, "\"md\".\"Reference2_entity\"");
+		metamodel.registerProperty(gen.model.md.Reference2.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.md.Reference2.class, "getX", "\"x\"");
 		adt$converter$AuthConverter.configure(container);
 		adt$converter$BasicSecurityConverter.configure(container);
 		metamodel.registerDataSource(gen.model.adt.BasicSecurity.class, "\"adt\".\"BasicSecurity\"");
@@ -632,6 +671,12 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.mixinReference.Person.class, "getAuthorID", "\"AuthorID\"");
 		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getAuthorID", "\"AuthorID\"");
 		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getIndex", "\"Index\"");
+		metamodel.registerProperty(gen.model.md.Child1.class, "getDetailid", "\"Detailid\"");
+		metamodel.registerProperty(gen.model.md.Child1.class, "getIndex", "\"Index\"");
+		metamodel.registerProperty(gen.model.md.Child2.class, "getDetailid", "\"Detailid\"");
+		metamodel.registerProperty(gen.model.md.Child2.class, "getIndex", "\"Index\"");
+		metamodel.registerProperty(gen.model.md.Reference1.class, "getDetailid", "\"Detailid\"");
+		metamodel.registerProperty(gen.model.md.Reference2.class, "getDetailid", "\"Detailid\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthor", "\"author\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthorID", "\"authorID\"");
 		metamodel.registerProperty(gen.model.security.Document.class, "getDeactivated", "\"deactivated\"");

@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.27897 
+*/
+
 package gen.model.binaries;
 
 
@@ -54,6 +59,8 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 			return false;
 		if(!(java.util.Arrays.equals(this.content, other.content)))
 			return false;
+		if(!(java.util.Arrays.equals(this.bools, other.bools)))
+			return false;
 		return true;
 	}
 
@@ -63,6 +70,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		this.ID = other.ID;
 		this.name = other.name;
 		this.content = other.content != null ? java.util.Arrays.copyOf(other.content, other.content.length) : null;
+		this.bools = other.bools == null ? null : java.util.Arrays.copyOf(other.bools, other.bools.length);
 		this.__originalValue = other.__originalValue;
 	}
 
@@ -76,33 +84,26 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		return "Document(" + URI + ')';
 	}
 	
-	
-	public Document(
-			final String name,
-			final byte[] content) {
-			
-		setName(name);
-		setContent(content);
-		this.URI = this.ID.toString();
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -203251078371730699L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Document(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
 			@com.fasterxml.jackson.annotation.JsonProperty("ID") final java.util.UUID ID,
 			@com.fasterxml.jackson.annotation.JsonProperty("name") final String name,
-			@com.fasterxml.jackson.annotation.JsonProperty("content") final byte[] content) {
+			@com.fasterxml.jackson.annotation.JsonProperty("content") final byte[] content,
+			@com.fasterxml.jackson.annotation.JsonProperty("bools") final boolean[] bools,
+			@com.fasterxml.jackson.annotation.JsonProperty("boolsCalc") final boolean[] boolsCalc) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
 		this.ID = ID == null ? org.revenj.Utils.MIN_UUID : ID;
 		this.name = name == null ? "" : name;
 		this.content = content == null ? org.revenj.Utils.EMPTY_BINARY : content;
+		this.bools = bools;
+		this.boolsCalc = boolsCalc;
 	}
 
+	private static final long serialVersionUID = 3709312081834049172L;
 	
 	private java.util.UUID ID;
 
@@ -161,7 +162,36 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		return this;
 	}
 
-	private transient Document __originalValue;
+	
+	private boolean[] bools;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("bools")
+	public boolean[] getBools()  {
+		
+		return bools;
+	}
+
+	
+	public Document setBools(final boolean[] value) {
+		
+		this.bools = value;
+		
+		return this;
+	}
+
+	
+	private boolean[] boolsCalc;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("boolsCalc")
+	public boolean[] getBoolsCalc()  {
+		
+		this.boolsCalc = __calculated_boolsCalc.apply(this);
+		return this.boolsCalc;
+	}
+
+	private static final java.util.function.Function<gen.model.binaries.Document, boolean[]> __calculated_boolsCalc = it -> it.getBools();
 	
 	static {
 		gen.model.binaries.repositories.DocumentRepository.__setupPersist(
@@ -197,6 +227,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		);
 	}
+	private transient Document __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -227,6 +258,28 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 				sw.writeAscii(",\"content\":", 11);
 				com.dslplatform.json.BinaryConverter.serialize(self.content, sw);
 			}
+		
+		if(self.bools != null && self.bools.length != 0) {
+			sw.writeAscii(",\"bools\":[", 10);
+			com.dslplatform.json.BoolConverter.serialize(self.bools[0], sw);
+			for(int i = 1; i < self.bools.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.BoolConverter.serialize(self.bools[i], sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else if(self.bools != null) sw.writeAscii(",\"bools\":[]", 11);
+		
+		if(self.boolsCalc != null && self.boolsCalc.length != 0) {
+			sw.writeAscii(",\"boolsCalc\":[", 14);
+			com.dslplatform.json.BoolConverter.serialize(self.boolsCalc[0], sw);
+			for(int i = 1; i < self.boolsCalc.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.BoolConverter.serialize(self.boolsCalc[i], sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else if(self.boolsCalc != null) sw.writeAscii(",\"boolsCalc\":[]", 15);
 	}
 
 	static void __serializeJsonObjectFull(final Document self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
@@ -245,6 +298,30 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 			
 			sw.writeAscii(",\"content\":", 11);
 			com.dslplatform.json.BinaryConverter.serialize(self.content, sw);
+		
+		if(self.bools != null && self.bools.length != 0) {
+			sw.writeAscii(",\"bools\":[", 10);
+			com.dslplatform.json.BoolConverter.serialize(self.bools[0], sw);
+			for(int i = 1; i < self.bools.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.BoolConverter.serialize(self.bools[i], sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else if(self.bools != null) sw.writeAscii(",\"bools\":[]", 11);
+		else sw.writeAscii(",\"bools\":null", 13);
+		
+		if(self.boolsCalc != null && self.boolsCalc.length != 0) {
+			sw.writeAscii(",\"boolsCalc\":[", 14);
+			com.dslplatform.json.BoolConverter.serialize(self.boolsCalc[0], sw);
+			for(int i = 1; i < self.boolsCalc.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.BoolConverter.serialize(self.boolsCalc[i], sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else if(self.boolsCalc != null) sw.writeAscii(",\"boolsCalc\":[]", 15);
+		else sw.writeAscii(",\"boolsCalc\":null", 17);
 	}
 
 	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Document> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Document>() {
@@ -261,6 +338,8 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		java.util.UUID _ID_ = org.revenj.Utils.MIN_UUID;
 		String _name_ = "";
 		byte[] _content_ = org.revenj.Utils.EMPTY_BINARY;
+		boolean[] _bools_ = null;
+		boolean[] _boolsCalc_ = null;
 		byte nextToken = reader.last();
 		if(nextToken != '}') {
 			int nameHash = reader.fillName();
@@ -289,6 +368,36 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 					case -1866546238:
 						_content_ = com.dslplatform.json.BinaryConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
+						break;
+					case 266799562:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							java.util.ArrayList<Boolean> __res = com.dslplatform.json.BoolConverter.deserializeCollection(reader);
+							boolean[] __resUnboxed = new boolean[__res.size()];
+							for(int _i=0;_i<__res.size();_i++) 
+								__resUnboxed[_i] = __res.get(_i);
+							_bools_ = __resUnboxed;
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -786417937:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							java.util.ArrayList<Boolean> __res = com.dslplatform.json.BoolConverter.deserializeCollection(reader);
+							boolean[] __resUnboxed = new boolean[__res.size()];
+							for(int _i=0;_i<__res.size();_i++) 
+								__resUnboxed[_i] = __res.get(_i);
+							_boolsCalc_ = __resUnboxed;
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
 						break;
 					default:
 						nextToken = reader.skip();
@@ -325,6 +434,36 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 						_content_ = com.dslplatform.json.BinaryConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
 						break;
+					case 266799562:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							java.util.ArrayList<Boolean> __res = com.dslplatform.json.BoolConverter.deserializeCollection(reader);
+							boolean[] __resUnboxed = new boolean[__res.size()];
+							for(int _i=0;_i<__res.size();_i++) 
+								__resUnboxed[_i] = __res.get(_i);
+							_bools_ = __resUnboxed;
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -786417937:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							java.util.ArrayList<Boolean> __res = com.dslplatform.json.BoolConverter.deserializeCollection(reader);
+							boolean[] __resUnboxed = new boolean[__res.size()];
+							for(int _i=0;_i<__res.size();_i++) 
+								__resUnboxed[_i] = __res.get(_i);
+							_boolsCalc_ = __resUnboxed;
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
 					default:
 						nextToken = reader.skip();
 						break;
@@ -339,6 +478,8 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		this.ID = _ID_;
 		this.name = _name_;
 		this.content = _content_;
+		this.bools = _bools_;
+		this.boolsCalc = _boolsCalc_;
 	}
 
 	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
@@ -366,17 +507,44 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		this.__originalValue = (Document)this.clone();
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Document>[] readers, int __index___ID, int __index___name, int __index___content) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Document>[] readers, int __index___ID, int __index___name, int __index___content, int __index___bools) {
 		
 		readers[__index___ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
 		readers[__index___name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 		readers[__index___content] = (item, reader, context) -> { item.content = org.revenj.postgres.converters.ByteaConverter.parse(reader, context); return item; };
+		readers[__index___bools] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {
+				boolean[] __resUnboxed = new boolean[__list.size()];
+				for(int _i=0;_i<__list.size();_i++) {
+					__resUnboxed[_i] = __list.get(_i);
+				}
+				item.bools = __resUnboxed;
+			} }; return item; };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Document>[] readers, int __index__extended_ID, int __index__extended_name, int __index__extended_content) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<Document>[] readers, int __index__extended_ID, int __index__extended_name, int __index__extended_content, int __index__extended_bools) {
 		
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 		readers[__index__extended_content] = (item, reader, context) -> { item.content = org.revenj.postgres.converters.ByteaConverter.parse(reader, context); return item; };
+		readers[__index__extended_bools] = (item, reader, context) -> { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {
+				boolean[] __resUnboxed = new boolean[__list.size()];
+				for(int _i=0;_i<__list.size();_i++) {
+					__resUnboxed[_i] = __list.get(_i);
+				}
+				item.bools = __resUnboxed;
+			} }; return item; };
 	}
+	
+	
+	public Document(
+			final String name,
+			final byte[] content,
+			final boolean[] bools) {
+			
+		setName(name);
+		setContent(content);
+		setBools(bools);
+		this.URI = this.ID.toString();
+	}
+
 }

@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.27897 
+*/
+
 package gen.model.md.converters;
 
 
@@ -50,15 +55,51 @@ public class DetailConverter implements ObjectConverter<gen.model.md.Detail> {
 		column = columnsExtended.stream().filter(it -> "masterId".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'masterId' column in md Detail. Check if DB is in sync");
 		__index__extended_masterId = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "children1".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'children1' column in md Detail_entity. Check if DB is in sync");
+		__index___children1 = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "children1".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'children1' column in md Detail. Check if DB is in sync");
+		__index__extended_children1 = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "children2".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'children2' column in md Detail_entity. Check if DB is in sync");
+		__index___children2 = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "children2".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'children2' column in md Detail. Check if DB is in sync");
+		__index__extended_children2 = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "reference1".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'reference1' column in md Detail_entity. Check if DB is in sync");
+		__index___reference1 = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "reference1".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'reference1' column in md Detail. Check if DB is in sync");
+		__index__extended_reference1 = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "reference2".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'reference2' column in md Detail_entity. Check if DB is in sync");
+		__index___reference2 = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "reference2".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'reference2' column in md Detail. Check if DB is in sync");
+		__index__extended_reference2 = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
+		__converter_children1 = locator.resolve(gen.model.md.converters.Child1Converter.class);
+		__converter_children2 = locator.resolve(gen.model.md.converters.Child2Converter.class);
+		__converter_reference1 = locator.resolve(gen.model.md.converters.Reference1Converter.class);
+		__converter_reference2 = locator.resolve(gen.model.md.converters.Reference2Converter.class);
 		
 			
-		gen.model.md.Detail.__configureConverter(readers, __index___id, __index___masterId);
+		gen.model.md.Detail.__configureConverter(readers, __index___id, __index___masterId, __converter_children1, __index___children1, __converter_children2, __index___children2, __converter_reference1, __index___reference1, __converter_reference2, __index___reference2);
 			
-		gen.model.md.Detail.__configureConverterExtended(readersExtended, __index__extended_id, __index__extended_masterId);
+		gen.model.md.Detail.__configureConverterExtended(readersExtended, __index__extended_id, __index__extended_masterId, __converter_children1, __index__extended_children1, __converter_children2, __index__extended_children2, __converter_reference1, __index__extended_reference1, __converter_reference2, __index__extended_reference2);
 	}
 
 	@Override
@@ -85,6 +126,10 @@ public class DetailConverter implements ObjectConverter<gen.model.md.Detail> {
 		
 		items[__index___id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
 		items[__index___masterId] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getMasterId());
+		items[__index___children1] = org.revenj.postgres.converters.ArrayTuple.create(instance.getChildren1(), __converter_children1::to);
+		items[__index___children2] = org.revenj.postgres.converters.ArrayTuple.create(instance.getChildren2(), __converter_children2::to);
+		items[__index___reference1] = __converter_reference1.to(instance.getReference1());
+		items[__index___reference2] = __converter_reference2.to(instance.getReference2());
 		return RecordTuple.from(items);
 	}
 
@@ -110,6 +155,10 @@ public class DetailConverter implements ObjectConverter<gen.model.md.Detail> {
 		
 		items[__index__extended_id] = org.revenj.postgres.converters.UuidConverter.toTuple(instance.getId());
 		items[__index__extended_masterId] = org.revenj.postgres.converters.IntConverter.toTuple(instance.getMasterId());
+		items[__index__extended_children1] = org.revenj.postgres.converters.ArrayTuple.create(instance.getChildren1(), __converter_children1::toExtended);
+		items[__index__extended_children2] = org.revenj.postgres.converters.ArrayTuple.create(instance.getChildren2(), __converter_children2::toExtended);
+		items[__index__extended_reference1] = __converter_reference1.toExtended(instance.getReference1());
+		items[__index__extended_reference2] = __converter_reference2.toExtended(instance.getReference2());
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
@@ -137,4 +186,16 @@ public class DetailConverter implements ObjectConverter<gen.model.md.Detail> {
 	private final int __index__extended_id;
 	private final int __index___masterId;
 	private final int __index__extended_masterId;
+	private gen.model.md.converters.Child1Converter __converter_children1;
+	private final int __index___children1;
+	private final int __index__extended_children1;
+	private gen.model.md.converters.Child2Converter __converter_children2;
+	private final int __index___children2;
+	private final int __index__extended_children2;
+	private gen.model.md.converters.Reference1Converter __converter_reference1;
+	private final int __index___reference1;
+	private final int __index__extended_reference1;
+	private gen.model.md.converters.Reference2Converter __converter_reference2;
+	private final int __index___reference2;
+	private final int __index__extended_reference2;
 }
