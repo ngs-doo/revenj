@@ -161,7 +161,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					}
 				}
 
-				context.Stream = new BufferedStream(stream);
+				context.Stream = new NpgsqlBufferedStream(stream);
 				context.Socket = socket;
 
 				ChangeState(context, NpgsqlConnectedState.Instance);

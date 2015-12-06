@@ -93,7 +93,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private readonly HashSet<string> CachedPlans = new HashSet<string>();
 
 		// The physical network connection to the backend.
-		private Stream _stream;
+		private NpgsqlBufferedStream _stream;
 
 		private Socket _socket;
 
@@ -552,7 +552,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <summary>
 		/// The physical connection stream to the backend.
 		/// </summary>
-		internal Stream Stream
+		internal NpgsqlBufferedStream Stream
 		{
 			get { return _stream; }
 			set { _stream = value; }
@@ -964,7 +964,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						{
 							// reset any responses just before getting new ones
 							this.connector.Mediator.ResetResponses();
-							this.state.ProcessBackendResponses(this.connector);
+							this.state.ProcessBackendResponsesWhileExists(this.connector);
 						}
 
 						this.connector._notificationAutoResetEvent.Set();
