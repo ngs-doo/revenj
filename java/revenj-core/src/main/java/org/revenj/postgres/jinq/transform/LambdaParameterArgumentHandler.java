@@ -30,10 +30,12 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 	static {
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.INT_TYPE);
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.DOUBLE_TYPE);
+		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.FLOAT_TYPE);
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.LONG_TYPE);
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.BOOLEAN_TYPE);
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/Integer"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/Double"));
+		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/Float"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/Long"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/Boolean"));
 		ALLOWED_QUERY_PARAMETER_TYPES.add(Type.getObjectType("java/lang/String"));
@@ -91,11 +93,15 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 		// motion will be used to push those field accesses or method calls
 		// outside the query where they will be evaluated and then passed in
 		// as a parameter)
-		if (!ALLOWED_QUERY_PARAMETER_TYPES.contains(argType)
-				&& metamodel.getEnumName(argType.getInternalName()) == null
-				&& !metamodel.isKnownManagedType(argType.getClassName()))
-			throw new TypedValueVisitorException("Accessing a field with unhandled type");
-
+		try {
+			if (!ALLOWED_QUERY_PARAMETER_TYPES.contains(argType)
+					&& (Annotations.asmTypeToClass(argType).isPrimitive()
+						|| (metamodel.getEnumName(argType.getInternalName()) == null
+							&& !metamodel.isKnownManagedType(argType.getClassName()))))
+				throw new TypedValueVisitorException("Accessing a field with unhandled type");
+		} catch (ClassNotFoundException e) {
+			throw new TypedValueVisitorException("Accessing a field with unhandled type", e);
+		}
 		return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 				new ParameterExpression(lambda.getLambdaIndex(), argIndex));
 	}

@@ -32,6 +32,15 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 
 	@Override
 	public ColumnExpressions<?> defaultValue(TypedValue val, SymbExPassDown in) throws TypedValueVisitorException {
+		if (val instanceof ConstantValue) {
+			ConstantValue cv = (ConstantValue)val;
+			if (cv.getType() == Type.FLOAT_TYPE
+					|| cv.getType() == Type.DOUBLE_TYPE
+					|| cv.getType() == Type.INT_TYPE
+					|| cv.getType() == Type.LONG_TYPE) {
+				return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression(cv.toString()));
+			}
+		}
 		throw new TypedValueVisitorException("Unhandled symbolic execution operation: " + val);
 	}
 
@@ -105,7 +114,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 	@Override
 	public ColumnExpressions<?> castValue(TypedValue.CastValue val, SymbExPassDown in) throws TypedValueVisitorException {
 		if (val.isPrimitive()) {
-			throw new TypedValueVisitorException("Casts of primitive values are not support in JPQL");
+			throw new TypedValueVisitorException("Casts of primitive values is not support in JINQ");
 		}
 		return val.operand.visit(this, SymbExPassDown.with(val, in.isExpectingConditional));
 	}
@@ -310,6 +319,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 		} else if (sig.equals(TransformationClassAnalyzer.integerIntValue)
 				|| sig.equals(TransformationClassAnalyzer.longLongValue)
 				|| sig.equals(TransformationClassAnalyzer.doubleDoubleValue)
+				|| sig.equals(TransformationClassAnalyzer.floatFloatValue)
 				|| sig.equals(TransformationClassAnalyzer.booleanBooleanValue)) {
 			SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
 			ColumnExpressions<?> base = val.base.visit(this, passdown);
@@ -333,7 +343,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 					throw new TypedValueVisitorException("Expecting a lambda factory for aggregate method");
 				LambdaFactory lambdaFactory = (LambdaFactory) val.args.get(0);
 				try {
-					lambda = LambdaAnalysis.analyzeMethod(config.metamodel, config.alternateClassLoader, config.isObjectEqualsSafe, config.isCollectionContainsSafe, lambdaFactory.getLambdaMethod(), lambdaFactory.getCapturedArgs(), true);
+					lambda = LambdaAnalysis.analyzeMethod(config.metamodel, config.alternateClassLoader, config.isObjectEqualsSafe, config.isAllEqualsSafe, config.isCollectionContainsSafe, lambdaFactory.getLambdaMethod(), lambdaFactory.getCapturedArgs(), true);
 				} catch (Exception e) {
 					throw new TypedValueVisitorException("Could not analyze the lambda code", e);
 				}
@@ -423,7 +433,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			}
 			Expression head = concatenatedStrings.get(concatenatedStrings.size() - 1).getOnlyColumn();
 			for (int n = concatenatedStrings.size() - 2; n >= 0; n--)
-				head = FunctionExpression.twoParam("CONCAT", head, concatenatedStrings.get(n).getOnlyColumn());
+				head = new BinaryExpression(head, " || ", concatenatedStrings.get(n).getOnlyColumn());
 			return ColumnExpressions.singleColumn(SimpleRowReader.READER, head);
 		} else {
 			try {
@@ -508,6 +518,9 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 		numericPromotionPriority.put(Type.getObjectType("java/math/BigInteger"), n);
 		n++;
 		numericPromotionPriority.put(Type.getObjectType("java/math/BigDecimal"), n);
+		n++;
+		numericPromotionPriority.put(Type.FLOAT_TYPE, n);
+		numericPromotionPriority.put(Type.getObjectType("java/lang/Float"), n);
 		n++;
 		numericPromotionPriority.put(Type.DOUBLE_TYPE, n);
 		numericPromotionPriority.put(Type.getObjectType("java/lang/Double"), n);

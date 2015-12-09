@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionExpression extends Expression {
-	final List<Expression> arguments = new ArrayList<>(3);
+	final List<Expression> arguments = new ArrayList<>(4);
 	String functionName;
 
 	public static FunctionExpression singleParam(String name, Expression base) {
@@ -27,6 +27,13 @@ public class FunctionExpression extends Expression {
 		func.arguments.add(param1);
 		func.arguments.add(param2);
 		func.arguments.add(param3);
+		func.functionName = name;
+		return func;
+	}
+
+	public static FunctionExpression withParams(String name, List<Expression> params) {
+		FunctionExpression func = new FunctionExpression();
+		func.arguments.addAll(params);
 		func.functionName = name;
 		return func;
 	}

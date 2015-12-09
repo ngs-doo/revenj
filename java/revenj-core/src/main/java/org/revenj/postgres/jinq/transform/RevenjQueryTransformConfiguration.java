@@ -15,11 +15,16 @@ public class RevenjQueryTransformConfiguration {
 	 * class loader to extract that code.
 	 */
 	public ClassLoader alternateClassLoader;
-	public boolean isObjectEqualsSafe;
+	public boolean isObjectEqualsSafe = true;
+	public boolean isAllEqualsSafe = true;
 	public boolean isCollectionContainsSafe;
 
 	public Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> getComparisonMethods() {
 		return metamodel.getComparisonMethods(isObjectEqualsSafe);
+	}
+
+	public Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> getStaticComparisonMethods() {
+		return metamodel.getStaticComparisonMethods(isObjectEqualsSafe);
 	}
 
 	public SymbExToColumns newSymbExToColumns(SymbExArgumentHandler argumentHandler) {

@@ -23,6 +23,8 @@ public abstract class MetamodelUtil {
 	protected final Set<String> knownEmbeddedtypes = new HashSet<>();
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> comparisonMethods;
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> comparisonMethodsWithObjectEquals;
+	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> staticComparisonMethods;
+	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> staticComparisonMethodsWithObjectEquals;
 
 	class MetamodelUtilAttribute {
 		public final String name;
@@ -80,12 +82,14 @@ public abstract class MetamodelUtil {
 		enums = new HashMap<>();
 		statics = new HashMap<>();
 		comparisonMethods = new HashMap<>();
+		staticComparisonMethods = new HashMap<>();
 		safeMethodAnnotations = new HashSet<>();
 		safeMethodAnnotations.addAll(TransformationClassAnalyzer.SafeMethodAnnotations);
 		safeMethods = new HashSet<>();
 		safeMethods.addAll(TransformationClassAnalyzer.KnownSafeMethods);
 		safeMethods.add(TransformationClassAnalyzer.integerIntValue);
 		safeMethods.add(TransformationClassAnalyzer.longLongValue);
+		safeMethods.add(TransformationClassAnalyzer.floatFloatValue);
 		safeMethods.add(TransformationClassAnalyzer.doubleDoubleValue);
 		safeMethods.add(TransformationClassAnalyzer.booleanBooleanValue);
 		safeMethods.add(inQueryStream);
@@ -94,11 +98,14 @@ public abstract class MetamodelUtil {
 		safeStaticMethods.add(TransformationClassAnalyzer.integerValueOf);
 		safeStaticMethods.add(TransformationClassAnalyzer.longValueOf);
 		safeStaticMethods.add(TransformationClassAnalyzer.doubleValueOf);
+		safeStaticMethods.add(TransformationClassAnalyzer.floatValueOf);
 		safeStaticMethods.add(TransformationClassAnalyzer.booleanValueOf);
 		fieldMethods = new HashMap<>();
 		nLinkMethods = new HashMap<>();
 		comparisonMethodsWithObjectEquals = new HashMap<>();
 		comparisonMethodsWithObjectEquals.put(MethodChecker.objectEquals, TypedValue.ComparisonValue.ComparisonOp.eq);
+		staticComparisonMethodsWithObjectEquals = new HashMap<>();
+		staticComparisonMethodsWithObjectEquals.put(MethodChecker.objectsEquals, TypedValue.ComparisonValue.ComparisonOp.eq);
 	}
 
 	protected void addProperty(Method method, String property) {
@@ -199,6 +206,10 @@ public abstract class MetamodelUtil {
 
 	public Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> getComparisonMethods(boolean withObjectEquals) {
 		return withObjectEquals ? comparisonMethodsWithObjectEquals : comparisonMethods;
+	}
+
+	public Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> getStaticComparisonMethods(boolean withObjectEquals) {
+		return withObjectEquals ? staticComparisonMethodsWithObjectEquals : staticComparisonMethods;
 	}
 
 	public Set<Class<?>> getSafeMethodAnnotations() {

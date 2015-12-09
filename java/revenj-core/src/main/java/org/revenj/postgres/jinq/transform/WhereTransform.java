@@ -70,7 +70,7 @@ public class WhereTransform extends RevenjOneLambdaQueryTransform {
 			PathAnalysis path = paths.get(n);
 
 			TypedValue returnVal = PathAnalysisSimplifier
-					.simplifyBoolean(path.getReturnValue(), config.getComparisonMethods());
+					.simplifyBoolean(path.getReturnValue(), config.getComparisonMethods(), config.getStaticComparisonMethods(), config.isAllEqualsSafe);
 			SymbExPassDown returnPassdown = SymbExPassDown.with(null, true);
 			ColumnExpressions<?> returnColumns = returnVal.visit(translator, returnPassdown);
 			if (!returnColumns.isSingleColumn())

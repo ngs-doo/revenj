@@ -102,7 +102,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		}
 		try {
 			RevenjQueryTransformConfiguration config = buildConfig(metamodel);
-			LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, null, true, true, true);
+			LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, null, true, true, true, true);
 			if (lambdaAnalysis == null) {
 				return null;
 			}

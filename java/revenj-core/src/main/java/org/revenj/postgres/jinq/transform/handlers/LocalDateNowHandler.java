@@ -10,14 +10,17 @@ import org.revenj.postgres.jinq.transform.MethodHandlerStatic;
 import org.revenj.postgres.jinq.transform.SymbExPassDown;
 import org.revenj.postgres.jinq.transform.SymbExToColumns;
 
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class LocalDateNowHandler implements MethodHandlerStatic {
 	@Override
-	public List<MethodSignature> getSupportedSignatures() {
-		return Collections.singletonList(
-				new MethodSignature("java/time/LocalDate", "now", "()Ljava/time/LocalDate;")
+	public List<MethodSignature> getSupportedSignatures() throws NoSuchMethodException {
+		return Arrays.asList(
+				MethodSignature.fromMethod(LocalDate.class.getMethod("now")),
+				new MethodSignature("org/joda/LocalDate", "now", "()Lorg/joda/LocalDate;")
 		);
 	}
 
@@ -26,7 +29,6 @@ public class LocalDateNowHandler implements MethodHandlerStatic {
 			MethodCallValue.StaticMethodCallValue val,
 			SymbExPassDown in,
 			SymbExToColumns columns) throws TypedValueVisitorException {
-		SymbExPassDown passdown = SymbExPassDown.with(val, in.isExpectingConditional);
 		return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression("CURRENT_DATE"));
 	}
 }

@@ -440,7 +440,7 @@ public final class RevenjQueryComposer<T> {
 		if (cachedQuery == null) {
 			JinqPostgresQuery<U> newQuery = null;
 			try {
-				LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, null, true, true, true);
+				LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, null, true, true, true, true);
 				if (lambdaAnalysis == null) {
 					return null;
 				}
@@ -481,7 +481,7 @@ public final class RevenjQueryComposer<T> {
 			try {
 				LambdaAnalysis[] lambdaAnalyses = new LambdaAnalysis[lambdaInfos.length];
 				for (int n = 0; n < lambdaInfos.length; n++) {
-					lambdaAnalyses[n] = lambdaInfos[n].fullyAnalyze(metamodel, null, true, true, true);
+					lambdaAnalyses[n] = lambdaInfos[n].fullyAnalyze(metamodel, null, true, true, true, true);
 					if (lambdaAnalyses[n] == null) {
 						return null;
 					}

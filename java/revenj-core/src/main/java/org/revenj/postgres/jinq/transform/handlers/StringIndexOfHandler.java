@@ -32,7 +32,7 @@ public class StringIndexOfHandler implements MethodHandlerVirtual {
 		ColumnExpressions<?> search = val.args.get(0).visit(columns, passdown);
 		return ColumnExpressions.singleColumn(base.reader,
 				new BinaryExpression(
-						FunctionExpression.twoParam("LOCATE", search.getOnlyColumn(), base.getOnlyColumn()),
+						FunctionExpression.twoParam("STRPOS", base.getOnlyColumn(), search.getOnlyColumn()),
 						"-",
 						new ConstantExpression("1")));
 	}

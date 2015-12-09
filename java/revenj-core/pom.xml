@@ -9,7 +9,7 @@
 	<description> DSL Platform compatible backend (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
-	<version>0.7.1</version>
+	<version>0.7.2</version>
 
 	<dependencies>
 		<dependency>
@@ -25,17 +25,17 @@
 		<dependency>
 			<groupId>org.jinq</groupId>
 			<artifactId>api</artifactId>
-			<version>1.8.4</version>
+			<version>1.8.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jinq</groupId>
 			<artifactId>analysis</artifactId>
-			<version>1.8.4</version>
+			<version>1.8.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jinq</groupId>
 			<artifactId>jinq-asm-rebased</artifactId>
-			<version>1.8.4</version>
+			<version>1.8.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.dslplatform</groupId>

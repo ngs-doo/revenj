@@ -99,7 +99,11 @@ public abstract class RevenjQueryTransform {
 			SymbExToColumns translator,
 			SymbExPassDown passdown) throws TypedValueVisitorException {
 		return (ColumnExpressions<U>) PathAnalysisSimplifier
-				.simplify(lambda.symbolicAnalysis.paths.get(pathIdx).getReturnValue(), config.getComparisonMethods())
+				.simplify(
+						lambda.symbolicAnalysis.paths.get(pathIdx).getReturnValue(),
+						config.getComparisonMethods(),
+						config.getStaticComparisonMethods(),
+						config.isAllEqualsSafe)
 				.visit(translator, passdown);
 	}
 

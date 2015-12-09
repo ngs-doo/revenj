@@ -249,14 +249,22 @@ public class TestQuery {
 		Assert.assertFalse(notFound);
 	}
 
+	@Test
+	public void floatType() throws IOException {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		boolean notFound = db.query(Composite.class).anyMatch(it -> (float)it.getSimple().getNumber() == 4.2f);
+		Assert.assertFalse(notFound);
+	}
+
 	//@Test
-	public void floatAndStreamType() throws IOException {
+	public void nestedSubqueryWithStream() throws IOException {
 		ServiceLocator locator = container;
 		DataContext db = locator.resolve(DataContext.class);
 		//TODO: does not work yet
 		boolean notFound =
 				db.query(Composite.class)
-				.anyMatch(it -> it.getEntities().stream().anyMatch(e -> e.getDetail1().stream().anyMatch(d -> d.getFf() == 4.2f)));
+						.anyMatch(it -> it.getEntities().stream().anyMatch(e -> e.getDetail1().stream().anyMatch(d -> d.getFf() == 4.2f)));
 		Assert.assertFalse(notFound);
 	}
 
@@ -288,5 +296,35 @@ public class TestQuery {
 		Query<Document> query = db.query(Document.class);
 		boolean found = query.anyMatch(it -> it.equals(Document.MEANING_OF_LIFE()));
 		Assert.assertFalse(found);
+	}
+
+	@Test
+	public void stringLikes() throws IOException {
+		ServiceLocator locator = container;
+		CompositeRepository repository = locator.resolve(CompositeRepository.class);
+		UUID id = UUID.randomUUID();
+		repository.insert(new Composite().setId(id).setSimple(new Simple().setText("xxx" + id + "yyy")));
+		List<Composite> found = repository.query()
+				.filter(it -> it.getSimple().getText().contains(id.toString()))
+				.filter(it -> it.getSimple().getText().startsWith("xxx" + id.toString()))
+				.filter(it -> it.getSimple().getText().endsWith(id.toString() + "yyy"))
+				.list();
+		Assert.assertEquals(1, found.size());
+		Assert.assertEquals(id, found.get(0).getId());
+	}
+
+	@Test
+	public void substringMethods() throws IOException {
+		ServiceLocator locator = container;
+		CompositeRepository repository = locator.resolve(CompositeRepository.class);
+		UUID id = UUID.randomUUID();
+		repository.insert(new Composite().setId(id).setSimple(new Simple().setText("xxx" + id + "yyy")));
+		List<Composite> found = repository.query()
+				.filter(it -> it.getId().equals(id))
+				.filter(it -> it.getSimple().getText().substring(3).equals(id.toString() + "yyy"))
+				.filter(it -> it.getSimple().getText().substring(0, 3).equals("xxx"))
+				.list();
+		Assert.assertEquals(1, found.size());
+		Assert.assertEquals(id, found.get(0).getId());
 	}
 }

@@ -20,6 +20,7 @@ class MethodChecker implements PathAnalysisMethodChecker {
 	private final boolean isCollectionContainsSafe;
 
 	public final static MethodSignature objectEquals = new MethodSignature("java/lang/Object", "equals", "(Ljava/lang/Object;)Z");
+	public final static MethodSignature objectsEquals = new MethodSignature("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
 
 	static {
 		try {
@@ -118,6 +119,9 @@ class MethodChecker implements PathAnalysisMethodChecker {
 	 */
 	@Override
 	public OperationSideEffect isStaticMethodSafe(MethodSignature m) {
+		if (isObjectEqualsSafe && objectsEquals.equals(m)) {
+			return OperationSideEffect.NONE;
+		}
 		return safeStaticMethods.contains(m) || jpqlFunctionStaticMethods.containsKey(m)
 				? OperationSideEffect.NONE
 				: OperationSideEffect.UNSAFE;

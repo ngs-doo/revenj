@@ -76,7 +76,7 @@ public class OuterJoinTransform extends RevenjOneLambdaQueryTransform {
 
 				SymbExPassDown passdown = SymbExPassDown.with(null, false);
 				JinqPostgresQuery<?> returnExpr = PathAnalysisSimplifier
-						.simplify(lambda.symbolicAnalysis.paths.get(0).getReturnValue(), config.getComparisonMethods())
+						.simplify(lambda.symbolicAnalysis.paths.get(0).getReturnValue(), config.getComparisonMethods(), config.getStaticComparisonMethods(), config.isAllEqualsSafe)
 						.visit(translator, passdown);
 
 				// Create the new query, merging in the analysis of the method
