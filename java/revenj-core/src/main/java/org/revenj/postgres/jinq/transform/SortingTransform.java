@@ -27,7 +27,7 @@ public class SortingTransform extends RevenjOneLambdaQueryTransform {
 				SelectFromWhere.SortingParameters sort = new SelectFromWhere.SortingParameters();
 				sort.expr = returnExpr.getOnlyColumn();
 				sort.isAscending = isAscending;
-				toReturn.sort.add(0, sort);
+				toReturn.sort.add(sort);
 				return toReturn;
 			}
 			throw new QueryTransformException("Existing query cannot be transformed further");
