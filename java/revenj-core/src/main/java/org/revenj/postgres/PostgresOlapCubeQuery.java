@@ -60,8 +60,8 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 			}
 		}
 		for (String o : customOrder) {
-			if (!cubeDimensions.containsKey(o)) {
-				throw new IllegalArgumentException("Invalid order: " + o + ". Order can be only field from used dimensions.");
+			if (!usedDimensions.contains(o) && !usedFacts.contains(o)) {
+				throw new IllegalArgumentException("Invalid order: " + o + ". Order can be only field from used dimensions and facts.");
 			}
 		}
 	}

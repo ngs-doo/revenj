@@ -43,21 +43,27 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 		{
 			queryBuilder.Append("(SELECT array_agg(");
 			var sqe = methodCall.Arguments[0] as SubQueryExpression;
+			var alias = "\"-sq-\"";
 			if (sqe != null)
 			{
 				var me = sqe.QueryModel.SelectClause.Selector as MemberExpression;
 				if (me != null)
 					queryBuilder.Append("\"").Append(me.Member.Name).Append("\"");
 				else
+				{
 					visitExpression(sqe.QueryModel.SelectClause.Selector);
+					alias = "\"" + sqe.QueryModel.MainFromClause.ItemName + "\"";
+				}
 			}
-			else queryBuilder.Append("\"-sq-\"");
+			else queryBuilder.Append(alias);
 			queryBuilder.Append(") FROM ");
 			if (methodCall.Arguments[0] is MemberExpression)
 				queryBuilder.Append("unnest(");
 			else queryBuilder.Append('(');
 			visitExpression(methodCall.Arguments[0]);
-			queryBuilder.Append(") \"-sq-\")");
+			queryBuilder.Append(") ");
+			queryBuilder.Append(alias);
+			queryBuilder.Append(")");
 		}
 	}
 }

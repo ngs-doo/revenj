@@ -48,8 +48,8 @@ namespace Revenj.DatabasePersistence.Postgres
 					throw new ArgumentException("Unknown fact: {0}. Use Facts property for available facts".With(f));
 
 			foreach (var o in customOrder)
-				if (!usedDimensions.Contains(o))
-					throw new ArgumentException("Invalid order: {0}. Order can be only field from used dimensions.".With(o));
+				if (!usedDimensions.Contains(o) && !usedFacts.Contains(o))
+					throw new ArgumentException("Invalid order: {0}. Order can be only field from used dimensions and facts.".With(o));
 		}
 
 		public DataTable Analyze<TFilter>(
