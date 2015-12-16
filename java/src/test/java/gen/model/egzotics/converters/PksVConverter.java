@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.32432 
+*/
+
 package gen.model.egzotics.converters;
 
 
@@ -66,6 +71,22 @@ public class PksVConverter implements ObjectConverter<gen.model.egzotics.PksV> {
 		column = columnsExtended.stream().filter(it -> "ee".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'ee' column in egzotics PksV. Check if DB is in sync");
 		__index__extended_ee = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "p".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'p' column in egzotics PksV_entity. Check if DB is in sync");
+		__index___p = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "p".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'p' column in egzotics PksV. Check if DB is in sync");
+		__index__extended_p = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "ll".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'll' column in egzotics PksV_entity. Check if DB is in sync");
+		__index___ll = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "ll".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'll' column in egzotics PksV. Check if DB is in sync");
+		__index__extended_ll = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
@@ -74,9 +95,9 @@ public class PksVConverter implements ObjectConverter<gen.model.egzotics.PksV> {
 		__converter_vv = locator.resolve(gen.model.egzotics.converters.vConverter.class);
 		
 			
-		gen.model.egzotics.PksV.__configureConverter(readers, __converter_v, __index___v, __converter_vv, __index___vv, __index___e, __index___ee);
+		gen.model.egzotics.PksV.__configureConverter(readers, __converter_v, __index___v, __converter_vv, __index___vv, __index___e, __index___ee, __index___p, __index___ll);
 			
-		gen.model.egzotics.PksV.__configureConverterExtended(readersExtended, __converter_v, __index__extended_v, __converter_vv, __index__extended_vv, __index__extended_e, __index__extended_ee);
+		gen.model.egzotics.PksV.__configureConverterExtended(readersExtended, __converter_v, __index__extended_v, __converter_vv, __index__extended_vv, __index__extended_e, __index__extended_ee, __index__extended_p, __index__extended_ll);
 	}
 
 	@Override
@@ -105,6 +126,8 @@ public class PksVConverter implements ObjectConverter<gen.model.egzotics.PksV> {
 		items[__index___vv] = org.revenj.postgres.converters.ArrayTuple.create(instance.getVv(), __converter_vv::to);
 		items[__index___e] = gen.model.egzotics.converters.EConverter.toTuple(instance.getE());
 		items[__index___ee] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEe(), gen.model.egzotics.converters.EConverter::toTuple);
+		items[__index___p] = org.revenj.postgres.converters.PointConverter.toTuple(instance.getP());
+		items[__index___ll] = org.revenj.postgres.converters.ArrayTuple.create(instance.getLl(), org.revenj.postgres.converters.PointConverter::toTuple);
 		return RecordTuple.from(items);
 	}
 
@@ -132,6 +155,8 @@ public class PksVConverter implements ObjectConverter<gen.model.egzotics.PksV> {
 		items[__index__extended_vv] = org.revenj.postgres.converters.ArrayTuple.create(instance.getVv(), __converter_vv::toExtended);
 		items[__index__extended_e] = gen.model.egzotics.converters.EConverter.toTuple(instance.getE());
 		items[__index__extended_ee] = org.revenj.postgres.converters.ArrayTuple.create(instance.getEe(), gen.model.egzotics.converters.EConverter::toTuple);
+		items[__index__extended_p] = org.revenj.postgres.converters.PointConverter.toTuple(instance.getP());
+		items[__index__extended_ll] = org.revenj.postgres.converters.ArrayTuple.create(instance.getLl(), org.revenj.postgres.converters.PointConverter::toTuple);
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
@@ -173,4 +198,8 @@ public class PksVConverter implements ObjectConverter<gen.model.egzotics.PksV> {
 	private final int __index__extended_e;
 	private final int __index___ee;
 	private final int __index__extended_ee;
+	private final int __index___p;
+	private final int __index__extended_p;
+	private final int __index___ll;
+	private final int __index__extended_ll;
 }

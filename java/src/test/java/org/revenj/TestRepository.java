@@ -18,6 +18,7 @@ import gen.model.md.repositories.MasterRepository;
 import gen.model.mixinReference.Author;
 import gen.model.mixinReference.repositories.AuthorRepository;
 import gen.model.test.*;
+import gen.model.test.Composite;
 import gen.model.test.repositories.*;
 import org.junit.After;
 import org.junit.Assert;
@@ -29,6 +30,8 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -36,6 +39,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class TestRepository {
@@ -116,6 +120,7 @@ public class TestRepository {
 	public static class ClickedLazyCollectionEventHandler implements DomainEventHandler<Callable<Clicked[]>> {
 		public static int COUNT;
 		private final Connection connection;
+
 		public ClickedLazyCollectionEventHandler(Connection connection) {
 			this.connection = connection;
 		}
@@ -350,7 +355,11 @@ public class TestRepository {
 	public void listIntPks() throws Exception {
 		ServiceLocator locator = container;
 		PersistableRepository<pks> repository = locator.resolve(PersistableRepository.class, pks.class);
-		pks pks = new pks().setId(Arrays.asList(0, Integer.MIN_VALUE, Integer.MAX_VALUE, -105102223, -1000000000, -1000000000, 1000000000, 100000000, Integer.MIN_VALUE + 1));
+		Random rnd = new Random();
+		pks pks = new pks()
+				.setId(Arrays.asList(0, rnd.nextInt(), Integer.MIN_VALUE, Integer.MAX_VALUE, -105102223, -1000000000, -1000000000, 1000000000, 100000000, Integer.MIN_VALUE + 1))
+				.setL(new Point2D.Double(4, 55.5))
+				.setPp(new Point[]{new Point(3, 4), new Point(55, 66)});
 		String uri = repository.insert(pks);
 		Optional<pks> found = repository.find(uri);
 		repository.delete(found.get());
@@ -385,7 +394,11 @@ public class TestRepository {
 		ServiceLocator locator = container;
 		PersistableRepository<PksV> repository = locator.resolve(PersistableRepository.class, PksV.class);
 		Random rnd = new Random();
-		PksV pks = new PksV().setE(E.B).setV(new v().setX(rnd.nextInt())).setVv(new v[]{new v(rnd.nextInt()), new v().setX(55)});
+		PksV pks = new PksV()
+				.setE(E.B).setV(new v().setX(rnd.nextInt()))
+				.setVv(new v[]{new v(rnd.nextInt()), new v().setX(55)})
+				.setP(new Point(1, 2))
+				.setLl(Arrays.asList(new Point2D.Double(6.6, 8.8), new Point2D.Double(-5.5, -4.3)));
 		pks.getEe().add(E.C);
 		pks.getEe().add(E.B);
 		String uri = repository.insert(pks);

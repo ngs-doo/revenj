@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.27897 
+* v1.0.0.32432 
 */
 
 package gen.model;
@@ -329,6 +329,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Composite.class, "getTsl", "\"tsl\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEntities", "\"entities\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"");
+		metamodel.registerProperty(gen.model.test.Composite.class, "getIndexes", "\"indexes\"");
 		test$converter$CompositeListConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.CompositeList.class, "\"test\".\"CompositeList_snowflake\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getURI", "\"URI\"");
@@ -347,6 +348,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getNumber", "\"number\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntitiesCount", "\"entitiesCount\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getHasEntities", "\"hasEntities\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntityHasMoney", "\"entityHasMoney\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getIndexes", "\"indexes\"");
 		container.register(gen.model.test.CompositeCube.class, false);
 		test$converter$EntityConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Entity.class, "\"test\".\"Entity_entity\"");
@@ -496,6 +499,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getXml", "\"xml\"");
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getS3", "\"s3\"");
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getPp", "\"pp\"");
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getL", "\"l\"");
 		egzotics$converter$vConverter.configure(container);
 		metamodel.registerDataSource(gen.model.egzotics.v.class, "\"egzotics\".\"v\"");
 		metamodel.registerProperty(gen.model.egzotics.v.class, "getX", "\"x\"");
@@ -511,6 +516,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getVv", "\"vv\"");
 		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getE", "\"e\"");
 		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getEe", "\"ee\"");
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getP", "\"p\"");
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getLl", "\"ll\"");
 		metamodel.registerEnum(gen.model.egzotics.E.class, "\"egzotics\".\"E\"");
 		issues$converter$DateListConverter.configure(container);
 		metamodel.registerDataSource(gen.model.issues.DateList.class, "\"issues\".\"DateList_entity\"");

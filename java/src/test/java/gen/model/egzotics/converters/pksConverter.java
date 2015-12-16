@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.32432 
+*/
+
 package gen.model.egzotics.converters;
 
 
@@ -58,15 +63,31 @@ public class pksConverter implements ObjectConverter<gen.model.egzotics.pks> {
 		column = columnsExtended.stream().filter(it -> "s3".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 's3' column in egzotics pks. Check if DB is in sync");
 		__index__extended_s3 = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "pp".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'pp' column in egzotics pks_entity. Check if DB is in sync");
+		__index___pp = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "pp".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'pp' column in egzotics pks. Check if DB is in sync");
+		__index__extended_pp = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "l".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'l' column in egzotics pks_entity. Check if DB is in sync");
+		__index___l = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "l".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'l' column in egzotics pks. Check if DB is in sync");
+		__index__extended_l = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
 		
 			
-		gen.model.egzotics.pks.__configureConverter(readers, __index___id, __index___xml, __index___s3);
+		gen.model.egzotics.pks.__configureConverter(readers, __index___id, __index___xml, __index___s3, __index___pp, __index___l);
 			
-		gen.model.egzotics.pks.__configureConverterExtended(readersExtended, __index__extended_id, __index__extended_xml, __index__extended_s3);
+		gen.model.egzotics.pks.__configureConverterExtended(readersExtended, __index__extended_id, __index__extended_xml, __index__extended_s3, __index__extended_pp, __index__extended_l);
 	}
 
 	@Override
@@ -94,6 +115,8 @@ public class pksConverter implements ObjectConverter<gen.model.egzotics.pks> {
 		items[__index___id] = org.revenj.postgres.converters.ArrayTuple.create(instance.getId(), org.revenj.postgres.converters.IntConverter::toTuple);
 		items[__index___xml] = org.revenj.postgres.converters.XmlConverter.toTuple(instance.getXml());
 		items[__index___s3] = org.revenj.postgres.converters.S3Converter.toTuple(instance.getS3());
+		items[__index___pp] = org.revenj.postgres.converters.ArrayTuple.create(instance.getPp(), org.revenj.postgres.converters.PointConverter::toTuple);
+		items[__index___l] = org.revenj.postgres.converters.PointConverter.toTuple(instance.getL());
 		return RecordTuple.from(items);
 	}
 
@@ -120,6 +143,8 @@ public class pksConverter implements ObjectConverter<gen.model.egzotics.pks> {
 		items[__index__extended_id] = org.revenj.postgres.converters.ArrayTuple.create(instance.getId(), org.revenj.postgres.converters.IntConverter::toTuple);
 		items[__index__extended_xml] = org.revenj.postgres.converters.XmlConverter.toTuple(instance.getXml());
 		items[__index__extended_s3] = org.revenj.postgres.converters.S3Converter.toTuple(instance.getS3());
+		items[__index__extended_pp] = org.revenj.postgres.converters.ArrayTuple.create(instance.getPp(), org.revenj.postgres.converters.PointConverter::toTuple);
+		items[__index__extended_l] = org.revenj.postgres.converters.PointConverter.toTuple(instance.getL());
 		return RecordTuple.from(items);
 	}
 	private final int columnCountExtended;
@@ -151,4 +176,8 @@ public class pksConverter implements ObjectConverter<gen.model.egzotics.pks> {
 	private final int __index__extended_xml;
 	private final int __index___s3;
 	private final int __index__extended_s3;
+	private final int __index___pp;
+	private final int __index__extended_pp;
+	private final int __index___l;
+	private final int __index__extended_l;
 }

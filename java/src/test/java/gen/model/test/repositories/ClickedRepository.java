@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.23157 
+* v1.0.0.32432 
 */
 
 package gen.model.test.repositories;
@@ -343,7 +343,7 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 			for(int i = 0; i < uris.length; i++) {
 				ids[i] = Long.parseLong(uris[i]);
 			}
-			statement.setArray(1, connection.createArrayOf("bigint", ids));
+			statement.setArray(1, connection.createArrayOf("int8", ids));
 			return readFromDb(statement, new java.util.ArrayList<>(uris.length));			
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
@@ -458,7 +458,7 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 			for(int i = 0; i < uris.length; i++) {
 				ids[i] = Long.parseLong(uris[i]);
 			}
-			statement.setArray(1, connection.createArrayOf("bigint", ids));
+			statement.setArray(1, connection.createArrayOf("int8", ids));
 			statement.executeUpdate();
 		} catch (java.sql.SQLException e) {
 			throw new RuntimeException(e);

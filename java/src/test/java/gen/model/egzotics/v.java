@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.32432 
+*/
+
 package gen.model.egzotics;
 
 
@@ -69,7 +74,7 @@ public final class v   implements java.lang.Cloneable, java.io.Serializable, com
 		this.x = x;
 	}
 
-	private static final long serialVersionUID = -5467614037805033832L;
+	private static final long serialVersionUID = 4303057795046559537L;
 	
 	private int x;
 

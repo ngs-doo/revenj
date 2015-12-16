@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.32432 
+*/
+
 package gen.model.test.repositories;
 
 
@@ -249,14 +254,32 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 	
 	@Override
 	public java.util.List<gen.model.test.Composite> find(String[] uris) {
+		final java.util.UUID[] ids = new java.util.UUID[uris.length];
+		for (int i = 0; i < uris.length; i++) {
+			try {
+				ids[i] = java.util.UUID.fromString(uris[i]);
+			} catch (java.lang.Exception e) {
+				throw new java.lang.IllegalArgumentException("Invalid URI value found: " + uris[i], e);
+			}
+		}
 		java.sql.Connection connection = getConnection();
-		try (java.sql.Statement statement = connection.createStatement();
+		try {
+			return find(ids, connection);
+		} finally {
+			releaseConnection(connection);
+		}
+	}
+
+
+	public java.util.List<gen.model.test.Composite> find(java.util.UUID[] ids, java.sql.Connection connection) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT _r FROM \"test\".\"Composite_entity\" _r WHERE _r.\"id\" = ANY(?)");
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
-			java.util.List<gen.model.test.Composite> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT _r FROM \"test\".\"Composite_entity\" _r WHERE _r.\"id\" IN (");
-			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
-			sb.append(")");
-			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
+			org.postgresql.util.PGobject arr = new org.postgresql.util.PGobject();
+			arr.setType("uuid[]");
+			arr.setValue(org.revenj.postgres.converters.ArrayTuple.create(ids, org.revenj.postgres.converters.UuidConverter::toTuple).buildTuple(false));
+			statement.setObject(1, arr);
+			java.util.List<gen.model.test.Composite> result = new java.util.ArrayList<>(ids.length);
+			try (java.sql.ResultSet rs = statement.executeQuery()) {
 				while (rs.next()) {
 					reader.process(rs.getString(1));
 					result.add(converter.from(reader));
@@ -266,8 +289,6 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
-		} finally { 
-			releaseConnection(connection); 
 		}
 	}
 	

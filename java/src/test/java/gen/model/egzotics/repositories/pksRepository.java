@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.32432 
+*/
+
 package gen.model.egzotics.repositories;
 
 
@@ -194,6 +199,7 @@ public class pksRepository   implements java.io.Closeable, org.revenj.patterns.R
 			StringBuilder sb = new StringBuilder("SELECT _r FROM \"egzotics\".\"pks_entity\" _r WHERE _r.\"id\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
+			statement.setEscapeProcessing(false);
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
 				while (rs.next()) {
 					reader.process(rs.getString(1));

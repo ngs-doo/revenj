@@ -25,6 +25,8 @@ module test {
 		List<Entity> entities;
 		detail<LazyLoad.comp> lazies;
 		calculated int entitiesCount from 'it => it.entities.Count';
+		calculated bool[] entityHasMoney from 'it => it.entities.Select(e => e.money > 0).ToArray()';
+		long[]? indexes;
 		calculated hasEntities from 'it => it.entities.Count > 0';
 		specification ForSimple 'it => it.simple.number == simple.number' {
 			Simple simple;
@@ -41,6 +43,8 @@ module test {
 		simple.number;
 		entitiesCount;
 		hasEntities;
+		entityHasMoney;
+		indexes;
 		calculated guid id2 from 'it => it.id';
 		specification ForSimple 'it => simples.Contains(it.simple)' {
 			List<Simple> simples;
@@ -172,6 +176,8 @@ module egzotics {
 		list<int> id;
 		xml? xml;
 		s3? s3;
+		point[] pp;
+		location l;
 	}
 	value v { int x; }
 	root PksV(vv, e, ee) {
@@ -179,6 +185,8 @@ module egzotics {
 		v[] vv;
 		E e;
 		Set<E> ee;
+		point p;
+		List<Location> ll;
 	}
 	enum E { A; B; C; }
 }

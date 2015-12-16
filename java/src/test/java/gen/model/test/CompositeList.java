@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29353 
+* v1.0.0.32432 
 */
 
 package gen.model.test;
@@ -22,7 +22,9 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 			@com.fasterxml.jackson.annotation.JsonProperty("simple")  final gen.model.test.Simple simple,
 			@com.fasterxml.jackson.annotation.JsonProperty("number")  final int number,
 			@com.fasterxml.jackson.annotation.JsonProperty("entitiesCount")  final int entitiesCount,
-			@com.fasterxml.jackson.annotation.JsonProperty("hasEntities")  final boolean hasEntities) {
+			@com.fasterxml.jackson.annotation.JsonProperty("hasEntities")  final boolean hasEntities,
+			@com.fasterxml.jackson.annotation.JsonProperty("entityHasMoney")  final boolean[] entityHasMoney,
+			@com.fasterxml.jackson.annotation.JsonProperty("indexes")  final long[] indexes) {
 			
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.id = id != null ? id : org.revenj.Utils.MIN_UUID;
@@ -38,6 +40,8 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 		this.number = number;
 		this.entitiesCount = entitiesCount;
 		this.hasEntities = hasEntities;
+		this.entityHasMoney = entityHasMoney != null ? entityHasMoney : new boolean[] { };
+		this.indexes = indexes;
 	}
 
 	
@@ -55,6 +59,8 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 		this.number = 0;
 		this.entitiesCount = 0;
 		this.hasEntities = false;
+		this.entityHasMoney = new boolean[] { };
+		this.indexes = null;
 	}
 
 	
@@ -91,7 +97,7 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	private static final long serialVersionUID = -3360289858768152866L;
+	private static final long serialVersionUID = -5241368694566029105L;
 	
 	private final java.util.UUID id;
 
@@ -193,6 +199,27 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 		return this.hasEntities;
 	}
 
+	private static final boolean[] _defaultentityHasMoney = new boolean[] { };
+	
+	private final boolean[] entityHasMoney;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("entityHasMoney")
+	public boolean[] getEntityHasMoney()  {
+		
+		return this.entityHasMoney;
+	}
+
+	
+	private final long[] indexes;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("indexes")
+	public long[] getIndexes()  {
+		
+		return this.indexes;
+	}
+
 	
 	private java.util.UUID id2;
 
@@ -223,7 +250,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = 1674382353985508024L;
+	private static final long serialVersionUID = 685986846977240128L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 
@@ -436,17 +463,17 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		
 		if(self.tsl.size() != 0) {
 			sw.writeAscii(",\"tsl\":[", 8);
-			org.revenj.json.JavaTimeConverter.serializeNullable(self.tsl.get(0), sw);
+			com.dslplatform.json.JavaTimeConverter.serializeNullable(self.tsl.get(0), sw);
 			for(int i = 1; i < self.tsl.size(); i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				org.revenj.json.JavaTimeConverter.serializeNullable(self.tsl.get(i), sw);
+				com.dslplatform.json.JavaTimeConverter.serializeNullable(self.tsl.get(i), sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
 		
 			if (!(self.change.getYear() == 1 && self.change.getMonthValue() == 1 && self.change.getDayOfMonth() == 1)) {
 				sw.writeAscii(",\"change\":", 10);
-				org.revenj.json.JavaTimeConverter.serialize(self.change, sw);
+				com.dslplatform.json.JavaTimeConverter.serialize(self.change, sw);
 			}
 		
 		if(self.entities.size() != 0) {
@@ -485,9 +512,30 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 				sw.writeAscii(",\"hasEntities\":true");
 			}
 		
-			if (!(self.id2.getMostSignificantBits() == 0 && self.id2.getLeastSignificantBits() == 0)) {
+		if(self.entityHasMoney.length != 0) {
+			sw.writeAscii(",\"entityHasMoney\":[", 19);
+			com.dslplatform.json.BoolConverter.serialize(self.entityHasMoney[0], sw);
+			for(int i = 1; i < self.entityHasMoney.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.BoolConverter.serialize(self.entityHasMoney[i], sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		
+		if(self.indexes != null && self.indexes.length != 0) {
+			sw.writeAscii(",\"indexes\":[", 12);
+			com.dslplatform.json.NumberConverter.serialize(self.indexes[0], sw);
+			for(int i = 1; i < self.indexes.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.NumberConverter.serialize(self.indexes[i], sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else if(self.indexes != null) sw.writeAscii(",\"indexes\":[]", 13);
+		
+			if (!(self.getId2().getMostSignificantBits() == 0 && self.getId2().getLeastSignificantBits() == 0)) {
 				sw.writeAscii(",\"id2\":", 7);
-				com.dslplatform.json.UUIDConverter.serialize(self.id2, sw);
+				com.dslplatform.json.UUIDConverter.serialize(self.getId2(), sw);
 			}
 	}
 
@@ -524,10 +572,10 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		
 		if(self.tsl.size() != 0) {
 			sw.writeAscii(",\"tsl\":[", 8);
-			org.revenj.json.JavaTimeConverter.serializeNullable(self.tsl.get(0), sw);
+			com.dslplatform.json.JavaTimeConverter.serializeNullable(self.tsl.get(0), sw);
 			for(int i = 1; i < self.tsl.size(); i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				org.revenj.json.JavaTimeConverter.serializeNullable(self.tsl.get(i), sw);
+				com.dslplatform.json.JavaTimeConverter.serializeNullable(self.tsl.get(i), sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
@@ -535,7 +583,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		
 			
 			sw.writeAscii(",\"change\":", 10);
-			org.revenj.json.JavaTimeConverter.serialize(self.change, sw);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.change, sw);
 		
 		if(self.entities.size() != 0) {
 			sw.writeAscii(",\"entities\":[", 13);
@@ -574,9 +622,32 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 				sw.writeAscii(",\"hasEntities\":false");
 			}
 		
+		if(self.entityHasMoney.length != 0) {
+			sw.writeAscii(",\"entityHasMoney\":[", 19);
+			com.dslplatform.json.BoolConverter.serialize(self.entityHasMoney[0], sw);
+			for(int i = 1; i < self.entityHasMoney.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.BoolConverter.serialize(self.entityHasMoney[i], sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"entityHasMoney\":[]", 20);
+		
+		if(self.indexes != null && self.indexes.length != 0) {
+			sw.writeAscii(",\"indexes\":[", 12);
+			com.dslplatform.json.NumberConverter.serialize(self.indexes[0], sw);
+			for(int i = 1; i < self.indexes.length; i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.NumberConverter.serialize(self.indexes[i], sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else if(self.indexes != null) sw.writeAscii(",\"indexes\":[]", 13);
+		else sw.writeAscii(",\"indexes\":null", 15);
+		
 			
 			sw.writeAscii(",\"id2\":", 7);
-			com.dslplatform.json.UUIDConverter.serialize(self.id2, sw);
+			com.dslplatform.json.UUIDConverter.serialize(self.getId2(), sw);
 	}
 
 	public static final com.dslplatform.json.JsonReader.ReadJsonObject<CompositeList> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<CompositeList>() {
@@ -599,6 +670,8 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		int _number_ = 0;
 		int _entitiesCount_ = 0;
 		boolean _hasEntities_ = false;
+		boolean[] _entityHasMoney_ = _defaultentityHasMoney;
+		long[] _indexes_ = null;
 		java.util.UUID _id2_ = org.revenj.Utils.MIN_UUID;
 		byte nextToken = reader.last();
 		if(nextToken != '}') {
@@ -677,14 +750,14 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 					if (nextToken == '[') {
 						nextToken = reader.getNextToken();
 						if (nextToken != ']') {
-							org.revenj.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _tsl_);
+							com.dslplatform.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _tsl_);
 						}
 						nextToken = reader.getNextToken();
 					}
 					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
 						break;
 					case 1922892221:
-						_change_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+						_change_ = com.dslplatform.json.JavaTimeConverter.deserializeLocalDate(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case -922096406:
@@ -715,6 +788,36 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 						break;
 					case -1925893080:
 						_hasEntities_ = com.dslplatform.json.BoolConverter.deserialize(reader); nextToken = reader.getNextToken();
+						break;
+					case -1029283846:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							java.util.ArrayList<Boolean> __res = com.dslplatform.json.BoolConverter.deserializeCollection(reader);
+							boolean[] __resUnboxed = new boolean[__res.size()];
+							for(int _i=0;_i<__res.size();_i++) 
+								__resUnboxed[_i] = __res.get(_i);
+							_entityHasMoney_ = __resUnboxed;
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -1595427141:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							java.util.ArrayList<Long> __res = com.dslplatform.json.NumberConverter.deserializeLongCollection(reader);
+							long[] __resUnboxed = new long[__res.size()];
+							for(int _i=0;_i<__res.size();_i++) 
+								__resUnboxed[_i] = __res.get(_i);
+							_indexes_ = __resUnboxed;
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
 						break;
 					case -1076877162:
 						_id2_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
@@ -803,14 +906,14 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 					if (nextToken == '[') {
 						nextToken = reader.getNextToken();
 						if (nextToken != ']') {
-							org.revenj.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _tsl_);
+							com.dslplatform.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _tsl_);
 						}
 						nextToken = reader.getNextToken();
 					}
 					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
 						break;
 					case 1922892221:
-						_change_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+						_change_ = com.dslplatform.json.JavaTimeConverter.deserializeLocalDate(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case -922096406:
@@ -842,6 +945,36 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 					case -1925893080:
 						_hasEntities_ = com.dslplatform.json.BoolConverter.deserialize(reader); nextToken = reader.getNextToken();
 						break;
+					case -1029283846:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							java.util.ArrayList<Boolean> __res = com.dslplatform.json.BoolConverter.deserializeCollection(reader);
+							boolean[] __resUnboxed = new boolean[__res.size()];
+							for(int _i=0;_i<__res.size();_i++) 
+								__resUnboxed[_i] = __res.get(_i);
+							_entityHasMoney_ = __resUnboxed;
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -1595427141:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							java.util.ArrayList<Long> __res = com.dslplatform.json.NumberConverter.deserializeLongCollection(reader);
+							long[] __resUnboxed = new long[__res.size()];
+							for(int _i=0;_i<__res.size();_i++) 
+								__resUnboxed[_i] = __res.get(_i);
+							_indexes_ = __resUnboxed;
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
 					case -1076877162:
 						_id2_ = com.dslplatform.json.UUIDConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
@@ -867,6 +1000,8 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.number = _number_;
 		this.entitiesCount = _entitiesCount_;
 		this.hasEntities = _hasEntities_;
+		this.entityHasMoney = _entityHasMoney_;
+		this.indexes = _indexes_;
 		this.id2 = _id2_;
 	}
 

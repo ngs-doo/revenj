@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29353 
+* v1.0.0.32432 
 */
 
 package gen.model.test.converters;
@@ -117,6 +117,22 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		column = columnsExtended.stream().filter(it -> "hasEntities".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'hasEntities' column in test CompositeList. Check if DB is in sync");
 		__index__extended_hasEntities = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "entityHasMoney".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entityHasMoney' column in test CompositeList_snowflake. Check if DB is in sync");
+		__index___entityHasMoney = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "entityHasMoney".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entityHasMoney' column in test CompositeList. Check if DB is in sync");
+		__index__extended_entityHasMoney = (int)column.get().order - 1;
+			
+		column = columns.stream().filter(it -> "indexes".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'indexes' column in test CompositeList_snowflake. Check if DB is in sync");
+		__index___indexes = (int)column.get().order - 1;
+			
+		column = columnsExtended.stream().filter(it -> "indexes".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'indexes' column in test CompositeList. Check if DB is in sync");
+		__index__extended_indexes = (int)column.get().order - 1;
 	}
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
@@ -166,6 +182,8 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		int _number_ = 0;
 		int _entitiesCount_ = 0;
 		boolean _hasEntities_ = false;
+		boolean[] _entityHasMoney_ = null;
+		long[] _indexes_ = null;
 		for(int x = 0; x < columnCount && i < columnCount; x++) {
 			
 			if (__index___URI == i) { _URI_ = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); i++; }
@@ -179,8 +197,22 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 			if (__index___number == i) { _number_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
 			if (__index___entitiesCount == i) { _entitiesCount_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
 			if (__index___hasEntities == i) { _hasEntities_ = org.revenj.postgres.converters.BoolConverter.parse(reader); i++; }
+			if (__index___entityHasMoney == i) { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {
+				boolean[] __resUnboxed = new boolean[__list.size()];
+				for(int _i=0;_i<__list.size();_i++) {
+					__resUnboxed[_i] = __list.get(_i);
+				}
+				_entityHasMoney_ = __resUnboxed;
+			} else _entityHasMoney_ = new boolean[] { }; }; i++; }
+			if (__index___indexes == i) { { java.util.List<Long> __list = org.revenj.postgres.converters.LongConverter.parseCollection(reader, context, false); if(__list != null) {
+				long[] __resUnboxed = new long[__list.size()];
+				for(int _i=0;_i<__list.size();_i++) {
+					__resUnboxed[_i] = __list.get(_i);
+				}
+				_indexes_ = __resUnboxed;
+			} }; i++; }
 		}
-		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_, _entitiesCount_, _hasEntities_);
+		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_, _entitiesCount_, _hasEntities_, _entityHasMoney_, _indexes_);
 		reader.read(outerContext);
 		return instance;
 	}
@@ -217,6 +249,8 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		int _number_ = 0;
 		int _entitiesCount_ = 0;
 		boolean _hasEntities_ = false;
+		boolean[] _entityHasMoney_ = null;
+		long[] _indexes_ = null;
 		for(int x = 0; x < columnCountExtended && i < columnCountExtended; x++) {
 			
 			if (__index__extended_URI == i) { _URI_ = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); i++; }
@@ -230,8 +264,22 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 			if (__index__extended_number == i) { _number_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
 			if (__index__extended_entitiesCount == i) { _entitiesCount_ = org.revenj.postgres.converters.IntConverter.parse(reader); i++; }
 			if (__index__extended_hasEntities == i) { _hasEntities_ = org.revenj.postgres.converters.BoolConverter.parse(reader); i++; }
+			if (__index__extended_entityHasMoney == i) { { java.util.List<Boolean> __list = org.revenj.postgres.converters.BoolConverter.parseCollection(reader, context, false); if(__list != null) {
+				boolean[] __resUnboxed = new boolean[__list.size()];
+				for(int _i=0;_i<__list.size();_i++) {
+					__resUnboxed[_i] = __list.get(_i);
+				}
+				_entityHasMoney_ = __resUnboxed;
+			} else _entityHasMoney_ = new boolean[] { }; }; i++; }
+			if (__index__extended_indexes == i) { { java.util.List<Long> __list = org.revenj.postgres.converters.LongConverter.parseCollection(reader, context, false); if(__list != null) {
+				long[] __resUnboxed = new long[__list.size()];
+				for(int _i=0;_i<__list.size();_i++) {
+					__resUnboxed[_i] = __list.get(_i);
+				}
+				_indexes_ = __resUnboxed;
+			} }; i++; }
 		}
-		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_, _entitiesCount_, _hasEntities_);
+		gen.model.test.CompositeList instance = new gen.model.test.CompositeList(_URI_, _id_, _enn_, _en_, _tsl_, _change_, _entities_, _simple_, _number_, _entitiesCount_, _hasEntities_, _entityHasMoney_, _indexes_);
 		reader.read(outerContext);
 		return instance;
 	}
@@ -258,4 +306,8 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 	private final int __index__extended_entitiesCount;
 	private final int __index___hasEntities;
 	private final int __index__extended_hasEntities;
+	private final int __index___entityHasMoney;
+	private final int __index__extended_entityHasMoney;
+	private final int __index___indexes;
+	private final int __index__extended_indexes;
 }

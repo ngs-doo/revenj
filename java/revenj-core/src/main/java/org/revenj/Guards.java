@@ -4,6 +4,7 @@ import org.w3c.dom.Element;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Stream;
 
 public abstract class Guards {
 	public static <T> void checkNulls(final Iterable<T> values) {
@@ -11,7 +12,8 @@ public abstract class Guards {
 
 		int i = 0;
 		for (final T value : values) {
-			if (value == null) throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+			if (value == null)
+				throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
 			i++;
 		}
 	}
@@ -20,7 +22,8 @@ public abstract class Guards {
 		if (values == null) return;
 
 		for (int i = 0; i < values.length; i++) {
-			if (values[i] == null) throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+			if (values[i] == null)
+				throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
 		}
 	}
 
@@ -28,7 +31,8 @@ public abstract class Guards {
 		if (values == null) return;
 
 		for (int i = 0; i < values.size(); i++) {
-			if (values.get(i) == null) throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+			if (values.get(i) == null)
+				throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
 		}
 	}
 
@@ -37,7 +41,8 @@ public abstract class Guards {
 
 		int i = 0;
 		for (final T value : values) {
-			if (value == null) throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
+			if (value == null)
+				throw new IllegalArgumentException("Element at index " + i + " was a null value, which is not permitted.");
 			i++;
 		}
 	}
@@ -170,7 +175,8 @@ public abstract class Guards {
 
 		final Queue<BigDecimal> result = new ArrayDeque<BigDecimal>();
 		for (final BigDecimal value : values) {
-			if (value == null) throw new NullPointerException("Default Queue implementation (java.util.ArrayDeque) does not support null elements!");
+			if (value == null)
+				throw new NullPointerException("Default Queue implementation (java.util.ArrayDeque) does not support null elements!");
 			result.add(setScale(value, scale));
 		}
 		return result;
@@ -265,7 +271,7 @@ public abstract class Guards {
 		public int compare(final BigDecimal left, final BigDecimal right) {
 			return left == null && right == null ? 0
 					: left == null ? -1
-					: right == null? 1
+					: right == null ? 1
 					: left.compareTo(right);
 		}
 	};
@@ -387,5 +393,50 @@ public abstract class Guards {
 			return false;
 		}
 		return true;
+	}
+
+	public static boolean[] toBooleanArray(List<Boolean> items) {
+		if (items == null) return null;
+		boolean[] result = new boolean[items.size()];
+		for (int i = 0; i < items.size(); i++) {
+			result[i] = items.get(i);
+		}
+		return result;
+	}
+
+	public static int[] toInt32Array(List<Integer> items) {
+		if (items == null) return null;
+		int[] result = new int[items.size()];
+		for (int i = 0; i < items.size(); i++) {
+			result[i] = items.get(i);
+		}
+		return result;
+	}
+
+	public static long[] toInt64Array(List<Long> items) {
+		if (items == null) return null;
+		long[] result = new long[items.size()];
+		for (int i = 0; i < items.size(); i++) {
+			result[i] = items.get(i);
+		}
+		return result;
+	}
+
+	public static float[] toFloatArray(List<Float> items) {
+		if (items == null) return null;
+		float[] result = new float[items.size()];
+		for (int i = 0; i < items.size(); i++) {
+			result[i] = items.get(i);
+		}
+		return result;
+	}
+
+	public static double[] toDoubleArray(List<Double> items) {
+		if (items == null) return null;
+		double[] result = new double[items.size()];
+		for (int i = 0; i < items.size(); i++) {
+			result[i] = items.get(i);
+		}
+		return result;
 	}
 }

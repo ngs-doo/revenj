@@ -8,10 +8,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -20,19 +16,6 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 
 	public DslJsonSerialization(final ServiceLocator locator, Optional<Fallback<ServiceLocator>> fallback) {
 		super(locator, false, true, false, fallback.orElse(null), ServiceLoader.load(Configuration.class));
-
-		registerReader(LocalDate.class, JavaTimeConverter.LocalDateReader);
-		registerWriter(LocalDate.class, JavaTimeConverter.LocalDateWriter);
-		registerReader(LocalDateTime.class, JavaTimeConverter.LocalDateTimeReader);
-		registerWriter(LocalDateTime.class, JavaTimeConverter.LocalDateTimeWriter);
-		registerReader(OffsetDateTime.class, JavaTimeConverter.DateTimeReader);
-		registerWriter(OffsetDateTime.class, JavaTimeConverter.DateTimeWriter);
-		registerReader(java.sql.Date.class, rdr -> java.sql.Date.valueOf(JavaTimeConverter.deserializeLocalDate(rdr)));
-		registerWriter(java.sql.Date.class, (writer, value) -> JavaTimeConverter.serialize(value.toLocalDate(), writer));
-		registerReader(java.sql.Timestamp.class, rdr -> java.sql.Timestamp.from(JavaTimeConverter.deserializeDateTime(rdr).toInstant()));
-		registerWriter(java.sql.Timestamp.class, (writer, value) -> JavaTimeConverter.serialize(OffsetDateTime.ofInstant(value.toInstant(), ZoneId.systemDefault()), writer));
-		registerReader(java.util.Date.class, rdr -> java.util.Date.from(JavaTimeConverter.deserializeDateTime(rdr).toInstant()));
-		registerWriter(java.util.Date.class, (writer, value) -> JavaTimeConverter.serialize(OffsetDateTime.ofInstant(value.toInstant(), ZoneId.systemDefault()), writer));
 	}
 
 	@Override

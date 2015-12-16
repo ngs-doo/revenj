@@ -11,7 +11,6 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.*;
 

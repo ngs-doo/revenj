@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.32432 
+*/
+
 package gen.model.egzotics;
 
 
@@ -13,6 +18,8 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.vv = new gen.model.egzotics.v[] { };
 		this.e = gen.model.egzotics.E.A;
 		this.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(4);
+		this.p = new java.awt.Point();
+		this.ll = new java.util.ArrayList<java.awt.geom.Point2D>(4);
 	}
 
 	
@@ -57,6 +64,10 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 			return false;
 		if(!((this.ee == other.ee || this.ee != null && this.ee.equals(other.ee))))
 			return false;
+		if(!(this.p.equals(other.p)))
+			return false;
+		if(!((this.ll == other.ll || this.ll != null && this.ll.equals(other.ll))))
+			return false;
 		return true;
 	}
 
@@ -72,6 +83,13 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 			};
 		this.e = other.e;
 		this.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(other.ee);
+		this.p = other.p != null ? (java.awt.Point)other.p.clone() : null;
+		this.ll = new java.util.ArrayList<java.awt.geom.Point2D>(other.ll.size());
+			if (other.ll != null) {
+				for (java.awt.geom.Point2D it : other.ll) {
+					this.ll.add(it != null ? new java.awt.geom.Point2D.Double(it.getX(), it.getY()) : null);
+				}
+			};
 		this.__originalValue = other.__originalValue;
 	}
 
@@ -85,23 +103,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return "PksV(" + URI + ')';
 	}
 	
-	
-	public PksV(
-			final gen.model.egzotics.v v,
-			final gen.model.egzotics.v[] vv,
-			final gen.model.egzotics.E e,
-			final java.util.Set<gen.model.egzotics.E> ee) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setV(v);
-		setVv(vv);
-		setE(e);
-		setEe(ee);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -3601443466013193472L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private PksV(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -109,15 +111,20 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 			@com.fasterxml.jackson.annotation.JsonProperty("v") final gen.model.egzotics.v v,
 			@com.fasterxml.jackson.annotation.JsonProperty("vv") final gen.model.egzotics.v[] vv,
 			@com.fasterxml.jackson.annotation.JsonProperty("e") final gen.model.egzotics.E e,
-			@com.fasterxml.jackson.annotation.JsonProperty("ee") final java.util.Set<gen.model.egzotics.E> ee) {
+			@com.fasterxml.jackson.annotation.JsonProperty("ee") final java.util.Set<gen.model.egzotics.E> ee,
+			@com.fasterxml.jackson.annotation.JsonProperty("p") final java.awt.Point p,
+			@com.fasterxml.jackson.annotation.JsonProperty("ll") final java.util.List<java.awt.geom.Point2D> ll) {
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
 		this.v = v == null ? new gen.model.egzotics.v() : v;
 		this.vv = vv == null ? new gen.model.egzotics.v[] { } : vv;
 		this.e = e == null ? gen.model.egzotics.E.A : e;
 		this.ee = ee == null ? new java.util.LinkedHashSet<gen.model.egzotics.E>(4) : ee;
+		this.p = p == null ? new java.awt.Point() : p;
+		this.ll = ll == null ? new java.util.ArrayList<java.awt.geom.Point2D>(4) : ll;
 	}
 
+	private static final long serialVersionUID = -3357073556017543506L;
 	
 	private gen.model.egzotics.v v;
 
@@ -197,7 +204,45 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return this;
 	}
 
-	private transient PksV __originalValue;
+	
+	private java.awt.Point p;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("p")
+	public java.awt.Point getP()  {
+		
+		return p;
+	}
+
+	
+	public PksV setP(final java.awt.Point value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"p\" cannot be null!");
+		this.p = value;
+		
+		return this;
+	}
+
+	
+	private java.util.List<java.awt.geom.Point2D> ll;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("ll")
+	public java.util.List<java.awt.geom.Point2D> getLl()  {
+		
+		return ll;
+	}
+
+	
+	public PksV setLl(final java.util.List<java.awt.geom.Point2D> value) {
+		
+		if(value == null) throw new IllegalArgumentException("Property \"ll\" cannot be null!");
+		org.revenj.Guards.checkNulls(value);
+		this.ll = value;
+		
+		return this;
+	}
+
 	
 	static {
 		gen.model.egzotics.repositories.PksVRepository.__setupPersist(
@@ -233,6 +278,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 			}
 		);
 	}
+	private transient PksV __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -295,6 +341,21 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
+		
+			if (!(self.p.x == 0 && self.p.y == 0)) {
+				sw.writeAscii(",\"p\":", 5);
+				com.dslplatform.json.JavaGeomConverter.serializePoint(self.p, sw);
+			}
+		
+		if(self.ll.size() != 0) {
+			sw.writeAscii(",\"ll\":[", 7);
+			com.dslplatform.json.JavaGeomConverter.serializeLocation(self.ll.get(0), sw);
+			for(int i = 1; i < self.ll.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.JavaGeomConverter.serializeLocation(self.ll.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
 	}
 
 	static void __serializeJsonObjectFull(final PksV self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
@@ -349,6 +410,21 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
 		else sw.writeAscii(",\"ee\":[]", 8);
+		
+			
+			sw.writeAscii(",\"p\":", 5);
+			com.dslplatform.json.JavaGeomConverter.serializePoint(self.p, sw);
+		
+		if(self.ll.size() != 0) {
+			sw.writeAscii(",\"ll\":[", 7);
+			com.dslplatform.json.JavaGeomConverter.serializeLocation(self.ll.get(0), sw);
+			for(int i = 1; i < self.ll.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
+				com.dslplatform.json.JavaGeomConverter.serializeLocation(self.ll.get(i), sw);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"ll\":[]", 8);
 	}
 
 	public static final com.dslplatform.json.JsonReader.ReadJsonObject<PksV> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<PksV>() {
@@ -366,6 +442,8 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		gen.model.egzotics.v[] _vv_ = _defaultvv;
 		gen.model.egzotics.E _e_ = gen.model.egzotics.E.A;
 		java.util.Set<gen.model.egzotics.E> _ee_ = new java.util.LinkedHashSet<gen.model.egzotics.E>(4);
+		java.awt.Point _p_ = new java.awt.Point();
+		java.util.List<java.awt.geom.Point2D> _ll_ = new java.util.ArrayList<java.awt.geom.Point2D>(4);
 		byte nextToken = reader.last();
 		if(nextToken != '}') {
 			int nameHash = reader.fillName();
@@ -453,6 +531,21 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 						}
 						nextToken = reader.getNextToken();
 					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					case -183745553:
+						_p_ = com.dslplatform.json.JavaGeomConverter.deserializePoint(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 1160889637:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.JavaGeomConverter.deserializeLocationCollection(reader, _ll_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
 						break;
 					default:
 						nextToken = reader.skip();
@@ -548,6 +641,21 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 						nextToken = reader.getNextToken();
 					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
 						break;
+					case -183745553:
+						_p_ = com.dslplatform.json.JavaGeomConverter.deserializePoint(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 1160889637:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							com.dslplatform.json.JavaGeomConverter.deserializeLocationCollection(reader, _ll_);
+						}
+						nextToken = reader.getNextToken();
+					}
+					else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
 					default:
 						nextToken = reader.skip();
 						break;
@@ -564,6 +672,8 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.vv = _vv_;
 		this.e = _e_;
 		this.ee = _ee_;
+		this.p = _p_;
+		this.ll = _ll_;
 	}
 
 	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
@@ -591,19 +701,42 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.__originalValue = (PksV)this.clone();
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<PksV>[] readers, gen.model.egzotics.converters.vConverter __converter_v, int __index___v, gen.model.egzotics.converters.vConverter __converter_vv, int __index___vv, int __index___e, int __index___ee) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<PksV>[] readers, gen.model.egzotics.converters.vConverter __converter_v, int __index___v, gen.model.egzotics.converters.vConverter __converter_vv, int __index___vv, int __index___e, int __index___ee, int __index___p, int __index___ll) {
 		
 		readers[__index___v] = (item, reader, context) -> { item.v = __converter_v.from(reader, context); return item; };
 		readers[__index___vv] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.v> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_vv::from); if (__list != null) {item.vv = __list.toArray(new gen.model.egzotics.v[__list.size()]);} else item.vv = new gen.model.egzotics.v[] { }; }; return item; };
 		readers[__index___e] = (item, reader, context) -> { item.e = gen.model.egzotics.converters.EConverter.fromReader(reader); return item; };
 		readers[__index___ee] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.E> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.egzotics.E.A, gen.model.egzotics.converters.EConverter::convertEnum); if (__list != null) {item.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(__list);} else item.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(4); }; return item; };
+		readers[__index___p] = (item, reader, context) -> { item.p = org.revenj.postgres.converters.PointConverter.parsePoint(reader, context, false); return item; };
+		readers[__index___ll] = (item, reader, context) -> { { java.util.List<java.awt.geom.Point2D> __list = org.revenj.postgres.converters.PointConverter.parseLocationCollection(reader, context, false); if(__list != null) {item.ll = __list;} else item.ll = new java.util.ArrayList<java.awt.geom.Point2D>(4); }; return item; };
 	}
 	
-	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<PksV>[] readers, final gen.model.egzotics.converters.vConverter __converter_v, int __index__extended_v, final gen.model.egzotics.converters.vConverter __converter_vv, int __index__extended_vv, int __index__extended_e, int __index__extended_ee) {
+	public static void __configureConverterExtended(org.revenj.postgres.ObjectConverter.Reader<PksV>[] readers, final gen.model.egzotics.converters.vConverter __converter_v, int __index__extended_v, final gen.model.egzotics.converters.vConverter __converter_vv, int __index__extended_vv, int __index__extended_e, int __index__extended_ee, int __index__extended_p, int __index__extended_ll) {
 		
 		readers[__index__extended_v] = (item, reader, context) -> { item.v = __converter_v.fromExtended(reader, context); return item; };
 		readers[__index__extended_vv] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.v> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_vv::fromExtended); if (__list != null) {item.vv = __list.toArray(new gen.model.egzotics.v[__list.size()]);} else item.vv = new gen.model.egzotics.v[] { }; }; return item; };
 		readers[__index__extended_e] = (item, reader, context) -> { item.e = gen.model.egzotics.converters.EConverter.fromReader(reader); return item; };
 		readers[__index__extended_ee] = (item, reader, context) -> { { java.util.List<gen.model.egzotics.E> __list = org.revenj.postgres.converters.EnumConverter.parseCollection(reader, context, gen.model.egzotics.E.A, gen.model.egzotics.converters.EConverter::convertEnum); if (__list != null) {item.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(__list);} else item.ee = new java.util.LinkedHashSet<gen.model.egzotics.E>(4); }; return item; };
+		readers[__index__extended_p] = (item, reader, context) -> { item.p = org.revenj.postgres.converters.PointConverter.parsePoint(reader, context, false); return item; };
+		readers[__index__extended_ll] = (item, reader, context) -> { { java.util.List<java.awt.geom.Point2D> __list = org.revenj.postgres.converters.PointConverter.parseLocationCollection(reader, context, false); if(__list != null) {item.ll = __list;} else item.ll = new java.util.ArrayList<java.awt.geom.Point2D>(4); }; return item; };
 	}
+	
+	
+	public PksV(
+			final gen.model.egzotics.v v,
+			final gen.model.egzotics.v[] vv,
+			final gen.model.egzotics.E e,
+			final java.util.Set<gen.model.egzotics.E> ee,
+			final java.awt.Point p,
+			final java.util.List<java.awt.geom.Point2D> ll) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setV(v);
+		setVv(vv);
+		setE(e);
+		setEe(ee);
+		setP(p);
+		setLl(ll);
+	}
+
 }

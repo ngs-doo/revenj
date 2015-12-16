@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -41,7 +42,8 @@ namespace Revenj.DatabasePersistence.Postgres
 			this.DomainModel = domainModel;
 			this.Locator = locator;
 			Notifications = Subject.AsObservable();
-			SetUpConnection(connectionInfo.ConnectionString + ";SyncNotification=true");
+			if (ConfigurationManager.AppSettings["Revenj.Notifications"] != "disabled")
+				SetUpConnection(connectionInfo.ConnectionString + ";SyncNotification=true");
 			AppDomain.CurrentDomain.ProcessExit += (s, ea) => IsDisposed = true;
 			AppDomain.CurrentDomain.DomainUnload += (s, ea) => IsDisposed = true;
 		}
