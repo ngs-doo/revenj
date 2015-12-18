@@ -1,17 +1,30 @@
 package org.revenj.server.servlet;
 
+import com.dslplatform.json.XmlConverter;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Optional;
 
 final class JacksonSerialization implements Serialization<String> {
@@ -25,7 +38,123 @@ final class JacksonSerialization implements Serialization<String> {
 				.setInjectableValues(new InjectableValues.Std().addValue("__locator", locator))
 				.registerModule(new Jdk8Module())
 				.registerModule(new JavaTimeModule())
+				.registerModule(withCustomSerializers())
 				.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+	}
+
+	private static SimpleModule withCustomSerializers() {
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(Element.class, new JsonSerializer<Element>() {
+			@Override
+			public void serialize(Element element, JsonGenerator gen, SerializerProvider unused) throws IOException {
+				Document document = element.getOwnerDocument();
+				DOMImplementationLS domImplLS = (DOMImplementationLS) document.getImplementation();
+				LSSerializer serializer = domImplLS.createLSSerializer();
+				LSOutput lsOutput = domImplLS.createLSOutput();
+				lsOutput.setEncoding("UTF-8");
+				StringWriter writer = new StringWriter();
+				lsOutput.setCharacterStream(writer);
+				serializer.write(document, lsOutput);
+			}
+		});
+		module.addSerializer(java.awt.Point.class, new JsonSerializer<java.awt.Point>() {
+			@Override
+			public void serialize(final java.awt.Point value, final JsonGenerator jg, final SerializerProvider unused) throws IOException {
+				jg.writeStartObject();
+				jg.writeNumberField("X", value.x);
+				jg.writeNumberField("Y", value.y);
+				jg.writeEndObject();
+			}
+		});
+		module.addSerializer(java.awt.geom.Point2D.class, new JsonSerializer<java.awt.geom.Point2D>() {
+			@Override
+			public void serialize(final java.awt.geom.Point2D value, final JsonGenerator jg, final SerializerProvider unused) throws IOException {
+				jg.writeStartObject();
+				jg.writeNumberField("X", value.getX());
+				jg.writeNumberField("Y", value.getY());
+				jg.writeEndObject();
+			}
+		});
+		module.addSerializer(java.awt.geom.Rectangle2D.class, new JsonSerializer<java.awt.geom.Rectangle2D>() {
+			@Override
+			public void serialize(final java.awt.geom.Rectangle2D rect, final JsonGenerator jg, final SerializerProvider unused) throws IOException {
+				jg.writeStartObject();
+				jg.writeNumberField("X", rect.getX());
+				jg.writeNumberField("Y", rect.getY());
+				jg.writeNumberField("Width", rect.getWidth());
+				jg.writeNumberField("Height", rect.getHeight());
+				jg.writeEndObject();
+			}
+		});
+		module.addSerializer(java.awt.image.BufferedImage.class, new JsonSerializer<java.awt.image.BufferedImage>() {
+			@Override
+			public void serialize(final java.awt.image.BufferedImage image, final JsonGenerator jg, final SerializerProvider _unused) throws IOException {
+				final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ImageIO.write(image, "png", baos);
+				jg.writeBinary(baos.toByteArray());
+			}
+		});
+		module.addDeserializer(Element.class, new JsonDeserializer<Element>() {
+			@Override
+			public Element deserialize(JsonParser parser, DeserializationContext unused) throws IOException {
+				if (parser.nextToken() == JsonToken.VALUE_STRING) {
+					try {
+						InputSource source = new InputSource(parser.getValueAsString());
+						return documentBuilder.parse(source).getDocumentElement();
+					} catch (SAXException ex) {
+						throw new IOException(ex);
+					}
+				} else {
+					@SuppressWarnings("unchecked")
+					final HashMap<String, Object> map = parser.readValueAs(HashMap.class);
+					return map == null ? null : XmlConverter.mapToXml(map);
+				}
+			}
+		});
+		module.addDeserializer(java.awt.Point.class, new JsonDeserializer<java.awt.Point>() {
+			@Override
+			public java.awt.Point deserialize(final JsonParser parser, final DeserializationContext unused) throws IOException {
+				final JsonNode tree = parser.getCodec().readTree(parser);
+				return new java.awt.Point(tree.get("X").asInt(), tree.get("Y").asInt());
+			}
+		});
+		module.addDeserializer(java.awt.geom.Point2D.class, new JsonDeserializer<java.awt.geom.Point2D>() {
+			@Override
+			public java.awt.geom.Point2D deserialize(final JsonParser parser, final DeserializationContext unused) throws IOException {
+				final JsonNode tree = parser.getCodec().readTree(parser);
+				return new java.awt.geom.Point2D.Double(tree.get("X").asDouble(), tree.get("Y").asDouble());
+			}
+		});
+		module.addDeserializer(java.awt.geom.Rectangle2D.class, new JsonDeserializer<java.awt.geom.Rectangle2D>() {
+			@Override
+			public java.awt.geom.Rectangle2D deserialize(final JsonParser parser, final DeserializationContext _unused) throws IOException {
+				final JsonNode tree = parser.getCodec().readTree(parser);
+				return new java.awt.geom.Rectangle2D.Double(
+						tree.get("X").asDouble(),
+						tree.get("Y").asDouble(),
+						tree.get("Width").asDouble(),
+						tree.get("Height").asDouble());
+			}
+		});
+		module.addDeserializer(java.awt.image.BufferedImage.class, new JsonDeserializer<java.awt.image.BufferedImage>() {
+			@Override
+			public java.awt.image.BufferedImage deserialize(final JsonParser parser, final DeserializationContext _unused) throws IOException {
+				final InputStream is = new ByteArrayInputStream(parser.getBinaryValue());
+				return ImageIO.read(is);
+			}
+		});
+		return module;
+	}
+
+	private static DocumentBuilder documentBuilder;
+
+	static {
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		try {
+			documentBuilder = dbFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	byte[] serializeAsBytes(Object value) throws IOException {

@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>0.7.1</version>
+			<version>0.7.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
