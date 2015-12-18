@@ -9,7 +9,7 @@
 	<description> DSL Platform compatible backend - servlet (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
-	<version>0.7.1</version>
+	<version>0.7.2</version>
 
 	<repositories>
 		<repository>

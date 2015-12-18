@@ -215,7 +215,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 		
 			if (!(self.birth.getYear() == 1 && self.birth.getMonthValue() == 1 && self.birth.getDayOfMonth() == 1)) {
 				sw.writeAscii(",\"birth\":", 9);
-				org.revenj.json.JavaTimeConverter.serialize(self.birth, sw);
+				com.dslplatform.json.JavaTimeConverter.serialize(self.birth, sw);
 			}
 		
 			if (self.yearOfBirth != 0) {
@@ -249,7 +249,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 		
 			
 			sw.writeAscii(",\"birth\":", 9);
-			org.revenj.json.JavaTimeConverter.serialize(self.birth, sw);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.birth, sw);
 		
 			
 			sw.writeAscii(",\"yearOfBirth\":", 15);
@@ -311,7 +311,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 				nextToken = reader.getNextToken();
 						break;
 					case 558509118:
-						_birth_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+						_birth_ = com.dslplatform.json.JavaTimeConverter.deserializeLocalDate(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case 2018960198:
@@ -356,7 +356,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 				nextToken = reader.getNextToken();
 						break;
 					case 558509118:
-						_birth_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+						_birth_ = com.dslplatform.json.JavaTimeConverter.deserializeLocalDate(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case 2018960198:

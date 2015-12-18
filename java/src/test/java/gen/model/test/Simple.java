@@ -276,7 +276,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 			if(hasWrittenProperty) sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
 			hasWrittenProperty = true;
 				sw.writeAscii("\"ts\":", 5);
-				org.revenj.json.JavaTimeConverter.serialize(self.ts, sw);
+				com.dslplatform.json.JavaTimeConverter.serialize(self.ts, sw);
 			}
 	}
 
@@ -315,7 +315,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 		
 			
 			sw.writeAscii(",\"ts\":", 6);
-			org.revenj.json.JavaTimeConverter.serialize(self.ts, sw);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.ts, sw);
 	}
 
 	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Simple> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Simple>() {
@@ -383,7 +383,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 					nextToken = reader.getNextToken();
 						break;
 					case 1178947184:
-						_ts_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+						_ts_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
 					nextToken = reader.getNextToken();
 						break;
 					default:
@@ -442,7 +442,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 					nextToken = reader.getNextToken();
 						break;
 					case 1178947184:
-						_ts_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+						_ts_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
 					nextToken = reader.getNextToken();
 						break;
 					default:

@@ -484,16 +484,16 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		com.dslplatform.json.StringConverter.serializeShortNullable(self.URI, sw);
 		if (self.ProcessedAt != null) {
 			sw.writeAscii(",\"ProcessedAt\":");
-			org.revenj.json.JavaTimeConverter.serialize(self.ProcessedAt, sw);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.ProcessedAt, sw);
 		}
 		if (self.QueuedAt != null) {
 			sw.writeAscii(",\"QueuedAt\":");
-			org.revenj.json.JavaTimeConverter.serialize(self.QueuedAt, sw);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.QueuedAt, sw);
 		}
 		
 			if (self.date != null) {
 				sw.writeAscii(",\"date\":", 8);
-				org.revenj.json.JavaTimeConverter.serialize(self.date, sw);
+				com.dslplatform.json.JavaTimeConverter.serialize(self.date, sw);
 			}
 		
 			if (!(java.math.BigDecimal.ZERO.compareTo(self.number) == 0)) {
@@ -532,13 +532,13 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		com.dslplatform.json.StringConverter.serializeShortNullable(self.URI, sw);
 		if (self.ProcessedAt != null) {
 			sw.writeAscii(",\"ProcessedAt\":");
-			org.revenj.json.JavaTimeConverter.serialize(self.ProcessedAt, sw);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.ProcessedAt, sw);
 		} else {
 			sw.writeAscii(",\"ProcessedAt\":null");
 		}
 		if (self.QueuedAt != null) {
 			sw.writeAscii(",\"QueuedAt\":");
-			org.revenj.json.JavaTimeConverter.serialize(self.QueuedAt, sw);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.QueuedAt, sw);
 		} else {
 			sw.writeAscii(",\"QueuedAt\":null");
 		}
@@ -546,7 +546,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 			
 			if (self.date != null) {
 				sw.writeAscii(",\"date\":", 8);
-				org.revenj.json.JavaTimeConverter.serialize(self.date, sw);
+				com.dslplatform.json.JavaTimeConverter.serialize(self.date, sw);
 			} else {
 				sw.writeAscii(",\"date\":null", 12);
 			}
@@ -622,15 +622,15 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 				nextToken = reader.getNextToken();
 						break;
 					case -497530082:
-						_ProcessedAt_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+						_ProcessedAt_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
 				nextToken = reader.getNextToken();
 						break;
 					case -1790398591:
-						_QueuedAt_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+						_QueuedAt_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
 				nextToken = reader.getNextToken();
 						break;
 					case -730669991:
-						_date_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+						_date_ = com.dslplatform.json.JavaTimeConverter.deserializeLocalDate(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case 467038368:
@@ -688,15 +688,15 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 				nextToken = reader.getNextToken();
 						break;
 					case -497530082:
-						_ProcessedAt_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+						_ProcessedAt_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
 				nextToken = reader.getNextToken();
 						break;
 					case -1790398591:
-						_QueuedAt_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+						_QueuedAt_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
 				nextToken = reader.getNextToken();
 						break;
 					case -730669991:
-						_date_ = org.revenj.json.JavaTimeConverter.deserializeLocalDate(reader);
+						_date_ = com.dslplatform.json.JavaTimeConverter.deserializeLocalDate(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case 467038368:

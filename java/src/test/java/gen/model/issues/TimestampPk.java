@@ -184,7 +184,7 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 		
 			if (self.ts != java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC)) {
 				sw.writeAscii(",\"ts\":", 6);
-				org.revenj.json.JavaTimeConverter.serialize(self.ts, sw);
+				com.dslplatform.json.JavaTimeConverter.serialize(self.ts, sw);
 			}
 		
 			if (!(java.math.BigDecimal.ZERO.compareTo(self.d) == 0)) {
@@ -200,7 +200,7 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 		
 			
 			sw.writeAscii(",\"ts\":", 6);
-			org.revenj.json.JavaTimeConverter.serialize(self.ts, sw);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.ts, sw);
 		
 			
 			sw.writeAscii(",\"d\":", 5);
@@ -238,7 +238,7 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 				nextToken = reader.getNextToken();
 						break;
 					case 1178947184:
-						_ts_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+						_ts_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case -519297933:
@@ -269,7 +269,7 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 				nextToken = reader.getNextToken();
 						break;
 					case 1178947184:
-						_ts_ = org.revenj.json.JavaTimeConverter.deserializeDateTime(reader);
+						_ts_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
 					nextToken = reader.getNextToken();
 						break;
 					case -519297933:

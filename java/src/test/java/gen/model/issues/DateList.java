@@ -211,10 +211,10 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 		
 		if(self.list.size() != 0) {
 			sw.writeAscii(",\"list\":[", 9);
-			org.revenj.json.JavaTimeConverter.serializeNullable(self.list.get(0), sw);
+			com.dslplatform.json.JavaTimeConverter.serializeNullable(self.list.get(0), sw);
 			for(int i = 1; i < self.list.size(); i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				org.revenj.json.JavaTimeConverter.serializeNullable(self.list.get(i), sw);
+				com.dslplatform.json.JavaTimeConverter.serializeNullable(self.list.get(i), sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
@@ -231,10 +231,10 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 		
 		if(self.list.size() != 0) {
 			sw.writeAscii(",\"list\":[", 9);
-			org.revenj.json.JavaTimeConverter.serializeNullable(self.list.get(0), sw);
+			com.dslplatform.json.JavaTimeConverter.serializeNullable(self.list.get(0), sw);
 			for(int i = 1; i < self.list.size(); i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				org.revenj.json.JavaTimeConverter.serializeNullable(self.list.get(i), sw);
+				com.dslplatform.json.JavaTimeConverter.serializeNullable(self.list.get(i), sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
@@ -280,7 +280,7 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 					if (nextToken == '[') {
 						nextToken = reader.getNextToken();
 						if (nextToken != ']') {
-							org.revenj.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _list_);
+							com.dslplatform.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _list_);
 						}
 						nextToken = reader.getNextToken();
 					}
@@ -318,7 +318,7 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 					if (nextToken == '[') {
 						nextToken = reader.getNextToken();
 						if (nextToken != ']') {
-							org.revenj.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _list_);
+							com.dslplatform.json.JavaTimeConverter.deserializeDateTimeNullableCollection(reader, _list_);
 						}
 						nextToken = reader.getNextToken();
 					}
