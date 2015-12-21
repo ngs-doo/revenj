@@ -1,8 +1,13 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.md.repositories;
 
 
 
-public class MasterRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.md.Master>, org.revenj.patterns.PersistableRepository<gen.model.md.Master> {
+public class MasterRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.md.Master>, org.revenj.postgres.BulkRepository<gen.model.md.Master>, org.revenj.patterns.PersistableRepository<gen.model.md.Master> {
 	
 	
 	
@@ -10,7 +15,7 @@ public class MasterRepository   implements java.io.Closeable, org.revenj.pattern
 			 final java.util.Optional<java.sql.Connection> transactionContext,
 			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
-			 final org.revenj.postgres.ObjectConverter<gen.model.md.Master> converter,
+			 final gen.model.md.converters.MasterConverter converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
 		this.transactionContext = transactionContext;
@@ -25,7 +30,7 @@ public class MasterRepository   implements java.io.Closeable, org.revenj.pattern
 	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
 	private final java.sql.Connection transactionConnection;
-	private final org.revenj.postgres.ObjectConverter<gen.model.md.Master> converter;
+	private final gen.model.md.converters.MasterConverter converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	private java.sql.Connection getConnection() {
@@ -54,6 +59,8 @@ public class MasterRepository   implements java.io.Closeable, org.revenj.pattern
 		
 		return filter;
 	}
+
+	private static final boolean hasCustomSecurity = false;
 
 	@Override
 	public org.revenj.patterns.Query<gen.model.md.Master> query(org.revenj.patterns.Specification<gen.model.md.Master> filter) {
@@ -118,6 +125,45 @@ public class MasterRepository   implements java.io.Closeable, org.revenj.pattern
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.md.Master>> search(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.md.Master> specification, Integer limit, Integer offset) {
+		String selectType = "SELECT array_agg(_r) FROM (SELECT _it as _r";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT array_agg(_r) FROM (SELECT _r FROM \"md\".\"Master_entity\" _r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> search(specification, limit, offset);
+		}
+		if (limit != null && limit >= 0) {
+			sb.append(" LIMIT ");
+			sb.append(Integer.toString(limit));
+		}
+		if (offset != null && offset >= 0) {
+			sb.append(" OFFSET ");
+			sb.append(Integer.toString(offset));
+		}
+		sb.append(") _sq");
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.md.Master> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public long count(org.revenj.patterns.Specification<gen.model.md.Master> specification) {
 		final String selectType = "SELECT COUNT(*)";
@@ -147,6 +193,35 @@ public class MasterRepository   implements java.io.Closeable, org.revenj.pattern
 		} finally { 
 			releaseConnection(connection); 
 		}
+	}
+
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Long> count(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.md.Master> specification) {
+		String selectType = "SELECT count(*)";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT count(*) FROM \"md\".\"Master_entity\" r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).count();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getLong(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
 	}
 
 	@Override
@@ -180,6 +255,35 @@ public class MasterRepository   implements java.io.Closeable, org.revenj.pattern
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Boolean> exists(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.md.Master> specification) {
+		String selectType = "exists(SELECT *";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("exists(SELECT * FROM \"md\".\"Master_entity\" r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).any();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getBoolean(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public void close() throws java.io.IOException { 
 	}
@@ -187,14 +291,47 @@ public class MasterRepository   implements java.io.Closeable, org.revenj.pattern
 	
 	@Override
 	public java.util.List<gen.model.md.Master> find(String[] uris) {
+		final int[] ids = new int[uris.length];
+		for (int i = 0; i < uris.length; i++) {
+			try {
+				ids[i] = Integer.parseInt(uris[i]);
+			} catch (java.lang.Exception e) {
+				throw new java.lang.IllegalArgumentException("Invalid URI value found: " + uris[i], e);
+			}
+		}
 		java.sql.Connection connection = getConnection();
-		try (java.sql.Statement statement = connection.createStatement();
+		try {
+			return find(ids, connection);
+		} finally {
+			releaseConnection(connection);
+		}
+	}
+
+	@Override
+	public java.util.Optional<gen.model.md.Master> find(String uri) {
+		final int id;
+		try {
+			id = Integer.parseInt(uri);
+		} catch (java.lang.Exception e) {
+			throw new java.lang.IllegalArgumentException("Invalid URI value found: " + uri, e);
+		}
+		java.sql.Connection connection = getConnection();
+		try {
+			return find(id, connection);
+		} finally {
+			releaseConnection(connection);
+		}
+	}
+
+	public java.util.List<gen.model.md.Master> find(int[] ids, java.sql.Connection connection) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT _r FROM \"md\".\"Master_entity\" _r WHERE _r.\"ID\" = ANY(?)");
 			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
-			java.util.List<gen.model.md.Master> result = new java.util.ArrayList<>(uris.length);
-			StringBuilder sb = new StringBuilder("SELECT _r FROM \"md\".\"Master_entity\" _r WHERE _r.\"ID\" IN (");
-			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
-			sb.append(")");
-			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
+			org.postgresql.util.PGobject arr = new org.postgresql.util.PGobject();
+			arr.setType("int4[]");
+			arr.setValue(org.revenj.postgres.converters.ArrayTuple.create(ids, org.revenj.postgres.converters.IntConverter::toTuple).buildTuple(false));
+			statement.setObject(1, arr);
+			java.util.List<gen.model.md.Master> result = new java.util.ArrayList<>(ids.length);
+			try (java.sql.ResultSet rs = statement.executeQuery()) {
 				while (rs.next()) {
 					reader.process(rs.getString(1));
 					result.add(converter.from(reader));
@@ -204,10 +341,128 @@ public class MasterRepository   implements java.io.Closeable, org.revenj.pattern
 			return result;
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
-		} finally { 
-			releaseConnection(connection); 
 		}
 	}
+
+	public java.util.Optional<gen.model.md.Master> find(int id, java.sql.Connection connection) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT _r FROM \"md\".\"Master_entity\" _r WHERE _r.\"ID\" = ?");
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
+			statement.setInt(1, id);
+			gen.model.md.Master instance;
+			try (java.sql.ResultSet rs = statement.executeQuery()) {
+				if (rs.next()) {
+					reader.process(rs.getString(1));
+					instance = converter.from(reader);
+				} else {
+					return java.util.Optional.empty();
+				}
+			}
+			if (!hasCustomSecurity) return java.util.Optional.of(instance);
+			java.util.List<gen.model.md.Master> result = new java.util.ArrayList<>(1);
+			result.add(instance);
+			
+			if (result.size() == 1) {
+				java.util.Optional.of(instance);
+			}
+			return java.util.Optional.empty();
+		} catch (java.sql.SQLException | java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.Optional<gen.model.md.Master>> find(org.revenj.postgres.BulkReaderQuery query, String uri) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		StringBuilder sb = query.getBuilder();
+		int index = query.getArgumentIndex();
+		if (uri == null) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> java.util.Optional.empty();
+		}
+		final int id;
+		try {
+			id = Integer.parseInt(uri);
+		} catch (java.lang.Exception e) {
+			throw new java.lang.IllegalArgumentException("Invalid URI value found: " + uri, e);
+		}
+		sb.append("SELECT _r FROM \"md\".\"Master_entity\" _r WHERE _r.\"ID\" = ?");
+		query.addArgument(ps -> {
+			try {
+				ps.setInt(index, id);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null) {
+					return java.util.Optional.empty();
+				}
+				rdr.process(res);
+				gen.model.md.Master instance = converter.from(rdr);
+				if (!hasCustomSecurity) return java.util.Optional.of(instance);
+				java.util.List<gen.model.md.Master> result = new java.util.ArrayList<>(1);
+				result.add(instance);
+				
+				if (result.size() == 1) {
+					java.util.Optional.of(instance);
+				}
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+			return java.util.Optional.empty();
+		};
+	}
+
+	@Override
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.md.Master>> find(org.revenj.postgres.BulkReaderQuery query, String[] uris) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter writer = query.getWriter();
+		StringBuilder sb = query.getBuilder();
+		int index = query.getArgumentIndex();
+		if (uris == null || uris.length == 0) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> new java.util.ArrayList<>(0);
+		}
+		sb.append("SELECT array_agg(_r) FROM \"md\".\"Master_entity\" _r WHERE _r.\"ID\" = ANY(?)");
+		final int[] ids = new int[uris.length];
+		for (int i = 0; i < uris.length; i++) {
+			try {
+				ids[i] = Integer.parseInt(uris[i]);
+			} catch (java.lang.Exception e) {
+				throw new java.lang.IllegalArgumentException("Invalid URI value found: " + uris[i], e);
+			}
+		}
+		query.addArgument(ps -> {
+			try {
+				org.postgresql.util.PGobject arr = new org.postgresql.util.PGobject();
+				arr.setType("int4[]");
+				writer.reset();
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(ids, org.revenj.postgres.converters.IntConverter::toTuple);
+				tuple.buildTuple(writer, false);
+				arr.setValue(writer.toString());
+				ps.setObject(index, arr);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.md.Master> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	
 	public static void __setupPersist(
 			java.util.function.BiConsumer<java.util.Collection<gen.model.md.Master>, org.revenj.postgres.PostgresWriter> insert, 

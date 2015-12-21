@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.25187 
+* v1.0.0.29923 
 */
 
 package gen.model.calc;
@@ -95,7 +95,7 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.xml = xml;
 	}
 
-	private static final long serialVersionUID = 2424813563748896511L;
+	private static final long serialVersionUID = -5388562044707411683L;
 	
 	private String suffix;
 
@@ -353,7 +353,7 @@ public class Type   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	public Type(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Type>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Type> rdr : readers) {
 			rdr.read(this, reader, context);
 		}

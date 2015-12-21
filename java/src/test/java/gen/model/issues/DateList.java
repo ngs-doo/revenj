@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.issues;
 
 
@@ -73,18 +78,7 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 		return "DateList(" + URI + ')';
 	}
 	
-	
-	public DateList(
-			final java.util.List<java.time.OffsetDateTime> list) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		this.ID = --__SequenceCounterID__;
-		setList(list);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 3512986534109879891L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private DateList(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -97,6 +91,7 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 		this.list = list == null ? new java.util.ArrayList<java.time.OffsetDateTime>(4) : list;
 	}
 
+	private static final long serialVersionUID = 6002127839251412135L;
 	
 	private long ID;
 
@@ -152,7 +147,6 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 		return this;
 	}
 
-	private transient DateList __originalValue;
 	
 	static {
 		gen.model.issues.repositories.DateListRepository.__setupPersist(
@@ -188,6 +182,7 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		);
 	}
+	private transient DateList __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -356,7 +351,7 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 	}
 	
 	public DateList(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<DateList>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<DateList> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -375,4 +370,14 @@ public class DateList   implements java.lang.Cloneable, java.io.Serializable, or
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.LongConverter.parse(reader); return item; };
 		readers[__index__extended_list] = (item, reader, context) -> { { java.util.List<java.time.OffsetDateTime> __list = org.revenj.postgres.converters.TimestampConverter.parseOffsetCollection(reader, context, true, true); if(__list != null) {item.list = __list;} else item.list = new java.util.ArrayList<java.time.OffsetDateTime>(4); }; return item; };
 	}
+	
+	
+	public DateList(
+			final java.util.List<java.time.OffsetDateTime> list) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		this.ID = --__SequenceCounterID__;
+		setList(list);
+	}
+
 }

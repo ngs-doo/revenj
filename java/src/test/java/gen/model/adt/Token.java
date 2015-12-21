@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.adt;
 
 
@@ -69,7 +74,7 @@ public final class Token   implements java.lang.Cloneable, java.io.Serializable,
 		this.token = token == null ? "" : token;
 	}
 
-	private static final long serialVersionUID = 139921322174919113L;
+	private static final long serialVersionUID = 1103959378292612965L;
 	
 	private String token;
 

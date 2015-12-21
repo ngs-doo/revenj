@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.32432 
+* v1.0.0.29923 
 */
 
 package gen.model;
@@ -299,6 +299,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getComp", "\"comp\"");
 		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getCompID", "\"compID\"");
 		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getSd", "\"sd\"");
@@ -312,6 +313,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.SingleDetail>>(){}.type, gen.model.test.repositories.SingleDetailRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.SingleDetail>>(){}.type, gen.model.test.repositories.SingleDetailRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.SingleDetail>>(){}.type, gen.model.test.repositories.SingleDetailRepository::new, false);
 		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getDetails", "\"details\"");
 		test$converter$CompositeConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Composite.class, "\"test\".\"Composite_entity\"");
@@ -321,6 +323,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Composite.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEnn", "\"enn\"");
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEn", "\"en\"");
@@ -337,6 +340,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.register(gen.model.test.repositories.CompositeListRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
 		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEnn", "\"enn\"");
@@ -380,6 +384,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.DomainEventStore<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
 		try {
 			org.revenj.Revenj.registerEvents(container, plugins, gen.model.test.Clicked.class, gen.model.test.Clicked[].class);
@@ -400,6 +405,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
 		mixinReference$converter$SpecificReportConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.SpecificReport.class, "\"mixinReference\".\"SpecificReport_entity\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getURI", "\"URI\"");
@@ -409,6 +415,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.SpecificReport>>(){}.type, gen.model.mixinReference.repositories.SpecificReportRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.mixinReference.SpecificReport>>(){}.type, gen.model.mixinReference.repositories.SpecificReportRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.mixinReference.SpecificReport>>(){}.type, gen.model.mixinReference.repositories.SpecificReportRepository::new, false);
 		mixinReference$converter$AuthorConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.Author.class, "\"mixinReference\".\"Author_entity\"");
 		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getURI", "\"URI\"");
@@ -418,6 +425,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
 		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getName", "\"name\"");
 		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getPerson", "\"person\"");
 		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getRezident", "\"rezident\"");
@@ -445,6 +453,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
 		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getName", "\"name\"");
 		permissions.registerFilter(gen.model.mixinReference.UserFilter.class, it -> it.getName().equals(org.revenj.security.PermissionManager.boundPrincipal.get().getName()), "RegularUser", false);
 		binaries$converter$DocumentConverter.configure(container);
@@ -456,6 +465,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"");
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"");
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getBools", "\"bools\"");
@@ -466,6 +476,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getId", "\"ID\"");
@@ -486,6 +497,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.security.Document>>(){}.type, gen.model.security.repositories.DocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.security.Document>>(){}.type, gen.model.security.repositories.DocumentRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.security.Document>>(){}.type, gen.model.security.repositories.DocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.security.Document.class, "getData", "\"data\"");
 		permissions.registerFilter(gen.model.security.Document.class, it -> !it.getDeactivated(), "Admin", true);
 		egzotics$converter$pksConverter.configure(container);
@@ -496,6 +508,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getId", "\"id\"");
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getXml", "\"xml\"");
 		metamodel.registerProperty(gen.model.egzotics.pks.class, "getS3", "\"s3\"");
@@ -512,6 +525,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
 		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getV", "\"v\"");
 		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getVv", "\"vv\"");
 		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getE", "\"e\"");
@@ -528,6 +542,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
 		metamodel.registerProperty(gen.model.issues.DateList.class, "getList", "\"list\"");
 		issues$converter$TimestampPkConverter.configure(container);
 		metamodel.registerDataSource(gen.model.issues.TimestampPk.class, "\"issues\".\"TimestampPk_entity\"");
@@ -537,6 +552,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
 		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getTs", "\"ts\"");
 		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getD", "\"d\"");
 		
@@ -550,6 +566,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
 		metamodel.registerProperty(gen.model.md.Master.class, "getDetails", "\"details\"");
 		md$converter$DetailConverter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Detail.class, "\"md\".\"Detail_entity\"");
@@ -598,6 +615,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
 		metamodel.registerProperty(gen.model.adt.User.class, "getUsername", "\"username\"");
 		metamodel.registerProperty(gen.model.adt.User.class, "getAuthentication", "\"authentication\"");
 		calc$converter$InfoConverter.configure(container);
@@ -608,6 +626,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
 		metamodel.registerProperty(gen.model.calc.Info.class, "getCode", "\"code\"");
 		metamodel.registerProperty(gen.model.calc.Info.class, "getName", "\"name\"");
 		calc$converter$TypeConverter.configure(container);
@@ -618,6 +637,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
 		metamodel.registerProperty(gen.model.calc.Type.class, "getSuffix", "\"suffix\"");
 		metamodel.registerProperty(gen.model.calc.Type.class, "getDescription", "\"description\"");
 		metamodel.registerProperty(gen.model.calc.Type.class, "getXml", "\"xml\"");
@@ -629,6 +649,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
 		metamodel.registerProperty(gen.model.calc.Realm.class, "getInfo", "\"info\"");
 		metamodel.registerProperty(gen.model.calc.Realm.class, "getInfoID", "\"infoID\"");
 		metamodel.registerProperty(gen.model.calc.Realm.class, "getRefType", "\"refType\"");

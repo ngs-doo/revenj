@@ -1,13 +1,13 @@
 /*
 * Created by DSL Platform
-* v1.0.0.32432 
+* v1.0.0.29923 
 */
 
 package gen.model.test.repositories;
 
 
 
-public class ClickedRepository   implements java.io.Closeable, org.revenj.patterns.DomainEventStore<gen.model.test.Clicked> {
+public class ClickedRepository   implements java.io.Closeable, org.revenj.patterns.DomainEventStore<gen.model.test.Clicked>, org.revenj.postgres.BulkRepository<gen.model.test.Clicked> {
 	
 	
 	
@@ -15,7 +15,7 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 			 final java.util.Optional<java.sql.Connection> transactionContext,
 			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
-			 final org.revenj.postgres.ObjectConverter<gen.model.test.Clicked> converter,
+			 final gen.model.test.converters.ClickedConverter converter,
 			 final org.revenj.patterns.ServiceLocator locator,
 			 final org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked>[] singleHandlers,
 			 final org.revenj.patterns.DomainEventHandler<gen.model.test.Clicked[]>[] collectionHandlers,
@@ -38,7 +38,7 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
 	private final java.sql.Connection transactionConnection;
-	private final org.revenj.postgres.ObjectConverter<gen.model.test.Clicked> converter;
+	private final gen.model.test.converters.ClickedConverter converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	private java.sql.Connection getConnection() {
@@ -74,6 +74,8 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 		}
 		return filter;
 	}
+
+	private static final boolean hasCustomSecurity = false;
 
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.Clicked> query(org.revenj.patterns.Specification<gen.model.test.Clicked> filter) {
@@ -121,10 +123,13 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 				applyFilters = applyFilters.andThen(ps -> {
 					try {
 						
-					Object[] __arr = new Object[spec.getInSet().size()];
-					int __ind = 0;
-					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
-					ps.setArray(2, connection.createArrayOf("numeric", __arr));
+					org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+					pgo.setType("numeric[]");
+					org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getInSet(), org.revenj.postgres.converters.DecimalConverter::toTuple);
+					pgWriter.reset();
+					tuple.buildTuple(pgWriter, false);
+					pgo.setValue(pgWriter.toString());
+					ps.setObject(2, pgo);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -174,6 +179,85 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.test.Clicked>> search(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.test.Clicked> specification, Integer limit, Integer offset) {
+		String selectType = "SELECT array_agg(_r) FROM (SELECT _it as _r";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT array_agg(_r) FROM (SELECT _r FROM \"test\".\"Clicked_event\" _r");
+		}
+		
+			else if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
+				gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						ps.setBigDecimal(index + 1, spec.getMin());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				query.addArgument(ps -> {
+					try {
+						
+					org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+					pgo.setType("numeric[]");
+					org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getInSet(), org.revenj.postgres.converters.DecimalConverter::toTuple);
+					pgWriter.reset();
+					tuple.buildTuple(pgWriter, false);
+					pgo.setValue(pgWriter.toString());
+					ps.setObject(index + 2, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				query.addArgument(ps -> {
+					try {
+						if (spec.getEn() == null) ps.setNull(index + 3, java.sql.Types.OTHER); 
+				else {
+					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+					__pgo.setType("\"test\".\"En\"");
+					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
+					ps.setObject(index + 3, __pgo);
+				}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> search(specification, limit, offset);
+		}
+		if (limit != null && limit >= 0) {
+			sb.append(" LIMIT ");
+			sb.append(Integer.toString(limit));
+		}
+		if (offset != null && offset >= 0) {
+			sb.append(" OFFSET ");
+			sb.append(Integer.toString(offset));
+		}
+		sb.append(") _sq");
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.test.Clicked> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public long count(org.revenj.patterns.Specification<gen.model.test.Clicked> specification) {
 		final String selectType = "SELECT COUNT(*)";
@@ -198,10 +282,13 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 				applyFilters = applyFilters.andThen(ps -> {
 					try {
 						
-					Object[] __arr = new Object[spec.getInSet().size()];
-					int __ind = 0;
-					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
-					ps.setArray(2, connection.createArrayOf("numeric", __arr));
+					org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+					pgo.setType("numeric[]");
+					org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getInSet(), org.revenj.postgres.converters.DecimalConverter::toTuple);
+					pgWriter.reset();
+					tuple.buildTuple(pgWriter, false);
+					pgo.setValue(pgWriter.toString());
+					ps.setObject(2, pgo);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -241,6 +328,75 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Long> count(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.test.Clicked> specification) {
+		String selectType = "SELECT count(*)";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT count(*) FROM \"test\".\"Clicked_event\" r");
+		}
+		
+			else if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
+				gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						ps.setBigDecimal(index + 1, spec.getMin());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				query.addArgument(ps -> {
+					try {
+						
+					org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+					pgo.setType("numeric[]");
+					org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getInSet(), org.revenj.postgres.converters.DecimalConverter::toTuple);
+					pgWriter.reset();
+					tuple.buildTuple(pgWriter, false);
+					pgo.setValue(pgWriter.toString());
+					ps.setObject(index + 2, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				query.addArgument(ps -> {
+					try {
+						if (spec.getEn() == null) ps.setNull(index + 3, java.sql.Types.OTHER); 
+				else {
+					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+					__pgo.setType("\"test\".\"En\"");
+					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
+					ps.setObject(index + 3, __pgo);
+				}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).count();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getLong(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public boolean exists(org.revenj.patterns.Specification<gen.model.test.Clicked> specification) {
 		final String selectType = "SELECT exists(SELECT *";
@@ -265,10 +421,13 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 				applyFilters = applyFilters.andThen(ps -> {
 					try {
 						
-					Object[] __arr = new Object[spec.getInSet().size()];
-					int __ind = 0;
-					for (Object __it : spec.getInSet()) __arr[__ind++] = __it;
-					ps.setArray(2, connection.createArrayOf("numeric", __arr));
+					org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+					pgo.setType("numeric[]");
+					org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getInSet(), org.revenj.postgres.converters.DecimalConverter::toTuple);
+					pgWriter.reset();
+					tuple.buildTuple(pgWriter, false);
+					pgo.setValue(pgWriter.toString());
+					ps.setObject(2, pgo);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -308,6 +467,75 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Boolean> exists(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.test.Clicked> specification) {
+		String selectType = "exists(SELECT *";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("exists(SELECT * FROM \"test\".\"Clicked_event\" r");
+		}
+		
+			else if (specification instanceof gen.model.test.Clicked.BetweenNumbers) {
+				gen.model.test.Clicked.BetweenNumbers spec = (gen.model.test.Clicked.BetweenNumbers)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"Clicked.BetweenNumbers\"(?, ?, ?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						ps.setBigDecimal(index + 1, spec.getMin());
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				query.addArgument(ps -> {
+					try {
+						
+					org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+					pgo.setType("numeric[]");
+					org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getInSet(), org.revenj.postgres.converters.DecimalConverter::toTuple);
+					pgWriter.reset();
+					tuple.buildTuple(pgWriter, false);
+					pgo.setValue(pgWriter.toString());
+					ps.setObject(index + 2, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+				query.addArgument(ps -> {
+					try {
+						if (spec.getEn() == null) ps.setNull(index + 3, java.sql.Types.OTHER); 
+				else {
+					org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
+					__pgo.setType("\"test\".\"En\"");
+					__pgo.setValue(gen.model.test.converters.EnConverter.stringValue(spec.getEn()));
+					ps.setObject(index + 3, __pgo);
+				}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).any();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getBoolean(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public void close() throws java.io.IOException { 
 	}
@@ -321,7 +549,7 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 			final java.util.Optional<java.sql.Connection> transactionContext,
 			final javax.sql.DataSource dataSource,
 			final org.revenj.postgres.QueryProvider queryProvider,
-			final org.revenj.postgres.ObjectConverter<gen.model.test.Clicked> converter,
+			final gen.model.test.converters.ClickedConverter converter,
 			final org.revenj.patterns.ServiceLocator locator) {
 		this(transactionContext,
 				dataSource,
@@ -337,19 +565,168 @@ public class ClickedRepository   implements java.io.Closeable, org.revenj.patter
 
 	@Override
 	public java.util.List<gen.model.test.Clicked> find(String[] uris) {
+		long[] ids = new long[uris.length];
+		for(int i = 0; i < uris.length; i++) {
+			ids[i] = Long.parseLong(uris[i]);
+		}
 		java.sql.Connection connection = getConnection();
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"Clicked_event\" r WHERE r._event_id = ANY(?)")) {
-			Object[] ids = new Object[uris.length];
-			for(int i = 0; i < uris.length; i++) {
-				ids[i] = Long.parseLong(uris[i]);
-			}
-			statement.setArray(1, connection.createArrayOf("int8", ids));
-			return readFromDb(statement, new java.util.ArrayList<>(uris.length));			
-		} catch (java.sql.SQLException | java.io.IOException e) {
-			throw new RuntimeException(e);
+		try {
+			return find(ids, connection);
 		} finally {
 			releaseConnection(connection);
 		}
+	}
+
+
+	@Override
+	public java.util.Optional<gen.model.test.Clicked> find(String uri) {
+		long id;
+		try {
+			id = Long.parseLong(uri);
+		} catch (Exception ignore) {
+			return java.util.Optional.empty();
+		}
+		java.sql.Connection connection = getConnection();
+		try {
+			return find(id, connection);
+		} finally {
+			releaseConnection(connection);
+		}
+	}
+
+	public java.util.List<gen.model.test.Clicked> find(long[] ids, java.sql.Connection connection) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"Clicked_event\" r WHERE r._event_id = ANY(?)")) {
+			Object[] arg = new Object[ids.length];
+			for(int i = 0; i < ids.length; i++) {
+				arg[i] = ids[i];
+			}
+			statement.setArray(1, connection.createArrayOf("int8", arg));
+			return readFromDb(statement, new java.util.ArrayList<>(ids.length));			
+		} catch (java.sql.SQLException | java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public java.util.Optional<gen.model.test.Clicked> find(long id, java.sql.Connection connection) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"Clicked_event\" r WHERE r._event_id = ?");
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
+			statement.setLong(1, id);
+			gen.model.test.Clicked instance;
+			try (java.sql.ResultSet rs = statement.executeQuery()) {
+				if (rs.next()) {
+					reader.process(rs.getString(1));
+					instance = converter.from(reader);
+				} else {
+					return java.util.Optional.empty();
+				}
+			}
+			if (!hasCustomSecurity) return java.util.Optional.of(instance);
+			java.util.List<gen.model.test.Clicked> result = new java.util.ArrayList<>(1);
+			result.add(instance);
+			
+			if (result.size() == 1) {
+				java.util.Optional.of(instance);
+			}
+			return java.util.Optional.empty();
+		} catch (java.sql.SQLException | java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.Optional<gen.model.test.Clicked>> find(org.revenj.postgres.BulkReaderQuery query, String uri) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		StringBuilder sb = query.getBuilder();
+		int index = query.getArgumentIndex();
+		if (uri == null) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> java.util.Optional.empty();
+		}
+		final long id;
+		try {
+			id = Long.parseLong(uri);
+		} catch (java.lang.Exception e) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> java.util.Optional.empty();
+		}
+		sb.append("SELECT _r FROM \"test\".\"Clicked_event\" _r WHERE _r._event_id = ?");
+		query.addArgument(ps -> {
+			try {
+				ps.setLong(index, id);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return (rs, ind) -> 
+		{
+			try {
+				String res = rs.getString(ind);
+				if (res == null) {
+					return java.util.Optional.empty();
+				}
+				rdr.process(res);
+				gen.model.test.Clicked instance = converter.from(rdr);
+				if (!hasCustomSecurity) return java.util.Optional.of(instance);
+				java.util.List<gen.model.test.Clicked> result = new java.util.ArrayList<>(1);
+				result.add(instance);
+				
+				if (result.size() == 1) {
+					java.util.Optional.of(instance);
+				}
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+			return java.util.Optional.empty();
+		};
+	}
+
+	@Override
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.test.Clicked>> find(org.revenj.postgres.BulkReaderQuery query, String[] uris) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter writer = query.getWriter();
+		StringBuilder sb = query.getBuilder();
+		int index = query.getArgumentIndex();
+		if (uris == null || uris.length == 0) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> new java.util.ArrayList<>(0);
+		}
+		sb.append("SELECT array_agg(_r) FROM \"test\".\"Clicked_event\" _r WHERE _r._event_id = ANY(?)");
+		final long[] ids = new long[uris.length];
+		for (int i = 0; i < uris.length; i++) {
+			try {
+				ids[i] = Long.parseLong(uris[i]);
+			} catch (java.lang.Exception e) {
+				throw new java.lang.IllegalArgumentException("Invalid URI value found: " + uris[i], e);
+			}
+		}
+		query.addArgument(ps -> {
+			try {
+				org.postgresql.util.PGobject arr = new org.postgresql.util.PGobject();
+				arr.setType("int8[]");
+				writer.reset();
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(ids, org.revenj.postgres.converters.LongConverter::toTuple);
+				tuple.buildTuple(writer, false);
+				arr.setValue(writer.toString());
+				ps.setObject(index, arr);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return (rs, ind) -> 
+		{
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.test.Clicked> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
 	}
 
 	private org.revenj.extensibility.Container executeBefore(java.sql.Connection connection, gen.model.test.Clicked[] events) {

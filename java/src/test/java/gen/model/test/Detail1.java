@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.test;
 
 
@@ -82,19 +87,7 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable, com
 		return "Detail1(" + URI + ')';
 	}
 	
-	
-	public Detail1(
-			final Float f,
-			final float ff) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setF(f);
-		setFf(ff);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 6376318334451980288L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail1(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -113,6 +106,7 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable, com
 		this.Index = Index;
 	}
 
+	private static final long serialVersionUID = 6797552984996140138L;
 	
 	private Float f;
 
@@ -418,7 +412,7 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable, com
 	}
 	
 	public Detail1(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Detail1>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Detail1> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -442,4 +436,15 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable, com
 		readers[__index__extended_EntityIndex] = (item, reader, context) -> { item.EntityIndex = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
+	
+	
+	public Detail1(
+			final Float f,
+			final float ff) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setF(f);
+		setFf(ff);
+	}
+
 }

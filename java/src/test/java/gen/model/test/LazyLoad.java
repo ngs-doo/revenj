@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.test;
 
 
@@ -81,20 +86,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		return "LazyLoad(" + URI + ')';
 	}
 	
-	
-	public LazyLoad(
-			final gen.model.test.Composite comp,
-			final gen.model.test.SingleDetail sd) {
-			
-		this.ID = --__SequenceCounterID__;
-		setComp(comp);
-		setSd(sd);
-		this.URI = java.lang.Integer.toString(this.ID);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 5235184555527779889L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private LazyLoad(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -113,6 +105,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		this.sdID = sdID;
 	}
 
+	private static final long serialVersionUID = -2868065895397612731L;
 	
 	private int ID;
 
@@ -275,7 +268,6 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		return this;
 	}
 
-	private transient LazyLoad __originalValue;
 	
 	static {
 		gen.model.test.repositories.LazyLoadRepository.__setupPersist(
@@ -311,6 +303,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		);
 	}
+	private transient LazyLoad __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -332,9 +325,10 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 				com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
 			}
 		
-			if(self.compURI != null) {
+			final String compURI = self.getCompURI();
+			if(compURI != null) {
 				sw.writeAscii(",\"compURI\":");
-				com.dslplatform.json.StringConverter.serializeShort(self.compURI, sw);
+				com.dslplatform.json.StringConverter.serializeShort(compURI, sw);
 			}
 		
 			if (self.compID != null) {
@@ -342,9 +336,10 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 				com.dslplatform.json.UUIDConverter.serialize(self.compID, sw);
 			}
 		
-			if(self.sdURI != null) {
+			final String sdURI = self.getSdURI();
+			if(sdURI != null) {
 				sw.writeAscii(",\"sdURI\":");
-				com.dslplatform.json.StringConverter.serializeShort(self.sdURI, sw);
+				com.dslplatform.json.StringConverter.serializeShort(sdURI, sw);
 			}
 		
 			if (self.sdID != null) {
@@ -363,7 +358,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 			com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
 		
 			sw.writeAscii(",\"compURI\":");
-			com.dslplatform.json.StringConverter.serializeShortNullable(self.compURI, sw);
+			com.dslplatform.json.StringConverter.serializeShortNullable(self.getCompURI(), sw);
 		
 			
 			if (self.compID != null) {
@@ -374,7 +369,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		
 			sw.writeAscii(",\"sdURI\":");
-			com.dslplatform.json.StringConverter.serializeShortNullable(self.sdURI, sw);
+			com.dslplatform.json.StringConverter.serializeShortNullable(self.getSdURI(), sw);
 		
 			
 			if (self.sdID != null) {
@@ -516,7 +511,7 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 	}
 	
 	public LazyLoad(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<LazyLoad>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<LazyLoad> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -541,4 +536,16 @@ public class LazyLoad   implements java.lang.Cloneable, java.io.Serializable, or
 		readers[__index__extended_sdURI] = (item, reader, context) -> { item.sdURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); return item; };
 		readers[__index__extended_sdID] = (item, reader, context) -> { item.sdID = org.revenj.postgres.converters.IntConverter.parseNullable(reader); return item; };
 	}
+	
+	
+	public LazyLoad(
+			final gen.model.test.Composite comp,
+			final gen.model.test.SingleDetail sd) {
+			
+		this.ID = --__SequenceCounterID__;
+		setComp(comp);
+		setSd(sd);
+		this.URI = java.lang.Integer.toString(this.ID);
+	}
+
 }

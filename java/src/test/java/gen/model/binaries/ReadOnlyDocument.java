@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.binaries;
 
 
@@ -14,7 +19,7 @@ public final class ReadOnlyDocument   implements java.io.Serializable, org.reven
 		this.Name = Name == null ? "" : Name;
 	}
 
-	private static final long serialVersionUID = -5287497268016383457L;
+	private static final long serialVersionUID = 8884820487569784131L;
 	
 	private final java.util.UUID ID;
 

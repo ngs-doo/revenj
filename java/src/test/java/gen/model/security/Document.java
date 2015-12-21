@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.security;
 
 
@@ -77,20 +82,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		return "Document(" + URI + ')';
 	}
 	
-	
-	public Document(
-			final java.util.Map<String, String> data,
-			final boolean deactivated) {
-			
-		this.ID = --__SequenceCounterID__;
-		setData(data);
-		setDeactivated(deactivated);
-		this.URI = java.lang.Integer.toString(this.ID);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 4812989081784555380L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Document(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -105,6 +97,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		this.deactivated = deactivated;
 	}
 
+	private static final long serialVersionUID = 1888971056995270960L;
 	
 	private int ID;
 
@@ -175,7 +168,6 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		}
 	}
 
-	private transient Document __originalValue;
 	
 	static {
 		gen.model.security.repositories.DocumentRepository.__setupPersist(
@@ -211,6 +203,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 			}
 		);
 	}
+	private transient Document __originalValue;
 	
 	private boolean deactivated;
 
@@ -390,7 +383,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 	}
 	
 	public Document(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Document>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Document> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -411,4 +404,16 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		readers[__index__extended_data] = (item, reader, context) -> { item.data = org.revenj.postgres.converters.HstoreConverter.parse(reader, context, false); return item; };
 		readers[__index__extended_deactivated] = (item, reader, context) -> { item.deactivated = org.revenj.postgres.converters.BoolConverter.parse(reader); return item; };
 	}
+	
+	
+	public Document(
+			final java.util.Map<String, String> data,
+			final boolean deactivated) {
+			
+		this.ID = --__SequenceCounterID__;
+		setData(data);
+		setDeactivated(deactivated);
+		this.URI = java.lang.Integer.toString(this.ID);
+	}
+
 }

@@ -13,8 +13,17 @@ public final class PostgresWriter implements PostgresBuffer, AutoCloseable {
 		position = 0;
 	}
 
+	private static ThreadLocal<PostgresWriter> threadWriter = new ThreadLocal<PostgresWriter>() {
+		@Override
+		protected PostgresWriter initialValue() {
+			return new PostgresWriter();
+		}
+	};
+
 	public static PostgresWriter create() {
-		return new PostgresWriter();
+		PostgresWriter writer = threadWriter.get();
+		writer.reset();
+		return writer;
 	}
 
 	public void close() {
@@ -38,7 +47,7 @@ public final class PostgresWriter implements PostgresBuffer, AutoCloseable {
 		if (position == buffer.length) {
 			buffer = Arrays.copyOf(buffer, buffer.length * 2);
 		}
-		buffer[position++] = (char)c;
+		buffer[position++] = (char) c;
 	}
 
 	public void write(char c) {
@@ -128,6 +137,24 @@ public final class PostgresWriter implements PostgresBuffer, AutoCloseable {
 		sb.append('\'');
 	}
 
+	public static void writeSimpleUri(StringBuilder sb, String uri) {
+		sb.append('\'');
+		int ind = uri.indexOf('\'');
+		if (ind == -1) {
+			sb.append(uri);
+		} else {
+			for (int i = 0; i < uri.length(); i++) {
+				char c = uri.charAt(i);
+				if (c == '\'') {
+					sb.append("''");
+				} else {
+					sb.append(c);
+				}
+			}
+		}
+		sb.append('\'');
+	}
+
 	private static int findEscapedChar(String input) {
 		for (int i = 0; i < input.length(); i++) {
 			char c = input.charAt(i);
@@ -181,6 +208,30 @@ public final class PostgresWriter implements PostgresBuffer, AutoCloseable {
 					}
 					i++;
 				}
+			}
+		}
+		sb.append("')");
+	}
+
+	public static void writeCompositeUri(StringBuilder sb, String uri) {
+		sb.append("('");
+		int i = 0;
+		int ind = findEscapedChar(uri);
+		if (ind == -1) {
+			sb.append(uri);
+		} else {
+			while (i < uri.length()) {
+				char c = uri.charAt(i);
+				if (c == '\\') {
+					sb.append(uri.charAt(++i));
+				} else if (c == '/') {
+					sb.append("','");
+				} else if (c == '\'') {
+					sb.append("''");
+				} else {
+					sb.append(c);
+				}
+				i++;
 			}
 		}
 		sb.append("')");

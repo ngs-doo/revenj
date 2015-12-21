@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.adt;
 
 
@@ -71,19 +76,7 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return "User(" + URI + ')';
 	}
 	
-	
-	public User(
-			final String username,
-			final gen.model.adt.Auth authentication) {
-			
-		setUsername(username);
-		setAuthentication(authentication);
-		this.URI = this.username;
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 7757947853171298584L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private User(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -96,6 +89,7 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.authentication = authentication;
 	}
 
+	private static final long serialVersionUID = 5496763966582113604L;
 	
 	private String username;
 
@@ -119,8 +113,8 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 	private gen.model.adt.Auth authentication;
 
 	
-	@com.fasterxml.jackson.annotation.JsonTypeInfo(use=com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME, include=com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY, property="$type")
 	@com.fasterxml.jackson.annotation.JsonProperty("authentication")
+	@com.fasterxml.jackson.annotation.JsonTypeInfo(use=com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME, include=com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY, property="$type")
 	public gen.model.adt.Auth getAuthentication()  {
 		
 		return authentication;
@@ -135,7 +129,6 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return this;
 	}
 
-	private transient User __originalValue;
 	
 	static {
 		gen.model.adt.repositories.UserRepository.__setupPersist(
@@ -171,6 +164,7 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 			}
 		);
 	}
+	private transient User __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -388,7 +382,7 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	public User(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<User>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<User> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -407,4 +401,15 @@ public class User   implements java.lang.Cloneable, java.io.Serializable, org.re
 		readers[__index__extended_username] = (item, reader, context) -> { item.username = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 		readers[__index__extended_authentication] = (item, reader, context) -> { item.authentication = __converter_authentication.fromExtended(reader, context); return item; };
 	}
+	
+	
+	public User(
+			final String username,
+			final gen.model.adt.Auth authentication) {
+			
+		setUsername(username);
+		setAuthentication(authentication);
+		this.URI = this.username;
+	}
+
 }

@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.32432 
+* v1.0.0.29923 
 */
 
 package gen.model.egzotics;
@@ -124,7 +124,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.ll = ll == null ? new java.util.ArrayList<java.awt.geom.Point2D>(4) : ll;
 	}
 
-	private static final long serialVersionUID = -3357073556017543506L;
+	private static final long serialVersionUID = 8920850357342930001L;
 	
 	private gen.model.egzotics.v v;
 
@@ -693,7 +693,7 @@ public class PksV   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	public PksV(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<PksV>[] readers, gen.model.egzotics.converters.PksVConverter converter) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<PksV> rdr : readers) {
 			rdr.read(this, reader, context);
 		}

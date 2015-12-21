@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.27897 
+* v1.0.0.29923 
 */
 
 package gen.model.md;
@@ -89,7 +89,7 @@ public class Reference1   implements java.lang.Cloneable, java.io.Serializable, 
 		this.Detailid = Detailid == null ? org.revenj.Utils.MIN_UUID : Detailid;
 	}
 
-	private static final long serialVersionUID = 6699570552465945122L;
+	private static final long serialVersionUID = 6375644459176421648L;
 	
 	private long l;
 
@@ -278,7 +278,7 @@ public class Reference1   implements java.lang.Cloneable, java.io.Serializable, 
 	}
 	
 	public Reference1(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Reference1>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Reference1> rdr : readers) {
 			rdr.read(this, reader, context);
 		}

@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.mixinReference;
 
 
@@ -93,24 +98,7 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 		return "Author(" + URI + ')';
 	}
 	
-	
-	public Author(
-			final String name,
-			final gen.model.mixinReference.Person person,
-			final gen.model.mixinReference.Resident rezident,
-			final gen.model.mixinReference.Child[] children) {
-			
-		this.ID = --__SequenceCounterID__;
-		setName(name);
-		setPerson(person);
-		setRezident(rezident);
-		setChildren(children);
-		this.URI = java.lang.Integer.toString(this.ID);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -1654952659856001409L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Author(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -131,6 +119,7 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 		this.children = children == null ? new gen.model.mixinReference.Child[] { } : children;
 	}
 
+	private static final long serialVersionUID = -6629630609565308997L;
 	
 	private int ID;
 
@@ -279,7 +268,6 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 		return this;
 	}
 
-	private transient Author __originalValue;
 	
 	static {
 		gen.model.mixinReference.repositories.AuthorRepository.__setupPersist(
@@ -319,6 +307,7 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 			}
 		);
 	}
+	private transient Author __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -613,7 +602,7 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 	}
 	
 	public Author(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Author>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Author> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -640,4 +629,20 @@ public class Author   implements java.lang.Cloneable, java.io.Serializable, org.
 		readers[__index__extended_rezidentID] = (item, reader, context) -> { item.rezidentID = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
 		readers[__index__extended_children] = (item, reader, context) -> { { java.util.List<gen.model.mixinReference.Child> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_children::fromExtended); if (__list != null) {item.children = __list.toArray(new gen.model.mixinReference.Child[__list.size()]);} else item.children = new gen.model.mixinReference.Child[] { }; }; return item; };
 	}
+	
+	
+	public Author(
+			final String name,
+			final gen.model.mixinReference.Person person,
+			final gen.model.mixinReference.Resident rezident,
+			final gen.model.mixinReference.Child[] children) {
+			
+		this.ID = --__SequenceCounterID__;
+		setName(name);
+		setPerson(person);
+		setRezident(rezident);
+		setChildren(children);
+		this.URI = java.lang.Integer.toString(this.ID);
+	}
+
 }

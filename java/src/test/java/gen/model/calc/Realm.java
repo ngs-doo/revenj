@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.calc;
 
 
@@ -76,19 +81,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		return "Realm(" + URI + ')';
 	}
 	
-	
-	public Realm(
-			final gen.model.calc.Info info,
-			final gen.model.calc.Type refType) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setInfo(info);
-		setRefType(refType);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -1375594837599875087L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Realm(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -109,6 +102,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		this.name = name == null ? "" : name;
 	}
 
+	private static final long serialVersionUID = -8175258700095338619L;
 	
 	private gen.model.calc.Info info;
 
@@ -253,7 +247,6 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 	}
 
 	private static final java.util.function.Function<gen.model.calc.Realm, String> __calculated_name = it ->  ( ( (it.getInfo().getName() + " (") + it.getRefType().getDescription()) + ")");
-	private transient Realm __originalValue;
 	
 	static {
 		gen.model.calc.repositories.RealmRepository.__setupPersist(
@@ -289,6 +282,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 			}
 		);
 	}
+	private transient Realm __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -305,9 +299,10 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		sw.writeAscii("\"URI\":");
 			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
 		
-			if(self.infoURI != null) {
+			final String infoURI = self.getInfoURI();
+			if(infoURI != null) {
 				sw.writeAscii(",\"infoURI\":");
-				com.dslplatform.json.StringConverter.serializeShort(self.infoURI, sw);
+				com.dslplatform.json.StringConverter.serializeShort(infoURI, sw);
 			}
 		
 			if (!(self.infoID.length() == 0)) {
@@ -315,9 +310,10 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 				sw.writeString(self.infoID);
 			}
 		
-			if(self.refTypeURI != null) {
+			final String refTypeURI = self.getRefTypeURI();
+			if(refTypeURI != null) {
 				sw.writeAscii(",\"refTypeURI\":");
-				com.dslplatform.json.StringConverter.serializeShort(self.refTypeURI, sw);
+				com.dslplatform.json.StringConverter.serializeShort(refTypeURI, sw);
 			}
 		
 			if (!(self.type.length() == 0)) {
@@ -325,14 +321,14 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 				sw.writeString(self.type);
 			}
 		
-			if (!(self.id.length() == 0)) {
+			if (!(self.getId().length() == 0)) {
 				sw.writeAscii(",\"id\":", 6);
-				sw.writeString(self.id);
+				sw.writeString(self.getId());
 			}
 		
-			if (!(self.name.length() == 0)) {
+			if (!(self.getName().length() == 0)) {
 				sw.writeAscii(",\"name\":", 8);
-				sw.writeString(self.name);
+				sw.writeString(self.getName());
 			}
 	}
 
@@ -342,14 +338,14 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 			com.dslplatform.json.StringConverter.serializeShort(self.URI, sw);
 		
 			sw.writeAscii(",\"infoURI\":");
-			com.dslplatform.json.StringConverter.serializeShortNullable(self.infoURI, sw);
+			com.dslplatform.json.StringConverter.serializeShortNullable(self.getInfoURI(), sw);
 		
 			
 			sw.writeAscii(",\"infoID\":", 10);
 			sw.writeString(self.infoID);
 		
 			sw.writeAscii(",\"refTypeURI\":");
-			com.dslplatform.json.StringConverter.serializeShortNullable(self.refTypeURI, sw);
+			com.dslplatform.json.StringConverter.serializeShortNullable(self.getRefTypeURI(), sw);
 		
 			
 			sw.writeAscii(",\"type\":", 8);
@@ -357,11 +353,11 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		
 			
 			sw.writeAscii(",\"id\":", 6);
-			sw.writeString(self.id);
+			sw.writeString(self.getId());
 		
 			
 			sw.writeAscii(",\"name\":", 8);
-			sw.writeString(self.name);
+			sw.writeString(self.getName());
 	}
 
 	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Realm> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Realm>() {
@@ -507,7 +503,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 	}
 	
 	public Realm(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Realm>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Realm> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -530,4 +526,15 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		readers[__index__extended_refTypeURI] = (item, reader, context) -> { item.refTypeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); return item; };
 		readers[__index__extended_type] = (item, reader, context) -> { item.type = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 	}
+	
+	
+	public Realm(
+			final gen.model.calc.Info info,
+			final gen.model.calc.Type refType) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setInfo(info);
+		setRefType(refType);
+	}
+
 }

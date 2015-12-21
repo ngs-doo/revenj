@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.test;
 
 
@@ -82,7 +87,7 @@ public final class Clicked   implements java.io.Serializable, com.dslplatform.js
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = 4451585166867280928L;
+	private static final long serialVersionUID = -3460630793497993684L;
 	
 	private java.time.LocalDate date;
 
@@ -200,7 +205,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.LinkedHashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = 5678635092106778093L;
+	private static final long serialVersionUID = 2086307098038654361L;
 	
 	private java.math.BigDecimal min;
 

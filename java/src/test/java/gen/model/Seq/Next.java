@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.Seq;
 
 
@@ -70,7 +75,6 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 4981945344407875395L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Next(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -81,6 +85,7 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.ID = ID;
 	}
 
+	private static final long serialVersionUID = 7166794290388218343L;
 	
 	private int ID;
 
@@ -138,7 +143,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = 2140855864644814769L;
+	private static final long serialVersionUID = 5263294815081220309L;
 	
 	private Integer min;
 
@@ -313,7 +318,6 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 	}
 }
 
-	private transient Next __originalValue;
 	
 	static {
 		gen.model.Seq.repositories.NextRepository.__setupPersist(
@@ -349,6 +353,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 			}
 		);
 	}
+	private transient Next __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -472,7 +477,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 	}
 	
 	public Next(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Next>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Next> rdr : readers) {
 			rdr.read(this, reader, context);
 		}

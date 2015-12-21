@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.mixinReference;
 
 
@@ -73,18 +78,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		return "UserFilter(" + URI + ')';
 	}
 	
-	
-	public UserFilter(
-			final String name) {
-			
-		this.ID = --__SequenceCounterID__;
-		setName(name);
-		this.URI = java.lang.Integer.toString(this.ID);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 34045148914462306L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private UserFilter(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -97,6 +91,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		this.name = name == null ? "" : name;
 	}
 
+	private static final long serialVersionUID = 3276517661470861758L;
 	
 	private int ID;
 
@@ -152,7 +147,6 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		return this;
 	}
 
-	private transient UserFilter __originalValue;
 	
 	static {
 		gen.model.mixinReference.repositories.UserFilterRepository.__setupPersist(
@@ -188,6 +182,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 			}
 		);
 	}
+	private transient UserFilter __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -330,7 +325,7 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 	}
 	
 	public UserFilter(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<UserFilter>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<UserFilter> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -349,4 +344,14 @@ public class UserFilter   implements java.lang.Cloneable, java.io.Serializable, 
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 	}
+	
+	
+	public UserFilter(
+			final String name) {
+			
+		this.ID = --__SequenceCounterID__;
+		setName(name);
+		this.URI = java.lang.Integer.toString(this.ID);
+	}
+
 }

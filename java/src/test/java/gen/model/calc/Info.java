@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.calc;
 
 
@@ -72,19 +77,7 @@ public class Info   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return "Info(" + URI + ')';
 	}
 	
-	
-	public Info(
-			final String code,
-			final String name) {
-			
-		setCode(code);
-		setName(name);
-		this.URI = this.code;
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 8424821638387905874L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Info(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -97,6 +90,7 @@ public class Info   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.name = name == null ? "" : name;
 	}
 
+	private static final long serialVersionUID = -7120682101009463474L;
 	
 	private String code;
 
@@ -135,7 +129,6 @@ public class Info   implements java.lang.Cloneable, java.io.Serializable, org.re
 		return this;
 	}
 
-	private transient Info __originalValue;
 	
 	static {
 		gen.model.calc.repositories.InfoRepository.__setupPersist(
@@ -171,6 +164,7 @@ public class Info   implements java.lang.Cloneable, java.io.Serializable, org.re
 			}
 		);
 	}
+	private transient Info __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -313,7 +307,7 @@ public class Info   implements java.lang.Cloneable, java.io.Serializable, org.re
 	}
 	
 	public Info(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Info>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Info> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -332,4 +326,15 @@ public class Info   implements java.lang.Cloneable, java.io.Serializable, org.re
 		readers[__index__extended_code] = (item, reader, context) -> { item.code = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 		readers[__index__extended_name] = (item, reader, context) -> { item.name = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 	}
+	
+	
+	public Info(
+			final String code,
+			final String name) {
+			
+		setCode(code);
+		setName(name);
+		this.URI = this.code;
+	}
+
 }

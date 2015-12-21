@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.mixinReference;
 
 
@@ -75,18 +80,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		return "SpecificReport(" + URI + ')';
 	}
 	
-	
-	public SpecificReport(
-			final gen.model.mixinReference.Author author) {
-			
-		this.ID = --__SequenceCounterID__;
-		setAuthor(author);
-		this.URI = java.lang.Integer.toString(this.ID);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -4689194959404172273L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SpecificReport(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -101,6 +95,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		this.authorID = authorID;
 	}
 
+	private static final long serialVersionUID = 7192016577696875979L;
 	
 	private int ID;
 
@@ -137,7 +132,6 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 	}
 	
 	private static int __SequenceCounterID__;
-	private transient SpecificReport __originalValue;
 	
 	static {
 		gen.model.mixinReference.repositories.SpecificReportRepository.__setupPersist(
@@ -173,6 +167,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 			}
 		);
 	}
+	private transient SpecificReport __originalValue;
 	
 	private gen.model.mixinReference.Author author;
 
@@ -253,9 +248,10 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 				com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
 			}
 		
-			if(self.authorURI != null) {
+			final String authorURI = self.getAuthorURI();
+			if(authorURI != null) {
 				sw.writeAscii(",\"authorURI\":");
-				com.dslplatform.json.StringConverter.serializeShort(self.authorURI, sw);
+				com.dslplatform.json.StringConverter.serializeShort(authorURI, sw);
 			}
 		
 			if (self.authorID != 0) {
@@ -274,7 +270,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 			com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
 		
 			sw.writeAscii(",\"authorURI\":");
-			com.dslplatform.json.StringConverter.serializeShortNullable(self.authorURI, sw);
+			com.dslplatform.json.StringConverter.serializeShortNullable(self.getAuthorURI(), sw);
 		
 			
 			sw.writeAscii(",\"authorID\":", 12);
@@ -393,7 +389,7 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 	}
 	
 	public SpecificReport(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SpecificReport>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<SpecificReport> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -414,4 +410,14 @@ public class SpecificReport   implements java.lang.Cloneable, java.io.Serializab
 		readers[__index__extended_authorURI] = (item, reader, context) -> { item.authorURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); return item; };
 		readers[__index__extended_authorID] = (item, reader, context) -> { item.authorID = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
+	
+	
+	public SpecificReport(
+			final gen.model.mixinReference.Author author) {
+			
+		this.ID = --__SequenceCounterID__;
+		setAuthor(author);
+		this.URI = java.lang.Integer.toString(this.ID);
+	}
+
 }

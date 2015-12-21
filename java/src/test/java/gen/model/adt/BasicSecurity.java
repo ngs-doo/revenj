@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.adt;
 
 
@@ -78,7 +83,7 @@ public final class BasicSecurity   implements java.lang.Cloneable, java.io.Seria
 		this.password = password == null ? "" : password;
 	}
 
-	private static final long serialVersionUID = 5826454432084422133L;
+	private static final long serialVersionUID = 4102188861482037953L;
 	
 	private String username;
 

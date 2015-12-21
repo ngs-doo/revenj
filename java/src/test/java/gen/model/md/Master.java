@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.md;
 
 
@@ -78,18 +83,7 @@ public class Master   implements java.lang.Cloneable, java.io.Serializable, org.
 		return "Master(" + URI + ')';
 	}
 	
-	
-	public Master(
-			final gen.model.md.Detail[] details) {
-			
-		this.ID = --__SequenceCounterID__;
-		setDetails(details);
-		this.URI = java.lang.Integer.toString(this.ID);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -4478835048626755815L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Master(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -102,6 +96,7 @@ public class Master   implements java.lang.Cloneable, java.io.Serializable, org.
 		this.details = details == null ? new gen.model.md.Detail[] { } : details;
 	}
 
+	private static final long serialVersionUID = -5028381201236751675L;
 	
 	private int ID;
 
@@ -165,7 +160,6 @@ public class Master   implements java.lang.Cloneable, java.io.Serializable, org.
 		return this;
 	}
 
-	private transient Master __originalValue;
 	
 	static {
 		gen.model.md.repositories.MasterRepository.__setupPersist(
@@ -203,6 +197,7 @@ public class Master   implements java.lang.Cloneable, java.io.Serializable, org.
 			}
 		);
 	}
+	private transient Master __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -387,7 +382,7 @@ public class Master   implements java.lang.Cloneable, java.io.Serializable, org.
 	}
 	
 	public Master(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Master>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Master> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -406,4 +401,14 @@ public class Master   implements java.lang.Cloneable, java.io.Serializable, org.
 		readers[__index__extended_ID] = (item, reader, context) -> { item.ID = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 		readers[__index__extended_details] = (item, reader, context) -> { { java.util.List<gen.model.md.Detail> __list = org.revenj.postgres.converters.ArrayTuple.parse(reader, context, __converter_details::fromExtended); if (__list != null) {item.details = __list.toArray(new gen.model.md.Detail[__list.size()]);} else item.details = new gen.model.md.Detail[] { }; }; return item; };
 	}
+	
+	
+	public Master(
+			final gen.model.md.Detail[] details) {
+			
+		this.ID = --__SequenceCounterID__;
+		setDetails(details);
+		this.URI = java.lang.Integer.toString(this.ID);
+	}
+
 }

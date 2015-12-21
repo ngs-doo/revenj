@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.mixinReference;
 
 
@@ -71,17 +76,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 		return "Person(" + URI + ')';
 	}
 	
-	
-	public Person(
-			final java.time.LocalDate birth) {
-			
-		setBirth(birth);
-		this.URI = java.lang.Integer.toString(this.AuthorID);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = 4019989449839427299L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Person(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -102,6 +97,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 		this.AuthorID = AuthorID;
 	}
 
+	private static final long serialVersionUID = 8491747206692333621L;
 	
 	private java.time.LocalDate birth;
 
@@ -190,10 +186,9 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 	
 	static {
 		gen.model.mixinReference.Author.__bindToperson(parent -> {
-			int i = 0;
-			gen.model.mixinReference.Person _r = parent.getPerson();
-			if (_r != null) {
-				_r.AuthorID = parent.getID();
+			gen.model.mixinReference.Person e = parent.getPerson();
+			if (e != null) {
+				e.AuthorID = parent.getID();
 			}
 		});
 	}
@@ -218,21 +213,21 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 				com.dslplatform.json.JavaTimeConverter.serialize(self.birth, sw);
 			}
 		
-			if (self.yearOfBirth != 0) {
+			if (self.getYearOfBirth() != 0) {
 				sw.writeAscii(",\"yearOfBirth\":", 15);
-				com.dslplatform.json.NumberConverter.serialize(self.yearOfBirth, sw);
+				com.dslplatform.json.NumberConverter.serialize(self.getYearOfBirth(), sw);
 			}
 		
-			if (self.dayOfBirth != 0) {
+			if (self.getDayOfBirth() != 0) {
 				sw.writeAscii(",\"dayOfBirth\":", 14);
-				com.dslplatform.json.NumberConverter.serialize(self.dayOfBirth, sw);
+				com.dslplatform.json.NumberConverter.serialize(self.getDayOfBirth(), sw);
 			}
 		
-			if (self.bornOnOddDay) {
+			if (self.getBornOnOddDay()) {
 				sw.writeAscii(",\"bornOnOddDay\":true");
 			}
 		
-			if (self.bornOnEvenDay) {
+			if (self.getBornOnEvenDay()) {
 				sw.writeAscii(",\"bornOnEvenDay\":true");
 			}
 		
@@ -253,19 +248,21 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 		
 			
 			sw.writeAscii(",\"yearOfBirth\":", 15);
-			com.dslplatform.json.NumberConverter.serialize(self.yearOfBirth, sw);
+			com.dslplatform.json.NumberConverter.serialize(self.getYearOfBirth(), sw);
 		
 			
 			sw.writeAscii(",\"dayOfBirth\":", 14);
-			com.dslplatform.json.NumberConverter.serialize(self.dayOfBirth, sw);
+			com.dslplatform.json.NumberConverter.serialize(self.getDayOfBirth(), sw);
 		
-			if (self.bornOnOddDay) {
+			
+			if (self.getBornOnOddDay()) {
 				sw.writeAscii(",\"bornOnOddDay\":true");
 			} else {
 				sw.writeAscii(",\"bornOnOddDay\":false");
 			}
 		
-			if (self.bornOnEvenDay) {
+			
+			if (self.getBornOnEvenDay()) {
 				sw.writeAscii(",\"bornOnEvenDay\":true");
 			} else {
 				sw.writeAscii(",\"bornOnEvenDay\":false");
@@ -413,7 +410,7 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 	}
 	
 	public Person(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Person>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Person> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -431,4 +428,13 @@ public class Person   implements java.lang.Cloneable, java.io.Serializable, com.
 		readers[__index__extended_birth] = (item, reader, context) -> { item.birth = org.revenj.postgres.converters.DateConverter.parse(reader, false); return item; };
 		readers[__index__extended_AuthorID] = (item, reader, context) -> { item.AuthorID = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
+	
+	
+	public Person(
+			final java.time.LocalDate birth) {
+			
+		setBirth(birth);
+		this.URI = java.lang.Integer.toString(this.AuthorID);
+	}
+
 }

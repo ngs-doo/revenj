@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.27897 
+* v1.0.0.29923 
 */
 
 package gen.model.binaries;
@@ -103,7 +103,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		this.boolsCalc = boolsCalc;
 	}
 
-	private static final long serialVersionUID = 3709312081834049172L;
+	private static final long serialVersionUID = -7850006447754211814L;
 	
 	private java.util.UUID ID;
 
@@ -270,16 +270,16 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		}
 		else if(self.bools != null) sw.writeAscii(",\"bools\":[]", 11);
 		
-		if(self.boolsCalc != null && self.boolsCalc.length != 0) {
+		if(self.getBoolsCalc() != null && self.getBoolsCalc().length != 0) {
 			sw.writeAscii(",\"boolsCalc\":[", 14);
-			com.dslplatform.json.BoolConverter.serialize(self.boolsCalc[0], sw);
-			for(int i = 1; i < self.boolsCalc.length; i++) {
+			com.dslplatform.json.BoolConverter.serialize(self.getBoolsCalc()[0], sw);
+			for(int i = 1; i < self.getBoolsCalc().length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.BoolConverter.serialize(self.boolsCalc[i], sw);
+				com.dslplatform.json.BoolConverter.serialize(self.getBoolsCalc()[i], sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
-		else if(self.boolsCalc != null) sw.writeAscii(",\"boolsCalc\":[]", 15);
+		else if(self.getBoolsCalc() != null) sw.writeAscii(",\"boolsCalc\":[]", 15);
 	}
 
 	static void __serializeJsonObjectFull(final Document self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
@@ -311,16 +311,16 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 		else if(self.bools != null) sw.writeAscii(",\"bools\":[]", 11);
 		else sw.writeAscii(",\"bools\":null", 13);
 		
-		if(self.boolsCalc != null && self.boolsCalc.length != 0) {
+		if(self.getBoolsCalc() != null && self.getBoolsCalc().length != 0) {
 			sw.writeAscii(",\"boolsCalc\":[", 14);
-			com.dslplatform.json.BoolConverter.serialize(self.boolsCalc[0], sw);
-			for(int i = 1; i < self.boolsCalc.length; i++) {
+			com.dslplatform.json.BoolConverter.serialize(self.getBoolsCalc()[0], sw);
+			for(int i = 1; i < self.getBoolsCalc().length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.BoolConverter.serialize(self.boolsCalc[i], sw);
+				com.dslplatform.json.BoolConverter.serialize(self.getBoolsCalc()[i], sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
-		else if(self.boolsCalc != null) sw.writeAscii(",\"boolsCalc\":[]", 15);
+		else if(self.getBoolsCalc() != null) sw.writeAscii(",\"boolsCalc\":[]", 15);
 		else sw.writeAscii(",\"boolsCalc\":null", 17);
 	}
 
@@ -499,7 +499,7 @@ public class Document   implements java.lang.Cloneable, java.io.Serializable, or
 	}
 	
 	public Document(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Document>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Document> rdr : readers) {
 			rdr.read(this, reader, context);
 		}

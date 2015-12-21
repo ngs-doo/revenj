@@ -1,13 +1,13 @@
 /*
 * Created by DSL Platform
-* v1.0.0.32432 
+* v1.0.0.29923 
 */
 
 package gen.model.test.repositories;
 
 
 
-public class CompositeListRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.test.CompositeList> {
+public class CompositeListRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.test.CompositeList>, org.revenj.postgres.BulkRepository<gen.model.test.CompositeList> {
 	
 	
 	
@@ -15,7 +15,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 			 final java.util.Optional<java.sql.Connection> transactionContext,
 			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
-			 final org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList> converter,
+			 final gen.model.test.converters.CompositeListConverter converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
 		this.transactionContext = transactionContext;
@@ -30,7 +30,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
 	private final java.sql.Connection transactionConnection;
-	private final org.revenj.postgres.ObjectConverter<gen.model.test.CompositeList> converter;
+	private final gen.model.test.converters.CompositeListConverter converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	private java.sql.Connection getConnection() {
@@ -64,6 +64,8 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		}
 		return filter;
 	}
+
+	private static final boolean hasCustomSecurity = false;
 
 	@Override
 	public org.revenj.patterns.Query<gen.model.test.CompositeList> query(org.revenj.patterns.Specification<gen.model.test.CompositeList> filter) {
@@ -104,20 +106,13 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				applyFilters = applyFilters.andThen(ps -> {
 					try {
 						
-				Object[] __arr = new Object[spec.getSimples().size()];
-				if (__arr.length > 0) {
-					gen.model.test.converters.SimpleConverter __converter = locator.resolve(gen.model.test.converters.SimpleConverter.class);
-					int __ind = 0;
-					for (gen.model.test.Simple __it : spec.getSimples()) {
-						org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
-						__pgo.setType("\"test\".\"Simple\"");
-						pgWriter.reset();
-						__converter.to(__it).buildTuple(pgWriter, false);
-						__pgo.setValue(pgWriter.toString());
-						__arr[__ind++] = __pgo;
-					}
-				}
-				ps.setArray(1, connection.createArrayOf("\"test\".\"Simple\"", __arr));
+				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+				pgo.setType("\"test\".\"Simple\"[]");
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getSimples(), locator.resolve(gen.model.test.converters.SimpleConverter.class)::to);
+				pgWriter.reset();
+				tuple.buildTuple(pgWriter, false);
+				pgo.setValue(pgWriter.toString());
+				ps.setObject(1, pgo);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -155,6 +150,66 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.test.CompositeList>> search(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.test.CompositeList> specification, Integer limit, Integer offset) {
+		String selectType = "SELECT array_agg(_r) FROM (SELECT _it as _r";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT array_agg(_r) FROM (SELECT _r FROM \"test\".\"CompositeList_snowflake\" _r");
+		}
+		
+			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
+				gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"CompositeList.ForSimple\"(?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						
+				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+				pgo.setType("\"test\".\"Simple\"[]");
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getSimples(), locator.resolve(gen.model.test.converters.SimpleConverter.class)::to);
+				pgWriter.reset();
+				tuple.buildTuple(pgWriter, false);
+				pgo.setValue(pgWriter.toString());
+				ps.setObject(index + 1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> search(specification, limit, offset);
+		}
+			sb.append(" ORDER BY \"id\" DESC");
+		if (limit != null && limit >= 0) {
+			sb.append(" LIMIT ");
+			sb.append(Integer.toString(limit));
+		}
+		if (offset != null && offset >= 0) {
+			sb.append(" OFFSET ");
+			sb.append(Integer.toString(offset));
+		}
+		sb.append(") _sq");
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.test.CompositeList> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public long count(org.revenj.patterns.Specification<gen.model.test.CompositeList> specification) {
 		final String selectType = "SELECT COUNT(*)";
@@ -172,20 +227,13 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				applyFilters = applyFilters.andThen(ps -> {
 					try {
 						
-				Object[] __arr = new Object[spec.getSimples().size()];
-				if (__arr.length > 0) {
-					gen.model.test.converters.SimpleConverter __converter = locator.resolve(gen.model.test.converters.SimpleConverter.class);
-					int __ind = 0;
-					for (gen.model.test.Simple __it : spec.getSimples()) {
-						org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
-						__pgo.setType("\"test\".\"Simple\"");
-						pgWriter.reset();
-						__converter.to(__it).buildTuple(pgWriter, false);
-						__pgo.setValue(pgWriter.toString());
-						__arr[__ind++] = __pgo;
-					}
-				}
-				ps.setArray(1, connection.createArrayOf("\"test\".\"Simple\"", __arr));
+				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+				pgo.setType("\"test\".\"Simple\"[]");
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getSimples(), locator.resolve(gen.model.test.converters.SimpleConverter.class)::to);
+				pgWriter.reset();
+				tuple.buildTuple(pgWriter, false);
+				pgo.setValue(pgWriter.toString());
+				ps.setObject(1, pgo);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -212,6 +260,55 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Long> count(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.test.CompositeList> specification) {
+		String selectType = "SELECT count(*)";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT count(*) FROM \"test\".\"CompositeList_snowflake\" r");
+		}
+		
+			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
+				gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"CompositeList.ForSimple\"(?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						
+				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+				pgo.setType("\"test\".\"Simple\"[]");
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getSimples(), locator.resolve(gen.model.test.converters.SimpleConverter.class)::to);
+				pgWriter.reset();
+				tuple.buildTuple(pgWriter, false);
+				pgo.setValue(pgWriter.toString());
+				ps.setObject(index + 1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).count();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getLong(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public boolean exists(org.revenj.patterns.Specification<gen.model.test.CompositeList> specification) {
 		final String selectType = "SELECT exists(SELECT *";
@@ -229,20 +326,13 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				applyFilters = applyFilters.andThen(ps -> {
 					try {
 						
-				Object[] __arr = new Object[spec.getSimples().size()];
-				if (__arr.length > 0) {
-					gen.model.test.converters.SimpleConverter __converter = locator.resolve(gen.model.test.converters.SimpleConverter.class);
-					int __ind = 0;
-					for (gen.model.test.Simple __it : spec.getSimples()) {
-						org.postgresql.util.PGobject __pgo = new org.postgresql.util.PGobject();
-						__pgo.setType("\"test\".\"Simple\"");
-						pgWriter.reset();
-						__converter.to(__it).buildTuple(pgWriter, false);
-						__pgo.setValue(pgWriter.toString());
-						__arr[__ind++] = __pgo;
-					}
-				}
-				ps.setArray(1, connection.createArrayOf("\"test\".\"Simple\"", __arr));
+				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+				pgo.setType("\"test\".\"Simple\"[]");
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getSimples(), locator.resolve(gen.model.test.converters.SimpleConverter.class)::to);
+				pgWriter.reset();
+				tuple.buildTuple(pgWriter, false);
+				pgo.setValue(pgWriter.toString());
+				ps.setObject(1, pgo);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -269,6 +359,55 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Boolean> exists(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.test.CompositeList> specification) {
+		String selectType = "exists(SELECT *";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("exists(SELECT * FROM \"test\".\"CompositeList_snowflake\" r");
+		}
+		
+			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
+				gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"CompositeList.ForSimple\"(?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						
+				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
+				pgo.setType("\"test\".\"Simple\"[]");
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(spec.getSimples(), locator.resolve(gen.model.test.converters.SimpleConverter.class)::to);
+				pgWriter.reset();
+				tuple.buildTuple(pgWriter, false);
+				pgo.setValue(pgWriter.toString());
+				ps.setObject(index + 1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).any();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getBoolean(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public void close() throws java.io.IOException { 
 	}
@@ -279,7 +418,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		java.sql.Connection connection = getConnection();
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"CompositeList_snowflake\" r WHERE r.\"URI\" = ANY(?)")) {
 			statement.setArray(1, connection.createArrayOf("text", uris));
-			return readFromDb(statement, new java.util.ArrayList<>(uris.length));			
+			return readFromDb(statement, new java.util.ArrayList<>(uris.length));
 		} catch (java.sql.SQLException | java.io.IOException e) {
 			throw new RuntimeException(e);
 		} finally {
@@ -287,5 +426,85 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		}
 	}
 
+	@Override
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.Optional<gen.model.test.CompositeList>> find(org.revenj.postgres.BulkReaderQuery query, String uri) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		StringBuilder sb = query.getBuilder();
+		int index = query.getArgumentIndex();
+		if (uri == null) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> java.util.Optional.empty();
+		}
+		sb.append("SELECT _r FROM \"test\".\"CompositeList_snowflake\" _r WHERE _r.\"URI\" = ?");
+		query.addArgument(ps -> {
+			try {
+				ps.setString(index, uri);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return (rs, ind) -> 
+		{
+			try {
+				String res = rs.getString(ind);
+				if (res == null) {
+					return java.util.Optional.empty();
+				}
+				rdr.process(res);
+				gen.model.test.CompositeList instance = converter.from(rdr);
+				if (!hasCustomSecurity) return java.util.Optional.of(instance);
+				java.util.List<gen.model.test.CompositeList> result = new java.util.ArrayList<>(1);
+				result.add(instance);
+				
+				if (result.size() == 1) {
+					java.util.Optional.of(instance);
+				}
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+			return java.util.Optional.empty();
+		};
+	}
+
+	@Override
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.test.CompositeList>> find(org.revenj.postgres.BulkReaderQuery query, String[] uris) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter writer = query.getWriter();
+		StringBuilder sb = query.getBuilder();
+		int index = query.getArgumentIndex();
+		if (uris == null || uris.length == 0) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> new java.util.ArrayList<>(0);
+		}
+		sb.append("SELECT array_agg(_r) FROM \"test\".\"CompositeList_snowflake\" _r WHERE _r.\"URI\" = ANY(?)");
+		query.addArgument(ps -> {
+			try {
+				org.postgresql.util.PGobject arr = new org.postgresql.util.PGobject();
+				arr.setType("text[]");
+				writer.reset();
+				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(uris, org.revenj.postgres.converters.StringConverter::toTuple);
+				tuple.buildTuple(writer, false);
+				arr.setValue(writer.toString());
+				ps.setObject(index, arr);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return (rs, ind) -> 
+		{
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.test.CompositeList> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
 
 }

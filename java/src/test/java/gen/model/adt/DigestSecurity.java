@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.adt;
 
 
@@ -78,7 +83,7 @@ public final class DigestSecurity   implements java.lang.Cloneable, java.io.Seri
 		this.passwordHash = passwordHash == null ? org.revenj.Utils.EMPTY_BINARY : passwordHash;
 	}
 
-	private static final long serialVersionUID = 1536490670658259921L;
+	private static final long serialVersionUID = 485717814833907685L;
 	
 	private String username;
 

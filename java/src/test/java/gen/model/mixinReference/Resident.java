@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.mixinReference;
 
 
@@ -71,19 +76,7 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable, co
 		return "Resident(" + URI + ')';
 	}
 	
-	
-	public Resident(
-			final java.util.UUID id,
-			final java.time.LocalDate birth) {
-			
-		setId(id);
-		setBirth(birth);
-		this.URI = this.id.toString();
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -6652115988760606745L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Resident(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -96,6 +89,7 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable, co
 		this.birth = birth == null ? org.revenj.Utils.MIN_LOCAL_DATE : birth;
 	}
 
+	private static final long serialVersionUID = 7975619427772604547L;
 	
 	private java.util.UUID id;
 
@@ -276,7 +270,7 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable, co
 	}
 	
 	public Resident(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Resident>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Resident> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -294,4 +288,15 @@ public class Resident   implements java.lang.Cloneable, java.io.Serializable, co
 		readers[__index__extended_id] = (item, reader, context) -> { item.id = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
 		readers[__index__extended_birth] = (item, reader, context) -> { item.birth = org.revenj.postgres.converters.DateConverter.parse(reader, false); return item; };
 	}
+	
+	
+	public Resident(
+			final java.util.UUID id,
+			final java.time.LocalDate birth) {
+			
+		setId(id);
+		setBirth(birth);
+		this.URI = this.id.toString();
+	}
+
 }

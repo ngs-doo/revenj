@@ -1,8 +1,13 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.calc.repositories;
 
 
 
-public class RealmRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.calc.Realm>, org.revenj.patterns.PersistableRepository<gen.model.calc.Realm> {
+public class RealmRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.calc.Realm>, org.revenj.postgres.BulkRepository<gen.model.calc.Realm>, org.revenj.patterns.PersistableRepository<gen.model.calc.Realm> {
 	
 	
 	
@@ -10,7 +15,7 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 			 final java.util.Optional<java.sql.Connection> transactionContext,
 			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
-			 final org.revenj.postgres.ObjectConverter<gen.model.calc.Realm> converter,
+			 final gen.model.calc.converters.RealmConverter converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
 		this.transactionContext = transactionContext;
@@ -25,7 +30,7 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
 	private final java.sql.Connection transactionConnection;
-	private final org.revenj.postgres.ObjectConverter<gen.model.calc.Realm> converter;
+	private final gen.model.calc.converters.RealmConverter converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	private java.sql.Connection getConnection() {
@@ -54,6 +59,8 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 		
 		return filter;
 	}
+
+	private static final boolean hasCustomSecurity = false;
 
 	@Override
 	public org.revenj.patterns.Query<gen.model.calc.Realm> query(org.revenj.patterns.Specification<gen.model.calc.Realm> filter) {
@@ -118,6 +125,45 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.calc.Realm>> search(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.calc.Realm> specification, Integer limit, Integer offset) {
+		String selectType = "SELECT array_agg(_r) FROM (SELECT _it as _r";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT array_agg(_r) FROM (SELECT _r FROM \"calc\".\"Realm_entity\" _r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> search(specification, limit, offset);
+		}
+		if (limit != null && limit >= 0) {
+			sb.append(" LIMIT ");
+			sb.append(Integer.toString(limit));
+		}
+		if (offset != null && offset >= 0) {
+			sb.append(" OFFSET ");
+			sb.append(Integer.toString(offset));
+		}
+		sb.append(") _sq");
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.calc.Realm> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public long count(org.revenj.patterns.Specification<gen.model.calc.Realm> specification) {
 		final String selectType = "SELECT COUNT(*)";
@@ -147,6 +193,35 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 		} finally { 
 			releaseConnection(connection); 
 		}
+	}
+
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Long> count(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.calc.Realm> specification) {
+		String selectType = "SELECT count(*)";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT count(*) FROM \"calc\".\"Realm_entity\" r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).count();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getLong(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
 	}
 
 	@Override
@@ -180,6 +255,35 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Boolean> exists(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.calc.Realm> specification) {
+		String selectType = "exists(SELECT *";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("exists(SELECT * FROM \"calc\".\"Realm_entity\" r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).any();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getBoolean(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public void close() throws java.io.IOException { 
 	}
@@ -194,6 +298,7 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 			StringBuilder sb = new StringBuilder("SELECT _r FROM \"calc\".\"Realm_entity\" _r WHERE _r.\"id\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
+			statement.setEscapeProcessing(false);
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
 				while (rs.next()) {
 					reader.process(rs.getString(1));
@@ -208,6 +313,96 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 			releaseConnection(connection); 
 		}
 	}
+
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.calc.Realm>> find(org.revenj.postgres.BulkReaderQuery query, String[] uris) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		StringBuilder sb = query.getBuilder();
+		if (uris == null || uris.length == 0) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> new java.util.ArrayList<>(0);
+		}
+		sb.append("SELECT array_agg(_r) FROM \"calc\".\"Realm_entity\" _r WHERE _r.\"id\" IN (");
+		org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
+		sb.append(")");
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.calc.Realm> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
+	@Override
+	public java.util.Optional<gen.model.calc.Realm> find(String uri) {
+		java.sql.Connection connection = getConnection();
+		try (java.sql.Statement statement = connection.createStatement();
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
+			StringBuilder sb = new StringBuilder("SELECT _r FROM \"calc\".\"Realm_entity\" _r WHERE _r.\"id\" = ");
+			org.revenj.postgres.PostgresWriter.writeSimpleUri(sb, uri);
+			statement.setEscapeProcessing(false);
+			gen.model.calc.Realm instance;
+			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
+				if (rs.next()) {
+					reader.process(rs.getString(1));
+					instance = converter.from(reader);
+				} else {
+					return java.util.Optional.empty();
+				}
+			}
+			if (!hasCustomSecurity) return java.util.Optional.of(instance);
+			java.util.List<gen.model.calc.Realm> result = new java.util.ArrayList<>(1);
+			result.add(instance);
+			
+			if (result.size() == 1) {
+				java.util.Optional.of(instance);
+			}
+			return java.util.Optional.empty();
+		} catch (java.sql.SQLException | java.io.IOException e) {
+			throw new RuntimeException(e);
+		} finally { 
+			releaseConnection(connection); 
+		}
+	}
+
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.Optional<gen.model.calc.Realm>> find(org.revenj.postgres.BulkReaderQuery query, String uri) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		StringBuilder sb = query.getBuilder();
+		if (uri == null) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> java.util.Optional.empty();
+		}
+		sb.append("SELECT _r FROM \"calc\".\"Realm_entity\" _r WHERE _r.\"id\" = ");
+		org.revenj.postgres.PostgresWriter.writeSimpleUri(sb, uri);
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null) {
+					return java.util.Optional.empty();
+				}
+				rdr.process(res);
+				gen.model.calc.Realm instance = converter.from(rdr);
+				if (!hasCustomSecurity) return java.util.Optional.of(instance);
+				java.util.List<gen.model.calc.Realm> result = new java.util.ArrayList<>(1);
+				result.add(instance);
+				
+				if (result.size() == 1) {
+					java.util.Optional.of(instance);
+				}
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+			return java.util.Optional.empty();
+		};
+	}
+
 	
 	public static void __setupPersist(
 			java.util.function.BiConsumer<java.util.Collection<gen.model.calc.Realm>, org.revenj.postgres.PostgresWriter> insert, 

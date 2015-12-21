@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.binaries;
 
 
@@ -15,7 +20,7 @@ public final class WritableDocument   implements java.io.Serializable, org.reven
 		setName(name);
 	}
 
-	private static final long serialVersionUID = -5745958157606098427L;
+	private static final long serialVersionUID = 7054100976818189777L;
 	
 	private String URI;
 

@@ -6,6 +6,7 @@ import gen.model.adt.BasicSecurity;
 import gen.model.adt.User;
 import gen.model.adt.repositories.UserRepository;
 import gen.model.binaries.Document;
+import gen.model.binaries.WritableDocument;
 import gen.model.egzotics.E;
 import gen.model.egzotics.PksV;
 import gen.model.egzotics.pks;
@@ -481,5 +482,31 @@ public class TestRepository {
 		Assert.assertTrue(t.deepEquals(found.get()));
 		Assert.assertEquals("test", found.get().getXml().getNodeName());
 		Assert.assertEquals("b", found.get().getXml().getAttribute("a"));
+	}
+
+	@Test
+	public void bulkReadingSql() throws Exception {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		Random rnd = new Random();
+		String name = "bulk " + rnd.nextInt();
+		Document document = new Document().setName(name);
+		context.create(document);
+		UUID id = document.getID();
+		RepositoryBulkReader bulkReader = locator.resolve(RepositoryBulkReader.class);
+		Callable<Optional<WritableDocument>> wd1 = bulkReader.find(WritableDocument.class, document.getURI());
+		Callable<List<WritableDocument>> wd2 = bulkReader.find(WritableDocument.class, new String[]{document.getURI()});
+		Callable<List<WritableDocument>> wd3 = bulkReader.search(WritableDocument.class, it -> it.getId() == id);
+		Callable<Boolean> wd4 = bulkReader.exists(WritableDocument.class, it -> it.getId() == id);
+		Callable<Long> wd5 = bulkReader.count(WritableDocument.class, it -> it.getId() == id);
+		bulkReader.execute();
+		Assert.assertTrue(wd1.call().isPresent());
+		Assert.assertEquals(1, wd2.call().size());
+		Assert.assertEquals(1, wd3.call().size());
+		Assert.assertTrue(wd4.call());
+		Assert.assertEquals(1L, wd5.call().longValue());
+		Assert.assertEquals(name, wd1.call().get().getName());
+		Assert.assertEquals(name, wd2.call().get(0).getName());
+		Assert.assertEquals(name, wd3.call().get(0).getName());
 	}
 }

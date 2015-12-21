@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.test;
 
 
@@ -82,19 +87,7 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 		return "Detail2(" + URI + ')';
 	}
 	
-	
-	public Detail2(
-			final java.net.URI u,
-			final double[] dd) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setU(u);
-		setDd(dd);
-	}
-
-	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -6156767151822150059L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail2(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -113,6 +106,7 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 		this.Index = Index;
 	}
 
+	private static final long serialVersionUID = -4475902015092088173L;
 	
 	private java.net.URI u;
 
@@ -454,7 +448,7 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 	}
 	
 	public Detail2(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Detail2>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Detail2> rdr : readers) {
 			rdr.read(this, reader, context);
 		}
@@ -490,4 +484,15 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 		readers[__index__extended_EntityIndex] = (item, reader, context) -> { item.EntityIndex = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
+	
+	
+	public Detail2(
+			final java.net.URI u,
+			final double[] dd) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setU(u);
+		setDd(dd);
+	}
+
 }

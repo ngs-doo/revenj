@@ -38,8 +38,16 @@ public abstract class PostgresTuple {
 		} else insertRecord(sw, "", null);
 	}
 
+	private static ThreadLocal<PostgresWriter> threadWriter = new ThreadLocal<PostgresWriter>() {
+		@Override
+		protected PostgresWriter initialValue() {
+			return new PostgresWriter();
+		}
+	};
+
 	public String buildTuple(boolean quote) {
-		try (PostgresWriter sw = PostgresWriter.create()) {
+		try (PostgresWriter sw = threadWriter.get()) {
+			sw.reset();
 			buildTuple(sw, quote);
 			return sw.toString();
 		}

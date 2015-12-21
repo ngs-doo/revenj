@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.24260 
+* v1.0.0.29923 
 */
 
 package gen.model.issues;
@@ -90,7 +90,7 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 		this.d = d == null ? java.math.BigDecimal.ZERO.setScale(9) : d;
 	}
 
-	private static final long serialVersionUID = -6964291541568801858L;
+	private static final long serialVersionUID = -5333121589735684657L;
 	
 	private java.time.OffsetDateTime ts;
 
@@ -308,7 +308,7 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 	}
 	
 	public TimestampPk(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<TimestampPk>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<TimestampPk> rdr : readers) {
 			rdr.read(this, reader, context);
 		}

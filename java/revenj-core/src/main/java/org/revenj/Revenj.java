@@ -13,7 +13,6 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -164,6 +163,7 @@ public abstract class Revenj {
 		container.registerInstance(EagerNotification.class, databaseNotification, false);
 		container.registerInstance(DataChangeNotification.class, databaseNotification, true);
 		ChangeNotification.registerContainer(container, databaseNotification);
+		container.registerFactory(RepositoryBulkReader.class, PostgresBulkReader::create, false);
 		container.registerInstance(PermissionManager.class, new RevenjPermissionManager(container), false);
 		container.registerInstance(ClassLoader.class, loader, false);
 		container.registerClass(new Generic<Serialization<String>>() {

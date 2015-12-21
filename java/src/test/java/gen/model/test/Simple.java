@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.test;
 
 
@@ -112,7 +117,7 @@ public final class Simple   implements java.lang.Cloneable, java.io.Serializable
 		this.ts = ts == null ? org.revenj.Utils.MIN_DATE_TIME : ts;
 	}
 
-	private static final long serialVersionUID = -8141549931756202148L;
+	private static final long serialVersionUID = 845658598096199744L;
 	
 	private int number;
 

@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.mixinReference;
 
 
@@ -68,7 +73,6 @@ public final class Test   implements java.lang.Cloneable, java.io.Serializable, 
 	public String toString() {
 		return "Test(" + x + ',' + author + ')';
 	}
-	private static final long serialVersionUID = 4156833507154115247L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Test(
 			@com.fasterxml.jackson.annotation.JsonProperty("_helper") final boolean _helper ,
@@ -79,6 +83,7 @@ public final class Test   implements java.lang.Cloneable, java.io.Serializable, 
 		this.author = author == null ? new gen.model.mixinReference.Author() : author;
 	}
 
+	private static final long serialVersionUID = -4911931088387240981L;
 	
 	private int x;
 

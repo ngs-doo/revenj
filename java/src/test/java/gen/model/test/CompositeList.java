@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.32432 
+* v1.0.0.29923 
 */
 
 package gen.model.test;
@@ -97,7 +97,7 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 	public String toString() {
 		return "CompositeList(" + URI + ')';
 	}
-	private static final long serialVersionUID = -5241368694566029105L;
+	private static final long serialVersionUID = 1002595496019865374L;
 	
 	private final java.util.UUID id;
 
@@ -224,6 +224,7 @@ public final class CompositeList   implements java.io.Serializable, com.dslplatf
 	private java.util.UUID id2;
 
 	
+	@com.fasterxml.jackson.annotation.JsonProperty("id2")
 	public java.util.UUID getId2()  {
 		
 		this.id2 = __calculated_id2.apply(this);
@@ -250,7 +251,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simples = new java.util.ArrayList<gen.model.test.Simple>(4);
 	}
 
-	private static final long serialVersionUID = 685986846977240128L;
+	private static final long serialVersionUID = -724231366998105839L;
 	
 	private java.util.List<gen.model.test.Simple> simples;
 

@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.test;
 
 
@@ -74,7 +79,6 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 	}
 	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
-	private static final long serialVersionUID = -1787441700853279275L;
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private SingleDetail(
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
@@ -87,6 +91,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		this.detailsURI = detailsURI == null ? new String[0] : detailsURI;
 	}
 
+	private static final long serialVersionUID = -2349029496036925359L;
 	
 	private int ID;
 
@@ -167,7 +172,6 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 		return this.detailsURI;
 	}
 
-	private transient SingleDetail __originalValue;
 	
 	static {
 		gen.model.test.repositories.SingleDetailRepository.__setupPersist(
@@ -203,6 +207,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 			}
 		);
 	}
+	private transient SingleDetail __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -224,12 +229,13 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 				com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
 			}
 		
-			if(self.detailsURI != null && self.detailsURI.length != 0) {
+			final String[] detailsURI = self.getDetailsURI();
+			if(self.detailsURI != null && detailsURI.length != 0) {
 				sw.writeAscii(",\"detailsURI\":[");
-				com.dslplatform.json.StringConverter.serializeShort(self.detailsURI[0], sw);
-				for(int i = 1; i < self.detailsURI.length; i++) {
+				com.dslplatform.json.StringConverter.serializeShort(detailsURI[0], sw);
+				for(int i = 1; i < detailsURI.length; i++) {
 					sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
-					com.dslplatform.json.StringConverter.serializeShort(self.detailsURI[i], sw);
+					com.dslplatform.json.StringConverter.serializeShort(detailsURI[i], sw);
 				}
 				sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 			}
@@ -244,15 +250,16 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 			sw.writeAscii(",\"ID\":", 6);
 			com.dslplatform.json.NumberConverter.serialize(self.ID, sw);
 		
-			if(self.detailsURI != null && self.detailsURI.length != 0) {
+			final String[] detailsURI = self.getDetailsURI();
+			if(detailsURI != null && detailsURI.length != 0) {
 				sw.writeAscii(",\"detailsURI\":[");
-				com.dslplatform.json.StringConverter.serializeShort(self.detailsURI[0], sw);
-				for(int i = 1; i < self.detailsURI.length; i++) {
+				com.dslplatform.json.StringConverter.serializeShort(detailsURI[0], sw);
+				for(int i = 1; i < detailsURI.length; i++) {
 					sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
-					com.dslplatform.json.StringConverter.serializeShort(self.detailsURI[i], sw);
+					com.dslplatform.json.StringConverter.serializeShort(detailsURI[i], sw);
 				}
 				sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
-			} else if(self.detailsURI != null) {
+			} else if(detailsURI != null) {
 				sw.writeAscii(",\"detailsURI\":[]");
 			} else {
 				sw.writeAscii(",\"detailsURI\":null");
@@ -380,7 +387,7 @@ public class SingleDetail   implements java.lang.Cloneable, java.io.Serializable
 	}
 	
 	public SingleDetail(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<SingleDetail>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<SingleDetail> rdr : readers) {
 			rdr.read(this, reader, context);
 		}

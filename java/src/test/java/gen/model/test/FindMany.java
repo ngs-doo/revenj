@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.test;
 
 
@@ -239,7 +244,7 @@ public static class Result   implements com.dslplatform.json.JsonObject {
 		this.ids = new java.util.LinkedHashSet<java.util.UUID>(4);
 	}
 
-	private static final long serialVersionUID = -8183538265852105791L;
+	private static final long serialVersionUID = 2432466702304816693L;
 	
 	private java.util.UUID id;
 

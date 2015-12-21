@@ -4,6 +4,7 @@ import org.revenj.patterns.ServiceLocator;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 
 public final class PostgresReader implements PostgresBuffer, AutoCloseable {
 	private String input = "";
@@ -12,7 +13,7 @@ public final class PostgresReader implements PostgresBuffer, AutoCloseable {
 	private int last;
 	private char[] buffer;
 	private int positionInBuffer;
-	public final ServiceLocator locator;
+	private ServiceLocator locator;
 	public final char[] tmp;
 
 	public PostgresReader() {
@@ -25,8 +26,27 @@ public final class PostgresReader implements PostgresBuffer, AutoCloseable {
 		this.locator = locator;
 	}
 
+	public Optional<ServiceLocator> getLocator() {
+		return Optional.ofNullable(locator);
+	}
+
+	void reset(ServiceLocator locator) {
+		positionInBuffer = 0;
+		positionInInput = 0;
+		this.locator = locator;
+	}
+
+	private static ThreadLocal<PostgresReader> threadReader = new ThreadLocal<PostgresReader>() {
+		@Override
+		protected PostgresReader initialValue() {
+			return new PostgresReader();
+		}
+	};
+
 	public static PostgresReader create(ServiceLocator locator) {
-		return new PostgresReader(locator);
+		PostgresReader reader = threadReader.get();
+		reader.reset(locator);
+		return reader;
 	}
 
 	public void close() {

@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.32432 
+* v1.0.0.29923 
 */
 
 package gen.model.test;
@@ -142,7 +142,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		this.hasEntities = hasEntities;
 	}
 
-	private static final long serialVersionUID = -4555384275149073854L;
+	private static final long serialVersionUID = 1271399589760697605L;
 	
 	private java.util.UUID id;
 
@@ -404,7 +404,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = 1069421907064566642L;
+	private static final long serialVersionUID = 3659879422946359937L;
 	
 	private gen.model.test.Simple simple;
 
@@ -1210,7 +1210,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 	}
 	
 	public Composite(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Composite>[] readers) throws java.io.IOException {
-		this.__locator = java.util.Optional.ofNullable(reader.locator);
+		this.__locator = reader.getLocator();
 		for (org.revenj.postgres.ObjectConverter.Reader<Composite> rdr : readers) {
 			rdr.read(this, reader, context);
 		}

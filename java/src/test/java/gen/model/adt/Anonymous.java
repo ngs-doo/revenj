@@ -1,3 +1,8 @@
+/*
+* Created by DSL Platform
+* v1.0.0.29923 
+*/
+
 package gen.model.adt;
 
 
@@ -54,7 +59,7 @@ public final class Anonymous   implements java.lang.Cloneable, java.io.Serializa
 		
 	}
 
-	private static final long serialVersionUID = -3090653141043937027L;
+	private static final long serialVersionUID = 3193913984921557809L;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);

@@ -1,13 +1,13 @@
 /*
 * Created by DSL Platform
-* v1.0.0.24260 
+* v1.0.0.29923 
 */
 
 package gen.model.issues.repositories;
 
 
 
-public class TimestampPkRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.issues.TimestampPk>, org.revenj.patterns.PersistableRepository<gen.model.issues.TimestampPk> {
+public class TimestampPkRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.issues.TimestampPk>, org.revenj.postgres.BulkRepository<gen.model.issues.TimestampPk>, org.revenj.patterns.PersistableRepository<gen.model.issues.TimestampPk> {
 	
 	
 	
@@ -15,7 +15,7 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 			 final java.util.Optional<java.sql.Connection> transactionContext,
 			 final javax.sql.DataSource dataSource,
 			 final org.revenj.postgres.QueryProvider queryProvider,
-			 final org.revenj.postgres.ObjectConverter<gen.model.issues.TimestampPk> converter,
+			 final gen.model.issues.converters.TimestampPkConverter converter,
 			 final org.revenj.patterns.ServiceLocator locator) {
 			
 		this.transactionContext = transactionContext;
@@ -30,7 +30,7 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 	private final javax.sql.DataSource dataSource;
 	private final org.revenj.postgres.QueryProvider queryProvider;
 	private final java.sql.Connection transactionConnection;
-	private final org.revenj.postgres.ObjectConverter<gen.model.issues.TimestampPk> converter;
+	private final gen.model.issues.converters.TimestampPkConverter converter;
 	private final org.revenj.patterns.ServiceLocator locator;
 	
 	private java.sql.Connection getConnection() {
@@ -59,6 +59,8 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 		
 		return filter;
 	}
+
+	private static final boolean hasCustomSecurity = false;
 
 	@Override
 	public org.revenj.patterns.Query<gen.model.issues.TimestampPk> query(org.revenj.patterns.Specification<gen.model.issues.TimestampPk> filter) {
@@ -123,6 +125,45 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.issues.TimestampPk>> search(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.issues.TimestampPk> specification, Integer limit, Integer offset) {
+		String selectType = "SELECT array_agg(_r) FROM (SELECT _it as _r";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT array_agg(_r) FROM (SELECT _r FROM \"issues\".\"TimestampPk_entity\" _r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> search(specification, limit, offset);
+		}
+		if (limit != null && limit >= 0) {
+			sb.append(" LIMIT ");
+			sb.append(Integer.toString(limit));
+		}
+		if (offset != null && offset >= 0) {
+			sb.append(" OFFSET ");
+			sb.append(Integer.toString(offset));
+		}
+		sb.append(") _sq");
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.issues.TimestampPk> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public long count(org.revenj.patterns.Specification<gen.model.issues.TimestampPk> specification) {
 		final String selectType = "SELECT COUNT(*)";
@@ -152,6 +193,35 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 		} finally { 
 			releaseConnection(connection); 
 		}
+	}
+
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Long> count(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.issues.TimestampPk> specification) {
+		String selectType = "SELECT count(*)";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("SELECT count(*) FROM \"issues\".\"TimestampPk_entity\" r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).count();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getLong(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
 	}
 
 	@Override
@@ -185,6 +255,35 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 		}
 	}
 
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, Boolean> exists(org.revenj.postgres.BulkReaderQuery query, org.revenj.patterns.Specification<gen.model.issues.TimestampPk> specification) {
+		String selectType = "exists(SELECT *";
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		final org.revenj.postgres.PostgresWriter pgWriter = query.getWriter();
+		int index = query.getArgumentIndex();
+		StringBuilder sb = query.getBuilder();
+		if (specification == null) {
+			sb.append("exists(SELECT * FROM \"issues\".\"TimestampPk_entity\" r");
+		}
+		
+		else {
+			sb.append("SELECT 0");
+			return (rs, ind) -> {
+				try {
+					return query(specification).any();
+				} catch (java.io.IOException e) {
+					throw new RuntimeException(e);
+				}
+			};
+		}
+		return (rs, ind) -> {
+			try {
+				return rs.getBoolean(ind);
+			} catch (java.sql.SQLException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
 	@Override
 	public void close() throws java.io.IOException { 
 	}
@@ -199,6 +298,7 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 			StringBuilder sb = new StringBuilder("SELECT _r FROM \"issues\".\"TimestampPk_entity\" _r WHERE _r.\"ts\" IN (");
 			org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
 			sb.append(")");
+			statement.setEscapeProcessing(false);
 			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
 				while (rs.next()) {
 					reader.process(rs.getString(1));
@@ -213,6 +313,96 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 			releaseConnection(connection); 
 		}
 	}
+
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.List<gen.model.issues.TimestampPk>> find(org.revenj.postgres.BulkReaderQuery query, String[] uris) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		StringBuilder sb = query.getBuilder();
+		if (uris == null || uris.length == 0) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> new java.util.ArrayList<>(0);
+		}
+		sb.append("SELECT array_agg(_r) FROM \"issues\".\"TimestampPk_entity\" _r WHERE _r.\"ts\" IN (");
+		org.revenj.postgres.PostgresWriter.writeSimpleUriList(sb, uris);
+		sb.append(")");
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null || res.length() == 0 || res.length() == 2) {
+					return new java.util.ArrayList<>(0);
+				}
+				rdr.process(res);
+				java.util.List<gen.model.issues.TimestampPk> result = org.revenj.postgres.converters.ArrayTuple.parse(rdr, 0, converter::from); 
+				
+				return result;
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
+
+	@Override
+	public java.util.Optional<gen.model.issues.TimestampPk> find(String uri) {
+		java.sql.Connection connection = getConnection();
+		try (java.sql.Statement statement = connection.createStatement();
+			org.revenj.postgres.PostgresReader reader = org.revenj.postgres.PostgresReader.create(locator)) {
+			StringBuilder sb = new StringBuilder("SELECT _r FROM \"issues\".\"TimestampPk_entity\" _r WHERE _r.\"ts\" = ");
+			org.revenj.postgres.PostgresWriter.writeSimpleUri(sb, uri);
+			statement.setEscapeProcessing(false);
+			gen.model.issues.TimestampPk instance;
+			try (java.sql.ResultSet rs = statement.executeQuery(sb.toString())) {
+				if (rs.next()) {
+					reader.process(rs.getString(1));
+					instance = converter.from(reader);
+				} else {
+					return java.util.Optional.empty();
+				}
+			}
+			if (!hasCustomSecurity) return java.util.Optional.of(instance);
+			java.util.List<gen.model.issues.TimestampPk> result = new java.util.ArrayList<>(1);
+			result.add(instance);
+			
+			if (result.size() == 1) {
+				java.util.Optional.of(instance);
+			}
+			return java.util.Optional.empty();
+		} catch (java.sql.SQLException | java.io.IOException e) {
+			throw new RuntimeException(e);
+		} finally { 
+			releaseConnection(connection); 
+		}
+	}
+
+	public java.util.function.BiFunction<java.sql.ResultSet, Integer, java.util.Optional<gen.model.issues.TimestampPk>> find(org.revenj.postgres.BulkReaderQuery query, String uri) {
+		final org.revenj.postgres.PostgresReader rdr = query.getReader();
+		StringBuilder sb = query.getBuilder();
+		if (uri == null) {
+			sb.append("SELECT 0");
+			return (rs, ind) -> java.util.Optional.empty();
+		}
+		sb.append("SELECT _r FROM \"issues\".\"TimestampPk_entity\" _r WHERE _r.\"ts\" = ");
+		org.revenj.postgres.PostgresWriter.writeSimpleUri(sb, uri);
+		return (rs, ind) -> {
+			try {
+				String res = rs.getString(ind);
+				if (res == null) {
+					return java.util.Optional.empty();
+				}
+				rdr.process(res);
+				gen.model.issues.TimestampPk instance = converter.from(rdr);
+				if (!hasCustomSecurity) return java.util.Optional.of(instance);
+				java.util.List<gen.model.issues.TimestampPk> result = new java.util.ArrayList<>(1);
+				result.add(instance);
+				
+				if (result.size() == 1) {
+					java.util.Optional.of(instance);
+				}
+			} catch (java.sql.SQLException | java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+			return java.util.Optional.empty();
+		};
+	}
+
 	
 	public static void __setupPersist(
 			java.util.function.BiConsumer<java.util.Collection<gen.model.issues.TimestampPk>, org.revenj.postgres.PostgresWriter> insert, 
