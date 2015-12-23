@@ -52,6 +52,7 @@ namespace Revenj.Http
 			{
 				Listener.Start();
 				TraceSource.TraceEvent(TraceEventType.Start, 1002);
+				ThreadPool.SetMinThreads(32 + Environment.ProcessorCount * 3, 32 + Environment.ProcessorCount * 3);
 				Console.WriteLine("Server running on:");
 				foreach (var url in prefixes)
 					Console.WriteLine(url);

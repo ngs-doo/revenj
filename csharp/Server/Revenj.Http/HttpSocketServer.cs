@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -8,6 +9,7 @@ using System.Security;
 using System.Security.Principal;
 using System.ServiceModel;
 using System.Threading;
+using System.Threading.Tasks;
 using Revenj.Api;
 using Revenj.DomainPatterns;
 
@@ -19,14 +21,15 @@ namespace Revenj.Http
 		private static readonly string MissingBasicAuth = "Basic realm=\"" + Environment.MachineName + "\"";
 
 		private static int MessageSizeLimit = 8 * 1024 * 1024;
-		private static int KeepAliveTimeout = 3000 * 1000;
+		private static int KeepAliveTimeout = 3000;
 
 		private readonly IServiceProvider Locator;
 		private readonly Socket Socket;
 		private readonly Routes Routes;
 		private readonly HttpAuth Authentication;
 
-		private readonly LinkedList<RequestInfo>[] OpenRequests;
+		private readonly ThreadLocal<HttpSocketContext> Context;
+		private readonly BlockingCollection<RequestInfo> Requests;
 
 		public HttpSocketServer(IServiceProvider locator)
 		{
@@ -82,8 +85,8 @@ Please check settings: " + string.Join(", ", endpoints));
 			}
 			var maxLen = ConfigurationManager.AppSettings["Revenj.ContentLengthLimit"];
 			if (!string.IsNullOrEmpty(maxLen)) MessageSizeLimit = int.Parse(maxLen);
-			var ka = ConfigurationManager.AppSettings["Revenj.KeepAliveTimeout"];
-			if (!string.IsNullOrEmpty(ka)) KeepAliveTimeout = int.Parse(ka) * 1000;
+			var ka = ConfigurationManager.AppSettings["Revenj.KeepAliveLimit"];
+			if (!string.IsNullOrEmpty(ka)) KeepAliveTimeout = int.Parse(ka);
 			Routes = new Routes(locator);
 			var customAuth = ConfigurationManager.AppSettings["CustomAuth"];
 			if (!string.IsNullOrEmpty(customAuth))
@@ -94,13 +97,12 @@ Please check settings: " + string.Join(", ", endpoints));
 				Authentication = locator.Resolve<HttpAuth>(authType);
 			}
 			else Authentication = locator.Resolve<HttpAuth>();
-			OpenRequests = new LinkedList<RequestInfo>[Environment.ProcessorCount * 2];
-			for (int i = 0; i < OpenRequests.Length; i++)
-			{
-				OpenRequests[i] = new LinkedList<RequestInfo>();
-				var t = new Thread(ProcessSockets);
-				t.Start(i);
-			}
+			Context = new ThreadLocal<HttpSocketContext>(() => new HttpSocketContext("http://127.0.0.1/", MessageSizeLimit));
+			var ca = ConfigurationManager.AppSettings["Revenj.HttpCapacity"];
+			if (!string.IsNullOrEmpty(ca))
+				Requests = new BlockingCollection<RequestInfo>(new ConcurrentQueue<RequestInfo>(), int.Parse(ca));
+			else
+				Requests = new BlockingCollection<RequestInfo>(new ConcurrentQueue<RequestInfo>());
 		}
 
 		public void Run()
@@ -113,8 +115,16 @@ Please check settings: " + string.Join(", ", endpoints));
 				else
 					Socket.Listen(1000);
 				TraceSource.TraceEvent(TraceEventType.Start, 1002);
-				var threadIndex = 0;
+				ThreadPool.SetMinThreads(64 + Environment.ProcessorCount * 3, 64 + Environment.ProcessorCount * 3);
 				Console.WriteLine("Http server running");
+				var ctx = Context.Value;
+				var loops = Math.Max(1, Environment.ProcessorCount / 2);
+				for (int i = 0; i < loops; i++)
+				{
+					var thread = new Thread(ProcessSocketLoop);
+					thread.Name = "Main socket loop: " + (i + 1);
+					thread.Start();
+				}
 				while (true)
 				{
 					try
@@ -123,11 +133,11 @@ Please check settings: " + string.Join(", ", endpoints));
 						if (socket.Connected)
 						{
 							socket.Blocking = true;
-							var os = OpenRequests[threadIndex++];
-							lock (os)
-								os.AddLast(new RequestInfo(socket));
+							if (Requests.TryAdd(new RequestInfo(socket)))
+								Task.Factory.StartNew(TryProcessSocket);
+							else
+								ctx.ReturnError(socket, 503);
 						}
-						threadIndex = threadIndex % OpenRequests.Length;
 					}
 					catch (SocketException ex)
 					{
@@ -149,176 +159,143 @@ Please check settings: " + string.Join(", ", endpoints));
 			}
 		}
 
-		class RequestInfo
+		struct RequestInfo
 		{
 			public readonly Socket Socket;
-			public bool HasData;
-			public int LastTicks;
-			public bool Alive;
+			public readonly bool HasData;
+			public readonly int TimeoutAt;
 
 			public RequestInfo(Socket socket)
 			{
 				this.Socket = socket;
 				HasData = true;
-				Alive = true;
+				TimeoutAt = 0;
 			}
-
-			public void EndRequest()
+			public RequestInfo(Socket socket, bool hasData)
 			{
-				HasData = false;
-				Alive = false;
+				this.Socket = socket;
+				this.HasData = hasData;
+				TimeoutAt = Environment.TickCount + KeepAliveTimeout;
 			}
 		}
 
-		private void ProcessSockets(object state)
+		private void ProcessSocketLoop(object state)
 		{
-			var index = (int)state;
-			var queue = OpenRequests[index];
-			var requests = new RequestInfo[1024];
-			var total = 0;
-			var ctx = new HttpSocketContext("http://127.0.0.1/", MessageSizeLimit);
-			ThreadContext.Request = ctx;
-			ThreadContext.Response = ctx;
+			var ctx = Context.Value;
+			var principal = Thread.CurrentPrincipal;
 			while (true)
 			{
-				try
+				var request = Requests.Take();
+				if (request.HasData)
+					ProcessSocket(request.Socket, ctx, principal);
+				else if (request.TimeoutAt < Environment.TickCount
+					|| !Requests.TryAdd(new RequestInfo(request.Socket, request.Socket.Poll(0, SelectMode.SelectRead))))
 				{
-					var curTicks = Environment.TickCount;
-					lock (queue)
-					{
-						if (requests.Length < queue.Count)
-							requests = new RequestInfo[queue.Count];
-						if (queue.Count > 0)
-						{
-							var cur = queue.First;
-							do
-							{
-								var next = cur.Next;
-								if (!cur.Value.Alive)
-									queue.Remove(cur);
-								cur = next;
-							} while (cur != null);
-							queue.CopyTo(requests, 0);
-						}
-						total = queue.Count;
-					}
-					if (total == 0)
-						Thread.Sleep(1);
-					for (int i = 0; i < total; i++)
-					{
-						var req = requests[i];
-						var socket = req.Socket;
-						try
-						{
-							if (!req.HasData)
-							{
-								req.HasData = socket.Poll(0, SelectMode.SelectRead);
-								req.Alive = req.LastTicks > curTicks;
-							}
-							IPrincipal previousPrincipal = null;
-							ctx.Reset();
-							while (req.HasData && (req.Alive = ctx.Parse(socket)))
-							{
-								RouteMatch match;
-								var route = Routes.Find(ctx.HttpMethod, ctx.RawUrl, ctx.AbsolutePath, out match);
-								if (route == null)
-								{
-									req.EndRequest();
-									var unknownRoute = "Unknown route " + ctx.RawUrl + " on method " + ctx.HttpMethod;
-									ctx.ReturnError(socket, 404, unknownRoute, false);
-									break;
-								}
-								var auth = Authentication.TryAuthorize(ctx.GetRequestHeader("authorization"), ctx.RawUrl, route);
-								if (auth.Principal != null)
-								{
-									ctx.ForRouteWithAuth(match, auth.Principal);
-									if (previousPrincipal != auth.Principal)
-										Thread.CurrentPrincipal = previousPrincipal = auth.Principal;
-									using (var stream = route.Handle(match.OrderedArgs, ctx.Stream))
-									{
-										var keepAlive = ctx.Return(stream, socket);
-										if (keepAlive)
-										{
-											if (ctx.Pipeline) continue;
-											else if (socket.Connected)
-											{
-												req.HasData = socket.Available > 0;
-												req.LastTicks = Environment.TickCount + KeepAliveTimeout;
-												break;
-											}
-										}
-										req.EndRequest();
-										break;
-									}
-								}
-								else if (auth.SendAuthenticate)
-								{
-									req.EndRequest();
-									ctx.AddHeader("WWW-Authenticate", MissingBasicAuth);
-									ctx.ReturnError(socket, (int)auth.ResponseCode, auth.Error, true);
-									break;
-								}
-								else
-								{
-									req.EndRequest();
-									ctx.ReturnError(socket, (int)auth.ResponseCode, auth.Error, true);
-									break;
-								}
-							}
-						}
-						catch (SecurityException sex)
-						{
-							req.EndRequest();
-							try { ctx.ReturnError(socket, (int)HttpStatusCode.Forbidden, sex.Message, true); }
-							catch (Exception ex)
-							{
-								Console.WriteLine(ex.Message);
-								TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex);
-							}
-						}
-						catch (ActionNotSupportedException anse)
-						{
-							req.EndRequest();
-							try { ctx.ReturnError(socket, 404, anse.Message, true); }
-							catch (Exception ex)
-							{
-								Console.WriteLine(ex.Message);
-								TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex);
-							}
-						}
-						catch (Exception ex)
-						{
-							req.EndRequest();
-							Console.WriteLine(ex.ToString());
-							TraceSource.TraceEvent(TraceEventType.Error, 5403, "{0}", ex);
-							try { ctx.ReturnError(socket, 500, ex.Message, false); }
-							catch (Exception ex2)
-							{
-								Console.WriteLine(ex2.Message);
-								TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex2);
-							}
-						}
-					}
-					for (var i = 0; i < total; i++)
-					{
-						var req = requests[i];
-						if (!req.Alive)
-						{
-							try { req.Socket.Close(); }
-							catch { }
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					Console.WriteLine(e.ToString());
-					TraceSource.TraceEvent(TraceEventType.Error, 5403, "{0}", e);
+					try { request.Socket.Close(); }
+					catch { }
 				}
 			}
-			for (var i = 0; i < total; i++)
+		}
+
+		private void TryProcessSocket()
+		{
+			RequestInfo request;
+			if (Requests.TryTake(out request))
 			{
-				try { requests[i].Socket.Close(); }
-				catch { }
+				if (request.HasData)
+				{
+					var ctx = Context.Value;
+					ProcessSocket(request.Socket, ctx, Thread.CurrentPrincipal);
+				}
+				else if (request.TimeoutAt < Environment.TickCount
+					|| !Requests.TryAdd(new RequestInfo(request.Socket, request.Socket.Poll(0, SelectMode.SelectRead))))
+				{
+					try { request.Socket.Close(); }
+					catch { }
+				}
+			}
+		}
+
+		private void ProcessSocket(Socket socket, HttpSocketContext ctx, IPrincipal principal)
+		{
+			ctx.Reset();
+			try
+			{
+				while (ctx.Parse(socket))
+				{
+					RouteMatch match;
+					var route = Routes.Find(ctx.HttpMethod, ctx.RawUrl, ctx.AbsolutePath, out match);
+					if (route == null)
+					{
+						var unknownRoute = "Unknown route " + ctx.RawUrl + " on method " + ctx.HttpMethod;
+						ctx.ReturnError(socket, 404, unknownRoute, false);
+						break;
+					}
+					var auth = Authentication.TryAuthorize(ctx.GetRequestHeader("authorization"), ctx.RawUrl, route);
+					if (auth.Principal != null)
+					{
+						ctx.ForRouteWithAuth(match, auth.Principal);
+						ThreadContext.Request = ctx;
+						ThreadContext.Response = ctx;
+						if (principal != auth.Principal)
+							Thread.CurrentPrincipal = principal = auth.Principal;
+						using (var stream = route.Handle(match.OrderedArgs, ctx.Stream))
+						{
+							var keepAlive = ctx.Return(stream, socket);
+							if (keepAlive)
+							{
+								if (ctx.Pipeline) continue;
+								else if (socket.Connected)
+								{
+									if (Requests.TryAdd(new RequestInfo(socket, socket.Available > 0)))
+										return;
+								}
+							}
+							socket.Close();
+							return;
+						}
+					}
+					else if (auth.SendAuthenticate)
+					{
+						ctx.AddHeader("WWW-Authenticate", MissingBasicAuth);
+						ctx.ReturnError(socket, (int)auth.ResponseCode, auth.Error, true);
+						return;
+					}
+					else
+					{
+						ctx.ReturnError(socket, (int)auth.ResponseCode, auth.Error, true);
+						return;
+					}
+				}
+			}
+			catch (SecurityException sex)
+			{
+				try { ctx.ReturnError(socket, (int)HttpStatusCode.Forbidden, sex.Message, true); }
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex.Message);
+					TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex);
+				}
+			}
+			catch (ActionNotSupportedException anse)
+			{
+				try { ctx.ReturnError(socket, 404, anse.Message, true); }
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex.Message);
+					TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex);
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				TraceSource.TraceEvent(TraceEventType.Error, 5403, "{0}", ex);
+				try { ctx.ReturnError(socket, 500, ex.Message, false); }
+				catch (Exception ex2)
+				{
+					Console.WriteLine(ex2.Message);
+					TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex2);
+				}
 			}
 		}
 	}
