@@ -14,7 +14,8 @@ using Revenj.Extensibility;
 
 namespace Revenj.DatabasePersistence.Oracle
 {
-	public abstract class OracleOlapCubeQuery<TSource> : IOlapCubeQuery
+	public abstract class OracleOlapCubeQuery<TSource> : IOlapCubeQuery<TSource>
+		where TSource : IDataSource
 	{
 		private readonly IServiceProvider Locator;
 		private readonly IDatabaseQuery DatabaseQuery;
@@ -52,11 +53,11 @@ namespace Revenj.DatabasePersistence.Oracle
 					throw new ArgumentException("Invalid order: {0}. Order can be only field from used dimensions and facts.".With(o));
 		}
 
-		public DataTable Analyze<TFilter>(
+		public DataTable Analyze(
 			IEnumerable<string> dimensions,
 			IEnumerable<string> facts,
 			IEnumerable<KeyValuePair<string, bool>> order,
-			ISpecification<TFilter> filter,
+			ISpecification<TSource> filter,
 			int? limit,
 			int? offset)
 		{

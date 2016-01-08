@@ -101,7 +101,7 @@
     <Compile Include="Converters\SecretConverter.cs" />
     <Compile Include="Converters\ImageConverter.cs" />
     <Compile Include="Converters\HstoreConverter.cs" />
-    <Compile Include="Cube\PostgresOlapCubeQuery.cs" />
+    <Compile Include="PostgresOlapCubeQuery.cs" />
     <Compile Include="Attributes\RepositoryAttribute.cs" />
     <Compile Include="NpgsqlTypes\ArrayHandling.cs" />
     <Compile Include="NpgsqlTypes\BitString.cs" />

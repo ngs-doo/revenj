@@ -75,7 +75,8 @@ public class RecordTuple extends PostgresTuple {
 	}
 
 	public String buildTuple(boolean quote) {
-		PostgresWriter sw = new PostgresWriter();
+		PostgresWriter sw = threadWriter.get();
+		sw.reset();
 		Mapping mappings = null;
 		if (quote) {
 			mappings = PostgresTuple::escapeQuote;

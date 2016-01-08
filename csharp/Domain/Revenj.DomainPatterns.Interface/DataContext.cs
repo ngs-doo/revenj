@@ -111,9 +111,12 @@ namespace Revenj.DomainPatterns
 		/// <summary>
 		/// OLAP cube builder. Data analysis using dimensions and facts
 		/// </summary>
-		/// <typeparam name="T">cube type</typeparam>
+		/// <typeparam name="TCube">cube type</typeparam>
+		/// <typeparam name="TSource">cube source type</typeparam>
 		/// <returns>cube builder</returns>
-		OlapCubeQueryBuilder CubeBuilder<T>() where T : IOlapCubeQuery;
+		OlapCubeQueryBuilder<TSource> CubeBuilder<TCube, TSource>()
+			where TCube : IOlapCubeQuery<TSource>
+			where TSource : IDataSource;
 		/// <summary>
 		/// Data which fails specified validation.
 		/// Filtered using provided specification.

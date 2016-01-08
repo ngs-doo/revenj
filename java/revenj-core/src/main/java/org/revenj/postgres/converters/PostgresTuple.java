@@ -38,7 +38,7 @@ public abstract class PostgresTuple {
 		} else insertRecord(sw, "", null);
 	}
 
-	private static ThreadLocal<PostgresWriter> threadWriter = new ThreadLocal<PostgresWriter>() {
+	protected static ThreadLocal<PostgresWriter> threadWriter = new ThreadLocal<PostgresWriter>() {
 		@Override
 		protected PostgresWriter initialValue() {
 			return new PostgresWriter();

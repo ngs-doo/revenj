@@ -38,7 +38,7 @@ namespace Revenj.DomainPatterns
 	/// Service for running queries against OLAP cube.
 	/// Pick and choose interesting dimension and fact and run aggregation on them.
 	/// </summary>
-	public interface IOlapCubeQuery
+	public interface IOlapCubeQuery<TSource> where TSource : IDataSource
 	{
 		/// <summary>
 		/// Available dimensions
@@ -55,7 +55,6 @@ namespace Revenj.DomainPatterns
 		/// Data will be returned in specified order.
 		/// Specification is used to filter only subset of data.
 		/// </summary>
-		/// <typeparam name="TSource">data source type</typeparam>
 		/// <param name="dimensions">dimension subset</param>
 		/// <param name="facts">fact subset</param>
 		/// <param name="order">custom order</param>
@@ -63,7 +62,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="limit">maximum number of rows</param>
 		/// <param name="offset">how many initial rows to skip</param>
 		/// <returns>result from created query</returns>
-		DataTable Analyze<TSource>(
+		DataTable Analyze(
 			IEnumerable<string> dimensions,
 			IEnumerable<string> facts,
 			IEnumerable<KeyValuePair<string, bool>> order,
@@ -89,32 +88,33 @@ namespace Revenj.DomainPatterns
 		/// <param name="limit">maximum number of row</param>
 		/// <param name="offset">how many initial rows to skip</param>
 		/// <returns>result from created query</returns>
-		public static DataTable Analyze(
-			this IOlapCubeQuery query,
+		public static DataTable Analyze<T>(
+			this IOlapCubeQuery<T> query,
 			IEnumerable<string> dimensions,
 			IEnumerable<string> facts,
 			IEnumerable<KeyValuePair<string, bool>> order,
 			int? limit,
-			int? offset)
+			int? offset) where T : IDataSource
 		{
-			return query.Analyze<object>(dimensions, facts, order, null, limit, offset);
+			return query.Analyze(dimensions, facts, order, null, limit, offset);
 		}
 		/// <summary>
 		/// Create OLAP cube builder with fluent API.
 		/// </summary>
 		/// <param name="query">OLAP cube</param>
 		/// <returns>builder</returns>
-		public static OlapCubeQueryBuilder Builder(this IOlapCubeQuery query)
+		public static OlapCubeQueryBuilder<T> Builder<T>(this IOlapCubeQuery<T> query)
+			where T : IDataSource
 		{
-			return new OlapCubeQueryBuilder(query);
+			return new OlapCubeQueryBuilder<T>(query);
 		}
 	}
 	/// <summary>
 	/// Fluent interface for building OLAP query.
 	/// </summary>
-	public class OlapCubeQueryBuilder
+	public class OlapCubeQueryBuilder<T> where T : IDataSource
 	{
-		private readonly IOlapCubeQuery Query;
+		private readonly IOlapCubeQuery<T> Query;
 		private readonly List<string> Dimensions = new List<string>();
 		private readonly List<string> Facts = new List<string>();
 		private int? ResultLimit;
@@ -125,7 +125,7 @@ namespace Revenj.DomainPatterns
 		/// Original OLAP cube query.
 		/// </summary>
 		/// <param name="query">OLAP cube query</param>
-		public OlapCubeQueryBuilder(IOlapCubeQuery query)
+		public OlapCubeQueryBuilder(IOlapCubeQuery<T> query)
 		{
 			this.Query = query;
 		}
@@ -135,7 +135,7 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		/// <param name="dimensionOrFact">dimension or fact</param>
 		/// <returns>itself</returns>
-		public OlapCubeQueryBuilder Use(string dimensionOrFact)
+		public OlapCubeQueryBuilder<T> Use(string dimensionOrFact)
 		{
 			if (Query.Dimensions.Contains(dimensionOrFact))
 				Dimensions.Add(dimensionOrFact);
@@ -153,15 +153,15 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		/// <param name="result">sort column</param>
 		/// <returns>itself</returns>
-		public OlapCubeQueryBuilder Ascending(string result) { return OrderBy(result, true); }
+		public OlapCubeQueryBuilder<T> Ascending(string result) { return OrderBy(result, true); }
 		/// <summary>
 		/// Use descending order for specific dimension or fact.
 		/// </summary>
 		/// <param name="result">sort column</param>
 		/// <returns>itself</returns>
-		public OlapCubeQueryBuilder Descending(string result) { return OrderBy(result, false); }
+		public OlapCubeQueryBuilder<T> Descending(string result) { return OrderBy(result, false); }
 
-		private OlapCubeQueryBuilder OrderBy(string result, bool ascending)
+		private OlapCubeQueryBuilder<T> OrderBy(string result, bool ascending)
 		{
 			if (!Query.Dimensions.Contains(result) && !Query.Facts.Contains(result))
 				throw new ArgumentException(
@@ -176,13 +176,13 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		/// <param name="limit">maximum results</param>
 		/// <returns>itself</returns>
-		public OlapCubeQueryBuilder Take(int limit) { return Limit(limit); }
+		public OlapCubeQueryBuilder<T> Take(int limit) { return Limit(limit); }
 		/// <summary>
 		/// Limit maximum results returned from analysis.
 		/// </summary>
 		/// <param name="limit">maximum results</param>
 		/// <returns>itself</returns>
-		public OlapCubeQueryBuilder Limit(int limit)
+		public OlapCubeQueryBuilder<T> Limit(int limit)
 		{
 			if (limit > 0)
 				this.ResultLimit = limit;
@@ -194,13 +194,13 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		/// <param name="offset">skipped results</param>
 		/// <returns>itself</returns>
-		public OlapCubeQueryBuilder Skip(int offset) { return Offset(offset); }
+		public OlapCubeQueryBuilder<T> Skip(int offset) { return Offset(offset); }
 		/// <summary>
 		/// Skip initial results returned from analysis.
 		/// </summary>
 		/// <param name="offset">skipped results</param>
 		/// <returns>itself</returns>
-		public OlapCubeQueryBuilder Offset(int offset)
+		public OlapCubeQueryBuilder<T> Offset(int offset)
 		{
 			if (offset >= 0)
 				this.ResultOffset = offset;
@@ -219,7 +219,7 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="TFilter">specification type</typeparam>
 		/// <param name="specification">predicate filter</param>
 		/// <returns>aggregated information</returns>
-		public DataTable Analyze<TFilter>(ISpecification<TFilter> specification)
+		public DataTable Analyze(ISpecification<T> specification)
 		{
 			return Query.Analyze(Dimensions, Facts, Order, specification, ResultLimit, ResultOffset);
 		}

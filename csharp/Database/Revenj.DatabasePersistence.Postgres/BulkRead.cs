@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Revenj.DomainPatterns;
 using Revenj.Utility;
@@ -56,7 +57,9 @@ namespace Revenj.DatabasePersistence.Postgres
 			private readonly List<Func<IDataReader, int, object>> ResultActions = new List<Func<IDataReader, int, object>>();
 			private object[] Results;
 			private object LastRepository;
+			private object LastCube;
 			private readonly Dictionary<Type, object> Repositories = new Dictionary<Type, object>();
+			private readonly Dictionary<Type, object> Cubes = new Dictionary<Type, object>();
 			private readonly Dictionary<string, PreparedCommand> PreparedStatements = new Dictionary<string, PreparedCommand>();
 			public bool UsePrepared { get; private set; }
 			private readonly StringBuilder ActionName = new StringBuilder(512);
@@ -189,6 +192,26 @@ namespace Revenj.DatabasePersistence.Postgres
 				}
 			}
 
+			private PostgresOlapCubeQuery<TFilter> GetCube<TCube, TFilter>()
+				where TFilter : IDataSource
+			{
+				if (LastCube is TCube)
+					return (PostgresOlapCubeQuery<TFilter>)LastCube;
+				if (Cubes.TryGetValue(typeof(TCube), out LastCube))
+					return (PostgresOlapCubeQuery<TFilter>)LastCube;
+				try
+				{
+					var cube = Locator.Resolve<TCube>();
+					LastCube = cube;
+					Cubes[typeof(TCube)] = cube;
+					return cube as PostgresOlapCubeQuery<TFilter>;
+				}
+				catch (Exception ex)
+				{
+					throw new ArgumentException("Specified type: " + typeof(TCube).FullName + " doesn't support OLAP cube.", ex);
+				}
+			}
+
 			public Lazy<T> Find<T>(string uri) where T : IIdentifiable
 			{
 				if (UsePrepared)
@@ -229,6 +252,54 @@ namespace Revenj.DatabasePersistence.Postgres
 				if (UsePrepared)
 					ActionName.Append(":E:").Append(filter == null ? typeof(T).FullName : filter.GetType().FullName);
 				return Add(GetRepository<T>().Exists(this, filter));
+			}
+
+			public Lazy<DataTable> Analyze<TCube, TFilter>(
+				IEnumerable<string> dimensionsAndFacts,
+				IEnumerable<KeyValuePair<string, bool>> order,
+				ISpecification<TFilter> filter,
+				int? limit,
+				int? offset)
+				where TCube : IOlapCubeQuery<TFilter>
+				where TFilter : IDataSource
+			{
+				if (UsePrepared)
+				{
+					ActionName.Append(":A");
+				}
+				Writer.Write("SELECT array_agg(_x) FROM (");
+				var cube = GetCube<TCube, TFilter>();
+				var dimensions = cube.Dimensions.Intersect(dimensionsAndFacts).ToList();
+				var facts = cube.Facts.Intersect(dimensionsAndFacts).ToList();
+				Writer.Write(cube.PrepareSql(dimensions, facts, order, filter, limit, offset));
+				Writer.Write(") _x),(");
+				var table = new DataTable();
+				var converters = cube.PrepareConverters(dimensions, facts, table);
+				ResultActions.Add((dr, ind) =>
+				{
+					var obj = dr.GetValue(ind);
+					var tr = obj as TextReader;
+					var btr = tr != null ? Stream.UseBufferedReader(tr) : Stream.UseBufferedReader(obj.ToString());
+					PostgresTypedArray.ParseCollection(btr, 0, Locator, (rdr, _, __, ___) =>
+					{
+						rdr.Read(3);
+						var args = new object[converters.Length];
+						for (int x = 0; x < converters.Length; x++)
+							args[x] = converters[x](rdr);
+						rdr.Read(3);
+						return table.Rows.Add(args);
+					});
+					if (tr != null) tr.Dispose();
+					return table;
+				});
+				int i = Index;
+				Index++;
+				return new Lazy<DataTable>(() =>
+				{
+					if (Results == null)
+						Execute();
+					return table;
+				});
 			}
 
 			public void Dispose()

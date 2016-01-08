@@ -156,11 +156,13 @@ namespace Revenj.Core
 			return Context.History<T>(uris);
 		}
 
-		public OlapCubeQueryBuilder CubeBuilder<T>() where T : IOlapCubeQuery
+		public OlapCubeQueryBuilder<TSource> CubeBuilder<TCube, TSource>()
+			where TCube : IOlapCubeQuery<TSource>
+			where TSource : IDataSource
 		{
 			if (Finished)
 				throw new InvalidOperationException("Transaction was already closed");
-			return Context.CubeBuilder<T>();
+			return Context.CubeBuilder<TCube, TSource>();
 		}
 
 		public TResult[] InvalidItems<TValidation, TResult>(ISpecification<TResult> specification)

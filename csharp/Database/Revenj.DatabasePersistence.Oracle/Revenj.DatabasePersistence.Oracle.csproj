@@ -88,7 +88,7 @@
     <Compile Include="Converters\DoubleArrayConverter.cs" />
     <Compile Include="Converters\DecimalArrayConverter.cs" />
     <Compile Include="Converters\DateArrayConverter.cs" />
-    <Compile Include="Cube\OracleOlapCubeQuery.cs" />
+    <Compile Include="OracleOlapCubeQuery.cs" />
     <Compile Include="IOracleDto.cs" />
     <Compile Include="IOracleReader.cs" />
     <Compile Include="OracleDatabaseQuery.cs" />

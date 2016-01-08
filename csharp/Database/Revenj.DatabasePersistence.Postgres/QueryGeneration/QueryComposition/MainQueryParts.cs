@@ -2,8 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
+using Remotion.Linq.Parsing.Structure;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
+using Revenj.DomainPatterns;
+using Revenj.Extensibility;
 
 namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 {
@@ -56,6 +60,41 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			ProcessResultOperators(sb);
 
 			return sb.ToString();
+		}
+
+		public static void AddFilter<TSource>(
+			IServiceProvider Locator,
+			IDatabaseQuery query,
+			ISpecification<TSource> filter,
+			StringBuilder sb)
+		{
+			var cf = Locator.Resolve<IPostgresConverterFactory>();
+			var ep = Locator.Resolve<IExtensibilityProvider>();
+			var qp =
+				new MainQueryParts(
+					Locator,
+					cf,
+					ep.ResolvePlugins<IQuerySimplification>(),
+					ep.ResolvePlugins<IExpressionMatcher>(),
+					ep.ResolvePlugins<IMemberMatcher>(),
+					new IProjectionMatcher[0]);
+			var linq = new Queryable<TSource>(new QueryExecutor(query, Locator, cf, ep)).Filter(filter);
+			var parser = QueryParser.CreateDefault();
+			var model = parser.GetParsedQuery(linq.Expression);
+			if (model.BodyClauses.Count > 0)
+			{
+				sb.AppendLine("WHERE");
+				for (int i = 0; i < model.BodyClauses.Count; i++)
+				{
+					var wc = model.BodyClauses[i] as WhereClause;
+					if (wc == null)
+						continue;
+					sb.Append("	");
+					if (i > 0)
+						sb.Append("AND ");
+					sb.Append(qp.GetSqlExpression(wc.Predicate));
+				}
+			}
 		}
 	}
 }

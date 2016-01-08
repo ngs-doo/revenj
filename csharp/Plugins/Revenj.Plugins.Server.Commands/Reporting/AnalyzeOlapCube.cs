@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Security;
+using System.Security.Principal;
 using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -13,7 +15,6 @@ using Revenj.Processing;
 using Revenj.Security;
 using Revenj.Serialization;
 using Revenj.Utility;
-using System.Security.Principal;
 
 namespace Revenj.Plugins.Server.Commands
 {
@@ -127,41 +128,17 @@ Example argument:
 			if (!permissions.CanAccess(cubeType.FullName, principal))
 				throw new SecurityException("You don't have permission to access: {0}.".With(argument.CubeName));
 
-			if (!typeof(IOlapCubeQuery).IsAssignableFrom(cubeType))
-				throw new ArgumentException("Cube type {0} is not IOlapCubeQuery.".With(cubeType.FullName));
+			var findImpl = cubeType.GetInterfaces().FirstOrDefault(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IOlapCubeQuery<>));
+			if (findImpl == null)
+				throw new ArgumentException("Cube type {0} is not IOlapCubeQuery<>.".With(cubeType.FullName));
 
-			IOlapCubeQuery query;
-			try
-			{
-				query = Locator.Resolve<IOlapCubeQuery>(cubeType);
-			}
-			catch (Exception ex)
-			{
-				throw new ArgumentException(
-					"Can't create cube query. Is query {0} registered in system?".With(cubeType.FullName),
-					ex);
-			}
+			var sourceType = findImpl.GetGenericArguments()[0];
 
-			if (string.IsNullOrEmpty(argument.SpecificationName) && argument.Specification == null)
-				return query.Analyze(argument.Dimensions, argument.Facts, argument.Order, argument.Limit, argument.Offset);
-			else if (string.IsNullOrEmpty(argument.SpecificationName))
+			IAnalyzeData command;
+			if (string.IsNullOrEmpty(argument.SpecificationName))
 			{
-				dynamic specification;
-				try
-				{
-					specification = input.Deserialize<TInput, dynamic>(argument.Specification, Locator);
-				}
-				catch (Exception ex)
-				{
-					throw new ArgumentException(
-						"Specification could not be deserialized.",
-						new FrameworkException(@"Please provide specification name. Error: {0}.".With(ex.Message), ex));
-				}
-				if (specification == null)
-					throw new ArgumentException(
-						"Specification could not be deserialized.",
-						new FrameworkException("Please provide specification name."));
-				return query.Analyze(argument.Dimensions, argument.Facts, argument.Order, specification, argument.Limit, argument.Offset);
+				var commandType = typeof(AnalyzeSpecification<,>).MakeGenericType(cubeType, sourceType);
+				command = (IAnalyzeData)Activator.CreateInstance(commandType);
 			}
 			else
 			{
@@ -170,20 +147,19 @@ Example argument:
 					?? DomainModel.Find(argument.SpecificationName);
 				if (specificationType == null)
 					throw new ArgumentException("Couldn't find specification: {0}".With(argument.SpecificationName));
-				var commandType = typeof(AnalyzeWithSpecification<>).MakeGenericType(specificationType);
-				var command = (IAnalyzeData)Activator.CreateInstance(commandType);
-				return
-					command.Analyze(
-						input,
-						Locator,
-						query,
-						argument.Dimensions,
-						argument.Facts,
-						argument.Order,
-						argument.Limit,
-						argument.Offset,
-						argument.Specification);
+				var commandType = typeof(AnalyzeWithSpecification<,,>).MakeGenericType(cubeType, sourceType, specificationType);
+				command = (IAnalyzeData)Activator.CreateInstance(commandType);
 			}
+			return
+				command.Analyze(
+					input,
+					Locator,
+					argument.Dimensions,
+					argument.Facts,
+					argument.Order,
+					argument.Limit,
+					argument.Offset,
+					argument.Specification);
 		}
 
 		private static class ConvertTable
@@ -209,7 +185,6 @@ Example argument:
 			DataTable Analyze<TFormat>(
 				ISerialization<TFormat> serializer,
 				IServiceProvider locator,
-				IOlapCubeQuery query,
 				IEnumerable<string> dimensions,
 				IEnumerable<string> facts,
 				IDictionary<string, bool> order,
@@ -218,25 +193,84 @@ Example argument:
 				TFormat data);
 		}
 
-		private class AnalyzeWithSpecification<TSpecification> : IAnalyzeData
+		private class AnalyzeSpecification<TCube, TSource> : IAnalyzeData
+			where TCube : IOlapCubeQuery<TSource>
+			where TSource : IDataSource
 		{
 			public DataTable Analyze<TFormat>(
 				ISerialization<TFormat> serializer,
 				IServiceProvider locator,
-				IOlapCubeQuery query,
 				IEnumerable<string> dimensions,
 				IEnumerable<string> facts,
 				IDictionary<string, bool> order,
 				int? limit,
 				int? offset,
-				TFormat data)
+				TFormat specificationData)
 			{
-				dynamic specification;
-				if (data == null)
+				TCube query;
+				try
+				{
+					query = locator.Resolve<TCube>();
+				}
+				catch (Exception ex)
+				{
+					throw new ArgumentException(
+						"Can't create cube query. Is query {0} registered in system?".With(typeof(TCube).FullName),
+						ex);
+				}
+				if (specificationData == null)
+					return query.Analyze(dimensions, facts, order, null, limit, offset);
+				ISpecification<TSource> specification;
+				try
+				{
+					specification = serializer.Deserialize<TFormat, ISpecification<TSource>>(specificationData, locator);
+				}
+				catch (Exception ex)
+				{
+					throw new ArgumentException(
+						"Specification could not be deserialized.",
+						new FrameworkException(@"Please provide specification name. Error: {0}.".With(ex.Message), ex));
+				}
+				if (specification == null)
+					throw new ArgumentException(
+						"Specification could not be deserialized.",
+						new FrameworkException("Please provide specification name."));
+				return query.Analyze(dimensions, facts, order, specification, limit, offset);
+			}
+		}
+
+		private class AnalyzeWithSpecification<TCube, TSource, TSpecification> : IAnalyzeData
+			where TCube : IOlapCubeQuery<TSource>
+			where TSource : IDataSource
+			where TSpecification : ISpecification<TSource>
+		{
+			public DataTable Analyze<TFormat>(
+				ISerialization<TFormat> serializer,
+				IServiceProvider locator,
+				IEnumerable<string> dimensions,
+				IEnumerable<string> facts,
+				IDictionary<string, bool> order,
+				int? limit,
+				int? offset,
+				TFormat specificationData)
+			{
+				TCube query;
+				try
+				{
+					query = locator.Resolve<TCube>();
+				}
+				catch (Exception ex)
+				{
+					throw new ArgumentException(
+						"Can't create cube query. Is query {0} registered in system?".With(typeof(TCube).FullName),
+						ex);
+				}
+				TSpecification specification;
+				if (specificationData == null)
 				{
 					try
 					{
-						specification = Activator.CreateInstance(typeof(TSpecification));
+						specification = (TSpecification)Activator.CreateInstance(typeof(TSpecification));
 					}
 					catch (Exception ex)
 					{
@@ -247,7 +281,7 @@ Example argument:
 				{
 					try
 					{
-						specification = serializer.Deserialize<TFormat, TSpecification>(data, locator);
+						specification = serializer.Deserialize<TFormat, TSpecification>(specificationData, locator);
 					}
 					catch (Exception ex)
 					{

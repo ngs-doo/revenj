@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -138,6 +139,25 @@ namespace Revenj.DomainPatterns
 		/// <param name="filter">search filter</param>
 		/// <returns>objects exists</returns>
 		Lazy<bool> Exists<T>(ISpecification<T> filter) where T : IDataSource;
+		/// <summary>
+		/// Run OLAP analysis on objects using provided specification
+		/// </summary>
+		/// <typeparam name="TCube">cube type</typeparam>
+		/// <typeparam name="TSource">cube data source type</typeparam>
+		/// <param name="dimensionsAndFacts">group by dimensions, analyze by facts</param>
+		/// <param name="order">provide result in specific order</param>
+		/// <param name="filter">search filter</param>
+		/// <param name="limit">max results</param>
+		/// <param name="offset">skip initial results</param>
+		/// <returns>found objects</returns>
+		Lazy<DataTable> Analyze<TCube, TSource>(
+			IEnumerable<string> dimensionsAndFacts,
+			IEnumerable<KeyValuePair<string, bool>> order,
+			ISpecification<TSource> filter,
+			int? limit,
+			int? offset)
+			where TCube : IOlapCubeQuery<TSource>
+			where TSource : IDataSource;
 		/// <summary>
 		/// Execute queries
 		/// </summary>
@@ -409,6 +429,20 @@ namespace Revenj.DomainPatterns
 			update(found);
 			repository.Persist(null, new[] { new KeyValuePair<TRoot, TRoot>(original, found) }, null);
 			return found;
+		}
+		/// <summary>
+		/// Run OLAP analysis on objects using provided specification
+		/// </summary>
+		/// <typeparam name="TCube">cube type</typeparam>
+		/// <typeparam name="TSource">cube data source type</typeparam>
+		/// <param name="bulk">bulk reader</param>
+		/// <param name="dimensionsAndFacts">group by dimensions, analyze by facts</param>
+		/// <returns>found objects</returns>
+		public static Lazy<DataTable> Analyze<TCube, TSource>(this IRepositoryBulkReader bulk, IEnumerable<string> dimensionsAndFacts)
+			where TCube : IOlapCubeQuery<TSource>
+			where TSource : IDataSource
+		{
+			return bulk.Analyze<TCube, TSource>(dimensionsAndFacts, null, null, null, null);
 		}
 	}
 }

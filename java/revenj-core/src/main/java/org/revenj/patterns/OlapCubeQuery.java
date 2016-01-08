@@ -29,7 +29,7 @@ public interface OlapCubeQuery<TSource extends DataSource> {
 	}
 
 	default OlapCubeQueryBuilder<TSource> builder() {
-		return new OlapCubeQueryBuilder(this);
+		return new OlapCubeQueryBuilder<>(this);
 	}
 
 	class OlapCubeQueryBuilder<TSource extends DataSource> {

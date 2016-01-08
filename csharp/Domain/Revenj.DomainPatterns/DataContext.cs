@@ -183,10 +183,12 @@ namespace Revenj.DomainPatterns
 			return repository.Find(uris);
 		}
 
-		public OlapCubeQueryBuilder CubeBuilder<T>() where T : IOlapCubeQuery
+		public OlapCubeQueryBuilder<TSource> CubeBuilder<TCube, TSource>()
+			where TCube : IOlapCubeQuery<TSource>
+			where TSource : IDataSource
 		{
-			var query = Locator.Resolve<IOlapCubeQuery>(typeof(T));
-			return new OlapCubeQueryBuilder(query);
+			var query = Locator.Resolve<IOlapCubeQuery<TSource>>(typeof(TCube));
+			return new OlapCubeQueryBuilder<TSource>(query);
 		}
 
 		public TResult[] InvalidItems<TValidation, TResult>(ISpecification<TResult> specification)

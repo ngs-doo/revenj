@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
@@ -42,14 +41,10 @@ namespace Revenj.Plugins.Rest.Commands
 			var type = domainModel.Find(name);
 			if (type == null)
 				return "Can't find olap cube: " + name;
-			if (!typeof(IOlapCubeQuery).IsAssignableFrom(type))
+			var findImpl = type.GetInterfaces().FirstOrDefault(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IOlapCubeQuery<>));
+			if (findImpl == null)
 				return name + " is not an olap cube.";
-			//TODO ugly hack. fix later
-			var prop = type.GetProperty("DataSource");
-			var source = prop != null ? (Type)prop.GetValue(null, null) : null;
-			if (source == null)
-				return Either<KeyValuePair<Type, Type>>.Fail("Cube data source not found. Static DataSource property not found.", HttpStatusCode.NotImplemented);
-			return new KeyValuePair<Type, Type>(type, source);
+			return new KeyValuePair<Type, Type>(type, findImpl.GetGenericArguments()[0]);
 		}
 
 		public static Either<Type> CheckAggregateRoot(IDomainModel domainModel, string name)
