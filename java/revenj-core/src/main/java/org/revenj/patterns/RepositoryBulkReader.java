@@ -1,7 +1,9 @@
 package org.revenj.patterns;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -36,6 +38,21 @@ public interface RepositoryBulkReader {
 
 	default <T extends DataSource> Callable<Boolean> exists(Class<T> manifest) {
 		return exists(manifest, null);
+	}
+
+	<TSource extends DataSource, TCube extends OlapCubeQuery<TSource>> Callable<List<Map<String, Object>>> analyze(
+			Class<TCube> manifest,
+			List<String> dimensionsAndFacts,
+			Collection<Map.Entry<String, Boolean>> order,
+			Specification<TSource> filter,
+			Integer limit,
+			Integer offset);
+
+	default <TSource extends DataSource, TCube extends OlapCubeQuery<TSource>> Callable<List<Map<String, Object>>> analyze(
+			Class<TCube> manifest,
+			List<String> dimensionsAndFacts,
+			Specification<TSource> filter) {
+		return analyze(manifest, dimensionsAndFacts, null, filter, null, null);
 	}
 
 	void execute() throws IOException;

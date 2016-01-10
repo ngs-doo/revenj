@@ -96,4 +96,28 @@ public class TestReport {
 						.analyze(new CompositeList.ForSimple());
 		Assert.assertEquals(1, results.size());
 	}
+
+	@Test
+	public void useExoticFieldsInCube() throws IOException {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		Composite co = new Composite();
+		co.getSimple().setNumber(200);
+		context.create(co);
+		CompositeCube cube = new CompositeCube(locator);
+		List<Map<String, Object>> results =
+				cube.builder()
+						.use(CompositeCube.avgInd)
+						.use(CompositeCube.count)
+						.use(CompositeCube.enn)
+						.use(CompositeCube.hasEntities)
+						.use(CompositeCube.hasSum)
+						.use(CompositeCube.indexes)
+						.use(CompositeCube.max)
+						.use(CompositeCube.min)
+						.use(CompositeCube.number)
+						.use(CompositeCube.simple)
+						.analyze(new CompositeList.ForSimple(Arrays.asList(co.getSimple())));
+		Assert.assertEquals(1, results.size());
+	}
 }

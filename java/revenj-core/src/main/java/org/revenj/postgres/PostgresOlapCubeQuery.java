@@ -9,6 +9,7 @@ import org.revenj.postgres.jinq.RevenjQueryComposer;
 import org.revenj.postgres.jinq.jpqlquery.*;
 import org.revenj.postgres.jinq.transform.*;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,6 +20,7 @@ import java.util.function.Function;
 public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implements OlapCubeQuery<TSource> {
 
 	protected final ServiceLocator locator;
+	protected final PostgresReader reader;
 	protected final Connection transactionConnection;
 	protected final javax.sql.DataSource dataSource;
 	private final MetamodelUtil metamodel;
@@ -27,9 +29,16 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 
 	protected final Map<String, Function<String, String>> cubeDimensions = new LinkedHashMap<>();
 	protected final Map<String, Function<String, String>> cubeFacts = new LinkedHashMap<>();
+	protected final Map<String, Converter> cubeConverters = new LinkedHashMap<>();
+
+	@FunctionalInterface
+	public interface Converter {
+		Object convert(PostgresReader reader) throws IOException;
+	}
 
 	protected PostgresOlapCubeQuery(ServiceLocator locator) {
 		this.locator = locator;
+		this.reader = new PostgresReader(locator);
 		this.transactionConnection = locator.tryResolve(Connection.class).orElse(null);
 		this.dataSource = transactionConnection != null ? null : locator.resolve(javax.sql.DataSource.class);
 		this.metamodel = locator.resolve(MetamodelUtil.class);
@@ -64,10 +73,6 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 				throw new IllegalArgumentException("Invalid order: " + o + ". Order can be only field from used dimensions and facts.");
 			}
 		}
-	}
-
-	protected String getLambdaAlias(Specification<TSource> specification) {
-		return "it";
 	}
 
 	protected Connection getConnection() {
@@ -123,24 +128,17 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		return specification;
 	}
 
-	@Override
-	public List<Map<String, Object>> analyze(
-			List<String> dimensions,
-			List<String> facts,
+	public void prepareSql(
+			StringBuilder sb,
+			List<String> usedDimensions,
+			List<String> usedFacts,
 			Collection<Map.Entry<String, Boolean>> order,
 			Specification<TSource> filter,
 			Integer limit,
-			Integer offset) {
-		List<String> usedDimensions = new ArrayList<>();
-		List<String> usedFacts = new ArrayList<>();
+			Integer offset,
+			List<GeneratedQueryParameter> parameters,
+			List<LambdaInfo> lambdas) {
 		Map<String, Boolean> customOrder = new LinkedHashMap<>();
-
-		if (dimensions != null) {
-			usedDimensions.addAll(dimensions);
-		}
-		if (facts != null) {
-			usedFacts.addAll(facts);
-		}
 		if (order != null) {
 			for (Map.Entry<String, Boolean> o : order) {
 				if (o.getKey() != null) {
@@ -151,33 +149,29 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 
 		validateInput(usedDimensions, usedFacts, customOrder.keySet());
 
-		StringBuilder sb = new StringBuilder();
-		String alias = filter != null ? getLambdaAlias(filter) : "_it";
-		sb.append("SELECT ");
+		String alias = "_it";
+		sb.append("SELECT ROW(");
 		for (String d : usedDimensions) {
-			sb.append(cubeDimensions.get(d).apply(alias)).append(" AS \"").append(d).append("\", ");
+			sb.append(cubeDimensions.get(d).apply(alias)).append(',');
 		}
 		for (String f : usedFacts) {
-			sb.append(cubeFacts.get(f).apply(alias)).append(" AS \"").append(f).append("\", ");
+			sb.append(cubeFacts.get(f).apply(alias)).append(',');
 		}
-		sb.setLength(sb.length() - 2);
-		sb.append('\n');
-		sb.append("FROM ").append(getSource()).append(" \"").append(alias).append("\"");
-		sb.append('\n');
+		sb.setLength(sb.length() - 1);
+		sb.append(") FROM ").append(getSource()).append(" \"").append(alias).append("\"");
 
-		SelectFromWhere<TSource> sfw = null;
-		LambdaInfo lambdaInfo = null;
 		if (filter != null) {
-			lambdaInfo = LambdaInfo.analyze(rewriteSpecification(filter), 0, true);
-			sfw = applyTransformWithLambda(alias, lambdaInfo);
+			LambdaInfo lambdaInfo = LambdaInfo.analyze(rewriteSpecification(filter), 0, true);
+			SelectFromWhere<?> sfw = applyTransformWithLambda(alias, lambdaInfo);
 			if (sfw != null && sfw.generateWhere("\"" + alias + "\"")) {
-				sb.append("WHERE\n");
+				sb.append(" WHERE ");
 				sb.append(sfw.getQueryString());
+				parameters.addAll(sfw.getQueryParameters());
 			}
+			lambdas.add(lambdaInfo);
 		}
-		sb.append('\n');
 		if (!usedDimensions.isEmpty()) {
-			sb.append("GROUP BY ");
+			sb.append(" GROUP BY ");
 			for (String d : usedDimensions) {
 				sb.append(cubeDimensions.get(d).apply(alias));
 				sb.append(", ");
@@ -186,34 +180,71 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 			sb.append('\n');
 		}
 		if (!customOrder.isEmpty()) {
-			sb.append("ORDER BY ");
+			sb.append(" ORDER BY ");
 			for (Map.Entry<String, Boolean> o : customOrder.entrySet()) {
-				sb.append("\"").append(o.getKey()).append("\" ").append(o.getValue() ? "ASC" : "DESC");
+				sb.append("\"").append(o.getKey()).append("\" ").append(o.getValue() ? "" : "DESC");
 				sb.append(", ");
 			}
 			sb.setLength(sb.length() - 2);
 		}
 		if (limit != null) {
-			sb.append("LIMIT ").append(limit).append('\n');
+			sb.append(" LIMIT ").append(limit);
 		}
 		if (offset != null) {
-			sb.append("OFFSET ").append(offset).append('\n');
+			sb.append(" OFFSET ").append(offset);
 		}
+	}
+
+	public Converter[] prepareConverters(List<String> dimensions, List<String> facts) {
+		@SuppressWarnings("unchecked")
+		Converter[] converters = new Converter[dimensions.size() + facts.size()];
+		for (int i = 0; i < dimensions.size(); i++) {
+			converters[i] = cubeConverters.get(dimensions.get(i));
+		}
+		for (int i = 0; i < facts.size(); i++) {
+			converters[i + dimensions.size()] = cubeConverters.get(facts.get(i));
+		}
+		return converters;
+	}
+
+	@Override
+	public List<Map<String, Object>> analyze(
+			List<String> dimensions,
+			List<String> facts,
+			Collection<Map.Entry<String, Boolean>> order,
+			Specification<TSource> filter,
+			Integer limit,
+			Integer offset) {
+		List<String> usedDimensions = new ArrayList<>();
+		List<String> usedFacts = new ArrayList<>();
+
+		if (dimensions != null) {
+			usedDimensions.addAll(dimensions);
+		}
+		if (facts != null) {
+			usedFacts.addAll(facts);
+		}
+
+		List<GeneratedQueryParameter> parameters = filter != null ? new ArrayList<>() : null;
+		List<LambdaInfo> lambdas = filter != null ? new ArrayList<>(1) : null;
+		StringBuilder sb = new StringBuilder();
+		prepareSql(sb, usedDimensions, usedFacts, order, filter, limit, offset, parameters, lambdas);
+		Converter[] converters = prepareConverters(usedDimensions, usedFacts);
 
 		Connection connection = getConnection();
 		List<Map<String, Object>> result = new ArrayList<>();
 		try (PreparedStatement ps = connection.prepareStatement(sb.toString())) {
-			if (sfw != null) {
+			if (parameters != null && parameters.size() > 0) {
 				RevenjQueryComposer.fillQueryParameters(
 						connection,
 						locator,
 						ps,
-						sfw.getQueryParameters(),
-						Collections.singletonList(lambdaInfo));
+						0,
+						parameters,
+						lambdas);
 			}
 			ResultSet rs = ps.executeQuery();
-			int columns = rs.getMetaData().getColumnCount();
-			String[] columnNames = new String[columns];
+			String[] columnNames = new String[usedFacts.size() + usedDimensions.size()];
 			for (int i = 0; i < usedDimensions.size(); i++) {
 				columnNames[i] = usedDimensions.get(i);
 			}
@@ -221,14 +252,16 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 				columnNames[usedDimensions.size() + i] = usedFacts.get(i);
 			}
 			while (rs.next()) {
+				reader.process(rs.getString(1));
+				reader.read();
 				Map<String, Object> item = new LinkedHashMap<>();
-				for (int i = 0; i < columns; i++) {
-					item.put(columnNames[i], rs.getObject(1 + i));
+				for (int i = 0; i < columnNames.length; i++) {
+					item.put(columnNames[i], converters[i].convert(reader));
 				}
 				result.add(item);
 			}
 			rs.close();
-		} catch (SQLException ex) {
+		} catch (SQLException | IOException ex) {
 			throw new RuntimeException(ex);
 		}
 		return result;

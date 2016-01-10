@@ -2,6 +2,10 @@ package org.revenj;
 
 import org.revenj.patterns.*;
 import org.revenj.postgres.*;
+import org.revenj.postgres.converters.ArrayTuple;
+import org.revenj.postgres.jinq.RevenjQueryComposer;
+import org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter;
+import org.revenj.postgres.jinq.transform.LambdaInfo;
 
 import java.io.IOException;
 import java.sql.*;
@@ -9,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoCloseable {
 
@@ -18,9 +23,11 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 	private final PostgresWriter writer;
 	private final StringBuilder builder;
 	private final List<Consumer<PreparedStatement>> writeArguments = new ArrayList<>();
+	private int totalArguments;
 	private final List<BiFunction<ResultSet, Integer, Object>> resultActions = new ArrayList<>();
 	private Object[] results;
 	private final Map<Class<?>, BulkRepository> repositories = new HashMap<>();
+	private final Map<Class<?>, PostgresOlapCubeQuery> cubes = new HashMap<>();
 	private final boolean closeConnection;
 
 	public PostgresBulkReader(ServiceLocator locator, Connection connection, boolean closeConnection) {
@@ -66,7 +73,7 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 
 	@Override
 	public int getArgumentIndex() {
-		return writeArguments.size() + 1;
+		return totalArguments + 1;
 	}
 
 	@Override
@@ -75,6 +82,7 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 		builder.setLength(0);
 		resultActions.clear();
 		writeArguments.clear();
+		totalArguments = 0;
 		results = null;
 		builder.append("SELECT (");
 	}
@@ -82,6 +90,7 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 	@Override
 	public void addArgument(Consumer<PreparedStatement> statement) {
 		writeArguments.add(statement);
+		totalArguments++;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -111,6 +120,16 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 		return repository;
 	}
 
+	@SuppressWarnings("unchecked")
+	private <TSource extends DataSource, TCube extends OlapCubeQuery<TSource>> PostgresOlapCubeQuery<TSource> getCube(Class<TCube> manifest) {
+		PostgresOlapCubeQuery cube = cubes.get(manifest);
+		if (cube == null) {
+			cube = (PostgresOlapCubeQuery) locator.resolve(manifest);
+			cubes.put(manifest, cube);
+		}
+		return cube;
+	}
+
 	@Override
 	public <T extends Identifiable> Callable<Optional<T>> find(Class<T> manifest, String uri) {
 		return add(getRepository(manifest).find(this, uri));
@@ -137,11 +156,84 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 	}
 
 	@Override
+	public <TSource extends DataSource, TCube extends OlapCubeQuery<TSource>> Callable<List<Map<String, Object>>> analyze(
+			Class<TCube> manifest,
+			List<String> dimensionsAndFacts,
+			Collection<Map.Entry<String, Boolean>> order,
+			Specification<TSource> filter,
+			Integer limit,
+			Integer offset) {
+		PostgresOlapCubeQuery<TSource> cube = getCube(manifest);
+		builder.append("SELECT array_agg(_x) FROM (");
+		List<String> dimensions = new ArrayList<>(dimensionsAndFacts.size());
+		List<String> facts = new ArrayList<>(dimensionsAndFacts.size());
+		for (String dof : dimensionsAndFacts) {
+			if (cube.getDimensions().contains(dof)) {
+				dimensions.add(dof);
+			} else {
+				facts.add(dof);
+			}
+		}
+		List<GeneratedQueryParameter> parameters = filter != null ? new ArrayList<>() : null;
+		List<LambdaInfo> lambdas = filter != null ? new ArrayList<>(1) : null;
+		cube.prepareSql(builder, dimensions, facts, order, filter, limit, offset, parameters, lambdas);
+		PostgresOlapCubeQuery.Converter[] converters = cube.prepareConverters(dimensions, facts);
+		String[] columnNames = new String[dimensionsAndFacts.size()];
+		for (int x = 0; x < dimensions.size(); x++) {
+			columnNames[x] = dimensions.get(x);
+		}
+		for (int x = 0; x < facts.size(); x++) {
+			columnNames[dimensions.size() + x] = facts.get(x);
+		}
+		builder.append(") _x),(");
+		int i = resultActions.size();
+		List<Map<String, Object>> result = new ArrayList<>();
+		int args = getArgumentIndex();
+		writeArguments.add(ps -> {
+			try {
+				RevenjQueryComposer.fillQueryParameters(
+						connection,
+						locator,
+						ps,
+						args,
+						parameters,
+						lambdas);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		totalArguments += parameters != null ? parameters.size() : 0;
+		resultActions.add((rs, ind) -> {
+			try {
+				reader.process(rs.getString(ind));
+				ArrayTuple.parse(reader, 0, (rdr, outCtx, ctx) -> {
+					Map<String, Object> map = new LinkedHashMap<>();
+					rdr.read(3);
+					for (int x = 0; x < converters.length; x++) {
+						map.put(columnNames[x], converters[x].convert(rdr));
+					}
+					rdr.read(3);
+					result.add(map);
+					return map;
+				});
+				return result;
+			} catch (SQLException | IOException ex) {
+				throw new RuntimeException(ex);
+			}
+		});
+		return () -> {
+			if (results == null) {
+				execute();
+			}
+			return result;
+		};
+	}
+
+	@Override
 	public void execute() throws IOException {
 		results = new Object[resultActions.size()];
-		builder.setLength(builder.length() - 2);
 		try {
-			try (PreparedStatement ps = connection.prepareStatement(builder.toString())) {
+			try (PreparedStatement ps = connection.prepareStatement(builder.substring(0, builder.length() - 2))) {
 				for (Consumer<PreparedStatement> writeArgument : writeArguments) {
 					writeArgument.accept(ps);
 				}

@@ -53,8 +53,15 @@ module test {
 	}
 	cube<CompositeList> CompositeCube {
 		dimension number;
+		dimension enn;
+		dimension hasEntities;
+		dimension simple;
+		dimension indexes;
 		max change max;
 		min change min;
+		count enn as count;
+		sum hasEntities hasSum;
+		avg indexes avgInd;
 	}
 	entity Entity {
 		money money;

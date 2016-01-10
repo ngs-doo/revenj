@@ -12,11 +12,13 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 import org.postgresql.util.PGobject;
 import org.revenj.patterns.DataSource;
 import org.revenj.postgres.ObjectConverter;
 import org.revenj.postgres.PostgresWriter;
+import org.revenj.postgres.converters.ArrayTuple;
 import org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter;
 import org.revenj.postgres.jinq.jpqlquery.JinqPostgresQuery;
 import org.revenj.Utils;
@@ -83,7 +85,9 @@ public final class RevenjQueryComposer<T> {
 	 */
 	private final List<LambdaInfo> lambdas = new ArrayList<>();
 
-	public int getLambdaCount() { return lambdas.size(); }
+	public int getLambdaCount() {
+		return lambdas.size();
+	}
 
 	private RevenjQueryComposer(
 			RevenjQueryComposer<?> base,
@@ -180,6 +184,7 @@ public final class RevenjQueryComposer<T> {
 			Connection connection,
 			ServiceLocator locator,
 			PreparedStatement ps,
+			int parameterOffset,
 			List<GeneratedQueryParameter> parameters,
 			List<LambdaInfo> lambdas) throws SQLException {
 		PostgresWriter writer = null;
@@ -192,7 +197,7 @@ public final class RevenjQueryComposer<T> {
 				value = lambdas.get(param.lambdaIndex).getField(param.fieldName);
 			}
 			if (value == null) {
-				ps.setObject(i + 1, null);
+				ps.setObject(i + 1 + parameterOffset, null);
 				continue;
 			}
 			Object[] elements = null;
@@ -217,9 +222,9 @@ public final class RevenjQueryComposer<T> {
 					tuple.buildTuple(writer, false);
 					pgo.setValue(writer.toString());
 					pgo.setType(converter.get().getDbName());
-					ps.setObject(i + 1, pgo);
+					ps.setObject(i + 1 + parameterOffset, pgo);
 				} else if (value instanceof LocalDate) {
-					ps.setDate(i + 1, java.sql.Date.valueOf((LocalDate) value));
+					ps.setDate(i + 1 + parameterOffset, java.sql.Date.valueOf((LocalDate) value));
 					//if (writer == null) writer = PostgresWriter.create();
 					//DateConverter.setParameter(writer, ps, i + 1, (LocalDate) value);
 				} else if (value instanceof LocalDateTime) {
@@ -229,7 +234,7 @@ public final class RevenjQueryComposer<T> {
 					if (writer == null) writer = PostgresWriter.create();
 					TimestampConverter.setParameter(writer, ps, i + 1, (OffsetDateTime) value);
 				} else {
-					ps.setObject(i + 1, value);
+					ps.setObject(i + 1 + parameterOffset, value);
 				}
 			} else {
 				Class<?> manifest = null;
@@ -241,35 +246,28 @@ public final class RevenjQueryComposer<T> {
 				}
 				Optional<ObjectConverter> converter = manifest != null ? getConverterFor(locator, manifest) : Optional.<ObjectConverter>empty();
 				if (converter.isPresent()) {
-					ObjectConverter oc = converter.get();
-					Object[] pgos = new Object[elements.length];
+					ObjectConverter<Object> oc = converter.get();
 					if (writer == null) writer = PostgresWriter.create();
-					for (int x = 0; x < pgos.length; x++) {
-						Object item = elements[x];
-						if (item != null) {
-							PGobject pgo = new PGobject();
-							writer.reset();
-							oc.to(item).buildTuple(writer, false);
-							pgo.setValue(writer.toString());
-							pgo.setType(oc.getDbName());
-							ps.setObject(i + 1, pgo);
-						}
-					}
-					java.sql.Array array = connection.createArrayOf(oc.getDbName(), pgos);
-					ps.setArray(i + 1, array);
+					writer.reset();
+					PostgresTuple tuple = ArrayTuple.create(elements, oc::to);
+					PGobject pgo = new PGobject();
+					pgo.setType(oc.getDbName() + "[]");
+					tuple.buildTuple(writer, false);
+					pgo.setValue(writer.toString());
+					ps.setObject(i + 1 + parameterOffset, pgo);
 				} else {
 					String type = getElementTypeFor(elements);
 					if ("unknown".equals(type)) {
 						if (elements.length == 0) {
 							//TODO: provide null instead !?
-							ps.setObject(i + 1, EMPTY_ARRAY);
+							ps.setObject(i + 1 + parameterOffset, EMPTY_ARRAY);
 							continue;
 						} else {
 							// throw meaningfull error!?
 						}
 					}
 					java.sql.Array array = connection.createArrayOf(type, elements);
-					ps.setArray(i + 1, array);
+					ps.setArray(i + 1 + parameterOffset, array);
 				}
 			}
 		}
@@ -303,7 +301,7 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement("SELECT COUNT(*) FROM (" + queryString + ") sq")) {
-			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
+			fillQueryParameters(connection, locator, ps, 0, query.getQueryParameters(), lambdas);
 			try (final ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					return rs.getLong(1);
@@ -319,7 +317,7 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement("SELECT EXISTS(" + queryString + ")")) {
-			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
+			fillQueryParameters(connection, locator, ps, 0, query.getQueryParameters(), lambdas);
 			try (final ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					return rs.getBoolean(1);
@@ -343,7 +341,7 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement("SELECT NOT EXISTS(" + queryString + ")")) {
-			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
+			fillQueryParameters(connection, locator, ps, 0, query.getQueryParameters(), lambdas);
 			try (final ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					return rs.getBoolean(1);
@@ -359,7 +357,7 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement(queryString)) {
-			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
+			fillQueryParameters(connection, locator, ps, 0, query.getQueryParameters(), lambdas);
 			final PostgresReader pr = new PostgresReader(locator);
 			try {
 				final ObjectConverter<T> converter = getConverterFor(locator, manifest).get();
@@ -382,7 +380,7 @@ public final class RevenjQueryComposer<T> {
 		final String queryString = query.getQueryString();
 		Connection connection = getConnection();
 		try (PreparedStatement ps = connection.prepareStatement(queryString)) {
-			fillQueryParameters(connection, locator, ps, query.getQueryParameters(), lambdas);
+			fillQueryParameters(connection, locator, ps, 0, query.getQueryParameters(), lambdas);
 			final PostgresReader pr = new PostgresReader(locator);
 			final ArrayList<T> result = new ArrayList<>();
 			try {

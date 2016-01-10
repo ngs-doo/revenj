@@ -492,6 +492,7 @@ public class TestRepository {
 		String name = "bulk " + rnd.nextInt();
 		Document document = new Document().setName(name);
 		context.create(document);
+		context.create(new Composite());
 		UUID id = document.getID();
 		RepositoryBulkReader bulkReader = locator.resolve(RepositoryBulkReader.class);
 		Callable<Optional<WritableDocument>> wd1 = bulkReader.find(WritableDocument.class, document.getURI());
@@ -499,6 +500,14 @@ public class TestRepository {
 		Callable<List<WritableDocument>> wd3 = bulkReader.search(WritableDocument.class, it -> it.getId() == id);
 		Callable<Boolean> wd4 = bulkReader.exists(WritableDocument.class, it -> it.getId() == id);
 		Callable<Long> wd5 = bulkReader.count(WritableDocument.class, it -> it.getId() == id);
+		Callable<List<Map<String, Object>>> wd6 =
+				bulkReader.analyze(
+						CompositeCube.class,
+						Arrays.asList(CompositeCube.max, CompositeCube.min),
+						Collections.EMPTY_LIST,
+						it -> true,
+						null,
+						null);
 		bulkReader.execute();
 		Assert.assertTrue(wd1.call().isPresent());
 		Assert.assertEquals(1, wd2.call().size());
@@ -508,5 +517,6 @@ public class TestRepository {
 		Assert.assertEquals(name, wd1.call().get().getName());
 		Assert.assertEquals(name, wd2.call().get(0).getName());
 		Assert.assertEquals(name, wd3.call().get(0).getName());
+		Assert.assertEquals(1, wd6.call().size());
 	}
 }
