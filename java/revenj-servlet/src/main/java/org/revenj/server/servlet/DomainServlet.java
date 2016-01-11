@@ -77,6 +77,28 @@ public class DomainServlet extends HttpServlet {
 	}
 
 	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		String path = req.getPathInfo();
+		if (path.startsWith("/submit/")) {
+			String name = path.substring("/submit/".length(), path.length());
+			Optional<Class<?>> manifest = model.find(name);
+			if (!manifest.isPresent()) {
+				res.sendError(400, "Unknown domain object: " + name);
+				return;
+			}
+			if (manifest.get().isAssignableFrom(DomainEvent.class)) {
+				res.sendError(400, "Specified type is not an domain event: " + name);
+				return;
+			}
+			DomainEvent domainEvent = (DomainEvent) serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
+			SubmitEvent.Argument arg = new SubmitEvent.Argument<>(name, domainEvent, "instance".equals(req.getParameter("result")));
+			Utility.executeJson(engine, req, res, SubmitEvent.class, arg);
+		} else {
+			res.sendError(405, "Unknown URL path: " + path);
+		}
+	}
+
+	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String path = req.getPathInfo();
 		if (path.startsWith("/find/")) {
@@ -117,20 +139,6 @@ public class DomainServlet extends HttpServlet {
 						name.get(),
 						spec -> new DomainObjectExists.Argument(name.get(), null, spec));
 			} else res.sendError(405, "Invalid URL path: " + path);
-		} else if (path.startsWith("/submit/")) {
-			String name = path.substring("/submit/".length(), path.length());
-			Optional<Class<?>> manifest = model.find(name);
-			if (!manifest.isPresent()) {
-				res.sendError(400, "Unknown domain object: " + name);
-				return;
-			}
-			if (manifest.get().isAssignableFrom(DomainEvent.class)) {
-				res.sendError(400, "Specified type is not an domain event: " + name);
-				return;
-			}
-			DomainEvent domainEvent = (DomainEvent) serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
-			SubmitEvent.Argument arg = new SubmitEvent.Argument<>(name, domainEvent, "instance".equals(req.getParameter("return")));
-			Utility.executeJson(engine, req, res, SubmitEvent.class, arg);
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);
 		}
