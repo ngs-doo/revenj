@@ -40,36 +40,36 @@ public class DomainServlet extends HttpServlet {
 			Optional<String> name = Utility.findName(model, path, "/search/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
-				if (spec != null) {
-					res.sendError(405, "Parsing specification from URL argument not yet supported. Use PUT method instead");
-				} else {
-					Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
-					Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
-					SearchDomainObject.Argument arg = new SearchDomainObject.Argument(name.get(), null, null, offset, limit, null);
-					Utility.executeJson(engine, req, res, SearchDomainObject.class, arg);
+				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req.getParameterMap(), res);
+				if (spec != null && !specification.isPresent()) {
+					return;
 				}
+				Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
+				Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
+				SearchDomainObject.Argument arg = new SearchDomainObject.Argument<>(name.get(), spec, specification.orElse(null), offset, limit, null);
+				Utility.executeJson(engine, req, res, SearchDomainObject.class, arg);
 			}
 		} else if (path.startsWith("/count/")) {
 			Optional<String> name = Utility.findName(model, path, "/count/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
-				if (spec != null) {
-					res.sendError(405, "Parsing specification from URL argument not yet supported. Use PUT method instead");
-				} else {
-					CountDomainObject.Argument arg = new CountDomainObject.Argument(name.get(), null, null);
-					Utility.executeJson(engine, req, res, CountDomainObject.class, arg);
+				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req.getParameterMap(), res);
+				if (spec != null && !specification.isPresent()) {
+					return;
 				}
+				CountDomainObject.Argument arg = new CountDomainObject.Argument<>(name.get(), spec, specification.orElse(null));
+				Utility.executeJson(engine, req, res, CountDomainObject.class, arg);
 			}
 		} else if (path.startsWith("/exists/")) {
 			Optional<String> name = Utility.findName(model, path, "/exists/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
-				if (spec != null) {
-					res.sendError(405, "Parsing specification from URL argument not yet supported. Use PUT method instead");
-				} else {
-					DomainObjectExists.Argument arg = new DomainObjectExists.Argument(name.get(), null, null);
-					Utility.executeJson(engine, req, res, DomainObjectExists.class, arg);
+				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req.getParameterMap(), res);
+				if (spec != null && !specification.isPresent()) {
+					return;
 				}
+				DomainObjectExists.Argument arg = new DomainObjectExists.Argument<>(name.get(), spec, specification.orElse(null));
+				Utility.executeJson(engine, req, res, DomainObjectExists.class, arg);
 			}
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);
@@ -86,11 +86,7 @@ public class DomainServlet extends HttpServlet {
 				res.sendError(400, "Unknown domain object: " + name);
 				return;
 			}
-			if (manifest.get().isAssignableFrom(DomainEvent.class)) {
-				res.sendError(400, "Specified type is not an domain event: " + name);
-				return;
-			}
-			DomainEvent domainEvent = (DomainEvent) serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
+			Object domainEvent = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
 			SubmitEvent.Argument arg = new SubmitEvent.Argument<>(name, domainEvent, "instance".equals(req.getParameter("result")));
 			Utility.executeJson(engine, req, res, SubmitEvent.class, arg);
 		} else {
@@ -117,7 +113,7 @@ public class DomainServlet extends HttpServlet {
 						req,
 						res,
 						name.get(),
-						spec -> new SearchDomainObject.Argument(name.get(), null, spec, offset, limit, null));
+						spec -> new SearchDomainObject.Argument<>(name.get(), null, spec, offset, limit, null));
 			} else res.sendError(405, "Invalid URL path: " + path);
 		} else if (path.startsWith("/count/")) {
 			Optional<String> name = Utility.findName(model, path, "/count/", res);
@@ -127,7 +123,7 @@ public class DomainServlet extends HttpServlet {
 						req,
 						res,
 						name.get(),
-						spec -> new CountDomainObject.Argument(name.get(), null, spec));
+						spec -> new CountDomainObject.Argument<>(name.get(), null, spec));
 			} else res.sendError(405, "Invalid URL path: " + path);
 		} else if (path.startsWith("/exists/")) {
 			Optional<String> name = Utility.findName(model, path, "/exists/", res);
@@ -137,7 +133,7 @@ public class DomainServlet extends HttpServlet {
 						req,
 						res,
 						name.get(),
-						spec -> new DomainObjectExists.Argument(name.get(), null, spec));
+						spec -> new DomainObjectExists.Argument<>(name.get(), null, spec));
 			} else res.sendError(405, "Invalid URL path: " + path);
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);

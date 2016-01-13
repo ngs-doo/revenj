@@ -59,6 +59,9 @@ public class GetDomainObject implements ServerCommand {
 		if (arg.Uri == null || arg.Uri.length == 0) {
 			return CommandResult.badRequest("Uri not specified.");
 		}
+		if (!Identifiable.class.isAssignableFrom(manifest.get())) {
+			return CommandResult.badRequest("Specified type is not an identifiable: " + arg.Name);
+		}
 		if (!permissions.canAccess(manifest.get(), principal)) {
 			return CommandResult.forbidden(arg.Name);
 		}

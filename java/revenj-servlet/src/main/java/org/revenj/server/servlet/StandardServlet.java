@@ -7,6 +7,7 @@ import org.revenj.server.ProcessingEngine;
 import org.revenj.server.ProcessingResult;
 import org.revenj.server.ServerCommandDescription;
 import org.revenj.server.commands.*;
+import org.revenj.server.commands.reporting.AnalyzeOlapCube;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,10 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class StandardServlet extends HttpServlet {
 
@@ -36,6 +34,38 @@ public class StandardServlet extends HttpServlet {
 
 	StandardServlet(ServiceLocator locator) {
 		this(locator.resolve(DomainModel.class), locator.resolve(ProcessingEngine.class), locator.resolve(WireSerialization.class));
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		String path = req.getPathInfo();
+		if (path.startsWith("/olap/")) {
+			final Optional<Class<?>> manifest = Utility.findType(model, path, "/olap/", res);
+			if (manifest.isPresent()) {
+				String name = path.substring("/olap/".length(), path.length());
+				Map<String, String[]> params = req.getParameterMap();
+				String[] specificationParam = params.get("specification");
+				String specificationName = specificationParam == null || specificationParam.length == 0 ? null : specificationParam[0];
+				Optional<Object> specification = Utility.specificationFromQuery(name, specificationName, model, params, res);
+				if (specificationName != null && !specification.isPresent()) {
+					return;
+				}
+				Utility.OlapInfo olapInfo = new Utility.OlapInfo(params);
+				AnalyzeOlapCube.Argument<Object> arg =
+						new AnalyzeOlapCube.Argument<>(
+								name,
+								specificationName,
+								specification.get(),
+								olapInfo.dimensions,
+								olapInfo.facts,
+								olapInfo.order,
+								olapInfo.limit,
+								olapInfo.offset);
+				Utility.executeJson(engine, req, res, AnalyzeOlapCube.class, arg);
+			}
+		} else {
+			res.sendError(405, "Unknown URL path: " + path);
+		}
 	}
 
 	@Override
@@ -78,6 +108,30 @@ public class StandardServlet extends HttpServlet {
 				}
 				PersistAggregateRoot.Argument<Object> arg = new PersistAggregateRoot.Argument<>(name, null, toUpdate, null);
 				Utility.executeJson(engine, req, res, PersistAggregateRoot.class, arg);
+			}
+		} else if (path.startsWith("/olap/")) {
+			final Optional<Class<?>> manifest = Utility.findType(model, path, "/olap/", res);
+			if (manifest.isPresent()) {
+				String name = path.substring("/olap/".length(), path.length());
+				Map<String, String[]> params = req.getParameterMap();
+				String[] specificationParam = params.get("specification");
+				String spec = specificationParam == null || specificationParam.length == 0 ? null : specificationParam[0];
+				Optional<Object> specification = Utility.specificationFromStream(serialization, name, spec, model, req.getInputStream(), res);
+				if (spec != null && !specification.isPresent()) {
+					return;
+				}
+				Utility.OlapInfo olapInfo = new Utility.OlapInfo(params);
+				AnalyzeOlapCube.Argument<Object> arg =
+						new AnalyzeOlapCube.Argument<>(
+								name,
+								spec,
+								specification.orElse(null),
+								olapInfo.dimensions,
+								olapInfo.facts,
+								olapInfo.order,
+								olapInfo.limit,
+								olapInfo.offset);
+				Utility.executeJson(engine, req, res, AnalyzeOlapCube.class, arg);
 			}
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);

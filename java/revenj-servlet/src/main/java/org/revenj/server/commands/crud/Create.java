@@ -59,6 +59,9 @@ public final class Create implements ServerCommand {
 		if (arg.Data == null) {
 			return CommandResult.badRequest("Data to create not specified.");
 		}
+		if (!AggregateRoot.class.isAssignableFrom(manifest.get())) {
+			return CommandResult.badRequest("Specified type is not an aggregate root: " + arg.Name);
+		}
 		if (!permissions.canAccess(manifest.get(), principal)) {
 			return CommandResult.forbidden(arg.Name);
 		}

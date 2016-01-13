@@ -75,6 +75,9 @@ public class PersistAggregateRoot implements ServerCommand {
 		if (!manifest.isPresent()) {
 			return CommandResult.badRequest("Couldn't find root type: " + arg.RootName);
 		}
+		if (!AggregateRoot.class.isAssignableFrom(manifest.get())) {
+			return CommandResult.badRequest("Specified type is not an aggregate root: " + arg.RootName);
+		}
 		if (!permissions.canAccess(manifest.get(), principal)) {
 			return CommandResult.forbidden(arg.RootName);
 		}
