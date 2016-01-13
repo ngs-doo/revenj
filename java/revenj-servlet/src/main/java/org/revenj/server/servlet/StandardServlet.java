@@ -43,19 +43,17 @@ public class StandardServlet extends HttpServlet {
 			final Optional<Class<?>> manifest = Utility.findType(model, path, "/olap/", res);
 			if (manifest.isPresent()) {
 				String name = path.substring("/olap/".length(), path.length());
-				Map<String, String[]> params = req.getParameterMap();
-				String[] specificationParam = params.get("specification");
-				String specificationName = specificationParam == null || specificationParam.length == 0 ? null : specificationParam[0];
-				Optional<Object> specification = Utility.specificationFromQuery(name, specificationName, model, params, res);
-				if (specificationName != null && !specification.isPresent()) {
+				String spec = req.getParameter("specification");
+				Optional<Object> specification = Utility.specificationFromQuery(name, spec, model, req, res);
+				if (spec != null && !specification.isPresent()) {
 					return;
 				}
-				Utility.OlapInfo olapInfo = new Utility.OlapInfo(params);
+				Utility.OlapInfo olapInfo = new Utility.OlapInfo(req);
 				AnalyzeOlapCube.Argument<Object> arg =
 						new AnalyzeOlapCube.Argument<>(
 								name,
-								specificationName,
-								specification.get(),
+								spec,
+								specification.orElse(null),
 								olapInfo.dimensions,
 								olapInfo.facts,
 								olapInfo.order,
@@ -113,14 +111,12 @@ public class StandardServlet extends HttpServlet {
 			final Optional<Class<?>> manifest = Utility.findType(model, path, "/olap/", res);
 			if (manifest.isPresent()) {
 				String name = path.substring("/olap/".length(), path.length());
-				Map<String, String[]> params = req.getParameterMap();
-				String[] specificationParam = params.get("specification");
-				String spec = specificationParam == null || specificationParam.length == 0 ? null : specificationParam[0];
-				Optional<Object> specification = Utility.specificationFromStream(serialization, name, spec, model, req.getInputStream(), res);
+				String spec = req.getParameter("specification");
+				Optional<Object> specification = Utility.specificationFromQuery(name, spec, model, req, res);
 				if (spec != null && !specification.isPresent()) {
 					return;
 				}
-				Utility.OlapInfo olapInfo = new Utility.OlapInfo(params);
+				Utility.OlapInfo olapInfo = new Utility.OlapInfo(req);
 				AnalyzeOlapCube.Argument<Object> arg =
 						new AnalyzeOlapCube.Argument<>(
 								name,

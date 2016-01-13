@@ -43,7 +43,7 @@ public class ReportingServlet extends HttpServlet {
 				res.sendError(400, "Unknown report object: " + name);
 				return;
 			}
-			final Optional<Object> report = Utility.objectFromQuery(manifest.get(), req.getParameterMap(), res);
+			final Optional<Object> report = Utility.objectFromQuery(manifest.get(), req, res);
 			if (report.isPresent()) {
 				PopulateReport.Argument<Object> arg = new PopulateReport.Argument<>(report.get(), name);
 				Utility.executeJson(engine, req, res, PopulateReport.class, arg);

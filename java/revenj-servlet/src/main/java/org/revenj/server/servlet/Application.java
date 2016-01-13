@@ -66,6 +66,7 @@ public class Application implements ServletContextListener {
 		context.addServlet("crud", new CrudServlet(container)).addMapping("/Crud.svc/*");
 		context.addServlet("domain", new DomainServlet(container)).addMapping("/Domain.svc/*");
 		context.addServlet("standard", new StandardServlet(container)).addMapping("/Commands.svc/*");
+		context.addServlet("reporting", new ReportingServlet(container)).addMapping("/Reporting.svc/*");
 	}
 
 	@Override

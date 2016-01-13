@@ -105,17 +105,28 @@ abstract class Utility {
 		return manifest;
 	}
 
-	static Optional<Object> objectFromQuery(Class<?> manifest, Map<String, String[]> params, HttpServletResponse res) throws IOException {
+	static Optional<Object> objectFromQuery(Class<?> manifest, HttpServletRequest req, HttpServletResponse res) throws IOException {
 		try {
 			Object instance = manifest.newInstance();
+			String queryString = req.getQueryString();
+			if (queryString == null || queryString.length() == 0) {
+				return Optional.of(instance);
+			}
 			Map<String, Method> methods = new HashMap<>();
 			for (Method m : manifest.getMethods()) {
-				methods.put("set" + m.getName().substring(0, 1).toUpperCase() + m.getName().substring(1), m);
+				if (m.getName().startsWith("set")) {
+					methods.put(m.getName().substring(3), m);
+				}
 			}
-			for (Map.Entry<String, String[]> kv : params.entrySet()) {
-				Method m = methods.get(kv.getKey());
-				if (m != null && kv.getValue() != null && kv.getValue().length == 1) {
-					m.invoke(instance, changeType(kv.getValue()[0], m.getParameterTypes()[0]));
+			for (String p : queryString.split("&")) {
+				int eqInd = p.indexOf('=');
+				if (eqInd < 1) {
+					continue;
+				}
+				String key = p.substring(0, eqInd);
+				Method m = methods.get(key.substring(0, 1).toUpperCase() + key.substring(1));
+				if (m != null) {
+					m.invoke(instance, changeType(req.getParameter(p), m.getParameterTypes()[0]));
 				}
 			}
 			return Optional.of(instance);
@@ -125,7 +136,12 @@ abstract class Utility {
 		}
 	}
 
-	static Optional<Object> specificationFromQuery(String parent, String name, DomainModel model, Map<String, String[]> params, HttpServletResponse res) throws IOException {
+	static Optional<Object> specificationFromQuery(
+			String parent,
+			String name,
+			DomainModel model,
+			HttpServletRequest req,
+			HttpServletResponse res) throws IOException {
 		if (name == null || name.length() == 0) return Optional.empty();
 		Optional<Class<?>> specManifest = model.find(parent + "$" + name);
 		if (!specManifest.isPresent()) {
@@ -135,7 +151,7 @@ abstract class Utility {
 				return Optional.empty();
 			}
 		}
-		return Utility.objectFromQuery(specManifest.get(), params, res);
+		return Utility.objectFromQuery(specManifest.get(), req, res);
 	}
 
 	static Optional<Object> specificationFromStream(
@@ -169,16 +185,14 @@ abstract class Utility {
 		public final Integer limit;
 		public final Integer offset;
 
-		public OlapInfo(Map<String, String[]> params) {
-			String[] dimensionsParam = params.get("dimensions");
-			this.dimensions = dimensionsParam == null ? null : dimensionsParam.length == 1 ? dimensionsParam[0].split(",") : dimensionsParam;
-			String[] factsParam = params.get("facts");
-			this.facts = factsParam == null ? null : factsParam.length == 1 ? factsParam[0].split(",") : factsParam;
-			String[] orderParam = params.get("order");
+		public OlapInfo(HttpServletRequest req) {
+			this.dimensions = req.getParameter("dimensions") == null ? null : req.getParameter("dimensions").split(",");
+			this.facts = req.getParameter("facts") == null ? null : req.getParameter("facts").split(",");
+			String orderParam = req.getParameter("order");
 			List<Map.Entry<String, Boolean>> order = null;
-			if (orderParam != null && orderParam.length == 1) {
+			if (orderParam != null) {
 				order = new ArrayList<>();
-				String[] parts = orderParam[0].split(",");
+				String[] parts = orderParam.split(",");
 				for (String p : parts) {
 					if (p.startsWith("+") || p.startsWith("-")) {
 						order.add(new AbstractMap.SimpleEntry<>(p.substring(1), p.startsWith("+")));
@@ -188,8 +202,8 @@ abstract class Utility {
 				}
 			}
 			this.order = order;
-			this.limit = params.containsKey("limit") ? Integer.parseInt("limit") : null;
-			this.offset = params.containsKey("offset") ? Integer.parseInt("offset") : null;
+			this.limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
+			this.offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
 		}
 	}
 

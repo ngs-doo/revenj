@@ -40,7 +40,7 @@ public class DomainServlet extends HttpServlet {
 			Optional<String> name = Utility.findName(model, path, "/search/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
-				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req.getParameterMap(), res);
+				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req, res);
 				if (spec != null && !specification.isPresent()) {
 					return;
 				}
@@ -53,7 +53,7 @@ public class DomainServlet extends HttpServlet {
 			Optional<String> name = Utility.findName(model, path, "/count/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
-				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req.getParameterMap(), res);
+				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req, res);
 				if (spec != null && !specification.isPresent()) {
 					return;
 				}
@@ -64,7 +64,7 @@ public class DomainServlet extends HttpServlet {
 			Optional<String> name = Utility.findName(model, path, "/exists/", res);
 			if (name.isPresent()) {
 				String spec = req.getParameter("specification");
-				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req.getParameterMap(), res);
+				Optional<Object> specification = Utility.specificationFromQuery(name.get(), spec, model, req, res);
 				if (spec != null && !specification.isPresent()) {
 					return;
 				}
