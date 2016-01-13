@@ -25,4 +25,12 @@ public class JsonTest {
 		String value = jackson.serialize(OffsetDateTime.of(LocalDateTime.of(2015, 9, 26, 1, 2, 3), ZoneOffset.ofHours(2)));
 		Assert.assertEquals("\"2015-09-26T01:02:03+02:00\"", value);
 	}
+
+	@Test
+	public void jacksonPoint() throws IOException {
+		JacksonSerialization jackson = new JacksonSerialization(null, Optional.empty());
+		java.awt.Point value = jackson.deserialize("{}", java.awt.Point.class);
+		Assert.assertEquals(0, value.x);
+		Assert.assertEquals(0, value.y);
+	}
 }

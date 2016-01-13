@@ -115,25 +115,41 @@ final class JacksonSerialization implements Serialization<String> {
 			@Override
 			public java.awt.Point deserialize(final JsonParser parser, final DeserializationContext unused) throws IOException {
 				final JsonNode tree = parser.getCodec().readTree(parser);
-				return new java.awt.Point(tree.get("X").asInt(), tree.get("Y").asInt());
+				JsonNode x = tree.get("X");
+				if (x == null) x = tree.get("x");
+				JsonNode y = tree.get("Y");
+				if (y == null) y = tree.get("y");
+				return new java.awt.Point(x != null ? x.asInt() : 0, y != null ? y.asInt() : 0);
 			}
 		});
 		module.addDeserializer(java.awt.geom.Point2D.class, new JsonDeserializer<java.awt.geom.Point2D>() {
 			@Override
 			public java.awt.geom.Point2D deserialize(final JsonParser parser, final DeserializationContext unused) throws IOException {
 				final JsonNode tree = parser.getCodec().readTree(parser);
-				return new java.awt.geom.Point2D.Double(tree.get("X").asDouble(), tree.get("Y").asDouble());
+				JsonNode x = tree.get("X");
+				if (x == null) x = tree.get("x");
+				JsonNode y = tree.get("Y");
+				if (y == null) y = tree.get("y");
+				return new java.awt.geom.Point2D.Double(x != null ? x.asDouble() : 0, y != null ? y.asDouble() : 0);
 			}
 		});
 		module.addDeserializer(java.awt.geom.Rectangle2D.class, new JsonDeserializer<java.awt.geom.Rectangle2D>() {
 			@Override
 			public java.awt.geom.Rectangle2D deserialize(final JsonParser parser, final DeserializationContext _unused) throws IOException {
 				final JsonNode tree = parser.getCodec().readTree(parser);
+				JsonNode x = tree.get("X");
+				if (x == null) x = tree.get("x");
+				JsonNode y = tree.get("Y");
+				if (y == null) y = tree.get("y");
+				JsonNode width = tree.get("Width");
+				if (width == null) width = tree.get("width");
+				JsonNode height = tree.get("Height");
+				if (height == null) height = tree.get("height");
 				return new java.awt.geom.Rectangle2D.Double(
-						tree.get("X").asDouble(),
-						tree.get("Y").asDouble(),
-						tree.get("Width").asDouble(),
-						tree.get("Height").asDouble());
+						x != null ? x.asDouble() : 0,
+						y != null ? y.asDouble() : 0,
+						width != null ? width.asDouble() : 0,
+						height != null ? height.asDouble() : 0);
 			}
 		});
 		module.addDeserializer(java.awt.image.BufferedImage.class, new JsonDeserializer<java.awt.image.BufferedImage>() {
