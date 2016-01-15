@@ -273,7 +273,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				var facts = cube.Facts.Intersect(dimensionsAndFacts).ToList();
 				Writer.Write(cube.PrepareSql(dimensions, facts, order, filter, limit, offset));
 				Writer.Write(") _x),(");
-				var table = new DataTable();
+				var table = new DataTable { CaseSensitive = true };
 				var converters = cube.PrepareConverters(dimensions, facts, table);
 				ResultActions.Add((dr, ind) =>
 				{

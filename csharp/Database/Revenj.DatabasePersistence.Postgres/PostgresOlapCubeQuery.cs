@@ -67,7 +67,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			if (facts != null)
 				usedFacts.AddRange(facts);
 			var sql = PrepareSql(usedDimensions, usedFacts, order, filter, limit, offset);
-			var table = new DataTable();
+			var table = new DataTable { CaseSensitive = true };
 			var converters = PrepareConverters(usedDimensions, usedFacts, table);
 			using (var cms = ChunkedMemoryStream.Create())
 			{
@@ -87,7 +87,7 @@ namespace Revenj.DatabasePersistence.Postgres
 			return table;
 		}
 
-		internal Func<BufferedTextReader, object>[] PrepareConverters(
+		public Func<BufferedTextReader, object>[] PrepareConverters(
 			List<string> usedDimensions,
 			List<string> usedFacts,
 			DataTable table)
@@ -104,38 +104,6 @@ namespace Revenj.DatabasePersistence.Postgres
 				table.Columns.Add(f, CubeTypes[f]);
 			}
 			return converters;
-		}
-
-		protected List<T> Analyze<T>(
-			Func<BufferedTextReader, T> converter,
-			IEnumerable<string> dimensions,
-			IEnumerable<string> facts,
-			IEnumerable<KeyValuePair<string, bool>> order,
-			ISpecification<TSource> filter,
-			int? limit,
-			int? offset)
-		{
-			var usedDimensions = new List<string>();
-			var usedFacts = new List<string>();
-			if (dimensions != null)
-				usedDimensions.AddRange(dimensions);
-			if (facts != null)
-				usedFacts.AddRange(facts);
-			var sql = PrepareSql(usedDimensions, usedFacts, order, filter, limit, offset);
-			var result = new List<T>();
-			using (var cms = ChunkedMemoryStream.Create())
-			{
-				DatabaseQuery.Execute(sql, dr =>
-				{
-					var obj = dr.GetValue(0);
-					var tr = obj as TextReader;
-					var btr = tr != null ? cms.UseBufferedReader(tr) : cms.UseBufferedReader(obj.ToString());
-					btr.Read();
-					result.Add(converter(btr));
-					if (tr != null) tr.Dispose();
-				});
-			}
-			return result;
 		}
 
 		internal string PrepareSql(
