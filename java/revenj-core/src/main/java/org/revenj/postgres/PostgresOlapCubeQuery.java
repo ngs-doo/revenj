@@ -182,16 +182,23 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		if (!customOrder.isEmpty()) {
 			sb.append(" ORDER BY ");
 			for (Map.Entry<String, Boolean> o : customOrder.entrySet()) {
-				sb.append("\"").append(o.getKey()).append("\" ").append(o.getValue() ? "" : "DESC");
+				if (cubeDimensions.containsKey(o.getKey())) {
+					sb.append(cubeDimensions.get(o.getKey()).apply(alias));
+				} else if (cubeFacts.containsKey(o.getKey())) {
+					sb.append(cubeFacts.get(o.getKey()).apply(alias));
+				} else {
+					sb.append("\"").append(o.getKey()).append("\"");
+				}
+				sb.append(o.getValue() ? "" : "DESC");
 				sb.append(", ");
 			}
 			sb.setLength(sb.length() - 2);
 		}
 		if (limit != null) {
-			sb.append(" LIMIT ").append(limit);
+			sb.append(" LIMIT ").append(Integer.toString(limit));
 		}
 		if (offset != null) {
-			sb.append(" OFFSET ").append(offset);
+			sb.append(" OFFSET ").append(Integer.toString(offset));
 		}
 	}
 
