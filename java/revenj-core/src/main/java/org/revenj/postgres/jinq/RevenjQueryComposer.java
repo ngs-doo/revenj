@@ -69,6 +69,7 @@ public final class RevenjQueryComposer<T> {
 	}
 
 	private final MetamodelUtil metamodel;
+	private final ClassLoader loader;
 	private final RevenjQueryComposerCache cachedQueries;
 	private final Connection connection;
 	private final ServiceLocator locator;
@@ -95,11 +96,12 @@ public final class RevenjQueryComposer<T> {
 			JinqPostgresQuery<T> query,
 			List<LambdaInfo> chainedLambdas,
 			LambdaInfo... additionalLambdas) {
-		this(base.metamodel, manifest, base.cachedQueries, base.connection, base.locator, base.getConnection, base.releaseConnection, query, chainedLambdas, additionalLambdas);
+		this(base.metamodel, base.loader, manifest, base.cachedQueries, base.connection, base.locator, base.getConnection, base.releaseConnection, query, chainedLambdas, additionalLambdas);
 	}
 
 	private RevenjQueryComposer(
 			MetamodelUtil metamodel,
+			ClassLoader loader,
 			Class<T> manifest,
 			RevenjQueryComposerCache cachedQueries,
 			Connection connection,
@@ -110,6 +112,7 @@ public final class RevenjQueryComposer<T> {
 			List<LambdaInfo> chainedLambdas,
 			LambdaInfo... additionalLambdas) {
 		this.metamodel = metamodel;
+		this.loader = loader;
 		this.manifest = manifest;
 		this.cachedQueries = cachedQueries;
 		this.connection = connection;
@@ -125,6 +128,7 @@ public final class RevenjQueryComposer<T> {
 
 	public static <T extends DataSource> RevenjQuery<T> findAll(
 			MetamodelUtil metamodel,
+			ClassLoader loader,
 			Class<T> manifest,
 			RevenjQueryComposerCache cachedQueries,
 			Connection conn,
@@ -142,6 +146,7 @@ public final class RevenjQueryComposer<T> {
 		RevenjQueryComposer<T> queryComposer =
 				new RevenjQueryComposer(
 						metamodel,
+						loader,
 						manifest,
 						cachedQueries,
 						conn,
@@ -438,7 +443,7 @@ public final class RevenjQueryComposer<T> {
 		if (cachedQuery == null) {
 			JinqPostgresQuery<U> newQuery = null;
 			try {
-				LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, null, true, true, true, true);
+				LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, loader, true, true, true, true);
 				if (lambdaAnalysis == null) {
 					return null;
 				}

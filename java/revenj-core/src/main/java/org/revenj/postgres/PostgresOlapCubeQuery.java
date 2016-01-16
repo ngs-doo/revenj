@@ -24,6 +24,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 	protected final Connection transactionConnection;
 	protected final javax.sql.DataSource dataSource;
 	private final MetamodelUtil metamodel;
+	private final ClassLoader loader;
 
 	protected abstract String getSource();
 
@@ -39,6 +40,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 	protected PostgresOlapCubeQuery(ServiceLocator locator) {
 		this.locator = locator;
 		this.reader = new PostgresReader(locator);
+		this.loader = locator.resolve(ClassLoader.class);
 		this.transactionConnection = locator.tryResolve(Connection.class).orElse(null);
 		this.dataSource = transactionConnection != null ? null : locator.resolve(javax.sql.DataSource.class);
 		this.metamodel = locator.resolve(MetamodelUtil.class);
@@ -107,7 +109,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		}
 		try {
 			RevenjQueryTransformConfiguration config = buildConfig(metamodel);
-			LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, null, true, true, true, true);
+			LambdaAnalysis lambdaAnalysis = lambdaInfo.fullyAnalyze(metamodel, loader, true, true, true, true);
 			if (lambdaAnalysis == null) {
 				return null;
 			}

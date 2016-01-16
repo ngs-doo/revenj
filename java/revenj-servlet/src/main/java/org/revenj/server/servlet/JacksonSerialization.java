@@ -15,7 +15,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
@@ -41,6 +40,18 @@ final class JacksonSerialization implements Serialization<String> {
 				.registerModule(withCustomSerializers())
 				.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 	}
+
+	private static final ThreadLocal<DocumentBuilder> documentBuilder = new ThreadLocal<DocumentBuilder>() {
+		@Override
+		public DocumentBuilder initialValue() {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			try {
+				return dbFactory.newDocumentBuilder();
+			} catch (ParserConfigurationException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	};
 
 	private static SimpleModule withCustomSerializers() {
 		SimpleModule module = new SimpleModule();
@@ -97,23 +108,29 @@ final class JacksonSerialization implements Serialization<String> {
 		module.addDeserializer(Element.class, new JsonDeserializer<Element>() {
 			@Override
 			public Element deserialize(JsonParser parser, DeserializationContext unused) throws IOException {
-				if (parser.nextToken() == JsonToken.VALUE_STRING) {
+				if (parser.getCurrentToken() == JsonToken.VALUE_STRING) {
 					try {
-						InputSource source = new InputSource(parser.getValueAsString());
-						return documentBuilder.parse(source).getDocumentElement();
+						byte[] content = parser.getValueAsString().getBytes("UTF-8");
+						return documentBuilder.get().parse(new ByteArrayInputStream(content)).getDocumentElement();
 					} catch (SAXException ex) {
 						throw new IOException(ex);
 					}
-				} else {
-					@SuppressWarnings("unchecked")
-					final HashMap<String, Object> map = parser.readValueAs(HashMap.class);
-					return map == null ? null : XmlConverter.mapToXml(map);
 				}
+				@SuppressWarnings("unchecked")
+				final HashMap<String, Object> map = parser.readValueAs(HashMap.class);
+				return map == null ? null : XmlConverter.mapToXml(map);
 			}
 		});
 		module.addDeserializer(java.awt.Point.class, new JsonDeserializer<java.awt.Point>() {
 			@Override
 			public java.awt.Point deserialize(final JsonParser parser, final DeserializationContext unused) throws IOException {
+				if (parser.getCurrentToken() == JsonToken.VALUE_STRING) {
+					String[] parts = parser.getValueAsString().split(",");
+					if (parts.length == 2) {
+						return new java.awt.Point(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+					}
+					throw new IOException("Unable to parse \"number,number\" format for point");
+				}
 				final JsonNode tree = parser.getCodec().readTree(parser);
 				JsonNode x = tree.get("X");
 				if (x == null) x = tree.get("x");
@@ -125,6 +142,13 @@ final class JacksonSerialization implements Serialization<String> {
 		module.addDeserializer(java.awt.geom.Point2D.class, new JsonDeserializer<java.awt.geom.Point2D>() {
 			@Override
 			public java.awt.geom.Point2D deserialize(final JsonParser parser, final DeserializationContext unused) throws IOException {
+				if (parser.getCurrentToken() == JsonToken.VALUE_STRING) {
+					String[] parts = parser.getValueAsString().split(",");
+					if (parts.length == 2) {
+						return new java.awt.geom.Point2D.Double(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]));
+					}
+					throw new IOException("Unable to parse \"number,number\" format for point");
+				}
 				final JsonNode tree = parser.getCodec().readTree(parser);
 				JsonNode x = tree.get("X");
 				if (x == null) x = tree.get("x");
@@ -136,6 +160,17 @@ final class JacksonSerialization implements Serialization<String> {
 		module.addDeserializer(java.awt.geom.Rectangle2D.class, new JsonDeserializer<java.awt.geom.Rectangle2D>() {
 			@Override
 			public java.awt.geom.Rectangle2D deserialize(final JsonParser parser, final DeserializationContext _unused) throws IOException {
+				if (parser.getCurrentToken() == JsonToken.VALUE_STRING) {
+					String[] parts = parser.getValueAsString().split(",");
+					if (parts.length == 4) {
+						return new java.awt.geom.Rectangle2D.Double(
+								Double.parseDouble(parts[0]),
+								Double.parseDouble(parts[1]),
+								Double.parseDouble(parts[2]),
+								Double.parseDouble(parts[3]));
+					}
+					throw new IOException("Unable to parse \"number,number,number,number\" format for rectangle");
+				}
 				final JsonNode tree = parser.getCodec().readTree(parser);
 				JsonNode x = tree.get("X");
 				if (x == null) x = tree.get("x");
@@ -160,17 +195,6 @@ final class JacksonSerialization implements Serialization<String> {
 			}
 		});
 		return module;
-	}
-
-	private static DocumentBuilder documentBuilder;
-
-	static {
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		try {
-			documentBuilder = dbFactory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	byte[] serializeAsBytes(Object value) throws IOException {

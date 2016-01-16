@@ -10,6 +10,7 @@ import org.revenj.postgres.jinq.transform.MetamodelUtil;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Optional;
 
 public class JinqMetaModel extends MetamodelUtil {
 
@@ -21,10 +22,16 @@ public class JinqMetaModel extends MetamodelUtil {
 	}
 
 	public static JinqMetaModel configure(Container container) {
+		Optional<JinqMetaModel> tryModel = container.tryResolve(JinqMetaModel.class);
+		if (tryModel.isPresent()) {
+			return tryModel.get();
+		}
 		org.revenj.postgres.jinq.JinqMetaModel metamodel = new org.revenj.postgres.jinq.JinqMetaModel();
 		container.registerInstance(MetamodelUtil.class, metamodel, false);
+		container.registerInstance(JinqMetaModel.class, metamodel, false);
 		DataSource dataSource = container.resolve(DataSource.class);
-		container.registerInstance(QueryProvider.class, new RevenjQueryProvider(metamodel, dataSource), false);
+		ClassLoader loader = container.resolve(ClassLoader.class);
+		container.registerInstance(QueryProvider.class, new RevenjQueryProvider(metamodel, loader, dataSource), false);
 		return metamodel;
 	}
 
@@ -52,7 +59,6 @@ public class JinqMetaModel extends MetamodelUtil {
 		comparisonMethods.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
 		comparisonMethodsWithObjectEquals.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
 		safeMethods.add(eqMethod);
-
 	}
 
 	@Override

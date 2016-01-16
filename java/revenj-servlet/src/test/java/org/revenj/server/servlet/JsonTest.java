@@ -2,6 +2,7 @@ package org.revenj.server.servlet;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -32,5 +33,20 @@ public class JsonTest {
 		java.awt.Point value = jackson.deserialize("{}", java.awt.Point.class);
 		Assert.assertEquals(0, value.x);
 		Assert.assertEquals(0, value.y);
+		value = jackson.deserialize("{\"x\":1,\"y\":2}", java.awt.Point.class);
+		Assert.assertEquals(1, value.x);
+		Assert.assertEquals(2, value.y);
+		value = jackson.deserialize("\"3,4\"", java.awt.Point.class);
+		Assert.assertEquals(3, value.x);
+		Assert.assertEquals(4, value.y);
+	}
+
+	@Test
+	public void jacksonXml() throws IOException {
+		JacksonSerialization jackson = new JacksonSerialization(null, Optional.empty());
+		Element value = jackson.deserialize("{\"root\":null}", Element.class);
+		Assert.assertEquals("root", value.getNodeName());
+		value = jackson.deserialize("\"<root/>\"", Element.class);
+		Assert.assertEquals("root", value.getNodeName());
 	}
 }

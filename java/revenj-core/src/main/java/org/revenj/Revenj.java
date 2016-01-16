@@ -4,6 +4,7 @@ import org.postgresql.ds.PGPoolingDataSource;
 import org.revenj.extensibility.Container;
 import org.revenj.json.DslJsonSerialization;
 import org.revenj.patterns.*;
+import org.revenj.postgres.jinq.JinqMetaModel;
 import org.revenj.security.PermissionManager;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
@@ -147,6 +148,7 @@ public abstract class Revenj {
 		container.registerInstance(properties);
 		container.registerInstance(ServiceLocator.class, container, false);
 		container.registerInstance(DataSource.class, dataSource, false);
+		container.registerInstance(ClassLoader.class, loader, false);
 		String ns = properties.getProperty("revenj.namespace");
 		SimpleDomainModel domainModel = new SimpleDomainModel(ns, loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
@@ -165,11 +167,11 @@ public abstract class Revenj {
 		ChangeNotification.registerContainer(container, databaseNotification);
 		container.registerFactory(RepositoryBulkReader.class, PostgresBulkReader::create, false);
 		container.registerInstance(PermissionManager.class, new RevenjPermissionManager(container), false);
-		container.registerInstance(ClassLoader.class, loader, false);
 		container.registerClass(new Generic<Serialization<String>>() {
 		}.type, DslJsonSerialization.class, false);
 		int total = 0;
 		if (aspects != null) {
+			JinqMetaModel.configure(container);
 			while (aspects.hasNext()) {
 				aspects.next().configure(container);
 				total++;

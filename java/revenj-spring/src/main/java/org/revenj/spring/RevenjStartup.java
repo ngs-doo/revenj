@@ -64,7 +64,8 @@ public class RevenjStartup {
 	public static void setup(Container container) throws IOException {
 		MetamodelUtil metamodel = container.resolve(MetamodelUtil.class);
 		DataSource dataSource = container.resolve(DataSource.class);
-		container.registerInstance(QueryProvider.class, new JinqQueryProvider(metamodel, dataSource), false);
+		ClassLoader loader = container.resolve(ClassLoader.class);
+		container.registerInstance(QueryProvider.class, new JinqQueryProvider(metamodel, loader, dataSource), false);
 	}
 
 	@Bean

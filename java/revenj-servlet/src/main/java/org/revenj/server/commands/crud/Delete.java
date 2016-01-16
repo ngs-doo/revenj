@@ -58,6 +58,9 @@ public final class Delete implements ServerCommand {
 		if (!manifest.isPresent()) {
 			return CommandResult.badRequest("Unable to find specified domain object: " + arg.Name);
 		}
+		if (!AggregateRoot.class.isAssignableFrom(manifest.get())) {
+			return CommandResult.badRequest("Specified type is not an aggregate root: " + arg.Name);
+		}
 		if (!permissions.canAccess(manifest.get(), principal)) {
 			return CommandResult.forbidden(arg.Name);
 		}

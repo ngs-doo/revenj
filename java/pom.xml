@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-storage</artifactId>
-			<version>0.8.0</version>
+			<version>0.8.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
