@@ -21,11 +21,8 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 		return new RevenjQuery<>(query);
 	}
 
-	interface AnalysisSpecification<T> extends Specification<T> {
-		LambdaInfo getAnalysisLambda(int index);
-	}
-
-	interface AnalysisOrder<T, V extends Comparable<V>> extends Compare<T, V> {
+	@FunctionalInterface
+	interface CustomAnalysis {
 		LambdaInfo getAnalysisLambda(int index);
 	}
 
@@ -33,14 +30,14 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 		if (predicate == null) {
 			return queryComposer;
 		}
-		return predicate instanceof AnalysisSpecification
-				? queryComposer.where(((AnalysisSpecification) predicate).getAnalysisLambda(queryComposer.getLambdaCount()))
+		return predicate instanceof CustomAnalysis
+				? queryComposer.where(((CustomAnalysis) predicate).getAnalysisLambda(queryComposer.getLambdaCount()))
 				: queryComposer.where(LambdaInfo.analyze(predicate, queryComposer.getLambdaCount(), true));
 	}
 
 	private RevenjQueryComposer applyOrder(Compare order, boolean ascending) {
-		return order instanceof AnalysisOrder
-				? queryComposer.sortedBy(((AnalysisOrder) order).getAnalysisLambda(queryComposer.getLambdaCount()), ascending)
+		return order instanceof CustomAnalysis
+				? queryComposer.sortedBy(((CustomAnalysis) order).getAnalysisLambda(queryComposer.getLambdaCount()), ascending)
 				: queryComposer.sortedBy(LambdaInfo.analyze(order, queryComposer.getLambdaCount(), true), ascending);
 	}
 
@@ -63,12 +60,12 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 	}
 
 	@Override
-	public <V extends Comparable<V>> Query<T> sortedBy(Compare<T, V> order) {
+	public <V> Query<T> sortedBy(Compare<T, V> order) {
 		return makeQueryStream(applyOrder(order, true));
 	}
 
 	@Override
-	public <V extends Comparable<V>> Query<T> sortedDescendingBy(Compare<T, V> order) {
+	public <V> Query<T> sortedDescendingBy(Compare<T, V> order) {
 		return makeQueryStream(applyOrder(order, false));
 	}
 
@@ -93,8 +90,8 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 	@Override
 	public boolean allMatch(Specification<? super T> predicate) throws IOException {
 		try {
-			LambdaInfo lambda = predicate instanceof AnalysisSpecification
-					? ((AnalysisSpecification) predicate).getAnalysisLambda(queryComposer.getLambdaCount())
+			LambdaInfo lambda = predicate instanceof CustomAnalysis
+					? ((CustomAnalysis) predicate).getAnalysisLambda(queryComposer.getLambdaCount())
 					: LambdaInfo.analyze(predicate, queryComposer.getLambdaCount(), true);
 			return queryComposer.all(lambda);
 		} catch (SQLException e) {

@@ -57,7 +57,7 @@ namespace Revenj.Plugins.Server.Commands
 			[DataMember]
 			public int? Limit;
 			[DataMember]
-			public Dictionary<string, bool> Order;
+			public List<KeyValuePair<string, bool>> Order;
 		}
 
 		private static TFormat CreateExampleArgument<TFormat>(ISerialization<TFormat> serializer)
@@ -186,7 +186,7 @@ Example argument:
 				TFormat data,
 				int? offset,
 				int? limit,
-				IDictionary<string, bool> order);
+				List<KeyValuePair<string, bool>> order);
 			SearchResult<TOutput> FindAndSerialize<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
@@ -197,7 +197,7 @@ Example argument:
 				TInput data,
 				int? offset,
 				int? limit,
-				IDictionary<string, bool> order);
+				List<KeyValuePair<string, bool>> order);
 		}
 
 		private static IQueryableRepository<T> GetRepository<T>(IServiceProvider locator)
@@ -213,7 +213,7 @@ Example argument:
 			}
 		}
 
-		private static T[] QueryWithConditions<T>(int? offset, int? limit, IDictionary<string, bool> order, IQueryable<T> result)
+		private static T[] QueryWithConditions<T>(int? offset, int? limit, List<KeyValuePair<string, bool>> order, IQueryable<T> result)
 		{
 			if (order != null)
 				result = result.OrderBy(order);
@@ -235,7 +235,7 @@ Example argument:
 				TFormat data,
 				int? offset,
 				int? limit,
-				IDictionary<string, bool> order)
+				List<KeyValuePair<string, bool>> order)
 			{
 				var repository = GetRepository<TDomainObject>(locator);
 				IQueryable<TDomainObject> result;
@@ -303,7 +303,7 @@ Example argument:
 				TInput data,
 				int? offset,
 				int? limit,
-				IDictionary<string, bool> order)
+				List<KeyValuePair<string, bool>> order)
 			{
 				var result = FindBy(input, domainModel, locator, data, offset, limit, order);
 				var filtered = permissions.ApplyFilters(principal, result);
@@ -321,7 +321,7 @@ Example argument:
 				TFormat data,
 				int? offset,
 				int? limit,
-				IDictionary<string, bool> order)
+				List<KeyValuePair<string, bool>> order)
 			{
 				var repository = GetRepository<TDomainObject>(locator);
 				dynamic specification;

@@ -219,15 +219,15 @@ Error: " + ex.Message;
 					: MessageFormat.Xml;
 		}
 
-		public static Dictionary<string, bool> ParseOrder(string order)
+		public static List<KeyValuePair<string, bool>> ParseOrder(string order)
 		{
 			if (string.IsNullOrEmpty(order))
 				return null;
 			return
 				(from o in order.Split(',')
 				 let word = o.Trim(new[] { '-', '+' })
-				 select new { word, asc = !o.StartsWith("-") })
-				.ToDictionary(it => it.word, it => it.asc);
+				 select new KeyValuePair<string, bool>(word, !o.StartsWith("-")))
+				 .ToList();
 		}
 
 		public static void ParseLimitOffset(

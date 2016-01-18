@@ -87,7 +87,7 @@ public class AnalyzeOlapCube implements ServerCommand {
 		}
 		final Specification specification;
 		if (arg.SpecificationName != null && arg.SpecificationName.length() > 0) {
-			Optional<Class<?>> specType = domainModel.find(arg.CubeName + "$" + arg.SpecificationName);
+			Optional<Class<?>> specType = domainModel.find(arg.CubeName + '+' + arg.SpecificationName);
 			if (!specType.isPresent()) {
 				specType = domainModel.find(arg.SpecificationName);
 			}

@@ -143,7 +143,7 @@ abstract class Utility {
 			HttpServletRequest req,
 			HttpServletResponse res) throws IOException {
 		if (name == null || name.length() == 0) return Optional.empty();
-		Optional<Class<?>> specManifest = model.find(parent + "$" + name);
+		Optional<Class<?>> specManifest = model.find(parent + "+" + name);
 		if (!specManifest.isPresent()) {
 			specManifest = model.find(name);
 			if (!specManifest.isPresent()) {
@@ -162,7 +162,7 @@ abstract class Utility {
 			InputStream stream,
 			HttpServletResponse res) throws IOException {
 		if (name == null || name.length() == 0) return Optional.empty();
-		Optional<Class<?>> specManifest = model.find(parent + "$" + name);
+		Optional<Class<?>> specManifest = model.find(parent + "+" + name);
 		if (!specManifest.isPresent()) {
 			specManifest = model.find(name);
 			if (!specManifest.isPresent()) {
@@ -178,6 +178,20 @@ abstract class Utility {
 		}
 	}
 
+	public static List<Map.Entry<String, Boolean>> parseOrder(String order) {
+		if (order == null || order.isEmpty()) return null;
+		List<Map.Entry<String, Boolean>> sortOrder = new ArrayList<>();
+		String[] parts = order.split(",");
+		for (String p : parts) {
+			if (p.startsWith("+") || p.startsWith("-")) {
+				sortOrder.add(new AbstractMap.SimpleEntry<>(p.substring(1), p.startsWith("+")));
+			} else {
+				sortOrder.add(new AbstractMap.SimpleEntry<>(p, true));
+			}
+		}
+		return sortOrder;
+	}
+
 	static class OlapInfo {
 		public final String[] dimensions;
 		public final String[] facts;
@@ -188,20 +202,7 @@ abstract class Utility {
 		public OlapInfo(HttpServletRequest req) {
 			this.dimensions = req.getParameter("dimensions") == null ? null : req.getParameter("dimensions").split(",");
 			this.facts = req.getParameter("facts") == null ? null : req.getParameter("facts").split(",");
-			String orderParam = req.getParameter("order");
-			List<Map.Entry<String, Boolean>> order = null;
-			if (orderParam != null) {
-				order = new ArrayList<>();
-				String[] parts = orderParam.split(",");
-				for (String p : parts) {
-					if (p.startsWith("+") || p.startsWith("-")) {
-						order.add(new AbstractMap.SimpleEntry<>(p.substring(1), p.startsWith("+")));
-					} else {
-						order.add(new AbstractMap.SimpleEntry<>(p, true));
-					}
-				}
-			}
-			this.order = order;
+			this.order = parseOrder(req.getParameter("order"));
 			this.limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
 			this.offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
 		}

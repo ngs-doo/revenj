@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.33672 
 */
 
 package gen.model;
@@ -283,102 +283,102 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.calc.Realm>>(){}.type, calc$converter$RealmConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
-		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"");
-		metamodel.registerProperty(gen.model.test.Simple.class, "getText", "\"text\"");
-		metamodel.registerProperty(gen.model.test.Simple.class, "getEn", "\"en\"");
-		metamodel.registerProperty(gen.model.test.Simple.class, "getEn2", "\"en2\"");
-		metamodel.registerProperty(gen.model.test.Simple.class, "getNb", "\"nb\"");
-		metamodel.registerProperty(gen.model.test.Simple.class, "getTs", "\"ts\"");
+		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"", gen.model.test.Simple::getNumber);
+		metamodel.registerProperty(gen.model.test.Simple.class, "getText", "\"text\"", gen.model.test.Simple::getText);
+		metamodel.registerProperty(gen.model.test.Simple.class, "getEn", "\"en\"", gen.model.test.Simple::getEn);
+		metamodel.registerProperty(gen.model.test.Simple.class, "getEn2", "\"en2\"", gen.model.test.Simple::getEn2);
+		metamodel.registerProperty(gen.model.test.Simple.class, "getNb", "\"nb\"", gen.model.test.Simple::getNb);
+		metamodel.registerProperty(gen.model.test.Simple.class, "getTs", "\"ts\"", gen.model.test.Simple::getTs);
 		metamodel.registerEnum(gen.model.test.En.class, "\"test\".\"En\"");
 		test$converter$LazyLoadConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.LazyLoad.class, "\"test\".\"LazyLoad_entity\"");
-		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getURI", "\"URI\"", gen.model.test.LazyLoad::getURI);
+		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getID", "\"ID\"", gen.model.test.LazyLoad::getID);
 		
 		container.register(gen.model.test.repositories.LazyLoadRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
-		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getComp", "\"comp\"");
-		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getCompID", "\"compID\"");
-		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getSd", "\"sd\"");
-		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getSdID", "\"sdID\"");
+		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getComp", "\"comp\"", gen.model.test.LazyLoad::getComp);
+		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getCompID", "\"compID\"", gen.model.test.LazyLoad::getCompID);
+		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getSd", "\"sd\"", gen.model.test.LazyLoad::getSd);
+		metamodel.registerProperty(gen.model.test.LazyLoad.class, "getSdID", "\"sdID\"", gen.model.test.LazyLoad::getSdID);
 		test$converter$SingleDetailConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.SingleDetail.class, "\"test\".\"SingleDetail_entity\"");
-		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getURI", "\"URI\"", gen.model.test.SingleDetail::getURI);
+		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getID", "\"ID\"", gen.model.test.SingleDetail::getID);
 		
 		container.register(gen.model.test.repositories.SingleDetailRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.SingleDetail>>(){}.type, gen.model.test.repositories.SingleDetailRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.SingleDetail>>(){}.type, gen.model.test.repositories.SingleDetailRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.SingleDetail>>(){}.type, gen.model.test.repositories.SingleDetailRepository::new, false);
-		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getDetails", "\"details\"");
+		metamodel.registerProperty(gen.model.test.SingleDetail.class, "getDetails", "\"details\"", gen.model.test.SingleDetail::getDetails);
 		test$converter$CompositeConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Composite.class, "\"test\".\"Composite_entity\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.test.Composite.class, "getURI", "\"URI\"", gen.model.test.Composite::getURI);
 		
 		container.register(gen.model.test.repositories.CompositeRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.Composite>>(){}.type, gen.model.test.repositories.CompositeRepository::new, false);
-		metamodel.registerProperty(gen.model.test.Composite.class, "getId", "\"id\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getEnn", "\"enn\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getEn", "\"en\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getSimple", "\"simple\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getChange", "\"change\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getTsl", "\"tsl\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getEntities", "\"entities\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"");
-		metamodel.registerProperty(gen.model.test.Composite.class, "getIndexes", "\"indexes\"");
+		metamodel.registerProperty(gen.model.test.Composite.class, "getId", "\"id\"", gen.model.test.Composite::getId);
+		metamodel.registerProperty(gen.model.test.Composite.class, "getEnn", "\"enn\"", gen.model.test.Composite::getEnn);
+		metamodel.registerProperty(gen.model.test.Composite.class, "getEn", "\"en\"", gen.model.test.Composite::getEn);
+		metamodel.registerProperty(gen.model.test.Composite.class, "getSimple", "\"simple\"", gen.model.test.Composite::getSimple);
+		metamodel.registerProperty(gen.model.test.Composite.class, "getChange", "\"change\"", gen.model.test.Composite::getChange);
+		metamodel.registerProperty(gen.model.test.Composite.class, "getTsl", "\"tsl\"", gen.model.test.Composite::getTsl);
+		metamodel.registerProperty(gen.model.test.Composite.class, "getEntities", "\"entities\"", gen.model.test.Composite::getEntities);
+		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"", gen.model.test.Composite::getLazies);
+		metamodel.registerProperty(gen.model.test.Composite.class, "getIndexes", "\"indexes\"", gen.model.test.Composite::getIndexes);
 		test$converter$CompositeListConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.CompositeList.class, "\"test\".\"CompositeList_snowflake\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getURI", "\"URI\"", gen.model.test.CompositeList::getURI);
 		
 		container.register(gen.model.test.repositories.CompositeListRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.test.CompositeList>>(){}.type, gen.model.test.repositories.CompositeListRepository::new, false);
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getId", "\"id\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEnn", "\"enn\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEn", "\"en\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getTsl", "\"tsl\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getChange", "\"change\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntities", "\"entities\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getSimple", "\"simple\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getNumber", "\"number\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntitiesCount", "\"entitiesCount\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getHasEntities", "\"hasEntities\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntityHasMoney", "\"entityHasMoney\"");
-		metamodel.registerProperty(gen.model.test.CompositeList.class, "getIndexes", "\"indexes\"");
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getId", "\"id\"", gen.model.test.CompositeList::getId);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEnn", "\"enn\"", gen.model.test.CompositeList::getEnn);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEn", "\"en\"", gen.model.test.CompositeList::getEn);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getTsl", "\"tsl\"", gen.model.test.CompositeList::getTsl);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getChange", "\"change\"", gen.model.test.CompositeList::getChange);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntities", "\"entities\"", gen.model.test.CompositeList::getEntities);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getSimple", "\"simple\"", gen.model.test.CompositeList::getSimple);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getNumber", "\"number\"", gen.model.test.CompositeList::getNumber);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntitiesCount", "\"entitiesCount\"", gen.model.test.CompositeList::getEntitiesCount);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getHasEntities", "\"hasEntities\"", gen.model.test.CompositeList::getHasEntities);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntityHasMoney", "\"entityHasMoney\"", gen.model.test.CompositeList::getEntityHasMoney);
+		metamodel.registerProperty(gen.model.test.CompositeList.class, "getIndexes", "\"indexes\"", gen.model.test.CompositeList::getIndexes);
 		container.register(gen.model.test.CompositeCube.class, false);
 		test$converter$EntityConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Entity.class, "\"test\".\"Entity_entity\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getMoney", "\"money\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getId", "\"id\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getComposite", "\"composite\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeID", "\"compositeID\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getDetail1", "\"detail1\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getDetail2", "\"detail2\"");
+		metamodel.registerProperty(gen.model.test.Entity.class, "getURI", "\"URI\"", gen.model.test.Entity::getURI);
+		metamodel.registerProperty(gen.model.test.Entity.class, "getMoney", "\"money\"", gen.model.test.Entity::getMoney);
+		metamodel.registerProperty(gen.model.test.Entity.class, "getId", "\"id\"", gen.model.test.Entity::getId);
+		metamodel.registerProperty(gen.model.test.Entity.class, "getComposite", "\"composite\"", gen.model.test.Entity::getComposite);
+		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeID", "\"compositeID\"", gen.model.test.Entity::getCompositeID);
+		metamodel.registerProperty(gen.model.test.Entity.class, "getDetail1", "\"detail1\"", gen.model.test.Entity::getDetail1);
+		metamodel.registerProperty(gen.model.test.Entity.class, "getDetail2", "\"detail2\"", gen.model.test.Entity::getDetail2);
 		test$converter$Detail1Converter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Detail1.class, "\"test\".\"Detail1_entity\"");
-		metamodel.registerProperty(gen.model.test.Detail1.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.test.Detail1.class, "getF", "\"f\"");
-		metamodel.registerProperty(gen.model.test.Detail1.class, "getFf", "\"ff\"");
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getURI", "\"URI\"", gen.model.test.Detail1::getURI);
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getF", "\"f\"", gen.model.test.Detail1::getF);
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getFf", "\"ff\"", gen.model.test.Detail1::getFf);
 		test$converter$Detail2Converter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Detail2.class, "\"test\".\"Detail2_entity\"");
-		metamodel.registerProperty(gen.model.test.Detail2.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.test.Detail2.class, "getU", "\"u\"");
-		metamodel.registerProperty(gen.model.test.Detail2.class, "getDd", "\"dd\"");
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getURI", "\"URI\"", gen.model.test.Detail2::getURI);
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getU", "\"u\"", gen.model.test.Detail2::getU);
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getDd", "\"dd\"", gen.model.test.Detail2::getDd);
 		test$converter$ClickedConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Clicked.class, "\"test\".\"Clicked_event\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getQueuedAt", "\"QueuedAt\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getProcessedAt", "\"ProcessedAt\"");
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getURI", "\"URI\"", gen.model.test.Clicked::getURI);
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getQueuedAt", "\"QueuedAt\"", gen.model.test.Clicked::getQueuedAt);
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getProcessedAt", "\"ProcessedAt\"", gen.model.test.Clicked::getProcessedAt);
 		
 		container.register(gen.model.test.repositories.ClickedRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.Clicked>>(){}.type, gen.model.test.repositories.ClickedRepository::new, false);
@@ -391,15 +391,15 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		} catch (java.lang.Exception e) {
 			throw new java.io.IOException(e);
 		}
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getDate", "\"date\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getNumber", "\"number\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getBigint", "\"bigint\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getBool", "\"bool\"");
-		metamodel.registerProperty(gen.model.test.Clicked.class, "getEn", "\"en\"");
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getDate", "\"date\"", gen.model.test.Clicked::getDate);
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getNumber", "\"number\"", gen.model.test.Clicked::getNumber);
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getBigint", "\"bigint\"", gen.model.test.Clicked::getBigint);
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getBool", "\"bool\"", gen.model.test.Clicked::getBool);
+		metamodel.registerProperty(gen.model.test.Clicked.class, "getEn", "\"en\"", gen.model.test.Clicked::getEn);
 		Seq$converter$NextConverter.configure(container);
 		metamodel.registerDataSource(gen.model.Seq.Next.class, "\"Seq\".\"Next_entity\"");
-		metamodel.registerProperty(gen.model.Seq.Next.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.Seq.Next.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.Seq.Next.class, "getURI", "\"URI\"", gen.model.Seq.Next::getURI);
+		metamodel.registerProperty(gen.model.Seq.Next.class, "getID", "\"ID\"", gen.model.Seq.Next::getID);
 		
 		container.register(gen.model.Seq.repositories.NextRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
@@ -408,8 +408,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
 		mixinReference$converter$SpecificReportConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.SpecificReport.class, "\"mixinReference\".\"SpecificReport_entity\"");
-		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getURI", "\"URI\"", gen.model.mixinReference.SpecificReport::getURI);
+		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getID", "\"ID\"", gen.model.mixinReference.SpecificReport::getID);
 		
 		container.register(gen.model.mixinReference.repositories.SpecificReportRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.SpecificReport>>(){}.type, gen.model.mixinReference.repositories.SpecificReportRepository::new, false);
@@ -418,57 +418,57 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.mixinReference.SpecificReport>>(){}.type, gen.model.mixinReference.repositories.SpecificReportRepository::new, false);
 		mixinReference$converter$AuthorConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.Author.class, "\"mixinReference\".\"Author_entity\"");
-		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getURI", "\"URI\"", gen.model.mixinReference.Author::getURI);
+		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getID", "\"ID\"", gen.model.mixinReference.Author::getID);
 		
 		container.register(gen.model.mixinReference.repositories.AuthorRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.mixinReference.Author>>(){}.type, gen.model.mixinReference.repositories.AuthorRepository::new, false);
-		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getName", "\"name\"");
-		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getPerson", "\"person\"");
-		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getRezident", "\"rezident\"");
-		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getRezidentID", "\"rezidentID\"");
-		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getChildren", "\"children\"");
+		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getName", "\"name\"", gen.model.mixinReference.Author::getName);
+		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getPerson", "\"person\"", gen.model.mixinReference.Author::getPerson);
+		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getRezident", "\"rezident\"", gen.model.mixinReference.Author::getRezident);
+		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getRezidentID", "\"rezidentID\"", gen.model.mixinReference.Author::getRezidentID);
+		metamodel.registerProperty(gen.model.mixinReference.Author.class, "getChildren", "\"children\"", gen.model.mixinReference.Author::getChildren);
 		mixinReference$converter$PersonConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.Person.class, "\"mixinReference\".\"Person_entity\"");
-		metamodel.registerProperty(gen.model.mixinReference.Person.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.mixinReference.Person.class, "getBirth", "\"birth\"");
+		metamodel.registerProperty(gen.model.mixinReference.Person.class, "getURI", "\"URI\"", gen.model.mixinReference.Person::getURI);
+		metamodel.registerProperty(gen.model.mixinReference.Person.class, "getBirth", "\"birth\"", gen.model.mixinReference.Person::getBirth);
 		mixinReference$converter$ResidentConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.Resident.class, "\"mixinReference\".\"Resident_entity\"");
-		metamodel.registerProperty(gen.model.mixinReference.Resident.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.mixinReference.Resident.class, "getId", "\"id\"");
-		metamodel.registerProperty(gen.model.mixinReference.Resident.class, "getBirth", "\"birth\"");
+		metamodel.registerProperty(gen.model.mixinReference.Resident.class, "getURI", "\"URI\"", gen.model.mixinReference.Resident::getURI);
+		metamodel.registerProperty(gen.model.mixinReference.Resident.class, "getId", "\"id\"", gen.model.mixinReference.Resident::getId);
+		metamodel.registerProperty(gen.model.mixinReference.Resident.class, "getBirth", "\"birth\"", gen.model.mixinReference.Resident::getBirth);
 		mixinReference$converter$ChildConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.Child.class, "\"mixinReference\".\"Child_entity\"");
-		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getVersion", "\"version\"");
+		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getURI", "\"URI\"", gen.model.mixinReference.Child::getURI);
+		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getVersion", "\"version\"", gen.model.mixinReference.Child::getVersion);
 		mixinReference$converter$UserFilterConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.UserFilter.class, "\"mixinReference\".\"UserFilter_entity\"");
-		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getURI", "\"URI\"", gen.model.mixinReference.UserFilter::getURI);
+		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getID", "\"ID\"", gen.model.mixinReference.UserFilter::getID);
 		
 		container.register(gen.model.mixinReference.repositories.UserFilterRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.mixinReference.UserFilter>>(){}.type, gen.model.mixinReference.repositories.UserFilterRepository::new, false);
-		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getName", "\"name\"");
+		metamodel.registerProperty(gen.model.mixinReference.UserFilter.class, "getName", "\"name\"", gen.model.mixinReference.UserFilter::getName);
 		permissions.registerFilter(gen.model.mixinReference.UserFilter.class, it -> it.getName().equals(org.revenj.security.PermissionManager.boundPrincipal.get().getName()), "RegularUser", false);
 		binaries$converter$DocumentConverter.configure(container);
 		metamodel.registerDataSource(gen.model.binaries.Document.class, "\"binaries\".\"Document_entity\"");
-		metamodel.registerProperty(gen.model.binaries.Document.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.binaries.Document.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getURI", "\"URI\"", gen.model.binaries.Document::getURI);
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getID", "\"ID\"", gen.model.binaries.Document::getID);
 		
 		container.register(gen.model.binaries.repositories.DocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.binaries.Document>>(){}.type, gen.model.binaries.repositories.DocumentRepository::new, false);
-		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"");
-		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"");
-		metamodel.registerProperty(gen.model.binaries.Document.class, "getBools", "\"bools\"");
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"", gen.model.binaries.Document::getName);
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"", gen.model.binaries.Document::getContent);
+		metamodel.registerProperty(gen.model.binaries.Document.class, "getBools", "\"bools\"", gen.model.binaries.Document::getBools);
 		binaries$converter$WritableDocumentConverter.configure(container);
 		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
 		
@@ -479,181 +479,181 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
-		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getId", "\"ID\"");
-		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getName", "\"name\"");
+		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getId", "\"ID\"", gen.model.binaries.WritableDocument::getId);
+		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getName", "\"name\"", gen.model.binaries.WritableDocument::getName);
 		binaries$converter$ReadOnlyDocumentConverter.configure(container);
 		metamodel.registerDataSource(gen.model.binaries.ReadOnlyDocument.class, "(SELECT \"ID\", name from binaries.\"Document\")");
 		
 		container.register(gen.model.binaries.repositories.ReadOnlyDocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.ReadOnlyDocument>>(){}.type, gen.model.binaries.repositories.ReadOnlyDocumentRepository::new, false);
-		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getID", "\"ID\"");
-		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getName", "\"name\"");
+		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getID", "\"ID\"", gen.model.binaries.ReadOnlyDocument::getID);
+		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getName", "\"name\"", gen.model.binaries.ReadOnlyDocument::getName);
 		security$converter$DocumentConverter.configure(container);
 		metamodel.registerDataSource(gen.model.security.Document.class, "\"security\".\"Document_entity\"");
-		metamodel.registerProperty(gen.model.security.Document.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.security.Document.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.security.Document.class, "getURI", "\"URI\"", gen.model.security.Document::getURI);
+		metamodel.registerProperty(gen.model.security.Document.class, "getID", "\"ID\"", gen.model.security.Document::getID);
 		
 		container.register(gen.model.security.repositories.DocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.security.Document>>(){}.type, gen.model.security.repositories.DocumentRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.security.Document>>(){}.type, gen.model.security.repositories.DocumentRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.security.Document>>(){}.type, gen.model.security.repositories.DocumentRepository::new, false);
-		metamodel.registerProperty(gen.model.security.Document.class, "getData", "\"data\"");
+		metamodel.registerProperty(gen.model.security.Document.class, "getData", "\"data\"", gen.model.security.Document::getData);
 		permissions.registerFilter(gen.model.security.Document.class, it -> !it.getDeactivated(), "Admin", true);
 		egzotics$converter$pksConverter.configure(container);
 		metamodel.registerDataSource(gen.model.egzotics.pks.class, "\"egzotics\".\"pks_entity\"");
-		metamodel.registerProperty(gen.model.egzotics.pks.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getURI", "\"URI\"", gen.model.egzotics.pks::getURI);
 		
 		container.register(gen.model.egzotics.repositories.pksRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.egzotics.pks>>(){}.type, gen.model.egzotics.repositories.pksRepository::new, false);
-		metamodel.registerProperty(gen.model.egzotics.pks.class, "getId", "\"id\"");
-		metamodel.registerProperty(gen.model.egzotics.pks.class, "getXml", "\"xml\"");
-		metamodel.registerProperty(gen.model.egzotics.pks.class, "getS3", "\"s3\"");
-		metamodel.registerProperty(gen.model.egzotics.pks.class, "getPp", "\"pp\"");
-		metamodel.registerProperty(gen.model.egzotics.pks.class, "getL", "\"l\"");
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getId", "\"id\"", gen.model.egzotics.pks::getId);
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getXml", "\"xml\"", gen.model.egzotics.pks::getXml);
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getS3", "\"s3\"", gen.model.egzotics.pks::getS3);
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getPp", "\"pp\"", gen.model.egzotics.pks::getPp);
+		metamodel.registerProperty(gen.model.egzotics.pks.class, "getL", "\"l\"", gen.model.egzotics.pks::getL);
 		egzotics$converter$vConverter.configure(container);
 		metamodel.registerDataSource(gen.model.egzotics.v.class, "\"egzotics\".\"v\"");
-		metamodel.registerProperty(gen.model.egzotics.v.class, "getX", "\"x\"");
+		metamodel.registerProperty(gen.model.egzotics.v.class, "getX", "\"x\"", gen.model.egzotics.v::getX);
 		egzotics$converter$PksVConverter.configure(container);
 		metamodel.registerDataSource(gen.model.egzotics.PksV.class, "\"egzotics\".\"PksV_entity\"");
-		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getURI", "\"URI\"", gen.model.egzotics.PksV::getURI);
 		
 		container.register(gen.model.egzotics.repositories.PksVRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.egzotics.PksV>>(){}.type, gen.model.egzotics.repositories.PksVRepository::new, false);
-		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getV", "\"v\"");
-		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getVv", "\"vv\"");
-		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getE", "\"e\"");
-		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getEe", "\"ee\"");
-		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getP", "\"p\"");
-		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getLl", "\"ll\"");
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getV", "\"v\"", gen.model.egzotics.PksV::getV);
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getVv", "\"vv\"", gen.model.egzotics.PksV::getVv);
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getE", "\"e\"", gen.model.egzotics.PksV::getE);
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getEe", "\"ee\"", gen.model.egzotics.PksV::getEe);
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getP", "\"p\"", gen.model.egzotics.PksV::getP);
+		metamodel.registerProperty(gen.model.egzotics.PksV.class, "getLl", "\"ll\"", gen.model.egzotics.PksV::getLl);
 		metamodel.registerEnum(gen.model.egzotics.E.class, "\"egzotics\".\"E\"");
 		issues$converter$DateListConverter.configure(container);
 		metamodel.registerDataSource(gen.model.issues.DateList.class, "\"issues\".\"DateList_entity\"");
-		metamodel.registerProperty(gen.model.issues.DateList.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.issues.DateList.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.issues.DateList.class, "getURI", "\"URI\"", gen.model.issues.DateList::getURI);
+		metamodel.registerProperty(gen.model.issues.DateList.class, "getID", "\"ID\"", gen.model.issues.DateList::getID);
 		
 		container.register(gen.model.issues.repositories.DateListRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.issues.DateList>>(){}.type, gen.model.issues.repositories.DateListRepository::new, false);
-		metamodel.registerProperty(gen.model.issues.DateList.class, "getList", "\"list\"");
+		metamodel.registerProperty(gen.model.issues.DateList.class, "getList", "\"list\"", gen.model.issues.DateList::getList);
 		issues$converter$TimestampPkConverter.configure(container);
 		metamodel.registerDataSource(gen.model.issues.TimestampPk.class, "\"issues\".\"TimestampPk_entity\"");
-		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getURI", "\"URI\"", gen.model.issues.TimestampPk::getURI);
 		
 		container.register(gen.model.issues.repositories.TimestampPkRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
-		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getTs", "\"ts\"");
-		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getD", "\"d\"");
+		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getTs", "\"ts\"", gen.model.issues.TimestampPk::getTs);
+		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getD", "\"d\"", gen.model.issues.TimestampPk::getD);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
 		md$converter$MasterConverter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Master.class, "\"md\".\"Master_entity\"");
-		metamodel.registerProperty(gen.model.md.Master.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.md.Master.class, "getID", "\"ID\"");
+		metamodel.registerProperty(gen.model.md.Master.class, "getURI", "\"URI\"", gen.model.md.Master::getURI);
+		metamodel.registerProperty(gen.model.md.Master.class, "getID", "\"ID\"", gen.model.md.Master::getID);
 		
 		container.register(gen.model.md.repositories.MasterRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.md.Master>>(){}.type, gen.model.md.repositories.MasterRepository::new, false);
-		metamodel.registerProperty(gen.model.md.Master.class, "getDetails", "\"details\"");
+		metamodel.registerProperty(gen.model.md.Master.class, "getDetails", "\"details\"", gen.model.md.Master::getDetails);
 		md$converter$DetailConverter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Detail.class, "\"md\".\"Detail_entity\"");
-		metamodel.registerProperty(gen.model.md.Detail.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.md.Detail.class, "getId", "\"id\"");
-		metamodel.registerProperty(gen.model.md.Detail.class, "getMasterId", "\"masterId\"");
-		metamodel.registerProperty(gen.model.md.Detail.class, "getChildren1", "\"children1\"");
-		metamodel.registerProperty(gen.model.md.Detail.class, "getChildren2", "\"children2\"");
-		metamodel.registerProperty(gen.model.md.Detail.class, "getReference1", "\"reference1\"");
-		metamodel.registerProperty(gen.model.md.Detail.class, "getReference2", "\"reference2\"");
+		metamodel.registerProperty(gen.model.md.Detail.class, "getURI", "\"URI\"", gen.model.md.Detail::getURI);
+		metamodel.registerProperty(gen.model.md.Detail.class, "getId", "\"id\"", gen.model.md.Detail::getId);
+		metamodel.registerProperty(gen.model.md.Detail.class, "getMasterId", "\"masterId\"", gen.model.md.Detail::getMasterId);
+		metamodel.registerProperty(gen.model.md.Detail.class, "getChildren1", "\"children1\"", gen.model.md.Detail::getChildren1);
+		metamodel.registerProperty(gen.model.md.Detail.class, "getChildren2", "\"children2\"", gen.model.md.Detail::getChildren2);
+		metamodel.registerProperty(gen.model.md.Detail.class, "getReference1", "\"reference1\"", gen.model.md.Detail::getReference1);
+		metamodel.registerProperty(gen.model.md.Detail.class, "getReference2", "\"reference2\"", gen.model.md.Detail::getReference2);
 		md$converter$Child1Converter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Child1.class, "\"md\".\"Child1_entity\"");
-		metamodel.registerProperty(gen.model.md.Child1.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.md.Child1.class, "getI", "\"i\"");
+		metamodel.registerProperty(gen.model.md.Child1.class, "getURI", "\"URI\"", gen.model.md.Child1::getURI);
+		metamodel.registerProperty(gen.model.md.Child1.class, "getI", "\"i\"", gen.model.md.Child1::getI);
 		md$converter$Child2Converter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Child2.class, "\"md\".\"Child2_entity\"");
-		metamodel.registerProperty(gen.model.md.Child2.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.md.Child2.class, "getD", "\"d\"");
+		metamodel.registerProperty(gen.model.md.Child2.class, "getURI", "\"URI\"", gen.model.md.Child2::getURI);
+		metamodel.registerProperty(gen.model.md.Child2.class, "getD", "\"d\"", gen.model.md.Child2::getD);
 		md$converter$Reference1Converter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Reference1.class, "\"md\".\"Reference1_entity\"");
-		metamodel.registerProperty(gen.model.md.Reference1.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.md.Reference1.class, "getL", "\"l\"");
+		metamodel.registerProperty(gen.model.md.Reference1.class, "getURI", "\"URI\"", gen.model.md.Reference1::getURI);
+		metamodel.registerProperty(gen.model.md.Reference1.class, "getL", "\"l\"", gen.model.md.Reference1::getL);
 		md$converter$Reference2Converter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Reference2.class, "\"md\".\"Reference2_entity\"");
-		metamodel.registerProperty(gen.model.md.Reference2.class, "getURI", "\"URI\"");
-		metamodel.registerProperty(gen.model.md.Reference2.class, "getX", "\"x\"");
+		metamodel.registerProperty(gen.model.md.Reference2.class, "getURI", "\"URI\"", gen.model.md.Reference2::getURI);
+		metamodel.registerProperty(gen.model.md.Reference2.class, "getX", "\"x\"", gen.model.md.Reference2::getX);
 		adt$converter$AuthConverter.configure(container);
 		adt$converter$BasicSecurityConverter.configure(container);
 		metamodel.registerDataSource(gen.model.adt.BasicSecurity.class, "\"adt\".\"BasicSecurity\"");
-		metamodel.registerProperty(gen.model.adt.BasicSecurity.class, "getUsername", "\"username\"");
-		metamodel.registerProperty(gen.model.adt.BasicSecurity.class, "getPassword", "\"password\"");
+		metamodel.registerProperty(gen.model.adt.BasicSecurity.class, "getUsername", "\"username\"", gen.model.adt.BasicSecurity::getUsername);
+		metamodel.registerProperty(gen.model.adt.BasicSecurity.class, "getPassword", "\"password\"", gen.model.adt.BasicSecurity::getPassword);
 		adt$converter$TokenConverter.configure(container);
 		metamodel.registerDataSource(gen.model.adt.Token.class, "\"adt\".\"Token\"");
-		metamodel.registerProperty(gen.model.adt.Token.class, "getToken", "\"token\"");
+		metamodel.registerProperty(gen.model.adt.Token.class, "getToken", "\"token\"", gen.model.adt.Token::getToken);
 		adt$converter$AnonymousConverter.configure(container);
 		metamodel.registerDataSource(gen.model.adt.Anonymous.class, "\"adt\".\"Anonymous\"");
 		adt$converter$DigestSecurityConverter.configure(container);
 		metamodel.registerDataSource(gen.model.adt.DigestSecurity.class, "\"adt\".\"DigestSecurity\"");
-		metamodel.registerProperty(gen.model.adt.DigestSecurity.class, "getUsername", "\"username\"");
-		metamodel.registerProperty(gen.model.adt.DigestSecurity.class, "getPasswordHash", "\"passwordHash\"");
+		metamodel.registerProperty(gen.model.adt.DigestSecurity.class, "getUsername", "\"username\"", gen.model.adt.DigestSecurity::getUsername);
+		metamodel.registerProperty(gen.model.adt.DigestSecurity.class, "getPasswordHash", "\"passwordHash\"", gen.model.adt.DigestSecurity::getPasswordHash);
 		adt$converter$UserConverter.configure(container);
 		metamodel.registerDataSource(gen.model.adt.User.class, "\"adt\".\"User_entity\"");
-		metamodel.registerProperty(gen.model.adt.User.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.adt.User.class, "getURI", "\"URI\"", gen.model.adt.User::getURI);
 		
 		container.register(gen.model.adt.repositories.UserRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.adt.User>>(){}.type, gen.model.adt.repositories.UserRepository::new, false);
-		metamodel.registerProperty(gen.model.adt.User.class, "getUsername", "\"username\"");
-		metamodel.registerProperty(gen.model.adt.User.class, "getAuthentication", "\"authentication\"");
+		metamodel.registerProperty(gen.model.adt.User.class, "getUsername", "\"username\"", gen.model.adt.User::getUsername);
+		metamodel.registerProperty(gen.model.adt.User.class, "getAuthentication", "\"authentication\"", gen.model.adt.User::getAuthentication);
 		calc$converter$InfoConverter.configure(container);
 		metamodel.registerDataSource(gen.model.calc.Info.class, "\"calc\".\"Info_entity\"");
-		metamodel.registerProperty(gen.model.calc.Info.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.calc.Info.class, "getURI", "\"URI\"", gen.model.calc.Info::getURI);
 		
 		container.register(gen.model.calc.repositories.InfoRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.calc.Info>>(){}.type, gen.model.calc.repositories.InfoRepository::new, false);
-		metamodel.registerProperty(gen.model.calc.Info.class, "getCode", "\"code\"");
-		metamodel.registerProperty(gen.model.calc.Info.class, "getName", "\"name\"");
+		metamodel.registerProperty(gen.model.calc.Info.class, "getCode", "\"code\"", gen.model.calc.Info::getCode);
+		metamodel.registerProperty(gen.model.calc.Info.class, "getName", "\"name\"", gen.model.calc.Info::getName);
 		calc$converter$TypeConverter.configure(container);
 		metamodel.registerDataSource(gen.model.calc.Type.class, "\"calc\".\"Type_entity\"");
-		metamodel.registerProperty(gen.model.calc.Type.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.calc.Type.class, "getURI", "\"URI\"", gen.model.calc.Type::getURI);
 		
 		container.register(gen.model.calc.repositories.TypeRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
-		metamodel.registerProperty(gen.model.calc.Type.class, "getSuffix", "\"suffix\"");
-		metamodel.registerProperty(gen.model.calc.Type.class, "getDescription", "\"description\"");
-		metamodel.registerProperty(gen.model.calc.Type.class, "getXml", "\"xml\"");
+		metamodel.registerProperty(gen.model.calc.Type.class, "getSuffix", "\"suffix\"", gen.model.calc.Type::getSuffix);
+		metamodel.registerProperty(gen.model.calc.Type.class, "getDescription", "\"description\"", gen.model.calc.Type::getDescription);
+		metamodel.registerProperty(gen.model.calc.Type.class, "getXml", "\"xml\"", gen.model.calc.Type::getXml);
 		calc$converter$RealmConverter.configure(container);
 		metamodel.registerDataSource(gen.model.calc.Realm.class, "\"calc\".\"Realm_entity\"");
-		metamodel.registerProperty(gen.model.calc.Realm.class, "getURI", "\"URI\"");
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getURI", "\"URI\"", gen.model.calc.Realm::getURI);
 		
 		container.register(gen.model.calc.repositories.RealmRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
-		metamodel.registerProperty(gen.model.calc.Realm.class, "getInfo", "\"info\"");
-		metamodel.registerProperty(gen.model.calc.Realm.class, "getInfoID", "\"infoID\"");
-		metamodel.registerProperty(gen.model.calc.Realm.class, "getRefType", "\"refType\"");
-		metamodel.registerProperty(gen.model.calc.Realm.class, "getType", "\"type\"");
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getInfo", "\"info\"", gen.model.calc.Realm::getInfo);
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getInfoID", "\"infoID\"", gen.model.calc.Realm::getInfoID);
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getRefType", "\"refType\"", gen.model.calc.Realm::getRefType);
+		metamodel.registerProperty(gen.model.calc.Realm.class, "getType", "\"type\"", gen.model.calc.Realm::getType);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -688,26 +688,26 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.calc.Type>>(){}.type, gen.model.calc.repositories.TypeRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
-		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"");
-		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"");
-		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"");
-		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityIndex", "\"EntityIndex\"");
-		metamodel.registerProperty(gen.model.test.Detail1.class, "getIndex", "\"Index\"");
-		metamodel.registerProperty(gen.model.test.Detail2.class, "getEntityCompositeid", "\"EntityCompositeid\"");
-		metamodel.registerProperty(gen.model.test.Detail2.class, "getEntityIndex", "\"EntityIndex\"");
-		metamodel.registerProperty(gen.model.test.Detail2.class, "getIndex", "\"Index\"");
-		metamodel.registerProperty(gen.model.mixinReference.Person.class, "getAuthorID", "\"AuthorID\"");
-		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getAuthorID", "\"AuthorID\"");
-		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getIndex", "\"Index\"");
-		metamodel.registerProperty(gen.model.md.Child1.class, "getDetailid", "\"Detailid\"");
-		metamodel.registerProperty(gen.model.md.Child1.class, "getIndex", "\"Index\"");
-		metamodel.registerProperty(gen.model.md.Child2.class, "getDetailid", "\"Detailid\"");
-		metamodel.registerProperty(gen.model.md.Child2.class, "getIndex", "\"Index\"");
-		metamodel.registerProperty(gen.model.md.Reference1.class, "getDetailid", "\"Detailid\"");
-		metamodel.registerProperty(gen.model.md.Reference2.class, "getDetailid", "\"Detailid\"");
-		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthor", "\"author\"");
-		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthorID", "\"authorID\"");
-		metamodel.registerProperty(gen.model.security.Document.class, "getDeactivated", "\"deactivated\"");
+		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"", gen.model.test.Entity::getCompositeid);
+		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"", gen.model.test.Entity::getIndex);
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"", gen.model.test.Detail1::getEntityCompositeid);
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityIndex", "\"EntityIndex\"", gen.model.test.Detail1::getEntityIndex);
+		metamodel.registerProperty(gen.model.test.Detail1.class, "getIndex", "\"Index\"", gen.model.test.Detail1::getIndex);
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getEntityCompositeid", "\"EntityCompositeid\"", gen.model.test.Detail2::getEntityCompositeid);
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getEntityIndex", "\"EntityIndex\"", gen.model.test.Detail2::getEntityIndex);
+		metamodel.registerProperty(gen.model.test.Detail2.class, "getIndex", "\"Index\"", gen.model.test.Detail2::getIndex);
+		metamodel.registerProperty(gen.model.mixinReference.Person.class, "getAuthorID", "\"AuthorID\"", gen.model.mixinReference.Person::getAuthorID);
+		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getAuthorID", "\"AuthorID\"", gen.model.mixinReference.Child::getAuthorID);
+		metamodel.registerProperty(gen.model.mixinReference.Child.class, "getIndex", "\"Index\"", gen.model.mixinReference.Child::getIndex);
+		metamodel.registerProperty(gen.model.md.Child1.class, "getDetailid", "\"Detailid\"", gen.model.md.Child1::getDetailid);
+		metamodel.registerProperty(gen.model.md.Child1.class, "getIndex", "\"Index\"", gen.model.md.Child1::getIndex);
+		metamodel.registerProperty(gen.model.md.Child2.class, "getDetailid", "\"Detailid\"", gen.model.md.Child2::getDetailid);
+		metamodel.registerProperty(gen.model.md.Child2.class, "getIndex", "\"Index\"", gen.model.md.Child2::getIndex);
+		metamodel.registerProperty(gen.model.md.Reference1.class, "getDetailid", "\"Detailid\"", gen.model.md.Reference1::getDetailid);
+		metamodel.registerProperty(gen.model.md.Reference2.class, "getDetailid", "\"Detailid\"", gen.model.md.Reference2::getDetailid);
+		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthor", "\"author\"", gen.model.mixinReference.SpecificReport::getAuthor);
+		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getAuthorID", "\"authorID\"", gen.model.mixinReference.SpecificReport::getAuthorID);
+		metamodel.registerProperty(gen.model.security.Document.class, "getDeactivated", "\"deactivated\"", gen.model.security.Document::getDeactivated);
 		
 		gen.model.security.Document.configureStaticMEANING_OF_LIFE(container);
 		metamodel.registerStatic(gen.model.security.Document.class, "MEANING_OF_LIFE", "\"security\".\"Document.MEANING_OF_LIFE\"");

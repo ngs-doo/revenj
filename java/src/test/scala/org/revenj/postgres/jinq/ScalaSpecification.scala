@@ -1,8 +1,9 @@
 package org.revenj.postgres.jinq
 
+import org.revenj.patterns.Specification
 import org.revenj.postgres.jinq.transform.{LambdaAnalysis, MetamodelUtil, LambdaInfo}
 
-case class ScalaSpecification[T](lambda: T => Boolean) extends RevenjQuery.AnalysisSpecification[T] {
+case class ScalaSpecification[T](lambda: T => Boolean) extends RevenjQuery.CustomAnalysis with Specification[T] {
 
   def getAnalysisLambda(index: Int): LambdaInfo = {
     lambda match {

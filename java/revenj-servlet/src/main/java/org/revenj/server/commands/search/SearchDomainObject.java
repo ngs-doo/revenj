@@ -2,12 +2,14 @@ package org.revenj.server.commands.search;
 
 import com.dslplatform.json.CompiledJson;
 import org.revenj.patterns.*;
+import org.revenj.postgres.jinq.JinqMetaModel;
 import org.revenj.security.PermissionManager;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;
 import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.security.Principal;
 import java.util.List;
@@ -18,12 +20,15 @@ public class SearchDomainObject implements ServerCommand {
 
 	private final DomainModel domainModel;
 	private final PermissionManager permissions;
+	private final JinqMetaModel jinqModel;
 
 	public SearchDomainObject(
 			DomainModel domainModel,
-			PermissionManager permissions) {
+			PermissionManager permissions,
+			JinqMetaModel jinqModel) {
 		this.domainModel = domainModel;
 		this.permissions = permissions;
+		this.jinqModel = jinqModel;
 	}
 
 	@CompiledJson
@@ -33,9 +38,9 @@ public class SearchDomainObject implements ServerCommand {
 		public TFormat Specification;
 		public Integer Offset;
 		public Integer Limit;
-		public Map<String, String> Order;
+		public List<Map.Entry<String, Boolean>> Order;
 
-		public Argument(String name, String specificationName, TFormat specification, Integer offset, Integer limit, Map<String, String> order) {
+		public Argument(String name, String specificationName, TFormat specification, Integer offset, Integer limit, List<Map.Entry<String, Boolean>> order) {
 			this.Name = name;
 			this.SpecificationName = specificationName;
 			this.Specification = specification;
@@ -66,12 +71,15 @@ public class SearchDomainObject implements ServerCommand {
 		if (!manifest.isPresent()) {
 			return CommandResult.badRequest("Unable to find specified domain object: " + arg.Name);
 		}
+		if (!DataSource.class.isAssignableFrom(manifest.get())) {
+			return CommandResult.badRequest("Specified type is not a data source: " + arg.Name);
+		}
 		if (!permissions.canAccess(manifest.get(), principal)) {
 			return CommandResult.forbidden(arg.Name);
 		}
 		final Specification specification;
 		if (arg.SpecificationName != null && arg.SpecificationName.length() > 0) {
-			Optional<Class<?>> specType = domainModel.find(arg.Name + "$" + arg.SpecificationName);
+			Optional<Class<?>> specType = domainModel.find(arg.Name + '+' + arg.SpecificationName);
 			if (!specType.isPresent()) {
 				specType = domainModel.find(arg.SpecificationName);
 			}
@@ -94,7 +102,36 @@ public class SearchDomainObject implements ServerCommand {
 		} catch (ReflectiveOperationException e) {
 			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
 		}
-		List<AggregateRoot> found = repository.search(specification, arg.Limit, arg.Offset);
+		List<DataSource> found;
+		if (arg.Order != null && !arg.Order.isEmpty()) {
+			Query<DataSource> query = repository.query(specification);
+			for (Map.Entry<String, Boolean> o : arg.Order) {
+				Method method;
+				try {
+					method = manifest.get().getMethod("get" + o.getKey().substring(0, 1).toUpperCase() + o.getKey().substring(1));
+				} catch (NoSuchMethodException e) {
+					return CommandResult.badRequest("Unable to find getter method for: " + o.getKey());
+				}
+				if (o.getValue()) {
+					query = query.sortedBy(jinqModel.findGetter(method));
+				} else {
+					query = query.sortedDescendingBy(jinqModel.findGetter(method));
+				}
+			}
+			if (arg.Offset != null) {
+				query = query.skip(arg.Offset);
+			}
+			if (arg.Limit != null) {
+				query = query.limit(arg.Limit);
+			}
+			try {
+				found = query.list();
+			} catch (IOException ex) {
+				return CommandResult.badRequest(ex.getMessage());
+			}
+		} else {
+			found = repository.search(specification, arg.Limit, arg.Offset);
+		}
 		try {
 			return CommandResult.success("Found " + found.size() + " items", output.serialize(found));
 		} catch (IOException e) {

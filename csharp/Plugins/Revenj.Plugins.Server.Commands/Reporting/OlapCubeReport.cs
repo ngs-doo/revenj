@@ -43,9 +43,9 @@ namespace Revenj.Plugins.Server.Commands
 
 		private static TFormat CreateExampleArgument<TFormat>(ISerialization<TFormat> serializer)
 		{
-			var dictOrder = new Dictionary<string, bool>();
-			dictOrder["City"] = true;
-			dictOrder["ShopName"] = false;
+			var order = new List<KeyValuePair<string, bool>>();
+			order.Add(new KeyValuePair<string, bool>("City", true));
+			order.Add(new KeyValuePair<string, bool>("ShopName", false));
 			return
 				serializer.Serialize(
 					new Argument<TFormat>
@@ -55,7 +55,7 @@ namespace Revenj.Plugins.Server.Commands
 						SpecificationName = "ByRegion",
 						Dimensions = new[] { "ShopName", "City" },
 						Facts = new[] { "TotalSum", "DailyAverage" },
-						Order = dictOrder
+						Order = order
 					});
 		}
 

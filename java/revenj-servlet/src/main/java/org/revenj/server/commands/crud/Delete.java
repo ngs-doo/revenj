@@ -76,7 +76,7 @@ public final class Delete implements ServerCommand {
 				return CommandResult.badRequest("Can't find " + arg.Name + " with uri: " + arg.Uri);
 			}
 			repository.delete(found.get());
-			return new CommandResult<>(output.serialize(found.get()), "Object deleted", 201);
+			return CommandResult.success("Object deleted", output.serialize(found.get()));
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}

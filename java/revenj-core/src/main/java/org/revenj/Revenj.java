@@ -129,7 +129,8 @@ public abstract class Revenj {
 				return Optional.of(found);
 			}
 			try {
-				Class<?> manifest = Class.forName(namespace + name, true, loader);
+				String className = name.indexOf('+') != -1 ? name.replace('+', '$') : name;
+				Class<?> manifest = Class.forName(namespace + className, true, loader);
 				cache.put(name, manifest);
 				return Optional.of(manifest);
 			} catch (ClassNotFoundException ignore) {

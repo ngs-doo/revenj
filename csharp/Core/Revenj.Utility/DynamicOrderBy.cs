@@ -19,7 +19,7 @@ namespace Revenj.Utility
 		/// <param name="collection">collection projection</param>
 		/// <param name="orderBy">order configuration</param>
 		/// <returns>sorted projection</returns>
-		public static IQueryable<T> OrderBy<T>(this IQueryable<T> collection, IDictionary<string, bool> orderBy)
+		public static IQueryable<T> OrderBy<T>(this IQueryable<T> collection, IEnumerable<KeyValuePair<string, bool>> orderBy)
 		{
 			var first = true;
 			if (orderBy != null)

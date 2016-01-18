@@ -15,13 +15,13 @@ public interface Query<T extends DataSource> {
 	Query<T> limit(long n);
 
 	@FunctionalInterface
-	interface Compare<U, V extends Comparable<V>> extends Serializable {
+	interface Compare<U, V> extends Serializable {
 		V compare(U item);
 	}
 
-	<V extends Comparable<V>> Query<T> sortedBy(Compare<T, V> order);
+	<V> Query<T> sortedBy(Compare<T, V> order);
 
-	<V extends Comparable<V>> Query<T> sortedDescendingBy(Compare<T, V> order);
+	<V> Query<T> sortedDescendingBy(Compare<T, V> order);
 
 	long count() throws IOException;
 

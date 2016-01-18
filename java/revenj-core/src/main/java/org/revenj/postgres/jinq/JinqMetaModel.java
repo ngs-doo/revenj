@@ -4,11 +4,13 @@ import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodSignature;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValue;
 import org.jinq.rebased.org.objectweb.asm.Type;
 import org.revenj.extensibility.Container;
+import org.revenj.patterns.Query;
 import org.revenj.postgres.QueryProvider;
 import org.revenj.postgres.jinq.transform.MetamodelUtil;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -16,6 +18,7 @@ public class JinqMetaModel extends MetamodelUtil {
 
 	private static final HashMap<Class<?>, String> classSources = new HashMap<>();
 	private static final HashMap<String, String> stringSources = new HashMap<>();
+	private static final HashMap<Method, Query.Compare> methodGetters = new HashMap<>();
 
 	public JinqMetaModel() {
 		safeMethods.add(new MethodSignature("java/lang/ThreadLocal", "get", "()Ljava/lang/Object;"));
@@ -35,9 +38,15 @@ public class JinqMetaModel extends MetamodelUtil {
 		return metamodel;
 	}
 
-	public void registerProperty(Class<?> clazz, String methodName, String property) throws IOException {
+	public <T, V> void registerProperty(
+			Class<?> clazz,
+			String methodName,
+			String property,
+			Query.Compare<T, V> getter) throws IOException {
 		try {
-			addProperty(clazz.getMethod(methodName), property);
+			Method method = clazz.getMethod(methodName);
+			addProperty(method, property);
+			methodGetters.put(method, getter);
 		} catch (NoSuchMethodException e) {
 			throw new IOException(e);
 		}
@@ -59,6 +68,10 @@ public class JinqMetaModel extends MetamodelUtil {
 		comparisonMethods.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
 		comparisonMethodsWithObjectEquals.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
 		safeMethods.add(eqMethod);
+	}
+
+	public Query.Compare findGetter(Method method) {
+		return methodGetters.get(method);
 	}
 
 	@Override

@@ -50,7 +50,7 @@ namespace Revenj.Plugins.Server.Commands
 			[DataMember]
 			public string[] Facts;
 			[DataMember]
-			public Dictionary<string, bool> Order;
+			public List<KeyValuePair<string, bool>> Order;
 			[DataMember]
 			public bool UseDataTable;
 			[DataMember]
@@ -61,9 +61,9 @@ namespace Revenj.Plugins.Server.Commands
 
 		private static TFormat CreateExampleArgument<TFormat>(ISerialization<TFormat> serializer)
 		{
-			var dictOrder = new Dictionary<string, bool>();
-			dictOrder["City"] = true;
-			dictOrder["ShopName"] = false;
+			var order = new List<KeyValuePair<string, bool>>();
+			order.Add(new KeyValuePair<string, bool>("City", true));
+			order.Add(new KeyValuePair<string, bool>("ShopName", false));
 			return
 				serializer.Serialize(
 					new Argument<TFormat>
@@ -72,7 +72,7 @@ namespace Revenj.Plugins.Server.Commands
 						SpecificationName = "ByRegion",
 						Dimensions = new[] { "ShopName", "City" },
 						Facts = new[] { "TotalSum", "DailyAverage" },
-						Order = dictOrder
+						Order = order
 					});
 		}
 
@@ -187,7 +187,7 @@ Example argument:
 				IServiceProvider locator,
 				IEnumerable<string> dimensions,
 				IEnumerable<string> facts,
-				IDictionary<string, bool> order,
+				List<KeyValuePair<string, bool>> order,
 				int? limit,
 				int? offset,
 				TFormat data);
@@ -202,7 +202,7 @@ Example argument:
 				IServiceProvider locator,
 				IEnumerable<string> dimensions,
 				IEnumerable<string> facts,
-				IDictionary<string, bool> order,
+				List<KeyValuePair<string, bool>> order,
 				int? limit,
 				int? offset,
 				TFormat specificationData)
@@ -249,7 +249,7 @@ Example argument:
 				IServiceProvider locator,
 				IEnumerable<string> dimensions,
 				IEnumerable<string> facts,
-				IDictionary<string, bool> order,
+				List<KeyValuePair<string, bool>> order,
 				int? limit,
 				int? offset,
 				TFormat specificationData)
