@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.36542 
 */
 
 package gen.model.calc;
@@ -50,6 +50,8 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		if (!URI.equals(other.URI))
 			return false;
 		
+		if(!(this.info == other.info || this.info != null && this.info.equals(other.info)))
+			return false;
 		if(!(this.infoURI == other.infoURI || this.infoURI != null && this.infoURI.equals(other.infoURI)))
 			return false;
 		if(!(this.infoID.equals(other.infoID)))
@@ -64,6 +66,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 	private Realm(Realm other) {
 		this.URI = other.URI;
 		this.__locator = other.__locator;
+		this.info = other.info == null ? null : (gen.model.calc.Info)(other.info.clone());
 		this.infoURI = other.infoURI;
 		this.infoID = other.infoID;
 		this.refTypeURI = other.refTypeURI;
@@ -87,6 +90,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
 			@com.fasterxml.jackson.annotation.JacksonInject("__locator") final org.revenj.patterns.ServiceLocator __locator,
 			@com.fasterxml.jackson.annotation.JsonProperty("infoURI") final String infoURI,
+			@com.fasterxml.jackson.annotation.JsonProperty("info") final gen.model.calc.Info info,
 			@com.fasterxml.jackson.annotation.JsonProperty("infoID") final String infoID,
 			@com.fasterxml.jackson.annotation.JsonProperty("refTypeURI") final String refTypeURI,
 			@com.fasterxml.jackson.annotation.JsonProperty("type") final String type,
@@ -95,6 +99,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.__locator = java.util.Optional.ofNullable(__locator);
 		this.infoURI = infoURI;
+		this.info = info;
 		this.infoID = infoID == null ? "" : infoID;
 		this.refTypeURI = refTypeURI;
 		this.type = type == null ? "" : type;
@@ -102,16 +107,16 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		this.name = name == null ? "" : name;
 	}
 
-	private static final long serialVersionUID = -8175258700095338619L;
+	private static final long serialVersionUID = 1458760964058554092L;
 	
 	private gen.model.calc.Info info;
 
 	
-	@com.fasterxml.jackson.annotation.JsonIgnore
+	@com.fasterxml.jackson.annotation.JsonProperty("info")
 	public gen.model.calc.Info getInfo()  {
 		
 		
-		if (__locator.isPresent() && (info != null && !info.getURI().equals(infoURI) || info == null && infoURI != null)) {
+		if (__locator.isPresent() && info == null && infoURI != null) {
 			gen.model.calc.repositories.InfoRepository repository = __locator.get().resolve(gen.model.calc.repositories.InfoRepository.class);
 			info = repository.find(infoURI).orElse(null);
 		}
@@ -254,17 +259,24 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 				try {
 					for (gen.model.calc.Realm agg : aggregates) {
 						 
-						agg.URI = gen.model.calc.converters.RealmConverter.buildURI(arg, agg);
+						agg.URI = gen.model.calc.converters.RealmConverter.buildURI(arg.getKey(), agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			},
-			(oldAggregates, newAggregates) -> {
-				for (int i = 0; i < newAggregates.size(); i++) {
-					gen.model.calc.Realm oldAgg = oldAggregates.get(i);
-					gen.model.calc.Realm newAgg = newAggregates.get(i);
-					 
+			(aggregates, arg) -> {
+				try {
+					java.util.List<gen.model.calc.Realm> oldAggregates = aggregates.getKey();
+					java.util.List<gen.model.calc.Realm> newAggregates = aggregates.getValue();
+					for (int i = 0; i < newAggregates.size(); i++) {
+						gen.model.calc.Realm oldAgg = oldAggregates.get(i);
+						gen.model.calc.Realm newAgg = newAggregates.get(i);
+						 
+						newAgg.URI = gen.model.calc.converters.RealmConverter.buildURI(arg.getKey(), newAgg);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
 				}
 			},
 			aggregates -> { 
@@ -305,6 +317,13 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 				com.dslplatform.json.StringConverter.serializeShort(infoURI, sw);
 			}
 		
+		if(self.info != null) {
+			sw.writeAscii(",\"info\":{", 9);
+			
+					gen.model.calc.Info.__serializeJsonObjectMinimal(self.info, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		}
+		
 			if (!(self.infoID.length() == 0)) {
 				sw.writeAscii(",\"infoID\":", 10);
 				sw.writeString(self.infoID);
@@ -340,6 +359,16 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 			sw.writeAscii(",\"infoURI\":");
 			com.dslplatform.json.StringConverter.serializeShortNullable(self.getInfoURI(), sw);
 		
+		
+		if(self.info != null) {
+			sw.writeAscii(",\"info\":{", 9);
+			
+					gen.model.calc.Info.__serializeJsonObjectFull(self.info, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		} else {
+			sw.writeAscii(",\"info\":null", 12);
+		}
+		
 			
 			sw.writeAscii(",\"infoID\":", 10);
 			sw.writeString(self.infoID);
@@ -372,6 +401,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		String _URI_ = "";
 		this.__locator = java.util.Optional.ofNullable(reader.context);
 		String _infoURI_ = null;
+		gen.model.calc.Info _info_ = null;
 		String _infoID_ = "";
 		String _refTypeURI_ = null;
 		String _type_ = "";
@@ -397,6 +427,14 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 					case 553270109:
 						_infoURI_ = com.dslplatform.json.StringConverter.deserialize(reader);
 							nextToken = reader.getNextToken();
+						break;
+					case 263456517:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_info_ = gen.model.calc.Info.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
 						break;
 					case -823552864:
 						_infoID_ = com.dslplatform.json.StringConverter.deserialize(reader);
@@ -445,6 +483,14 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 						_infoURI_ = com.dslplatform.json.StringConverter.deserialize(reader);
 							nextToken = reader.getNextToken();
 						break;
+					case 263456517:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_info_ = gen.model.calc.Info.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
 					case -823552864:
 						_infoID_ = com.dslplatform.json.StringConverter.deserialize(reader);
 					nextToken = reader.getNextToken();
@@ -478,6 +524,7 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		this.URI = _URI_;
 		if(_infoURI_ == null) throw new java.io.IOException("In entity calc.Realm, property info can't be null. infoURI provided as null");
 		this.infoURI = _infoURI_;
+		this.info = _info_;
 		this.infoID = _infoID_;
 		if(_refTypeURI_ == null) throw new java.io.IOException("In entity calc.Realm, property refType can't be null. refTypeURI provided as null");
 		this.refTypeURI = _refTypeURI_;
@@ -511,10 +558,11 @@ public class Realm   implements java.lang.Cloneable, java.io.Serializable, org.r
 		this.__originalValue = (Realm)this.clone();
 	}
 
-	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Realm>[] readers, int __index___infoURI, int __index___infoID, int __index___refTypeURI, int __index___type, int __index___id) {
+	public static void __configureConverter(org.revenj.postgres.ObjectConverter.Reader<Realm>[] readers, int __index___infoURI, int __index___infoID, gen.model.calc.converters.InfoConverter __converter_info, int __index___info, int __index___refTypeURI, int __index___type, int __index___id) {
 		
 		readers[__index___infoURI] = (item, reader, context) -> { item.infoURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); return item; };
 		readers[__index___infoID] = (item, reader, context) -> { item.infoID = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
+		readers[__index___info] = (item, reader, context) -> { item.info = __converter_info.fromExtended(reader, context); return item; };
 		readers[__index___refTypeURI] = (item, reader, context) -> { item.refTypeURI = org.revenj.postgres.converters.StringConverter.parse(reader, context, true); return item; };
 		readers[__index___type] = (item, reader, context) -> { item.type = org.revenj.postgres.converters.StringConverter.parse(reader, context, false); return item; };
 	}

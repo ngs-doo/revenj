@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.36542 
 */
 
 package gen.model.calc.converters;
@@ -56,6 +56,10 @@ public class RealmConverter implements ObjectConverter<gen.model.calc.Realm> {
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'infoID' column in calc Realm. Check if DB is in sync");
 		__index__extended_infoID = (int)column.get().order - 1;
 			
+		column = columns.stream().filter(it -> "info".equals(it.columnName)).findAny();
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'info' column in calc Realm. Check if DB is in sync");
+		__index___info = (int)column.get().order - 1;
+			
 		column = columns.stream().filter(it -> "refTypeURI".equals(it.columnName)).findAny();
 		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'refTypeURI' column in calc Realm_entity. Check if DB is in sync");
 		__index___refTypeURI = (int)column.get().order - 1;
@@ -83,9 +87,10 @@ public class RealmConverter implements ObjectConverter<gen.model.calc.Realm> {
 
 	public void configure(org.revenj.patterns.ServiceLocator locator) {
 		
+		__converter_info = locator.resolve(gen.model.calc.converters.InfoConverter.class);
 		
 			
-		gen.model.calc.Realm.__configureConverter(readers, __index___infoURI, __index___infoID, __index___refTypeURI, __index___type, __index___id);
+		gen.model.calc.Realm.__configureConverter(readers, __index___infoURI, __index___infoID, __converter_info, __index___info, __index___refTypeURI, __index___type, __index___id);
 			
 		gen.model.calc.Realm.__configureConverterExtended(readersExtended, __index__extended_infoURI, __index__extended_infoID, __index__extended_refTypeURI, __index__extended_type, __index__extended_id);
 	}
@@ -114,6 +119,7 @@ public class RealmConverter implements ObjectConverter<gen.model.calc.Realm> {
 		
 		if (instance.getInfoURI() != null)items[__index___infoURI] = new org.revenj.postgres.converters.ValueTuple(instance.getInfoURI());;
 		items[__index___infoID] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getInfoID());
+		items[__index___info] = __converter_info.toExtended(instance.getInfo());
 		if (instance.getRefTypeURI() != null)items[__index___refTypeURI] = new org.revenj.postgres.converters.ValueTuple(instance.getRefTypeURI());;
 		items[__index___type] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getType());
 		items[__index___id] = org.revenj.postgres.converters.StringConverter.toTuple(instance.getId());
@@ -172,6 +178,8 @@ public class RealmConverter implements ObjectConverter<gen.model.calc.Realm> {
 	private final int __index__extended_infoURI;
 	private final int __index___infoID;
 	private final int __index__extended_infoID;
+	private gen.model.calc.converters.InfoConverter __converter_info;
+	private final int __index___info;
 	private final int __index___refTypeURI;
 	private final int __index__extended_refTypeURI;
 	private final int __index___type;

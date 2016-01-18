@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.36542 
 */
 
 package gen.model.calc.repositories;
@@ -405,8 +405,8 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 
 	
 	public static void __setupPersist(
-			java.util.function.BiConsumer<java.util.Collection<gen.model.calc.Realm>, org.revenj.postgres.PostgresWriter> insert, 
-			java.util.function.BiConsumer<java.util.List<gen.model.calc.Realm>, java.util.List<gen.model.calc.Realm>> update,
+			java.util.function.BiConsumer<java.util.Collection<gen.model.calc.Realm>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> insert, 
+			java.util.function.BiConsumer<java.util.Map.Entry<java.util.List<gen.model.calc.Realm>, java.util.List<gen.model.calc.Realm>>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> update,
 			java.util.function.Consumer<java.util.Collection<gen.model.calc.Realm>> delete,
 			java.util.function.Function<gen.model.calc.Realm, gen.model.calc.Realm> track) {
 		insertLoop = insert;
@@ -415,8 +415,8 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 		trackChanges = track;
 	}
 
-	private static java.util.function.BiConsumer<java.util.Collection<gen.model.calc.Realm>, org.revenj.postgres.PostgresWriter> insertLoop;
-	private static java.util.function.BiConsumer<java.util.List<gen.model.calc.Realm>, java.util.List<gen.model.calc.Realm>> updateLoop;
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.calc.Realm>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> insertLoop;
+	private static java.util.function.BiConsumer<java.util.Map.Entry<java.util.List<gen.model.calc.Realm>, java.util.List<gen.model.calc.Realm>>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> updateLoop;
 	private static java.util.function.Consumer<java.util.Collection<gen.model.calc.Realm>> deleteLoop;
 	private static java.util.function.Function<gen.model.calc.Realm, gen.model.calc.Realm> trackChanges;
 
@@ -432,7 +432,7 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {
-				insertLoop.accept(insert, sw);
+				insertLoop.accept(insert, new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
@@ -474,7 +474,7 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
-				updateLoop.accept(oldUpdate, newUpdate);
+				updateLoop.accept(new java.util.AbstractMap.SimpleEntry<>(oldUpdate, newUpdate), new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 				org.revenj.postgres.converters.PostgresTuple tupleOld = org.revenj.postgres.converters.ArrayTuple.create(oldUpdate, converter::to);
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
@@ -524,7 +524,7 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"calc\".\"insert_Realm\"(ARRAY[?])");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			java.util.List<gen.model.calc.Realm> insert = java.util.Collections.singletonList(item);
-			if (insertLoop != null) insertLoop.accept(insert, sw);
+			if (insertLoop != null) insertLoop.accept(insert, new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 			sw.reset();
 			org.revenj.postgres.converters.PostgresTuple tuple = converter.to(item);
 			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
@@ -553,7 +553,7 @@ public class RealmRepository   implements java.io.Closeable, org.revenj.patterns
 			if (oldItem == null) oldItem = find(newItem.getURI()).get();
 			java.util.List<gen.model.calc.Realm> oldUpdate = java.util.Collections.singletonList(oldItem);
 			java.util.List<gen.model.calc.Realm> newUpdate = java.util.Collections.singletonList(newItem);
-			if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
+			if (updateLoop != null) updateLoop.accept(new java.util.AbstractMap.SimpleEntry<>(oldUpdate, newUpdate), new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 			org.revenj.postgres.converters.PostgresTuple tupleOld = converter.to(oldItem);
 			org.revenj.postgres.converters.PostgresTuple tupleNew = converter.to(newItem);
 			org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();

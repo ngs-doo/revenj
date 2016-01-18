@@ -257,7 +257,7 @@ module calc {
 	}
 
 	root Realm(id) {
-		Info *info;
+		Info *info { snapshot; }
 
 		Type(type) *refType;
 		String type;
