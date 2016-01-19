@@ -1,9 +1,6 @@
 package org.revenj.server.commands;
 
-import org.revenj.patterns.DomainModel;
-import org.revenj.patterns.SearchableRepository;
 import org.revenj.patterns.ServiceLocator;
-import org.revenj.patterns.Specification;
 import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.server.CommandResult;

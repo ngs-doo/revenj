@@ -78,7 +78,7 @@ public class StandardServlet extends HttpServlet {
 				Utility.executeJson(engine, req, res, PersistAggregateRoot.class, arg);
 			}
 		} else if (path.startsWith("/execute/")) {
-			String name = path.substring("/execute/".length(), path.length());
+			String name = path.substring("/execute/".length(), path.length()).replace('+', '$');
 			String argument = Utility.readString(req.getInputStream(), req.getCharacterEncoding());
 			ExecuteService.Argument<String> arg = new ExecuteService.Argument<>(name, argument);
 			ByteArrayOutputStream os = serialization.serialize(arg, "application/json");
