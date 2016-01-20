@@ -33,6 +33,7 @@ final class JacksonSerialization implements Serialization<String> {
 	public JacksonSerialization(ServiceLocator locator, Optional<ObjectMapper> jackson) {
 		mapper = jackson.orElse(new ObjectMapper())
 				.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
+				.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 				.setInjectableValues(new InjectableValues.Std().addValue("__locator", locator))
 				.registerModule(new Jdk8Module())
