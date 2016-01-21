@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.17084 
 */
 
 package gen.model.test.converters;
@@ -21,12 +21,12 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		
 			
 		final java.util.List<ObjectConverter.ColumnInfo> columns =
-				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "CompositeList_snowflake".equals(it.typeName))
+				allColumns.stream().filter(it -> "test".equals(it.typeSchema) && "CompositeList".equals(it.typeName))
 				.collect(Collectors.toList());
 		columnCount = columns.size();
 			
 		column = columns.stream().filter(it -> "URI".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'URI' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'URI' column in test CompositeList. Check if DB is in sync");
 		__index___URI = (int)column.get().order - 1;
 			
 		final java.util.List<ObjectConverter.ColumnInfo> columnsExtended =
@@ -39,7 +39,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_URI = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "id".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'id' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'id' column in test CompositeList. Check if DB is in sync");
 		__index___id = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "id".equals(it.columnName)).findAny();
@@ -47,7 +47,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_id = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "enn".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'enn' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'enn' column in test CompositeList. Check if DB is in sync");
 		__index___enn = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "enn".equals(it.columnName)).findAny();
@@ -55,7 +55,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_enn = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "en".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'en' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'en' column in test CompositeList. Check if DB is in sync");
 		__index___en = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "en".equals(it.columnName)).findAny();
@@ -63,7 +63,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_en = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "tsl".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'tsl' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'tsl' column in test CompositeList. Check if DB is in sync");
 		__index___tsl = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "tsl".equals(it.columnName)).findAny();
@@ -71,7 +71,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_tsl = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "change".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'change' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'change' column in test CompositeList. Check if DB is in sync");
 		__index___change = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "change".equals(it.columnName)).findAny();
@@ -79,7 +79,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_change = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "entities".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entities' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entities' column in test CompositeList. Check if DB is in sync");
 		__index___entities = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "entities".equals(it.columnName)).findAny();
@@ -87,7 +87,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_entities = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "simple".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'simple' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'simple' column in test CompositeList. Check if DB is in sync");
 		__index___simple = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "simple".equals(it.columnName)).findAny();
@@ -95,7 +95,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_simple = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "number".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'number' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'number' column in test CompositeList. Check if DB is in sync");
 		__index___number = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "number".equals(it.columnName)).findAny();
@@ -103,7 +103,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_number = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "entitiesCount".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entitiesCount' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entitiesCount' column in test CompositeList. Check if DB is in sync");
 		__index___entitiesCount = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "entitiesCount".equals(it.columnName)).findAny();
@@ -111,7 +111,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_entitiesCount = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "hasEntities".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'hasEntities' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'hasEntities' column in test CompositeList. Check if DB is in sync");
 		__index___hasEntities = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "hasEntities".equals(it.columnName)).findAny();
@@ -119,7 +119,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_hasEntities = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "entityHasMoney".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entityHasMoney' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'entityHasMoney' column in test CompositeList. Check if DB is in sync");
 		__index___entityHasMoney = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "entityHasMoney".equals(it.columnName)).findAny();
@@ -127,7 +127,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 		__index__extended_entityHasMoney = (int)column.get().order - 1;
 			
 		column = columns.stream().filter(it -> "indexes".equals(it.columnName)).findAny();
-		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'indexes' column in test CompositeList_snowflake. Check if DB is in sync");
+		if (!column.isPresent()) throw new java.io.IOException("Unable to find 'indexes' column in test CompositeList. Check if DB is in sync");
 		__index___indexes = (int)column.get().order - 1;
 			
 		column = columnsExtended.stream().filter(it -> "indexes".equals(it.columnName)).findAny();
@@ -144,7 +144,7 @@ public class CompositeListConverter implements ObjectConverter<gen.model.test.Co
 
 	@Override
 	public String getDbName() {
-		return "\"test\".\"CompositeList_snowflake\"";
+		return "\"test\".\"CompositeList\"";
 	}
 
 	@Override

@@ -9,7 +9,7 @@
 	<description> DSL Platform compatible backend (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
-	<version>0.8.1</version>
+	<version>0.9.0</version>
 
 	<dependencies>
 		<dependency>
@@ -39,13 +39,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.dslplatform</groupId>
-			<artifactId>dsl-json</artifactId>
-			<version>0.9.5</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dslplatform</groupId>
 			<artifactId>dsl-json-java8</artifactId>
-			<version>0.9.4</version>
+			<version>0.9.5</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

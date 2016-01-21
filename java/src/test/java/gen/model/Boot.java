@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.33672 
+* v1.0.0.17084 
 */
 
 package gen.model;
@@ -334,7 +334,7 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"", gen.model.test.Composite::getLazies);
 		metamodel.registerProperty(gen.model.test.Composite.class, "getIndexes", "\"indexes\"", gen.model.test.Composite::getIndexes);
 		test$converter$CompositeListConverter.configure(container);
-		metamodel.registerDataSource(gen.model.test.CompositeList.class, "\"test\".\"CompositeList_snowflake\"");
+		metamodel.registerDataSource(gen.model.test.CompositeList.class, "\"test\".\"CompositeList\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getURI", "\"URI\"", gen.model.test.CompositeList::getURI);
 		
 		container.register(gen.model.test.repositories.CompositeListRepository.class);

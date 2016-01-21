@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.17084 
 */
 
 package gen.model.test.repositories;
@@ -62,6 +62,11 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 			java.util.List<gen.model.test.Simple> _spec_simples_ = _spec_.getSimples();
 			return it -> (_spec_simples_.contains(it.getSimple()));
 		}
+		if (filter instanceof gen.model.test.CompositeCube.FilterMax) {
+			gen.model.test.CompositeCube.FilterMax _spec_ = (gen.model.test.CompositeCube.FilterMax)filter;
+			java.time.LocalDate _spec_value_ = _spec_.getValue();
+			return it -> it.getChange().compareTo(_spec_value_) >= 0;
+		}
 		return filter;
 	}
 
@@ -97,7 +102,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
-				sql = "SELECT r FROM \"test\".\"CompositeList_snowflake\" r";
+				sql = "SELECT r FROM \"test\".\"CompositeList\" r";
 			} 
 			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
 				gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
@@ -113,6 +118,18 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				tuple.buildTuple(pgWriter, false);
 				pgo.setValue(pgWriter.toString());
 				ps.setObject(1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else if (specification instanceof gen.model.test.CompositeCube.FilterMax) {
+				gen.model.test.CompositeCube.FilterMax spec = (gen.model.test.CompositeCube.FilterMax)specification;
+				sql = selectType + " FROM \"test\".\"CompositeList.FilterMax\"(?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setDate(1, java.sql.Date.valueOf(spec.getValue()));
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -157,7 +174,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		int index = query.getArgumentIndex();
 		StringBuilder sb = query.getBuilder();
 		if (specification == null) {
-			sb.append("SELECT array_agg(_r) FROM (SELECT _r FROM \"test\".\"CompositeList_snowflake\" _r");
+			sb.append("SELECT array_agg(_r) FROM (SELECT _r FROM \"test\".\"CompositeList\" _r");
 		}
 		
 			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
@@ -175,6 +192,19 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				tuple.buildTuple(pgWriter, false);
 				pgo.setValue(pgWriter.toString());
 				ps.setObject(index + 1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else if (specification instanceof gen.model.test.CompositeCube.FilterMax) {
+				gen.model.test.CompositeCube.FilterMax spec = (gen.model.test.CompositeCube.FilterMax)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"CompositeList.FilterMax\"(?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						ps.setDate(index + 1, java.sql.Date.valueOf(spec.getValue()));
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -218,7 +248,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql;
 			if (specification == null) {
-				sql = "SELECT COUNT(*) FROM \"test\".\"CompositeList_snowflake\" r";
+				sql = "SELECT COUNT(*) FROM \"test\".\"CompositeList\" r";
 			} 
 			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
 				gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
@@ -234,6 +264,18 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				tuple.buildTuple(pgWriter, false);
 				pgo.setValue(pgWriter.toString());
 				ps.setObject(1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else if (specification instanceof gen.model.test.CompositeCube.FilterMax) {
+				gen.model.test.CompositeCube.FilterMax spec = (gen.model.test.CompositeCube.FilterMax)specification;
+				sql = selectType + " FROM \"test\".\"CompositeList.FilterMax\"(?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setDate(1, java.sql.Date.valueOf(spec.getValue()));
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -267,7 +309,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		int index = query.getArgumentIndex();
 		StringBuilder sb = query.getBuilder();
 		if (specification == null) {
-			sb.append("SELECT count(*) FROM \"test\".\"CompositeList_snowflake\" r");
+			sb.append("SELECT count(*) FROM \"test\".\"CompositeList\" r");
 		}
 		
 			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
@@ -285,6 +327,19 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				tuple.buildTuple(pgWriter, false);
 				pgo.setValue(pgWriter.toString());
 				ps.setObject(index + 1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else if (specification instanceof gen.model.test.CompositeCube.FilterMax) {
+				gen.model.test.CompositeCube.FilterMax spec = (gen.model.test.CompositeCube.FilterMax)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"CompositeList.FilterMax\"(?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						ps.setDate(index + 1, java.sql.Date.valueOf(spec.getValue()));
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -317,7 +372,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		try (org.revenj.postgres.PostgresWriter pgWriter = org.revenj.postgres.PostgresWriter.create()) {
 			String sql = null;
 			if (specification == null) {
-				sql = "SELECT exists(SELECT * FROM \"test\".\"CompositeList_snowflake\" r";
+				sql = "SELECT exists(SELECT * FROM \"test\".\"CompositeList\" r";
 			} 
 			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
 				gen.model.test.CompositeList.ForSimple spec = (gen.model.test.CompositeList.ForSimple)specification;
@@ -333,6 +388,18 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				tuple.buildTuple(pgWriter, false);
 				pgo.setValue(pgWriter.toString());
 				ps.setObject(1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else if (specification instanceof gen.model.test.CompositeCube.FilterMax) {
+				gen.model.test.CompositeCube.FilterMax spec = (gen.model.test.CompositeCube.FilterMax)specification;
+				sql = selectType + " FROM \"test\".\"CompositeList.FilterMax\"(?) it";
+				
+				applyFilters = applyFilters.andThen(ps -> {
+					try {
+						ps.setDate(1, java.sql.Date.valueOf(spec.getValue()));
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -366,7 +433,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 		int index = query.getArgumentIndex();
 		StringBuilder sb = query.getBuilder();
 		if (specification == null) {
-			sb.append("exists(SELECT * FROM \"test\".\"CompositeList_snowflake\" r");
+			sb.append("exists(SELECT * FROM \"test\".\"CompositeList\" r");
 		}
 		
 			else if (specification instanceof gen.model.test.CompositeList.ForSimple) {
@@ -384,6 +451,19 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 				tuple.buildTuple(pgWriter, false);
 				pgo.setValue(pgWriter.toString());
 				ps.setObject(index + 1, pgo);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+			else if (specification instanceof gen.model.test.CompositeCube.FilterMax) {
+				gen.model.test.CompositeCube.FilterMax spec = (gen.model.test.CompositeCube.FilterMax)specification;
+				sb.append(selectType);
+				sb.append(" FROM \"test\".\"CompositeList.FilterMax\"(?) it");
+				
+				query.addArgument(ps -> {
+					try {
+						ps.setDate(index + 1, java.sql.Date.valueOf(spec.getValue()));
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -416,7 +496,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 	@Override
 	public java.util.List<gen.model.test.CompositeList> find(String[] uris) {
 		java.sql.Connection connection = getConnection();
-		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"CompositeList_snowflake\" r WHERE r.\"URI\" = ANY(?)")) {
+		try (java.sql.PreparedStatement statement = connection.prepareStatement("SELECT r FROM \"test\".\"CompositeList\" r WHERE r.\"URI\" = ANY(?)")) {
 			statement.setArray(1, connection.createArrayOf("text", uris));
 			return readFromDb(statement, new java.util.ArrayList<>(uris.length));
 		} catch (java.sql.SQLException | java.io.IOException e) {
@@ -435,7 +515,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 			sb.append("SELECT 0");
 			return (rs, ind) -> java.util.Optional.empty();
 		}
-		sb.append("SELECT _r FROM \"test\".\"CompositeList_snowflake\" _r WHERE _r.\"URI\" = ?");
+		sb.append("SELECT _r FROM \"test\".\"CompositeList\" _r WHERE _r.\"URI\" = ?");
 		query.addArgument(ps -> {
 			try {
 				ps.setString(index, uri);
@@ -476,7 +556,7 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 			sb.append("SELECT 0");
 			return (rs, ind) -> new java.util.ArrayList<>(0);
 		}
-		sb.append("SELECT array_agg(_r) FROM \"test\".\"CompositeList_snowflake\" _r WHERE _r.\"URI\" = ANY(?)");
+		sb.append("SELECT array_agg(_r) FROM \"test\".\"CompositeList\" _r WHERE _r.\"URI\" = ANY(?)");
 		query.addArgument(ps -> {
 			try {
 				org.postgresql.util.PGobject arr = new org.postgresql.util.PGobject();

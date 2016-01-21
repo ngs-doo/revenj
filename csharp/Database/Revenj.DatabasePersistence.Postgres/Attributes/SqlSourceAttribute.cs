@@ -31,7 +31,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				else if (typeof(IDomainEvent).IsAssignableFrom(type))
 					source = SourceTypes[type] = "\"{0}\".\"{1}_event\"".With(type.Namespace, type.Name);
 				else if (typeof(IIdentifiable).IsAssignableFrom(type))
-					source = SourceTypes[type] = "\"{0}\".\"{1}_snowflake\"".With(type.Namespace, type.Name);
+					source = SourceTypes[type] = "\"{0}\".\"{1}\"".With(type.Namespace, type.Name);
 				//TODO cleanup
 				else if (typeof(IEntity).IsAssignableFrom(type))
 					source = SourceTypes[type] = "\"{0}\".\"{1}_entity\"".With(type.Namespace, type.Name);

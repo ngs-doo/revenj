@@ -49,12 +49,6 @@ public class RevenjProcessor extends AbstractProcessor {
 							element,
 							eventAnnotation);
 				} else {
-					final String fullName;
-					if (element.getEnclosingElement() == null) {
-						fullName = element.asType().toString();
-					} else {
-						fullName = element.getEnclosingElement().asType().toString() + "$" + element.getSimpleName().toString();
-					}
 					boolean foundImpl = false;
 					for (TypeMirror iface : element.getInterfaces()) {
 						String sign = iface.toString();
@@ -66,7 +60,7 @@ public class RevenjProcessor extends AbstractProcessor {
 							impl = new ArrayList<>();
 							handlers.put(sign, impl);
 						}
-						impl.add(fullName);
+						impl.add(element.getQualifiedName().toString());
 						foundImpl = true;
 					}
 					if (!foundImpl) {

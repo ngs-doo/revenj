@@ -31,7 +31,7 @@ namespace Revenj.DatabasePersistence.Oracle
 				else if (typeof(IDomainEvent).IsAssignableFrom(type))
 					source = SourceTypes[type] = "\"{0}\".\"{1}_EVENT\"".With(type.Namespace, type.Name.Replace('.', '$'));
 				else if (typeof(IIdentifiable).IsAssignableFrom(type))
-					source = SourceTypes[type] = "\"{0}\".\"{1}_SNOWFLAKE\"".With(type.Namespace, type.Name);
+					source = SourceTypes[type] = "\"{0}\".\"{1}\"".With(type.Namespace, type.Name);
 				//TODO cleanup
 				else if (typeof(IEntity).IsAssignableFrom(type))
 					source = SourceTypes[type] = "\"{0}\".\"{1}_ENTITY\"".With(type.Namespace, type.Name);
