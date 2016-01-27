@@ -1,6 +1,6 @@
 package org.revenj.postgres.jinq
 
-import org.revenj.patterns.DataSource
+import org.revenj.patterns.{Query, DataSource}
 import org.revenj.postgres.jinq.transform.{LambdaAnalysis, LambdaInfo, MetamodelUtil}
 
 case class ScalaSort[T <: DataSource, V <: java.lang.Comparable[V]](lambda: T => V) extends RevenjQuery.CustomAnalysis with Query.Compare[T, V] {
@@ -19,6 +19,7 @@ case class ScalaSort[T <: DataSource, V <: java.lang.Comparable[V]](lambda: T =>
     override def fullyAnalyze(metamodel: MetamodelUtil,
                               alternateClassLoader: ClassLoader,
                               isObjectEqualsSafe: Boolean,
+                              isAllEqualsSafe: Boolean,
                               isCollectionContainsSafe: Boolean,
                               throwExceptionOnFailure: Boolean): LambdaAnalysis = {
       LambdaAnalysis.fullyAnalyzeClassAsLambda(
@@ -28,6 +29,7 @@ case class ScalaSort[T <: DataSource, V <: java.lang.Comparable[V]](lambda: T =>
         metamodel,
         alternateClassLoader,
         isObjectEqualsSafe,
+        isAllEqualsSafe,
         isCollectionContainsSafe,
         throwExceptionOnFailure)
     }

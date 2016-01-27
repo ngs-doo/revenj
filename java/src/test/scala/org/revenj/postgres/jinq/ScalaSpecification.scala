@@ -27,6 +27,7 @@ case class ScalaSpecification[T](lambda: T => Boolean) extends RevenjQuery.Custo
                               alternateClassLoader: ClassLoader,
                               isObjectEqualsSafe: Boolean,
                               isCollectionContainsSafe: Boolean,
+                              isAllEqualsSafe: Boolean,
                               throwExceptionOnFailure: Boolean): LambdaAnalysis = {
       LambdaAnalysis.fullyAnalyzeClassAsLambda(
         this,
@@ -35,6 +36,7 @@ case class ScalaSpecification[T](lambda: T => Boolean) extends RevenjQuery.Custo
         metamodel,
         alternateClassLoader,
         isObjectEqualsSafe,
+        isAllEqualsSafe,
         isCollectionContainsSafe,
         throwExceptionOnFailure)
     }
