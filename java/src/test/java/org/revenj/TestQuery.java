@@ -345,20 +345,23 @@ public class TestQuery {
 		}
 
 		infoRepository.insert(infos);
-		List<Info> found = infoRepository.search(it -> it.getCode().startsWith("code " + id))
+
+		Specification<Info> filter = it -> it.getCode().startsWith("code " + id);
+
+		List<Info> found = infoRepository.search(filter)
 				.stream()
 				.sorted((a, b) -> a.getName().compareTo(b.getName()))
 				.collect(Collectors.toList());
 
 		List<Info> infosAscByName = infoRepository.query()
-				.filter(it -> it.getCode().startsWith("code " + id))
-				.sortedBy(it -> it.getName())
+				.filter(filter)
+				.sortedBy(Info::getName)
 				.list();
 		Assert.assertEquals(found, infosAscByName);
 
 		List<Info> infosDescByName = infoRepository.query()
-				.filter(it -> it.getCode().startsWith("code " + id))
-				.sortedDescendingBy(it -> it.getName())
+				.filter(filter)
+				.sortedDescendingBy(Info::getName)
 				.list();
 		Collections.reverse(infosDescByName);
 		Assert.assertEquals(found, infosDescByName);
@@ -382,18 +385,20 @@ public class TestQuery {
 		Method method = Info.class.getMethod("getName");
 		Query.Compare<Info, ?> nameOrder = jinqMetaModel.findGetter(method);
 
+		Specification<Info> filter = it -> it.getCode().startsWith("code " + id);
+
 		infoRepository.insert(infos);
-		List<Info> found = infoRepository.search(it -> it.getCode().startsWith("code " + id))
+		List<Info> found = infoRepository.search(filter)
 				.stream()
 				.sorted((a, b) -> a.getName().compareTo(b.getName()))
 				.collect(Collectors.toList());
 
-		List<Info> infosAscByName = infoRepository.query(it -> it.getCode().startsWith("code " + id))
+		List<Info> infosAscByName = infoRepository.query(filter)
 				.sortedBy(nameOrder)
 				.list();
 		Assert.assertEquals(found, infosAscByName);
 
-		List<Info> infosDescByName = infoRepository.query(it -> it.getCode().startsWith("code " + id))
+		List<Info> infosDescByName = infoRepository.query(filter)
 				.sortedDescendingBy(nameOrder)
 				.list();
 		Collections.reverse(infosDescByName);

@@ -38,6 +38,6 @@ public class SortingTransform extends RevenjOneLambdaQueryTransform {
 
 	@Override
 	public String getTransformationTypeCachingTag() {
-		return SortingTransform.class.getName();
+		return isAscending ? "sort-asc" : "sort-desc";
 	}
 }
