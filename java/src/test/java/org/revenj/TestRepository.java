@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
+import org.revenj.handlers.ClickedCollectionEventHandler;
 import org.revenj.patterns.*;
 import org.w3c.dom.Element;
 
@@ -95,15 +96,6 @@ public class TestRepository {
 		public static int COUNT;
 
 		public void handle(Clicked event) {
-			COUNT++;
-		}
-	}
-
-	@EventHandler
-	public static class ClickedCollectionEventHandler implements DomainEventHandler<Clicked[]> {
-		public static int COUNT;
-
-		public void handle(Clicked[] events) {
 			COUNT++;
 		}
 	}

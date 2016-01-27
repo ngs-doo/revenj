@@ -14,13 +14,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class JinqMetaModel extends MetamodelUtil {
+public final class JinqMetaModel extends MetamodelUtil {
 
 	private static final HashMap<Class<?>, String> classSources = new HashMap<>();
 	private static final HashMap<String, String> stringSources = new HashMap<>();
 	private static final HashMap<Method, Query.Compare> methodGetters = new HashMap<>();
 
-	public JinqMetaModel() {
+	private JinqMetaModel() {
 		safeMethods.add(new MethodSignature("java/lang/ThreadLocal", "get", "()Ljava/lang/Object;"));
 	}
 

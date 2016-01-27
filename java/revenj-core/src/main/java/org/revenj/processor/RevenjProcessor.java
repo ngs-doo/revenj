@@ -60,7 +60,11 @@ public class RevenjProcessor extends AbstractProcessor {
 							impl = new ArrayList<>();
 							handlers.put(sign, impl);
 						}
-						impl.add(element.getQualifiedName().toString());
+						if (element.getNestingKind().isNested()) {
+							impl.add(element.getEnclosingElement().asType().toString() + "$" + element.getSimpleName().toString());
+						} else {
+							impl.add(element.asType().toString());
+						}
 						foundImpl = true;
 					}
 					if (!foundImpl) {

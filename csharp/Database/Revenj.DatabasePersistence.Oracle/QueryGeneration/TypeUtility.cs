@@ -55,7 +55,10 @@ namespace Revenj.DatabasePersistence.Oracle
 					}
 				}
 			}
+			if (value == null)
+				return "NULL";
 			var strConv = query.ConverterFactory.GetVarrayStringFactory(element);
+			if (strConv == null && element.IsNullable()) query.ConverterFactory.GetStringFactory(element.GetGenericArguments()[0]);
 			if (strConv != null)
 			{
 				var param = strConv(value);

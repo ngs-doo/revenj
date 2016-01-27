@@ -63,7 +63,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 			return ToString((byte[])value);
 		}
 
-		public string ToString(bool[] value)
+		public string ToString(byte[] value)
 		{
 			//TODO
 			return null;

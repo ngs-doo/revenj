@@ -31,6 +31,10 @@ public class TestServiceLocator {
 	public void canResolveQueryProvider() throws Exception {
 		final Properties props = new Properties();
 		props.put(key, value);
+		java.io.File revProps = new java.io.File("revenj.properties");
+		if (revProps.exists() && revProps.isFile()) {
+			props.load(new java.io.FileReader(revProps));
+		}
 
 		final ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost/revenj", props);
 		try {

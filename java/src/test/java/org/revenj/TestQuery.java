@@ -335,7 +335,6 @@ public class TestQuery {
 		ServiceLocator locator = container;
 		InfoRepository infoRepository = locator.resolve(InfoRepository.class);
 
-		infoRepository.delete(infoRepository.search());
 		String id = UUID.randomUUID().toString();
 
 		List<Info> infos = new ArrayList<Info>();
@@ -346,7 +345,7 @@ public class TestQuery {
 		}
 
 		infoRepository.insert(infos);
-		List<Info> found = infoRepository.search()
+		List<Info> found = infoRepository.search(it -> it.getCode().startsWith("code " + id))
 				.stream()
 				.sorted((a, b) -> a.getName().compareTo(b.getName()))
 				.collect(Collectors.toList());
@@ -370,7 +369,6 @@ public class TestQuery {
 		ServiceLocator locator = container;
 		InfoRepository infoRepository = locator.resolve(InfoRepository.class);
 
-		infoRepository.delete(infoRepository.search());
 		String id = UUID.randomUUID().toString();
 
 		List<Info> infos = new ArrayList<Info>();
@@ -385,19 +383,17 @@ public class TestQuery {
 		Query.Compare<Info, ?> nameOrder = jinqMetaModel.findGetter(method);
 
 		infoRepository.insert(infos);
-		List<Info> found = infoRepository.search()
+		List<Info> found = infoRepository.search(it -> it.getCode().startsWith("code " + id))
 				.stream()
 				.sorted((a, b) -> a.getName().compareTo(b.getName()))
 				.collect(Collectors.toList());
 
-		List<Info> infosAscByName = infoRepository.query()
-				//.filter(it -> it.getCode().startsWith("code " + id))
+		List<Info> infosAscByName = infoRepository.query(it -> it.getCode().startsWith("code " + id))
 				.sortedBy(nameOrder)
 				.list();
 		Assert.assertEquals(found, infosAscByName);
 
-		List<Info> infosDescByName = infoRepository.query()
-				//.filter(it -> it.getCode().startsWith("code " + id))
+		List<Info> infosDescByName = infoRepository.query(it -> it.getCode().startsWith("code " + id))
 				.sortedDescendingBy(nameOrder)
 				.list();
 		Collections.reverse(infosDescByName);
