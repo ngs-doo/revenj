@@ -3,6 +3,8 @@ package org.revenj;
 import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
+import gen.model.calc.Info;
+import gen.model.calc.repositories.InfoRepository;
 import gen.model.security.Document;
 import gen.model.test.Clicked;
 import gen.model.test.Composite;
@@ -14,15 +16,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.patterns.DataContext;
-import org.revenj.patterns.Query;
-import org.revenj.patterns.ServiceLocator;
-import org.revenj.patterns.Specification;
+import org.revenj.patterns.*;
+import org.revenj.postgres.jinq.JinqMetaModel;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TestQuery {
 
@@ -326,5 +328,79 @@ public class TestQuery {
 				.list();
 		Assert.assertEquals(1, found.size());
 		Assert.assertEquals(id, found.get(0).getId());
+	}
+
+	@Test
+	public void stringOrderingViaLambda() throws IOException {
+		ServiceLocator locator = container;
+		InfoRepository infoRepository = locator.resolve(InfoRepository.class);
+
+		infoRepository.delete(infoRepository.search());
+		String id = UUID.randomUUID().toString();
+
+		List<Info> infos = new ArrayList<Info>();
+		for (char letter = 'A'; letter < 'Z'; letter++) {
+			infos.add(new Info()
+					.setCode(String.format("code %s %c", id, letter))
+					.setName(String.format("name %s %c", id, letter)));
+		}
+
+		infoRepository.insert(infos);
+		List<Info> found = infoRepository.search()
+				.stream()
+				.sorted((a, b) -> a.getName().compareTo(b.getName()))
+				.collect(Collectors.toList());
+
+		List<Info> infosAscByName = infoRepository.query()
+				.filter(it -> it.getCode().startsWith("code " + id))
+				.sortedBy(it -> it.getName())
+				.list();
+		Assert.assertEquals(found, infosAscByName);
+
+		List<Info> infosDescByName = infoRepository.query()
+				.filter(it -> it.getCode().startsWith("code " + id))
+				.sortedDescendingBy(it -> it.getName())
+				.list();
+		Collections.reverse(infosDescByName);
+		Assert.assertEquals(found, infosDescByName);
+	}
+
+	@Test
+	public void stringOrderingViaPropertyName() throws IOException, NoSuchMethodException {
+		ServiceLocator locator = container;
+		InfoRepository infoRepository = locator.resolve(InfoRepository.class);
+
+		infoRepository.delete(infoRepository.search());
+		String id = UUID.randomUUID().toString();
+
+		List<Info> infos = new ArrayList<Info>();
+		for (char letter = 'A'; letter < 'Z'; letter++) {
+			infos.add(new Info()
+					.setCode(String.format("code %s %c", id, letter))
+					.setName(String.format("name %s %c", id, letter)));
+		}
+
+		JinqMetaModel jinqMetaModel = locator.resolve(JinqMetaModel.class);
+		Method method = Info.class.getMethod("getName");
+		Query.Compare<Info, ?> nameOrder = jinqMetaModel.findGetter(method);
+
+		infoRepository.insert(infos);
+		List<Info> found = infoRepository.search()
+				.stream()
+				.sorted((a, b) -> a.getName().compareTo(b.getName()))
+				.collect(Collectors.toList());
+
+		List<Info> infosAscByName = infoRepository.query()
+				//.filter(it -> it.getCode().startsWith("code " + id))
+				.sortedBy(nameOrder)
+				.list();
+		Assert.assertEquals(found, infosAscByName);
+
+		List<Info> infosDescByName = infoRepository.query()
+				//.filter(it -> it.getCode().startsWith("code " + id))
+				.sortedDescendingBy(nameOrder)
+				.list();
+		Collections.reverse(infosDescByName);
+		Assert.assertEquals(found, infosDescByName);
 	}
 }
