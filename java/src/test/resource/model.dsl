@@ -202,10 +202,10 @@ module issues {
 		List<Timestamp?> list;
 	}
 	root TimestampPk(ts) {
-        Timestamp ts;
-        decimal(9) d;
-        persistence { history; }
-    }
+		Timestamp ts;
+		decimal(9) d;
+		persistence { history; }
+	}
 }
 module md {
 	root Master {
@@ -264,5 +264,31 @@ module calc {
 
 		calculated String id from 'it => it.info.code + it.type' { persistable; } //TODO: bad practice navigating over root
 		calculated String name from 'it => it.info.name + " (" + it.refType.description + ")"';
+	}
+}
+
+module stock
+{
+	big aggregate Article {
+		Int         projectID;
+		String(10)  sku;
+		String(25)  title;
+	}
+
+	snowflake<Article> ArticleGrid {
+		ID;
+		projectID;
+		sku;
+		title;
+
+		specification filterSearch 'it =>
+			it.projectID == projectID && (
+				filter == null ||
+				filter == "" ||
+				it.sku.ToLower().Contains(filter.ToLower()) ||
+				it.title.ToLower().Contains(filter.ToLower()))' {
+			Int     projectID;
+			String? filter;
+		}
 	}
 }

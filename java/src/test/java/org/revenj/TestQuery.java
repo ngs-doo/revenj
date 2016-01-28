@@ -6,6 +6,10 @@ import gen.model.Seq.repositories.NextRepository;
 import gen.model.calc.Info;
 import gen.model.calc.repositories.InfoRepository;
 import gen.model.security.Document;
+import gen.model.stock.Article;
+import gen.model.stock.ArticleGrid;
+import gen.model.stock.repositories.ArticleGridRepository;
+import gen.model.stock.repositories.ArticleRepository;
 import gen.model.test.Clicked;
 import gen.model.test.Composite;
 import gen.model.test.En;
@@ -403,5 +407,64 @@ public class TestQuery {
 				.list();
 		Collections.reverse(infosDescByName);
 		Assert.assertEquals(found, infosDescByName);
+	}
+
+	@Test
+	public void queryWithNullSearchFilter() throws IOException {
+		ServiceLocator locator = container;
+		ArticleRepository repository = locator.resolve(ArticleRepository.class);
+
+		Random random = new Random();
+		Article article = new Article()
+				.setProjectID(random.nextInt())
+				.setSku(UUID.randomUUID().toString().substring(0, 10))
+				.setTitle(UUID.randomUUID().toString().substring(0, 25));
+		repository.insert(article);
+
+		ArticleGridRepository gridRepository = locator.resolve(ArticleGridRepository.class);
+		Specification<ArticleGrid> spec = new ArticleGrid.filterSearch()
+				.setProjectID(article.getProjectID())
+				.setFilter(null);
+
+		List<ArticleGrid> list = gridRepository.query(spec).list();
+
+		Assert.assertEquals(1, list.size());
+		Assert.assertEquals(article.getID(), list.get(0).getID());
+	}
+
+	@Test
+	public void queryWithOrderingAndSearchFilter() throws IOException, NoSuchMethodException {
+		ServiceLocator locator = container;
+		ArticleRepository repository = locator.resolve(ArticleRepository.class);
+
+		Random random = new Random();
+		int projectID = random.nextInt();
+		Article article1 = new Article()
+				.setProjectID(projectID)
+				.setSku(UUID.randomUUID().toString().substring(0, 10))
+				.setTitle("Article A");
+		Article article2 = new Article()
+				.setProjectID(projectID)
+				.setSku(UUID.randomUUID().toString().substring(0, 10))
+				.setTitle("Article Z");
+		repository.insert(Arrays.asList(article1, article2));
+
+		ArticleGridRepository gridRepository = locator.resolve(ArticleGridRepository.class);
+		Specification<ArticleGrid> spec = new ArticleGrid.filterSearch()
+				.setProjectID(projectID)
+				.setFilter("article");
+
+		JinqMetaModel jmm = locator.resolve(JinqMetaModel.class);
+		Method method = ArticleGrid.class.getMethod("getTitle");
+		Query.Compare<ArticleGrid, ?> order = jmm.findGetter(method);
+
+		List<ArticleGrid> list = gridRepository
+				.query(spec)
+				.sortedDescendingBy(order)
+				.list();
+
+		Assert.assertEquals(2, list.size());
+		Assert.assertEquals(article2.getID(), list.get(0).getID());
+		Assert.assertEquals(article1.getID(), list.get(1).getID());
 	}
 }
