@@ -6,8 +6,10 @@ import gen.model.Seq.repositories.NextRepository;
 import gen.model.calc.Info;
 import gen.model.calc.repositories.InfoRepository;
 import gen.model.security.Document;
+import gen.model.stock.AnalysisGrid;
 import gen.model.stock.Article;
 import gen.model.stock.ArticleGrid;
+import gen.model.stock.repositories.AnalysisGridRepository;
 import gen.model.stock.repositories.ArticleGridRepository;
 import gen.model.stock.repositories.ArticleRepository;
 import gen.model.test.Clicked;
@@ -466,5 +468,18 @@ public class TestQuery {
 		Assert.assertEquals(2, list.size());
 		Assert.assertEquals(article2.getID(), list.get(0).getID());
 		Assert.assertEquals(article1.getID(), list.get(1).getID());
+	}
+
+	@Test
+	public void queryWithComplexSpecification() throws IOException, NoSuchMethodException {
+		ServiceLocator locator = container;
+		AnalysisGridRepository analysisGridRepository =
+				locator.resolve(AnalysisGridRepository.class);
+
+		Optional<AnalysisGrid> results =
+				analysisGridRepository
+					.query(new AnalysisGrid.filterSearch())
+					.findFirst();
+		Assert.assertNotNull(results);
 	}
 }

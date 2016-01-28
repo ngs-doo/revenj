@@ -291,4 +291,38 @@ module stock
 			String? filter;
 		}
 	}
+
+	aggregate Analysis(projectID, articleID) {
+		Int          projectID;
+		Int          articleID;
+		Relationship reportArticle(articleID) stock.Article;
+
+		String(1)? abc;
+		String(1)? xyz;
+		String(50)? clazz;
+	}
+
+	snowflake<Analysis> AnalysisGrid {
+		projectID;
+		reportArticle.title;
+		reportArticle.sku;
+		xyz;
+		abc;
+
+		specification filterSearch 'it =>
+			it.projectID == projectID && (
+				filter == null || filter == "" ||
+				it.title.ToLower().Contains(filter.ToLower()) ||
+				it.sku.ToLower().Contains(filter.ToLower())) &&
+			(abc == null || it.abc == abc) &&
+			(xyz == null || it.xyz == xyz) && (
+				clazz == null || clazz == "" || 
+				it.sku.ToLower().Contains(clazz.ToLower()))' {
+			Int         projectID;
+			String?     filter;
+			String(1)?  abc;
+			String(1)?  xyz;
+			String(50)? clazz;
+		}
+	}
 }

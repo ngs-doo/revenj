@@ -289,6 +289,14 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.stock.converters.ArticleGridConverter stock$converter$ArticleGridConverter = new gen.model.stock.converters.ArticleGridConverter(columns);
 		container.registerInstance(gen.model.stock.converters.ArticleGridConverter.class, stock$converter$ArticleGridConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.stock.ArticleGrid>>(){}.type, stock$converter$ArticleGridConverter, false);
+		
+		gen.model.stock.converters.AnalysisConverter stock$converter$AnalysisConverter = new gen.model.stock.converters.AnalysisConverter(columns);
+		container.registerInstance(gen.model.stock.converters.AnalysisConverter.class, stock$converter$AnalysisConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.stock.Analysis>>(){}.type, stock$converter$AnalysisConverter, false);
+		
+		gen.model.stock.converters.AnalysisGridConverter stock$converter$AnalysisGridConverter = new gen.model.stock.converters.AnalysisGridConverter(columns);
+		container.registerInstance(gen.model.stock.converters.AnalysisGridConverter.class, stock$converter$AnalysisGridConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.stock.AnalysisGrid>>(){}.type, stock$converter$AnalysisGridConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"", gen.model.test.Simple::getNumber);
@@ -688,6 +696,34 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.stock.ArticleGrid.class, "getProjectID", "\"projectID\"", gen.model.stock.ArticleGrid::getProjectID);
 		metamodel.registerProperty(gen.model.stock.ArticleGrid.class, "getSku", "\"sku\"", gen.model.stock.ArticleGrid::getSku);
 		metamodel.registerProperty(gen.model.stock.ArticleGrid.class, "getTitle", "\"title\"", gen.model.stock.ArticleGrid::getTitle);
+		stock$converter$AnalysisConverter.configure(container);
+		metamodel.registerDataSource(gen.model.stock.Analysis.class, "\"stock\".\"Analysis_entity\"");
+		metamodel.registerProperty(gen.model.stock.Analysis.class, "getURI", "\"URI\"", gen.model.stock.Analysis::getURI);
+		
+		container.register(gen.model.stock.repositories.AnalysisRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.stock.Analysis>>(){}.type, gen.model.stock.repositories.AnalysisRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.stock.Analysis>>(){}.type, gen.model.stock.repositories.AnalysisRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.stock.Analysis>>(){}.type, gen.model.stock.repositories.AnalysisRepository::new, false);
+		metamodel.registerProperty(gen.model.stock.Analysis.class, "getProjectID", "\"projectID\"", gen.model.stock.Analysis::getProjectID);
+		metamodel.registerProperty(gen.model.stock.Analysis.class, "getArticleID", "\"articleID\"", gen.model.stock.Analysis::getArticleID);
+		metamodel.registerProperty(gen.model.stock.Analysis.class, "getAbc", "\"abc\"", gen.model.stock.Analysis::getAbc);
+		metamodel.registerProperty(gen.model.stock.Analysis.class, "getXyz", "\"xyz\"", gen.model.stock.Analysis::getXyz);
+		metamodel.registerProperty(gen.model.stock.Analysis.class, "getClazz", "\"clazz\"", gen.model.stock.Analysis::getClazz);
+		stock$converter$AnalysisGridConverter.configure(container);
+		metamodel.registerDataSource(gen.model.stock.AnalysisGrid.class, "\"stock\".\"AnalysisGrid\"");
+		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getURI", "\"URI\"", gen.model.stock.AnalysisGrid::getURI);
+		
+		container.register(gen.model.stock.repositories.AnalysisGridRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.stock.AnalysisGrid>>(){}.type, gen.model.stock.repositories.AnalysisGridRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.stock.AnalysisGrid>>(){}.type, gen.model.stock.repositories.AnalysisGridRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.stock.AnalysisGrid>>(){}.type, gen.model.stock.repositories.AnalysisGridRepository::new, false);
+		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getProjectID", "\"projectID\"", gen.model.stock.AnalysisGrid::getProjectID);
+		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getTitle", "\"title\"", gen.model.stock.AnalysisGrid::getTitle);
+		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getSku", "\"sku\"", gen.model.stock.AnalysisGrid::getSku);
+		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getXyz", "\"xyz\"", gen.model.stock.AnalysisGrid::getXyz);
+		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getAbc", "\"abc\"", gen.model.stock.AnalysisGrid::getAbc);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -724,6 +760,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.calc.Realm>>(){}.type, gen.model.calc.repositories.RealmRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.stock.Article>>(){}.type, gen.model.stock.repositories.ArticleRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.stock.Analysis>>(){}.type, gen.model.stock.repositories.AnalysisRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"", gen.model.test.Entity::getCompositeid);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"", gen.model.test.Entity::getIndex);
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"", gen.model.test.Detail1::getEntityCompositeid);
