@@ -10,18 +10,21 @@ public class GeneratedQueryParameter {
 	public final int lambdaIndex;
 	public final int argIndex;
 	public final String fieldName;
+	public final String type;
 
-	public GeneratedQueryParameter(String paramName, int lambdaIndex, int argIndex) {
+	public GeneratedQueryParameter(String paramName, int lambdaIndex, int argIndex, String type) {
 		this.paramName = paramName;
 		this.lambdaIndex = lambdaIndex;
 		this.argIndex = argIndex;
 		this.fieldName = null;
+		this.type = type;
 	}
 
-	public GeneratedQueryParameter(String paramName, int lambdaIndex, String fieldName) {
+	public GeneratedQueryParameter(String paramName, int lambdaIndex, String fieldName, String type) {
 		this.paramName = paramName;
 		this.lambdaIndex = lambdaIndex;
 		this.argIndex = -1;
 		this.fieldName = fieldName;
+		this.type = type;
 	}
 }

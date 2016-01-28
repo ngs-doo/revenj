@@ -14,13 +14,6 @@ class QueryGenerationState {
 		return queryString.toString();
 	}
 
-	/**
-	 * Gives a text label that can be used to identify an entry in the FROM section
-	 * of a JPQL query.
-	 *
-	 * @param from
-	 * @return a text label
-	 */
 	public String generateFromAlias(From from) {
 		if (fromAliases.containsKey(from))
 			return fromAliases.get(from);
@@ -43,9 +36,9 @@ class QueryGenerationState {
 	 * Returns the parameter name that should be used to represent the parameter
 	 * in a query string.
 	 */
-	public String registerParameter(Object paramNode, int lambdaIndex, int argIndex) {
+	public String registerParameter(Object paramNode, int lambdaIndex, int argIndex, String argType) {
 		String paramName = nextParamIndex();
-		parameters.add(new GeneratedQueryParameter(paramName, lambdaIndex, argIndex));
+		parameters.add(new GeneratedQueryParameter(paramName, lambdaIndex, argIndex, argType));
 		return paramName;
 	}
 
@@ -54,11 +47,11 @@ class QueryGenerationState {
 	 * in a query string. This version is used to handle parameters that are encoded
 	 * as fields in a lambda object.
 	 */
-	public String registerParameter(Object paramNode, int lambdaIndex, String fieldName) {
+	public String registerParameter(Object paramNode, int lambdaIndex, String fieldName, String argType) {
 		//if (!parameterNames.containsKey(paramNode))
 		//{
 		String paramName = nextParamIndex();
-		parameters.add(new GeneratedQueryParameter(paramName, lambdaIndex, fieldName));
+		parameters.add(new GeneratedQueryParameter(paramName, lambdaIndex, fieldName, argType));
 		return paramName;
 	}
 

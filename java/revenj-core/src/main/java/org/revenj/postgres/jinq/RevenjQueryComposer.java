@@ -2,18 +2,15 @@ package org.revenj.postgres.jinq;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 
+import org.postgresql.core.Oid;
 import org.postgresql.util.PGobject;
 import org.revenj.patterns.DataSource;
 import org.revenj.postgres.ObjectConverter;
@@ -41,21 +38,31 @@ import org.revenj.patterns.ServiceLocator;
 public final class RevenjQueryComposer<T> {
 
 	private static final Map<Class<?>, String> typeMapping = new HashMap<>();
+	private static final Map<String, Integer> sqlIdMapping = new HashMap<>();
+
+	private static void addMapping(Class<?> manifest, String dbType, int oid, int sqlId) {
+		typeMapping.put(manifest, dbType);
+		sqlIdMapping.put(manifest.getName(), sqlId);
+	}
 
 	static {
-		typeMapping.put(int.class, "int");
-		typeMapping.put(Integer.class, "int");
-		typeMapping.put(String.class, "varchar");
-		typeMapping.put(long.class, "bigint");
-		typeMapping.put(Long.class, "bigint");
-		typeMapping.put(BigDecimal.class, "numeric");
-		typeMapping.put(float.class, "real");
-		typeMapping.put(Float.class, "real");
-		typeMapping.put(double.class, "float");
-		typeMapping.put(Double.class, "float");
-		typeMapping.put(UUID.class, "uuid");
-		typeMapping.put(Map.class, "hstore");
-		typeMapping.put(byte[].class, "bytea");
+		addMapping(int.class, "int", Oid.INT4, Types.INTEGER);
+		addMapping(Integer.class, "int", Oid.INT4, Types.INTEGER);
+		addMapping(String.class, "varchar", Oid.VARCHAR, Types.VARCHAR);
+		addMapping(long.class, "bigint", Oid.INT8, Types.BIGINT);
+		addMapping(Long.class, "bigint", Oid.INT8, Types.BIGINT);
+		addMapping(BigDecimal.class, "numeric", Oid.NUMERIC, Types.NUMERIC);
+		addMapping(float.class, "real", Oid.FLOAT4, Types.FLOAT);
+		addMapping(Float.class, "real", Oid.FLOAT4, Types.FLOAT);
+		addMapping(double.class, "float", Oid.FLOAT8, Types.DOUBLE);
+		addMapping(Double.class, "float", Oid.FLOAT8, Types.DOUBLE);
+		addMapping(boolean.class, "bool", Oid.BOOL, Types.BOOLEAN);
+		addMapping(Boolean.class, "bool", Oid.BOOL, Types.BOOLEAN);
+		addMapping(LocalDate.class, "date", Oid.DATE, Types.DATE);
+		addMapping(OffsetDateTime.class, "timestamptz", Oid.TIMESTAMPTZ, Types.TIMESTAMP_WITH_TIMEZONE);
+		addMapping(UUID.class, "uuid", Oid.UUID, Types.OTHER);
+		addMapping(Map.class, "hstore", -1, Types.OTHER);
+		addMapping(byte[].class, "bytea", Oid.BYTEA, Types.BLOB);
 	}
 
 	@FunctionalInterface
@@ -202,7 +209,12 @@ public final class RevenjQueryComposer<T> {
 				value = lambdas.get(param.lambdaIndex).getField(param.fieldName);
 			}
 			if (value == null) {
-				ps.setObject(i + 1 + parameterOffset, null);
+				Integer sqlId = sqlIdMapping.get(param.type);
+				if (sqlId == null || sqlId == -1) {
+					ps.setObject(i + 1 + parameterOffset, null);
+				} else {
+					ps.setNull(i + 1 + parameterOffset, sqlId);
+				}
 				continue;
 			}
 			Object[] elements = null;

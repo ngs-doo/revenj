@@ -103,7 +103,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 			throw new TypedValueVisitorException("Accessing a field with unhandled type", e);
 		}
 		return ColumnExpressions.singleColumn(SimpleRowReader.READER,
-				new ParameterExpression(lambda.getLambdaIndex(), argIndex));
+				new ParameterExpression(lambda.getLambdaIndex(), argIndex, argType.getClassName()));
 	}
 
 	protected JinqPostgresQuery<?> handleIndirectLambdaSubQueryArg(int argIndex, Type argType) throws TypedValueVisitorException {
@@ -139,7 +139,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 
 		ParameterAsQuery<?> query = new ParameterAsQuery<>();
 		query.cols = ColumnExpressions.singleColumn(SimpleRowReader.READER,
-				new ParameterExpression(lambda.getLambdaIndex(), argIndex));
+				new ParameterExpression(lambda.getLambdaIndex(), argIndex, argType.getClassName()));
 		return query;
 	}
 
@@ -229,7 +229,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 				throw new TypedValueVisitorException("Accessing a field with unhandled type");
 
 			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
-					new ParameterFieldExpression(lambda.getLambdaIndex(), name));
+					new ParameterFieldExpression(lambda.getLambdaIndex(), name, argType.getClassName()));
 		}
 		throw new TypedValueVisitorException("Cannot read fields of this lambda");
 	}
