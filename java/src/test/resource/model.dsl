@@ -326,3 +326,10 @@ module stock
 		}
 	}
 }
+
+module education {
+    root SortUUIDRoot {
+        uuid pero;
+        uuid marker;
+    }
+}

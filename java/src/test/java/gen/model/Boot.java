@@ -297,6 +297,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.stock.converters.AnalysisGridConverter stock$converter$AnalysisGridConverter = new gen.model.stock.converters.AnalysisGridConverter(columns);
 		container.registerInstance(gen.model.stock.converters.AnalysisGridConverter.class, stock$converter$AnalysisGridConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.stock.AnalysisGrid>>(){}.type, stock$converter$AnalysisGridConverter, false);
+		
+		gen.model.education.converters.SortUUIDRootConverter education$converter$SortUUIDRootConverter = new gen.model.education.converters.SortUUIDRootConverter(columns);
+		container.registerInstance(gen.model.education.converters.SortUUIDRootConverter.class, education$converter$SortUUIDRootConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.education.SortUUIDRoot>>(){}.type, education$converter$SortUUIDRootConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"", gen.model.test.Simple::getNumber);
@@ -724,6 +728,18 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getSku", "\"sku\"", gen.model.stock.AnalysisGrid::getSku);
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getXyz", "\"xyz\"", gen.model.stock.AnalysisGrid::getXyz);
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getAbc", "\"abc\"", gen.model.stock.AnalysisGrid::getAbc);
+		education$converter$SortUUIDRootConverter.configure(container);
+		metamodel.registerDataSource(gen.model.education.SortUUIDRoot.class, "\"education\".\"SortUUIDRoot_entity\"");
+		metamodel.registerProperty(gen.model.education.SortUUIDRoot.class, "getURI", "\"URI\"", gen.model.education.SortUUIDRoot::getURI);
+		metamodel.registerProperty(gen.model.education.SortUUIDRoot.class, "getID", "\"ID\"", gen.model.education.SortUUIDRoot::getID);
+		
+		container.register(gen.model.education.repositories.SortUUIDRootRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.education.SortUUIDRoot>>(){}.type, gen.model.education.repositories.SortUUIDRootRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.education.SortUUIDRoot>>(){}.type, gen.model.education.repositories.SortUUIDRootRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.education.SortUUIDRoot>>(){}.type, gen.model.education.repositories.SortUUIDRootRepository::new, false);
+		metamodel.registerProperty(gen.model.education.SortUUIDRoot.class, "getPero", "\"pero\"", gen.model.education.SortUUIDRoot::getPero);
+		metamodel.registerProperty(gen.model.education.SortUUIDRoot.class, "getMarker", "\"marker\"", gen.model.education.SortUUIDRoot::getMarker);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -762,6 +778,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.stock.Article>>(){}.type, gen.model.stock.repositories.ArticleRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.stock.Analysis>>(){}.type, gen.model.stock.repositories.AnalysisRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.education.SortUUIDRoot>>(){}.type, gen.model.education.repositories.SortUUIDRootRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"", gen.model.test.Entity::getCompositeid);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"", gen.model.test.Entity::getIndex);
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"", gen.model.test.Detail1::getEntityCompositeid);

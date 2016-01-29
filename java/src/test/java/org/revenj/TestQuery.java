@@ -5,6 +5,8 @@ import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
 import gen.model.calc.Info;
 import gen.model.calc.repositories.InfoRepository;
+import gen.model.education.SortUUIDRoot;
+import gen.model.education.repositories.*;
 import gen.model.security.Document;
 import gen.model.stock.AnalysisGrid;
 import gen.model.stock.Article;
@@ -482,5 +484,28 @@ public class TestQuery {
 					.query(new AnalysisGrid.filterSearch())
 					.findFirst();
 		Assert.assertNotNull(results);
+	}
+
+	@Test
+	public void testUUIDordering() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<SortUUIDRoot> repo = locator.resolve(SortUUIDRootRepository.class);
+
+		UUID marker = UUID.randomUUID();
+		List<SortUUIDRoot> roots = new ArrayList<>();
+		for(int  i=0; i<10; i++) {
+			roots.add(new SortUUIDRoot().setPero(UUID.randomUUID()).setMarker(marker));
+		}
+
+		repo.insert(roots);
+
+		List<SortUUIDRoot> qAsc = repo.query(it -> it.getMarker().equals(marker)).sortedBy(it -> it.getPero()).list();
+		List<SortUUIDRoot> orig  = roots.stream().sorted((a,b)-> a.getPero().toString().compareTo(b.getPero().toString())).collect(Collectors.toList());
+		Assert.assertEquals(orig,qAsc);
+
+		List<SortUUIDRoot> qDesc = repo.query(it -> it.getMarker().equals(marker)).sortedDescendingBy(it -> it.getPero()).list();
+		Collections.reverse(orig);
+		Assert.assertEquals(orig,qDesc);
+
 	}
 }
