@@ -1,10 +1,11 @@
 org.revenj.postgres.jinq.transform.handlers.AbsInstanceHandler
 org.revenj.postgres.jinq.transform.handlers.CollectionToStreamHandler
+org.revenj.postgres.jinq.transform.handlers.DateAfterHandler
+org.revenj.postgres.jinq.transform.handlers.DateBeforeHandler
+org.revenj.postgres.jinq.transform.handlers.DateTimeCompareHandler
 org.revenj.postgres.jinq.transform.handlers.LengthHandler
 org.revenj.postgres.jinq.transform.handlers.LocalDateCompareHandler
-org.revenj.postgres.jinq.transform.handlers.LocalDateTimeCompareHandler
 org.revenj.postgres.jinq.transform.handlers.ObjectEqualsHandler
-org.revenj.postgres.jinq.transform.handlers.OffsetDateTimeCompareHandler
 org.revenj.postgres.jinq.transform.handlers.PrincipalGetName
 org.revenj.postgres.jinq.transform.handlers.StringLikeHandler
 org.revenj.postgres.jinq.transform.handlers.StringIndexOfHandler

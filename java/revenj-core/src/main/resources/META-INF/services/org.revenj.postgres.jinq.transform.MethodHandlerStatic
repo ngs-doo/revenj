@@ -1,7 +1,7 @@
 org.revenj.postgres.jinq.transform.handlers.AbsStaticHandler
+org.revenj.postgres.jinq.transform.handlers.DateNowHandler
 org.revenj.postgres.jinq.transform.handlers.MathSqrtHandler
 org.revenj.postgres.jinq.transform.handlers.IntegerValueOfHandler
-org.revenj.postgres.jinq.transform.handlers.LocalDateNowHandler
 org.revenj.postgres.jinq.transform.handlers.StringValueOfHandler
 org.revenj.postgres.jinq.transform.handlers.LongValueOfHandler
 org.revenj.postgres.jinq.transform.handlers.UuidParseHandler
