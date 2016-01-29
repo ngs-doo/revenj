@@ -5,6 +5,8 @@ import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
 import gen.model.calc.Info;
 import gen.model.calc.repositories.InfoRepository;
+import gen.model.xc.SearchByTimestampAndOrderByTimestamp;
+import gen.model.xc.repositories.SearchByTimestampAndOrderByTimestampRepository;
 import gen.model.security.Document;
 import gen.model.stock.AnalysisGrid;
 import gen.model.stock.Article;
@@ -482,5 +484,34 @@ public class TestQuery {
 					.query(new AnalysisGrid.filterSearch())
 					.findFirst();
 		Assert.assertNotNull(results);
+	}
+
+	@Test
+	public void testTimestampQueryingAndOrder() throws IOException {
+		ServiceLocator locator = container;
+		SearchByTimestampAndOrderByTimestampRepository analysisGridRepository =
+				locator.resolve(SearchByTimestampAndOrderByTimestampRepository.class);
+
+		String marker = UUID.randomUUID().toString();
+		OffsetDateTime dt1 = OffsetDateTime.now();
+		OffsetDateTime dt2 = dt1.plusDays(1);
+		OffsetDateTime dt3 = dt1.plusDays(2);
+		OffsetDateTime dt4 = dt1.plusDays(3);
+
+		SearchByTimestampAndOrderByTimestamp[]  arr = new SearchByTimestampAndOrderByTimestamp[] {
+				new SearchByTimestampAndOrderByTimestamp().setOndate(dt1).setMarker(marker),
+				new SearchByTimestampAndOrderByTimestamp().setOndate(dt2).setMarker(marker),
+				new SearchByTimestampAndOrderByTimestamp().setOndate(dt3).setMarker(marker),
+				new SearchByTimestampAndOrderByTimestamp().setOndate(dt4).setMarker(marker)
+		};
+		analysisGridRepository.insert(arr);
+
+		List<SearchByTimestampAndOrderByTimestamp> queryResults =
+				analysisGridRepository
+						.query(it -> it.getMarker().equals(marker) && it.getOndate().isAfter(dt2))
+						.sortedDescendingBy(SearchByTimestampAndOrderByTimestamp::getOndate)
+						.list();
+		Assert.assertEquals(queryResults.size(), arr.length - 2);
+		Assert.assertEquals(queryResults.get(0).getOndate(), dt4);
 	}
 }

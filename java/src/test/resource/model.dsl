@@ -325,4 +325,11 @@ module stock
 			String(50)? clazz;
 		}
 	}
+
+}
+module xc {
+	root SearchByTimestampAndOrderByTimestamp {
+	    Timestamp ondate;
+	    String marker;
+	}
 }

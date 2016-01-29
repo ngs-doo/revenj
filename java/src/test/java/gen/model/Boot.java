@@ -297,6 +297,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.stock.converters.AnalysisGridConverter stock$converter$AnalysisGridConverter = new gen.model.stock.converters.AnalysisGridConverter(columns);
 		container.registerInstance(gen.model.stock.converters.AnalysisGridConverter.class, stock$converter$AnalysisGridConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.stock.AnalysisGrid>>(){}.type, stock$converter$AnalysisGridConverter, false);
+		
+		gen.model.xc.converters.SearchByTimestampAndOrderByTimestampConverter xc$converter$SearchByTimestampAndOrderByTimestampConverter = new gen.model.xc.converters.SearchByTimestampAndOrderByTimestampConverter(columns);
+		container.registerInstance(gen.model.xc.converters.SearchByTimestampAndOrderByTimestampConverter.class, xc$converter$SearchByTimestampAndOrderByTimestampConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.xc.SearchByTimestampAndOrderByTimestamp>>(){}.type, xc$converter$SearchByTimestampAndOrderByTimestampConverter, false);
 		test$converter$SimpleConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Simple.class, "\"test\".\"Simple\"");
 		metamodel.registerProperty(gen.model.test.Simple.class, "getNumber", "\"number\"", gen.model.test.Simple::getNumber);
@@ -724,6 +728,18 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getSku", "\"sku\"", gen.model.stock.AnalysisGrid::getSku);
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getXyz", "\"xyz\"", gen.model.stock.AnalysisGrid::getXyz);
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getAbc", "\"abc\"", gen.model.stock.AnalysisGrid::getAbc);
+		xc$converter$SearchByTimestampAndOrderByTimestampConverter.configure(container);
+		metamodel.registerDataSource(gen.model.xc.SearchByTimestampAndOrderByTimestamp.class, "\"xc\".\"SearchByTimestampAndOrderByTimestamp_entity\"");
+		metamodel.registerProperty(gen.model.xc.SearchByTimestampAndOrderByTimestamp.class, "getURI", "\"URI\"", gen.model.xc.SearchByTimestampAndOrderByTimestamp::getURI);
+		metamodel.registerProperty(gen.model.xc.SearchByTimestampAndOrderByTimestamp.class, "getID", "\"ID\"", gen.model.xc.SearchByTimestampAndOrderByTimestamp::getID);
+		
+		container.register(gen.model.xc.repositories.SearchByTimestampAndOrderByTimestampRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.xc.SearchByTimestampAndOrderByTimestamp>>(){}.type, gen.model.xc.repositories.SearchByTimestampAndOrderByTimestampRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.xc.SearchByTimestampAndOrderByTimestamp>>(){}.type, gen.model.xc.repositories.SearchByTimestampAndOrderByTimestampRepository::new, false);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.xc.SearchByTimestampAndOrderByTimestamp>>(){}.type, gen.model.xc.repositories.SearchByTimestampAndOrderByTimestampRepository::new, false);
+		metamodel.registerProperty(gen.model.xc.SearchByTimestampAndOrderByTimestamp.class, "getOndate", "\"ondate\"", gen.model.xc.SearchByTimestampAndOrderByTimestamp::getOndate);
+		metamodel.registerProperty(gen.model.xc.SearchByTimestampAndOrderByTimestamp.class, "getMarker", "\"marker\"", gen.model.xc.SearchByTimestampAndOrderByTimestamp::getMarker);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.test.LazyLoad>>(){}.type, gen.model.test.repositories.LazyLoadRepository::new, false);
 		
@@ -762,6 +778,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.stock.Article>>(){}.type, gen.model.stock.repositories.ArticleRepository::new, false);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.stock.Analysis>>(){}.type, gen.model.stock.repositories.AnalysisRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.xc.SearchByTimestampAndOrderByTimestamp>>(){}.type, gen.model.xc.repositories.SearchByTimestampAndOrderByTimestampRepository::new, false);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getCompositeid", "\"Compositeid\"", gen.model.test.Entity::getCompositeid);
 		metamodel.registerProperty(gen.model.test.Entity.class, "getIndex", "\"Index\"", gen.model.test.Entity::getIndex);
 		metamodel.registerProperty(gen.model.test.Detail1.class, "getEntityCompositeid", "\"EntityCompositeid\"", gen.model.test.Detail1::getEntityCompositeid);
