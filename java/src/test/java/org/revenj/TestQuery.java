@@ -40,7 +40,7 @@ public class TestQuery {
 
 	@Before
 	public void initContainer() throws IOException {
-		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj?user=revenj");
+		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj");
 	}
 
 	@After
