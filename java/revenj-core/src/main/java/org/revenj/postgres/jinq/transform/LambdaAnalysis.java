@@ -290,24 +290,26 @@ public class LambdaAnalysis {
 		// Open up the corresponding class to analyze
 		PathAnalysisFactory pathAnalysisFactory = new PathAnalysisFactory(
 				metamodel.getMethodChecker(isObjectEqualsSafe, isCollectionContainsSafe));
-		TransformationClassAnalyzer classAnalyzer =
-				new TransformationClassAnalyzer(className, alternateClassLoader);
+		TransformationClassAnalyzer classAnalyzer = new TransformationClassAnalyzer(className, alternateClassLoader);
 		MethodAnalysisResults analysis = classAnalyzer.analyzeLambdaMethod(methodName, methodSignature, pathAnalysisFactory);
-		PathAnalysisSimplifier.cleanAndSimplify(analysis, metamodel.getComparisonMethods(isObjectEqualsSafe), metamodel.getStaticComparisonMethods(isObjectEqualsSafe), isAllEqualsSafe);
+		if (analysis != null) {
+			PathAnalysisSimplifier.cleanAndSimplify(analysis, metamodel.getComparisonMethods(isObjectEqualsSafe), metamodel.getStaticComparisonMethods(isObjectEqualsSafe), isAllEqualsSafe);
+		}
 		return analysis;
 	}
 
 	private static MethodAnalysisResults analyzeLambdaClass(Class<?> lambdaClass, MetamodelUtil metamodel, LambdaAsClassAnalysisConfig lambdaAsClass, ClassLoader alternateClassLoader, boolean isObjectEqualsSafe, boolean isAllEqualsSafe, boolean isCollectionContainsSafe) throws IOException, AnalyzerException {
 		// Open up the corresponding class to analyze
-		TransformationClassAnalyzer classAnalyzer =
-				new TransformationClassAnalyzer(lambdaClass.getName(), alternateClassLoader);
+		TransformationClassAnalyzer classAnalyzer = new TransformationClassAnalyzer(lambdaClass.getName(), alternateClassLoader);
 		Method matchingMethod = lambdaAsClass.findLambdaMethod(lambdaClass);
-		if (matchingMethod == null)
+		if (matchingMethod == null) {
 			throw new AnalyzerException(null, "Could not find a lambda method with the expected name in the class");
-		PathAnalysisFactory pathAnalysisFactory = new PathAnalysisFactory(
-				metamodel.getMethodChecker(isObjectEqualsSafe, isCollectionContainsSafe));
+		}
+		PathAnalysisFactory pathAnalysisFactory = new PathAnalysisFactory(metamodel.getMethodChecker(isObjectEqualsSafe, isCollectionContainsSafe));
 		MethodAnalysisResults analysis = classAnalyzer.analyzeLambdaMethod(matchingMethod.getName(), Type.getMethodDescriptor(matchingMethod), pathAnalysisFactory);
-		PathAnalysisSimplifier.cleanAndSimplify(analysis, metamodel.getComparisonMethods(isObjectEqualsSafe), metamodel.getStaticComparisonMethods(isObjectEqualsSafe), isAllEqualsSafe);
+		if (analysis != null) {
+			PathAnalysisSimplifier.cleanAndSimplify(analysis, metamodel.getComparisonMethods(isObjectEqualsSafe), metamodel.getStaticComparisonMethods(isObjectEqualsSafe), isAllEqualsSafe);
+		}
 		return analysis;
 	}
 
