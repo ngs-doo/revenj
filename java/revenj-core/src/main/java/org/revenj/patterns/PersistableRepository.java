@@ -3,7 +3,7 @@ package org.revenj.patterns;
 import java.io.IOException;
 import java.util.*;
 
-public interface PersistableRepository<T extends AggregateRoot> extends Repository<T> {
+public interface PersistableRepository<T extends AggregateRoot> extends Repository<T>, SearchableRepository<T> {
 
 	String[] persist(Collection<T> insert, Collection<Map.Entry<T, T>> update, Collection<T> delete) throws IOException;
 

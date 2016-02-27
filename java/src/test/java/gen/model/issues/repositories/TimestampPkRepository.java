@@ -1,13 +1,13 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.25103 
 */
 
 package gen.model.issues.repositories;
 
 
 
-public class TimestampPkRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.issues.TimestampPk>, org.revenj.postgres.BulkRepository<gen.model.issues.TimestampPk>, org.revenj.patterns.PersistableRepository<gen.model.issues.TimestampPk> {
+public class TimestampPkRepository   implements java.io.Closeable, org.revenj.patterns.SearchableRepository<gen.model.issues.TimestampPk>, org.revenj.postgres.BulkRepository<gen.model.issues.TimestampPk>, org.revenj.patterns.PersistableRepository<gen.model.issues.TimestampPk> {
 	
 	
 	
@@ -405,8 +405,8 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 
 	
 	public static void __setupPersist(
-			java.util.function.BiConsumer<java.util.Collection<gen.model.issues.TimestampPk>, org.revenj.postgres.PostgresWriter> insert, 
-			java.util.function.BiConsumer<java.util.List<gen.model.issues.TimestampPk>, java.util.List<gen.model.issues.TimestampPk>> update,
+			java.util.function.BiConsumer<java.util.Collection<gen.model.issues.TimestampPk>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> insert, 
+			java.util.function.BiConsumer<java.util.Map.Entry<java.util.List<gen.model.issues.TimestampPk>, java.util.List<gen.model.issues.TimestampPk>>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> update,
 			java.util.function.Consumer<java.util.Collection<gen.model.issues.TimestampPk>> delete,
 			java.util.function.Function<gen.model.issues.TimestampPk, gen.model.issues.TimestampPk> track) {
 		insertLoop = insert;
@@ -415,8 +415,8 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 		trackChanges = track;
 	}
 
-	private static java.util.function.BiConsumer<java.util.Collection<gen.model.issues.TimestampPk>, org.revenj.postgres.PostgresWriter> insertLoop;
-	private static java.util.function.BiConsumer<java.util.List<gen.model.issues.TimestampPk>, java.util.List<gen.model.issues.TimestampPk>> updateLoop;
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.issues.TimestampPk>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> insertLoop;
+	private static java.util.function.BiConsumer<java.util.Map.Entry<java.util.List<gen.model.issues.TimestampPk>, java.util.List<gen.model.issues.TimestampPk>>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> updateLoop;
 	private static java.util.function.Consumer<java.util.Collection<gen.model.issues.TimestampPk>> deleteLoop;
 	private static java.util.function.Function<gen.model.issues.TimestampPk, gen.model.issues.TimestampPk> trackChanges;
 
@@ -432,7 +432,7 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {
-				insertLoop.accept(insert, sw);
+				insertLoop.accept(insert, new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
@@ -474,7 +474,7 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
-				updateLoop.accept(oldUpdate, newUpdate);
+				updateLoop.accept(new java.util.AbstractMap.SimpleEntry<>(oldUpdate, newUpdate), new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 				org.revenj.postgres.converters.PostgresTuple tupleOld = org.revenj.postgres.converters.ArrayTuple.create(oldUpdate, converter::to);
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();
@@ -524,7 +524,7 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 		try (java.sql.PreparedStatement statement = connection.prepareStatement("/*NO LOAD BALANCE*/SELECT \"issues\".\"insert_TimestampPk\"(ARRAY[?])");
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			java.util.List<gen.model.issues.TimestampPk> insert = java.util.Collections.singletonList(item);
-			if (insertLoop != null) insertLoop.accept(insert, sw);
+			if (insertLoop != null) insertLoop.accept(insert, new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 			sw.reset();
 			org.revenj.postgres.converters.PostgresTuple tuple = converter.to(item);
 			org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
@@ -553,7 +553,7 @@ public class TimestampPkRepository   implements java.io.Closeable, org.revenj.pa
 			if (oldItem == null) oldItem = find(newItem.getURI()).get();
 			java.util.List<gen.model.issues.TimestampPk> oldUpdate = java.util.Collections.singletonList(oldItem);
 			java.util.List<gen.model.issues.TimestampPk> newUpdate = java.util.Collections.singletonList(newItem);
-			if (updateLoop != null) updateLoop.accept(oldUpdate, newUpdate);
+			if (updateLoop != null) updateLoop.accept(new java.util.AbstractMap.SimpleEntry<>(oldUpdate, newUpdate), new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 			org.revenj.postgres.converters.PostgresTuple tupleOld = converter.to(oldItem);
 			org.revenj.postgres.converters.PostgresTuple tupleNew = converter.to(newItem);
 			org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();

@@ -512,6 +512,6 @@ public class TestQuery {
 						.sortedDescendingBy(SearchByTimestampAndOrderByTimestamp::getOndate)
 						.list();
 		Assert.assertEquals(queryResults.size(), arr.length - 2);
-		Assert.assertEquals(queryResults.get(0).getOndate(), dt4);
+		Assert.assertTrue(queryResults.get(0).getOndate().isEqual(dt4));
 	}
 }

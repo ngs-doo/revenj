@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface Repository<T extends Identifiable> extends SearchableRepository<T> {
+public interface Repository<T extends Identifiable> {
 	List<T> find(String[] uris);
 
 	default List<T> find(Collection<String> uris) {

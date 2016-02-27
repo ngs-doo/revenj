@@ -511,4 +511,22 @@ public class TestRepository {
 		Assert.assertEquals(name, wd3.call().get(0).getName());
 		Assert.assertEquals(1, wd6.call().size());
 	}
+
+	@Test
+	public void canReadHistory() throws Exception {
+		ServiceLocator locator = container;
+		PersistableRepository<TimestampPk> repository = locator.resolve(PersistableRepository.class, TimestampPk.class);
+		Repository<History<TimestampPk>> history = locator.resolve(Repository.class, Utils.makeGenericType(History.class, TimestampPk.class));
+		OffsetDateTime odt = OffsetDateTime.now();
+		TimestampPk pk = new TimestampPk().setTs(odt).setD(BigDecimal.ONE);
+		String uri = repository.insert(pk);
+		Optional<TimestampPk> found = repository.find(uri);
+		Optional<History<TimestampPk>> foundHistory = history.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Assert.assertTrue(foundHistory.isPresent());
+		Assert.assertEquals(1, foundHistory.get().getSnapshots().size());
+		Assert.assertEquals(uri, foundHistory.get().getURI());
+		//Assert.assertEquals(found.get(), foundHistory.get().getSnapshots().get(0).getValue());
+		Assert.assertTrue(found.get().getTs().isEqual(foundHistory.get().getSnapshots().get(0).getValue().getTs()));
+	}
 }

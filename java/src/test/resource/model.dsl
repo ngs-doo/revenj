@@ -267,8 +267,7 @@ module calc {
 	}
 }
 
-module stock
-{
+module stock {
 	big aggregate Article {
 		Int         projectID;
 		String(10)  sku;
@@ -325,7 +324,6 @@ module stock
 			String(50)? clazz;
 		}
 	}
-
 }
 module xc {
 	root SearchByTimestampAndOrderByTimestamp {

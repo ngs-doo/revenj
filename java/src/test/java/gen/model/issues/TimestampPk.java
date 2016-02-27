@@ -1,13 +1,13 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.20667 
 */
 
 package gen.model.issues;
 
 
 
-public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, com.dslplatform.json.JsonObject {
+public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable, org.revenj.patterns.AggregateRoot, org.revenj.patterns.ObjectHistory, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -90,7 +90,7 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 		this.d = d == null ? java.math.BigDecimal.ZERO.setScale(9) : d;
 	}
 
-	private static final long serialVersionUID = -5333121589735684657L;
+	private static final long serialVersionUID = -1174789531366006433L;
 	
 	private java.time.OffsetDateTime ts;
 
@@ -137,17 +137,24 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 				try {
 					for (gen.model.issues.TimestampPk agg : aggregates) {
 						 
-						agg.URI = gen.model.issues.converters.TimestampPkConverter.buildURI(arg, agg);
+						agg.URI = gen.model.issues.converters.TimestampPkConverter.buildURI(arg.getKey(), agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			},
-			(oldAggregates, newAggregates) -> {
-				for (int i = 0; i < newAggregates.size(); i++) {
-					gen.model.issues.TimestampPk oldAgg = oldAggregates.get(i);
-					gen.model.issues.TimestampPk newAgg = newAggregates.get(i);
-					 
+			(aggregates, arg) -> {
+				try {
+					java.util.List<gen.model.issues.TimestampPk> oldAggregates = aggregates.getKey();
+					java.util.List<gen.model.issues.TimestampPk> newAggregates = aggregates.getValue();
+					for (int i = 0; i < newAggregates.size(); i++) {
+						gen.model.issues.TimestampPk oldAgg = oldAggregates.get(i);
+						gen.model.issues.TimestampPk newAgg = newAggregates.get(i);
+						 
+						newAgg.URI = gen.model.issues.converters.TimestampPkConverter.buildURI(arg.getKey(), newAgg);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
 				}
 			},
 			aggregates -> { 
@@ -165,6 +172,424 @@ public class TimestampPk   implements java.lang.Cloneable, java.io.Serializable,
 			}
 		);
 	}
+	
+
+public static class History   implements org.revenj.patterns.History<gen.model.issues.TimestampPk>, com.dslplatform.json.JsonObject {
+	
+	
+	
+	public History(
+			@com.fasterxml.jackson.annotation.JsonProperty("URI")  final String URI,
+			@com.fasterxml.jackson.annotation.JsonProperty("Snapshots")  final java.util.List<gen.model.issues.TimestampPk.Snapshot> Snapshots) {
+			
+		this.URI = URI;
+		this.Snapshots = Snapshots;
+	}
+
+	
+	private final String URI;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("URI")
+	public String getURI()  {
+		
+		return this.URI;
+	}
+
+	
+	private final java.util.List<gen.model.issues.TimestampPk.Snapshot> Snapshots;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("Snapshots")
+	public java.util.List<gen.model.issues.TimestampPk.Snapshot> getSnapshots()  {
+		
+		return this.Snapshots;
+	}
+
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final History self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			if (!(self.URI.length() == 0)) {
+				sw.writeAscii(",\"URI\":", 7);
+				sw.writeString(self.URI);
+			}
+		
+		final java.util.List<gen.model.issues.TimestampPk.Snapshot> _tmp_Snapshots_ = self.Snapshots;
+		if(_tmp_Snapshots_.size() != 0) {
+			sw.writeAscii(",\"Snapshots\":[", 14);
+			gen.model.issues.TimestampPk.Snapshot item = _tmp_Snapshots_.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.issues.TimestampPk.Snapshot.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < _tmp_Snapshots_.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = _tmp_Snapshots_.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.issues.TimestampPk.Snapshot.__serializeJsonObjectMinimal(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+	}
+
+	static void __serializeJsonObjectFull(final History self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			
+			sw.writeAscii(",\"URI\":", 7);
+			sw.writeString(self.URI);
+		
+		final java.util.List<gen.model.issues.TimestampPk.Snapshot> _tmp_Snapshots_ = self.Snapshots;
+		if(_tmp_Snapshots_.size() != 0) {
+			sw.writeAscii(",\"Snapshots\":[", 14);
+			gen.model.issues.TimestampPk.Snapshot item = _tmp_Snapshots_.get(0);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.issues.TimestampPk.Snapshot.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			for(int i = 1; i < _tmp_Snapshots_.size(); i++) {
+				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
+				item = _tmp_Snapshots_.get(i);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+				gen.model.issues.TimestampPk.Snapshot.__serializeJsonObjectFull(item, sw, false);
+				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+			}
+			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
+		}
+		else sw.writeAscii(",\"Snapshots\":[]", 15);
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<History> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<History>() {
+		@Override
+		public History deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.issues.TimestampPk.History(reader);
+		}
+	};
+
+	private History(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		String _URI_ = "";
+		java.util.List<gen.model.issues.TimestampPk.Snapshot> _Snapshots_ = new java.util.ArrayList<gen.model.issues.TimestampPk.Snapshot>(4);
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 2125331066:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.issues.TimestampPk.Snapshot.JSON_READER, _Snapshots_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 2053729053:
+						_URI_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 2125331066:
+						
+					if (nextToken == '[') {
+						nextToken = reader.getNextToken();
+						if (nextToken != ']') {
+							reader.deserializeCollection(gen.model.issues.TimestampPk.Snapshot.JSON_READER, _Snapshots_);
+						}
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '[' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.URI = _URI_;
+		this.Snapshots = _Snapshots_;
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.issues.TimestampPk.History(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
+}
+
+	
+
+public static class Snapshot   implements org.revenj.patterns.Snapshot<gen.model.issues.TimestampPk>, com.dslplatform.json.JsonObject {
+	
+	
+	
+	public Snapshot(
+			@com.fasterxml.jackson.annotation.JsonProperty("At")  final java.time.OffsetDateTime At,
+			@com.fasterxml.jackson.annotation.JsonProperty("Action")  final String Action,
+			@com.fasterxml.jackson.annotation.JsonProperty("Value")  final gen.model.issues.TimestampPk Value) {
+			
+		this.At = At;
+		this.Action = Action;
+		this.Value = Value;
+		this.URI = Value.getURI() + '/' + At.getNano();
+	}
+
+	
+	private final java.time.OffsetDateTime At;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("At")
+	public java.time.OffsetDateTime getAt()  {
+		
+		return this.At;
+	}
+
+	
+	private final String Action;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("Action")
+	public String getAction()  {
+		
+		return this.Action;
+	}
+
+	
+	private final gen.model.issues.TimestampPk Value;
+
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("Value")
+	public gen.model.issues.TimestampPk getValue()  {
+		
+		return this.Value;
+	}
+
+	
+	private final String URI;
+
+	
+	public String getURI()  {
+		
+		return this.URI;
+	}
+
+	
+	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
+		if (minimal) {
+			__serializeJsonObjectMinimal(this, sw, false);
+		} else {
+			__serializeJsonObjectFull(this, sw, false);
+		}
+		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+	}
+
+	static void __serializeJsonObjectMinimal(final Snapshot self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			if (self.At != java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC)) {
+				sw.writeAscii(",\"At\":", 6);
+				com.dslplatform.json.JavaTimeConverter.serialize(self.At, sw);
+			}
+		
+			if (!(self.Action.length() == 0)) {
+				sw.writeAscii(",\"Action\":", 10);
+				sw.writeString(self.Action);
+			}
+		
+		if(self.Value != null) {
+			sw.writeAscii(",\"Value\":{", 10);
+			
+					gen.model.issues.TimestampPk.__serializeJsonObjectMinimal(self.Value, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		}
+	}
+
+	static void __serializeJsonObjectFull(final Snapshot self, com.dslplatform.json.JsonWriter sw, boolean hasWrittenProperty) {
+		
+		
+			
+			sw.writeAscii(",\"At\":", 6);
+			com.dslplatform.json.JavaTimeConverter.serialize(self.At, sw);
+		
+			
+			sw.writeAscii(",\"Action\":", 10);
+			sw.writeString(self.Action);
+		
+		
+		if(self.Value != null) {
+			sw.writeAscii(",\"Value\":{", 10);
+			
+					gen.model.issues.TimestampPk.__serializeJsonObjectFull(self.Value, sw, false);
+					sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
+		} else {
+			sw.writeAscii(",\"Value\":null", 13);
+		}
+	}
+
+	public static final com.dslplatform.json.JsonReader.ReadJsonObject<Snapshot> JSON_READER = new com.dslplatform.json.JsonReader.ReadJsonObject<Snapshot>() {
+		@Override
+		public Snapshot deserialize(final com.dslplatform.json.JsonReader reader) throws java.io.IOException {
+			return new gen.model.issues.TimestampPk.Snapshot(reader);
+		}
+	};
+
+	private Snapshot(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		
+		java.time.OffsetDateTime _At_ = org.revenj.Utils.MIN_DATE_TIME;
+		String _Action_ = "";
+		gen.model.issues.TimestampPk _Value_ = null;
+		byte nextToken = reader.last();
+		if(nextToken != '}') {
+			int nameHash = reader.fillName();
+			nextToken = reader.getNextToken();
+			if(nextToken == 'n') {
+				if (reader.wasNull()) {
+					nextToken = reader.getNextToken();
+				} else {
+					throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+				}
+			} else {
+				switch(nameHash) {
+					
+					case 1456825256:
+						_At_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 175614239:
+						_Action_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -783812246:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_Value_ = gen.model.issues.TimestampPk.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			while (nextToken == ',') {
+				nextToken = reader.getNextToken();
+				nameHash = reader.fillName();
+				nextToken = reader.getNextToken();
+				if(nextToken == 'n') {
+					if (reader.wasNull()) {
+						nextToken = reader.getNextToken();
+						continue;
+					} else {
+						throw new java.io.IOException("Expecting 'u' (as null) at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+					}
+				}
+				switch(nameHash) {
+					
+					case 1456825256:
+						_At_ = com.dslplatform.json.JavaTimeConverter.deserializeDateTime(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case 175614239:
+						_Action_ = com.dslplatform.json.StringConverter.deserialize(reader);
+					nextToken = reader.getNextToken();
+						break;
+					case -783812246:
+						
+					if (nextToken == '{') {
+						reader.getNextToken();
+						_Value_ = gen.model.issues.TimestampPk.JSON_READER.deserialize(reader);
+						nextToken = reader.getNextToken();
+					} else throw new java.io.IOException("Expecting '{' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+						break;
+					default:
+						nextToken = reader.skip();
+						break;
+				}
+			}
+			if (nextToken != '}') {
+				throw new java.io.IOException("Expecting '}' at position " + reader.positionInStream() + ". Found " + (char)nextToken);
+			}
+		}
+		
+		this.At = _At_;
+		this.Action = _Action_;
+		this.Value = _Value_;
+		this.URI = this.Value.getURI() + '/' + this.At.getNano();
+	}
+
+	public static Object deserialize(final com.dslplatform.json.JsonReader<org.revenj.patterns.ServiceLocator> reader) throws java.io.IOException {
+		switch (reader.getNextToken()) {
+			case 'n':
+				if (reader.wasNull())
+					return null;
+				throw new java.io.IOException("Invalid null value found at: " + reader.positionInStream());
+			case '{':
+				reader.getNextToken();
+				return new gen.model.issues.TimestampPk.Snapshot(reader);
+			case '[':
+				return reader.deserializeNullableCollection(JSON_READER);
+			default:
+				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
+		}
+	}
+}
+
 	private transient TimestampPk __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {

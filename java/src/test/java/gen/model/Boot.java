@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.5.5871.15913 
+* v1.0.0.25103 
 */
 
 package gen.model;
@@ -577,6 +577,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.issues.TimestampPk.class, "getD", "\"d\"", gen.model.issues.TimestampPk::getD);
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.issues.TimestampPk>>(){}.type, gen.model.issues.repositories.TimestampPkRepository::new, false);
+		
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<org.revenj.patterns.History<gen.model.issues.TimestampPk>>>(){}.type, gen.model.issues.repositories.TimestampPkHistoryRepository::new, false);
 		md$converter$MasterConverter.configure(container);
 		metamodel.registerDataSource(gen.model.md.Master.class, "\"md\".\"Master_entity\"");
 		metamodel.registerProperty(gen.model.md.Master.class, "getURI", "\"URI\"", gen.model.md.Master::getURI);

@@ -107,7 +107,7 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> BulkRepository<T> getRepository(Class<T> manifest) {
+	private BulkRepository getRepository(Class<?> manifest) {
 		BulkRepository repository = repositories.get(manifest);
 		if (repository == null) {
 			try {
