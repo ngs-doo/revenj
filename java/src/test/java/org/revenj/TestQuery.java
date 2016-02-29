@@ -5,6 +5,7 @@ import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
 import gen.model.calc.Info;
 import gen.model.calc.repositories.InfoRepository;
+import gen.model.test.*;
 import gen.model.xc.SearchByTimestampAndOrderByTimestamp;
 import gen.model.xc.repositories.SearchByTimestampAndOrderByTimestampRepository;
 import gen.model.security.Document;
@@ -14,10 +15,6 @@ import gen.model.stock.ArticleGrid;
 import gen.model.stock.repositories.AnalysisGridRepository;
 import gen.model.stock.repositories.ArticleGridRepository;
 import gen.model.stock.repositories.ArticleRepository;
-import gen.model.test.Clicked;
-import gen.model.test.Composite;
-import gen.model.test.En;
-import gen.model.test.Simple;
 import gen.model.test.repositories.CompositeRepository;
 import org.junit.After;
 import org.junit.Assert;
@@ -513,5 +510,16 @@ public class TestQuery {
 						.list();
 		Assert.assertEquals(queryResults.size(), arr.length - 2);
 		Assert.assertTrue(queryResults.get(0).getOndate().isEqual(dt4));
+	}
+
+	@Test
+	public void willRecognizeSpecificationOnSql() throws IOException {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		LocalDate ld = LocalDate.now();
+		Clicked cl = new Clicked().setDate(ld);
+		db.submit(cl);
+		long count = db.query(ClickedList.class).filter(new ClickedList.FindAt(ld)).count();
+		Assert.assertTrue(count > 0);
 	}
 }

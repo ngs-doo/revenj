@@ -1,13 +1,13 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.15576 
 */
 
 package gen.model.test.repositories;
 
 
 
-public class CompositeRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.test.Composite>, org.revenj.postgres.BulkRepository<gen.model.test.Composite>, org.revenj.patterns.PersistableRepository<gen.model.test.Composite> {
+public class CompositeRepository   implements java.io.Closeable, org.revenj.patterns.SearchableRepository<gen.model.test.Composite>, org.revenj.postgres.BulkRepository<gen.model.test.Composite>, org.revenj.patterns.PersistableRepository<gen.model.test.Composite> {
 	
 	
 	
@@ -58,9 +58,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 	public static org.revenj.patterns.Specification<gen.model.test.Composite> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.test.Composite> filter) {
 		
 		if (filter instanceof gen.model.test.Composite.ForSimple) {
-			gen.model.test.Composite.ForSimple _spec_ = (gen.model.test.Composite.ForSimple)filter;
-			gen.model.test.Simple _spec_simple_ = _spec_.getSimple();
-			return it -> (it.getSimple().getNumber() == _spec_simple_.getNumber());
+			return ((gen.model.test.Composite.ForSimple)filter).rewriteLambda();
 		}
 		return filter;
 	}
@@ -587,8 +585,8 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 
 	
 	public static void __setupPersist(
-			java.util.function.BiConsumer<java.util.Collection<gen.model.test.Composite>, org.revenj.postgres.PostgresWriter> insert, 
-			java.util.function.BiConsumer<java.util.List<gen.model.test.Composite>, java.util.List<gen.model.test.Composite>> update,
+			java.util.function.BiConsumer<java.util.Collection<gen.model.test.Composite>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> insert, 
+			java.util.function.BiConsumer<java.util.Map.Entry<java.util.List<gen.model.test.Composite>, java.util.List<gen.model.test.Composite>>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> update,
 			java.util.function.Consumer<java.util.Collection<gen.model.test.Composite>> delete,
 			java.util.function.Function<gen.model.test.Composite, gen.model.test.Composite> track) {
 		insertLoop = insert;
@@ -597,8 +595,8 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 		trackChanges = track;
 	}
 
-	private static java.util.function.BiConsumer<java.util.Collection<gen.model.test.Composite>, org.revenj.postgres.PostgresWriter> insertLoop;
-	private static java.util.function.BiConsumer<java.util.List<gen.model.test.Composite>, java.util.List<gen.model.test.Composite>> updateLoop;
+	private static java.util.function.BiConsumer<java.util.Collection<gen.model.test.Composite>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> insertLoop;
+	private static java.util.function.BiConsumer<java.util.Map.Entry<java.util.List<gen.model.test.Composite>, java.util.List<gen.model.test.Composite>>, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> updateLoop;
 	private static java.util.function.Consumer<java.util.Collection<gen.model.test.Composite>> deleteLoop;
 	private static java.util.function.Function<gen.model.test.Composite, gen.model.test.Composite> trackChanges;
 
@@ -614,7 +612,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 			org.revenj.postgres.PostgresWriter sw = org.revenj.postgres.PostgresWriter.create()) {
 			String[] result;
 			if (insert != null && !insert.isEmpty()) {
-				insertLoop.accept(insert, sw);
+				insertLoop.accept(insert, new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 				sw.reset();
 				org.revenj.postgres.converters.PostgresTuple tuple = org.revenj.postgres.converters.ArrayTuple.create(insert, converter::to);
 				org.postgresql.util.PGobject pgo = new org.postgresql.util.PGobject();
@@ -656,7 +654,7 @@ public class CompositeRepository   implements java.io.Closeable, org.revenj.patt
 						oldUpdate.set(missing.get(it.getURI()), it);
 					}
 				}
-				updateLoop.accept(oldUpdate, newUpdate);
+				updateLoop.accept(new java.util.AbstractMap.SimpleEntry<>(oldUpdate, newUpdate), new java.util.AbstractMap.SimpleEntry<>(sw, locator));
 				org.revenj.postgres.converters.PostgresTuple tupleOld = org.revenj.postgres.converters.ArrayTuple.create(oldUpdate, converter::to);
 				org.revenj.postgres.converters.PostgresTuple tupleNew = org.revenj.postgres.converters.ArrayTuple.create(newUpdate, converter::to);
 				org.postgresql.util.PGobject pgOld = new org.postgresql.util.PGobject();

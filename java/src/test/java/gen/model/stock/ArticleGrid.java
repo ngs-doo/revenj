@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.5.5871.15913 
+* v1.0.0.15576 
 */
 
 package gen.model.stock;
@@ -21,10 +21,10 @@ public final class ArticleGrid   implements java.io.Serializable, com.dslplatfor
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.ID = ID;
 		this.projectID = projectID;
-		this.sku = sku != null ? sku : "";
 		org.revenj.Guards.checkLength(sku, 10);
-		this.title = title != null ? title : "";
+		this.sku = sku != null ? sku : "";
 		org.revenj.Guards.checkLength(title, 25);
+		this.title = title != null ? title : "";
 	}
 
 	
@@ -72,7 +72,7 @@ public final class ArticleGrid   implements java.io.Serializable, com.dslplatfor
 	public String toString() {
 		return "ArticleGrid(" + URI + ')';
 	}
-	private static final long serialVersionUID = 4065092723417845769L;
+	private static final long serialVersionUID = 8293110065538777933L;
 	
 	private final long ID;
 
@@ -115,7 +115,7 @@ public final class ArticleGrid   implements java.io.Serializable, com.dslplatfor
 
 	
 
-public static class filterSearch   implements java.io.Serializable, com.dslplatform.json.JsonObject, org.revenj.patterns.Specification<ArticleGrid> {
+public static class filterSearch   implements java.io.Serializable, org.revenj.patterns.Specification<ArticleGrid>, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -134,7 +134,7 @@ public static class filterSearch   implements java.io.Serializable, com.dslplatf
 		this.projectID = 0;
 	}
 
-	private static final long serialVersionUID = -1427010402086690219L;
+	private static final long serialVersionUID = 5911040863617018908L;
 	
 	private int projectID;
 
@@ -171,6 +171,16 @@ public static class filterSearch   implements java.io.Serializable, com.dslplatf
 		return this;
 	}
 
+	
+		public boolean test(gen.model.stock.ArticleGrid it) {
+			return ( (it.getProjectID() == this.getProjectID()) &&  ( ( ( this.getFilter() == null ||  this.getFilter().equals("")) || it.getSku().toLowerCase().contains(this.getFilter().toLowerCase())) || it.getTitle().toLowerCase().contains(this.getFilter().toLowerCase())));
+		}
+	
+		public org.revenj.patterns.Specification<ArticleGrid> rewriteLambda() {
+			int _projectID_ = this.getProjectID();
+			String _filter_ = this.getFilter();
+			return it -> ( (it.getProjectID() == _projectID_) &&  ( ( ( _filter_ == null ||  _filter_.equals("")) || it.getSku().toLowerCase().contains(_filter_.toLowerCase())) || it.getTitle().toLowerCase().contains(_filter_.toLowerCase())));
+		}
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -303,10 +313,6 @@ public static class filterSearch   implements java.io.Serializable, com.dslplatf
 				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
 		}
 	}
-	
-		public boolean test(gen.model.stock.ArticleGrid it) {
-			return ( (it.getProjectID() == this.getProjectID()) &&  ( ( ( this.getFilter() == null ||  this.getFilter().equals("")) || it.getSku().toLowerCase().contains(this.getFilter().toLowerCase())) || it.getTitle().toLowerCase().contains(this.getFilter().toLowerCase())));
-		}
 }
 
 	

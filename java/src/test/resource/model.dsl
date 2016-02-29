@@ -91,11 +91,19 @@ module test {
 			En? en;
 		}
 	}
+	sql ClickedList from 'SELECT date, number FROM test."Clicked" GROUP BY date, number' {
+		date? date;
+		decimal? number;
+	}
 	report FindMany {
 		uuid id;
 		Set<uuid> ids;
 		List<CompositeList> composites 'it => ids.Contains(it.id)' order by id limit 4;
 		Composite found 'it => it.id == id';
+		calculated int idsCount from 'it => it.ids.Count';
+		calculated uuid[] uuids from 'it => it.ids.ToArray()';
+//		CompositeCube(number, simple, count) cube 'it => true' limit 2;
+		ClickedList[] clicked 'it => true';
 	}
 }
 module Seq {

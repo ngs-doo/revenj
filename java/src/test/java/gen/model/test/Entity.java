@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.15576 
 */
 
 package gen.model.test;
@@ -108,6 +108,23 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.
 		return "Entity(" + URI + ')';
 	}
 	
+	
+	public Entity(
+			final java.math.BigDecimal money,
+			final String id,
+			final gen.model.test.Composite composite,
+			final java.util.Set<gen.model.test.Detail1> detail1,
+			final java.util.Set<gen.model.test.Detail2> detail2) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setMoney(money);
+		setId(id);
+		setComposite(composite);
+		setDetail1(detail1);
+		setDetail2(detail2);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Entity(
@@ -133,7 +150,7 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = 1698021413284302284L;
+	private static final long serialVersionUID = -4123518911220244391L;
 	
 	private java.math.BigDecimal money;
 
@@ -238,11 +255,11 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.
 	}
 
 	
-	static void __bindTodetail1(java.util.function.Consumer<gen.model.test.Entity> binder) {
+	static void __bindTodetail1(java.util.function.BiConsumer<gen.model.test.Entity, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> binder) {
 		__binderdetail1 = binder;
 	}
 
-	private static java.util.function.Consumer<gen.model.test.Entity> __binderdetail1;
+	private static java.util.function.BiConsumer<gen.model.test.Entity, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> __binderdetail1;
 	
 	private java.util.Set<gen.model.test.Detail1> detail1;
 
@@ -264,11 +281,11 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.
 	}
 
 	
-	static void __bindTodetail2(java.util.function.Consumer<gen.model.test.Entity> binder) {
+	static void __bindTodetail2(java.util.function.BiConsumer<gen.model.test.Entity, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> binder) {
 		__binderdetail2 = binder;
 	}
 
-	private static java.util.function.Consumer<gen.model.test.Entity> __binderdetail2;
+	private static java.util.function.BiConsumer<gen.model.test.Entity, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> __binderdetail2;
 	
 	private java.util.Set<gen.model.test.Detail2> detail2;
 
@@ -328,13 +345,18 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.
 
 	
 	static {
-		gen.model.test.Composite.__bindToentities(parent -> {
-			int i = 0;
-			for (gen.model.test.Entity e : parent.getEntities()) { 
-				e.Compositeid = parent.getId();
-				e.Index = i++; 
-				__binderdetail1.accept(e);
-				__binderdetail2.accept(e);
+		gen.model.test.Composite.__bindToentities((parent, arg) -> {
+			try {
+				int i = 0;
+				for (gen.model.test.Entity e : parent.getEntities()) { 
+					e.Compositeid = parent.getId();
+					e.Index = i++; 
+					__binderdetail1.accept(e, arg);
+					__binderdetail2.accept(e, arg);
+					e.URI = gen.model.test.converters.EntityConverter.buildURI(arg.getKey(), e);
+				}
+			} catch (java.io.IOException ex) {
+				throw new RuntimeException(ex);
 			}
 		});
 	}
@@ -712,21 +734,4 @@ public class Entity   implements java.lang.Cloneable, java.io.Serializable, com.
 		readers[__index__extended_Compositeid] = (item, reader, context) -> { item.Compositeid = org.revenj.postgres.converters.UuidConverter.parse(reader, false); return item; };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
-	
-	
-	public Entity(
-			final java.math.BigDecimal money,
-			final String id,
-			final gen.model.test.Composite composite,
-			final java.util.Set<gen.model.test.Detail1> detail1,
-			final java.util.Set<gen.model.test.Detail2> detail2) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setMoney(money);
-		setId(id);
-		setComposite(composite);
-		setDetail1(detail1);
-		setDetail2(detail2);
-	}
-
 }

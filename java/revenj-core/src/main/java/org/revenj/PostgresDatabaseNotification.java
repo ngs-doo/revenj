@@ -105,7 +105,9 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 				stmt.execute("LISTEN events; LISTEN aggregate_roots");
 				retryCount = 0;
 				Pooling pooling = new Pooling(bc, stmt);
-				new Thread(pooling).start();
+				Thread thread = new Thread(pooling);
+				thread.setDaemon(true);
+				thread.start();
 			} else cleanupConnection(connection);
 		} catch (Exception ex) {
 			try {
@@ -230,5 +232,6 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 
 	public void close() {
 		isClosed = true;
+
 	}
 }

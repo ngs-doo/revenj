@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.15576 
 */
 
 package gen.model.test;
@@ -87,7 +87,7 @@ public final class Clicked   implements java.io.Serializable, com.dslplatform.js
 	public String toString() {
 		return URI != null ? "Clicked(" + URI + ')' : "new Clicked(" + super.hashCode() + ')';
 	}
-	private static final long serialVersionUID = -3460630793497993684L;
+	private static final long serialVersionUID = 8752610876125657913L;
 	
 	private java.time.LocalDate date;
 
@@ -205,7 +205,7 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		this.inSet = new java.util.LinkedHashSet<java.math.BigDecimal>(4);
 	}
 
-	private static final long serialVersionUID = 2086307098038654361L;
+	private static final long serialVersionUID = -6816315145787986286L;
 	
 	private java.math.BigDecimal min;
 
@@ -266,6 +266,13 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 	
 		public boolean test(gen.model.test.Clicked it) {
 			return ( ( it.getNumber().compareTo(this.getMin()) >= 0 && (this.getInSet().contains(it.getNumber()))) &&  it.getEn().equals(this.getEn()));
+		}
+	
+		public org.revenj.patterns.Specification<Clicked> rewriteLambda() {
+			java.math.BigDecimal _min_ = this.getMin();
+			java.util.Set<java.math.BigDecimal> _inSet_ = this.getInSet();
+			gen.model.test.En _en_ = this.getEn();
+			return it -> ( ( it.getNumber().compareTo(_min_) >= 0 && (_inSet_.contains(it.getNumber()))) &&  it.getEn().equals(_en_));
 		}
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
@@ -471,6 +478,26 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 		}
 	}
 }
+
+	
+	@com.fasterxml.jackson.annotation.JsonCreator private Clicked(
+			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
+			@com.fasterxml.jackson.annotation.JsonProperty("ProcessedAt") final java.time.OffsetDateTime ProcessedAt,
+			@com.fasterxml.jackson.annotation.JsonProperty("QueuedAt") final java.time.OffsetDateTime QueuedAt,
+			@com.fasterxml.jackson.annotation.JsonProperty("date") final java.time.LocalDate date,
+			@com.fasterxml.jackson.annotation.JsonProperty("number") final java.math.BigDecimal number,
+			@com.fasterxml.jackson.annotation.JsonProperty("bigint") final Long bigint,
+			@com.fasterxml.jackson.annotation.JsonProperty("bool") final java.util.Set<Boolean> bool,
+			@com.fasterxml.jackson.annotation.JsonProperty("en") final gen.model.test.En en) {
+		this.URI = URI != null ? URI : "new " + new java.util.UUID(0L, 0L).toString();
+		this.ProcessedAt = ProcessedAt == null ? null : ProcessedAt;
+		this.QueuedAt = QueuedAt == null ? null : QueuedAt;
+		this.date = date;
+		this.number = number == null ? java.math.BigDecimal.ZERO : number;
+		this.bigint = bigint;
+		this.bool = bool == null ? new java.util.LinkedHashSet<Boolean>(4) : bool;
+		this.en = en;
+	}
 
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
@@ -770,26 +797,6 @@ public static class BetweenNumbers   implements java.io.Serializable, org.revenj
 				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
 		}
 	}
-	
-	@com.fasterxml.jackson.annotation.JsonCreator private Clicked(
-			@com.fasterxml.jackson.annotation.JsonProperty("URI") final String URI ,
-			@com.fasterxml.jackson.annotation.JsonProperty("ProcessedAt") final java.time.OffsetDateTime ProcessedAt,
-			@com.fasterxml.jackson.annotation.JsonProperty("QueuedAt") final java.time.OffsetDateTime QueuedAt,
-			@com.fasterxml.jackson.annotation.JsonProperty("date") final java.time.LocalDate date,
-			@com.fasterxml.jackson.annotation.JsonProperty("number") final java.math.BigDecimal number,
-			@com.fasterxml.jackson.annotation.JsonProperty("bigint") final Long bigint,
-			@com.fasterxml.jackson.annotation.JsonProperty("bool") final java.util.Set<Boolean> bool,
-			@com.fasterxml.jackson.annotation.JsonProperty("en") final gen.model.test.En en) {
-		this.URI = URI != null ? URI : "new " + new java.util.UUID(0L, 0L).toString();
-		this.ProcessedAt = ProcessedAt == null ? null : ProcessedAt;
-		this.QueuedAt = QueuedAt == null ? null : QueuedAt;
-		this.date = date;
-		this.number = number == null ? java.math.BigDecimal.ZERO : number;
-		this.bigint = bigint;
-		this.bool = bool == null ? new java.util.LinkedHashSet<Boolean>(4) : bool;
-		this.en = en;
-	}
-
 	
 	public Clicked(org.revenj.postgres.PostgresReader reader, int context, org.revenj.postgres.ObjectConverter.Reader<Clicked>[] readers) throws java.io.IOException {
 		for (org.revenj.postgres.ObjectConverter.Reader<Clicked> rdr : readers) {

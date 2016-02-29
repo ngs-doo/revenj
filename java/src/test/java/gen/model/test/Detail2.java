@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.15576 
 */
 
 package gen.model.test;
@@ -87,6 +87,17 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 		return "Detail2(" + URI + ')';
 	}
 	
+	
+	public Detail2(
+			final java.net.URI u,
+			final double[] dd) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setU(u);
+		setDd(dd);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail2(
@@ -106,7 +117,7 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = -4475902015092088173L;
+	private static final long serialVersionUID = -2112999879161674024L;
 	
 	private java.net.URI u;
 
@@ -202,12 +213,17 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 
 	
 	static {
-		gen.model.test.Entity.__bindTodetail2(parent -> {
-			int i = 0;
-			for (gen.model.test.Detail2 e : parent.getDetail2()) { 
-				e.EntityCompositeid = parent.getCompositeid();
-				e.EntityIndex = parent.getIndex();
-				e.Index = i++; 
+		gen.model.test.Entity.__bindTodetail2((parent, arg) -> {
+			try {
+				int i = 0;
+				for (gen.model.test.Detail2 e : parent.getDetail2()) { 
+					e.EntityCompositeid = parent.getCompositeid();
+					e.EntityIndex = parent.getIndex();
+					e.Index = i++; 
+					e.URI = gen.model.test.converters.Detail2Converter.buildURI(arg.getKey(), e);
+				}
+			} catch (java.io.IOException ex) {
+				throw new RuntimeException(ex);
 			}
 		});
 	}
@@ -232,12 +248,13 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 				com.dslplatform.json.NetConverter.serialize(self.u, sw);
 			}
 		
-		if(self.dd.length != 0) {
+		final double[] _tmp_dd_ = self.dd;
+		if(_tmp_dd_.length != 0) {
 			sw.writeAscii(",\"dd\":[", 7);
-			com.dslplatform.json.NumberConverter.serialize(self.dd[0], sw);
-			for(int i = 1; i < self.dd.length; i++) {
+			com.dslplatform.json.NumberConverter.serialize(_tmp_dd_[0], sw);
+			for(int i = 1; i < _tmp_dd_.length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.NumberConverter.serialize(self.dd[i], sw);
+				com.dslplatform.json.NumberConverter.serialize(_tmp_dd_[i], sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
@@ -271,12 +288,13 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 				sw.writeAscii(",\"u\":null", 9);
 			}
 		
-		if(self.dd.length != 0) {
+		final double[] _tmp_dd_ = self.dd;
+		if(_tmp_dd_.length != 0) {
 			sw.writeAscii(",\"dd\":[", 7);
-			com.dslplatform.json.NumberConverter.serialize(self.dd[0], sw);
-			for(int i = 1; i < self.dd.length; i++) {
+			com.dslplatform.json.NumberConverter.serialize(_tmp_dd_[0], sw);
+			for(int i = 1; i < _tmp_dd_.length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.NumberConverter.serialize(self.dd[i], sw);
+				com.dslplatform.json.NumberConverter.serialize(_tmp_dd_[i], sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
@@ -484,15 +502,4 @@ public class Detail2   implements java.lang.Cloneable, java.io.Serializable, com
 		readers[__index__extended_EntityIndex] = (item, reader, context) -> { item.EntityIndex = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
-	
-	
-	public Detail2(
-			final java.net.URI u,
-			final double[] dd) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setU(u);
-		setDd(dd);
-	}
-
 }

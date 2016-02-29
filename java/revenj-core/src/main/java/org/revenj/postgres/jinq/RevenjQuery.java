@@ -32,7 +32,7 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 		}
 		return predicate instanceof CustomAnalysis
 				? queryComposer.where(((CustomAnalysis) predicate).getAnalysisLambda(queryComposer.getLambdaCount()))
-				: queryComposer.where(LambdaInfo.analyze(predicate, queryComposer.getLambdaCount(), true));
+				: queryComposer.where(LambdaInfo.analyze(queryComposer.rewrite(predicate), queryComposer.getLambdaCount(), true));
 	}
 
 	private RevenjQueryComposer applyOrder(Compare order, boolean ascending) {
@@ -92,7 +92,7 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 		try {
 			LambdaInfo lambda = predicate instanceof CustomAnalysis
 					? ((CustomAnalysis) predicate).getAnalysisLambda(queryComposer.getLambdaCount())
-					: LambdaInfo.analyze(predicate, queryComposer.getLambdaCount(), true);
+					: LambdaInfo.analyze(queryComposer.rewrite(predicate), queryComposer.getLambdaCount(), true);
 			return queryComposer.all(lambda);
 		} catch (SQLException e) {
 			throw new IOException(e);

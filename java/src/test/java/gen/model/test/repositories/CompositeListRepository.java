@@ -1,13 +1,13 @@
 /*
 * Created by DSL Platform
-* v1.0.0.17084 
+* v1.0.0.15576 
 */
 
 package gen.model.test.repositories;
 
 
 
-public class CompositeListRepository   implements java.io.Closeable, org.revenj.patterns.Repository<gen.model.test.CompositeList>, org.revenj.postgres.BulkRepository<gen.model.test.CompositeList> {
+public class CompositeListRepository   implements java.io.Closeable, org.revenj.patterns.SearchableRepository<gen.model.test.CompositeList>, org.revenj.postgres.BulkRepository<gen.model.test.CompositeList> {
 	
 	
 	
@@ -58,14 +58,10 @@ public class CompositeListRepository   implements java.io.Closeable, org.revenj.
 	public static org.revenj.patterns.Specification<gen.model.test.CompositeList> rewriteSpecificationToLambda(org.revenj.patterns.Specification<gen.model.test.CompositeList> filter) {
 		
 		if (filter instanceof gen.model.test.CompositeList.ForSimple) {
-			gen.model.test.CompositeList.ForSimple _spec_ = (gen.model.test.CompositeList.ForSimple)filter;
-			java.util.List<gen.model.test.Simple> _spec_simples_ = _spec_.getSimples();
-			return it -> (_spec_simples_.contains(it.getSimple()));
+			return ((gen.model.test.CompositeList.ForSimple)filter).rewriteLambda();
 		}
 		if (filter instanceof gen.model.test.CompositeCube.FilterMax) {
-			gen.model.test.CompositeCube.FilterMax _spec_ = (gen.model.test.CompositeCube.FilterMax)filter;
-			java.time.LocalDate _spec_value_ = _spec_.getValue();
-			return it -> it.getChange().compareTo(_spec_value_) >= 0;
+			return ((gen.model.test.CompositeCube.FilterMax)filter).rewriteLambda();
 		}
 		return filter;
 	}

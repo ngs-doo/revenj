@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.15576 
 */
 
 package gen.model.test;
@@ -87,6 +87,17 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable, com
 		return "Detail1(" + URI + ')';
 	}
 	
+	
+	public Detail1(
+			final Float f,
+			final float ff) {
+			
+		URI = java.lang.Integer.toString(System.identityHashCode(this));
+		setF(f);
+		setFf(ff);
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Detail1(
@@ -106,7 +117,7 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable, com
 		this.Index = Index;
 	}
 
-	private static final long serialVersionUID = 6797552984996140138L;
+	private static final long serialVersionUID = -8013771845972487135L;
 	
 	private Float f;
 
@@ -200,12 +211,17 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable, com
 
 	
 	static {
-		gen.model.test.Entity.__bindTodetail1(parent -> {
-			int i = 0;
-			for (gen.model.test.Detail1 e : parent.getDetail1()) { 
-				e.EntityCompositeid = parent.getCompositeid();
-				e.EntityIndex = parent.getIndex();
-				e.Index = i++; 
+		gen.model.test.Entity.__bindTodetail1((parent, arg) -> {
+			try {
+				int i = 0;
+				for (gen.model.test.Detail1 e : parent.getDetail1()) { 
+					e.EntityCompositeid = parent.getCompositeid();
+					e.EntityIndex = parent.getIndex();
+					e.Index = i++; 
+					e.URI = gen.model.test.converters.Detail1Converter.buildURI(arg.getKey(), e);
+				}
+			} catch (java.io.IOException ex) {
+				throw new RuntimeException(ex);
 			}
 		});
 	}
@@ -436,15 +452,4 @@ public class Detail1   implements java.lang.Cloneable, java.io.Serializable, com
 		readers[__index__extended_EntityIndex] = (item, reader, context) -> { item.EntityIndex = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 		readers[__index__extended_Index] = (item, reader, context) -> { item.Index = org.revenj.postgres.converters.IntConverter.parse(reader); return item; };
 	}
-	
-	
-	public Detail1(
-			final Float f,
-			final float ff) {
-			
-		URI = java.lang.Integer.toString(System.identityHashCode(this));
-		setF(f);
-		setFf(ff);
-	}
-
 }

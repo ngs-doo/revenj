@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.jinq.rebased.org.objectweb.asm.Type;
 
 import ch.epfl.labos.iu.orm.queryll2.path.TransformationClassAnalyzer;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodSignature;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValue;
+import org.revenj.patterns.Specification;
 
 public abstract class MetamodelUtil {
 	private final Set<Class<?>> safeMethodAnnotations;
@@ -25,6 +27,7 @@ public abstract class MetamodelUtil {
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> comparisonMethodsWithObjectEquals;
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> staticComparisonMethods;
 	protected final Map<MethodSignature, TypedValue.ComparisonValue.ComparisonOp> staticComparisonMethodsWithObjectEquals;
+	protected final Map<Class<?>, Function> specificationRewrites;
 
 	class MetamodelUtilAttribute {
 		public final String name;
@@ -106,6 +109,7 @@ public abstract class MetamodelUtil {
 		comparisonMethodsWithObjectEquals.put(MethodChecker.objectEquals, TypedValue.ComparisonValue.ComparisonOp.eq);
 		staticComparisonMethodsWithObjectEquals = new HashMap<>();
 		staticComparisonMethodsWithObjectEquals.put(MethodChecker.objectsEquals, TypedValue.ComparisonValue.ComparisonOp.eq);
+		specificationRewrites = new HashMap<>();
 	}
 
 	protected void addProperty(Method method, String property) {
@@ -136,6 +140,14 @@ public abstract class MetamodelUtil {
 		comparisonMethods.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
 		comparisonMethodsWithObjectEquals.put(eqMethod, TypedValue.ComparisonValue.ComparisonOp.eq);
 		safeMethods.add(eqMethod);
+	}
+
+	public <T, S extends Specification<T>> void registerSpecification(Class<S> manifest, Function<S, Specification<T>> conversion) {
+		specificationRewrites.put(manifest, conversion);
+	}
+
+	public Function<Specification, Specification> lookupRewrite(Specification filter) {
+		return specificationRewrites.get(filter.getClass());
 	}
 
 	public <U> boolean isKnownManagedType(String entityClassName) {

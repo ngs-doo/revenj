@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.15576 
 */
 
 package gen.model.Seq;
@@ -85,7 +85,7 @@ public class Next   implements java.lang.Cloneable, java.io.Serializable, org.re
 		this.ID = ID;
 	}
 
-	private static final long serialVersionUID = 7166794290388218343L;
+	private static final long serialVersionUID = 8480339187257992354L;
 	
 	private int ID;
 
@@ -143,7 +143,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 		this.max = 0;
 	}
 
-	private static final long serialVersionUID = 5263294815081220309L;
+	private static final long serialVersionUID = -6369424402035703972L;
 	
 	private Integer min;
 
@@ -183,6 +183,12 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 	
 		public boolean test(gen.model.Seq.Next it) {
 			return ( this.getMin() == null ||  ( (it.getID() >= this.getMin()) &&  (it.getID() <= this.getMax())));
+		}
+	
+		public org.revenj.patterns.Specification<Next> rewriteLambda() {
+			Integer _min_ = this.getMin();
+			int _max_ = this.getMax();
+			return it -> ( _min_ == null ||  ( (it.getID() >= _min_) &&  (it.getID() <= _max_)));
 		}
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
@@ -318,6 +324,7 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 	}
 }
 
+	private transient Next __originalValue;
 	
 	static {
 		gen.model.Seq.repositories.NextRepository.__setupPersist(
@@ -325,17 +332,24 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 				try {
 					for (gen.model.Seq.Next agg : aggregates) {
 						 
-						agg.URI = gen.model.Seq.converters.NextConverter.buildURI(arg, agg);
+						agg.URI = gen.model.Seq.converters.NextConverter.buildURI(arg.getKey(), agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			},
-			(oldAggregates, newAggregates) -> {
-				for (int i = 0; i < newAggregates.size(); i++) {
-					gen.model.Seq.Next oldAgg = oldAggregates.get(i);
-					gen.model.Seq.Next newAgg = newAggregates.get(i);
-					 
+			(aggregates, arg) -> {
+				try {
+					java.util.List<gen.model.Seq.Next> oldAggregates = aggregates.getKey();
+					java.util.List<gen.model.Seq.Next> newAggregates = aggregates.getValue();
+					for (int i = 0; i < newAggregates.size(); i++) {
+						gen.model.Seq.Next oldAgg = oldAggregates.get(i);
+						gen.model.Seq.Next newAgg = newAggregates.get(i);
+						 
+						newAgg.URI = gen.model.Seq.converters.NextConverter.buildURI(arg.getKey(), newAgg);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
 				}
 			},
 			aggregates -> { 
@@ -353,7 +367,6 @@ public static class BetweenIds   implements java.io.Serializable, org.revenj.pat
 			}
 		);
 	}
-	private transient Next __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);

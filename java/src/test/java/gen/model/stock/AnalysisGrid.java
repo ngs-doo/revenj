@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.5.5871.15913 
+* v1.0.0.15576 
 */
 
 package gen.model.stock;
@@ -21,14 +21,14 @@ public final class AnalysisGrid   implements java.io.Serializable, com.dslplatfo
 			
 		this.URI = URI != null ? URI : new java.util.UUID(0L, 0L).toString();
 		this.projectID = projectID;
-		this.title = title != null ? title : "";
 		org.revenj.Guards.checkLength(title, 25);
-		this.sku = sku != null ? sku : "";
+		this.title = title != null ? title : "";
 		org.revenj.Guards.checkLength(sku, 10);
-		this.xyz = xyz;
+		this.sku = sku != null ? sku : "";
 		org.revenj.Guards.checkLength(xyz, 1);
-		this.abc = abc;
+		this.xyz = xyz;
 		org.revenj.Guards.checkLength(abc, 1);
+		this.abc = abc;
 	}
 
 	
@@ -77,7 +77,7 @@ public final class AnalysisGrid   implements java.io.Serializable, com.dslplatfo
 	public String toString() {
 		return "AnalysisGrid(" + URI + ')';
 	}
-	private static final long serialVersionUID = -5336591672687065505L;
+	private static final long serialVersionUID = -6368001767733782643L;
 	
 	private final int projectID;
 
@@ -130,7 +130,7 @@ public final class AnalysisGrid   implements java.io.Serializable, com.dslplatfo
 
 	
 
-public static class filterSearch   implements java.io.Serializable, com.dslplatform.json.JsonObject, org.revenj.patterns.Specification<AnalysisGrid> {
+public static class filterSearch   implements java.io.Serializable, org.revenj.patterns.Specification<AnalysisGrid>, com.dslplatform.json.JsonObject {
 	
 	
 	
@@ -155,7 +155,7 @@ public static class filterSearch   implements java.io.Serializable, com.dslplatf
 		this.projectID = 0;
 	}
 
-	private static final long serialVersionUID = -7925476850171536883L;
+	private static final long serialVersionUID = 7994259469981688642L;
 	
 	private int projectID;
 
@@ -249,6 +249,19 @@ public static class filterSearch   implements java.io.Serializable, com.dslplatf
 		return this;
 	}
 
+	
+		public boolean test(gen.model.stock.AnalysisGrid it) {
+			return ( ( ( ( (it.getProjectID() == this.getProjectID()) &&  ( ( ( this.getFilter() == null ||  this.getFilter().equals("")) || it.getTitle().toLowerCase().contains(this.getFilter().toLowerCase())) || it.getSku().toLowerCase().contains(this.getFilter().toLowerCase()))) &&  ( this.getAbc() == null ||  it.getAbc().equals(this.getAbc()))) &&  ( this.getXyz() == null ||  it.getXyz().equals(this.getXyz()))) &&  ( ( this.getClazz() == null ||  this.getClazz().equals("")) || it.getSku().toLowerCase().contains(this.getClazz().toLowerCase())));
+		}
+	
+		public org.revenj.patterns.Specification<AnalysisGrid> rewriteLambda() {
+			int _projectID_ = this.getProjectID();
+			String _filter_ = this.getFilter();
+			String _abc_ = this.getAbc();
+			String _xyz_ = this.getXyz();
+			String _clazz_ = this.getClazz();
+			return it -> ( ( ( ( (it.getProjectID() == _projectID_) &&  ( ( ( _filter_ == null ||  _filter_.equals("")) || it.getTitle().toLowerCase().contains(_filter_.toLowerCase())) || it.getSku().toLowerCase().contains(_filter_.toLowerCase()))) &&  ( _abc_ == null ||  it.getAbc().equals(_abc_))) &&  ( _xyz_ == null ||  it.getXyz().equals(_xyz_))) &&  ( ( _clazz_ == null ||  _clazz_.equals("")) || it.getSku().toLowerCase().contains(_clazz_.toLowerCase())));
+		}
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -456,10 +469,6 @@ public static class filterSearch   implements java.io.Serializable, com.dslplatf
 				throw new java.io.IOException("Invalid char value found at: " + reader.positionInStream() + ". Expecting null, { or [. Found: " + (char)reader.last());
 		}
 	}
-	
-		public boolean test(gen.model.stock.AnalysisGrid it) {
-			return ( ( ( ( (it.getProjectID() == this.getProjectID()) &&  ( ( ( this.getFilter() == null ||  this.getFilter().equals("")) || it.getTitle().toLowerCase().contains(this.getFilter().toLowerCase())) || it.getSku().toLowerCase().contains(this.getFilter().toLowerCase()))) &&  ( this.getAbc() == null ||  it.getAbc().equals(this.getAbc()))) &&  ( this.getXyz() == null ||  it.getXyz().equals(this.getXyz()))) &&  ( ( this.getClazz() == null ||  this.getClazz().equals("")) || it.getSku().toLowerCase().contains(this.getClazz().toLowerCase())));
-		}
 }
 
 	

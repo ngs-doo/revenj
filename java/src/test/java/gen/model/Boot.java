@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.25103 
+* v1.0.0.12875 
 */
 
 package gen.model;
@@ -152,6 +152,10 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		gen.model.test.converters.ClickedConverter test$converter$ClickedConverter = new gen.model.test.converters.ClickedConverter(columns);
 		container.registerInstance(gen.model.test.converters.ClickedConverter.class, test$converter$ClickedConverter, false);
 		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.Clicked>>(){}.type, test$converter$ClickedConverter, false);
+		
+		gen.model.test.converters.ClickedListConverter test$converter$ClickedListConverter = new gen.model.test.converters.ClickedListConverter(loadQueryInfo(container, "SELECT * FROM (SELECT date, number FROM test.\"Clicked\" GROUP BY date, number) sq LIMIT 0", "test", "ClickedList"));
+		container.registerInstance(gen.model.test.converters.ClickedListConverter.class, test$converter$ClickedListConverter, false);
+		container.registerInstance(new org.revenj.patterns.Generic<org.revenj.postgres.ObjectConverter<gen.model.test.ClickedList>>(){}.type, test$converter$ClickedListConverter, false);
 		
 		gen.model.Seq.converters.NextConverter Seq$converter$NextConverter = new gen.model.Seq.converters.NextConverter(columns);
 		container.registerInstance(gen.model.Seq.converters.NextConverter.class, Seq$converter$NextConverter, false);
@@ -353,6 +357,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Composite.class, "getEntities", "\"entities\"", gen.model.test.Composite::getEntities);
 		metamodel.registerProperty(gen.model.test.Composite.class, "getLazies", "\"lazies\"", gen.model.test.Composite::getLazies);
 		metamodel.registerProperty(gen.model.test.Composite.class, "getIndexes", "\"indexes\"", gen.model.test.Composite::getIndexes);
+		
+		metamodel.registerSpecification(gen.model.test.Composite.ForSimple.class, gen.model.test.Composite.ForSimple::rewriteLambda);
 		test$converter$CompositeListConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.CompositeList.class, "\"test\".\"CompositeList\"");
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getURI", "\"URI\"", gen.model.test.CompositeList::getURI);
@@ -374,7 +380,11 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getHasEntities", "\"hasEntities\"", gen.model.test.CompositeList::getHasEntities);
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getEntityHasMoney", "\"entityHasMoney\"", gen.model.test.CompositeList::getEntityHasMoney);
 		metamodel.registerProperty(gen.model.test.CompositeList.class, "getIndexes", "\"indexes\"", gen.model.test.CompositeList::getIndexes);
+		
+		metamodel.registerSpecification(gen.model.test.CompositeList.ForSimple.class, gen.model.test.CompositeList.ForSimple::rewriteLambda);
 		container.register(gen.model.test.CompositeCube.class, false);
+		
+		metamodel.registerSpecification(gen.model.test.CompositeCube.FilterMax.class, gen.model.test.CompositeCube.FilterMax::rewriteLambda);
 		test$converter$EntityConverter.configure(container);
 		metamodel.registerDataSource(gen.model.test.Entity.class, "\"test\".\"Entity_entity\"");
 		metamodel.registerProperty(gen.model.test.Entity.class, "getURI", "\"URI\"", gen.model.test.Entity::getURI);
@@ -416,6 +426,17 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getBigint", "\"bigint\"", gen.model.test.Clicked::getBigint);
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getBool", "\"bool\"", gen.model.test.Clicked::getBool);
 		metamodel.registerProperty(gen.model.test.Clicked.class, "getEn", "\"en\"", gen.model.test.Clicked::getEn);
+		
+		metamodel.registerSpecification(gen.model.test.Clicked.BetweenNumbers.class, gen.model.test.Clicked.BetweenNumbers::rewriteLambda);
+		
+		container.register(gen.model.test.repositories.ClickedListRepository.class);
+		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.test.ClickedList>>(){}.type, gen.model.test.repositories.ClickedListRepository::new, false);
+		test$converter$ClickedListConverter.configure(container);
+		metamodel.registerDataSource(gen.model.test.ClickedList.class, "(SELECT date, number FROM test.\"Clicked\" GROUP BY date, number)");
+		metamodel.registerProperty(gen.model.test.ClickedList.class, "getDate", "\"date\"", gen.model.test.ClickedList::getDate);
+		metamodel.registerProperty(gen.model.test.ClickedList.class, "getNumber", "\"number\"", gen.model.test.ClickedList::getNumber);
+		
+		metamodel.registerSpecification(gen.model.test.ClickedList.FindAt.class, gen.model.test.ClickedList.FindAt::rewriteLambda);
 		Seq$converter$NextConverter.configure(container);
 		metamodel.registerDataSource(gen.model.Seq.Next.class, "\"Seq\".\"Next_entity\"");
 		metamodel.registerProperty(gen.model.Seq.Next.class, "getURI", "\"URI\"", gen.model.Seq.Next::getURI);
@@ -426,6 +447,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.Seq.Next>>(){}.type, gen.model.Seq.repositories.NextRepository::new, false);
+		
+		metamodel.registerSpecification(gen.model.Seq.Next.BetweenIds.class, gen.model.Seq.Next.BetweenIds::rewriteLambda);
 		mixinReference$converter$SpecificReportConverter.configure(container);
 		metamodel.registerDataSource(gen.model.mixinReference.SpecificReport.class, "\"mixinReference\".\"SpecificReport_entity\"");
 		metamodel.registerProperty(gen.model.mixinReference.SpecificReport.class, "getURI", "\"URI\"", gen.model.mixinReference.SpecificReport::getURI);
@@ -489,11 +512,11 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getName", "\"name\"", gen.model.binaries.Document::getName);
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getContent", "\"content\"", gen.model.binaries.Document::getContent);
 		metamodel.registerProperty(gen.model.binaries.Document.class, "getBools", "\"bools\"", gen.model.binaries.Document::getBools);
-		binaries$converter$WritableDocumentConverter.configure(container);
-		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
 		
 		container.register(gen.model.binaries.repositories.WritableDocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
+		binaries$converter$WritableDocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.WritableDocument.class, "\"binaries\".\"Document\"");
 		
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.Repository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.postgres.BulkRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
@@ -501,11 +524,11 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.PersistableRepository<gen.model.binaries.WritableDocument>>(){}.type, gen.model.binaries.repositories.WritableDocumentRepository::new, false);
 		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getId", "\"ID\"", gen.model.binaries.WritableDocument::getId);
 		metamodel.registerProperty(gen.model.binaries.WritableDocument.class, "getName", "\"name\"", gen.model.binaries.WritableDocument::getName);
-		binaries$converter$ReadOnlyDocumentConverter.configure(container);
-		metamodel.registerDataSource(gen.model.binaries.ReadOnlyDocument.class, "(SELECT \"ID\", name from binaries.\"Document\")");
 		
 		container.register(gen.model.binaries.repositories.ReadOnlyDocumentRepository.class);
 		container.registerFactory(new org.revenj.patterns.Generic<org.revenj.patterns.SearchableRepository<gen.model.binaries.ReadOnlyDocument>>(){}.type, gen.model.binaries.repositories.ReadOnlyDocumentRepository::new, false);
+		binaries$converter$ReadOnlyDocumentConverter.configure(container);
+		metamodel.registerDataSource(gen.model.binaries.ReadOnlyDocument.class, "(SELECT \"ID\", name from binaries.\"Document\")");
 		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getID", "\"ID\"", gen.model.binaries.ReadOnlyDocument::getID);
 		metamodel.registerProperty(gen.model.binaries.ReadOnlyDocument.class, "getName", "\"name\"", gen.model.binaries.ReadOnlyDocument::getName);
 		security$converter$DocumentConverter.configure(container);
@@ -702,6 +725,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.stock.ArticleGrid.class, "getProjectID", "\"projectID\"", gen.model.stock.ArticleGrid::getProjectID);
 		metamodel.registerProperty(gen.model.stock.ArticleGrid.class, "getSku", "\"sku\"", gen.model.stock.ArticleGrid::getSku);
 		metamodel.registerProperty(gen.model.stock.ArticleGrid.class, "getTitle", "\"title\"", gen.model.stock.ArticleGrid::getTitle);
+		
+		metamodel.registerSpecification(gen.model.stock.ArticleGrid.filterSearch.class, gen.model.stock.ArticleGrid.filterSearch::rewriteLambda);
 		stock$converter$AnalysisConverter.configure(container);
 		metamodel.registerDataSource(gen.model.stock.Analysis.class, "\"stock\".\"Analysis_entity\"");
 		metamodel.registerProperty(gen.model.stock.Analysis.class, "getURI", "\"URI\"", gen.model.stock.Analysis::getURI);
@@ -730,6 +755,8 @@ public class Boot implements org.revenj.extensibility.SystemAspect {
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getSku", "\"sku\"", gen.model.stock.AnalysisGrid::getSku);
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getXyz", "\"xyz\"", gen.model.stock.AnalysisGrid::getXyz);
 		metamodel.registerProperty(gen.model.stock.AnalysisGrid.class, "getAbc", "\"abc\"", gen.model.stock.AnalysisGrid::getAbc);
+		
+		metamodel.registerSpecification(gen.model.stock.AnalysisGrid.filterSearch.class, gen.model.stock.AnalysisGrid.filterSearch::rewriteLambda);
 		xc$converter$SearchByTimestampAndOrderByTimestampConverter.configure(container);
 		metamodel.registerDataSource(gen.model.xc.SearchByTimestampAndOrderByTimestamp.class, "\"xc\".\"SearchByTimestampAndOrderByTimestamp_entity\"");
 		metamodel.registerProperty(gen.model.xc.SearchByTimestampAndOrderByTimestamp.class, "getURI", "\"URI\"", gen.model.xc.SearchByTimestampAndOrderByTimestamp::getURI);

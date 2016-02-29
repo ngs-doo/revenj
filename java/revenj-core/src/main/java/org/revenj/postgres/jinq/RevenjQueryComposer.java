@@ -9,10 +9,12 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 import org.postgresql.core.Oid;
 import org.postgresql.util.PGobject;
 import org.revenj.patterns.DataSource;
+import org.revenj.patterns.Specification;
 import org.revenj.postgres.ObjectConverter;
 import org.revenj.postgres.PostgresWriter;
 import org.revenj.postgres.converters.ArrayTuple;
@@ -533,6 +535,11 @@ public final class RevenjQueryComposer<T> {
 			transformationConfig.isCollectionContainsSafe = true;
 		}
 		return transformationConfig;
+	}
+
+	public Specification rewrite(Specification filter) {
+		Function<Specification, Specification> conversion = metamodel.lookupRewrite(filter);
+		return conversion != null ? conversion.apply(filter) : filter;
 	}
 
 	public <E extends Exception> RevenjQueryComposer<T> where(LambdaInfo lambdaInfo) {

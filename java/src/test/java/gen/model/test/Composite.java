@@ -1,6 +1,6 @@
 /*
 * Created by DSL Platform
-* v1.0.0.29923 
+* v1.0.0.15576 
 */
 
 package gen.model.test;
@@ -109,6 +109,27 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		return "Composite(" + URI + ')';
 	}
 	
+	
+	public Composite(
+			final java.util.UUID id,
+			final gen.model.test.En[] enn,
+			final gen.model.test.En en,
+			final gen.model.test.Simple simple,
+			final java.util.List<java.time.OffsetDateTime> tsl,
+			final java.util.List<gen.model.test.Entity> entities,
+			final long[] indexes) {
+			
+		setId(id);
+		setEnn(enn);
+		setEn(en);
+		setSimple(simple);
+		setTsl(tsl);
+		setEntities(entities);
+		setIndexes(indexes);
+		this.URI = this.id.toString();
+	}
+
+	
 	private transient java.util.Optional<org.revenj.patterns.ServiceLocator> __locator = java.util.Optional.empty();
 	
 	@com.fasterxml.jackson.annotation.JsonCreator private Composite(
@@ -142,7 +163,7 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 		this.hasEntities = hasEntities;
 	}
 
-	private static final long serialVersionUID = 1271399589760697605L;
+	private static final long serialVersionUID = 5330807536990535264L;
 	
 	private java.util.UUID id;
 
@@ -261,11 +282,11 @@ public class Composite   implements java.lang.Cloneable, java.io.Serializable, o
 	}
 
 	
-	static void __bindToentities(java.util.function.Consumer<gen.model.test.Composite> binder) {
+	static void __bindToentities(java.util.function.BiConsumer<gen.model.test.Composite, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> binder) {
 		__binderentities = binder;
 	}
 
-	private static java.util.function.Consumer<gen.model.test.Composite> __binderentities;
+	private static java.util.function.BiConsumer<gen.model.test.Composite, java.util.Map.Entry<org.revenj.postgres.PostgresWriter, org.revenj.patterns.ServiceLocator>> __binderentities;
 	
 	private java.util.List<gen.model.test.Entity> entities;
 
@@ -404,7 +425,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 		this.simple = new gen.model.test.Simple();
 	}
 
-	private static final long serialVersionUID = 3659879422946359937L;
+	private static final long serialVersionUID = -7251827779934751500L;
 	
 	private gen.model.test.Simple simple;
 
@@ -427,6 +448,11 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 	
 		public boolean test(gen.model.test.Composite it) {
 			return (it.getSimple().getNumber() == this.getSimple().getNumber());
+		}
+	
+		public org.revenj.patterns.Specification<Composite> rewriteLambda() {
+			gen.model.test.Simple _simple_ = this.getSimple();
+			return it -> (it.getSimple().getNumber() == _simple_.getNumber());
 		}
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
@@ -547,6 +573,7 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 	}
 }
 
+	private transient Composite __originalValue;
 	
 	static {
 		gen.model.test.repositories.CompositeRepository.__setupPersist(
@@ -555,20 +582,27 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 					for (gen.model.test.Composite agg : aggregates) {
 						
 						agg.change = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
-						__binderentities.accept(agg); 
-						agg.URI = gen.model.test.converters.CompositeConverter.buildURI(arg, agg);
+						__binderentities.accept(agg, arg); 
+						agg.URI = gen.model.test.converters.CompositeConverter.buildURI(arg.getKey(), agg);
 					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			},
-			(oldAggregates, newAggregates) -> {
-				for (int i = 0; i < newAggregates.size(); i++) {
-					gen.model.test.Composite oldAgg = oldAggregates.get(i);
-					gen.model.test.Composite newAgg = newAggregates.get(i);
-					
+			(aggregates, arg) -> {
+				try {
+					java.util.List<gen.model.test.Composite> oldAggregates = aggregates.getKey();
+					java.util.List<gen.model.test.Composite> newAggregates = aggregates.getValue();
+					for (int i = 0; i < newAggregates.size(); i++) {
+						gen.model.test.Composite oldAgg = oldAggregates.get(i);
+						gen.model.test.Composite newAgg = newAggregates.get(i);
+						
 					newAgg.change = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
-					__binderentities.accept(newAgg); 
+					__binderentities.accept(newAgg, arg); 
+						newAgg.URI = gen.model.test.converters.CompositeConverter.buildURI(arg.getKey(), newAgg);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
 				}
 			},
 			aggregates -> { 
@@ -586,7 +620,6 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			}
 		);
 	}
-	private transient Composite __originalValue;
 	
 	public void serialize(final com.dslplatform.json.JsonWriter sw, final boolean minimal) {
 		sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
@@ -608,15 +641,16 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 				com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
 			}
 		
-		if(self.enn.length != 0) {
+		final gen.model.test.En[] _tmp_enn_ = self.enn;
+		if(_tmp_enn_.length != 0) {
 			sw.writeAscii(",\"enn\":[", 8);
-			gen.model.test.En item = self.enn[0];
+			gen.model.test.En item = _tmp_enn_[0];
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
 				sw.writeAscii(item.name());
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
-			for(int i = 1; i < self.enn.length; i++) {
+			for(int i = 1; i < _tmp_enn_.length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
-				item = self.enn[i];
+				item = _tmp_enn_[i];
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
 				sw.writeAscii(item.name());
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
@@ -639,25 +673,27 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 				com.dslplatform.json.JavaTimeConverter.serialize(self.change, sw);
 			}
 		
-		if(self.tsl.size() != 0) {
+		final java.util.List<java.time.OffsetDateTime> _tmp_tsl_ = self.tsl;
+		if(_tmp_tsl_.size() != 0) {
 			sw.writeAscii(",\"tsl\":[", 8);
-			com.dslplatform.json.JavaTimeConverter.serialize(self.tsl.get(0), sw);
-			for(int i = 1; i < self.tsl.size(); i++) {
+			com.dslplatform.json.JavaTimeConverter.serialize(_tmp_tsl_.get(0), sw);
+			for(int i = 1; i < _tmp_tsl_.size(); i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.JavaTimeConverter.serialize(self.tsl.get(i), sw);
+				com.dslplatform.json.JavaTimeConverter.serialize(_tmp_tsl_.get(i), sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
 		
-		if(self.entities.size() != 0) {
+		final java.util.List<gen.model.test.Entity> _tmp_entities_ = self.entities;
+		if(_tmp_entities_.size() != 0) {
 			sw.writeAscii(",\"entities\":[", 13);
-			gen.model.test.Entity item = self.entities.get(0);
+			gen.model.test.Entity item = _tmp_entities_.get(0);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
 				gen.model.test.Entity.__serializeJsonObjectMinimal(item, sw, false);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
-			for(int i = 1; i < self.entities.size(); i++) {
+			for(int i = 1; i < _tmp_entities_.size(); i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
-				item = self.entities.get(i);
+				item = _tmp_entities_.get(i);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
 				gen.model.test.Entity.__serializeJsonObjectMinimal(item, sw, false);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
@@ -681,22 +717,24 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 				com.dslplatform.json.NumberConverter.serialize(self.getEntitiesCount(), sw);
 			}
 		
-		if(self.getEntityHasMoney().length != 0) {
+		final boolean[] _tmp_entityHasMoney_ = self.getEntityHasMoney();
+		if(_tmp_entityHasMoney_.length != 0) {
 			sw.writeAscii(",\"entityHasMoney\":[", 19);
-			com.dslplatform.json.BoolConverter.serialize(self.getEntityHasMoney()[0], sw);
-			for(int i = 1; i < self.getEntityHasMoney().length; i++) {
+			com.dslplatform.json.BoolConverter.serialize(_tmp_entityHasMoney_[0], sw);
+			for(int i = 1; i < _tmp_entityHasMoney_.length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.BoolConverter.serialize(self.getEntityHasMoney()[i], sw);
+				com.dslplatform.json.BoolConverter.serialize(_tmp_entityHasMoney_[i], sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
 		
-		if(self.indexes != null && self.indexes.length != 0) {
+		final long[] _tmp_indexes_ = self.indexes;
+		if(_tmp_indexes_ != null && _tmp_indexes_.length != 0) {
 			sw.writeAscii(",\"indexes\":[", 12);
-			com.dslplatform.json.NumberConverter.serialize(self.indexes[0], sw);
-			for(int i = 1; i < self.indexes.length; i++) {
+			com.dslplatform.json.NumberConverter.serialize(_tmp_indexes_[0], sw);
+			for(int i = 1; i < _tmp_indexes_.length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.NumberConverter.serialize(self.indexes[i], sw);
+				com.dslplatform.json.NumberConverter.serialize(_tmp_indexes_[i], sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
@@ -716,15 +754,16 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			sw.writeAscii(",\"id\":", 6);
 			com.dslplatform.json.UUIDConverter.serialize(self.id, sw);
 		
-		if(self.enn.length != 0) {
+		final gen.model.test.En[] _tmp_enn_ = self.enn;
+		if(_tmp_enn_.length != 0) {
 			sw.writeAscii(",\"enn\":[", 8);
-			gen.model.test.En item = self.enn[0];
+			gen.model.test.En item = _tmp_enn_[0];
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
 				sw.writeAscii(item.name());
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
-			for(int i = 1; i < self.enn.length; i++) {
+			for(int i = 1; i < _tmp_enn_.length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
-				item = self.enn[i];
+				item = _tmp_enn_[i];
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
 				sw.writeAscii(item.name());
 				sw.writeByte(com.dslplatform.json.JsonWriter.QUOTE);
@@ -748,26 +787,28 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			sw.writeAscii(",\"change\":", 10);
 			com.dslplatform.json.JavaTimeConverter.serialize(self.change, sw);
 		
-		if(self.tsl.size() != 0) {
+		final java.util.List<java.time.OffsetDateTime> _tmp_tsl_ = self.tsl;
+		if(_tmp_tsl_.size() != 0) {
 			sw.writeAscii(",\"tsl\":[", 8);
-			com.dslplatform.json.JavaTimeConverter.serialize(self.tsl.get(0), sw);
-			for(int i = 1; i < self.tsl.size(); i++) {
+			com.dslplatform.json.JavaTimeConverter.serialize(_tmp_tsl_.get(0), sw);
+			for(int i = 1; i < _tmp_tsl_.size(); i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.JavaTimeConverter.serialize(self.tsl.get(i), sw);
+				com.dslplatform.json.JavaTimeConverter.serialize(_tmp_tsl_.get(i), sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
 		else sw.writeAscii(",\"tsl\":[]", 9);
 		
-		if(self.entities.size() != 0) {
+		final java.util.List<gen.model.test.Entity> _tmp_entities_ = self.entities;
+		if(_tmp_entities_.size() != 0) {
 			sw.writeAscii(",\"entities\":[", 13);
-			gen.model.test.Entity item = self.entities.get(0);
+			gen.model.test.Entity item = _tmp_entities_.get(0);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
 				gen.model.test.Entity.__serializeJsonObjectFull(item, sw, false);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
-			for(int i = 1; i < self.entities.size(); i++) {
+			for(int i = 1; i < _tmp_entities_.size(); i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);	
-				item = self.entities.get(i);
+				item = _tmp_entities_.get(i);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_START);
 				gen.model.test.Entity.__serializeJsonObjectFull(item, sw, false);
 				sw.writeByte(com.dslplatform.json.JsonWriter.OBJECT_END);
@@ -795,23 +836,25 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 			sw.writeAscii(",\"entitiesCount\":", 17);
 			com.dslplatform.json.NumberConverter.serialize(self.getEntitiesCount(), sw);
 		
-		if(self.getEntityHasMoney().length != 0) {
+		final boolean[] _tmp_entityHasMoney_ = self.getEntityHasMoney();
+		if(_tmp_entityHasMoney_.length != 0) {
 			sw.writeAscii(",\"entityHasMoney\":[", 19);
-			com.dslplatform.json.BoolConverter.serialize(self.getEntityHasMoney()[0], sw);
-			for(int i = 1; i < self.getEntityHasMoney().length; i++) {
+			com.dslplatform.json.BoolConverter.serialize(_tmp_entityHasMoney_[0], sw);
+			for(int i = 1; i < _tmp_entityHasMoney_.length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.BoolConverter.serialize(self.getEntityHasMoney()[i], sw);
+				com.dslplatform.json.BoolConverter.serialize(_tmp_entityHasMoney_[i], sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
 		else sw.writeAscii(",\"entityHasMoney\":[]", 20);
 		
-		if(self.indexes != null && self.indexes.length != 0) {
+		final long[] _tmp_indexes_ = self.indexes;
+		if(_tmp_indexes_ != null && _tmp_indexes_.length != 0) {
 			sw.writeAscii(",\"indexes\":[", 12);
-			com.dslplatform.json.NumberConverter.serialize(self.indexes[0], sw);
-			for(int i = 1; i < self.indexes.length; i++) {
+			com.dslplatform.json.NumberConverter.serialize(_tmp_indexes_[0], sw);
+			for(int i = 1; i < _tmp_indexes_.length; i++) {
 				sw.writeByte(com.dslplatform.json.JsonWriter.COMMA);
-				com.dslplatform.json.NumberConverter.serialize(self.indexes[i], sw);
+				com.dslplatform.json.NumberConverter.serialize(_tmp_indexes_[i], sw);
 			}
 			sw.writeByte(com.dslplatform.json.JsonWriter.ARRAY_END);
 		}
@@ -1261,25 +1304,4 @@ public static class ForSimple   implements java.io.Serializable, org.revenj.patt
 				item.indexes = __resUnboxed;
 			} }; return item; };
 	}
-	
-	
-	public Composite(
-			final java.util.UUID id,
-			final gen.model.test.En[] enn,
-			final gen.model.test.En en,
-			final gen.model.test.Simple simple,
-			final java.util.List<java.time.OffsetDateTime> tsl,
-			final java.util.List<gen.model.test.Entity> entities,
-			final long[] indexes) {
-			
-		setId(id);
-		setEnn(enn);
-		setEn(en);
-		setSimple(simple);
-		setTsl(tsl);
-		setEntities(entities);
-		setIndexes(indexes);
-		this.URI = this.id.toString();
-	}
-
 }
