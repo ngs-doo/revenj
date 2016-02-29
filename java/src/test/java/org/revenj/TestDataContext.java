@@ -8,10 +8,12 @@ import gen.model.binaries.WritableDocument;
 import gen.model.calc.Info;
 import gen.model.calc.Realm;
 import gen.model.calc.Type;
+import gen.model.issues.TimestampPk;
 import gen.model.mixinReference.Author;
 import gen.model.mixinReference.SpecificReport;
 import gen.model.test.Clicked;
 import gen.model.test.Composite;
+import gen.model.test.FindMany;
 import gen.model.test.Simple;
 import org.junit.After;
 import org.junit.Assert;
@@ -23,6 +25,7 @@ import org.revenj.patterns.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 public class TestDataContext {
@@ -187,5 +190,35 @@ public class TestDataContext {
 		Optional<Realm> found = context.find(Realm.class, r.getURI());
 		Assert.assertTrue(found.isPresent());
 		Assert.assertTrue(r.deepEquals(found.get()));
+	}
+
+	@Test
+	public void canPopulateReport() throws IOException {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		Composite co = new Composite();
+		UUID id = UUID.randomUUID();
+		co.setId(id);
+		context.create(co);
+		FindMany.Result result = context.populate(new FindMany(id, new HashSet<>(Collections.singletonList(id))));
+		Assert.assertEquals(id, result.getFound().getId());
+	}
+
+	@Test
+	public void canLoadHistory() throws Exception {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		OffsetDateTime odt = OffsetDateTime.now();
+		TimestampPk pk = new TimestampPk().setTs(odt).setD(BigDecimal.ONE);
+		db.create(pk);
+		String uri = pk.getURI();
+		Optional<TimestampPk> found = db.find(TimestampPk.class, uri);
+		Optional<History<TimestampPk>> foundHistory = db.history(TimestampPk.class, uri);
+		Assert.assertTrue(found.isPresent());
+		Assert.assertTrue(foundHistory.isPresent());
+		Assert.assertEquals(1, foundHistory.get().getSnapshots().size());
+		Assert.assertEquals(uri, foundHistory.get().getURI());
+		//Assert.assertEquals(found.get(), foundHistory.get().getSnapshots().get(0).getValue());
+		Assert.assertTrue(found.get().getTs().isEqual(foundHistory.get().getSnapshots().get(0).getValue().getTs()));
 	}
 }

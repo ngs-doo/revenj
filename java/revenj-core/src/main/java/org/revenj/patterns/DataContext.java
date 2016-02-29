@@ -88,4 +88,15 @@ public interface DataContext {
 	<T> T populate(Report<T> report);
 
 	<T extends Identifiable> Observable<DataChangeNotification.TrackInfo<T>> track(Class<T> manifest);
+
+	<T extends ObjectHistory> List<History<T>> history(Class<T> manifest, Collection<String> uris);
+
+	default <T extends ObjectHistory> Optional<History<T>> history(Class<T> manifest, String uri) {
+		List<History<T>> found = history(manifest, Collections.singletonList(uri));
+		return found.size() == 1 ? Optional.of(found.get(0)) : Optional.<History<T>>empty();
+	}
+
+	default <T extends ObjectHistory> List<History<T>> history(Class<T> manifest, String[] uris) {
+		return history(manifest, Arrays.asList(uris));
+	}
 }

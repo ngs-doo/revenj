@@ -16,7 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 final class LocatorDataContext implements UnitOfWork {
 	private final Container locator;
-	private ConcurrentHashMap<Class<?>, SearchableRepository> repositories;
+	private ConcurrentHashMap<Class<?>, SearchableRepository> searchRepositories;
+	private ConcurrentHashMap<Class<?>, Repository> lookupRepositories;
+	private ConcurrentHashMap<Class<?>, PersistableRepository> persistableRepositories;
+	private ConcurrentHashMap<Class<?>, Repository> historyRepositories;
 	private ConcurrentHashMap<Class<?>, DomainEventStore> eventStores;
 	private DataChangeNotification changes;
 	private final Connection connection;
@@ -55,13 +58,60 @@ final class LocatorDataContext implements UnitOfWork {
 		return new LocatorDataContext(locator, connection);
 	}
 
-	private SearchableRepository getRepository(Class<?> manifest) {
+	private <T extends DataSource> SearchableRepository<T> getSearchableRepository(Class<T> manifest) {
 		if (closed) throw new RuntimeException("Unit of work has been closed");
-		if (repositories == null) repositories = new ConcurrentHashMap<>();
-		return repositories.computeIfAbsent(manifest, clazz ->
+		if (searchRepositories == null) searchRepositories = new ConcurrentHashMap<>();
+		return searchRepositories.computeIfAbsent(manifest, clazz ->
 		{
+			if (persistableRepositories != null) {
+				PersistableRepository repository = persistableRepositories.get(manifest);
+				if (repository != null) return repository;
+			}
 			try {
 				return (SearchableRepository) locator.resolve(Utils.makeGenericType(SearchableRepository.class, manifest));
+			} catch (ReflectiveOperationException ex) {
+				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
+			}
+		});
+	}
+
+	private Repository getLookupRepository(Class<?> manifest) {
+		if (closed) throw new RuntimeException("Unit of work has been closed");
+		if (lookupRepositories == null) lookupRepositories = new ConcurrentHashMap<>();
+		return lookupRepositories.computeIfAbsent(manifest, clazz ->
+		{
+			if (persistableRepositories != null) {
+				PersistableRepository repository = persistableRepositories.get(manifest);
+				if (repository != null) return repository;
+			}
+			try {
+				return (Repository) locator.resolve(Utils.makeGenericType(Repository.class, manifest));
+			} catch (ReflectiveOperationException ex) {
+				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
+			}
+		});
+	}
+
+	private Repository getHistoryRepository(Class<?> manifest) {
+		if (closed) throw new RuntimeException("Unit of work has been closed");
+		if (historyRepositories == null) historyRepositories = new ConcurrentHashMap<>();
+		return historyRepositories.computeIfAbsent(manifest, clazz ->
+		{
+			try {
+				return (Repository) locator.resolve(Utils.makeGenericType(Repository.class, Utils.makeGenericType(History.class, manifest)));
+			} catch (ReflectiveOperationException ex) {
+				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
+			}
+		});
+	}
+
+	private PersistableRepository getPersistableRepository(Class<?> manifest) {
+		if (closed) throw new RuntimeException("Unit of work has been closed");
+		if (persistableRepositories == null) persistableRepositories = new ConcurrentHashMap<>();
+		return persistableRepositories.computeIfAbsent(manifest, clazz ->
+		{
+			try {
+				return (PersistableRepository) locator.resolve(Utils.makeGenericType(PersistableRepository.class, manifest));
 			} catch (ReflectiveOperationException ex) {
 				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
 			}
@@ -83,32 +133,32 @@ final class LocatorDataContext implements UnitOfWork {
 
 	@Override
 	public <T extends Identifiable> Optional<T> find(Class<T> manifest, String uri) {
-		return ((Repository) getRepository(manifest)).find(uri);
+		return getLookupRepository(manifest).find(uri);
 	}
 
 	@Override
 	public <T extends Identifiable> List<T> find(Class<T> manifest, Collection<String> uris) {
-		return ((Repository) getRepository(manifest)).find(uris);
+		return getLookupRepository(manifest).find(uris);
 	}
 
 	@Override
 	public <T extends DataSource> Query<T> query(Class<T> manifest, Specification<T> filter) {
-		return getRepository(manifest).query(filter);
+		return getSearchableRepository(manifest).query(filter);
 	}
 
 	@Override
 	public <T extends DataSource> List<T> search(Class<T> manifest, Specification<T> filter, Integer limit, Integer offset) {
-		return getRepository(manifest).search(filter, limit, offset);
+		return getSearchableRepository(manifest).search(filter, limit, offset);
 	}
 
 	@Override
 	public <T extends DataSource> long count(Class<T> manifest, Specification<T> filter) {
-		return getRepository(manifest).count(filter);
+		return getSearchableRepository(manifest).count(filter);
 	}
 
 	@Override
 	public <T extends DataSource> boolean exists(Class<T> manifest, Specification<T> filter) {
-		return getRepository(manifest).exists(filter);
+		return getSearchableRepository(manifest).exists(filter);
 	}
 
 	@Override
@@ -117,7 +167,7 @@ final class LocatorDataContext implements UnitOfWork {
 			return;
 		}
 		Class<?> manifest = aggregates.iterator().next().getClass();
-		((PersistableRepository) getRepository(manifest)).insert(aggregates);
+		getPersistableRepository(manifest).insert(aggregates);
 		hasChanges = true;
 	}
 
@@ -127,7 +177,7 @@ final class LocatorDataContext implements UnitOfWork {
 			return;
 		}
 		Class<?> manifest = pairs.iterator().next().getValue().getClass();
-		((PersistableRepository) getRepository(manifest)).persist(null, pairs, null);
+		getPersistableRepository(manifest).persist(null, pairs, null);
 		hasChanges = true;
 	}
 
@@ -137,7 +187,7 @@ final class LocatorDataContext implements UnitOfWork {
 			return;
 		}
 		Class<?> manifest = aggregates.iterator().next().getClass();
-		((PersistableRepository) getRepository(manifest)).delete(aggregates);
+		getPersistableRepository(manifest).delete(aggregates);
 		hasChanges = true;
 	}
 
@@ -154,6 +204,11 @@ final class LocatorDataContext implements UnitOfWork {
 	@Override
 	public <T> T populate(Report<T> report) {
 		return report.populate(locator);
+	}
+
+	@Override
+	public <T extends ObjectHistory> List<History<T>> history(Class<T> manifest, Collection<String> uris) {
+		return getHistoryRepository(manifest).find(uris);
 	}
 
 	@Override
