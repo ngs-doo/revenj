@@ -42,6 +42,10 @@ public abstract class Revenj {
 				throw new IOException("Unable to find revenj.properties. Searching in: " + revProps.getAbsolutePath());
 			}
 		}
+		return setup(properties);
+	}
+
+	public static Container setup(Properties properties) throws IOException {
 		String plugins = properties.getProperty("revenj.pluginsPath");
 		File pluginsPath = null;
 		if (plugins != null) {

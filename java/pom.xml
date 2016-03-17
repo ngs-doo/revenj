@@ -9,7 +9,7 @@
 	<description> DSL Platform compatible backend (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>pom</packaging>
-	<version>0.9.3</version>
+	<version>0.9.4</version>
 
 	<modules>
 		<module>revenj-core</module>
@@ -22,19 +22,19 @@
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>0.9.3</version>
+			<version>0.9.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-servlet</artifactId>
-			<version>0.9.3</version>
+			<version>0.9.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-storage</artifactId>
-			<version>0.9.3</version>
+			<version>0.9.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
