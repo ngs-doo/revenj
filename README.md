@@ -100,6 +100,7 @@ Go through the tutorials:
 
  * [Servlet setup](tutorials/revenj-tutorial-servlet.md)
  * [JINQ basics](tutorials/revenj-tutorial-jinq-basics.md)
+ * [Dependency Injection](tutorials/revenj-tutorial-dependency-injection.md)
 
 
 ##Revenj features
