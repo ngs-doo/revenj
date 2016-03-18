@@ -98,6 +98,7 @@ Go through the tutorials:
 
 ###JVM
 
+ * [Servlet setup](tutorials/revenj-tutorial-servlet.md)
  * [JINQ basics](tutorials/revenj-tutorial-jinq-basics.md)
 
 
