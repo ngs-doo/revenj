@@ -16,9 +16,9 @@ import java.util.Optional;
 
 public final class JinqMetaModel extends MetamodelUtil {
 
-	private static final HashMap<Class<?>, String> classSources = new HashMap<>();
-	private static final HashMap<String, String> stringSources = new HashMap<>();
-	private static final HashMap<Method, Query.Compare> methodGetters = new HashMap<>();
+	private final HashMap<Class<?>, String> classSources = new HashMap<>();
+	private final HashMap<String, String> stringSources = new HashMap<>();
+	private final HashMap<Method, Query.Compare> methodGetters = new HashMap<>();
 
 	private JinqMetaModel() {
 		safeMethods.add(new MethodSignature("java/lang/ThreadLocal", "get", "()Ljava/lang/Object;"));
@@ -82,5 +82,9 @@ public final class JinqMetaModel extends MetamodelUtil {
 	@Override
 	public String dataSourceNameFromClassName(String className) {
 		return stringSources.get(className);
+	}
+
+	public Iterable<Class<?>> dataSources() {
+		return classSources.keySet();
 	}
 }
