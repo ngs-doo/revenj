@@ -102,6 +102,7 @@ Go through the tutorials:
  * [JINQ basics](tutorials/revenj-tutorial-jinq-basics.md)
  * [Dependency Injection](tutorials/revenj-tutorial-dependency-injection.md)
  * [OLAP queries](tutorials/revenj-tutorial-olap-basics.md)
+ * [Event handlers](tutorials/revenj-tutorial-handling-events.md)
 
 
 ##Revenj features

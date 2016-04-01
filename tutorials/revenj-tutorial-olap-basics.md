@@ -58,7 +58,7 @@ For a simple DSL such as:
 we've defined cube on top of single `Task` table. Now we can use `TaskAnalysis` to gain insights into our data.
 For example, if we want to know per project how many tasks there are and how many are still opened, instead of manually running SQL query such as:
 
-    SELECT project, COUNT(*) as total, SUM(CASE WHEN closed == null THEN 1 ELSE 0) as opened
+    SELECT project, COUNT(*) as total, SUM(CASE WHEN closed IS NULL THEN 1 ELSE 0 END) as opened
     FROM Task
     GROUP BY project
 
