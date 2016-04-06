@@ -43,6 +43,8 @@ namespace Revenj.Plugins.Server.Commands
 			public string Uri;
 			[DataMember]
 			public TFormat Data;
+			[DataMember]
+			public bool? ReturnInstance;
 		}
 
 		private static TFormat CreateExampleArgument<TFormat>(ISerialization<TFormat> serializer)
@@ -118,7 +120,7 @@ Please check your arguments.".With(argument.Name), null);
 					newCache[rootType] = command;
 					Cache = newCache;
 				}
-				var result = command.Update(input, output, locator, argument.Uri, argument.Data);
+				var result = command.Update(input, output, locator, argument.Uri, argument.ReturnInstance ?? true, argument.Data);
 
 				return CommandResult<TOutput>.Success(result, "Object updated");
 			}
@@ -139,6 +141,7 @@ Example argument:
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
 				string uri,
+				bool returnInstance,
 				TInput data);
 		}
 
@@ -150,6 +153,7 @@ Example argument:
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
 				string uri,
+				bool returnInstance,
 				TInput data)
 			{
 				TRoot root;
@@ -171,7 +175,7 @@ Example argument:
 					if (original == null)
 						throw new ArgumentException("Can't find {0} with uri: {1}.".With(typeof(TRoot).FullName, uri));
 					repository.Persist(null, new[] { new KeyValuePair<TRoot, TRoot>(original, root) }, null);
-					return output.Serialize(root);
+					return returnInstance ? output.Serialize(root) : output.Serialize(root.URI);
 				}
 				catch (Exception ex)
 				{

@@ -299,5 +299,17 @@ Example:
 				return @"Error deserializing expression. " + ex.Message;
 			}
 		}
+
+		public static bool? ReturnInstance(string argument, IRequestContext request)
+		{
+			var result = argument ?? request.GetHeader("x-revenj-result");
+			return result == "instance" ? true : result == "uri" ? (bool?)false : null;
+		}
+
+		public static bool IncludeCount(string argument, IRequestContext request)
+		{
+			var result = argument ?? request.GetHeader("x-revenj-includecount");
+			return result == "yes";
+		}
 	}
 }

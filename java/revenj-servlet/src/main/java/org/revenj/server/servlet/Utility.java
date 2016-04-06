@@ -178,6 +178,14 @@ abstract class Utility {
 		}
 	}
 
+	static Boolean returnInstance(HttpServletRequest request) throws IOException {
+		String result = request.getParameter("result");
+		if (result == null) {
+			result = request.getHeader("x-revenj-result");
+		}
+		return "instance".equals(result) ? Boolean.TRUE : "uri".equals(result) ? Boolean.FALSE : null;
+	}
+
 	public static List<Map.Entry<String, Boolean>> parseOrder(String order) {
 		if (order == null || order.isEmpty()) return null;
 		List<Map.Entry<String, Boolean>> sortOrder = new ArrayList<>();

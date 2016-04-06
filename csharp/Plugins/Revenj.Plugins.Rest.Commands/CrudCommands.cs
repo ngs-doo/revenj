@@ -28,7 +28,7 @@ namespace Revenj.Plugins.Rest.Commands
 			this.Serialization = serialization;
 		}
 
-		public Stream Create(string root, Stream body)
+		public Stream Create(string root, string result, Stream body)
 		{
 			var rootType = Utility.CheckAggregateRoot(DomainModel, root);
 			var validatedData = Utility.ParseObject(Serialization, rootType, body, false, Locator);
@@ -38,7 +38,8 @@ namespace Revenj.Plugins.Rest.Commands
 					new Create.Argument<object>
 					{
 						Name = rootType.Result.FullName,
-						Data = validatedData.Result
+						Data = validatedData.Result,
+						ReturnInstance = Utility.ReturnInstance(result, ThreadContext.Request)
 					});
 		}
 
@@ -62,6 +63,11 @@ namespace Revenj.Plugins.Rest.Commands
 
 		public Stream Update(string root, string uri, Stream body)
 		{
+			return UpdateQuery(root, uri, null, body);
+		}
+
+		public Stream UpdateQuery(string root, string uri, string result, Stream body)
+		{
 			var rootType = Utility.CheckAggregateRoot(DomainModel, root);
 			var validatedData = Utility.ParseObject(Serialization, rootType, body, false, Locator);
 			if (validatedData.IsFailure) return validatedData.Error;
@@ -71,13 +77,9 @@ namespace Revenj.Plugins.Rest.Commands
 					{
 						Name = rootType.Result.FullName,
 						Uri = uri,
-						Data = validatedData.Result
+						Data = validatedData.Result,
+						ReturnInstance = Utility.ReturnInstance(result, ThreadContext.Request)
 					});
-		}
-
-		public Stream UpdateQuery(string root, string uri, Stream body)
-		{
-			return Update(root, uri, body);
 		}
 
 		public Stream Delete(string root, string uri)

@@ -90,7 +90,7 @@ public class DomainServlet extends HttpServlet {
 				return;
 			}
 			Object domainEvent = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
-			SubmitEvent.Argument arg = new SubmitEvent.Argument<>(name, domainEvent, "instance".equals(req.getParameter("result")));
+			SubmitEvent.Argument arg = new SubmitEvent.Argument<>(name, domainEvent, Utility.returnInstance(req));
 			Utility.executeJson(engine, req, res, SubmitEvent.class, arg);
 		} else if (path.startsWith("/find/")) {
 			findWithArguments(req, res, path);

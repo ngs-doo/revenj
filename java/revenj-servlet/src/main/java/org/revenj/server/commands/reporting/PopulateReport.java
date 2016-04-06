@@ -1,6 +1,5 @@
 package org.revenj.server.commands.reporting;
 
-import com.dslplatform.json.CompiledJson;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
@@ -23,7 +22,6 @@ public class PopulateReport implements ServerCommand {
 		this.permissions = permissions;
 	}
 
-	@CompiledJson
 	public static final class Argument<TFormat> {
 		public TFormat Data;
 		public String ReportName;

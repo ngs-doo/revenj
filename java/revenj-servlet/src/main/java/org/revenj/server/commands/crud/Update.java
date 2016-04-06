@@ -1,6 +1,5 @@
 package org.revenj.server.commands.crud;
 
-import com.dslplatform.json.CompiledJson;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.server.CommandResult;
@@ -23,16 +22,17 @@ public final class Update implements ServerCommand {
 		this.permissions = permissions;
 	}
 
-	@CompiledJson
 	public static final class Argument<TFormat> {
 		public String Name;
 		public String Uri;
 		public TFormat Data;
+		public Boolean ReturnInstance;
 
-		public Argument(String name, String uri, TFormat data) {
+		public Argument(String name, String uri, TFormat data, Boolean returnInstance) {
 			this.Name = name;
 			this.Uri = uri;
 			this.Data = data;
+			this.ReturnInstance = returnInstance;
 		}
 
 		@SuppressWarnings("unused")
@@ -86,7 +86,8 @@ public final class Update implements ServerCommand {
 				return CommandResult.badRequest("Can't find " + arg.Name + " with uri: " + arg.Uri);
 			}
 			repository.update(found.get(), instance);
-			return new CommandResult<>(output.serialize(instance), "Object changed", 200);
+			boolean returnInstance = arg.ReturnInstance == null || arg.ReturnInstance;
+			return new CommandResult<>(output.serialize(returnInstance ? instance : instance.getURI()), "Object changed", 200);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}

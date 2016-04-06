@@ -130,8 +130,8 @@ public abstract class AbstractAnnotationProcessorTest {
 
 		List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticCollector.getDiagnostics();
 		if (diagnostics.size() > 0 && diagnostics.get(0).getKind() == Kind.WARNING
-				&& diagnostics.get(0).getMessage(Locale.ENGLISH).startsWith("Supported source version 'RELEASE_6' from "
-				+ "annotation processor 'com.dslplatform.json.CompiledJsonProcessor' less than -source")) {
+				&& diagnostics.get(0).getMessage(Locale.ENGLISH).startsWith("Supported source version 'RELEASE_8' from "
+				+ "annotation processor 'org.revenj.processor.RevenjProcessor' less than -source")) {
 			return diagnostics.subList(1, diagnostics.size());
 		}
 		return diagnostics;

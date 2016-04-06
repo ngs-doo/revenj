@@ -23,9 +23,9 @@ namespace Revenj.Features.RestCache
 			this.Locator = locator;
 		}
 
-		public Stream Create(string root, Stream body)
+		public Stream Create(string root, string result, Stream body)
 		{
-			return CrudComands.Create(root, body);
+			return CrudComands.Create(root, result, body);
 		}
 
 		public Stream Read(string domainObject, string uri)
@@ -49,9 +49,9 @@ namespace Revenj.Features.RestCache
 			return CrudComands.Update(root, uri, body);
 		}
 
-		public Stream UpdateQuery(string root, string uri, Stream body)
+		public Stream UpdateQuery(string root, string uri, string result, Stream body)
 		{
-			return CrudComands.UpdateQuery(root, uri, body);
+			return CrudComands.UpdateQuery(root, uri, result, body);
 		}
 
 		public Stream Delete(string root, string uri)

@@ -1,6 +1,5 @@
 package org.revenj.server.commands.reporting;
 
-import com.dslplatform.json.CompiledJson;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
@@ -27,7 +26,6 @@ public class AnalyzeOlapCube implements ServerCommand {
 		this.permissions = permissions;
 	}
 
-	@CompiledJson
 	public static final class Argument<TFormat> {
 		public String CubeName;
 		public String SpecificationName;

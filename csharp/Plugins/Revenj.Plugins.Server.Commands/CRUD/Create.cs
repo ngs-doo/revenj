@@ -42,6 +42,8 @@ namespace Revenj.Plugins.Server.Commands
 			public string Name;
 			[DataMember]
 			public TFormat Data;
+			[DataMember]
+			public bool? ReturnInstance;
 		}
 
 		private static TFormat CreateExampleArgument<TFormat>(ISerialization<TFormat> serializer)
@@ -108,7 +110,7 @@ Please check your arguments.".With(argument.Name), null);
 					newCache[rootType] = command;
 					Cache = newCache;
 				}
-				var result = command.Create(input, output, locator, argument.Data);
+				var result = command.Create(input, output, locator, argument.ReturnInstance ?? true, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Created, result, "Object created");
 			}
@@ -128,6 +130,7 @@ Example argument:
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
+				bool returnInstance,
 				TInput data);
 		}
 
@@ -138,6 +141,7 @@ Example argument:
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
+				bool returnInstance,
 				TInput data)
 			{
 				TRoot root;
@@ -156,7 +160,7 @@ Example argument:
 				{
 					var repository = locator.Resolve<IPersistableRepository<TRoot>>();
 					repository.Insert(root);
-					return output.Serialize(root);
+					return returnInstance ? output.Serialize(root) : output.Serialize(root.URI);
 				}
 				catch (Exception ex)
 				{

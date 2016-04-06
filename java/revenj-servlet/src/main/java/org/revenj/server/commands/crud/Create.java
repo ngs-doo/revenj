@@ -1,6 +1,5 @@
 package org.revenj.server.commands.crud;
 
-import com.dslplatform.json.*;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.server.CommandResult;
@@ -9,7 +8,6 @@ import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Map;
 import java.util.Optional;
 
 public final class Create implements ServerCommand {
@@ -24,14 +22,15 @@ public final class Create implements ServerCommand {
 		this.permissions = permissions;
 	}
 
-	@CompiledJson
 	public static final class Argument<TFormat> {
 		public String Name;
 		public TFormat Data;
+		public Boolean ReturnInstance;
 
-		public Argument(String name, TFormat data) {
+		public Argument(String name, TFormat data, Boolean returnInstance) {
 			this.Name = name;
 			this.Data = data;
+			this.ReturnInstance = returnInstance;
 		}
 
 		@SuppressWarnings("unused")
@@ -79,7 +78,8 @@ public final class Create implements ServerCommand {
 		}
 		try {
 			repository.insert(instance);
-			return new CommandResult<>(output.serialize(instance), "Object created", 201);
+			boolean returnInstance = arg.ReturnInstance == null || arg.ReturnInstance;
+			return new CommandResult<>(output.serialize(returnInstance ? instance : instance.getURI()), "Object created", 201);
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}

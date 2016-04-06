@@ -1,6 +1,5 @@
 package org.revenj.server.commands.crud;
 
-import com.dslplatform.json.CompiledJson;
 import org.revenj.patterns.*;
 import org.revenj.Utils;
 import org.revenj.security.PermissionManager;
@@ -25,7 +24,6 @@ public final class Delete implements ServerCommand {
 		this.permissions = permissions;
 	}
 
-	@CompiledJson
 	public static final class Argument {
 		public String Name;
 		public String Uri;

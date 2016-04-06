@@ -16,15 +16,17 @@ namespace Revenj.Plugins.Rest.Commands
 		/// <summary>
 		/// Create aggregate root from message body.
 		/// Aggregate root is defined in URL.
-		/// Return created aggregate root.
+		/// Return created aggregate root or it's URI (based on result = [uri|instance]) argument.
+		/// Default is instance
 		/// </summary>
 		/// <param name="root">aggregate root name</param>
+		/// <param name="result">return URI or whole object</param>
 		/// <param name="body">serialized aggregate root</param>
 		/// <returns>saved aggregate root</returns>
 		[OperationContract]
-		[WebInvoke(Method = "POST", UriTemplate = "/{root}")]
+		[WebInvoke(Method = "POST", UriTemplate = "/{root}?result={result}")]
 		[Description("Create aggregate root")]
-		Stream Create(string root, Stream body);
+		Stream Create(string root, string result, Stream body);
 		/// <summary>
 		/// Read domain object based on provided identifier.
 		/// Return found domain object.
@@ -52,6 +54,8 @@ namespace Revenj.Plugins.Rest.Commands
 		/// <summary>
 		/// Change existing aggregate root.
 		/// Return changed aggregate.
+		/// Return created aggregate root or it's URI (based on result = [uri|instance]) argument.
+		/// Default is instance
 		/// </summary>
 		/// <param name="root">aggregate root name</param>
 		/// <param name="uri">identifier</param>
@@ -67,12 +71,13 @@ namespace Revenj.Plugins.Rest.Commands
 		/// </summary>
 		/// <param name="root">aggregate root name</param>
 		/// <param name="uri">identifier</param>
+		/// <param name="result">return URI or whole object</param>
 		/// <param name="body">serialized changed aggregate root</param>
 		/// <returns>persisted aggregate root</returns>
 		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/{root}?uri={uri}")]
+		[WebInvoke(Method = "PUT", UriTemplate = "/{root}?uri={uri}&result={result}")]
 		[Description("Change aggregate root")]
-		Stream UpdateQuery(string root, string uri, Stream body);
+		Stream UpdateQuery(string root, string uri, string result, Stream body);
 		/// <summary>
 		/// Delete existing aggregate root.
 		/// Return deleted aggregate.

@@ -1,6 +1,5 @@
 package org.revenj.server.commands.search;
 
-import com.dslplatform.json.CompiledJson;
 import org.revenj.patterns.*;
 import org.revenj.postgres.jinq.JinqMetaModel;
 import org.revenj.security.PermissionManager;
@@ -31,7 +30,6 @@ public class SearchDomainObject implements ServerCommand {
 		this.jinqModel = jinqModel;
 	}
 
-	@CompiledJson
 	public static final class Argument<TFormat> {
 		public String Name;
 		public String SpecificationName;

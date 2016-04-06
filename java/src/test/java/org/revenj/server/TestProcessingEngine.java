@@ -61,7 +61,7 @@ public class TestProcessingEngine {
 		ServerCommandDescription cd = new ServerCommandDescription<>(
 				null,
 				Create.class,
-				new Create.Argument<>("test.Composite", composite));
+				new Create.Argument<>("test.Composite", composite, true));
 		ProcessingResult<Object> result =
 				engine.execute(
 						Object.class,
@@ -103,7 +103,7 @@ public class TestProcessingEngine {
 		ServerCommandDescription cd = new ServerCommandDescription<>(
 				null,
 				Create.class,
-				json.serialize(new Create.Argument<>("test.Composite", json.serialize(composite))));
+				json.serialize(new Create.Argument<>("test.Composite", json.serialize(composite), true)));
 		ProcessingResult<String> result =
 				engine.execute(
 						String.class,
@@ -143,7 +143,7 @@ public class TestProcessingEngine {
 		ServerCommandDescription cd1 = new ServerCommandDescription<>(
 				null,
 				Create.class,
-				new Create.Argument<>("test.Composite", composite));
+				new Create.Argument<>("test.Composite", composite, true));
 		ServerCommandDescription cd2 = new ServerCommandDescription<>(
 				null,
 				AnalyzeOlapCube.class,
@@ -174,7 +174,7 @@ public class TestProcessingEngine {
 		ServerCommandDescription cd1 = new ServerCommandDescription<>(
 				null,
 				Create.class,
-				new Create.Argument<>("test.Composite", composite));
+				new Create.Argument<>("test.Composite", composite, true));
 		ServerCommandDescription cd2 = new ServerCommandDescription<>(
 				null,
 				PopulateReport.class,

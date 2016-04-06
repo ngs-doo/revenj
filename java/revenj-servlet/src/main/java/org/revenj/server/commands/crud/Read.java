@@ -1,6 +1,5 @@
 package org.revenj.server.commands.crud;
 
-import com.dslplatform.json.CompiledJson;
 import org.revenj.patterns.DomainModel;
 import org.revenj.patterns.Identifiable;
 import org.revenj.patterns.Repository;
@@ -26,7 +25,6 @@ public final class Read implements ServerCommand {
 		this.permissions = permissions;
 	}
 
-	@CompiledJson
 	public static final class Argument {
 		public String Name;
 		public String Uri;

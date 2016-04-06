@@ -82,7 +82,7 @@ namespace Revenj.Plugins.Rest.Commands
 			var spec = Utility.ParseObject(Serialization, specType, data, true, Locator);
 			if (doType.IsFailure || specType.IsFailure || spec.IsFailure) return doType.Error ?? specType.Error ?? spec.Error;
 			var additionalCommands = EmptyCommands;
-			if (intLimit != null && (count == "yes" || ThreadContext.Request.GetHeader("IncludeCount") == "yes"))
+			if (intLimit != null && Utility.IncludeCount(count, ThreadContext.Request))
 			{
 				additionalCommands = new[] 
 				{ 
@@ -140,7 +140,7 @@ namespace Revenj.Plugins.Rest.Commands
 			Utility.ParseLimitOffset(limit, offset, out intLimit, out intOffset);
 			var ordDict = Utility.ParseOrder(order);
 			var additionalCommands = EmptyCommands;
-			if (intLimit != null && (count == "yes" || ThreadContext.Request.GetHeader("IncludeCount") == "yes"))
+			if (intLimit != null && Utility.IncludeCount(count, ThreadContext.Request))
 			{
 				additionalCommands = new[] 
 				{ 
@@ -359,7 +359,6 @@ namespace Revenj.Plugins.Rest.Commands
 		public Stream SubmitEvent(string domainEvent, string result, Stream body)
 		{
 			var domainType = Utility.CheckDomainEvent(DomainModel, domainEvent);
-			bool? returnInstance = result == "instance" ? true : result == "uri" ? (bool?)false : null;
 			var validatedObject = Utility.ParseObject(Serialization, domainType, body, true, Locator);
 			if (validatedObject.IsFailure) return validatedObject.Error;
 			return
@@ -368,7 +367,7 @@ namespace Revenj.Plugins.Rest.Commands
 					{
 						Name = domainType.Result.FullName,
 						Data = validatedObject.Result,
-						ReturnInstance = returnInstance
+						ReturnInstance = Utility.ReturnInstance(result, ThreadContext.Request)
 					});
 		}
 

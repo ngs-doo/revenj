@@ -77,7 +77,7 @@ public class CrudServlet extends HttpServlet {
 			return;
 		}
 		Object instance = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
-		Utility.executeJson(engine, req, res, Create.class, new Create.Argument<>(name, instance));
+		Utility.executeJson(engine, req, res, Create.class, new Create.Argument<>(name, instance, Utility.returnInstance(req)));
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class CrudServlet extends HttpServlet {
 			return;
 		}
 		Object instance = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
-		Utility.executeJson(engine, req, res, Update.class, new Update.Argument<>(name, uri, instance));
+		Utility.executeJson(engine, req, res, Update.class, new Update.Argument<>(name, uri, instance, Utility.returnInstance(req)));
 	}
 
 	@Override
