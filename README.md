@@ -85,22 +85,17 @@ Setup a Postgres or Oracle instance.
 
 Go through the tutorials:
 
-###.NET/Mono
-
  * [Setting up Visual studio and REST server](tutorials/revenj-tutorial-setup.md)
- * or [Setting up REST server on Mono](tutorials/revenj-tutorial-mono.md)
+ * [Setting up REST server on Mono](tutorials/revenj-tutorial-mono.md)
+ * [Servlet setup](tutorials/revenj-tutorial-servlet.md)
  * [Event sourcing in Revenj](tutorials/revenj-tutorial-event-sourcing.md)
  * [Using advanced Event sourcing features in Revenj](tutorials/revenj-tutorial-aggregate-events.md)
  * [NoSQL documents in relational database](tutorials/revenj-tutorial-nosql-documents.md)
  * [Notifications / SignalR integration](tutorials/revenj-tutorial-notifications.md)
  * [Security basics](tutorials/revenj-tutorial-security-basics.md)
  * [LINQ basics](tutorials/revenj-tutorial-linq-basics.md)
-
-###JVM
-
- * [Servlet setup](tutorials/revenj-tutorial-servlet.md)
  * [JINQ basics](tutorials/revenj-tutorial-jinq-basics.md)
- * [Dependency Injection](tutorials/revenj-tutorial-dependency-injection.md)
+ * [Dependency Injection in JVM](tutorials/revenj-tutorial-dependency-injection.md)
  * [OLAP queries](tutorials/revenj-tutorial-olap-basics.md)
  * [Event handlers](tutorials/revenj-tutorial-handling-events.md)
  * [Bulk reading](tutorials/revenj-tutorial-bulk-reading.md)

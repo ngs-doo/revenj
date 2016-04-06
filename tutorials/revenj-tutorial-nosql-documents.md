@@ -178,8 +178,8 @@ There are also several other modeling constructs which can be used to implement 
       Child[] Children 'it => it.ParentID == id' order by ID;
     }
 
-Report feature will also create an appropriate object in the database, but currently Revenj will call two LINQ queries to reconstruct it.
-Populating report is done with the use of IReport API:
+Report feature will also create an appropriate object in the database (function), which Revenj will call to get the result.
+Populating report is done with the use of `IReport` API:
 
     var pd = new ParentDocument { id = 123 };
     var result = pd.Populate(locator);
@@ -238,7 +238,7 @@ This means that model such as
       string(50) operator;
     }
 
-is supported and will have a snapshot of Invoice as a column in the table, while pointer syntax is currently not allowed (in the future pointer syntax will probably be used to merge aggregate events with ordinary events).
+is supported and will have a snapshot of Invoice as a column in the table, while pointer syntax will create a reference to other event/aggregate (this aggregate needs to disallow delete and URI changes to be referencable in such a way).
 
 While these are the basics, with the introduction of couple other concepts, modeling can be improved and eased greatly. 
 Mixin concept has various applications, and one of them is to provide polymorphism in the database. 

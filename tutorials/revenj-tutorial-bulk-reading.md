@@ -3,6 +3,7 @@
 #### Utilizing ORDBMS features
 
 PostgreSQL and Oracle are object-relational databases and as such support more complex query projections then relational-only database.
+Several scenarios of such usage is already covered in [NoSQL documents tutorial](revenj-tutorial-nosql-documents.md).
 This is rarely used in real world due to several major reasons:
 
  * popular ORMs don't support such queries (out of the box or at all)
@@ -49,20 +50,20 @@ DSL has a report concept which has several usages, one of them is to aggregate s
       set<int> alternatives;
       string productName;
       Master master 'it => it.number == id';
-	  List<Master> others 'it => alternatives.Contains(it.number)' LIMIT 10;
-	  List<Detail> products 'it => it.product.Contains(productName) || it.masterID == master.number';
+	  count<Master> others 'it => alternatives.Contains(it.number)';
+	  List<Detail> products 'it => it.product.Contains(productName) || it.masterID == master.number' LIMIT 10;
     }
 
 which will translate into database function. 
 In PostgreSQL that function will have three arguments (id, alternatives and productName) and will return three columns (master, others and products) which fills the role of three queries to the database.
 Function in the database looks something along the lines of:
 
-    CREATE FUNCTION MultipleQueries(id int, alternatives int[], productName varchar, OUT master Master, OUT Master[] others, OUT Detail[] products)
+    CREATE FUNCTION MultipleQueries(id int, alternatives int[], productName varchar, OUT master Master, OUT bigint others, OUT Detail[] products)
       RETURNS void AS $$
       //...
       SELECT it INTO master FROM Master it WHERE it.number = id;
-      SELECT array_agg(it) INTO others FROM Master it WHERE it.number = ANY(alternatives);
-      SELECT array_agg(it) INTO products FROM Detail it WHERE it.product LIKE '%' || productName || '%' OR it.masterID = master.number;
+      SELECT count(it) INTO others FROM Master it WHERE it.number = ANY(alternatives);
+      SELECT array_agg(it) INTO products FROM Detail it WHERE it.product LIKE '%' || productName || '%' OR it.masterID = master.number LIMIT 10;
     $$ END LANGUAGE PLPGSQL;
 
 which has three out parameters and returns a single row. 
@@ -94,8 +95,8 @@ In Java equivalent query can be created as:
 
     RepositoryBulkReader reader = locator.resolve(RepositoryBulkReader.class);
     Callable<Optional<Master>> master = reader.find(Master.class, id.toString); //int id
-	Callable<List<Master>> others = reader.search(Master.class, it -> alternatives.contains(it.getNumber()), 10, null); //set<int> alternatives
-	Callable<List<Detail>> products = reader.search(Detail.class, it -> it.getProduct().contains(productName) || it.getMasterID() == id);
+	Callable<Long> others = reader.count(Master.class, it -> alternatives.contains(it.getNumber()));
+	Callable<List<Detail>> products = reader.search(Detail.class, it -> it.getProduct().contains(productName) || it.getMasterID() == id, 10, null);
 	reader.execute(); // will create and run the actual query after which callable can be queried for actual values.
 
 This allows for very performant queries when there is noticeable latency over database link.
