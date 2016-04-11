@@ -1,6 +1,6 @@
-## OLAP queries in Revenj
+## OLAP cube queries in Revenj
 
-#### Understanding what OLAP means in Revenj
+#### Understanding what OLAP cube means in Revenj
 
 On line transaction processing; or OLTP stands for system running a lot of small transactions.
 Online analytical processing; or OLAP stands for system which runs analytical queries.
@@ -15,7 +15,7 @@ In terms of SQL this usually means GROUP BY dimensions and AGGREGATE BY facts, e
 
 where we want to find the number of items sold and total amount of money earned from sales for that product.
 
-To be more precise OLAP stands for three basic analytical operations:
+To be more precise [OLAP](https://en.wikipedia.org/wiki/OLAP_cube) stands for three basic analytical operations:
 
  * consolidation - aggregation of facts
  * drill down - grouping by dimensions
@@ -27,6 +27,8 @@ There are two major data sources used for such operations:
  * [snowflake schema](https://en.wikipedia.org/wiki/Snowflake_schema) - which allows for multi-level joins
 
 While OLTP systems are usually normalized and use snowflake schema for rich querying, OLAP systems are often denormilized and most queries are star schema queries.
+
+![Snowflake schema](pictures/snowflake-schema.png)
 
 While DSL Platform has snowflake concept for defining projections of the data, Revenj supports any data source as input for OLAP cubes/queries.
 Therefore specialized SQL can be created as data sources and Revenj will happily use them to run OLAP queries.
@@ -86,3 +88,8 @@ This means that HTTP can be used to ask ad hoc queries such as
     GET /Commands.svc/olap/Todo.TaskAnalysis?dimensions=project&facts=total,opened
 
 and run equivalent queries without even writing any Java code.
+This allows easy to use client side interface such as:
+
+![PHP cube](pictures/cube-filter.png)
+
+which can give answer to wide range of questions.

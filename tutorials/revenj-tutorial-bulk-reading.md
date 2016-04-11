@@ -12,7 +12,7 @@ This is rarely used in real world due to several major reasons:
 
 Some realational databases (such as MS SQL Server) also have other features, such as support for [multiple queries](https://msdn.microsoft.com/en-us/library/ms378758(v=sql.110).aspx) in a single roundtrip.
 
-In practice this means that on MS SQL Server DSL such as:
+In practice this means that on MS SQL Server, DSL such as:
 
     aggregate Master(number) {
       int number;
@@ -28,6 +28,9 @@ can be looked up by primary key in a single query such as:
     SELECT * FROM Detail Where masterID = @id
 
 which will return two recordsets. Together they can represent a single complex aggregate.
+
+![MS SQL Server multiple statements](pictures/mssql-multi-query.png)
+
 While this works very well for lookups, it's not ideal way to query complex data sources since level of nesting is rather limited.
 
 ORDMBS support for alternative query methods, such as:
