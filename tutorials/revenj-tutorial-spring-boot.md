@@ -120,8 +120,16 @@ Let's start with a minimal DSL and a simple [CRUD](http://en.wikipedia.org/wiki/
 An DSL example we can write is:
 
     module hello {
-      aggregate World(id) {
-        int id;
+      aggregate World {
+        string message;
+      }
+    }
+
+which is slighly shorter version of a similar DSL:
+
+    module hello {
+      aggregate World(ID) {
+        int ID { sequence; }
         string message;
       }
     }
@@ -134,12 +142,20 @@ This DSL will be converted into:
 
 [Aggregate root](http://dddcommunity.org/resources/ddd_terms/) is an DSL concept from Domain-Driven Design which is converted into appropriate objects in various domains. For now it's easiest to consider it an entity from JPA.
 
+If everything is working correctly, after build Maven plugin should update our `spring-boot` database, due to `applySql` = `true` argument.
+SQL script will be saved to `sql` folder.
+Alternatively we could use alternative migration mechanism instead of this convenient development setup.
+
+Migrated database should look like:
+
+![Postgres table](pictures/boot-database.png)
+
 To CRUD it we can either use builtin [REST-like API](https://github.com/ngs-doo/revenj/blob/master/java/revenj-servlet/src/main/java/org/revenj/server/servlet/CrudServlet.java) available in a Servlet jar provided with Revenj or write manual mappings in Spring controllers.
+
+###Integrating with Spring
 
 Rest plugin will open up endpoint which is available (by default) via `/Crud.svc/example.Post` url,
 while in Spring we will define exact mapping.
-
-###Integrating with Spring
 
 Spring boot application should be configured with a class such as:
 
