@@ -35,7 +35,7 @@ either create such user and database or change appropriate connection strings in
 For convenience project is [available for download](https://github.com/ngs-doo/revenj/blob/master/tutorials/examples/SpringBoot.zip).
 
 Let's start a new Project based on Maven and using Java 1.8 as Project SDK.
-We will need Maven (3.3.9 or newer) so we should check in IDEA that it's not using older version of Maven:
+We will need Maven (3.0.5 or newer) which should be provided with IDEA.
 
 ![IDEA Maven version](pictures/idea-maven.png)
 
@@ -81,7 +81,9 @@ After we are done, `pom.xml` should look like:
                         </goals>
                         <configuration>
                             <target>revenj.spring</target>
-                            <settings>jackson</settings>
+                            <settings>
+								<setting>jackson</setting>
+							</settings>
                             <postgres>localhost/spring-boot?user=revenj&amp;password=revenj</postgres>
                             <applySql>true</applySql>
                         </configuration>

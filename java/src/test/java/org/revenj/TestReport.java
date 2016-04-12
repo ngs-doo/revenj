@@ -13,22 +13,26 @@ import org.revenj.extensibility.Container;
 import org.revenj.patterns.DataContext;
 import org.revenj.patterns.OlapCubeQuery;
 import org.revenj.patterns.ServiceLocator;
+import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.IOException;
 import java.util.*;
 
 public class TestReport {
 
+	private PostgresEmbeddedService postgres;
 	private Container container;
 
 	@Before
 	public void initContainer() throws IOException {
-		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj");
+		postgres = Setup.database();
+		container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj");
 	}
 
 	@After
 	public void closeContainer() throws Exception {
 		container.close();
+		postgres.stop();
 	}
 
 	@Test

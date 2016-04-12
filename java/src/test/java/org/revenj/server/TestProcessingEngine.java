@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.revenj.Revenj;
+import org.revenj.Setup;
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.SystemAspect;
 import org.revenj.serialization.Serialization;
@@ -19,6 +20,7 @@ import org.revenj.server.commands.crud.Read;
 import org.revenj.server.commands.reporting.AnalyzeOlapCube;
 import org.revenj.server.commands.reporting.PopulateReport;
 import org.revenj.server.servlet.Application;
+import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.File;
 import java.io.FileReader;
@@ -26,6 +28,7 @@ import java.util.*;
 
 public class TestProcessingEngine {
 
+	private PostgresEmbeddedService postgres;
 	private Container container;
 
 	@Before
@@ -37,9 +40,10 @@ public class TestProcessingEngine {
 			properties.load(new FileReader(revProps));
 		}
 		PGSimpleDataSource dataSource = new PGSimpleDataSource();
-		dataSource.setUrl("jdbc:postgresql://localhost/revenj");
-		dataSource.setUser(properties.getProperty("user"));
-		dataSource.setPassword(properties.getProperty("password"));
+		dataSource.setUrl("jdbc:postgresql://localhost:5555/revenj");
+		dataSource.setUser("revenj");
+		dataSource.setPassword("revenj");
+		postgres = Setup.database();
 		container =
 				Revenj.setup(
 						dataSource,
@@ -52,6 +56,7 @@ public class TestProcessingEngine {
 	@After
 	public void closeContainer() throws Exception {
 		container.close();
+		postgres.stop();
 	}
 
 	@Test

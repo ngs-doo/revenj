@@ -29,6 +29,7 @@ import org.revenj.extensibility.Container;
 import org.revenj.handlers.ClickedCollectionEventHandler;
 import org.revenj.patterns.*;
 import org.w3c.dom.Element;
+import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -46,16 +47,19 @@ import java.util.concurrent.Callable;
 
 public class TestRepository {
 
+	private PostgresEmbeddedService postgres;
 	private Container container;
 
 	@Before
 	public void initContainer() throws IOException {
-		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj");
+		postgres = Setup.database();
+		container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj");
 	}
 
 	@After
 	public void closeContainer() throws Exception {
 		container.close();
+		postgres.stop();
 	}
 
 	@Test

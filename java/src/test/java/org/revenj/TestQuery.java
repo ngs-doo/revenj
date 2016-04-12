@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 import org.revenj.postgres.jinq.JinqMetaModel;
+import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -33,16 +34,19 @@ import java.util.stream.Collectors;
 
 public class TestQuery {
 
+	private PostgresEmbeddedService postgres;
 	private Container container;
 
 	@Before
 	public void initContainer() throws IOException {
-		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj");
+		postgres = Setup.database();
+		container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj");
 	}
 
 	@After
 	public void closeContainer() throws Exception {
 		container.close();
+		postgres.stop();
 	}
 
 	@Test

@@ -9,6 +9,7 @@ import org.revenj.extensibility.Container;
 import org.revenj.json.DslJsonSerialization;
 import org.revenj.serialization.WireSerialization;
 import org.revenj.server.servlet.Application;
+import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,11 +32,17 @@ public class TestDslJson {
 
 	@Test
 	public void testFallback() throws Exception {
-		try (Container container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj")) {
-			Application.setup(container);
-			WireSerialization serialization = container.resolve(WireSerialization.class);
-			ByteArrayOutputStream os = serialization.serialize(new TestMe(), "application/json");
-			Assert.assertEquals("{}", os.toString("UTF-8"));
+		PostgresEmbeddedService postgres = null;
+		try {
+			postgres = Setup.database();
+			try (Container container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj")) {
+				Application.setup(container);
+				WireSerialization serialization = container.resolve(WireSerialization.class);
+				ByteArrayOutputStream os = serialization.serialize(new TestMe(), "application/json");
+				Assert.assertEquals("{}", os.toString("UTF-8"));
+			}
+		} finally {
+			if (postgres != null) postgres.stop();
 		}
 	}
 }

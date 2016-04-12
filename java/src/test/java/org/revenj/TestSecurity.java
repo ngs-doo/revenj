@@ -13,6 +13,7 @@ import org.revenj.extensibility.Container;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.security.PermissionManager;
 import org.revenj.security.UserPrincipal;
+import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -23,16 +24,19 @@ import java.util.List;
 
 public class TestSecurity {
 
+	private PostgresEmbeddedService postgres;
 	private Container container;
 
 	@Before
 	public void initContainer() throws IOException {
-		container = (Container) Boot.configure("jdbc:postgresql://localhost/revenj");
+		postgres = Setup.database();
+		container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj");
 	}
 
 	@After
 	public void closeContainer() throws Exception {
 		container.close();
+		postgres.stop();
 	}
 
 	@Test

@@ -2,21 +2,38 @@ package org.revenj;
 
 import gen.model.Boot;
 import gen.model.test.Composite;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.revenj.extensibility.Container;
 import org.revenj.patterns.DataChangeNotification;
 import org.revenj.patterns.DataContext;
 import org.revenj.patterns.Generic;
 import org.revenj.patterns.ServiceLocator;
+import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 import rx.Observable;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 public class TestNotifications {
 
+	private PostgresEmbeddedService postgres;
+
+	@Before
+	public void initDb() throws IOException {
+		postgres = Setup.database();
+	}
+
+	@After
+	public void closeDb() throws Exception {
+		postgres.stop();
+	}
+
 	@Test
 	public void willRaiseNotification() throws Exception {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost/revenj");
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5555/revenj");
 		DataContext context = locator.resolve(DataContext.class);
 		DataChangeNotification notification = locator.resolve(DataChangeNotification.class);
 		boolean[] hasRead = new boolean[1];
@@ -39,7 +56,7 @@ public class TestNotifications {
 
 	@Test
 	public void canTrack() throws Exception {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5555/revenj");
 		DataContext context = locator.resolve(DataContext.class);
 		DataChangeNotification notification = locator.resolve(DataChangeNotification.class);
 		boolean[] hasRead = new boolean[1];
@@ -67,7 +84,7 @@ public class TestNotifications {
 
 	@Test
 	public void observableSignatures() throws Exception {
-		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5432/revenj");
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5555/revenj");
 		DataContext context = locator.resolve(DataContext.class);
 		Observable<Composite> notification = new Generic<Observable<Composite>>() {
 		}.resolve(locator);

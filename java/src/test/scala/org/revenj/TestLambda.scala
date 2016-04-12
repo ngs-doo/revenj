@@ -3,29 +3,34 @@ package org.revenj
 import java.io.IOException
 import java.util.Optional
 
-import _root_.gen.model.Boot
+import gen.model.Boot
 import gen.model.adt.{Anonymous, User}
 import org.revenj.extensibility.Container
-
 import org.junit._
 import org.revenj.patterns._
 import org.revenj.postgres.jinq.{JinqMetaModel, ScalaSort, ScalaSpecification}
+import ru.yandex.qatools.embed.service.PostgresEmbeddedService
 
 import scala.util.Random
 
 class TestLambda {
 
+  private var postgres: PostgresEmbeddedService = null
   private var container: Container = null
 
   @Before
-  @throws(classOf[IOException])
+  @throws[IOException]
   def initContainer {
-    container = Boot.configure("jdbc:postgresql://localhost/revenj").asInstanceOf[Container]
+    postgres = new PostgresEmbeddedService("localhost", 5555, "revenj", "revenj", "revenj", "target/db", true, 5000)
+    postgres.start
+    container = Boot.configure("jdbc:postgresql://localhost:5432/revenj").asInstanceOf[Container]
   }
 
   @After
-  def closeContainer() {
+  @throws[Exception]
+  def closeContainer {
     container.close
+    postgres.stop
   }
 
   class RichQuery[T <: DataSource](query: Query[T]) {
