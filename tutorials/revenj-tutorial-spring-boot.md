@@ -81,9 +81,9 @@ After we are done, `pom.xml` should look like:
                         </goals>
                         <configuration>
                             <target>revenj.spring</target>
-                            <settings>
-								<setting>jackson</setting>
-							</settings>
+                            <options>
+                                <option>jackson</option>
+                            </options>
                             <postgres>localhost/spring-boot?user=revenj&amp;password=revenj</postgres>
                             <applySql>true</applySql>
                         </configuration>
