@@ -1,43 +1,19 @@
 package org.revenj;
 
-import gen.model.Boot;
-import gen.model.mixinReference.Author;
 import gen.model.mixinReference.UserFilter;
-import gen.model.mixinReference.repositories.AuthorRepository;
 import gen.model.mixinReference.repositories.UserFilterRepository;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.revenj.extensibility.Container;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.security.PermissionManager;
 import org.revenj.security.UserPrincipal;
-import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
-import java.io.IOException;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-public class TestSecurity {
-
-	private PostgresEmbeddedService postgres;
-	private Container container;
-
-	@Before
-	public void initContainer() throws IOException {
-		postgres = Setup.database();
-		container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj");
-	}
-
-	@After
-	public void closeContainer() throws Exception {
-		container.close();
-		postgres.stop();
-	}
+public class TestSecurity extends Setup {
 
 	@Test
 	public void simpleAccessCheck() throws Exception {

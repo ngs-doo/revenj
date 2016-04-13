@@ -1,20 +1,16 @@
 package org.revenj;
 
-import gen.model.Boot;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.revenj.extensibility.Container;
-import org.revenj.patterns.ServiceLocator;
 import org.revenj.postgres.QueryProvider;
-import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.util.Properties;
 
 @RunWith(Parameterized.class)
-public class TestServiceLocator {
+public class TestServiceLocator extends Setup {
 	@Parameters
 	public static Object[][] data() {
 		return new Object[][]{{"foo", "bar"}, {"revenj.resolveUnknown", "true"}};
@@ -37,17 +33,6 @@ public class TestServiceLocator {
 			props.load(new java.io.FileReader(revProps));
 		}
 
-		PostgresEmbeddedService postgres = null;
-		try {
-			postgres = Setup.database();
-			final ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5555/revenj", props);
-			try {
-				Assert.assertNotNull(locator.resolve(QueryProvider.class));
-			} finally {
-				((Container) locator).close();
-			}
-		} finally {
-			if (postgres != null) postgres.stop();
-		}
+		Assert.assertNotNull(container.resolve(QueryProvider.class));
 	}
 }

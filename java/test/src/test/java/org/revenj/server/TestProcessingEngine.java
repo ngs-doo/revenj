@@ -4,10 +4,7 @@ import gen.model.Boot;
 import gen.model.test.Composite;
 import gen.model.test.FindMany;
 import gen.model.test.Simple;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.revenj.Revenj;
 import org.revenj.Setup;
@@ -24,12 +21,27 @@ import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 public class TestProcessingEngine {
 
-	private PostgresEmbeddedService postgres;
 	private Container container;
+
+	private static PostgresEmbeddedService postgres;
+
+	@BeforeClass
+	public static void setupDatabase() throws IOException {
+		postgres = Setup.database();
+	}
+
+	@AfterClass
+	public static void teardownDatabase() {
+		if (postgres != null) {
+			postgres.stop();
+			postgres = null;
+		}
+	}
 
 	@Before
 	public void initContainer() throws Exception {
@@ -43,7 +55,6 @@ public class TestProcessingEngine {
 		dataSource.setUrl("jdbc:postgresql://localhost:5555/revenj");
 		dataSource.setUser("revenj");
 		dataSource.setPassword("revenj");
-		postgres = Setup.database();
 		container =
 				Revenj.setup(
 						dataSource,
@@ -56,7 +67,6 @@ public class TestProcessingEngine {
 	@After
 	public void closeContainer() throws Exception {
 		container.close();
-		postgres.stop();
 	}
 
 	@Test

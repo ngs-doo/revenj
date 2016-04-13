@@ -1,39 +1,18 @@
 package org.revenj;
 
-import gen.model.Boot;
 import gen.model.test.Composite;
 import gen.model.test.CompositeCube;
 import gen.model.test.CompositeList;
 import gen.model.test.FindMany;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.revenj.extensibility.Container;
 import org.revenj.patterns.DataContext;
-import org.revenj.patterns.OlapCubeQuery;
 import org.revenj.patterns.ServiceLocator;
-import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.IOException;
 import java.util.*;
 
-public class TestReport {
-
-	private PostgresEmbeddedService postgres;
-	private Container container;
-
-	@Before
-	public void initContainer() throws IOException {
-		postgres = Setup.database();
-		container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj");
-	}
-
-	@After
-	public void closeContainer() throws Exception {
-		container.close();
-		postgres.stop();
-	}
+public class TestReport extends Setup {
 
 	@Test
 	public void canPopulateReport() throws IOException {

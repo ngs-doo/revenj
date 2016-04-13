@@ -95,6 +95,9 @@ module test {
 		date? date;
 		decimal? number;
 	}
+	specification<ClickedList> FindAt 'it => it.date == date' {
+		date date;
+	}
 	report FindMany {
 		uuid id;
 		Set<uuid> ids;
@@ -337,5 +340,11 @@ module xc {
 	root SearchByTimestampAndOrderByTimestamp {
 	    Timestamp ondate;
 	    String marker;
+	}
+	uuid aggregate Partner {
+		Partner?     *owner;
+		specification findChildren 'it => it.ownerID == ownerID' {
+			UUID ownerID;
+		}
 	}
 }

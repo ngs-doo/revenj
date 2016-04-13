@@ -23,7 +23,7 @@ class TestLambda {
   def initContainer {
     postgres = new PostgresEmbeddedService("localhost", 5555, "revenj", "revenj", "revenj", "target/db", true, 5000)
     postgres.start
-    container = Boot.configure("jdbc:postgresql://localhost:5432/revenj").asInstanceOf[Container]
+    container = Boot.configure("jdbc:postgresql://localhost:5555/revenj?user=revenj&password=revenj").asInstanceOf[Container]
   }
 
   @After

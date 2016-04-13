@@ -1,6 +1,5 @@
 package org.revenj;
 
-import gen.model.Boot;
 import gen.model.adt.BasicSecurity;
 import gen.model.adt.User;
 import org.junit.Assert;
@@ -32,17 +31,14 @@ public class TestDslJson {
 
 	@Test
 	public void testFallback() throws Exception {
-		PostgresEmbeddedService postgres = null;
-		try {
-			postgres = Setup.database();
-			try (Container container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj")) {
-				Application.setup(container);
-				WireSerialization serialization = container.resolve(WireSerialization.class);
-				ByteArrayOutputStream os = serialization.serialize(new TestMe(), "application/json");
-				Assert.assertEquals("{}", os.toString("UTF-8"));
-			}
+		PostgresEmbeddedService postgres = Setup.database();
+		try (Container container = Setup.container()) {
+			Application.setup(container);
+			WireSerialization serialization = container.resolve(WireSerialization.class);
+			ByteArrayOutputStream os = serialization.serialize(new TestMe(), "application/json");
+			Assert.assertEquals("{}", os.toString("UTF-8"));
 		} finally {
-			if (postgres != null) postgres.stop();
+			postgres.stop();
 		}
 	}
 }

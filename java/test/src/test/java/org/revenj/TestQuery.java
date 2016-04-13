@@ -1,6 +1,5 @@
 package org.revenj;
 
-import gen.model.Boot;
 import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
 import gen.model.calc.Info;
@@ -16,14 +15,10 @@ import gen.model.stock.repositories.AnalysisGridRepository;
 import gen.model.stock.repositories.ArticleGridRepository;
 import gen.model.stock.repositories.ArticleRepository;
 import gen.model.test.repositories.CompositeRepository;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.revenj.extensibility.Container;
 import org.revenj.patterns.*;
 import org.revenj.postgres.jinq.JinqMetaModel;
-import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -32,22 +27,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TestQuery {
-
-	private PostgresEmbeddedService postgres;
-	private Container container;
-
-	@Before
-	public void initContainer() throws IOException {
-		postgres = Setup.database();
-		container = (Container) Boot.configure("jdbc:postgresql://localhost:5555/revenj");
-	}
-
-	@After
-	public void closeContainer() throws Exception {
-		container.close();
-		postgres.stop();
-	}
+public class TestQuery extends Setup {
 
 	@Test
 	public void simpleQuery() throws IOException {
