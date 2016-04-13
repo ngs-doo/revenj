@@ -70,8 +70,8 @@ namespace Revenj.DatabasePersistence
 		/// Connection and transaction information will be appended to the provided command.
 		/// </summary>
 		/// <param name="query">ADO.NET driver</param>
-		/// <param name="sql">sql to execute</param>
-		/// <param name="parameters">sql parameters</param>
+		/// <param name="sql">SQL to execute</param>
+		/// <param name="parameters">SQL parameters</param>
 		/// <returns>comand.Execute() result</returns>
 		public static int Execute(
 			this IDatabaseQuery query,
@@ -85,11 +85,11 @@ namespace Revenj.DatabasePersistence
 			return query.Execute(com);
 		}
 		/// <summary>
-		/// Create database command using provided sql and by
+		/// Create database command using provided SQL and by
 		/// replacing ? with parameter arguments.
 		/// </summary>
 		/// <param name="query">ADO.NET driver</param>
-		/// <param name="sql">sql to execute</param>
+		/// <param name="sql">SQL to execute</param>
 		/// <param name="parameters">parameters to bind</param>
 		/// <returns></returns>
 		public static IDbCommand CreateCommand(
@@ -123,8 +123,8 @@ namespace Revenj.DatabasePersistence
 		/// command.ExecuteDataReader() will be called.
 		/// </summary>
 		/// <param name="query">ADO.NET driver</param>
-		/// <param name="sql">sql to execute</param>
-		/// <param name="action">datareader converter</param>
+		/// <param name="sql">SQL to execute</param>
+		/// <param name="action">data reader converter</param>
 		/// <param name="parameters">command parameters</param>
 		public static void Execute(
 			this IDatabaseQuery query,
@@ -146,7 +146,7 @@ namespace Revenj.DatabasePersistence
 		/// </summary>
 		/// <typeparam name="T">result type</typeparam>
 		/// <param name="query">ADO.NET driver</param>
-		/// <param name="sql">sql to execute</param>
+		/// <param name="sql">SQL to execute</param>
 		/// <param name="instancer">object factory</param>
 		/// <param name="parameters">additional command parameters</param>
 		/// <returns>populated list</returns>
@@ -169,8 +169,8 @@ namespace Revenj.DatabasePersistence
 		/// Connection and transaction information will be appended to the provided command.
 		/// </summary>
 		/// <param name="query">ADO.NET driver</param>
-		/// <param name="sql">sql to execute</param>
-		/// <param name="parameters">sql additional parameters</param>
+		/// <param name="sql">SQL to execute</param>
+		/// <param name="parameters">SQL additional parameters</param>
 		/// <returns>populated table</returns>
 		public static DataTable Fill(
 			this IDatabaseQuery query,
@@ -209,7 +209,7 @@ namespace Revenj.DatabasePersistence
 		/// </summary>
 		/// <typeparam name="T">result type</typeparam>
 		/// <param name="query">ADO.NET driver</param>
-		/// <param name="sql">sql to execute</param>
+		/// <param name="sql">SQL to execute</param>
 		/// <param name="instancer">object factory</param>
 		/// <param name="parameters"></param>
 		/// <returns></returns>

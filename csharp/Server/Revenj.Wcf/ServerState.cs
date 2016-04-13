@@ -19,5 +19,10 @@ namespace Revenj.Wcf
 			IsReady = true;
 			Ready(factory);
 		}
+		public event Action<SystemEvent> Change = f => { };
+		public void Notify(SystemEvent value)
+		{
+			Change(value);
+		}
 	}
 }

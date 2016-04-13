@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
+import org.revenj.extensibility.SystemState;
 import org.revenj.patterns.DataChangeNotification;
 import org.revenj.patterns.DataContext;
 import org.revenj.patterns.Generic;
@@ -14,8 +15,10 @@ import org.revenj.patterns.ServiceLocator;
 import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 import rx.Observable;
 
+import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
+import java.sql.Connection;
 
 public class TestNotifications {
 
@@ -108,6 +111,25 @@ public class TestNotifications {
 		}
 		Assert.assertTrue(hasRead[0]);
 		Assert.assertEquals(co.getURI(), uris[0]);
+		((AutoCloseable) locator).close();
+	}
+
+	@Test
+	public void canDetectMigration() throws Exception {
+		ServiceLocator locator = Boot.configure("jdbc:postgresql://localhost:5555/revenj");
+		locator.resolve(DataChangeNotification.class);
+		SystemState state = locator.resolve(SystemState.class);
+		boolean[] changes = new boolean[1];
+		state.change().subscribe(it -> changes[0] = true);
+		Assert.assertFalse(changes[0]);
+		Connection sql = locator.resolve(DataSource.class).getConnection();
+		sql.createStatement().execute("SELECT pg_notify('migration', 'new')");
+		sql.close();
+		for (int i = 0; i < 10; i++) {
+			if (changes[0]) break;
+			Thread.sleep(100);
+		}
+		Assert.assertTrue(changes[0]);
 		((AutoCloseable) locator).close();
 	}
 }

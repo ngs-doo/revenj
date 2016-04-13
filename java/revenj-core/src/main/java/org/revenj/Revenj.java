@@ -2,6 +2,7 @@ package org.revenj;
 
 import org.postgresql.ds.PGPoolingDataSource;
 import org.revenj.extensibility.Container;
+import org.revenj.extensibility.SystemState;
 import org.revenj.json.DslJsonSerialization;
 import org.revenj.patterns.*;
 import org.revenj.postgres.jinq.JinqMetaModel;
@@ -148,8 +149,10 @@ public abstract class Revenj {
 			Properties properties,
 			Optional<ClassLoader> classLoader,
 			Iterator<SystemAspect> aspects) throws IOException {
+		RevenjSystemState state = new RevenjSystemState();
 		ClassLoader loader = classLoader.orElse(Thread.currentThread().getContextClassLoader());
 		SimpleContainer container = new SimpleContainer("true".equals(properties.getProperty("revenj.resolveUnknown")));
+		container.registerAs(state, SystemState.class);
 		container.registerInstance(properties);
 		container.registerInstance(ServiceLocator.class, container, false);
 		container.registerInstance(DataSource.class, dataSource, false);
@@ -166,6 +169,7 @@ public abstract class Revenj {
 						dataSource,
 						Optional.of(domainModel),
 						properties,
+						state,
 						container);
 		container.registerInstance(EagerNotification.class, databaseNotification, false);
 		container.registerInstance(DataChangeNotification.class, databaseNotification, true);
@@ -187,6 +191,7 @@ public abstract class Revenj {
 			domainModel.updateNamespace(nsAfter);
 		}
 		properties.setProperty("revenj.aspectsCount", Integer.toString(total));
+		state.started(container);
 		return container;
 	}
 

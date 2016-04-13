@@ -2,6 +2,7 @@ package org.revenj;
 
 import org.postgresql.PGNotification;
 import org.postgresql.core.BaseConnection;
+import org.revenj.extensibility.SystemState;
 import org.revenj.postgres.PostgresReader;
 import org.revenj.postgres.converters.StringConverter;
 import org.revenj.patterns.DomainModel;
@@ -25,6 +26,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 
 	private final DataSource dataSource;
 	private final Optional<DomainModel> domainModel;
+	private final SystemState systemState;
 	private final ServiceLocator locator;
 	private final Properties properties;
 
@@ -43,10 +45,12 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			DataSource dataSource,
 			Optional<DomainModel> domainModel,
 			Properties properties,
+			SystemState systemState,
 			ServiceLocator locator) {
 		this.dataSource = dataSource;
 		this.domainModel = domainModel;
 		this.properties = properties;
+		this.systemState = systemState;
 		this.locator = locator;
 		notifications = subject.asObservable();
 		String timeoutValue = properties.getProperty("revenj.notifications.timeout");
@@ -102,7 +106,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			}
 			if (bc != null) {
 				Statement stmt = bc.createStatement();
-				stmt.execute("LISTEN events; LISTEN aggregate_roots");
+				stmt.execute("LISTEN events; LISTEN aggregate_roots; LISTEN migration;");
 				retryCount = 0;
 				Pooling pooling = new Pooling(bc, stmt);
 				Thread thread = new Thread(pooling);
@@ -143,7 +147,12 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 						continue;
 					}
 					for (PGNotification n : notifications) {
-						if (!"events".equals(n.getName()) && !"aggregate_roots".equals(n.getName())) continue;
+						if (!"events".equals(n.getName()) && !"aggregate_roots".equals(n.getName())) {
+							if ("migration".equals(n.getName())) {
+								systemState.notify(new SystemState.SystemEvent("migration", n.getParameter()));
+							}
+							continue;
+						}
 						String param = n.getParameter();
 						String ident = param.substring(0, param.indexOf(':'));
 						String op = param.substring(ident.length() + 1, param.indexOf(':', ident.length() + 1));
@@ -232,6 +241,5 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 
 	public void close() {
 		isClosed = true;
-
 	}
 }

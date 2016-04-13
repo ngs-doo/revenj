@@ -12,6 +12,7 @@ using Revenj.DatabasePersistence.Postgres.Converters;
 using Revenj.DatabasePersistence.Postgres.Npgsql;
 using Revenj.DomainPatterns;
 using Revenj.Utility;
+using Revenj.Extensibility;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
@@ -29,18 +30,22 @@ namespace Revenj.DatabasePersistence.Postgres
 			new ConcurrentDictionary<Type, IRepository<IIdentifiable>>(1, 17);
 		private readonly IServiceProvider Locator;
 		private readonly BufferedTextReader Reader = new BufferedTextReader(string.Empty, new char[64], new char[8192]);
+		private readonly ISystemState SystemState;
 
 		public PostgresDatabaseNotification(
 			ConnectionInfo connectionInfo,
 			Lazy<IDomainModel> domainModel,
+			ISystemState systemState,
 			IServiceProvider locator)
 		{
 			Contract.Requires(connectionInfo != null);
 			Contract.Requires(domainModel != null);
 			Contract.Requires(locator != null);
+			Contract.Requires(systemState != null);
 
 			this.DomainModel = domainModel;
 			this.Locator = locator;
+			this.SystemState = systemState;
 			Notifications = Subject.AsObservable();
 			if (ConfigurationManager.AppSettings["Revenj.Notifications"] != "disabled")
 				SetUpConnection(connectionInfo.ConnectionString + ";SyncNotification=true");
@@ -78,7 +83,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				Connection.Notification += Connection_Notification;
 				Connection.Open();
 				var com = Connection.CreateCommand();
-				com.CommandText = "listen events; listen aggregate_roots;";
+				com.CommandText = "listen events; listen aggregate_roots; listen migration;";
 				com.ExecuteNonQuery();
 				RetryCount = 0;
 			}
@@ -135,6 +140,11 @@ namespace Revenj.DatabasePersistence.Postgres
 								break;
 						}
 					}
+				}
+				else if (e.Condition == "migration")
+				{
+					TraceSource.TraceEvent(TraceEventType.Information, 5155, "Postgres migration detected: {0} ", e.AdditionalInformation);
+					SystemState.Notify(new SystemEvent("migration", e.AdditionalInformation));
 				}
 			}
 			catch (Exception ex)
