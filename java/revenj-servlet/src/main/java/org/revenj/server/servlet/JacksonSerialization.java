@@ -21,6 +21,9 @@ import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -56,17 +59,25 @@ final class JacksonSerialization implements Serialization<String> {
 
 	private static SimpleModule withCustomSerializers() {
 		SimpleModule module = new SimpleModule();
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer transformer;
+		try {
+			transformer = tf.newTransformer();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		} catch (TransformerConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+
 		module.addSerializer(Element.class, new JsonSerializer<Element>() {
 			@Override
 			public void serialize(Element element, JsonGenerator gen, SerializerProvider unused) throws IOException {
-				Document document = element.getOwnerDocument();
-				DOMImplementationLS domImplLS = (DOMImplementationLS) document.getImplementation();
-				LSSerializer serializer = domImplLS.createLSSerializer();
-				LSOutput lsOutput = domImplLS.createLSOutput();
-				lsOutput.setEncoding("UTF-8");
 				StringWriter writer = new StringWriter();
-				lsOutput.setCharacterStream(writer);
-				serializer.write(document, lsOutput);
+				try {
+					transformer.transform(new DOMSource(element.getOwnerDocument()), new StreamResult(writer));
+				} catch (TransformerException e) {
+					throw new IOException(e);
+				}
+				gen.writeString(writer.toString());
 			}
 		});
 		module.addSerializer(java.awt.Point.class, new JsonSerializer<java.awt.Point>() {

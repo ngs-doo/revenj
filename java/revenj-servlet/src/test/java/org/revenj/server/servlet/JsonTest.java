@@ -2,6 +2,7 @@ package org.revenj.server.servlet;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.revenj.Utils;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
@@ -9,7 +10,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
 
 public class JsonTest {
 
@@ -48,5 +53,23 @@ public class JsonTest {
 		Assert.assertEquals("root", value.getNodeName());
 		value = jackson.deserialize("\"<root/>\"", Element.class);
 		Assert.assertEquals("root", value.getNodeName());
+	}
+
+	static class WithXml {
+		public String URI;
+		public List<Element> xmls;
+	}
+
+	@Test
+	public void xmlJacksonClass() throws IOException {
+		final JacksonSerialization json = new JacksonSerialization(null, Optional.empty());
+		byte[] bytes = "[null,{\"document\":null},{\"TextElement\":\"some text & \"},{\"ElementWithCData\":\"\"},{\"AtributedElement\":{\"@foo\":\"bar\",\"@qwe\":\"poi\"}},{\"NestedTextElement\":{\"FirstNest\":{\"SecondNest\":\"bird\"}}}]".getBytes();
+		List<Element> xmls = (List<Element>) json.deserialize(Utils.makeGenericType(ArrayList.class, Element.class), bytes, bytes.length);
+		WithXml instance = new WithXml();
+		instance.URI = "abc";
+		instance.xmls = xmls;
+		String res = json.serialize(instance);
+		WithXml deser = (WithXml) json.deserialize(WithXml.class, res.getBytes(), res.length());
+		assertEquals(6, deser.xmls.size());
 	}
 }
