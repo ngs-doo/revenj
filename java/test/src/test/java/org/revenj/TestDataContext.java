@@ -7,9 +7,12 @@ import gen.model.binaries.WritableDocument;
 import gen.model.calc.Info;
 import gen.model.calc.Realm;
 import gen.model.calc.Type;
+import gen.model.events.Event;
+import gen.model.events.Root;
 import gen.model.issues.TimestampPk;
 import gen.model.mixinReference.Author;
 import gen.model.mixinReference.SpecificReport;
+import gen.model.sql.GuardCheck;
 import gen.model.test.Clicked;
 import gen.model.test.Composite;
 import gen.model.test.FindMany;
@@ -204,5 +207,49 @@ public class TestDataContext extends Setup {
 		Assert.assertEquals(uri, foundHistory.get().getURI());
 		//Assert.assertEquals(found.get(), foundHistory.get().getSnapshots().get(0).getValue());
 		Assert.assertTrue(found.get().getTs().isEqual(foundHistory.get().getSnapshots().get(0).getValue().getTs()));
+	}
+
+	@Test
+	public void sqlWithCast() throws Exception {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		List<GuardCheck> found = db.search(GuardCheck.class);
+		Assert.assertEquals(1, found.size());
+		Assert.assertEquals(0, BigDecimal.ONE.compareTo(found.get(0).getA()));
+	}
+
+	@Test
+	public void rootWithEventReference() throws Exception {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		Root root = new Root();
+		Event event = new Event();
+		root.setEvent(event);
+		db.submit(event);
+		Assert.assertEquals(root.getEventURI(), event.getURI());
+		db.create(root);
+		Optional<Root> found = db.find(Root.class, root.getURI());
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals(found.get().getEventURI(), event.getURI());
+	}
+
+	@Test
+	public void eventWithReferences() throws Exception {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		Root root = new Root();
+		Event event1 = new Event();
+		Event event2 = new Event();
+		event2.setEvent(event1);
+		event2.setRoot(root);
+		db.create(root);
+		db.submit(event1);
+		Assert.assertEquals(event2.getEventURI(), event1.getURI());
+		Assert.assertEquals(event2.getRootURI(), root.getURI());
+		db.submit(event2);
+		Optional<Event> found = db.find(Event.class, event2.getURI());
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals(found.get().getEventURI(), event1.getURI());
+		Assert.assertEquals(found.get().getRootURI(), root.getURI());
 	}
 }

@@ -17,7 +17,6 @@ import org.revenj.server.commands.crud.Read;
 import org.revenj.server.commands.reporting.AnalyzeOlapCube;
 import org.revenj.server.commands.reporting.PopulateReport;
 import org.revenj.server.servlet.Application;
-import ru.yandex.qatools.embed.service.PostgresEmbeddedService;
 
 import java.io.File;
 import java.io.FileReader;
@@ -28,19 +27,14 @@ public class TestProcessingEngine {
 
 	private Container container;
 
-	private static PostgresEmbeddedService postgres;
-
 	@BeforeClass
 	public static void setupDatabase() throws IOException {
-		postgres = Setup.database();
+		Setup.setupDatabase();
 	}
 
 	@AfterClass
 	public static void teardownDatabase() {
-		if (postgres != null) {
-			postgres.stop();
-			postgres = null;
-		}
+		Setup.teardownDatabase();
 	}
 
 	@Before

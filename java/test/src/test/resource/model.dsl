@@ -348,3 +348,17 @@ module xc {
 		}
 	}
 }
+module events {
+	root Root {
+		Event? *event;
+	}
+	event Event {
+		Root? *root;
+		Event? *event;
+	}
+}
+module sql {
+	SQL GuardCheck <# SELECT 1.0 as a #> {
+		Decimal(5) a;
+	}
+}
