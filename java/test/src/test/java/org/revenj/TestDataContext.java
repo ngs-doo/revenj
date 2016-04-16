@@ -7,6 +7,8 @@ import gen.model.binaries.WritableDocument;
 import gen.model.calc.Info;
 import gen.model.calc.Realm;
 import gen.model.calc.Type;
+import gen.model.events.Alert2;
+import gen.model.events.AlertEventLog;
 import gen.model.events.Event;
 import gen.model.events.Root;
 import gen.model.issues.TimestampPk;
@@ -251,5 +253,19 @@ public class TestDataContext extends Setup {
 		Assert.assertTrue(found.isPresent());
 		Assert.assertEquals(found.get().getEventURI(), event1.getURI());
 		Assert.assertEquals(found.get().getRootURI(), root.getURI());
+	}
+
+	@Test
+	public void eventWithMixin() throws Exception {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		AlertEventLog log = new AlertEventLog();
+		log.setAlert(new Alert2().setPartnerID(2).setProp2("abc"));
+		db.submit(log);
+		Optional<AlertEventLog> found = db.find(AlertEventLog.class, log.getURI());
+		Assert.assertTrue(found.isPresent());
+		Assert.assertEquals(2, found.get().getAlert().getPartnerID());
+		Alert2 alert = (Alert2) found.get().getAlert();
+		Assert.assertEquals("abc", alert.getProp2());
 	}
 }

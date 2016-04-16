@@ -356,6 +356,20 @@ module events {
 		Root? *root;
 		Event? *event;
 	}
+	mixin AlertScenario {
+		Int partnerID;
+	}
+	value Alert1 {
+		has mixin AlertScenario;
+		String prop1;
+	}
+	value Alert2 {
+		has mixin AlertScenario;
+		String prop2;
+	}
+	event AlertEventLog {
+		AlertScenario alert;
+	}
 }
 module sql {
 	SQL GuardCheck <# SELECT 1.0 as a #> {
