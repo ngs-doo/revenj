@@ -6,9 +6,7 @@ import org.revenj.serialization.Serialization;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.ServiceLoader;
 
@@ -38,19 +36,5 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 	public Object deserialize(Type type, String data) throws IOException {
 		byte[] bytes = data.getBytes("UTF-8");
 		return super.deserialize(type, bytes, bytes.length);
-	}
-
-	@Deprecated
-	public Object deserialize(byte[] tmp, Type type, InputStream stream) throws IOException {
-		int size = 0;
-		int read;
-		while ((read = stream.read(tmp, size, tmp.length - size)) != -1) {
-			size += read;
-			if (size == tmp.length) {
-				tmp = Arrays.copyOf(tmp, tmp.length * 2);
-			}
-		}
-		//TODO: use underlying stream deserializer when it starts supporting autogrowing buffer
-		return super.deserialize(type, tmp, size);
 	}
 }

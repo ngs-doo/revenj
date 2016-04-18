@@ -55,11 +55,11 @@ public class DslJsonMessageConverter extends AbstractGenericHttpMessageConverter
 	}
 
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-		return serializer.deserialize(threadBuffer.get(), clazz, inputMessage.getBody());
+		return serializer.deserialize(clazz, inputMessage.getBody(), threadBuffer.get());
 	}
 
 	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-		return serializer.deserialize(threadBuffer.get(), type, inputMessage.getBody());
+		return serializer.deserialize(type, inputMessage.getBody(), threadBuffer.get());
 	}
 
 	protected void writeInternal(Object instance, Type type, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
