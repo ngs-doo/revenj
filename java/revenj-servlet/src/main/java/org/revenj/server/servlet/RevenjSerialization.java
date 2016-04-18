@@ -30,6 +30,11 @@ final class RevenjSerialization implements WireSerialization {
 			public Object deserialize(ServiceLocator serviceLocator, Type manifest, byte[] body, int size) throws IOException {
 				return jackson.deserialize(manifest, body, size);
 			}
+
+			@Override
+			public Object deserialize(ServiceLocator serviceLocator, Type manifest, InputStream stream) throws IOException {
+				return jackson.deserialize(manifest, stream);
+			}
 		}));
 		this.passThrough = new PassThroughSerialization();
 	}

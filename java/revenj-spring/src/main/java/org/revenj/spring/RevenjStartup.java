@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Optional;
@@ -96,6 +97,11 @@ public class RevenjStartup {
 			@Override
 			public Object deserialize(ServiceLocator serviceLocator, Type type, byte[] bytes, int len) throws IOException {
 				return mapper.readValue(bytes, 0, len, mapper.getTypeFactory().constructType(type));
+			}
+
+			@Override
+			public Object deserialize(ServiceLocator serviceLocator, Type type, InputStream stream) throws IOException {
+				return mapper.readValue(stream, mapper.getTypeFactory().constructType(type));
 			}
 		});
 	}

@@ -9,7 +9,7 @@
 	<description> DSL Platform compatible backend (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>pom</packaging>
-	<version>0.9.5</version>
+	<version>0.9.6</version>
 
 	<modules>
 		<module>revenj-core</module>
