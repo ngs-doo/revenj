@@ -54,6 +54,19 @@ Unlike .NET which scans assembly in runtime for such signatures, JVM version use
 While developers can register their own services there, its recommended practice to use `@EventHandler` annotation for registering handlers into services.
 [Revenj processor](https://github.com/ngs-doo/revenj/blob/master/java/revenj-core/src/main/java/org/revenj/processor/RevenjProcessor.java) will run during compilation and register such services.
 
+Processor can be configured to run in Maven with:
+
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.3</version>
+      <configuration>
+        <annotationProcessors>
+          <annotationProcessor>org.revenj.processor.RevenjProcessor</annotationProcessor>
+        </annotationProcessors>
+      </configuration>
+    </plugin>
+
 For example, an event such as:
 
     module testing {
