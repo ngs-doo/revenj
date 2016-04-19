@@ -2,6 +2,7 @@ package org.revenj;
 
 import gen.model.adt.BasicSecurity;
 import gen.model.adt.User;
+import gen.model.issues.SA1Bo;
 import gen.model.numbers.DecimalPk;
 import gen.model.numbers.EntityWithLongs;
 import gen.model.numbers.LongNumbers;
@@ -49,12 +50,35 @@ public class TestDslJson extends Setup {
 		try (Container container = Setup.container()) {
 			Application.setup(container);
 			WireSerialization serialization = container.resolve(WireSerialization.class);
-			LongNumbers orig = new LongNumbers().setEntity(new EntityWithLongs().setProp(new long[] { 0 }));
+			LongNumbers orig = new LongNumbers().setEntity(new EntityWithLongs().setProp(new long[] { 3 }));
 			ByteArrayOutputStream os = serialization.serialize(orig, "application/json");
 			ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
 			LongNumbers deser = serialization.deserialize(is, "application/json", LongNumbers.class);
 			Assert.assertTrue(deser.deepEquals(orig));
-			Assert.assertArrayEquals(new long[] { 0 }, deser.getEntity().getProp());
+			Assert.assertArrayEquals(new long[] { 3 }, deser.getEntity().getProp());
+		}
+	}
+
+	@Test
+	public void testJsonObjectDefaults() throws Exception {
+		try (Container container = Setup.container()) {
+			Application.setup(container);
+			WireSerialization serialization = container.resolve(WireSerialization.class);
+			ByteArrayInputStream is = new ByteArrayInputStream("{\"sE1Bo\":{\"p1Bo\":true}}".getBytes());
+			SA1Bo deser = serialization.deserialize(is, "application/json", SA1Bo.class);
+			Assert.assertTrue(deser.getSE1Bo().getP1Bo());
+		}
+	}
+
+	@Test
+	public void testJsonObjectDefaultsForNull() throws Exception {
+		try (Container container = Setup.container()) {
+			Application.setup(container);
+			WireSerialization serialization = container.resolve(WireSerialization.class);
+			ByteArrayInputStream is = new ByteArrayInputStream("{}".getBytes());
+			SA1Bo deser = serialization.deserialize(is, "application/json", SA1Bo.class);
+			Assert.assertNotNull(deser.getSE1Bo());
+			Assert.assertNotNull(deser.getSV1Bo());
 		}
 	}
 

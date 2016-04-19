@@ -217,6 +217,16 @@ module issues {
 		decimal(9) d;
 		persistence { history; }
 	}
+	aggregate SA1Bo {
+		SE1Bo sE1Bo;
+		SV1Bo sV1Bo;
+	}
+	entity SE1Bo {
+		Boolean p1Bo;
+	}
+	value SV1Bo {
+		Boolean p1Bo;
+	}
 }
 module md {
 	root Master {
