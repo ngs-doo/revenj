@@ -376,3 +376,14 @@ module sql {
 		Decimal(5) a;
 	}
 }
+module numbers {
+	aggregate LongNumbers {
+		EntityWithLongs entity;
+	}
+	entity EntityWithLongs {
+		Array<Long> prop;
+	}
+	aggregate DecimalPk(d) {
+		decimal(4) d;
+	}
+}

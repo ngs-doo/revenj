@@ -19,6 +19,7 @@ public abstract class Utils {
 	public static final BigDecimal ZERO_1 = BigDecimal.ZERO.setScale(1);
 	public static final BigDecimal ZERO_2 = BigDecimal.ZERO.setScale(2);
 	public static final BigDecimal ZERO_3 = BigDecimal.ZERO.setScale(3);
+	public static final BigDecimal ZERO_4 = BigDecimal.ZERO.setScale(4);
 	public static final InetAddress LOOPBACK = InetAddress.getLoopbackAddress();
 
 	private static final ConcurrentMap<String, GenericType> typeCache = new ConcurrentHashMap<>();
