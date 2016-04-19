@@ -32,8 +32,8 @@ Therefore there are 4 distinct event handler signatures:
 
 meaning that classes such as:
 
-    public class EventHandler1 : DomainEventHandler<EVENT> { ... }
-    public class EventHandler2 : DomainEventHandler<Callable<EVENT[]>> { ... }
+    public class EventHandler1 implements DomainEventHandler<EVENT> { ... }
+    public class EventHandler2 implements DomainEventHandler<Callable<EVENT[]>> { ... }
 
 will be invoked during submission of event to event store.
 Handlers will run within the transaction of the submission, meaning if event is submitted within transaction scope, event handlers will share the same transaction scope.
@@ -66,7 +66,7 @@ For example, an event such as:
 can be handled with an event handler such as:
 
     @org.revenj.patterns.EventHandler
-	public class UpdateRssFeed : DomainEventHandler<Callable<testing.Tutorial>> {
+	public class UpdateRssFeed implements DomainEventHandler<Callable<testing.Tutorial>> {
 	  private final DataContext context;
 	  public UpdateRssFeed(DataContext context) { this.context = context; }
       public void handle(Callable<testing.Tutorial> afterPersistance) {
