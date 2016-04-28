@@ -314,7 +314,7 @@ module stock {
 
 	aggregate Analysis(projectID, articleID) {
 		Int          projectID;
-		Int          articleID;
+		Long         articleID;
 		Relationship reportArticle(articleID) stock.Article;
 
 		String(1)? abc;

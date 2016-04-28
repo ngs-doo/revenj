@@ -4,6 +4,71 @@
         <name>NGS.Templater</name>
     </assembly>
     <members>
+        <member name="T:NGS.Templater.ITemplater">
+            <summary>
+            Provides access to low level API.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">
+            <summary>
+            Metadata for each specific tag.
+            Metadata is used for value conversions and formatting.
+            </summary>
+            <param name="tag">Tag for which metadata is required</param>
+            <param name="all">True returns metadata for all matching tags, false returns metadata for just the first one</param>
+            <returns>String array of tag metadata. If tag is not found empty array will be returned</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">
+            <summary>
+            Since there can be multiple tags with same id, metadata for each specific tag in sequence
+            can be obtained by passing in its index.
+            If tags doesn't exists at that index null will be returned.
+            </summary>
+            <param name="tag">Tag for which metadata is required</param>
+            <param name="index">Tag index in sequence of same tag names</param>
+            <returns>Found metadata. null if tag/index does not exist</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">
+            <summary>
+            Replace first specified tag with provided value.
+            Some document formats and value converters support complex values (DateTime, Image, ...)
+            </summary>
+            <param name="tag">Tag to be replaced</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Successful replacement</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">
+            <summary>
+            Replace tag at index in the sequence of same tag names with provided value.
+            Some document formats and value converters support complex values (DateTime, Image, ...)
+            </summary>
+            <param name="tag">Tag to be replaced</param>
+            <param name="index">Tag index in sequence of same tag names</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Successful replacement</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">
+            <summary>
+            Resize context which contains all specified tags.
+            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
+            </summary>
+            <param name="tags">Tags which specifies the context</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Clone(System.Int32)">
+            <summary>
+            Clones a document.
+            </summary>
+            <param name="count">Number of clones to create</param>
+            <returns>An IEnumerable&lt;ITemplater&gt; with cloned tags, text and other document properties</returns>
+        </member>
+        <member name="P:NGS.Templater.ITemplater.Tags">
+            <summary>
+            Recognized tags in the document.
+            Each tag is enumerated once.
+            </summary>
+        </member>
         <member name="T:NGS.Templater.IDocumentFactoryBuilder">
             <summary>
             Templater document factory builder. 
@@ -65,6 +130,39 @@
             <param name="license">License key</param>
             <returns>configured document factory</returns>
         </member>
+        <member name="T:NGS.Templater.Configuration">
+            <summary>
+            Public entry point.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.Configuration.Configure(System.String,System.String)">
+            <summary>
+            Create instance of document factory using provided license information.
+            </summary>
+            <param name="customer">License owner</param>
+            <param name="license">License key</param>
+            <returns>Document factory</returns>
+        </member>
+        <member name="M:NGS.Templater.Configuration.Configure(System.String)">
+            <summary>
+            Create instance of document factory using provided custom license file (default is 'templater.lic').
+            File can be embedded in assembly.
+            </summary>
+            <param name="path">Path to license file</param>
+            <returns>Document factory</returns>
+        </member>
+        <member name="P:NGS.Templater.Configuration.Builder">
+            <summary>
+            Create instance of document factory builder, so custom plugins can be provided.
+            </summary>
+        </member>
+        <member name="P:NGS.Templater.Configuration.Factory">
+            <summary>
+            Create instance of document factory.
+            License will be checked from 'templater.lic' file.
+            File can be embedded in assembly.
+            </summary>
+        </member>
         <member name="T:NGS.Templater.IDocumentFactory">
             <summary>
             Creates template document interface
@@ -99,84 +197,6 @@
             <param name="output">Result stream will be used to output the processed document</param>
             <param name="extension">Template extension</param>
             <returns>Template document interface</returns>
-        </member>
-        <member name="T:NGS.Templater.ITemplater">
-            <summary>
-            Provides access to low level API.
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">
-            <summary>
-            Metadata for each specific tag.
-            Metadata is used for value conversions and formatting.
-            </summary>
-            <param name="tag">Tag for which metadata is required</param>
-            <param name="all">True returns metadata for all matching tags, false returns metadata for just the first one</param>
-            <returns>String array of tag metadata. If tag is not found empty array will be returned</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">
-            <summary>
-            Replace first specified tag with provided value.
-            Some document formats and value converters support complex values (DateTime, Image, ...)
-            </summary>
-            <param name="tag">Tag to be replaced</param>
-            <param name="value">Replacement value (which can be formatted)</param>
-            <returns>Successful replacement</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">
-            <summary>
-            Resize context which contains all specified tags.
-            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
-            </summary>
-            <param name="tags">Tags which specifies the context</param>
-            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
-            <returns>Context found and resized</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.Clone(System.Int32)">
-            <summary>
-            Clones a document.
-            </summary>
-            <param name="count">Number of clones to create</param>
-            <returns>An IEnumerable&lt;ITemplater&gt; with cloned tags, text and other document properties</returns>
-        </member>
-        <member name="P:NGS.Templater.ITemplater.Tags">
-            <summary>
-            Recognized tags in the document.
-            Each tag is enumerated once.
-            </summary>
-        </member>
-        <member name="T:NGS.Templater.Configuration">
-            <summary>
-            Public entry point.
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.Configuration.Configure(System.String,System.String)">
-            <summary>
-            Create instance of document factory using provided license information.
-            </summary>
-            <param name="customer">License owner</param>
-            <param name="license">License key</param>
-            <returns>Document factory</returns>
-        </member>
-        <member name="M:NGS.Templater.Configuration.Configure(System.String)">
-            <summary>
-            Create instance of document factory using provided custom license file (default is 'templater.lic').
-            File can be embedded in assembly.
-            </summary>
-            <param name="path">Path to license file</param>
-            <returns>Document factory</returns>
-        </member>
-        <member name="P:NGS.Templater.Configuration.Builder">
-            <summary>
-            Create instance of document factory builder, so custom plugins can be provided.
-            </summary>
-        </member>
-        <member name="P:NGS.Templater.Configuration.Factory">
-            <summary>
-            Create instance of document factory.
-            License will be checked from 'templater.lic' file.
-            File can be embedded in assembly.
-            </summary>
         </member>
         <member name="T:NGS.Templater.ITemplateDocument">
             <summary>
