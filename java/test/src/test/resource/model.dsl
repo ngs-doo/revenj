@@ -105,7 +105,7 @@ module test {
 		Composite found 'it => it.id == id';
 		calculated int idsCount from 'it => it.ids.Count';
 		calculated uuid[] uuids from 'it => it.ids.ToArray()';
-//		CompositeCube(number, simple, count) cube 'it => true' limit 2;
+		CompositeCube(number, simple, count) cube 'it => true' limit 2;
 		ClickedList[] clicked 'it => true';
 	}
 }

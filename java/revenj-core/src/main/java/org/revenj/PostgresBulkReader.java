@@ -210,7 +210,7 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 					Map<String, Object> map = new LinkedHashMap<>();
 					rdr.read(3);
 					for (int x = 0; x < converters.length; x++) {
-						map.put(columnNames[x], converters[x].convert(rdr));
+						map.put(columnNames[x], converters[x].convert(rdr, 1));
 					}
 					rdr.read(3);
 					result.add(map);

@@ -34,7 +34,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 
 	@FunctionalInterface
 	public interface Converter {
-		Object convert(PostgresReader reader) throws IOException;
+		Object convert(PostgresReader reader, int context) throws IOException;
 	}
 
 	protected PostgresOlapCubeQuery(ServiceLocator locator) {
@@ -265,7 +265,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 				reader.read();
 				Map<String, Object> item = new LinkedHashMap<>();
 				for (int i = 0; i < columnNames.length; i++) {
-					item.put(columnNames[i], converters[i].convert(reader));
+					item.put(columnNames[i], converters[i].convert(reader, 1));
 				}
 				result.add(item);
 			}

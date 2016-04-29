@@ -20,7 +20,7 @@ namespace Revenj.DatabasePersistence.Postgres
 		protected abstract string Source { get; }
 		protected readonly Dictionary<string, Func<string, string>> CubeDimensions = new Dictionary<string, Func<string, string>>();
 		protected readonly Dictionary<string, Func<string, string>> CubeFacts = new Dictionary<string, Func<string, string>>();
-		protected readonly Dictionary<string, Func<BufferedTextReader, object>> CubeConverters = new Dictionary<string, Func<BufferedTextReader, object>>();
+		protected readonly Dictionary<string, Func<BufferedTextReader, int, object>> CubeConverters = new Dictionary<string, Func<BufferedTextReader, int, object>>();
 		protected readonly Dictionary<string, Type> CubeTypes = new Dictionary<string, Type>();
 
 		protected PostgresOlapCubeQuery(IServiceProvider locator)
@@ -79,7 +79,7 @@ namespace Revenj.DatabasePersistence.Postgres
 					btr.Read();
 					var args = new object[converters.Length];
 					for (int i = 0; i < converters.Length; i++)
-						args[i] = converters[i](btr);
+						args[i] = converters[i](btr, 1);
 					table.Rows.Add(args);
 					if (tr != null) tr.Dispose();
 				});
@@ -87,12 +87,12 @@ namespace Revenj.DatabasePersistence.Postgres
 			return table;
 		}
 
-		public Func<BufferedTextReader, object>[] PrepareConverters(
+		public Func<BufferedTextReader, int, object>[] PrepareConverters(
 			List<string> usedDimensions,
 			List<string> usedFacts,
 			DataTable table)
 		{
-			var converters = new Func<BufferedTextReader, object>[usedDimensions.Count + usedFacts.Count];
+			var converters = new Func<BufferedTextReader, int, object>[usedDimensions.Count + usedFacts.Count];
 			foreach (var d in usedDimensions)
 			{
 				converters[table.Columns.Count] = CubeConverters[d];

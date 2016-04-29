@@ -285,7 +285,7 @@ namespace Revenj.DatabasePersistence.Postgres
 						rdr.Read(3);
 						var args = new object[converters.Length];
 						for (int x = 0; x < converters.Length; x++)
-							args[x] = converters[x](rdr);
+							args[x] = converters[x](rdr, 1);
 						rdr.Read(3);
 						return table.Rows.Add(args);
 					});
