@@ -26,7 +26,6 @@ namespace Revenj.Extensibility
 		/// <summary>
 		/// Notify system about an system event
 		/// </summary>
-		/// <typeparam name="T">event type</typeparam>
 		/// <param name="value">event data</param>
 		void Notify(SystemEvent value);
 	}

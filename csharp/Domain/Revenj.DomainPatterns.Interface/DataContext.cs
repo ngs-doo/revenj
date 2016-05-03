@@ -180,6 +180,7 @@ namespace Revenj.DomainPatterns
 		/// Data will be sent immediately to the backing store.
 		/// </summary>
 		/// <typeparam name="T">aggregate type</typeparam>
+		/// <param name="context">data context</param>
 		/// <param name="root">root instance</param>
 		public static void Create<T>(this IDataContext context, T root) where T : IAggregateRoot
 		{

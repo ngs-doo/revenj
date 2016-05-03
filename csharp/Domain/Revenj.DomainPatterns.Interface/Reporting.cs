@@ -216,7 +216,6 @@ namespace Revenj.DomainPatterns
 		/// Load query data by running analysis on subset of data.
 		/// Specification predicate is used to filter data.
 		/// </summary>
-		/// <typeparam name="TFilter">specification type</typeparam>
 		/// <param name="specification">predicate filter</param>
 		/// <returns>aggregated information</returns>
 		public DataTable Analyze(ISpecification<T> specification)

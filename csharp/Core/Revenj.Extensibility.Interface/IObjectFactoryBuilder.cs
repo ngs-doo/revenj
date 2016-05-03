@@ -224,6 +224,12 @@ namespace Revenj.Extensibility
 
 			builder.Add(new FactoryBuilderType { type = type, Scope = scope, AsType = asType, IsGeneric = isGeneric });
 		}
+		/// <summary>
+		/// Register specified type to the container. Default scope is transient
+		/// </summary>
+		/// <typeparam name="TService">service type</typeparam>
+		/// <param name="builder">container builder</param>
+		/// <param name="scope">resolution scope</param>
 		public static void RegisterType<TService>(
 			this IObjectFactoryBuilder builder,
 			InstanceScope scope = InstanceScope.Transient)
@@ -232,6 +238,13 @@ namespace Revenj.Extensibility
 
 			builder.Add(new FactoryBuilderType { type = typeof(TService), Scope = scope, IsGeneric = false });
 		}
+		/// <summary>
+		/// Register specified type to the container as custom service. Default scope is transient
+		/// </summary>
+		/// <typeparam name="TService">service implementation</typeparam>
+		/// <typeparam name="TAs">service type</typeparam>
+		/// <param name="builder">container builder</param>
+		/// <param name="scope">resolution scope</param>
 		public static void RegisterType<TService, TAs>(
 			this IObjectFactoryBuilder builder,
 			InstanceScope scope = InstanceScope.Transient)
@@ -241,6 +254,14 @@ namespace Revenj.Extensibility
 
 			builder.Add(new FactoryBuilderType { type = typeof(TService), Scope = scope, AsType = new[] { typeof(TAs) }, IsGeneric = false });
 		}
+		/// <summary>
+		/// Register specified type to the container as custom services. Default scope is transient
+		/// </summary>
+		/// <typeparam name="TService">service implementation</typeparam>
+		/// <typeparam name="TAs1">service type</typeparam>
+		/// <typeparam name="TAs2">additional service type</typeparam>
+		/// <param name="builder">container builder</param>
+		/// <param name="scope">resolution scope</param>
 		public static void RegisterType<TService, TAs1, TAs2>(
 			this IObjectFactoryBuilder builder,
 			InstanceScope scope = InstanceScope.Transient)
@@ -311,7 +332,13 @@ namespace Revenj.Extensibility
 			ofb.Add(new FactoryBuilderInstance { instance = instance, AsType = typeof(T) });
 			factory.Register(ofb);
 		}
-
+		/// <summary>
+		/// Register instance to the container builder.
+		/// Registered instance will be available in nested scopes too.
+		/// </summary>
+		/// <typeparam name="T">service</typeparam>
+		/// <param name="builder">container builder</param>
+		/// <param name="instance">provided instance</param>
 		public static void RegisterSingleton<T>(this IObjectFactoryBuilder builder, T instance)
 		{
 			Contract.Requires(builder != null);
@@ -352,7 +379,7 @@ namespace Revenj.Extensibility
 		}
 		/// <summary>
 		/// Register factory to the container with specified scope.
-		/// Service will be resolved from the factory using contexed scope.
+		/// Service will be resolved from the factory using context scope.
 		/// </summary>
 		/// <typeparam name="T">service type</typeparam>
 		/// <param name="factory">current scope</param>
@@ -367,7 +394,14 @@ namespace Revenj.Extensibility
 			ofb.Add(new FactoryBuilderFunc { func = f => func(f), AsType = new[] { typeof(T) }, Scope = scope });
 			factory.Register(ofb);
 		}
-
+		/// <summary>
+		/// Register factory to the container builder with specified scope. Default scope is Transient.
+		/// Service will be resolved from the factory using context scope.
+		/// </summary>
+		/// <typeparam name="T">service type</typeparam>
+		/// <param name="builder">container builder</param>
+		/// <param name="func">factory to service</param>
+		/// <param name="scope">factory scope</param>
 		public static void RegisterFunc<T>(this IObjectFactoryBuilder builder, Func<IObjectFactory, T> func, InstanceScope scope = InstanceScope.Transient)
 		{
 			Contract.Requires(builder != null);
@@ -375,6 +409,16 @@ namespace Revenj.Extensibility
 
 			builder.Add(new FactoryBuilderFunc { func = f => func(f), AsType = new[] { typeof(T) }, Scope = scope });
 		}
+		/// <summary>
+		/// Register factory to the container builder with specified scope. Default scope is Transient.
+		/// Service will be resolved from the factory using context scope.
+		/// </summary>
+		/// <typeparam name="T">implementation type</typeparam>
+		/// <typeparam name="TAs1">as service</typeparam>
+		/// <typeparam name="TAs2">as alternative service</typeparam>
+		/// <param name="builder">container builder</param>
+		/// <param name="func">factory to service</param>
+		/// <param name="scope">factory scope</param>
 		public static void RegisterFunc<T, TAs1, TAs2>(this IObjectFactoryBuilder builder, Func<IObjectFactory, T> func, InstanceScope scope = InstanceScope.Transient)
 			where T : TAs1, TAs2
 		{

@@ -58,12 +58,12 @@ After we are done, `pom.xml` should look like:
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-spring</artifactId>
-            <version>0.9.4</version>
+            <version>0.9.7</version>
         </dependency>
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-servlet</artifactId>
-            <version>0.9.4</version>
+            <version>0.9.7</version>
         </dependency>
     </dependencies>
     <build>
@@ -71,7 +71,7 @@ After we are done, `pom.xml` should look like:
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>0.5</version>
+                <version>0.6</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>

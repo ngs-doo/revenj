@@ -104,12 +104,28 @@ namespace Revenj.Security
 
 			return manager.ApplyFilters(Thread.CurrentPrincipal, data);
 		}
-
+		/// <summary>
+		/// Specify filter which will be applied when user principal is in specified role.
+		/// Users which are not in specified role will not have this filter applied to them.
+		/// </summary>
+		/// <typeparam name="T">object type</typeparam>
+		/// <param name="manager">permission service</param>
+		/// <param name="filter">filtering expression</param>
+		/// <param name="role">for which role filter applies</param>
+		/// <returns>un-register instance. If called registration will be removed</returns>
 		public static IDisposable RegisterForRole<T>(this IPermissionManager manager, Expression<Func<T, bool>> filter, string role)
 		{
 			return manager.RegisterFilter(filter, role, false);
 		}
-
+		/// <summary>
+		/// Specify filter which will be applied when user principal is not in specified role.
+		/// Users which are not in specified role will not have this filter applied to them.
+		/// </summary>
+		/// <typeparam name="T">object type</typeparam>
+		/// <param name="manager">permission service</param>
+		/// <param name="filter">filtering expression</param>
+		/// <param name="role">for which role filter applies</param>
+		/// <returns>un-register instance. If called registration will be removed</returns>
 		public static IDisposable RegisterWhenNotInRole<T>(this IPermissionManager manager, Expression<Func<T, bool>> filter, string role)
 		{
 			return manager.RegisterFilter(filter, role, false);

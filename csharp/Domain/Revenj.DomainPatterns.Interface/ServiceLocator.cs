@@ -12,7 +12,7 @@ namespace Revenj.DomainPatterns
 		/// Resolve service using provided type.
 		/// </summary>
 		/// <typeparam name="T">service type</typeparam>
-		/// <param name="locator">service locator</param>
+		/// <param name="provider">service locator</param>
 		/// <returns>resolved service</returns>
 		public static T Resolve<T>(this IServiceProvider provider)
 		{
@@ -29,7 +29,7 @@ Check if service should be registered or it's dependencies satisfied");
 		/// Resolve service using provided type and cast it to appropriate result.
 		/// </summary>
 		/// <typeparam name="T">result type</typeparam>
-		/// <param name="locator">service locator</param>
+		/// <param name="provider">service locator</param>
 		/// <param name="type">service type</param>
 		/// <returns>casted resolved service</returns>
 		public static T Resolve<T>(this IServiceProvider provider, Type type)
