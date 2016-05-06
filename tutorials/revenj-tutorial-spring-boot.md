@@ -138,9 +138,9 @@ which is slighly shorter version of a similar DSL:
 
 This DSL will be converted into:
 
- * package *example* in Java with a class `World`
+ * package *hello* in Java with a class `World`
  * repository and converter for conversion between Postgres representation and Java instance
- * schema *example* in Postgres and a table named `World`
+ * schema *hello* in Postgres and a table named `World`
 
 [Aggregate root](http://dddcommunity.org/resources/ddd_terms/) is an DSL concept from Domain-Driven Design which is converted into appropriate objects in various domains. For now it's easiest to consider it an entity from JPA.
 
@@ -156,7 +156,7 @@ To CRUD it we can either use builtin [REST-like API](https://github.com/ngs-doo/
 
 ###Integrating with Spring
 
-Rest plugin will open up endpoint which is available (by default) via `/Crud.svc/example.Post` url,
+Rest plugin will open up endpoint which is available (by default) via `/Crud.svc/hello.World` url,
 while in Spring we will define exact mapping.
 
 Spring boot application should be configured with a class such as:
@@ -170,6 +170,7 @@ Spring boot application should be configured with a class such as:
     
         private final Container container;
         private final DataSource dataSource;
+        @Autowired private RequestMappingHandlerAdapter handlerAdapter;
 
         public Application() throws IOException {
             container = Revenj.setup();

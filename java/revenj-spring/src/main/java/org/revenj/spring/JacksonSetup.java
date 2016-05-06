@@ -30,6 +30,10 @@ public class JacksonSetup {
 
 	@PostConstruct
 	public void init() {
+		configure(handlerAdapter, locator);
+	}
+
+	public static void configure(RequestMappingHandlerAdapter handlerAdapter, ServiceLocator locator) {
 		findJackson(handlerAdapter).ifPresent(m -> {
 			ObjectMapper mapper = m.getObjectMapper();
 			if (mapper == null) mapper = new ObjectMapper();
