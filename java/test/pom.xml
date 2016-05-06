@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4-1206-jdbc4</version>
+			<version>9.4.1208</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -63,7 +63,7 @@
 		<dependency>
 			<groupId>com.dslplatform</groupId>
 			<artifactId>dsl-clc</artifactId>
-			<version>1.6.1</version>
+			<version>1.6.3</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -85,7 +85,7 @@
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>0.6</version>
+                <version>0.7</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>
