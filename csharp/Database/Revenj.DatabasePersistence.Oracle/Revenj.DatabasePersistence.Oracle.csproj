@@ -73,6 +73,7 @@
     <Compile Include="ConnectionInfo.cs" />
     <Compile Include="Converters\BoolArrayConverter.cs" />
     <Compile Include="Converters\BinaryArrayConverter.cs" />
+    <Compile Include="Converters\UrlArrayConverter.cs" />
     <Compile Include="Converters\TextArrayConverter.cs" />
     <Compile Include="Converters\IPAddressArrayConverter.cs" />
     <Compile Include="Converters\LongSetConverter.cs" />
