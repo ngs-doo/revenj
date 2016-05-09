@@ -100,6 +100,7 @@ Go through the tutorials:
  * [OLAP queries](tutorials/revenj-tutorial-olap-basics.md)
  * [Event handlers](tutorials/revenj-tutorial-handling-events.md)
  * [Bulk reading](tutorials/revenj-tutorial-bulk-reading.md)
+ * [Falling back to SQL](tutorials/revenj-tutorial-raw-sql.md)
 
 
 ##Revenj features

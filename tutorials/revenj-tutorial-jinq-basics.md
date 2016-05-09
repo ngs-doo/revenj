@@ -68,3 +68,15 @@ JINQ provider was built with extensibility in mind, so in case of a missing feat
 
 Currenlty only simple queries are supported, meaning, no joins, grouping or other SQL like behavior can be simulated. Since Java version is work in progress, this will be improved in time.
 Still, by defining snowflake which spans several tables, joins can be provided as a data source and JINQ can do simple filtering on it.
+
+JINQ also has issues with more complex queries; in a sense of combination of various ORs and ANDs which can produce strange and often incorrect SQL statements. Best workaround in those cases is to split single expression into multiple ones. Instead of writing:
+
+	ctx.query(Task.class)
+      .filter(t => (t.getClosed() != null || t.getDescription().startsWith("test-")) 
+                && (t.getCreated().after(LocalDate.of(2015, 1, 1)) || t.getDescription().startsWith("non-test-")));
+
+alternative query can be written:
+
+	ctx.query(Task.class)
+      .filter(t => t.getClosed() != null || t.getDescription().startsWith("test-"))
+      .filter(t => t.getCreated().after(LocalDate.of(2015, 1, 1)) || t.getDescription().startsWith("non-test-"));
