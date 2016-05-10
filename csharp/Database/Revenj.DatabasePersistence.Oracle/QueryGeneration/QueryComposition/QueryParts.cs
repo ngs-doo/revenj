@@ -10,6 +10,7 @@ using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.ResultOperators;
 using Revenj.Common;
 using Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport;
+using Revenj.DatabasePersistence.Oracle.Plugins.MemberSupport;
 using Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors;
 using Revenj.DomainPatterns;
 
@@ -24,7 +25,8 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition
 		};
 		internal static readonly IMemberMatcher[] StaticMemberMatchers = new IMemberMatcher[]{
 			new CommonMembers(),
-			new EnumerableMembers()
+			new EnumerableMembers(),
+			new DateTimeMembers()
 		};
 
 		public readonly IServiceProvider Locator;

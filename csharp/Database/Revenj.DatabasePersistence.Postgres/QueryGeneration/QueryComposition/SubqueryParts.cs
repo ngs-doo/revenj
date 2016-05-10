@@ -15,13 +15,13 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 		internal readonly QueryParts ParentQuery;
 		public readonly Expression Selector;
 
-		public SubqueryParts(QueryParts parentQuery, Expression selector, string contextName)
-			: this(parentQuery, false, selector, contextName) { }
+		public SubqueryParts(QueryParts parentQuery, Expression selector, QueryContext context)
+			: this(parentQuery, false, selector, context) { }
 
-		public SubqueryParts(QueryParts parentQuery, bool canQueryInMemory, Expression selector, string contextName)
+		public SubqueryParts(QueryParts parentQuery, bool canQueryInMemory, Expression selector, QueryContext context)
 			: base(
 				parentQuery.Locator,
-				contextName,
+				context,
 				parentQuery.ConverterFactory,
 				parentQuery.Simplifications,
 				parentQuery.ExpressionMatchers,

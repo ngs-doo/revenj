@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
@@ -23,7 +24,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMembers.Add(typeof(Dictionary<string, string>.ValueCollection).GetProperty("Count"), GetCount);
 		}
 
-		public bool TryMatch(MemberExpression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		public bool TryMatch(MemberExpression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
 			MemberCallDelegate mcd;
 			if (SupportedMembers.TryGetValue(expression.Member, out mcd))

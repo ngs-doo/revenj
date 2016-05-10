@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Text;
+using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
@@ -27,7 +28,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMembers["Count"] = countDict;
 		}
 
-		public bool TryMatch(MemberExpression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		public bool TryMatch(MemberExpression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
 			Dictionary<Type, MemberCallDelegate> dict;
 			var member = expression.Member;

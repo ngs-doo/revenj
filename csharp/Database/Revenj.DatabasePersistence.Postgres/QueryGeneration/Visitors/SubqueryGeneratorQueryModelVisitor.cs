@@ -10,26 +10,26 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 	{
 		public static SubqueryParts ParseSubquery(QueryModel queryModel, QueryParts parentQuery)
 		{
-			return ParseSubquery(queryModel, parentQuery, false, parentQuery.ContextName);
+			return ParseSubquery(queryModel, parentQuery, false, parentQuery.Context);
 		}
 
 		public static SubqueryParts ParseSubquery(QueryModel queryModel, QueryParts parentQuery, bool canQueryInMemory)
 		{
-			return ParseSubquery(queryModel, parentQuery, canQueryInMemory, parentQuery.ContextName);
+			return ParseSubquery(queryModel, parentQuery, canQueryInMemory, parentQuery.Context);
 		}
 
-		public static SubqueryParts ParseSubquery(QueryModel queryModel, QueryParts parentQuery, bool canQueryInMemory, string contextName)
+		public static SubqueryParts ParseSubquery(QueryModel queryModel, QueryParts parentQuery, bool canQueryInMemory, QueryContext context)
 		{
-			var visitor = new SubqueryGeneratorQueryModelVisitor(parentQuery, canQueryInMemory, queryModel.SelectClause.Selector, contextName);
+			var visitor = new SubqueryGeneratorQueryModelVisitor(parentQuery, canQueryInMemory, queryModel.SelectClause.Selector, context);
 			visitor.VisitQueryModel(queryModel);
 			return visitor.QueryParts;
 		}
 
 		private readonly SubqueryParts QueryParts;
 
-		private SubqueryGeneratorQueryModelVisitor(QueryParts parentQuery, bool canQueryInMemory, Expression selector, string contextName)
+		private SubqueryGeneratorQueryModelVisitor(QueryParts parentQuery, bool canQueryInMemory, Expression selector, QueryContext context)
 		{
-			QueryParts = new SubqueryParts(parentQuery, canQueryInMemory, selector, contextName);
+			QueryParts = new SubqueryParts(parentQuery, canQueryInMemory, selector, context);
 		}
 
 		public override void VisitQueryModel(QueryModel queryModel)

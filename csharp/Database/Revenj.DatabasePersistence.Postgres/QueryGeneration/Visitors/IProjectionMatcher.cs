@@ -6,6 +6,6 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 {
 	public interface IProjectionMatcher
 	{
-		bool TryMatch(Expression expression, MainQueryParts queryParts, Action<Expression> visitExpression);
+		bool TryMatch(Expression expression, MainQueryParts queryParts, Action<Expression> visitExpression, QueryContext context);
 	}
 }

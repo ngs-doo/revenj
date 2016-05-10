@@ -11,7 +11,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ProjectionSimplifications
 	[Export(typeof(IProjectionMatcher))]
 	public class SumProjection : IProjectionMatcher
 	{
-		public bool TryMatch(Expression expression, MainQueryParts queryParts, Action<Expression> visitExpression)
+		public bool TryMatch(Expression expression, MainQueryParts queryParts, Action<Expression> visitExpression, QueryContext context)
 		{
 			var sq = expression as SubQueryExpression;
 			return sq != null

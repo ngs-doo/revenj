@@ -5,7 +5,7 @@ using System.Text;
 using Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors;
 
-namespace Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport
+namespace Revenj.DatabasePersistence.Oracle.Plugins.MemberSupport
 {
 	internal class EnumerableMembers : IMemberMatcher
 	{

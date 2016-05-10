@@ -41,7 +41,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.QuerySimplifications
 				? SimplifyConstantExpression(query, parts, exp, ce)
 				: ma != null
 				? SimplifyMemberExpression(query, parts, exp, ma)
-				: exp + " = ANY(" + (pe != null ? query.ContextName + "\"" + pe.Name + "\"" : parts.GetSqlExpression(parts.MainFrom.FromExpression)) + ")";
+				: exp + " = ANY(" + (pe != null ? query.Context.Name + "\"" + pe.Name + "\"" : parts.GetSqlExpression(parts.MainFrom.FromExpression)) + ")";
 		}
 
 		private string SimplifyConstantExpression(QueryParts query, SubqueryParts parts, string exp, ConstantExpression ce)

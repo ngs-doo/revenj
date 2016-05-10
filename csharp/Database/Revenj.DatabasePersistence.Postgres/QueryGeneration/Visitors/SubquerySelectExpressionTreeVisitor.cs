@@ -141,7 +141,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				var last = Query.Selects[Query.Selects.Count - 1];
 				var sb = new StringBuilder();
 				foreach (var mm in Query.MemberMatchers)
-					if (mm.TryMatch(expression, sb, exp => sb.Append(last.Sql)))
+					if (mm.TryMatch(expression, sb, exp => sb.Append(last.Sql), Query.Context))
 						break;
 				if (sb.Length > 0)
 				{
@@ -161,7 +161,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 
 		protected override Expression VisitSubQueryExpression(SubQueryExpression expression)
 		{
-			var sqParts = new SubqueryParts(Query, expression.QueryModel.SelectClause.Selector, Query.ContextName);
+			var sqParts = new SubqueryParts(Query, expression.QueryModel.SelectClause.Selector, Query.Context);
 			var sq = SubqueryGeneratorQueryModelVisitor.ParseSubquery(expression.QueryModel, sqParts);
 			if (!Query.CanQueryInMemory)
 			{

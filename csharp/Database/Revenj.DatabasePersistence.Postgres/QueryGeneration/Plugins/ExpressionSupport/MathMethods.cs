@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
@@ -49,7 +50,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			return dict;
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
 			var mce = expression as MethodCallExpression;
 			if (mce == null)

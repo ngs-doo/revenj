@@ -22,7 +22,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			IEnumerable<IProjectionMatcher> projectionMatchers)
 			: base(
 				locator,
-				string.Empty,
+				QueryContext.Standard,
 				factory,
 				simplifications,
 				expressionMatchers,

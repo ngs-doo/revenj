@@ -20,7 +20,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 		public readonly IServiceProvider Locator;
 		public readonly IPostgresConverterFactory ConverterFactory;
 
-		public readonly string ContextName;
+		public readonly QueryContext Context;
 
 		public int CurrentSelectIndex { get; set; }
 		public readonly List<SelectSource> Selects = new List<SelectSource>();
@@ -39,7 +39,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 
 		protected QueryParts(
 			IServiceProvider locator,
-			string contextName,
+			QueryContext context,
 			IPostgresConverterFactory converterFactory,
 			IEnumerable<IQuerySimplification> simplifications,
 			IEnumerable<IExpressionMatcher> expressionMatchers,
@@ -52,7 +52,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			this.ExpressionMatchers = expressionMatchers;
 			this.MemberMatchers = memberMatchers;
 			this.ProjectionMatchers = projectionMatchers;
-			this.ContextName = contextName;
+			this.Context = context;
 		}
 
 		public class SelectSource
@@ -194,12 +194,12 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 
 		public string GetSqlExpression(Expression expression)
 		{
-			return GetSqlExpression(expression, ContextName);
+			return GetSqlExpression(expression, Context);
 		}
 
-		public string GetSqlExpression(Expression expression, string contextName)
+		public string GetSqlExpression(Expression expression, QueryContext context)
 		{
-			return SqlGeneratorExpressionTreeVisitor.GetSqlExpression(expression, this, contextName);
+			return SqlGeneratorExpressionTreeVisitor.GetSqlExpression(expression, this, context);
 		}
 
 		private static bool EndsWithQuerySource(MemberExpression me)
@@ -352,8 +352,8 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 				{
 					var sb = new StringBuilder();
 					var name = qse != null ? qse.ReferencedQuerySource.ItemName : par.Name;
-					if (par != null && !string.IsNullOrEmpty(ContextName))
-						sb.Append(ContextName);
+					if (par != null && !string.IsNullOrEmpty(Context.Name))
+						sb.Append(Context.Name);
 					sb.Append('"').Append(name).Append('"');
 					list.Reverse();
 					foreach (var m in list)
@@ -447,7 +447,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 
 			var pe = fromExpression as ParameterExpression;
 			if (pe != null)
-				return "UNNEST({0}\"{1}\") AS \"{2}\"".With(ContextName, pe.Name, name);
+				return "UNNEST({0}\"{1}\") AS \"{2}\"".With(Context.Name, pe.Name, name);
 
 			return FromSqlSource(name, type);
 		}

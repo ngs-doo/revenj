@@ -199,7 +199,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			ProcessedExpressions.Add(expression);
 
 			foreach (var candidate in Query.ProjectionMatchers)
-				if (candidate.TryMatch(expression, Query, exp => VisitExpression(exp)))
+				if (candidate.TryMatch(expression, Query, exp => VisitExpression(exp), Query.Context))
 					return expression;
 
 			var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(expression.QueryModel, Query, true);

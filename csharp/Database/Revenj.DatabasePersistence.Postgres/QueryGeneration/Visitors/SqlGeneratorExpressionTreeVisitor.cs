@@ -17,12 +17,12 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 		public static string GetSqlExpression(Expression linqExpression, QueryParts queryParts)
 		{
 			//TODO pass queryParts context!?
-			return GetSqlExpression(linqExpression, queryParts, string.Empty);
+			return GetSqlExpression(linqExpression, queryParts, QueryContext.Standard);
 		}
 
-		public static string GetSqlExpression(Expression linqExpression, QueryParts queryParts, string contextName)
+		public static string GetSqlExpression(Expression linqExpression, QueryParts queryParts, QueryContext context)
 		{
-			var visitor = new SqlGeneratorExpressionTreeVisitor(queryParts, contextName);
+			var visitor = new SqlGeneratorExpressionTreeVisitor(queryParts, context);
 			visitor.VisitExpression(linqExpression);
 
 			return visitor.SqlExpression.ToString();
@@ -30,12 +30,12 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 
 		private readonly StringBuilder SqlExpression = new StringBuilder();
 		private readonly QueryParts QueryParts;
-		private readonly string ContextName;
+		private readonly QueryContext Context;
 
-		private SqlGeneratorExpressionTreeVisitor(QueryParts queryParts, string contextName)
+		private SqlGeneratorExpressionTreeVisitor(QueryParts queryParts, QueryContext context)
 		{
 			this.QueryParts = queryParts;
-			this.ContextName = contextName;
+			this.Context = context;
 		}
 
 		protected override Expression VisitQuerySourceReferenceExpression(QuerySourceReferenceExpression expression)
@@ -84,7 +84,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			SqlExpression.Append(" ");
 
 			foreach (var candidate in QueryParts.ExpressionMatchers)
-				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp)))
+				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
 					return expression;
 
 			var left = expression.Left;
@@ -238,7 +238,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 		protected override Expression VisitMemberExpression(MemberExpression expression)
 		{
 			foreach (var candidate in QueryParts.MemberMatchers)
-				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp)))
+				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
 					return expression;
 
 			if (expression.Expression == null)
@@ -252,10 +252,10 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			else
 			{
 				//TODO query parts context!?
-				if (!string.IsNullOrEmpty(ContextName))
+				if (!string.IsNullOrEmpty(Context.Name))
 					SqlExpression.Append('(');
 				VisitExpression(expression.Expression);
-				if (!string.IsNullOrEmpty(ContextName))
+				if (!string.IsNullOrEmpty(Context.Name))
 					SqlExpression.Append(')');
 				SqlExpression.AppendFormat(".\"{0}\"", expression.Member.Name);
 			}
@@ -342,7 +342,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 		protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
 		{
 			foreach (var candidate in QueryParts.ExpressionMatchers)
-				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp)))
+				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
 					return expression;
 
 			var attr = expression.Method.GetCustomAttributes(typeof(DatabaseFunctionAttribute), false) as DatabaseFunctionAttribute[];
@@ -354,7 +354,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 					var em = Activator.CreateInstance(df.Call, new object[] { df.Function }) as IExpressionMatcher;
 					if (em == null)
 						throw new FrameworkException("DatabaseFunction attribute target is not an " + typeof(IExpressionMatcher).FullName);
-					if (!em.TryMatch(expression, SqlExpression, exp => VisitExpression(exp)))
+					if (!em.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
 						throw new FrameworkException("DatabaseFunction could not match provided expression.");
 					return expression;
 				}
@@ -370,14 +370,14 @@ Method calls which don't have conversion to sql are available only in select par
 
 		protected override Expression VisitSubQueryExpression(SubQueryExpression expression)
 		{
-			var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(expression.QueryModel, QueryParts, false, ContextName);
+			var subquery = SubqueryGeneratorQueryModelVisitor.ParseSubquery(expression.QueryModel, QueryParts, false, Context);
 			SqlExpression.AppendFormat("({0})", subquery.BuildSqlString(true));
 			return expression;
 		}
 
 		protected override Expression VisitParameterExpression(ParameterExpression expression)
 		{
-			SqlExpression.Append(ContextName).Append('"').Append(expression.Name).Append('"');
+			SqlExpression.Append(Context.Name).Append('"').Append(expression.Name).Append('"');
 			return expression;
 		}
 

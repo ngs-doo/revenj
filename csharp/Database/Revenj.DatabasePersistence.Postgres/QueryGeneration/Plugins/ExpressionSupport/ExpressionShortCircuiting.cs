@@ -2,6 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Text;
+using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
@@ -9,7 +10,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 	[Export(typeof(IExpressionMatcher))]
 	public class ExpressionShortCircuiting : IExpressionMatcher
 	{
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
 			var be = expression as BinaryExpression;
 			return be != null

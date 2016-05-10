@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Text;
 using Remotion.Linq.Clauses.Expressions;
+using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
@@ -24,7 +25,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			return false;
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
 			var be = expression as BinaryExpression;
 			if (be == null)

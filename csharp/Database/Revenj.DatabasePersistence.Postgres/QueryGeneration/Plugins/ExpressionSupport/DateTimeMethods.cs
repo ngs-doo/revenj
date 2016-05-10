@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Revenj.DatabasePersistence.Postgres.Converters;
+using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
 
 namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
@@ -32,7 +33,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			DynamicSupportedMethods.Add(typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) }), SubtractDateTime);
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
 			var mce = expression as MethodCallExpression;
 			if (mce == null)
@@ -150,7 +151,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			var ce = methodCall.Object as ConstantExpression;
 			if (ce != null) ToDbTimestamp(queryBuilder, ce);
 			else visitExpression(methodCall.Object);
-			queryBuilder.Append(" - ");
+			queryBuilder.Append("::timestamptz - ");
 			ce = methodCall.Arguments[0] as ConstantExpression;
 			if (ce != null) ToDbTimestamp(queryBuilder, ce);
 			else visitExpression(methodCall.Arguments[0]);

@@ -104,6 +104,7 @@
     <Compile Include="QueryGeneration\Plugins\ExpressionSupport\LinqMethods.cs" />
     <Compile Include="QueryGeneration\Plugins\ExpressionSupport\StringMethods.cs" />
     <Compile Include="QueryGeneration\Plugins\MemberSupport\CommonMembers.cs" />
+    <Compile Include="QueryGeneration\Plugins\MemberSupport\DateTimeMembers.cs" />
     <Compile Include="QueryGeneration\Plugins\MemberSupport\EnumerableMembers.cs" />
     <Compile Include="QueryGeneration\ParameterAggregator.cs" />
     <Compile Include="QueryGeneration\Queryable.cs" />

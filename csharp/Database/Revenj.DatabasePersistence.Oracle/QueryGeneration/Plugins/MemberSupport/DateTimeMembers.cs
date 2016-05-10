@@ -4,11 +4,10 @@ using System.ComponentModel.Composition;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using Revenj.DatabasePersistence.Postgres.Converters;
-using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
-using Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors;
+using Revenj.DatabasePersistence.Oracle.QueryGeneration.QueryComposition;
+using Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors;
 
-namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
+namespace Revenj.DatabasePersistence.Oracle.Plugins.MemberSupport
 {
 	[Export(typeof(IMemberMatcher))]
 	public class DateTimeMembers : IMemberMatcher
@@ -19,7 +18,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 		static DateTimeMembers()
 		{
 			SupportedMembers = new Dictionary<MemberInfo, MemberCallDelegate>();
-			SupportedMembers.Add(typeof(DateTime).GetProperty("Date"), GetDate);
+			/*SupportedMembers.Add(typeof(DateTime).GetProperty("Date"), GetDate);
 			SupportedMembers.Add(typeof(DateTime).GetProperty("Day"), GetDay);
 			SupportedMembers.Add(typeof(DateTime).GetProperty("DayOfWeek"), GetDayOfWeek);
 			SupportedMembers.Add(typeof(DateTime).GetProperty("DayOfYear"), GetDayOfYear);
@@ -32,9 +31,9 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMembers.Add(typeof(DateTime).GetProperty("Year"), GetYear);
 			SupportedMembers.Add(typeof(TimeSpan).GetProperty("Days"), GetTimeSpanDays);
 			SupportedMembers.Add(typeof(TimeSpan).GetProperty("TotalDays"), GetTimeSpanTotalDays);
-			SupportedMembers.Add(typeof(TimeSpan).GetProperty("TotalHours"), GetTimeSpanTotalHours);
+			SupportedMembers.Add(typeof(TimeSpan).GetProperty("TotalHours"), GetTimeSpanTotalHours);*/
 			SupportedMembers.Add(typeof(DateTime).GetProperty("Now", BindingFlags.Static | BindingFlags.Public), CurrentTimestamp);
-			SupportedMembers.Add(typeof(DateTime).GetProperty("UtcNow", BindingFlags.Static | BindingFlags.Public), CurrentUtcTimestamp);
+			SupportedMembers.Add(typeof(DateTime).GetProperty("UtcNow", BindingFlags.Static | BindingFlags.Public), CurrentTimestamp);
 			SupportedMembers.Add(typeof(DateTime).GetProperty("Today", BindingFlags.Static | BindingFlags.Public), CurrentDate);
 		}
 
@@ -48,7 +47,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			}
 			return false;
 		}
-
+		/*
 		private static void GetDate(MemberExpression memberCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
 			visitExpression(memberCall.Expression);
@@ -120,7 +119,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 
 		private static void GetTimeSpanDays(MemberExpression memberCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			GetTimeSpanTotalDays(memberCall, queryBuilder, visitExpression, context);
+			GetTimeSpanTotalDays(memberCall, queryBuilder, visitExpression);
 			queryBuilder.AppendFormat("::int");
 		}
 
@@ -139,41 +138,15 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			visitExpression(memberCall.Expression);
 			queryBuilder.AppendFormat(")");
 		}
-
+		*/
 		private static void CurrentTimestamp(MemberExpression memberCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			if (context.CanUseParams)
-			{
-				queryBuilder.Append("'");
-				queryBuilder.Append(TimestampConverter.ToDatabase(context.Time.Value.Now));
-				queryBuilder.Append("'::timestamptz");
-			}
-			else
-				queryBuilder.Append("CURRENT_TIMESTAMP");
-		}
-
-		private static void CurrentUtcTimestamp(MemberExpression memberCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
-		{
-			if (context.CanUseParams)
-			{
-				queryBuilder.Append("'");
-				queryBuilder.Append(TimestampConverter.ToDatabase(context.Time.Value.UtcNow));
-				queryBuilder.Append("'::timestamptz");
-			}
-			else
-				queryBuilder.Append("CURRENT_TIMESTAMP");
+			queryBuilder.Append("CURRENT_TIMESTAMP");
 		}
 
 		private static void CurrentDate(MemberExpression memberCall, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
 		{
-			if (context.CanUseParams)
-			{
-				queryBuilder.Append("'");
-				queryBuilder.Append(context.Time.Value.Today.ToString("yyyy-MM-dd"));
-				queryBuilder.Append("'::date");
-			}
-			else
-				queryBuilder.Append("CURRENT_DATE");
+			queryBuilder.Append("CURRENT_DATE");
 		}
 	}
 }
