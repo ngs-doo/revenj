@@ -359,15 +359,17 @@ module xc {
 		}
 	}
 
-  event CoverageUpdate {
-    String supplierID;
-  }
-
-  sql CoverageVersions1 <# SELECT  _event_id "eventID", "supplierID", _processed_at "processedAt" from xc."CoverageUpdate" #>
-  {
-    String supplierID;
-    Timestamp processedAt;
-  }
+	event CoverageUpdate {
+		String supplierID;
+	}
+	
+	sql CoverageVersions1 <# 
+		SELECT  _event_id "eventID", "supplierID", _processed_at "processedAt" 
+		from xc."CoverageUpdate" 
+	#> {
+		String supplierID;
+		Timestamp processedAt;
+	}
 }
 module events {
 	root Root {

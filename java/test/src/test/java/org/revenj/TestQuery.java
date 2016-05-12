@@ -499,23 +499,19 @@ public class TestQuery extends Setup {
 	@Test
 	public void testSQLMapping() throws IOException {
 		ServiceLocator locator = container;
-		CoverageUpdateRepository covUpdateRepo =
-				locator.resolve(CoverageUpdateRepository.class);
-		CoverageVersions1Repository covVersionsRepo =
-				locator.resolve(CoverageVersions1Repository.class);
+		CoverageUpdateRepository covUpdateRepo = locator.resolve(CoverageUpdateRepository.class);
+		CoverageVersions1Repository covVersionsRepo = locator.resolve(CoverageVersions1Repository.class);
 
 		String suppID = UUID.randomUUID().toString();
 		covUpdateRepo.submit(new CoverageUpdate().setSupplierID(suppID));
 		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Thread.sleep(100);
+		} catch (InterruptedException ignore) {
 		}
 		covUpdateRepo.submit(new CoverageUpdate().setSupplierID(suppID));
 
 		List<CoverageVersions1> items = covVersionsRepo.query(it -> it.getSupplierID().equals(suppID)).list();
 		Assert.assertEquals(items.size(), 2);
-
 		Assert.assertNotEquals(items.get(0).getProcessedAt().isEqual(items.get(1).getProcessedAt()), true);
 	}
 
