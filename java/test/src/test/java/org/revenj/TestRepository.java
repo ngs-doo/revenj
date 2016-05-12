@@ -6,6 +6,8 @@ import gen.model.adt.User;
 import gen.model.adt.repositories.UserRepository;
 import gen.model.binaries.Document;
 import gen.model.binaries.WritableDocument;
+import gen.model.binaries.converters.DocumentConverter;
+import gen.model.calc.converters.InfoConverter;
 import gen.model.egzotics.E;
 import gen.model.egzotics.PksV;
 import gen.model.egzotics.pks;
@@ -513,5 +515,32 @@ public class TestRepository extends Setup {
 		Assert.assertEquals(uri, foundHistory.get().getURI());
 		//Assert.assertEquals(found.get(), foundHistory.get().getSnapshots().get(0).getValue());
 		Assert.assertTrue(found.get().getTs().isEqual(foundHistory.get().getSnapshots().get(0).getValue().getTs()));
+	}
+
+	@Test
+	public void shallowReferenceUuidPkEquality() throws IOException {
+		ServiceLocator locator = container;
+		DocumentConverter converter = locator.resolve(DocumentConverter.class);
+		gen.model.binaries.Document instance = converter.shallowReference("7739d32c-54af-4a71-8412-0f96981d4677", locator);
+		Assert.assertEquals("7739d32c-54af-4a71-8412-0f96981d4677", instance.getURI());
+		Assert.assertEquals(UUID.fromString("7739d32c-54af-4a71-8412-0f96981d4677"), instance.getID());
+	}
+
+	@Test
+	public void shallowReferenceStringPkEquality() throws IOException {
+		ServiceLocator locator = container;
+		InfoConverter converter = locator.resolve(InfoConverter.class);
+		gen.model.calc.Info instance = converter.shallowReference(",\\", locator);
+		Assert.assertEquals(",\\", instance.getURI());
+		Assert.assertEquals(",\\", instance.getCode());
+		instance = converter.shallowReference("", locator);
+		Assert.assertEquals("", instance.getURI());
+		Assert.assertEquals("", instance.getCode());
+		instance = converter.shallowReference("abc", locator);
+		Assert.assertEquals("abc", instance.getURI());
+		Assert.assertEquals("abc", instance.getCode());
+		instance = converter.shallowReference("\"", locator);
+		Assert.assertEquals("\"", instance.getURI());
+		Assert.assertEquals("\"", instance.getCode());
 	}
 }
