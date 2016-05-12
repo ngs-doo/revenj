@@ -351,12 +351,23 @@ module xc {
 	    Timestamp ondate;
 	    String marker;
 	}
+  
 	uuid aggregate Partner {
 		Partner?     *owner;
 		specification findChildren 'it => it.ownerID == ownerID' {
 			UUID ownerID;
 		}
 	}
+
+  event CoverageUpdate {
+    String supplierID;
+  }
+
+  sql CoverageVersions1 <# SELECT  _event_id "eventID", "supplierID", _processed_at "processedAt" from xc."CoverageUpdate" #>
+  {
+    String supplierID;
+    Timestamp processedAt;
+  }
 }
 module events {
 	root Root {

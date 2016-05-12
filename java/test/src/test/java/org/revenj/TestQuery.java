@@ -5,8 +5,8 @@ import gen.model.Seq.repositories.NextRepository;
 import gen.model.calc.Info;
 import gen.model.calc.repositories.InfoRepository;
 import gen.model.test.*;
-import gen.model.xc.SearchByTimestampAndOrderByTimestamp;
-import gen.model.xc.repositories.SearchByTimestampAndOrderByTimestampRepository;
+import gen.model.xc.*;
+import gen.model.xc.repositories.*;
 import gen.model.security.Document;
 import gen.model.stock.AnalysisGrid;
 import gen.model.stock.Article;
@@ -494,6 +494,29 @@ public class TestQuery extends Setup {
 						.list();
 		Assert.assertEquals(queryResults.size(), arr.length - 2);
 		Assert.assertTrue(queryResults.get(0).getOndate().isEqual(dt4));
+	}
+
+	@Test
+	public void testSQLMapping() throws IOException {
+		ServiceLocator locator = container;
+		CoverageUpdateRepository covUpdateRepo =
+				locator.resolve(CoverageUpdateRepository.class);
+		CoverageVersions1Repository covVersionsRepo =
+				locator.resolve(CoverageVersions1Repository.class);
+
+		String suppID = UUID.randomUUID().toString();
+		covUpdateRepo.submit(new CoverageUpdate().setSupplierID(suppID));
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		covUpdateRepo.submit(new CoverageUpdate().setSupplierID(suppID));
+
+		List<CoverageVersions1> items = covVersionsRepo.query(it -> it.getSupplierID().equals(suppID)).list();
+		Assert.assertEquals(items.size(), 2);
+
+		Assert.assertNotEquals(items.get(0).getProcessedAt().isEqual(items.get(1).getProcessedAt()), true);
 	}
 
 	@Test
