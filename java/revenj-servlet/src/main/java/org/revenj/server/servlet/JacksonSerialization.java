@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.revenj.TreePath;
 import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.w3c.dom.Document;
@@ -117,6 +118,12 @@ final class JacksonSerialization implements Serialization<String> {
 				jg.writeBinary(baos.toByteArray());
 			}
 		});
+		module.addSerializer(TreePath.class, new JsonSerializer<TreePath>() {
+			@Override
+			public void serialize(final TreePath path, final JsonGenerator jg, final SerializerProvider _unused) throws IOException {
+				jg.writeString(path.toString());
+			}
+		});
 		module.addDeserializer(Element.class, new JsonDeserializer<Element>() {
 			@Override
 			public Element deserialize(JsonParser parser, DeserializationContext unused) throws IOException {
@@ -204,6 +211,12 @@ final class JacksonSerialization implements Serialization<String> {
 			public java.awt.image.BufferedImage deserialize(final JsonParser parser, final DeserializationContext _unused) throws IOException {
 				final InputStream is = new ByteArrayInputStream(parser.getBinaryValue());
 				return ImageIO.read(is);
+			}
+		});
+		module.addDeserializer(TreePath.class, new JsonDeserializer<TreePath>() {
+			@Override
+			public TreePath deserialize(final JsonParser parser, final DeserializationContext _unused) throws IOException {
+				return TreePath.create(parser.getValueAsString());
 			}
 		});
 		return module;
