@@ -8,10 +8,8 @@ import gen.model.binaries.Document;
 import gen.model.binaries.WritableDocument;
 import gen.model.binaries.converters.DocumentConverter;
 import gen.model.calc.converters.InfoConverter;
-import gen.model.egzotics.E;
-import gen.model.egzotics.PksV;
-import gen.model.egzotics.pks;
-import gen.model.egzotics.v;
+import gen.model.egzotics.*;
+import gen.model.egzotics.repositories.TreeRepository;
 import gen.model.issues.TimestampPk;
 import gen.model.issues.repositories.TimestampPkRepository;
 import gen.model.md.Detail;
@@ -553,5 +551,24 @@ public class TestRepository extends Setup {
 		Assert.assertEquals("123/456", instance.getURI());
 		Assert.assertEquals(123, instance.getProjectID());
 		Assert.assertEquals(456L, instance.getArticleID());
+	}
+
+	@Test
+	public void checkTreePath() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<Tree> repository = locator.resolve(TreeRepository.class);
+		Tree t = new Tree();
+		t.setT1(TreePath.create("a.b.c"));
+		t.setT2(TreePath.create("aa.bb"));
+		t.setTt1(Arrays.asList(TreePath.create("yy"), null, TreePath.create("def")));
+		t.setTt2(new TreePath[] { TreePath.create("xxx"), TreePath.create("abc.def")});
+		String uri = repository.insert(t);
+		Assert.assertEquals("a.b.c", uri);
+		Optional<Tree> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		repository.delete(t);
+		Tree t2 = found.get();
+		Assert.assertEquals(t.getURI(), t2.getURI());
+		Assert.assertTrue(t.deepEquals(t2));
 	}
 }

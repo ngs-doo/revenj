@@ -74,6 +74,7 @@
     <Compile Include="TemporaryResources.cs" />
     <Compile Include="TopologicalSort.cs" />
     <Compile Include="Reflection\TypeUtility.cs" />
+    <Compile Include="TreePath.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Revenj.snk">

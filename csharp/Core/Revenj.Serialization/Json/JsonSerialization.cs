@@ -19,6 +19,7 @@ namespace Revenj.Serialization
 		private readonly JsonSerializer SharedSerializer;
 		private static readonly StringEnumConverter EnumConverter = new StringEnumConverter();
 		private static readonly TextReaderConverter TextReaderConverter = new TextReaderConverter();
+		private static readonly TreePathConverter TreePathConverter = new TreePathConverter();
 
 		public JsonSerialization(SerializationBinder binder)
 		{
@@ -28,6 +29,7 @@ namespace Revenj.Serialization
 			SharedSerializer = new JsonSerializer();
 			SharedSerializer.Converters.Add(EnumConverter);
 			SharedSerializer.Converters.Add(TextReaderConverter);
+			SharedSerializer.Converters.Add(TreePathConverter);
 			//TODO: register all converters
 			SharedSerializer.TypeNameHandling = TypeNameHandling.Auto;
 			SharedSerializer.TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple;
@@ -91,6 +93,7 @@ namespace Revenj.Serialization
 					var jsonNet = new JsonSerializer();
 					jsonNet.Converters.Add(EnumConverter);
 					jsonNet.Converters.Add(TextReaderConverter);
+					jsonNet.Converters.Add(TreePathConverter);
 					jsonNet.TypeNameHandling = TypeNameHandling.Auto;
 					jsonNet.Context = context;
 					jsonNet.Binder = Binder;
@@ -283,6 +286,7 @@ namespace Revenj.Serialization
 						var jsonNet = new JsonSerializer();
 						jsonNet.Converters.Add(EnumConverter);
 						jsonNet.Converters.Add(TextReaderConverter);
+						jsonNet.Converters.Add(TreePathConverter);
 						jsonNet.TypeNameHandling = TypeNameHandling.Auto;
 						jsonNet.Context = context;
 						jsonNet.Binder = Binder;

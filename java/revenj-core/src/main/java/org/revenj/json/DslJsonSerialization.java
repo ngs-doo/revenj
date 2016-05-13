@@ -1,6 +1,7 @@
 package org.revenj.json;
 
 import com.dslplatform.json.*;
+import org.revenj.TreePath;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.serialization.Serialization;
 
@@ -14,6 +15,8 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 
 	public DslJsonSerialization(final ServiceLocator locator, Optional<Fallback<ServiceLocator>> fallback) {
 		super(locator, false, true, false, fallback.orElse(null), ServiceLoader.load(Configuration.class));
+		registerReader(TreePath.class, TreePathConverter.Reader);
+		registerWriter(TreePath.class, TreePathConverter.Writer);
 	}
 
 	@Override

@@ -207,6 +207,12 @@ module egzotics {
 		List<Location> ll;
 	}
 	enum E { A; B; C; }
+	root Tree(t1) {
+		path t1; 
+		path? t2; 
+		list<path?>? tt1;
+		path[] tt2;
+	}	
 }
 module issues {
 	big root DateList {

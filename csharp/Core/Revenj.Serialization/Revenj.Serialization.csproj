@@ -68,6 +68,8 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Json\Converters\TreePathConverter.cs" />
+    <Compile Include="Json\TreePathConverter.cs" />
     <Compile Include="Setup.cs" />
     <Compile Include="Json\Converters\SecretConverter.cs" />
     <Compile Include="Json\Converters\DrawingConverter.cs" />

@@ -133,4 +133,13 @@ public class TestJson {
 		Assert.assertEquals(deserialized, ts);
 		Assert.assertEquals(deserialized.toInstant(), odt.toInstant());
 	}
+
+	@Test
+	public void treePathConversion() throws IOException {
+		DslJsonSerialization json = new DslJsonSerialization(null, Optional.empty());
+		TreePath tp = TreePath.create("abc.def");
+		String serialized = json.serialize(tp);
+		TreePath deserialized = json.deserialize(serialized, TreePath.class);
+		Assert.assertEquals(deserialized, tp);
+	}
 }
