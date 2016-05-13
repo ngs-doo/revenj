@@ -19,6 +19,7 @@ import gen.model.md.Master;
 import gen.model.md.repositories.MasterRepository;
 import gen.model.mixinReference.Author;
 import gen.model.mixinReference.repositories.AuthorRepository;
+import gen.model.stock.converters.AnalysisConverter;
 import gen.model.test.*;
 import gen.model.test.Composite;
 import gen.model.test.repositories.*;
@@ -542,5 +543,15 @@ public class TestRepository extends Setup {
 		instance = converter.shallowReference("\"", locator);
 		Assert.assertEquals("\"", instance.getURI());
 		Assert.assertEquals("\"", instance.getCode());
+	}
+
+	@Test
+	public void shallowReferenceCompositePkEquality() throws IOException {
+		ServiceLocator locator = container;
+		AnalysisConverter converter = locator.resolve(AnalysisConverter.class);
+		gen.model.stock.Analysis instance = converter.shallowReference("123/456", locator);
+		Assert.assertEquals("123/456", instance.getURI());
+		Assert.assertEquals(123, instance.getProjectID());
+		Assert.assertEquals(456L, instance.getArticleID());
 	}
 }

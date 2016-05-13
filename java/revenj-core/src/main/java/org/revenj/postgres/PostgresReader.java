@@ -234,4 +234,40 @@ public final class PostgresReader implements PostgresBuffer, AutoCloseable {
 			hash = (hash ^ buffer[i]) * 0x1000193;
 		return (int) hash;
 	}
+
+	private static int findEscapedChar(String input) {
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			if (c == '\\' || c == '/') {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public static void parseCompositeURI(String uri, String[] result) throws IOException {
+		int index = 0;
+		int i = findEscapedChar(uri);
+		if (i == -1) {
+			result[0] = uri;
+		} else {
+			StringBuilder sb = new StringBuilder();
+			sb.append(uri, 0, i);
+			while (i < uri.length()) {
+				char c = uri.charAt(i);
+				if (c == '\\') {
+					sb.append(uri.charAt(++i));
+				} else if (c == '/') {
+					result[index++] = sb.toString();
+					if (index == result.length) throw new IOException("Invalid URI provided: " + uri + ". Number of expected parts: " +  result.length);
+					sb.setLength(0);
+				} else {
+					sb.append(c);
+				}
+				i++;
+			}
+			sb.append(uri, i, uri.length());
+			result[index] = sb.toString();
+		}
+	}
 }

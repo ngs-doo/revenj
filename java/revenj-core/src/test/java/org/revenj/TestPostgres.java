@@ -103,4 +103,24 @@ public class TestPostgres {
 		String value = writer.bufferToString();
 		Assert.assertEquals("2000-12-31 23:38:00+01", value);
 	}
+
+	@Test
+	public void checkUriParsing() throws IOException {
+		String[] arr = new String[2];
+		PostgresReader.parseCompositeURI("1234/", arr);
+		Assert.assertEquals("1234", arr[0]);
+		Assert.assertEquals("", arr[1]);
+		PostgresReader.parseCompositeURI("123/3456", arr);
+		Assert.assertEquals("123", arr[0]);
+		Assert.assertEquals("3456", arr[1]);
+		PostgresReader.parseCompositeURI("\\\\123\\/34/56", arr);
+		Assert.assertEquals("\\123/34", arr[0]);
+		Assert.assertEquals("56", arr[1]);
+		try {
+			PostgresReader.parseCompositeURI("123/34/56", arr);
+			Assert.fail("Exception expected");
+		}catch (IOException ex) {
+			Assert.assertTrue(ex.getMessage().contains("Number of expected parts: 2"));
+		}
+	}
 }
