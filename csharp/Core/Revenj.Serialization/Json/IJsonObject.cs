@@ -58,7 +58,7 @@ namespace Revenj.Serialization
 			sw.Flush();
 			stream.Position = 0;
 		}
-		public static void Serialize(this IList<IJsonObject> values, ChunkedMemoryStream stream)
+		public static void Serialize<T>(this List<T> values, ChunkedMemoryStream stream) where T : IJsonObject
 		{
 			stream.Reset();
 			var sw = stream.GetWriter();

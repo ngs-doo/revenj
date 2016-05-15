@@ -360,6 +360,7 @@ Near: " + ex.Where, ex);
 
 		public void BulkInsert(string table, IEnumerable<IPostgresTuple[]> data)
 		{
+			if (!InTransaction) throw new FrameworkException("BulkInsert can only be used within transaction");
 			using (var cms = Revenj.Utility.ChunkedMemoryStream.Create())
 			{
 				var sw = cms.GetWriter();
