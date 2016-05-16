@@ -160,7 +160,6 @@ namespace Revenj.Http
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.Message);
 				TraceSource.TraceEvent(TraceEventType.Error, 5403, "{0}", ex);
 				ReturnError(response, 500, ex.Message);
 			}
@@ -184,7 +183,6 @@ namespace Revenj.Http
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.Message);
 				TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex);
 			}
 		}

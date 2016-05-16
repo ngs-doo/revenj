@@ -141,7 +141,6 @@ Please check settings: " + string.Join(", ", endpoints));
 					}
 					catch (SocketException ex)
 					{
-						Console.WriteLine(ex.ToString());
 						TraceSource.TraceEvent(TraceEventType.Error, 5401, "{0}", ex);
 					}
 				}
@@ -273,7 +272,6 @@ Please check settings: " + string.Join(", ", endpoints));
 				try { ctx.ReturnError(socket, (int)HttpStatusCode.Forbidden, sex.Message, true); }
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex.Message);
 					TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex);
 				}
 			}
@@ -282,18 +280,15 @@ Please check settings: " + string.Join(", ", endpoints));
 				try { ctx.ReturnError(socket, 404, anse.Message, true); }
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex.Message);
 					TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex);
 				}
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.Message);
 				TraceSource.TraceEvent(TraceEventType.Error, 5403, "{0}", ex);
 				try { ctx.ReturnError(socket, 500, ex.Message, false); }
 				catch (Exception ex2)
 				{
-					Console.WriteLine(ex2.Message);
 					TraceSource.TraceEvent(TraceEventType.Error, 5404, "{0}", ex2);
 				}
 			}
