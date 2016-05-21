@@ -571,4 +571,29 @@ public class TestRepository extends Setup {
 		Assert.assertEquals(t.getURI(), t2.getURI());
 		Assert.assertTrue(t.deepEquals(t2));
 	}
+
+	@Test
+	public void checkSnowflakeReference() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<Composite> aggregates = locator.resolve(CompositeRepository.class);
+		Repository<CompositeList> snowflakes = locator.resolve(CompositeListRepository.class);
+		Composite co = new Composite();
+		UUID id = UUID.randomUUID();
+		co.setId(id);
+		String uri = aggregates.insert(co);
+		Optional<CompositeList> fs = snowflakes.find(uri);
+		Assert.assertTrue(fs.isPresent());
+		CompositeList snow = fs.get();
+		co.setSelfReference(snow);
+		co.getSelfReferences().add(snow);
+		aggregates.update(co);
+		Optional<Composite> found = aggregates.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Composite co2 = found.get();
+		Assert.assertTrue(co.deepEquals(co2));
+		Assert.assertEquals(snow.getURI(), co2.getSelfReference().getURI());
+		Assert.assertEquals(1, co2.getSelfReferencesURI().length);
+		Assert.assertEquals(1, co2.getSelfReferences().size());
+		Assert.assertEquals(snow.getURI(), co2.getSelfReferences().get(0).getURI());
+	}
 }

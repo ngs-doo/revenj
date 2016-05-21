@@ -28,6 +28,8 @@ module test {
 		calculated bool[] entityHasMoney from 'it => it.entities.Select(e => e.money > 0).ToArray()';
 		long[]? indexes;
 		calculated hasEntities from 'it => it.entities.Count > 0';
+		CompositeList? *selfReference;
+		List<CompositeList> *selfReferences;
 		specification ForSimple 'it => it.simple.number == simple.number' {
 			Simple simple;
 		}
