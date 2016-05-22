@@ -7,10 +7,13 @@ org.revenj.postgres.jinq.transform.handlers.LengthHandler
 org.revenj.postgres.jinq.transform.handlers.LocalDateCompareHandler
 org.revenj.postgres.jinq.transform.handlers.ObjectEqualsHandler
 org.revenj.postgres.jinq.transform.handlers.PrincipalGetName
+org.revenj.postgres.jinq.transform.handlers.StringBuilderAppendHandler
 org.revenj.postgres.jinq.transform.handlers.StringLikeHandler
 org.revenj.postgres.jinq.transform.handlers.StringIndexOfHandler
 org.revenj.postgres.jinq.transform.handlers.SubstringHandler
 org.revenj.postgres.jinq.transform.handlers.ToLowerHandler
 org.revenj.postgres.jinq.transform.handlers.ToStringHandler
 org.revenj.postgres.jinq.transform.handlers.ToUpperHandler
+org.revenj.postgres.jinq.transform.handlers.TreePathAncestorHandler
+org.revenj.postgres.jinq.transform.handlers.TreePathDescendantHandler
 org.revenj.postgres.jinq.transform.handlers.TrimHandler

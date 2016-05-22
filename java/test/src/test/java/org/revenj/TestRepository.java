@@ -21,6 +21,7 @@ import gen.model.stock.converters.AnalysisConverter;
 import gen.model.test.*;
 import gen.model.test.Composite;
 import gen.model.test.repositories.*;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.handlers.ClickedCollectionEventHandler;
@@ -595,5 +596,23 @@ public class TestRepository extends Setup {
 		Assert.assertEquals(1, co2.getSelfReferencesURI().length);
 		Assert.assertEquals(1, co2.getSelfReferences().size());
 		Assert.assertEquals(snow.getURI(), co2.getSelfReferences().get(0).getURI());
+	}
+
+	@Test
+	public void checkTreePathOperators() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<Tree> repository = locator.resolve(TreeRepository.class);
+		long now = (new Date()).getTime();
+		Tree t1 = new Tree();
+		t1.setT1(TreePath.create("a.b" + now + ".c"));
+		Tree t2 = new Tree();
+		t2.setT1(TreePath.create("a.b.c" + now));
+		repository.insert(Arrays.asList(t1, t2));
+		List<Tree> found = repository.query().filter(it -> it.getT1().isDescendant(TreePath.create("a.b" + now))).list();
+		Assert.assertEquals(1, found.size());
+		Assert.assertTrue(t1.deepEquals(found.get(0)));
+		found = repository.query().filter(it -> it.getT1().isAncestor(TreePath.create("a.b.c" + now+".d"))).list();
+		Assert.assertEquals(1, found.size());
+		Assert.assertTrue(t2.deepEquals(found.get(0)));
 	}
 }

@@ -162,7 +162,8 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 					break;
 
 				case ExpressionType.Add:
-					if (expression.Type == typeof(string))
+					//TODO: hack. move outside
+					if (expression.Type == typeof(string) || expression.Type == typeof(TreePath) || expression.Type == typeof(TreePath?))
 						SqlExpression.Append(" || ");
 					else
 						SqlExpression.Append(" + ");

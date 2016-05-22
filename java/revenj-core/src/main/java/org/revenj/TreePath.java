@@ -72,4 +72,23 @@ public final class TreePath {
 		}
 		return new TreePath(this.value + "." + other.value, values);
 	}
+
+	private static boolean compare(String[] left, String[] right, int count) {
+		for (int i = 0; i < count; i++) {
+			if (!left[i].equals(right[i])) return false;
+		}
+		return true;
+	}
+
+	public boolean isAncestor(TreePath other) {
+		if (other == null) return false;
+		if (this.value.equals(other.value)) return true;
+		return this.parts.length < other.parts.length && compare(this.parts, other.parts, this.parts.length);
+	}
+
+	public boolean isDescendant(TreePath other) {
+		if (other == null) return false;
+		if (this.value.equals(other.value)) return true;
+		return this.parts.length > other.parts.length && compare(this.parts, other.parts, other.parts.length);
+	}
 }

@@ -5,3 +5,4 @@ org.revenj.postgres.jinq.transform.handlers.IntegerValueOfHandler
 org.revenj.postgres.jinq.transform.handlers.StringValueOfHandler
 org.revenj.postgres.jinq.transform.handlers.LongValueOfHandler
 org.revenj.postgres.jinq.transform.handlers.UuidParseHandler
+org.revenj.postgres.jinq.transform.handlers.TreePathCreateHandler

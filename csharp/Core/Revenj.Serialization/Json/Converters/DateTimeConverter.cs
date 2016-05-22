@@ -83,6 +83,28 @@ namespace Revenj.Serialization.Json.Converters
 			buffer[end + 6] = '"';
 			sw.Write(buffer, 0, end + 7);
 		}
+		private static void SaveWithOffset(TimeSpan offset, TextWriter sw, char[] buffer, int end)
+		{
+			if (offset.Ticks >= 0)
+				buffer[end] = '+';
+			else
+				buffer[end] = '-';
+			NumberConverter.Write2(offset.Hours, buffer, end + 1);
+			buffer[end + 3] = ':';
+			NumberConverter.Write2(offset.Minutes, buffer, end + 4);
+			if (offset.Seconds != 0)
+			{
+				buffer[end + 6] = ':';
+				NumberConverter.Write2(offset.Seconds, buffer, end + 4);
+				buffer[end + 9] = '"';
+				sw.Write(buffer, 0, end + 10);
+			}
+			else
+			{
+				buffer[end + 6] = '"';
+				sw.Write(buffer, 0, end + 7);
+			}
+		}
 
 		public static void SerializeDate(DateTime value, TextWriter sw, char[] buffer)
 		{
@@ -155,32 +177,118 @@ namespace Revenj.Serialization.Json.Converters
 						}
 					}
 				}
-				if (value.Kind != DateTimeKind.Utc)
+				if (value.Kind == DateTimeKind.Local)
 				{
 					SaveWithLocal(value, sw, buffer, end);
 				}
-				else
+				else if (value.Kind == DateTimeKind.Utc)
 				{
 					buffer[end] = 'Z';
 					buffer[end + 1] = '"';
 					sw.Write(buffer, 0, end + 2);
 				}
+				else
+				{
+					buffer[end] = '"';
+					sw.Write(buffer, 0, end + 1);
+				}
 			}
 			else
 			{
-				if (value.Kind != DateTimeKind.Utc)
-				{
+				if (value.Kind == DateTimeKind.Local)
 					SaveWithLocal(value, sw, buffer, 20);
-				}
-				else
+				else if (value.Kind == DateTimeKind.Utc)
 				{
 					buffer[20] = 'Z';
 					buffer[21] = '"';
 					sw.Write(buffer, 0, 22);
 				}
+				else
+				{
+					buffer[20] = '"';
+					sw.Write(buffer, 0, 21);
+				}
+			}
+		}
+		public static void Serialize(DateTimeOffset value, TextWriter sw, char[] buffer)
+		{
+			buffer[0] = '"';
+			buffer[5] = '-';
+			buffer[8] = '-';
+			buffer[11] = 'T';
+			buffer[14] = ':';
+			buffer[17] = ':';
+			NumberConverter.Write4(value.Year, buffer, 1);
+			NumberConverter.Write2(value.Month, buffer, 6);
+			NumberConverter.Write2(value.Day, buffer, 9);
+			NumberConverter.Write2(value.Hour, buffer, 12);
+			NumberConverter.Write2(value.Minute, buffer, 15);
+			NumberConverter.Write2(value.Second, buffer, 18);
+			int nano = (int)(value.ToUniversalTime().Ticks - new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, DateTimeKind.Utc).Ticks);
+			if (nano != 0)
+			{
+				buffer[20] = '.';
+				var div = nano / 100;
+				var div2 = div / 100;
+				var rem = nano - div * 100;
+				int end;
+				if (rem != 0)
+				{
+					NumberConverter.Write3(div2, buffer, 21);
+					NumberConverter.Write2(div - div2 * 100, buffer, 24);
+					NumberConverter.Write2(rem, buffer, 26);
+					end = 28;
+				}
+				else
+				{
+					var rem2 = div - div2 * 100;
+					if (rem2 != 0)
+					{
+						NumberConverter.Write3(div2, buffer, 21);
+						NumberConverter.Write2(div - div2 * 100, buffer, 24);
+						end = 26;
+					}
+					else
+					{
+						var div3 = div2 / 100;
+						if (div2 != div3 * 100)
+						{
+							NumberConverter.Write3(div2, buffer, 21);
+							end = 24;
+						}
+						else
+						{
+							buffer[21] = (char)(div3 + '0');
+							end = 22;
+						}
+					}
+				}
+				if (value.Offset == TimeSpan.Zero)
+				{
+					buffer[end] = 'Z';
+					buffer[end + 1] = '"';
+					sw.Write(buffer, 0, end + 2);
+				}
+				else SaveWithOffset(value.Offset, sw, buffer, end);
+			}
+			else
+			{
+				if (value.Offset == TimeSpan.Zero)
+				{
+					buffer[20] = 'Z';
+					buffer[21] = '"';
+					sw.Write(buffer, 0, 22);
+				}
+				else SaveWithOffset(value.Offset, sw, buffer, 20);
 			}
 		}
 		public static void Serialize(DateTime? value, TextWriter sw, char[] buffer)
+		{
+			if (value == null)
+				sw.Write("null");
+			else Serialize(value.Value, sw, buffer);
+		}
+		public static void Serialize(DateTimeOffset? value, TextWriter sw, char[] buffer)
 		{
 			if (value == null)
 				sw.Write("null");
@@ -332,6 +440,77 @@ namespace Revenj.Serialization.Json.Converters
 					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for DateTime value. Expecting timestamp or null");
 				}
 				else res.Add(DeserializeTimestamp(sr, nextToken));
+			}
+			if (nextToken != ']')
+			{
+				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+		}
+		public static DateTimeOffset DeserializeOffset(BufferedTextReader sr, int nextToken)
+		{
+			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			int i = 0;
+			var buffer = sr.SmallBuffer;
+			nextToken = sr.Read();
+			for (; i < buffer.Length && nextToken != '"'; i++, nextToken = sr.Read())
+				buffer[i] = (char)nextToken;
+			try
+			{
+				if (i > 0 && buffer[i - 1] == 'Z')
+					return DateTimeOffset.Parse(new string(buffer, 0, i), Invariant, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+				return DateTimeOffset.Parse(new string(buffer, 0, i), Invariant);
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Error parsing timestamp at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+			}
+		}
+		public static List<DateTimeOffset> DeserializeOffsetCollection(BufferedTextReader sr, int nextToken)
+		{
+			var res = new List<DateTimeOffset>();
+			DeserializeOffsetCollection(sr, nextToken, res);
+			return res;
+		}
+		public static void DeserializeOffsetCollection(BufferedTextReader sr, int nextToken, ICollection<DateTimeOffset> res)
+		{
+			res.Add(DeserializeOffset(sr, nextToken));
+			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
+			{
+				nextToken = JsonSerialization.GetNextToken(sr);
+				res.Add(DeserializeOffset(sr, nextToken));
+			}
+			if (nextToken != ']')
+			{
+				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+		}
+		public static List<DateTimeOffset?> DeserializeOffsetNullableCollection(BufferedTextReader sr, int nextToken)
+		{
+			var res = new List<DateTimeOffset?>();
+			DeserializeOffsetNullableCollection(sr, nextToken, res);
+			return res;
+		}
+		public static void DeserializeOffsetNullableCollection(BufferedTextReader sr, int nextToken, ICollection<DateTimeOffset?> res)
+		{
+			if (nextToken == 'n')
+			{
+				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+					res.Add(null);
+				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for DateTime value. Expecting timestamp or null");
+			}
+			else res.Add(DeserializeOffset(sr, nextToken));
+			while ((nextToken = JsonSerialization.GetNextToken(sr)) == ',')
+			{
+				nextToken = JsonSerialization.GetNextToken(sr);
+				if (nextToken == 'n')
+				{
+					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+						res.Add(null);
+					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for DateTime value. Expecting timestamp or null");
+				}
+				else res.Add(DeserializeOffset(sr, nextToken));
 			}
 			if (nextToken != ']')
 			{

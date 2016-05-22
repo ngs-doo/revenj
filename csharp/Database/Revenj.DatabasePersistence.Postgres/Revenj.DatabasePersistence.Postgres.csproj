@@ -81,6 +81,7 @@
     <Compile Include="ConnectionInfo.cs" />
     <Compile Include="BulkRead.cs" />
     <Compile Include="Npgsql\NpgsqlBufferedStream.cs" />
+    <Compile Include="QueryGeneration\Plugins\ExpressionSupport\TreeMethods.cs" />
     <Compile Include="QueryGeneration\QueryComposition\QueryContext.cs" />
     <Compile Include="Setup.cs" />
     <Compile Include="Converters\BoolConverter.cs" />

@@ -28,7 +28,21 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		{
 			if (value.Kind == DateTimeKind.Utc)
 				return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF+00");
+			if (value.Kind == DateTimeKind.Unspecified)
+				return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF");
 			var offset = CurrentZone.GetUtcOffset(value);
+			if (offset.Minutes != 0)
+				value = value.AddMinutes(offset.Minutes);
+			if (offset.Hours >= 0)
+				return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") + "+" + offset.Hours.ToString("00");
+			return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF") + offset.Hours.ToString("00");
+		}
+
+		public static string ToDatabase(DateTimeOffset value)
+		{
+			if (value.Offset == TimeSpan.Zero)
+				return value.ToString("yyyy-MM-dd HH:mm:ss.FFFFFF+00");
+			var offset = value.Offset;
 			if (offset.Minutes != 0)
 				value = value.AddMinutes(offset.Minutes);
 			if (offset.Hours >= 0)
@@ -50,6 +64,41 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			NumberConverter.Write2(value.Minute, buffer, pos + 14);
 			NumberConverter.Write2(value.Second, buffer, pos + 17);
 			int micro = (int)(value.Ticks - new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, value.Kind).Ticks) / 10;
+			int end = pos + 19;
+			if (micro != 0)
+			{
+				buffer[pos + 19] = '.';
+				var div = micro / 100;
+				var rem = micro - div * 100;
+				NumberConverter.Write4(div, buffer, 20);
+				NumberConverter.Write2(rem, buffer, 24);
+				end = pos + 25;
+				while (buffer[end] == '0')
+					end--;
+				end++;
+			}
+			if (hours >= 0)
+				buffer[end] = '+';
+			else
+				buffer[end] = '-';
+			NumberConverter.Write2(hours, buffer, end + 1);
+			return end + 3;
+		}
+
+		public static int Serialize(DateTimeOffset value, char[] buffer, int pos, int hours)
+		{
+			buffer[pos + 4] = '-';
+			buffer[pos + 7] = '-';
+			buffer[pos + 10] = ' ';
+			buffer[pos + 13] = ':';
+			buffer[pos + 16] = ':';
+			NumberConverter.Write4(value.Year, buffer, pos);
+			NumberConverter.Write2(value.Month, buffer, pos + 5);
+			NumberConverter.Write2(value.Day, buffer, pos + 8);
+			NumberConverter.Write2(value.Hour, buffer, pos + 11);
+			NumberConverter.Write2(value.Minute, buffer, pos + 14);
+			NumberConverter.Write2(value.Second, buffer, pos + 17);
+			int micro = (int)(value.ToUniversalTime().Ticks - new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, DateTimeKind.Utc).Ticks) / 10;
 			int end = pos + 19;
 			if (micro != 0)
 			{

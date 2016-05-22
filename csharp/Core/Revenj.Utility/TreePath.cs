@@ -105,6 +105,13 @@ namespace Revenj
 				}
 			}
 		}
+
+		private static bool Compare(string[] left, string[] right, int count)
+		{
+			for (int i = 0; i < count; i++)
+				if (left[i] != right[i]) return false;
+			return true;
+		}
 		/// <summary>
 		/// Concatenate two paths
 		/// </summary>
@@ -120,6 +127,20 @@ namespace Revenj
 			Array.Copy(right.Parts, 0, values, left.Parts.Length, right.Parts.Length);
 			return new TreePath(left.Value + "." + right.Value, values);
 		}
+
+		public bool IsAncestor(TreePath other)
+		{
+			if (this.Value == other.Value) return true;
+			return this.Parts.Length < other.Parts.Length && Compare(this.Parts, other.Parts, this.Parts.Length);
+		}
+
+		public bool IsDescendant(TreePath other)
+		{
+			if (this.Value == other.Value) return true;
+			return this.Parts.Length > other.Parts.Length && Compare(this.Parts, other.Parts, other.Parts.Length);
+		}
+
+		public int Level { get { return Parts.Length; } }
 		//TODO: various methods
 	}
 }
