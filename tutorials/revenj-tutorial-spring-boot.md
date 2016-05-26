@@ -58,12 +58,12 @@ After we are done, `pom.xml` should look like:
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-spring</artifactId>
-            <version>0.9.7</version>
+            <version>0.9.8</version>
         </dependency>
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-servlet</artifactId>
-            <version>0.9.7</version>
+            <version>0.9.8</version>
         </dependency>
     </dependencies>
     <build>
@@ -71,7 +71,7 @@ After we are done, `pom.xml` should look like:
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>0.6</version>
+                <version>0.9</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -181,13 +181,7 @@ Spring boot application should be configured with a class such as:
             try {
                 org.revenj.server.servlet.Application.configure(servletContext, container);
                 org.revenj.spring.RevenjStartup.setup(container);
-                //configure jackson inject attribute
-                JacksonSetup.findJackson(handlerAdapter).ifPresent(m -> {
-                    ObjectMapper mapper = m.getObjectMapper();
-                    if (mapper == null) mapper = new ObjectMapper();
-                    mapper.setInjectableValues(new InjectableValues.Std().addValue("__locator", container));
-                    m.setObjectMapper(mapper);
-                });
+                org.revenj.spring.JacksonSetup.configure(handlerAdapter, container);
             } catch (Exception ex) {
                 throw new ServletException(ex);
             }

@@ -63,7 +63,7 @@
 		<dependency>
 			<groupId>com.dslplatform</groupId>
 			<artifactId>dsl-clc</artifactId>
-			<version>1.6.3</version>
+			<version>1.7.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -85,7 +85,7 @@
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>0.7</version>
+                <version>0.9</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>
@@ -100,6 +100,9 @@
                             <servicesManifest>${project.build.directory}/test-classes/META-INF/services</servicesManifest>
                             <options>
 	                            <option>manual-json</option>
+	                            <option>uri-reference</option>
+	                            <option>lazy-load-warning</option>
+	                            <option>something_custom</option>
                             </options>
                         </configuration>
                     </execution>
@@ -123,11 +126,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.2</version>
-			</plugin-->
 		</plugins>
 	</build>
 </project>
