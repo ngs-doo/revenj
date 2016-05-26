@@ -216,6 +216,20 @@ module egzotics {
 		path[] tt2;
 	}	
 }
+module mixintest {
+	aggregate Foo {
+		List<Bar> bars;
+	}
+	entity Bar {
+		String name;
+		String description;
+		Mixin  mixin;
+	}
+	mixin Mixin;
+	value ImplVoid {
+		has mixin Mixin;
+	}
+}
 module issues {
 	big root DateList {
 		List<Timestamp?> list;

@@ -17,6 +17,10 @@ import gen.model.md.Master;
 import gen.model.md.repositories.MasterRepository;
 import gen.model.mixinReference.Author;
 import gen.model.mixinReference.repositories.AuthorRepository;
+import gen.model.mixintest.Bar;
+import gen.model.mixintest.Foo;
+import gen.model.mixintest.ImplVoid;
+import gen.model.mixintest.repositories.FooRepository;
 import gen.model.stock.converters.AnalysisConverter;
 import gen.model.test.*;
 import gen.model.test.Composite;
@@ -614,5 +618,17 @@ public class TestRepository extends Setup {
 		found = repository.query().filter(it -> it.getT1().isAncestor(TreePath.create("a.b.c" + now+".d"))).list();
 		Assert.assertEquals(1, found.size());
 		Assert.assertTrue(t2.deepEquals(found.get(0)));
+	}
+
+	@Test
+	public void mixinWithEmptyValue() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<Foo> repository = locator.resolve(FooRepository.class);
+		Foo original = new Foo().setBars(Collections.singletonList(new Bar().setMixin(new ImplVoid())));
+		String uri = repository.insert(original);
+		Optional<Foo> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		Assert.assertTrue(found.get().deepEquals(original));
+		Assert.assertTrue(found.get().getBars().get(0).getMixin() instanceof ImplVoid);
 	}
 }
