@@ -15,7 +15,7 @@ namespace Revenj.DomainPatterns
 		private readonly IServiceProvider Locator;
 		private readonly ConcurrentDictionary<Type, Action<List<IDomainEvent>>> EventStores =
 			new ConcurrentDictionary<Type, Action<List<IDomainEvent>>>(1, 17);
-		private BlockingCollection<EventInfo> EventQueue = new BlockingCollection<EventInfo>(new ConcurrentQueue<EventInfo>());
+		private readonly BlockingCollection<EventInfo> EventQueue = new BlockingCollection<EventInfo>(new ConcurrentQueue<EventInfo>());
 		private bool IsDisposed;
 		private readonly Thread Loop;
 

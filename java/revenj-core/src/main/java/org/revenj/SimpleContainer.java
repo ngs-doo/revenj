@@ -209,6 +209,13 @@ final class SimpleContainer implements Container {
 				}
 			}
 		}
+		if (constructors.length == 0) {
+			try {
+				Object instance = manifest.newInstance();
+				return Either.success(instance);
+			} catch (Exception ignore) {
+			}
+		}
 		return error == null
 				? Either.fail("Unable to find constructors for: " + manifest)
 				: Either.fail(error);

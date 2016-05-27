@@ -9,6 +9,7 @@ namespace Revenj.DomainPatterns
 	internal class DataContext : IDataContext
 	{
 		private readonly IServiceProvider Locator;
+		private GlobalEventStore GlobalEventStore;
 		private ConcurrentDictionary<Type, object> SingleLookups;
 		private ConcurrentDictionary<Type, object> ManyLookups;
 		private ConcurrentDictionary<Type, object> QuerySources;
@@ -149,6 +150,14 @@ namespace Revenj.DomainPatterns
 		{
 			var store = GetStore<T>();
 			store.Submit(events);
+		}
+
+		public void Queue<T>(IEnumerable<T> events) where T : IDomainEvent
+		{
+			if (GlobalEventStore == null)
+				GlobalEventStore = Locator.Resolve<GlobalEventStore>();
+			foreach (var e in events)
+				GlobalEventStore.Queue(e);
 		}
 
 		public T Populate<T>(IReport<T> report)

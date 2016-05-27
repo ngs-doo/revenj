@@ -83,11 +83,20 @@ namespace Revenj.DomainPatterns
 		/// <param name="aggregates">remove provided aggregate roots</param>
 		void Delete<T>(IEnumerable<T> aggregates) where T : IAggregateRoot;
 		/// <summary>
-		/// Raise domain events
+		/// Raise domain events (within current transaction)
+		/// If currently inside transaction and transaction is rolled back, event will not be saved
 		/// </summary>
 		/// <typeparam name="T">event type</typeparam>
 		/// <param name="events">domain events</param>
 		void Submit<T>(IEnumerable<T> events) where T : IDomainEvent;
+		/// <summary>
+		/// Queue domain event for out-of-transaction submission to the store
+		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
+		/// If current transaction is rolled back, event will still be persisted
+		/// </summary>
+		/// <typeparam name="T">event type</typeparam>
+		/// <param name="events">domain events</param>
+		void Queue<T>(IEnumerable<T> events) where T : IDomainEvent;
 		/// <summary>
 		/// Populate report
 		/// </summary>
@@ -307,6 +316,7 @@ namespace Revenj.DomainPatterns
 		}
 		/// <summary>
 		/// Submit single Domain Event
+		/// If currently inside transaction and transaction is rolled back, event will not be saved
 		/// </summary>
 		/// <typeparam name="TEvent">domain event type</typeparam>
 		/// <param name="context">data context</param>
@@ -315,6 +325,19 @@ namespace Revenj.DomainPatterns
 			where TEvent : IDomainEvent
 		{
 			context.Submit(new[] { domainEvent });
+		}
+		/// <summary>
+		/// Queue domain event for out-of-transaction submission to the store
+		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
+		/// If current transaction is rolled back, event will still be persisted
+		/// </summary>
+		/// <typeparam name="TEvent">domain event type</typeparam>
+		/// <param name="context">data context</param>
+		/// <param name="domainEvent">domain event</param>
+		public static void Queue<TEvent>(this IDataContext context, TEvent domainEvent)
+			where TEvent : IDomainEvent
+		{
+			context.Queue(new[] { domainEvent });
 		}
 	}
 }

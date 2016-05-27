@@ -234,4 +234,16 @@ public class TestContainer {
 		SelfReference sr2 = sr.getSelf();
 		Assert.assertEquals(sr, sr2);
 	}
+
+	static class Single {}
+
+	@Test
+	public void singletonInContext() throws Exception {
+		Container container = new SimpleContainer(false);
+		container.register(Single.class, true);
+		Container nested = container.createScope();
+		Single s1 = nested.resolve(Single.class);
+		Single s2 = container.resolve(Single.class);
+		Assert.assertEquals(s1, s2);
+	}
 }

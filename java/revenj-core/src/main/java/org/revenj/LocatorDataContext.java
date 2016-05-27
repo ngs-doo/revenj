@@ -21,6 +21,7 @@ final class LocatorDataContext implements UnitOfWork {
 	private ConcurrentHashMap<Class<?>, PersistableRepository> persistableRepositories;
 	private ConcurrentHashMap<Class<?>, Repository> historyRepositories;
 	private ConcurrentHashMap<Class<?>, DomainEventStore> eventStores;
+	private GlobalEventStore globalEventStore;
 	private DataChangeNotification changes;
 	private final Connection connection;
 	private boolean hasChanges;
@@ -199,6 +200,16 @@ final class LocatorDataContext implements UnitOfWork {
 		Class<?> manifest = events.iterator().next().getClass();
 		getEventStore(manifest).submit(events);
 		hasChanges = true;
+	}
+
+	@Override
+	public <T extends DomainEvent> void queue(Collection<T> events) {
+		if (globalEventStore == null) {
+			globalEventStore = locator.resolve(GlobalEventStore.class);
+		}
+		for (T e : events) {
+			globalEventStore.queue(e);
+		}
 	}
 
 	@Override

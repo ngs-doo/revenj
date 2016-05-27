@@ -85,6 +85,12 @@ public interface DataContext {
 		submit(Collections.singletonList(event));
 	}
 
+	<T extends DomainEvent> void queue(Collection<T> events);
+
+	default <T extends DomainEvent> void queue(T event) {
+		queue(Collections.singletonList(event));
+	}
+
 	<T> T populate(Report<T> report);
 
 	<T extends Identifiable> Observable<DataChangeNotification.TrackInfo<T>> track(Class<T> manifest);

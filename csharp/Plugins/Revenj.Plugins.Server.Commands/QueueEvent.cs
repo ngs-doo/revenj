@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics.Contracts;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Security;
@@ -24,16 +23,16 @@ namespace Revenj.Plugins.Server.Commands
 
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
+		private readonly IDataContext DataContext;
 
 		public QueueEvent(
 			IDomainModel domainModel,
-			IPermissionManager permissions)
+			IPermissionManager permissions,
+			IDataContext dataContext)
 		{
-			Contract.Requires(domainModel != null);
-			Contract.Requires(permissions != null);
-
 			this.DomainModel = domainModel;
 			this.Permissions = permissions;
+			this.DataContext = dataContext;
 		}
 
 		[DataContract(Namespace = "")]
@@ -89,7 +88,7 @@ Please check your arguments.".With(argument.Name), null);
 					newCache[eventType] = command;
 					Cache = newCache;
 				}
-				command.Queue(input, locator, argument.Data);
+				command.Queue(input, locator, DataContext, argument.Data);
 
 				return CommandResult<TOutput>.Return(HttpStatusCode.Accepted, default(TOutput), "Event queued");
 			}
@@ -108,6 +107,7 @@ Example argument:
 			void Queue<TInput>(
 				ISerialization<TInput> input,
 				IServiceProvider locator,
+				IDataContext context,
 				TInput data);
 		}
 
@@ -117,6 +117,7 @@ Example argument:
 			public void Queue<TInput>(
 				ISerialization<TInput> input,
 				IServiceProvider locator,
+				IDataContext context,
 				TInput data)
 			{
 				TEvent domainEvent;
@@ -128,10 +129,9 @@ Example argument:
 				{
 					throw new ArgumentException("Error deserializing domain event.", ex);
 				}
-				var domainStore = locator.Resolve<IDomainEventStore>();
 				try
 				{
-					domainStore.Queue(domainEvent);
+					context.Queue(domainEvent);
 				}
 				catch (SecurityException) { throw; }
 				catch (Exception ex)

@@ -268,4 +268,21 @@ public class TestDataContext extends Setup {
 		Alert2 alert = (Alert2) found.get().getAlert();
 		Assert.assertEquals("abc", alert.getProp2());
 	}
+
+	@Test
+	public void canQueueEvent() throws Exception {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		long count = db.count(AlertEventLog.class);
+		AlertEventLog log = new AlertEventLog();
+		log.setAlert(new Alert2().setPartnerID(2).setProp2("abc"));
+		db.queue(log);
+		long newCount = 0;
+		for(int i = 0; i < 10; i++) {
+			newCount = db.count(AlertEventLog.class);
+			if (count != newCount) break;
+			Thread.sleep(100);
+		}
+		Assert.assertEquals(count + 1, newCount);
+	}
 }

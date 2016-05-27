@@ -2,11 +2,8 @@ package org.revenj.server.servlet;
 
 import org.revenj.patterns.*;
 import org.revenj.server.ProcessingEngine;
-import org.revenj.server.commands.CountDomainObject;
-import org.revenj.server.commands.GetDomainObject;
+import org.revenj.server.commands.*;
 import org.revenj.server.commands.search.SearchDomainObject;
-import org.revenj.server.commands.DomainObjectExists;
-import org.revenj.server.commands.SubmitEvent;
 import org.revenj.serialization.WireSerialization;
 
 import javax.servlet.ServletException;
@@ -92,6 +89,16 @@ public class DomainServlet extends HttpServlet {
 			Object domainEvent = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
 			SubmitEvent.Argument arg = new SubmitEvent.Argument<>(name, domainEvent, Utility.returnInstance(req));
 			Utility.executeJson(engine, req, res, SubmitEvent.class, arg);
+		} else if (path.startsWith("/queue/")) {
+			String name = path.substring("/queue/".length(), path.length());
+			Optional<Class<?>> manifest = model.find(name);
+			if (!manifest.isPresent()) {
+				res.sendError(400, "Unknown domain object: " + name);
+				return;
+			}
+			Object domainEvent = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
+			QueueEvent.Argument arg = new QueueEvent.Argument<>(name, domainEvent);
+			Utility.executeJson(engine, req, res, QueueEvent.class, arg);
 		} else if (path.startsWith("/find/")) {
 			findWithArguments(req, res, path);
 		} else if (path.startsWith("/search/")) {

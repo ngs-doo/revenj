@@ -9,18 +9,18 @@
 	<description> DSL Platform compatible backend - S3 integration (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
-	<version>0.9.8</version>
+	<version>0.9.9</version>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>0.9.8</version>
+			<version>0.9.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.10.66</version>
+			<version>1.11.5</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

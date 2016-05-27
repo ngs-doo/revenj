@@ -122,11 +122,11 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		}
 	}
 
-	class Pooling implements Runnable {
+	private class Pooling implements Runnable {
 		private final BaseConnection connection;
 		private final Statement ping;
 
-		public Pooling(BaseConnection connection, Statement ping) {
+		Pooling(BaseConnection connection, Statement ping) {
 			this.connection = connection;
 			this.ping = ping;
 		}

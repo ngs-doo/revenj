@@ -118,7 +118,7 @@ public abstract class Revenj {
 		private final ClassLoader loader;
 		private final ConcurrentMap<String, Class<?>> cache = new ConcurrentHashMap<>();
 
-		public SimpleDomainModel(String namespace, ClassLoader loader) {
+		SimpleDomainModel(String namespace, ClassLoader loader) {
 			this.namespace = namespace != null && namespace.length() > 0 ? namespace + "." : "";
 			this.loader = loader;
 		}
@@ -157,6 +157,7 @@ public abstract class Revenj {
 		container.registerInstance(ServiceLocator.class, container, false);
 		container.registerInstance(DataSource.class, dataSource, false);
 		container.registerInstance(ClassLoader.class, loader, false);
+		container.register(GlobalEventStore.class, true);
 		String ns = properties.getProperty("revenj.namespace");
 		SimpleDomainModel domainModel = new SimpleDomainModel(ns, loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
