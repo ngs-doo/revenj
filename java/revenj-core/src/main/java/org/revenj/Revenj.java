@@ -3,14 +3,14 @@ package org.revenj;
 import org.postgresql.ds.PGPoolingDataSource;
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.SystemState;
-import org.revenj.json.DslJsonSerialization;
+import org.revenj.serialization.json.DslJsonSerialization;
 import org.revenj.patterns.*;
 import org.revenj.postgres.jinq.JinqMetaModel;
 import org.revenj.security.PermissionManager;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
 import org.revenj.serialization.Serialization;
-import org.revenj.xml.XmlJaxbSerialization;
+import org.revenj.serialization.xml.XmlJaxbSerialization;
 import org.w3c.dom.Element;
 
 import javax.sql.DataSource;

@@ -9,7 +9,7 @@ import gen.model.numbers.LongNumbers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.json.DslJsonSerialization;
+import org.revenj.serialization.json.DslJsonSerialization;
 import org.revenj.patterns.DataContext;
 import org.revenj.serialization.WireSerialization;
 import org.revenj.server.servlet.Application;

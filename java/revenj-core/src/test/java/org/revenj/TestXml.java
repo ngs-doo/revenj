@@ -2,8 +2,8 @@ package org.revenj;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.revenj.xml.JaxbConfiguration;
-import org.revenj.xml.XmlJaxbSerialization;
+import org.revenj.serialization.xml.JaxbConfiguration;
+import org.revenj.serialization.xml.XmlJaxbSerialization;
 import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
@@ -73,6 +73,16 @@ public class TestXml {
 	@Test
 	public void stringListConversion() throws Exception {
 		Element elem = xml.serialize(Utils.makeGenericType(List.class, String.class), Arrays.asList("abc", "def"));
+		Assert.assertEquals("<ArrayOfstring><string>abc</string><string>def</string></ArrayOfstring>", toString(elem));
+		List<String> value = xml.deserialize(elem, List.class, String.class);
+		Assert.assertEquals(2, value.size());
+		Assert.assertEquals("abc", value.get(0));
+		Assert.assertEquals("def", value.get(1));
+	}
+
+	@Test
+	public void stringArrayListConversion() throws Exception {
+		Element elem = xml.serialize(Arrays.asList("abc", "def"));
 		Assert.assertEquals("<ArrayOfstring><string>abc</string><string>def</string></ArrayOfstring>", toString(elem));
 		List<String> value = xml.deserialize(elem, List.class, String.class);
 		Assert.assertEquals(2, value.size());

@@ -1,4 +1,4 @@
-package org.revenj.xml;
+package org.revenj.serialization.xml;
 
 import org.revenj.postgres.converters.XmlConverter;
 import org.w3c.dom.Element;

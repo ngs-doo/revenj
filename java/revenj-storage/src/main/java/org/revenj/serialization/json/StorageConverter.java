@@ -1,4 +1,4 @@
-package org.revenj.json;
+package org.revenj.serialization.json;
 
 import com.dslplatform.json.*;
 import com.dslplatform.json.NumberConverter;

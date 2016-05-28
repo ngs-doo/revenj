@@ -1,4 +1,4 @@
-package org.revenj.json;
+package org.revenj.serialization.json;
 
 import com.dslplatform.json.*;
 import org.revenj.TreePath;
@@ -22,6 +22,9 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 	@Override
 	public String serialize(Type manifest, Object value) throws IOException {
 		if (value == null) return "null";
+		if (manifest == null) {
+			manifest = value.getClass();
+		}
 		final JsonWriter jw = new JsonWriter();
 		if (!serialize(jw, manifest, value)) {
 			if (fallback != null) {

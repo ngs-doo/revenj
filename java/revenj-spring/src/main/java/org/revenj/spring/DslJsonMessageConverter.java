@@ -1,7 +1,7 @@
 package org.revenj.spring;
 
 import com.dslplatform.json.JsonWriter;
-import org.revenj.json.DslJsonSerialization;
+import org.revenj.serialization.json.DslJsonSerialization;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;

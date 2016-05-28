@@ -1,4 +1,4 @@
-package org.revenj.xml;
+package org.revenj.serialization.xml;
 
 import org.revenj.TreePath;
 

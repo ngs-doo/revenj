@@ -1,4 +1,4 @@
-package org.revenj.xml;
+package org.revenj.serialization.xml;
 
 import org.revenj.TreePath;
 import org.revenj.Utils;
@@ -162,16 +162,30 @@ public class XmlJaxbSerialization implements Serialization<Element> {
 	};
 
 	private static final byte[] NULL = "<object nil=\"true\"/>".getBytes();
+	private static final byte[] EMPTY = "<ArrayOfobject/>".getBytes();
 
 	public void serializeTo(Object value, OutputStream stream) throws IOException {
 		if (value == null) {
 			stream.write(NULL);
 			return;
 		}
-		Class<?> manifest = value.getClass();
+		Type manifest = findBestManifest(value);
 		Map.Entry<Marshaller, Unmarshaller> converter = converters.get(manifest);
 		if (converter == null) {
-			throw new IOException("Unable to find XML marshaller for: " + manifest);
+			if (value instanceof Collection) {
+				Collection items = (Collection) value;
+				if (items.size() == 0) {
+					stream.write(EMPTY);
+					return;
+				}
+				ArrayList list = new ArrayList(items.size());
+				list.addAll(items);
+				manifest = findBestManifest(list);
+				converter = converters.get(manifest);
+			}
+			if (converter == null) {
+				throw new IOException("Unable to find XML marshaller for: " + manifest);
+			}
 		}
 		Function wrapper = packers.get(manifest);
 		try {
@@ -181,8 +195,27 @@ public class XmlJaxbSerialization implements Serialization<Element> {
 		}
 	}
 
+	private Type findBestManifest(Object value) {
+		Class<?> container = value.getClass();
+		if (List.class.isAssignableFrom(container)) {
+			List items = (List) value;
+			if (items.size() > 0) {
+				for (int i = 0; i < items.size(); i++) {
+					Object item = items.get(i);
+					if (item != null) {
+						return Utils.makeGenericType(List.class, item.getClass());
+					}
+				}
+			}
+		}
+		return container;
+	}
+
 	@Override
 	public Element serialize(Type manifest, Object value) throws IOException {
+		if (manifest == null && value != null) {
+			manifest = findBestManifest(value);
+		}
 		if (manifest == null && value == null) {
 			Document doc = documentBuilder.get().newDocument();
 			Element object = doc.createElement("object");

@@ -1,6 +1,4 @@
-package org.revenj.xml;
-
-import org.w3c.dom.Element;
+package org.revenj.serialization.xml;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

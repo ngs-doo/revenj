@@ -1,11 +1,10 @@
-package org.revenj.xml;
+package org.revenj.serialization.xml;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 import java.net.URL;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Function;
 
 @XmlRootElement(name = "anyURI")

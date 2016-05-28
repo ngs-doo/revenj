@@ -3,11 +3,11 @@ package org.revenj.server.servlet;
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.JsonWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.revenj.json.DslJsonSerialization;
+import org.revenj.serialization.json.DslJsonSerialization;
 import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.serialization.WireSerialization;
-import org.revenj.xml.XmlJaxbSerialization;
+import org.revenj.serialization.xml.XmlJaxbSerialization;
 import org.w3c.dom.Element;
 
 import java.io.ByteArrayInputStream;

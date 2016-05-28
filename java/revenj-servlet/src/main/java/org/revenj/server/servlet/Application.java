@@ -8,7 +8,7 @@ import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.serialization.WireSerialization;
 import org.revenj.server.ProcessingEngine;
-import org.revenj.xml.XmlJaxbSerialization;
+import org.revenj.serialization.xml.XmlJaxbSerialization;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;

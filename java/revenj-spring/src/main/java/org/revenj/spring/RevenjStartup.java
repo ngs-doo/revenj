@@ -4,7 +4,7 @@ import com.dslplatform.json.DslJson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.revenj.Revenj;
 import org.revenj.extensibility.Container;
-import org.revenj.json.DslJsonSerialization;
+import org.revenj.serialization.json.DslJsonSerialization;
 import org.revenj.patterns.DataChangeNotification;
 import org.revenj.patterns.DataContext;
 import org.revenj.patterns.ServiceLocator;

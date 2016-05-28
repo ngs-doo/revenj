@@ -228,7 +228,8 @@ final class JacksonSerialization implements Serialization<String> {
 
 	@Override
 	public String serialize(Type type, Object value) throws IOException {
-		JavaType javaType = mapper.getTypeFactory().constructType(type);
+		if (value == null) return "null";
+		JavaType javaType = mapper.getTypeFactory().constructType(type == null ? value.getClass() : type);
 		return mapper.writerFor(javaType).writeValueAsString(value);
 	}
 

@@ -4,7 +4,7 @@ import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.JsonWriter;
 import org.junit.Assert;
 import org.junit.Test;
-import org.revenj.json.DslJsonSerialization;
+import org.revenj.serialization.json.DslJsonSerialization;
 import com.dslplatform.json.JavaTimeConverter;
 
 import java.io.ByteArrayInputStream;

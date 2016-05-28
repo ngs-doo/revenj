@@ -9,7 +9,7 @@ public interface Serialization<TFormat> {
 	TFormat serialize(Type type, Object value) throws IOException;
 
 	default TFormat serialize(Object value) throws IOException {
-		return serialize(value != null ? value.getClass() : null, value);
+		return serialize(null, value);
 	}
 
 	Object deserialize(Type type, TFormat data) throws IOException;
