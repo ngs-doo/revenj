@@ -20,10 +20,9 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 	}
 
 	@Override
-	public String serialize(Object value) throws IOException {
+	public String serialize(Type manifest, Object value) throws IOException {
 		if (value == null) return "null";
 		final JsonWriter jw = new JsonWriter();
-		final Class<?> manifest = value.getClass();
 		if (!serialize(jw, manifest, value)) {
 			if (fallback != null) {
 				ByteArrayOutputStream os = new ByteArrayOutputStream();

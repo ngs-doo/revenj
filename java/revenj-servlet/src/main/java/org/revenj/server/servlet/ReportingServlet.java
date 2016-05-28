@@ -46,7 +46,7 @@ public class ReportingServlet extends HttpServlet {
 			final Optional<Object> report = Utility.objectFromQuery(manifest.get(), req, res);
 			if (report.isPresent()) {
 				PopulateReport.Argument<Object> arg = new PopulateReport.Argument<>(report.get(), name);
-				Utility.executeJson(engine, req, res, PopulateReport.class, arg);
+				Utility.execute(engine, req, res, serialization, PopulateReport.class, arg);
 			}
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);
@@ -62,7 +62,7 @@ public class ReportingServlet extends HttpServlet {
 				String name = path.substring("/report/".length(), path.length());
 				Object report = serialization.deserialize(req.getInputStream(), "application/json", manifest.get());
 				PopulateReport.Argument<Object> arg = new PopulateReport.Argument<>(report, name);
-				Utility.executeJson(engine, req, res, PopulateReport.class, arg);
+				Utility.execute(engine, req, res, serialization, PopulateReport.class, arg);
 			}
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);

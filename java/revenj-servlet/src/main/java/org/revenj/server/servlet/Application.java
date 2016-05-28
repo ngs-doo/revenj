@@ -8,6 +8,7 @@ import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.serialization.WireSerialization;
 import org.revenj.server.ProcessingEngine;
+import org.revenj.xml.XmlJaxbSerialization;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -58,7 +59,7 @@ public class Application implements ServletContextListener {
 		Optional<PluginLoader> plugins = container.tryResolve(PluginLoader.class);
 		PermissionManager permissions = container.resolve(PermissionManager.class);
 		DataSource dataSource = container.resolve(DataSource.class);
-		WireSerialization serialization = new RevenjSerialization(container);
+		WireSerialization serialization = new RevenjSerialization(container, container.resolve(XmlJaxbSerialization.class));
 		container.registerInstance(WireSerialization.class, serialization, false);
 		container.registerInstance(new Generic<Serialization<String>>() {
 		}.type, serialization.find(String.class).get(), false);

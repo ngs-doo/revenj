@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 final class PassThroughSerialization implements Serialization<Object> {
 
 	@Override
-	public Object serialize(Object value) {
+	public Object serialize(Type type, Object value) {
 		return value;
 	}
 

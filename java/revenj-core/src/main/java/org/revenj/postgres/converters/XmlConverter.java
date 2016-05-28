@@ -35,7 +35,7 @@ public abstract class XmlConverter {
 		}
 	}
 
-	private static String xmlToString(Element value) {
+	public static String xmlToString(Element value) {
 		Document document = value.getOwnerDocument();
 		DOMImplementationLS domImplLS = (DOMImplementationLS) document.getImplementation();
 		LSSerializer serializer = domImplLS.createLSSerializer();
@@ -64,7 +64,7 @@ public abstract class XmlConverter {
 		return stringToXml(value);
 	}
 
-	private static Element stringToXml(String value) throws IOException {
+	public static Element stringToXml(String value) throws IOException {
 		if (value.length() == 0) return null;
 		try {
 			InputSource source = new InputSource(new StringReader(value));

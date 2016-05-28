@@ -82,9 +82,23 @@ namespace Revenj.Extensibility
 			{
 				foreach (var impl in implementations)
 				{
-					var ci = new ConceptImplementation<TService>(impl);
-					if (filter(ci.Type, ci.ImplementsType))
-						dict[ci.Type] = ci;
+					object md;
+					if (impl.Metadata.TryGetValue(Metadata.Implements, out md))
+					{
+						var multiple = md as Type[] ?? new[] { md as Type };
+						foreach (var type in multiple)
+						{
+							var ci = new ConceptImplementation<TService>(impl, type);
+							if (filter(ci.Type, type))
+								dict[ci.Type] = ci;
+						}
+					}
+					else
+					{
+						var ci = new ConceptImplementation<TService>(impl, null);
+						if (filter(ci.Type, null))
+							dict[ci.Type] = ci;
+					}
 				}
 			}
 			catch (DependencyResolutionException ex)
@@ -121,16 +135,21 @@ namespace Revenj.Extensibility
 
 			foreach (var impl in implementations)
 			{
-				var ci = new ConceptImplementation<TInterface>(impl);
-				if (ci.ImplementsType != null)
+				object md;
+				if (impl.Metadata.TryGetValue(Metadata.Implements, out md))
 				{
-					List<ConceptImplementation<TInterface>> conceptImplList;
-					if (!filter(ci.Type, ci.ImplementsType))
-						continue;
+					var multiple = md as Type[] ?? new[] { md as Type };
+					foreach (var type in multiple)
+					{
+						var ci = new ConceptImplementation<TInterface>(impl, type);
+						List<ConceptImplementation<TInterface>> conceptImplList;
+						if (!filter(ci.Type, ci.ImplementsType))
+							continue;
 
-					if (!implDict.TryGetValue(ci.ImplementsType, out conceptImplList))
-						implDict.Add(ci.ImplementsType, conceptImplList = new List<ConceptImplementation<TInterface>>());
-					conceptImplList.Add(ci);
+						if (!implDict.TryGetValue(ci.ImplementsType, out conceptImplList))
+							implDict.Add(ci.ImplementsType, conceptImplList = new List<ConceptImplementation<TInterface>>());
+						conceptImplList.Add(ci);
+					}
 				}
 			}
 
@@ -168,7 +187,7 @@ namespace Revenj.Extensibility
 
 			var list = new List<ConceptImplementation<TImplementation>>();
 			foreach (var impl in implementations)
-				list.Add(new ConceptImplementation<TImplementation>(impl));
+				list.Add(new ConceptImplementation<TImplementation>(impl, null));
 
 			var dict = new Dictionary<Type, Func<Type, object[], TImplementation>>(list.Count);
 			foreach (var item in list)
@@ -197,14 +216,16 @@ namespace Revenj.Extensibility
 			public readonly Type ExtendsType;
 			public readonly Type InsteadOfType;
 
-			public ConceptImplementation(Lazy<TImplementation, Dictionary<string, object>> impl)
+			public ConceptImplementation(Lazy<TImplementation, Dictionary<string, object>> impl, Type ImplementsType)
 			{
 				Contract.Requires(impl != null);
+				this.ImplementsType = ImplementsType;
 
 				object md;
 				if (impl.Metadata.TryGetValue(Metadata.ClassType, out md))
 					Type = (Type)md;
 				else
+				{
 					try
 					{
 						Type = impl.Value.GetType();
@@ -214,15 +235,13 @@ namespace Revenj.Extensibility
 						throw new FrameworkException(@"Plugin {0} doesn't have an empty constructor.
 It must be decorated with ClassType Metadata.".With(ex.Element.DisplayName), ex);
 					}
+				}
 
 				if (impl.Metadata.TryGetValue(Metadata.After, out md))
 					AfterType = (Type)md;
 
 				if (impl.Metadata.TryGetValue(Metadata.Before, out md))
 					BeforeType = (Type)md;
-
-				if (impl.Metadata.TryGetValue(Metadata.Implements, out md))
-					ImplementsType = (Type)md;
 
 				if (impl.Metadata.TryGetValue(Metadata.Extends, out md))
 					ExtendsType = (Type)md;

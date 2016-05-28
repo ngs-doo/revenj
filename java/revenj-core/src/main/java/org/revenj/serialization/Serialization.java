@@ -6,7 +6,11 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 public interface Serialization<TFormat> {
-	TFormat serialize(Object value) throws IOException;
+	TFormat serialize(Type type, Object value) throws IOException;
+
+	default TFormat serialize(Object value) throws IOException {
+		return serialize(value != null ? value.getClass() : null, value);
+	}
 
 	Object deserialize(Type type, TFormat data) throws IOException;
 

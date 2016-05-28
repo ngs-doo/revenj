@@ -17,6 +17,7 @@ import org.revenj.server.commands.crud.Read;
 import org.revenj.server.commands.reporting.AnalyzeOlapCube;
 import org.revenj.server.commands.reporting.PopulateReport;
 import org.revenj.server.servlet.Application;
+import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.FileReader;
@@ -202,5 +203,48 @@ public class TestProcessingEngine {
 		Assert.assertEquals(200, description.result.status);
 		FindMany.Result report = (FindMany.Result) description.result.data;
 		Assert.assertEquals(composite.getId(), report.getFound().getId());
+	}
+
+	@Test
+	public void xmlThroughEngine() throws Exception {
+		ProcessingEngine engine = container.resolve(ProcessingEngine.class);
+		WireSerialization serialization = container.resolve(WireSerialization.class);
+		Serialization<Element> xml = serialization.find(Element.class).get();
+		Composite composite = new Composite().setId(UUID.randomUUID()).setSimple(new Simple().setNumber(234).setText("text"));
+		ServerCommandDescription cd = new ServerCommandDescription<>(
+				null,
+				Create.class,
+				new Create.Argument<>("test.Composite", composite, true));
+		ProcessingResult<Element> result =
+				engine.execute(
+						Object.class,
+						Element.class,
+						new ServerCommandDescription[]{cd},
+						null);
+		Assert.assertEquals(200, result.status);
+		Assert.assertEquals(1, result.executedCommandResults.length);
+		CommandResultDescription<Element> description = result.executedCommandResults[0];
+		Assert.assertEquals(201, description.result.status);
+		Composite saved = xml.deserialize(description.result.data, Composite.class);
+		//Assert.assertEquals(composite.getId().toString(), saved.getURI());
+		Assert.assertEquals(composite.getId(), saved.getId());
+		cd = new ServerCommandDescription<>(
+				null,
+				Read.class,
+				new Read.Argument("test.Composite", saved.getId().toString()));
+		result =
+				engine.execute(
+						Object.class,
+						Element.class,
+						new ServerCommandDescription[]{cd},
+						null);
+		Assert.assertEquals(200, result.status);
+		Assert.assertEquals(1, result.executedCommandResults.length);
+		description = result.executedCommandResults[0];
+		Assert.assertEquals(200, description.result.status);
+		Composite c2 = xml.deserialize(description.result.data, Composite.class);
+		//Assert.assertEquals(composite, c2);//TODO
+		Assert.assertEquals(composite.getId(), c2.getId());
+		Assert.assertEquals(composite.getSimple(), c2.getSimple());
 	}
 }

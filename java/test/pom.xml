@@ -102,6 +102,7 @@
 	                            <option>manual-json</option>
 	                            <option>uri-reference</option>
 	                            <option>lazy-load-warning</option>
+	                            <option>jaxb</option>
 	                            <option>something_custom</option>
                             </options>
                         </configuration>

@@ -47,7 +47,7 @@ public class DomainServlet extends HttpServlet {
 				Integer limit = req.getParameter("limit") != null ? Integer.parseInt(req.getParameter("limit")) : null;
 				Integer offset = req.getParameter("offset") != null ? Integer.parseInt(req.getParameter("offset")) : null;
 				SearchDomainObject.Argument arg = new SearchDomainObject.Argument<>(name.get(), spec, specification.orElse(null), offset, limit, order);
-				Utility.executeJson(engine, req, res, SearchDomainObject.class, arg);
+				Utility.execute(engine, req, res, serialization, SearchDomainObject.class, arg);
 			}
 		} else if (path.startsWith("/count/")) {
 			Optional<String> name = Utility.findName(model, path, "/count/", res);
@@ -58,7 +58,7 @@ public class DomainServlet extends HttpServlet {
 					return;
 				}
 				CountDomainObject.Argument arg = new CountDomainObject.Argument<>(name.get(), spec, specification.orElse(null));
-				Utility.executeJson(engine, req, res, CountDomainObject.class, arg);
+				Utility.execute(engine, req, res, serialization, CountDomainObject.class, arg);
 			}
 		} else if (path.startsWith("/exists/")) {
 			Optional<String> name = Utility.findName(model, path, "/exists/", res);
@@ -69,7 +69,7 @@ public class DomainServlet extends HttpServlet {
 					return;
 				}
 				DomainObjectExists.Argument arg = new DomainObjectExists.Argument<>(name.get(), spec, specification.orElse(null));
-				Utility.executeJson(engine, req, res, DomainObjectExists.class, arg);
+				Utility.execute(engine, req, res, serialization, DomainObjectExists.class, arg);
 			}
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);
@@ -88,7 +88,7 @@ public class DomainServlet extends HttpServlet {
 			}
 			Object domainEvent = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
 			SubmitEvent.Argument arg = new SubmitEvent.Argument<>(name, domainEvent, Utility.returnInstance(req));
-			Utility.executeJson(engine, req, res, SubmitEvent.class, arg);
+			Utility.execute(engine, req, res, serialization, SubmitEvent.class, arg);
 		} else if (path.startsWith("/queue/")) {
 			String name = path.substring("/queue/".length(), path.length());
 			Optional<Class<?>> manifest = model.find(name);
@@ -98,7 +98,7 @@ public class DomainServlet extends HttpServlet {
 			}
 			Object domainEvent = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
 			QueueEvent.Argument arg = new QueueEvent.Argument<>(name, domainEvent);
-			Utility.executeJson(engine, req, res, QueueEvent.class, arg);
+			Utility.execute(engine, req, res, serialization, QueueEvent.class, arg);
 		} else if (path.startsWith("/find/")) {
 			findWithArguments(req, res, path);
 		} else if (path.startsWith("/search/")) {
@@ -170,10 +170,11 @@ public class DomainServlet extends HttpServlet {
 
 	private void findWithArguments(HttpServletRequest req, HttpServletResponse res, String path) throws IOException {
 		String[] uris = serialization.deserialize(req.getInputStream(), req.getContentType(), String[].class);
-		Utility.findName(model, path, "/find/", res).ifPresent(name -> {
-			GetDomainObject.Argument arg = new GetDomainObject.Argument(name, uris, "match".equals(req.getParameter("order")));
-			Utility.executeJson(engine, req, res, GetDomainObject.class, arg);
-		});
+		Optional<String> name = Utility.findName(model, path, "/find/", res);
+		if (name.isPresent()) {
+			GetDomainObject.Argument arg = new GetDomainObject.Argument(name.get(), uris, "match".equals(req.getParameter("order")));
+			Utility.execute(engine, req, res, serialization, GetDomainObject.class, arg);
+		}
 	}
 
 	private void executeWithSpecification(
@@ -203,6 +204,6 @@ public class DomainServlet extends HttpServlet {
 		} else {
 			arg = buildArgument.apply(null);
 		}
-		Utility.executeJson(engine, req, res, target, arg);
+		Utility.execute(engine, req, res, serialization, target, arg);
 	}
 }

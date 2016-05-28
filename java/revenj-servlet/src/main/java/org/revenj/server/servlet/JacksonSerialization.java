@@ -11,11 +11,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.revenj.TreePath;
 import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSOutput;
-import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
 import javax.imageio.ImageIO;
@@ -231,8 +227,9 @@ final class JacksonSerialization implements Serialization<String> {
 	}
 
 	@Override
-	public String serialize(Object value) throws IOException {
-		return mapper.writeValueAsString(value);
+	public String serialize(Type type, Object value) throws IOException {
+		JavaType javaType = mapper.getTypeFactory().constructType(type);
+		return mapper.writerFor(javaType).writeValueAsString(value);
 	}
 
 	public void serialize(Object value, OutputStream stream) throws IOException {

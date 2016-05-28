@@ -10,6 +10,8 @@ import org.revenj.security.PermissionManager;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;
 import org.revenj.serialization.Serialization;
+import org.revenj.xml.XmlJaxbSerialization;
+import org.w3c.dom.Element;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -179,6 +181,10 @@ public abstract class Revenj {
 		container.registerInstance(PermissionManager.class, new RevenjPermissionManager(container), false);
 		container.registerClass(new Generic<Serialization<String>>() {
 		}.type, DslJsonSerialization.class, false);
+		XmlJaxbSerialization xml = new XmlJaxbSerialization(container, Optional.of(plugins));
+		container.registerInstance(new Generic<Serialization<Element>>() {
+		}.type, xml, false);
+		container.registerInstance(xml);
 		int total = 0;
 		if (aspects != null) {
 			JinqMetaModel.configure(container);

@@ -97,22 +97,37 @@ public class ServiceTest extends Mockito {
 		private final JacksonSerialization jackson = new JacksonSerialization(null, Optional.empty());
 
 		@Override
-		public void serialize(Object value, OutputStream stream, String contentType) throws IOException {
+		public String serialize(Object value, OutputStream stream, String accept) throws IOException {
 			jackson.serialize(value, stream);
+			return "application/json";
 		}
 
 		@Override
-		public Object deserialize(Type type, byte[] content, int length, String accept) throws IOException {
+		public Object deserialize(Type type, byte[] content, int length, String contentType) throws IOException {
 			return jackson.deserialize(type, content, length);
 		}
 
 		@Override
-		public Object deserialize(Type type, InputStream stream, String accept) throws IOException {
+		public Object deserialize(Type type, InputStream stream, String contentType) throws IOException {
 			return jackson.deserialize(type, stream);
+		}
+
+		static class PassThroughSerialization implements Serialization<Object> {
+
+			@Override
+			public Object serialize(Type type, Object value) {
+				return value;
+			}
+
+			@Override
+			public Object deserialize(Type type, Object data) throws IOException {
+				return data;
+			}
 		}
 
 		@Override
 		public <TFormat> Optional<Serialization<TFormat>> find(Class<TFormat> format) {
+			if (format == Object.class) return Optional.of((Serialization) new PassThroughSerialization());
 			return Optional.of((Serialization) jackson);
 		}
 	}
@@ -159,7 +174,7 @@ public class ServiceTest extends Mockito {
 		when(dataSource.getConnection()).thenReturn(connection);
 		when(response.getOutputStream()).thenReturn(outputStream);
 		when(container.createScope()).thenReturn(container);
-		when(container.resolve((Type)MyService.class)).thenReturn(new MyService());
+		when(container.resolve((Type) MyService.class)).thenReturn(new MyService());
 
 		ProcessingEngine engine =
 				new ProcessingEngine(

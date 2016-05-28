@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -19,16 +18,17 @@ import java.util.concurrent.LinkedBlockingDeque;
 class GlobalEventStore implements Closeable {
 
 	private final Container container;
+	private final DataSource dataSource;
+	private Connection connection;
 	private final ConcurrentMap<Class<?>, DomainEventStore> eventStores = new ConcurrentHashMap<>();
 	private final BlockingQueue<DomainEvent> eventQueue = new LinkedBlockingDeque<>();
 	private final Thread loop;
 	private boolean isClosed;
 
-	public GlobalEventStore(Container container, DataSource dataSource) throws SQLException {
+	public GlobalEventStore(Container container, DataSource dataSource) {
 		this.container = container;
-		Connection connection = dataSource.getConnection();
-		connection.setAutoCommit(true);
-		container.registerInstance(connection);
+		this.dataSource = dataSource;
+		setupConnection();
 		loop = new Thread(new WaitForEvents());
 		loop.setDaemon(true);
 		loop.start();
@@ -74,9 +74,24 @@ class GlobalEventStore implements Closeable {
 					if (info.getClass() != currentType) {
 						bulk.add(info);
 					}
-				} catch (Exception ignore) {
+				} catch (Exception e) {
+					try {
+						connection.close();
+					} catch (Exception ignore) {
+					}
+					setupConnection();
 				}
 			}
+		}
+	}
+
+	private void setupConnection() {
+		try {
+			eventStores.clear();
+			connection = dataSource.getConnection();
+			connection.setAutoCommit(true);
+			container.registerInstance(connection);
+		} catch (Exception ignore) {
 		}
 	}
 
