@@ -9,23 +9,33 @@ import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-@SupportedAnnotationTypes({"org.revenj.patterns.EventHandler"})
+@SupportedAnnotationTypes({"org.revenj.patterns.EventHandler", "javax.inject.Inject", "javax.inject.Singleton"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class RevenjProcessor extends AbstractProcessor {
 
 	private TypeElement eventTypeElement;
 	private DeclaredType eventDeclaredType;
+	private TypeElement injectTypeElement;
+	private DeclaredType injectDeclaredType;
+	private TypeElement singletonTypeElement;
+	private DeclaredType singletonDeclaredType;
 
 	@Override
 	public synchronized void init(ProcessingEnvironment processingEnv) {
 		super.init(processingEnv);
 		eventTypeElement = processingEnv.getElementUtils().getTypeElement("org.revenj.patterns.EventHandler");
 		eventDeclaredType = processingEnv.getTypeUtils().getDeclaredType(eventTypeElement);
+		injectTypeElement = processingEnv.getElementUtils().getTypeElement("javax.inject.Inject");
+		injectDeclaredType = processingEnv.getTypeUtils().getDeclaredType(injectTypeElement);
+		singletonTypeElement = processingEnv.getElementUtils().getTypeElement("javax.inject.Singleton");
+		singletonDeclaredType = processingEnv.getTypeUtils().getDeclaredType(singletonTypeElement);
 	}
 
 	@Override
@@ -33,67 +43,176 @@ public class RevenjProcessor extends AbstractProcessor {
 		if (roundEnv.processingOver()) {
 			return false;
 		}
-		Set<? extends Element> eventAnnotated = roundEnv.getElementsAnnotatedWith(eventTypeElement);
-		if (!eventAnnotated.isEmpty()) {
-			Map<String, List<String>> handlers = new HashMap<>();
-			for (Element el : eventAnnotated) {
-				if (!(el instanceof TypeElement)) {
-					continue;
-				}
-				TypeElement element = (TypeElement) el;
-				if (!hasPublicCtor(element)) {
-					AnnotationMirror eventAnnotation = getAnnotation(element, eventDeclaredType);
-					processingEnv.getMessager().printMessage(
-							Diagnostic.Kind.ERROR,
-							"EventHandler requires public constructor",
-							element,
-							eventAnnotation);
-				} else {
-					boolean foundImpl = false;
-					for (TypeMirror iface : element.getInterfaces()) {
-						String sign = iface.toString();
-						if (!sign.startsWith("org.revenj.patterns.DomainEventHandler<")) {
-							continue;
-						}
-						List<String> impl = handlers.get(sign);
-						if (impl == null) {
-							impl = new ArrayList<>();
-							handlers.put(sign, impl);
-						}
-						if (element.getNestingKind().isNested()) {
-							impl.add(element.getEnclosingElement().asType().toString() + "$" + element.getSimpleName().toString());
-						} else {
-							impl.add(element.asType().toString());
-						}
-						foundImpl = true;
+		Set<? extends Element> events = roundEnv.getElementsAnnotatedWith(eventTypeElement);
+		Set<? extends Element> injects = roundEnv.getElementsAnnotatedWith(injectTypeElement);
+		Set<? extends Element> singletons = roundEnv.getElementsAnnotatedWith(singletonTypeElement);
+		Map<String, List<String>> handlers = new HashMap<>();
+		StringBuilder registrations = new StringBuilder();
+		findEventHandlers(events, handlers);
+		findInjections(injects, registrations);
+		registerTypes(singletons, registrations, true, singletonDeclaredType);
+		if (!handlers.isEmpty()) {
+			try {
+				for (Map.Entry<String, List<String>> kv : handlers.entrySet()) {
+					FileObject rfo = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/" + URLEncoder.encode(kv.getKey(), "UTF-8"));
+					BufferedWriter bw = new BufferedWriter(rfo.openWriter());
+					for (String impl : kv.getValue()) {
+						bw.write(impl);
+						bw.newLine();
 					}
-					if (!foundImpl) {
-						AnnotationMirror eventAnnotation = getAnnotation(element, eventDeclaredType);
-						processingEnv.getMessager().printMessage(
-								Diagnostic.Kind.ERROR,
-								"EventHandler annotation on " + element.toString() + " requires implementation of DomainEventHandler<T extends DomainEvent>",
-								element,
-								eventAnnotation);
-					}
+					bw.close();
 				}
+			} catch (IOException e) {
+				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed saving event handler registrations");
 			}
-			if (!handlers.isEmpty()) {
-				try {
-					for (Map.Entry<String, List<String>> kv : handlers.entrySet()) {
-						FileObject rfo = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/" + URLEncoder.encode(kv.getKey(), "UTF-8"));
-						BufferedWriter bw = new BufferedWriter(rfo.openWriter());
-						for (String impl : kv.getValue()) {
-							bw.write(impl);
-							bw.newLine();
-						}
-						bw.close();
+		}
+		if (registrations.length() > 0) {
+			try {
+				FileObject fo = processingEnv.getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "", "revenj_container_Registrations.java");
+				File file = new File(fo.toUri());
+				Writer writer;
+				if (file.exists()) {
+					if (!file.delete()) {
+						processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Failed to delete container registrations: " + file.getAbsolutePath());
 					}
-				} catch (IOException e) {
-					processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed saving event handler registrations");
+					writer = new OutputStreamWriter(new FileOutputStream(file));
+				} else {
+					writer = processingEnv.getFiler().createSourceFile("revenj_container_Registrations").openWriter();
 				}
+				writer.write("public class revenj_container_Registrations implements org.revenj.extensibility.SystemAspect {\n");
+				writer.write("  @Override\n  public void configure(org.revenj.extensibility.Container container) {\n");
+				writer.write(registrations.toString());
+				writer.write("\n  }\n}");
+				writer.close();
+				fo = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/org.revenj.extensibility.SystemAspect");
+				file = new File(fo.toUri());
+				if (file.exists()) {
+					Files.write(Paths.get(fo.toUri()), "revenj_container_Registrations\n".getBytes("UTF-8"), StandardOpenOption.APPEND);
+				} else {
+					writer = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/org.revenj.extensibility.SystemAspect").openWriter();
+					writer.write("revenj_container_Registrations\n");
+					writer.close();
+				}
+			} catch (IOException e) {
+				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed saving container registrations");
 			}
 		}
 		return false;
+	}
+
+	private void findEventHandlers(Set<? extends Element> events, Map<String, List<String>> handlers) {
+		for (Element el : events) {
+			if (!(el instanceof TypeElement)) {
+				continue;
+			}
+			TypeElement element = (TypeElement) el;
+			if (!hasPublicCtor(element)) {
+				processingEnv.getMessager().printMessage(
+						Diagnostic.Kind.ERROR,
+						"EventHandler requires public constructor",
+						element,
+						getAnnotation(element, eventDeclaredType));
+			} else {
+				boolean foundImpl = false;
+				for (TypeMirror iface : element.getInterfaces()) {
+					String sign = iface.toString();
+					if (!sign.startsWith("org.revenj.patterns.DomainEventHandler<")) {
+						continue;
+					}
+					List<String> impl = handlers.get(sign);
+					if (impl == null) {
+						impl = new ArrayList<>();
+						handlers.put(sign, impl);
+					}
+					if (element.getNestingKind().isNested()) {
+						impl.add(element.getEnclosingElement().asType().toString() + "$" + element.getSimpleName().toString());
+					} else {
+						impl.add(element.asType().toString());
+					}
+					foundImpl = true;
+				}
+				if (!foundImpl) {
+					processingEnv.getMessager().printMessage(
+							Diagnostic.Kind.ERROR,
+							"EventHandler annotation on " + element.toString() + " requires implementation of DomainEventHandler<T extends DomainEvent>",
+							element,
+							getAnnotation(element, eventDeclaredType));
+				}
+			}
+		}
+	}
+
+	private void findInjections(Set<? extends Element> injects, StringBuilder registrations) {
+		for (Element el : injects) {
+			Element p = el.getEnclosingElement();
+			if (!(el instanceof ExecutableElement) || !(p instanceof TypeElement)) {
+				continue;
+			}
+			ExecutableElement element = (ExecutableElement) el;
+			TypeElement parent = (TypeElement) p;
+			if (!element.getModifiers().contains(Modifier.PUBLIC)
+					|| !parent.getModifiers().contains(Modifier.PUBLIC)) {
+				processingEnv.getMessager().printMessage(
+						Diagnostic.Kind.WARNING,
+						"@Inject used in '" + parent.asType() + "' can only be used on a public constructor in a public type",
+						element,
+						getAnnotation(element, injectDeclaredType));
+			} else if (parent.getTypeParameters().size() > 0) {
+				processingEnv.getMessager().printMessage(
+						Diagnostic.Kind.WARNING,
+						"@Inject used on '" + parent.asType() + "' will be handled by reflection",
+						element,
+						getAnnotation(element, injectDeclaredType));
+			} else {
+				int position = registrations.length();
+				registrations.append("    container.registerFactory(");
+				registrations.append(parent);
+				registrations.append(".class, c -> new ");
+				registrations.append(parent);
+				registrations.append("(");
+				for (VariableElement ve : element.getParameters()) {
+					TypeElement argType = processingEnv.getElementUtils().getTypeElement(ve.asType().toString());
+					if (!argType.getModifiers().contains(Modifier.PUBLIC)) {
+						processingEnv.getMessager().printMessage(
+								Diagnostic.Kind.WARNING,
+								"Arguments for constructor with @Inject must be public. '" + ve.asType() + "' is not public.",
+								element,
+								getAnnotation(element, injectDeclaredType));
+						registrations.setLength(position);
+						return;
+					}
+					registrations.append("c.resolve(");
+					registrations.append(ve.asType());
+					registrations.append(".class)");
+					registrations.append(",");
+				}
+				if (element.getParameters().size() > 0) {
+					registrations.setLength(registrations.length() - 1);
+				}
+				registrations.append("), false);\n");
+			}
+		}
+	}
+
+	private void registerTypes(Set<? extends Element> types, StringBuilder registrations, boolean singleton, DeclaredType declaredType) {
+		for (Element el : types) {
+			if (!(el instanceof TypeElement)) {
+				continue;
+			}
+			TypeElement element = (TypeElement) el;
+			if (!element.getModifiers().contains(Modifier.PUBLIC)) {
+				processingEnv.getMessager().printMessage(
+						Diagnostic.Kind.WARNING,
+						(singleton ? "@Singleton" : "@Transient") + " used on '" + element.asType() + "' can only be used on a public type",
+						element,
+						getAnnotation(element, declaredType));
+			} else {
+				registrations.append("    container.register(");
+				registrations.append(element.asType());
+				registrations.append(".class, ");
+				registrations.append(singleton ? "true);" : "false);\n");
+			}
+		}
 	}
 
 	private boolean hasPublicCtor(Element element) {
@@ -103,13 +222,6 @@ public class RevenjProcessor extends AbstractProcessor {
 			}
 		}
 		return false;
-	}
-
-	private boolean checkInterfaces(TypeElement element, TypeElement target) {
-		for (TypeElement type : ElementFilter.typesIn(element.getEnclosedElements())) {
-			String name = type.getSimpleName().toString();
-		}
-		return true;
 	}
 
 	private AnnotationMirror getAnnotation(Element element, DeclaredType annotationType) {

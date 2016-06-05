@@ -97,6 +97,7 @@ public abstract class StorageConverter {
 		return new S3(bucket, key, length, name, mimeType, metadata);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static ArrayList<S3> deserializeS3Collection(final JsonReader reader) throws IOException {
 		return reader.deserializeCollection(S3Reader);
 	}
@@ -105,6 +106,7 @@ public abstract class StorageConverter {
 		reader.deserializeCollection(S3Reader, res);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static ArrayList<S3> deserializeS3NullableCollection(final JsonReader reader) throws IOException {
 		return reader.deserializeNullableCollection(S3Reader);
 	}

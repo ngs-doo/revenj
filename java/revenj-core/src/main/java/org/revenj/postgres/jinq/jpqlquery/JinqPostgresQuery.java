@@ -7,6 +7,7 @@ import java.util.List;
  * needed to parse results into a form usable by Jinq.
  */
 public abstract class JinqPostgresQuery<T> implements JinqPostgresFragment {
+	@SuppressWarnings("unchecked")
 	public static <U> JinqPostgresQuery<U> findAll(String dataSource) {
 		SelectFromWhere<U> query = new SelectFromWhere<>();
 		From from = From.forDataSource(dataSource);

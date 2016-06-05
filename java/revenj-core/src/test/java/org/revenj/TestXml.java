@@ -16,6 +16,7 @@ import java.awt.geom.Point2D;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
@@ -167,7 +168,9 @@ public class TestXml {
 		OffsetDateTime now = OffsetDateTime.now();
 		OffsetDateTime soon = OffsetDateTime.now().plusHours(2);
 		Element elem = xml.serialize(new OffsetDateTime[]{now, soon});
-		Assert.assertEquals("<ArrayOfdateTime><dateTime>" + now.toString() + "</dateTime><dateTime>" + soon.toString() + "</dateTime></ArrayOfdateTime>", toString(elem));
+		Assert.assertEquals("<ArrayOfdateTime><dateTime>" + now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+				+ "</dateTime><dateTime>" + soon.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+				+ "</dateTime></ArrayOfdateTime>", toString(elem));
 		OffsetDateTime[] value = xml.deserialize(elem, OffsetDateTime[].class);
 		Assert.assertArrayEquals(new OffsetDateTime[]{now, soon}, value);
 	}

@@ -36,6 +36,7 @@ public class PopulateReport implements ServerCommand {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <TInput, TOutput> CommandResult<TOutput> execute(
 			ServiceLocator locator,
