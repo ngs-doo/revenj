@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.revenj.postgres.QueryProvider;
+import org.revenj.database.postgres.QueryProvider;
 
 import java.util.Properties;
 

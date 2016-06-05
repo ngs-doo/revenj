@@ -1,6 +1,6 @@
 package org.revenj.serialization.xml;
 
-import org.revenj.postgres.converters.XmlConverter;
+import org.revenj.database.postgres.converters.XmlConverter;
 import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;

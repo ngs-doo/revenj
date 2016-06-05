@@ -2,9 +2,9 @@ package org.revenj;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.revenj.postgres.PostgresReader;
-import org.revenj.postgres.PostgresWriter;
-import org.revenj.postgres.converters.*;
+import org.revenj.database.postgres.PostgresReader;
+import org.revenj.database.postgres.PostgresWriter;
+import org.revenj.database.postgres.converters.*;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;

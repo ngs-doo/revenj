@@ -5,7 +5,7 @@ import org.revenj.extensibility.Container;
 import org.revenj.extensibility.SystemState;
 import org.revenj.serialization.json.DslJsonSerialization;
 import org.revenj.patterns.*;
-import org.revenj.postgres.jinq.JinqMetaModel;
+import org.revenj.database.postgres.jinq.JinqMetaModel;
 import org.revenj.security.PermissionManager;
 import org.revenj.extensibility.PluginLoader;
 import org.revenj.extensibility.SystemAspect;

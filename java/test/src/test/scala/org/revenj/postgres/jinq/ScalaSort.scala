@@ -1,7 +1,7 @@
-package org.revenj.postgres.jinq
+package org.revenj.database.postgres.jinq
 
 import org.revenj.patterns.{Query, DataSource}
-import org.revenj.postgres.jinq.transform.{LambdaAnalysis, LambdaInfo, MetamodelUtil}
+import org.revenj.database.postgres.jinq.transform.{LambdaAnalysis, LambdaInfo, MetamodelUtil}
 
 case class ScalaSort[T <: DataSource, V <: java.lang.Comparable[V]](lambda: T => V) extends RevenjQuery.CustomAnalysis with Query.Compare[T, V] {
   def getAnalysisLambda(index: Int): LambdaInfo = new ScalaLambdaInfo(lambda, index)

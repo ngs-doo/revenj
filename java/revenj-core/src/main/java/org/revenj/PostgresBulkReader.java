@@ -1,11 +1,11 @@
 package org.revenj;
 
 import org.revenj.patterns.*;
-import org.revenj.postgres.*;
-import org.revenj.postgres.converters.ArrayTuple;
-import org.revenj.postgres.jinq.RevenjQueryComposer;
-import org.revenj.postgres.jinq.jpqlquery.GeneratedQueryParameter;
-import org.revenj.postgres.jinq.transform.LambdaInfo;
+import org.revenj.database.postgres.*;
+import org.revenj.database.postgres.converters.ArrayTuple;
+import org.revenj.database.postgres.jinq.RevenjQueryComposer;
+import org.revenj.database.postgres.jinq.jpqlquery.GeneratedQueryParameter;
+import org.revenj.database.postgres.jinq.transform.LambdaInfo;
 
 import java.io.IOException;
 import java.sql.*;

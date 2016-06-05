@@ -8,7 +8,7 @@ import gen.model.adt.{Anonymous, User}
 import org.revenj.extensibility.Container
 import org.junit._
 import org.revenj.patterns._
-import org.revenj.postgres.jinq.{JinqMetaModel, ScalaSort, ScalaSpecification}
+import org.revenj.database.postgres.jinq.{JinqMetaModel, ScalaSort, ScalaSpecification}
 import ru.yandex.qatools.embed.service.PostgresEmbeddedService
 
 import scala.util.Random

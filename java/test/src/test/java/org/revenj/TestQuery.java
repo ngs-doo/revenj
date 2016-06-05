@@ -21,11 +21,11 @@ import gen.model.test.repositories.CompositeRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.*;
-import org.revenj.postgres.jinq.JinqMetaModel;
-import org.revenj.postgres.jinq.jpqlquery.*;
-import org.revenj.postgres.jinq.transform.MethodHandlerVirtual;
-import org.revenj.postgres.jinq.transform.SymbExPassDown;
-import org.revenj.postgres.jinq.transform.SymbExToColumns;
+import org.revenj.database.postgres.jinq.JinqMetaModel;
+import org.revenj.database.postgres.jinq.jpqlquery.*;
+import org.revenj.database.postgres.jinq.transform.MethodHandlerVirtual;
+import org.revenj.database.postgres.jinq.transform.SymbExPassDown;
+import org.revenj.database.postgres.jinq.transform.SymbExToColumns;
 
 import java.io.IOException;
 import java.lang.reflect.Method;

@@ -1,7 +1,7 @@
 package org.revenj.server.commands.search;
 
 import org.revenj.patterns.*;
-import org.revenj.postgres.jinq.JinqMetaModel;
+import org.revenj.database.postgres.jinq.JinqMetaModel;
 import org.revenj.security.PermissionManager;
 import org.revenj.server.CommandResult;
 import org.revenj.server.ServerCommand;

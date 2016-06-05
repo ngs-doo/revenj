@@ -3,10 +3,10 @@ package org.revenj.spring;
 import org.revenj.patterns.DataSource;
 import org.revenj.patterns.Query;
 import org.revenj.patterns.ServiceLocator;
-import org.revenj.postgres.QueryProvider;
-import org.revenj.postgres.jinq.RevenjQueryComposer;
-import org.revenj.postgres.jinq.RevenjQueryComposerCache;
-import org.revenj.postgres.jinq.transform.MetamodelUtil;
+import org.revenj.database.postgres.QueryProvider;
+import org.revenj.database.postgres.jinq.RevenjQueryComposer;
+import org.revenj.database.postgres.jinq.RevenjQueryComposerCache;
+import org.revenj.database.postgres.jinq.transform.MetamodelUtil;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import java.sql.Connection;

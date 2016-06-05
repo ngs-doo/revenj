@@ -1,0 +1,8 @@
+org.revenj.database.postgres.jinq.transform.handlers.AbsStaticHandler
+org.revenj.database.postgres.jinq.transform.handlers.DateNowHandler
+org.revenj.database.postgres.jinq.transform.handlers.MathSqrtHandler
+org.revenj.database.postgres.jinq.transform.handlers.IntegerValueOfHandler
+org.revenj.database.postgres.jinq.transform.handlers.StringValueOfHandler
+org.revenj.database.postgres.jinq.transform.handlers.LongValueOfHandler
+org.revenj.database.postgres.jinq.transform.handlers.UuidParseHandler
+org.revenj.database.postgres.jinq.transform.handlers.TreePathCreateHandler

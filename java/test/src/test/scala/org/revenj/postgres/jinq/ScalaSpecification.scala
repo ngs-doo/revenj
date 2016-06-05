@@ -1,7 +1,7 @@
-package org.revenj.postgres.jinq
+package org.revenj.database.postgres.jinq
 
 import org.revenj.patterns.Specification
-import org.revenj.postgres.jinq.transform.{LambdaAnalysis, MetamodelUtil, LambdaInfo}
+import org.revenj.database.postgres.jinq.transform.{LambdaAnalysis, MetamodelUtil, LambdaInfo}
 
 case class ScalaSpecification[T](lambda: T => Boolean) extends RevenjQuery.CustomAnalysis with Specification[T] {
 
