@@ -171,7 +171,10 @@ public class RevenjProcessor extends AbstractProcessor {
 				registrations.append(parent);
 				registrations.append("(");
 				for (VariableElement ve : element.getParameters()) {
-					TypeElement argType = processingEnv.getElementUtils().getTypeElement(ve.asType().toString());
+					String typeName = ve.asType().toString();
+					int genInd = typeName.indexOf('<');
+					String containerType = genInd > 0 ? typeName.substring(0, genInd) : typeName;
+					TypeElement argType = processingEnv.getElementUtils().getTypeElement(containerType);
 					if (!argType.getModifiers().contains(Modifier.PUBLIC)) {
 						processingEnv.getMessager().printMessage(
 								Diagnostic.Kind.WARNING,
@@ -181,9 +184,19 @@ public class RevenjProcessor extends AbstractProcessor {
 						registrations.setLength(position);
 						return;
 					}
-					registrations.append("c.resolve(");
-					registrations.append(ve.asType());
-					registrations.append(".class)");
+					if (genInd > 0) {
+						if (!checkGenericArguments(typeName, element)) {
+							registrations.setLength(position);
+							return;
+						}
+						registrations.append("new org.revenj.patterns.Generic<");
+						registrations.append(typeName);
+						registrations.append(">(){}.resolve(c)");
+					} else {
+						registrations.append("c.resolve(");
+						registrations.append(typeName);
+						registrations.append(".class)");
+					}
 					registrations.append(",");
 				}
 				if (element.getParameters().size() > 0) {
@@ -192,6 +205,25 @@ public class RevenjProcessor extends AbstractProcessor {
 				registrations.append("), false);\n");
 			}
 		}
+	}
+
+	private boolean checkGenericArguments(String typeName, ExecutableElement element) {
+		int genInd = typeName.indexOf('<');
+		if (genInd == -1) return true;
+		String[] args = typeName.substring(genInd + 1, typeName.length() - 1).split(",");
+		for (String t : args) {
+			TypeElement argType = processingEnv.getElementUtils().getTypeElement(t.trim());
+			if (!argType.getModifiers().contains(Modifier.PUBLIC)) {
+				processingEnv.getMessager().printMessage(
+						Diagnostic.Kind.WARNING,
+						"Arguments for constructor with @Inject must be public. '" + t.trim() + "' is not public.",
+						element,
+						getAnnotation(element, injectDeclaredType));
+				return false;
+			}
+			if (!checkGenericArguments(t, element)) return false;
+		}
+		return true;
 	}
 
 	private void registerTypes(Set<? extends Element> types, StringBuilder registrations, boolean singleton, DeclaredType declaredType) {

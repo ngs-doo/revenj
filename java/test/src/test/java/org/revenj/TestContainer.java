@@ -41,6 +41,12 @@ public class TestContainer {
 		}
 	}
 
+	public static class GenArg {
+		public Generics<A1> g;
+		@Inject
+		public GenArg(Generics<A1> g) { this.g = g; }
+	}
+
 	@Test
 	public void willRespectInjectAnnotation() throws Exception {
 		Container container = new SimpleContainer(false);
@@ -63,5 +69,16 @@ public class TestContainer {
 		}
 		Generics<A1> wi = container.resolve(Generics.class, A1.class);
 		Assert.assertTrue(wi.t instanceof A1);
+	}
+
+	@Test
+	public void canResolveGenericArg() throws Exception {
+		Container container = new SimpleContainer(false);
+		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class);
+		for(SystemAspect a : aspects) {
+			a.configure(container);
+		}
+		GenArg wi = container.resolve(GenArg.class);
+		Assert.assertTrue(wi.g.t instanceof A1);
 	}
 }

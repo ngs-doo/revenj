@@ -64,6 +64,9 @@ module test {
 		count enn as count;
 		sum hasEntities hasSum;
 		avg indexes avgInd;
+		specification ForSimple 'it => simples.Contains(it.simple)' {
+			List<Simple> simples;
+		}
 	}
 	entity Entity {
 		money money;

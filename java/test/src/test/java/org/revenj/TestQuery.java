@@ -490,6 +490,21 @@ public class TestQuery extends Setup {
 	}
 
 	@Test
+	public void queryWithComplexSpecificationFromCube() throws IOException, NoSuchMethodException {
+		ServiceLocator locator = container;
+
+		CompositeCube cube = new CompositeCube(locator);
+		CompositeCube.ForSimple filter = new CompositeCube.ForSimple();
+		List<Map<String, Object>> results =
+				cube.analyze(
+						Collections.singletonList(CompositeCube.number),
+						null,
+						filter::test);
+
+		Assert.assertNotNull(results);
+	}
+
+	@Test
 	public void testTimestampQueryingAndOrder() throws IOException {
 		ServiceLocator locator = container;
 		SearchByTimestampAndOrderByTimestampRepository analysisGridRepository =

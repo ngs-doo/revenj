@@ -1,10 +1,7 @@
 package org.revenj.processor;
 
 import org.junit.Test;
-import org.revenj.processor.models.NonPublicArgument;
-import org.revenj.processor.models.TestGenerics;
-import org.revenj.processor.models.TestInvalidEventHandler;
-import org.revenj.processor.models.TestValidEventHandler;
+import org.revenj.processor.models.*;
 
 import javax.annotation.processing.Processor;
 import javax.tools.Diagnostic;
@@ -19,17 +16,17 @@ public class ValidationTest extends AbstractAnnotationProcessorTest {
 
 	@Test
 	public void testValidHandler() {
-		assertCompilationSuccessful(compileTestCase(TestValidEventHandler.class));
+		assertCompilationSuccessful(compileTestCase(ValidEventHandler.class));
 	}
 
 	@Test
 	public void testInvalidHandler() {
-		assertCompilationReturned(Diagnostic.Kind.ERROR, 5, compileTestCase(TestInvalidEventHandler.class));
+		assertCompilationReturned(Diagnostic.Kind.ERROR, 5, compileTestCase(InvalidEventHandler.class));
 	}
 
 	@Test
-	public void testGenericsWarning() {
-		assertCompilationReturned(Diagnostic.Kind.WARNING, 6, compileTestCase(TestGenerics.class));
+	public void testGenericsClassWarning() {
+		assertCompilationReturned(Diagnostic.Kind.WARNING, 6, compileTestCase(GenericClass.class));
 	}
 
 	@Test
@@ -40,5 +37,15 @@ public class ValidationTest extends AbstractAnnotationProcessorTest {
 	@Test
 	public void testNonPublicArgument() {
 		assertCompilationReturned(Diagnostic.Kind.WARNING, 8, compileTestCase(NonPublicArgument.class));
+	}
+
+	@Test
+	public void testGenericArgWarning() {
+		assertCompilationSuccessful(compileTestCase(GenericArgument.class));
+	}
+
+	@Test
+	public void testGenericNonPublicArgument() {
+		assertCompilationReturned(Diagnostic.Kind.WARNING, 8, compileTestCase(GenericNonPublicArgument.class));
 	}
 }

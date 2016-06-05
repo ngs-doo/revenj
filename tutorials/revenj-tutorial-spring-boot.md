@@ -58,12 +58,12 @@ After we are done, `pom.xml` should look like:
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-spring</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-servlet</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
     </dependencies>
     <build>

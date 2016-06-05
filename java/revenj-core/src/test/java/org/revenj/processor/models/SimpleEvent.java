@@ -4,7 +4,7 @@ import org.revenj.patterns.DomainEvent;
 
 import java.time.OffsetDateTime;
 
-public class TestEvent implements DomainEvent {
+public class SimpleEvent implements DomainEvent {
 	@Override
 	public OffsetDateTime getQueuedAt() {
 		return null;

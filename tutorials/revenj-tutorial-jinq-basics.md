@@ -80,3 +80,15 @@ alternative query can be written:
 	ctx.query(Task.class)
       .filter(t => t.getClosed() != null || t.getDescription().startsWith("test-"))
       .filter(t => t.getCreated().after(LocalDate.of(2015, 1, 1)) || t.getDescription().startsWith("non-test-"));
+
+####Bypassing JINQ
+
+`query` method will work through JINQ, while `search` method will call database functions. 
+Sometimes it's required to call `query` method (for example custom ordering is required or cube API is used) and if JINQ is unable to convert Java to SQL properly, there is an alternative way to get correct SQL.
+DSL Platform will register custom handler for `test` method of specifications. During conversion through JINQ, this custom handler will be used instead of JINQ analyzer.
+In code this would look something like:
+
+    Task.CustomSpecification specification = new Task.CustomSpecification();
+    List<Task> tasks = ctx.query(Task.class).filter(specification::test).list();
+
+The `specification::test` part of the query will cause JINQ to use alternative query builder which supports much more complex queries.

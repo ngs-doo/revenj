@@ -2,8 +2,8 @@ package org.revenj.processor.models;
 
 import javax.inject.Inject;
 
-public class TestGenerics<T> {
+public class GenericClass<T> {
 	@Inject
-	public TestGenerics() {
+	public GenericClass() {
 	}
 }
