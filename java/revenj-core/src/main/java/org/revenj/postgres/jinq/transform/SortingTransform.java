@@ -18,7 +18,8 @@ public class SortingTransform extends RevenjOneLambdaQueryTransform {
 		try {
 			if (query instanceof SelectFromWhere && query.canSort()) {
 				SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;
-				SymbExToColumns translator = config.newSymbExToColumns(SelectFromWhereLambdaArgumentHandler.fromSelectFromWhere(sfw, lambda, config.metamodel, parentArgumentScope, false));
+				SelectFromWhereLambdaArgumentHandler argHandler = SelectFromWhereLambdaArgumentHandler.fromSelectFromWhere(sfw, lambda, config.metamodel, parentArgumentScope, false);
+				SymbExToColumns translator = config.newSymbExToColumns(argHandler, lambda.getLambdaIndex());
 
 				ColumnExpressions<U> returnExpr = makeSelectExpression(translator, lambda);
 

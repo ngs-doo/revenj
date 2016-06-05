@@ -210,8 +210,7 @@ public class LambdaParameterArgumentHandler implements SymbExArgumentHandler {
 	}
 
 	@Override
-	public ColumnExpressions<?> handleThisFieldRead(String name, Type argType)
-			throws TypedValueVisitorException {
+	public ColumnExpressions<?> handleThisFieldRead(String name, Type argType) throws TypedValueVisitorException {
 		if (lambda.usesParametersAsFields()) {
 			if (lambda.usesIndirectFields()) {
 				return handleIndirectThisFieldRead(name, argType);

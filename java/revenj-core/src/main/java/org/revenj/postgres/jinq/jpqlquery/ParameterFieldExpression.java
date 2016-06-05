@@ -3,9 +3,9 @@ package org.revenj.postgres.jinq.jpqlquery;
 import java.util.Objects;
 
 public class ParameterFieldExpression extends Expression {
-	private int lambdaIndex;
-	private String fieldName;
-	private String fieldType;
+	final int lambdaIndex;
+	final String fieldName;
+	final String fieldType;
 
 	public ParameterFieldExpression(int lambdaIndex, String fieldName, String fieldType) {
 		this.lambdaIndex = lambdaIndex;

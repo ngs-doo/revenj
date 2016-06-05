@@ -31,7 +31,8 @@ public class GroupingTransform extends RevenjMultiLambdaQueryTransform {
 				for (int n = 0; n < lambdas.length; n++) {
 					LambdaAnalysis lambda = lambdas[n];
 
-					SymbExToColumns translator = config.newSymbExToColumns(new GroupingLambdasArgumentHandler(keySelect, streamTee, lambdas[n], config.metamodel, parentArgumentScope, false));
+					GroupingLambdasArgumentHandler argHandler = new GroupingLambdasArgumentHandler(keySelect, streamTee, lambda, config.metamodel, parentArgumentScope, false);
+					SymbExToColumns translator = config.newSymbExToColumns(argHandler, n);
 
 					ColumnExpressions<U> returnQuery = makeSelectExpression(translator, lambda);
 

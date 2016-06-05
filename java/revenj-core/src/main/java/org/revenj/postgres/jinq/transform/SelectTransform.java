@@ -18,7 +18,8 @@ public class SelectTransform extends RevenjOneLambdaQueryTransform {
 		try {
 			if (query.isSelectFromWhere() || query.isSelectFromWhereGroupHaving()) {
 				SelectFromWhere<V> sfw = (SelectFromWhere<V>) query;
-				SymbExToColumns translator = config.newSymbExToColumns(SelectFromWhereLambdaArgumentHandler.fromSelectFromWhere(sfw, lambda, config.metamodel, parentArgumentScope, withSource));
+				SelectFromWhereLambdaArgumentHandler argHandler = SelectFromWhereLambdaArgumentHandler.fromSelectFromWhere(sfw, lambda, config.metamodel, parentArgumentScope, withSource);
+				SymbExToColumns translator = config.newSymbExToColumns(argHandler, lambda.getLambdaIndex());
 
 				ColumnExpressions<U> returnExpr = makeSelectExpression(translator, lambda);
 
@@ -29,7 +30,8 @@ public class SelectTransform extends RevenjOneLambdaQueryTransform {
 				return toReturn;
 			} else if (query.isSelectOnly()) {
 				SelectOnly<V> sfw = (SelectOnly<V>) query;
-				SymbExToColumns translator = config.newSymbExToColumns(SelectFromWhereLambdaArgumentHandler.fromSelectOnly(sfw, lambda, config.metamodel, parentArgumentScope, false));
+				SelectFromWhereLambdaArgumentHandler argHandler = SelectFromWhereLambdaArgumentHandler.fromSelectOnly(sfw, lambda, config.metamodel, parentArgumentScope, false);
+				SymbExToColumns translator = config.newSymbExToColumns(argHandler, lambda.getLambdaIndex());
 
 				ColumnExpressions<U> returnExpr = makeSelectExpression(translator, lambda);
 

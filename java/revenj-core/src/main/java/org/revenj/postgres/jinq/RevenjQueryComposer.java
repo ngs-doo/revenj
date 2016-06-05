@@ -204,16 +204,18 @@ public final class RevenjQueryComposer<T> {
 		PostgresWriter writer = null;
 		for (int i = 0; i < parameters.size(); i++) {
 			GeneratedQueryParameter param = parameters.get(i);
-			Object value;
-			if (param.fieldName == null) {
-				value = lambdas.get(param.lambdaIndex).getCapturedArg(param.argIndex);
-			} else {
-				value = lambdas.get(param.lambdaIndex).getField(param.fieldName);
-			}
+			Object value = param.getValue.apply(lambdas.get(param.lambdaIndex));
 			if (value == null) {
-				Integer sqlId = sqlIdMapping.get(param.type);
+				Integer sqlId = sqlIdMapping.get(param.javaType);
 				if (sqlId == null || sqlId == -1) {
-					ps.setObject(i + 1 + parameterOffset, null);
+					if (param.sqlType != null) {
+						PGobject pgo = new PGobject();
+						pgo.setType(param.sqlType);
+						pgo.setValue("null");
+						ps.setObject(i + 1 + parameterOffset, pgo);
+					} else {
+						ps.setObject(i + 1 + parameterOffset, null);
+					}
 				} else {
 					ps.setNull(i + 1 + parameterOffset, sqlId);
 				}
@@ -279,7 +281,14 @@ public final class RevenjQueryComposer<T> {
 					if ("unknown".equals(type)) {
 						if (elements.length == 0) {
 							//TODO: provide null instead !?
-							ps.setObject(i + 1 + parameterOffset, EMPTY_ARRAY);
+							if (param.sqlType != null) {
+								PGobject pgo = new PGobject();
+								pgo.setType(param.sqlType);
+								pgo.setValue("{}");
+								ps.setObject(i + 1 + parameterOffset, pgo);
+							} else {
+								ps.setObject(i + 1 + parameterOffset, EMPTY_ARRAY);
+							}
 							continue;
 						} else {
 							// throw meaningfull error!?

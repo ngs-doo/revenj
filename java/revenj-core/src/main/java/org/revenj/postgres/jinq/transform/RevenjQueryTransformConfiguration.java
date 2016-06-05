@@ -27,12 +27,12 @@ public class RevenjQueryTransformConfiguration {
 		return metamodel.getStaticComparisonMethods(isObjectEqualsSafe);
 	}
 
-	public SymbExToColumns newSymbExToColumns(SymbExArgumentHandler argumentHandler) {
-		return new SymbExToColumns(this, argumentHandler);
+	public SymbExToColumns newSymbExToColumns(SymbExArgumentHandler argumentHandler, int lambdaIndex) {
+		return new SymbExToColumns(this, argumentHandler, lambdaIndex);
 	}
 
-	public SymbExToSubQuery newSymbExToSubQuery(SymbExArgumentHandler argumentHandler, boolean isExpectingStream) {
-		return new SymbExToSubQuery(this, argumentHandler, isExpectingStream);
+	public SymbExToSubQuery newSymbExToSubQuery(SymbExArgumentHandler argumentHandler, boolean isExpectingStream, int lambdaIndex) {
+		return new SymbExToSubQuery(this, argumentHandler, isExpectingStream, lambdaIndex);
 	}
 
 	public Map<String, TypedValue> findLambdaAsClassConstructorParameters(MethodSignature sig, List<TypedValue> args) throws QueryTransformException {

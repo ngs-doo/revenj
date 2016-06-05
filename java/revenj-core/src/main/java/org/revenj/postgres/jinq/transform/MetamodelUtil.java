@@ -1,12 +1,11 @@
 package org.revenj.postgres.jinq.transform;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
+import ch.epfl.labos.iu.orm.queryll2.symbolic.BasicSymbolicInterpreter;
 import org.jinq.rebased.org.objectweb.asm.Type;
 
 import ch.epfl.labos.iu.orm.queryll2.path.TransformationClassAnalyzer;
@@ -122,6 +121,31 @@ public abstract class MetamodelUtil {
 		MethodSignature signature = MethodSignature.fromMethod(method);
 		statics.put(signature, function);
 		safeStaticMethods.add(signature);
+	}
+
+	public void register(MethodHandlerVirtual handler) throws IOException {
+		//TODO: temp hack. MethodChecked class needs major refactoring ;(
+		try {
+			for (MethodSignature signature : handler.getSupportedSignatures()) {
+				MethodChecker.jpqlFunctionMethods.put(signature, handler);
+			}
+		} catch (NoSuchMethodException e) {
+			throw new IOException(e);
+		}
+	}
+
+	public void register(MethodHandlerStatic handler) throws IOException {
+		try {
+			for (MethodSignature signature : handler.getSupportedSignatures()) {
+				MethodChecker.jpqlFunctionStaticMethods.put(signature, handler);
+			}
+		} catch (NoSuchMethodException e) {
+			throw new IOException(e);
+		}
+	}
+
+	public Optional<MethodHandlerVirtual> findVirtualHandler(MethodSignature method) {
+		return Optional.ofNullable(MethodChecker.jpqlFunctionMethods.get(method));
 	}
 
 	private void insertNLinkMethod(String className, String methodName, String returnType, MetamodelUtilAttribute pluralAttribute) {

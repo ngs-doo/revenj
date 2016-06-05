@@ -23,11 +23,13 @@ import org.revenj.postgres.jinq.jpqlquery.*;
 
 public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExpressions<?>, TypedValueVisitorException> {
 	final SymbExArgumentHandler argHandler;
+	public final int lambdaIndex;
 	final RevenjQueryTransformConfiguration config;
 
-	SymbExToColumns(RevenjQueryTransformConfiguration config, SymbExArgumentHandler argumentHandler) {
+	SymbExToColumns(RevenjQueryTransformConfiguration config, SymbExArgumentHandler argumentHandler, int lambdaIndex) {
 		this.config = config;
 		this.argHandler = argumentHandler;
+		this.lambdaIndex = lambdaIndex;
 	}
 
 	@Override
@@ -92,8 +94,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 	public ColumnExpressions<?> notOpValue(TypedValue.NotValue val, SymbExPassDown in) throws TypedValueVisitorException {
 		SymbExPassDown passdown = SymbExPassDown.with(val, true);
 		ColumnExpressions<?> left = val.operand.visit(this, passdown);
-		return ColumnExpressions.singleColumn(left.reader,
-				UnaryExpression.prefix("NOT", left.getOnlyColumn()));
+		return ColumnExpressions.singleColumn(left.reader, UnaryExpression.prefix("NOT", left.getOnlyColumn()));
 	}
 
 	@Override
@@ -104,9 +105,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			return ColumnExpressions.singleColumn(SimpleRowReader.READER,
 					new ConstantExpression("'" + val.name + "'::" + dbEnum));
 		} else if ("java/lang/Boolean".equals(val.owner)) {
-			if ("TRUE".equals(val.name) || "FALSE".equals(val.name))
-				return ColumnExpressions.singleColumn(SimpleRowReader.READER,
-						new ConstantExpression("TRUE".equals(val.name) ? "TRUE" : "FALSE"));
+			return ColumnExpressions.singleColumn(SimpleRowReader.READER, new ConstantExpression(val.name));
 		}
 		return defaultValue(val, in);
 	}
@@ -333,7 +332,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			SymbExPassDown passdown = SymbExPassDown.with(val, false);
 
 			// Check out what stream we're aggregating
-			SymbExToSubQuery translator = config.newSymbExToSubQuery(argHandler, true);
+			SymbExToSubQuery translator = config.newSymbExToSubQuery(argHandler, true, lambdaIndex);
 			JinqPostgresQuery<?> subQuery = val.base.visit(translator, passdown);
 
 			// Extract the lambda used
@@ -391,7 +390,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 			SymbExPassDown passdown = SymbExPassDown.with(val, false);
 
 			// Check out what stream we're aggregating
-			SymbExToSubQuery translator = config.newSymbExToSubQuery(argHandler, true);
+			SymbExToSubQuery translator = config.newSymbExToSubQuery(argHandler, true, lambdaIndex);
 			JinqPostgresQuery<?> subQuery = val.base.visit(translator, passdown);
 
 			if (subQuery.isValidSubquery() && subQuery instanceof SelectFromWhere) {
@@ -488,7 +487,7 @@ public class SymbExToColumns extends TypedValueVisitor<SymbExPassDown, ColumnExp
 		ColumnExpressions<?> item = itemVal.visit(this, passdown);
 
 		// Handle the collection part of isInList as a subquery
-		SymbExToSubQuery translator = config.newSymbExToSubQuery(argHandler, isExpectingStream);
+		SymbExToSubQuery translator = config.newSymbExToSubQuery(argHandler, isExpectingStream, lambdaIndex);
 		JinqPostgresQuery<?> subQuery = listVal.visit(translator, passdown);
 
 		if (subQuery.isValidSubquery() && subQuery instanceof SelectFromWhere) {

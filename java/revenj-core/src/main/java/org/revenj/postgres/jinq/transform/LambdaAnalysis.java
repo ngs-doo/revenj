@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.jinq.rebased.org.objectweb.asm.Handle;
 import org.jinq.rebased.org.objectweb.asm.Opcodes;
@@ -21,6 +22,7 @@ import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodSignature;
 import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValue;
 
 import com.user00.thunk.SerializedLambda;
+import org.revenj.patterns.Specification;
 
 /**
  * Holds analysis information about the code for a lambda.
@@ -221,6 +223,16 @@ public class LambdaAnalysis {
 		// If the invoke virtual comes from a method reference, then there shouldn't be any captured arguments
 		SerializedLambda s = lambdaInfo.serializedLambda;
 		if (s.capturedArgs != null && s.capturedArgs.length > 0) {
+			if ("test".equals(lambdaInfo.serializedLambda.implMethodName) && s.capturedArgs.length == 1 && s.capturedArgs[0] instanceof Specification) {
+				MethodSignature sig = new MethodSignature(lambdaInfo.serializedLambda.implClass, "test", lambdaInfo.serializedLambda.implMethodSignature);
+				Optional<MethodHandlerVirtual> virtualHandler = metamodel.findVirtualHandler(sig);
+				if (virtualHandler.isPresent()) {
+					MethodAnalysisResults analysis = analyzeInvokeVirtual(s.implClass, s.implMethodName, s.implMethodSignature, metamodel, alternateClassLoader, isObjectEqualsSafe, isCollectionContainsSafe, throwExceptionOnFailure);
+					if (analysis != null) {
+						return new LambdaAnalysis(lambdaInfo.Lambda, s, analysis, lambdaInfo.lambdaIndex);
+					}
+				}
+			}
 			if (throwExceptionOnFailure)
 				throw new IllegalArgumentException("Cannot handle lambda method references to a virtual method including captured arguments");
 			return null;

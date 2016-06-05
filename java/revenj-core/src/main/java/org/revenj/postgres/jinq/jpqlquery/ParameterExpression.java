@@ -3,9 +3,9 @@ package org.revenj.postgres.jinq.jpqlquery;
 import java.util.Objects;
 
 public class ParameterExpression extends Expression {
-	private int lambdaIndex;
-	private int argIndex;
-	private String argType;
+	final int lambdaIndex;
+	final int argIndex;
+	final String argType;
 
 	public ParameterExpression(int lambdaIndex, int argIndex, String argType) {
 		this.lambdaIndex = lambdaIndex;

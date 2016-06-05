@@ -14,13 +14,15 @@ import org.revenj.postgres.jinq.jpqlquery.*;
 
 public class SymbExToSubQuery extends TypedValueVisitor<SymbExPassDown, JinqPostgresQuery<?>, TypedValueVisitorException> {
 	final SymbExArgumentHandler argHandler;
+	final int lambdaIndex;
 	RevenjQueryTransformConfiguration config = new RevenjQueryTransformConfiguration();
 	boolean isExpectingStream;
 
-	SymbExToSubQuery(RevenjQueryTransformConfiguration config, SymbExArgumentHandler argumentHandler, boolean isExpectingStream) {
+	SymbExToSubQuery(RevenjQueryTransformConfiguration config, SymbExArgumentHandler argumentHandler, boolean isExpectingStream, int lambdaIndex) {
 		this.config = config;
 		this.argHandler = argumentHandler;
 		this.isExpectingStream = isExpectingStream;
+		this.lambdaIndex = lambdaIndex;
 	}
 
 	@Override
@@ -148,7 +150,7 @@ public class SymbExToSubQuery extends TypedValueVisitor<SymbExPassDown, JinqPost
 					|| (!expectingPluralLink && config.metamodel.isSingularAttributeFieldMethod(sig) && config.metamodel.isFieldMethodAssociationType(sig))) {
 				String linkName = expectingPluralLink ?
 						config.metamodel.nLinkMethodToLinkName(sig) : config.metamodel.fieldMethodToFieldName(sig);
-				SymbExToColumns translator = config.newSymbExToColumns(argHandler);
+				SymbExToColumns translator = config.newSymbExToColumns(argHandler, lambdaIndex);
 
 				SymbExPassDown passdown = SymbExPassDown.with(val, false);
 				ColumnExpressions<?> nLinkBase = val.base.visit(translator, passdown);

@@ -21,7 +21,8 @@ public class MultiAggregateTransform extends RevenjMultiLambdaQueryTransform {
                 for (int n = 0; n < lambdas.length; n++) {
                     LambdaAnalysis lambda = lambdas[n];
 
-                    SymbExToColumns translator = config.newSymbExToColumns(new AggregateStreamLambdaArgumentHandler(streamTee, lambdas[n], config.metamodel, parentArgumentScope, false));
+                    AggregateStreamLambdaArgumentHandler argHandler = new AggregateStreamLambdaArgumentHandler(streamTee, lambda, config.metamodel, parentArgumentScope, false);
+                    SymbExToColumns translator = config.newSymbExToColumns(argHandler, n);
 
                     ColumnExpressions<U> returnQuery = makeSelectExpression(translator, lambda);
 

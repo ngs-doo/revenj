@@ -63,7 +63,8 @@ public class WhereTransform extends RevenjOneLambdaQueryTransform {
 			SelectFromWhere<V> sfw,
 			SymbExArgumentHandler parentArgumentScope) throws TypedValueVisitorException,
 			QueryTransformException {
-		SymbExToColumns translator = config.newSymbExToColumns(SelectFromWhereLambdaArgumentHandler.fromSelectFromWhere(sfw, where, config.metamodel, parentArgumentScope, withSource));
+		SelectFromWhereLambdaArgumentHandler argHandler = SelectFromWhereLambdaArgumentHandler.fromSelectFromWhere(sfw, where, config.metamodel, parentArgumentScope, withSource);
+		SymbExToColumns translator = config.newSymbExToColumns(argHandler, where.getLambdaIndex());
 		Expression methodExpr = null;
 		final List<PathAnalysis> paths = where.symbolicAnalysis.paths;
 		for (int n = 0; n < paths.size(); n++) {

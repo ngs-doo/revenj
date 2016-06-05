@@ -1,5 +1,8 @@
 package org.revenj;
 
+import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodCallValue;
+import ch.epfl.labos.iu.orm.queryll2.symbolic.MethodSignature;
+import ch.epfl.labos.iu.orm.queryll2.symbolic.TypedValueVisitorException;
 import gen.model.Seq.Next;
 import gen.model.Seq.repositories.NextRepository;
 import gen.model.calc.Info;
@@ -19,12 +22,17 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.*;
 import org.revenj.postgres.jinq.JinqMetaModel;
+import org.revenj.postgres.jinq.jpqlquery.*;
+import org.revenj.postgres.jinq.transform.MethodHandlerVirtual;
+import org.revenj.postgres.jinq.transform.SymbExPassDown;
+import org.revenj.postgres.jinq.transform.SymbExToColumns;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TestQuery extends Setup {
@@ -453,17 +461,31 @@ public class TestQuery extends Setup {
 		Assert.assertEquals(article1.getID(), list.get(1).getID());
 	}
 
-	//query to complex for JINQ
-	//@Test
+	//query too complex for JINQ, fallback to DSL Platform expression
+	@Test
 	public void queryWithComplexSpecification() throws IOException, NoSuchMethodException {
 		ServiceLocator locator = container;
 		AnalysisGridRepository analysisGridRepository =
 				locator.resolve(AnalysisGridRepository.class);
 
-		Optional<AnalysisGrid> results =
-				analysisGridRepository
-					.query(new AnalysisGrid.filterSearch())
-					.findFirst();
+		AnalysisGrid.filterSearch filter = new AnalysisGrid.filterSearch();
+		Optional<AnalysisGrid> results = analysisGridRepository.query(it -> true).filter(filter::test).findFirst();
+		Assert.assertNotNull(results);
+	}
+
+	//query too complex for JINQ, fallback to DSL Platform expression
+	@Test
+	public void queryWithComplexSpecificationInCube() throws IOException, NoSuchMethodException {
+		ServiceLocator locator = container;
+
+		CompositeCube cube = new CompositeCube(locator);
+		CompositeList.ForSimple filter = new CompositeList.ForSimple();
+		List<Map<String, Object>> results =
+				cube.analyze(
+						Collections.singletonList(CompositeCube.number),
+						null,
+						filter::test);
+
 		Assert.assertNotNull(results);
 	}
 
