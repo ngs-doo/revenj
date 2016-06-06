@@ -15,7 +15,7 @@ which makes a basics for mapping to simple POJO objects.
 ####Data sources
 
 Revenj uses a convention based naming for data types. 
-Convention states that entities are read from `_entity` view, snowflakes are read from `_snowflake` view. 
+Convention states that entities are read from `_entity` view, while snowflakes are read from view with the same name. 
 So if we have a simple DSL:
 
     module Todo {
@@ -31,7 +31,7 @@ So if we have a simple DSL:
       }
     }
 
-this means Revenj will expect a `"Todo"."Task_entity"` view and a `"Todo"."TaskList_snowflake"` view for those two data sources. 
+this means Revenj will expect a `"Todo"."Task_entity"` view and a `"Todo"."TaskList"` view for those two data sources. 
 DSL Platform will therefore create table `"Todo"."Task"` and expected views. 
 So when we do a query in Revenj such as:
 
@@ -50,7 +50,7 @@ In the above example `closedTask` projection will be converted to:
 The query will be executed at the time of `Query` materialization, such as calling a `.list()` on it.
 The second query will be converted to something like:
 
-    SELECT COUNT(*) FROM "Todo"."TaskList_snowflake" t
+    SELECT COUNT(*) FROM "Todo"."TaskList" t
 
 since count result operator was used.
 
@@ -62,7 +62,7 @@ Since Revenj always works with the whole object from the database (DB and code m
 
 ####Provider extensibility
 
-JINQ provider was built with extensibility in mind, so in case of a missing feature/conversion or a bad SQL, it's rather easy to add specialized code for dealing with such scenario. Default extensibility is defined as service registration in appropriate Java file [plugins](https://github.com/ngs-doo/revenj/blob/master/java/revenj-core/src/main/resources/META-INF/services/org.revenj.postgres.jinq.transform.MethodHandlerVirtual). For example String.substring method, is implemented in SubstringHandler as [handle method](https://github.com/ngs-doo/revenj/blob/master/java/revenj-core/src/main/java/org/revenj/postgres/jinq/transform/handlers/SubstringHandler.java#L26). It's enough to add a jar which exports supported signatures via [Service loader](https://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html) to import new behavior into Revenj.
+JINQ provider was built with extensibility in mind, so in case of a missing feature/conversion or a bad SQL, it's rather easy to add specialized code for dealing with such scenario. Default extensibility is defined as service registration in appropriate Java file [plugins](https://github.com/ngs-doo/revenj/blob/master/java/revenj-core/src/main/resources/META-INF/services/org.revenj.database.postgres.jinq.transform.MethodHandlerVirtual). For example String.substring method, is implemented in SubstringHandler as [handle method](https://github.com/ngs-doo/revenj/blob/master/java/revenj-core/src/main/java/org/revenj/database/postgres/jinq/transform/handlers/SubstringHandler.java#L26). It's enough to add a jar which exports supported signatures via [Service loader](https://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html) to import new behavior into Revenj.
 
 ####Support for complex queries
 

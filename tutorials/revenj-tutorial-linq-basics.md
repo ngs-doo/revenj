@@ -20,7 +20,7 @@ It basically allows us to map SQL queries to almost LINQ like expressions, inste
 
 ####Data sources
 
-Revenj uses a convention based naming for data types, but this can be overridden with a custom name attribute. Convention states that entities are read from `_entity` view, snowflakes are read from `_snowflake` view (Oracles uses uppercase naming convention). So if we have a simple DSL:
+Revenj uses a convention based naming for data types, but this can be overridden with a custom name attribute. Convention states that entities are read from `_entity` view (Oracles uses uppercase naming convention), while snowflakes are read from view with same name. So if we have a simple DSL:
 
     module Todo {
       aggregate Task {
@@ -35,7 +35,7 @@ Revenj uses a convention based naming for data types, but this can be overridden
       }
     }
 
-this means Revenj will expect a `"Todo"."Task_entity"` view and a `"Todo"."TaskList_snowflake"` view for those two data sources. DSL Platform will therefore create table `"Todo"."Task"` and expected views. So when we do a query in Revenj such as:
+this means Revenj will expect a `"Todo"."Task_entity"` view and a `"Todo"."TaskList"` view for those two data sources. DSL Platform will therefore create table `"Todo"."Task"` and expected views. So when we do a query in Revenj such as:
 
     IDataContext ctx = ...
     IQueryable<Task> closedTasks = ctx.Query<Task>().Where(t => t.closed != null);
@@ -48,7 +48,7 @@ we will get a projection to specified views. By applying filters to `IQueryable`
 The query will be executed at the time of `IQueryable` materialization, such as calling a `.ToList()` on it.
 The second query will be converted to something like:
 
-    SELECT COUNT(*)::int FROM "Todo"."TaskList_snowflake" t
+    SELECT COUNT(*)::int FROM "Todo"."TaskList" t
 
 since count result operator was used. To define read-only data source, SQL concept can be used, such as:
 
