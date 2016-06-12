@@ -123,4 +123,11 @@ public class TestPostgres {
 			Assert.assertTrue(ex.getMessage().contains("Number of expected parts: 2"));
 		}
 	}
+
+	@Test
+	public void compositeUriCheck() throws IOException {
+		StringBuilder sb = new StringBuilder();
+		PostgresWriter.writeCompositeUri(sb, "ab\\\\cd/de''fg");
+		Assert.assertEquals("('ab\\cd','de''''fg')", sb.toString());
+	}
 }
