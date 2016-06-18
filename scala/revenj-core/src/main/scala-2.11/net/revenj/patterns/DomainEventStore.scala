@@ -7,6 +7,7 @@ trait DomainEventStore[T <: DomainEvent] {
   def submit(events: Seq[T]): Future[IndexedSeq[String]]
 
   def submit(event: T): Future[String] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
     require(event ne null, "null value provided for event")
     submit(Seq(event)).map(_.head)
   }

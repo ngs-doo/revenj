@@ -25,6 +25,7 @@ trait Repository[T <: Identifiable] {
     * @return future to found domain object
     */
   def find(uri: String): Future[Option[T]] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
     require(uri ne null, "null value provided for URI")
     find(Seq(uri)).map(_.headOption)
   }

@@ -17,4 +17,12 @@ trait ServiceLocator {
     * @return registered implementation
     */
   def resolve[T: TypeTag]: T
+
+  def tryResolve[T: TypeTag]: Option[T] = {
+    try {
+      Some(resolve[T])
+    } catch {
+      case _: Throwable => None
+    }
+  }
 }

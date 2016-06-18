@@ -43,7 +43,7 @@ object OlapCubeQuery {
 
   //TODO: pimp for builder
 
-  private class OlapCubeQueryBuilder[T](query: OlapCubeQuery[T]) {
+  private class OlapCubeQueryBuilder[T <: DataSource](query: OlapCubeQuery[T]) {
     private val dimensions = ArrayBuffer.newBuilder[String]
     private val facts = ArrayBuffer.newBuilder[String]
     private var resultLimit: Option[Int] = None

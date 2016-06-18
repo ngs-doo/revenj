@@ -5,7 +5,7 @@ import net.revenj.patterns.ServiceLocator
 import scala.reflect.runtime.universe.TypeTag
 
 trait Container extends ServiceLocator {
-  def registerClass[T: TypeTag](manifest: Class[T], singleton: Boolean)
+  def registerClass[T <: S, S](singleton: Boolean)(implicit tt: TypeTag[T], ts: TypeTag[S])
 
   def registerInstance[T: TypeTag](service: T, handleClose: Boolean)
 
