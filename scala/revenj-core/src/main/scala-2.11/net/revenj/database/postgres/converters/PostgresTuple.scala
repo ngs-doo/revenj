@@ -20,8 +20,7 @@ trait PostgresTuple {
       sw.write('\'')
       insertRecord(sw, "", PostgresTuple.QUOTES)
       sw.write('\'')
-    }
-    else insertRecord(sw, "", null)
+    } else insertRecord(sw, "", null)
   }
 
   def buildTuple(quote: Boolean): String = {
@@ -52,8 +51,7 @@ object PostgresTuple {
     val mustEscapeRecord = false
     val mustEscapeArray = false
 
-    def insertRecord(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
-    }
+    def insertRecord(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {}
 
     override def insertArray(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
       writer.write("NULL")

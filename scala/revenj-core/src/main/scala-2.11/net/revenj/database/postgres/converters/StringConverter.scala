@@ -42,8 +42,7 @@ object StringConverter extends Converter[String] {
             } else {
               cur = reader.read(context)
             }
-          }
-          else cur = reader.read()
+          } else cur = reader.read()
         }
         if (cur == -1) {
           throw new IOException("Unable to find end of string")

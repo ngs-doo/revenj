@@ -30,8 +30,7 @@ class ValueTuple(value: String, hasMarkers: Boolean, val mustEscapeRecord: Boole
               m(sw, slashEscape.charAt(x))
               x += 1
             }
-          }
-          else m(sw, c)
+          } else m(sw, c)
           i += 1
         }
       case _ =>
@@ -85,8 +84,7 @@ object ValueTuple {
 
     val mustEscapeArray = true
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
-    }
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {}
 
     override def buildTuple(quote: Boolean): String = if (quote) "'\"\"'" else "\"\""
   }

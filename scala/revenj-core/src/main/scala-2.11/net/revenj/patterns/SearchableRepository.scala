@@ -31,7 +31,6 @@ trait SearchableRepository[T <: DataSource] {
     */
   def count(specification: Option[Specification[T]] = None): Future[Long]
 
-
   /** Check if any element satisfying provided specification exists.
     *
     * @param specification search predicate

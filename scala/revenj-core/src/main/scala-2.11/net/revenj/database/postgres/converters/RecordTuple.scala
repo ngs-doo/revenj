@@ -24,8 +24,7 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
         sw.write('"')
         p.insertRecord(sw, "1", mappings)
         sw.write('"')
-      }
-      else p.insertRecord(sw, "", mappings)
+      } else p.insertRecord(sw, "", mappings)
     }
     var i = 1
     while (i < properties.length) {
@@ -36,8 +35,7 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
           sw.write('"')
           p.insertRecord(sw, "1", mappings)
           sw.write('"')
-        }
-        else p.insertRecord(sw, "", mappings)
+        } else p.insertRecord(sw, "", mappings)
       }
       i += 1
     }
@@ -68,8 +66,7 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
         mapQuote()
         p.insertRecord(sw, newEscaping, mappings)
         mapQuote()
-      }
-      else p.insertRecord(sw, escaping, mappings)
+      } else p.insertRecord(sw, escaping, mappings)
     }
     var i = 1
     while (i < properties.length) {
@@ -80,8 +77,7 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
           mapQuote()
           p.insertRecord(sw, newEscaping, mappings)
           mapQuote()
-        }
-        else p.insertRecord(sw, escaping, mappings)
+        } else p.insertRecord(sw, escaping, mappings)
       }
       i += 1
     }
@@ -120,8 +116,7 @@ object RecordTuple {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
-    }
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {}
 
     override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
       sw.write("NULL")
@@ -129,5 +124,4 @@ object RecordTuple {
 
     override def buildTuple(quote: Boolean): String = "NULL"
   }
-
 }

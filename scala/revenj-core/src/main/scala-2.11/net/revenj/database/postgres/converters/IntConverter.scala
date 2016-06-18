@@ -102,5 +102,4 @@ object IntConverter extends Converter[Int] {
       value.toString
     }
   }
-
 }

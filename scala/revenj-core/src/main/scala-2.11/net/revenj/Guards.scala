@@ -3,22 +3,22 @@ package net.revenj
 import scala.collection.GenTraversableLike
 import scala.collection.generic.CanBuildFrom
 
-object Guards{
+object Guards {
 
-	def checkCollectionNulls[T <: AnyRef](values: Traversable[T]) {
-		if (values ne null) {
-			var i = 0
-			val iterator = values.toIterator
-			while (iterator.hasNext) {
-				if (iterator.next() eq null) {
-					throw new IllegalArgumentException("Null value found at index \"" + i + "\".")
-				}
-				i += 1
-			}
-		}
-	}
+  def checkCollectionNulls[T <: AnyRef](values: Traversable[T]) {
+    if (values ne null) {
+      var i = 0
+      val iterator = values.toIterator
+      while (iterator.hasNext) {
+        if (iterator.next() eq null) {
+          throw new IllegalArgumentException("Null value found at index \"" + i + "\".")
+        }
+        i += 1
+      }
+    }
+  }
 
-	def checkArrayNulls[T <: AnyRef](values: Array[T]) {
+  def checkArrayNulls[T <: AnyRef](values: Array[T]) {
     if (values ne null) {
       var i = 0
       while (i < values.length) {
@@ -30,15 +30,15 @@ object Guards{
     }
   }
 
-	def checkCollectionNulls[T <: AnyRef](values: Option[Traversable[T]]) {
+  def checkCollectionNulls[T <: AnyRef](values: Option[Traversable[T]]) {
     if ((values ne null) && values.isDefined) checkCollectionNulls(values.get)
   }
 
-	def checkArrayNulls[T <: AnyRef](values: Option[Array[T]]) {
+  def checkArrayNulls[T <: AnyRef](values: Option[Array[T]]) {
     if ((values ne null) && values.isDefined) checkArrayNulls(values.get)
   }
 
-	def checkCollectionOptionRefNulls[T <: AnyRef](values: Traversable[Option[T]]) {
+  def checkCollectionOptionRefNulls[T <: AnyRef](values: Traversable[Option[T]]) {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
@@ -52,7 +52,7 @@ object Guards{
     }
   }
 
-	def checkArrayOptionRefNulls[T <: AnyRef](values: Array[Option[T]]) {
+  def checkArrayOptionRefNulls[T <: AnyRef](values: Array[Option[T]]) {
     if (values ne null) {
       var i = 0
       while (i < values.length) {
@@ -65,7 +65,7 @@ object Guards{
     }
   }
 
-	def checkCollectionOptionValNulls[T <: AnyVal](values: Traversable[Option[T]]) {
+  def checkCollectionOptionValNulls[T <: AnyVal](values: Traversable[Option[T]]) {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
@@ -78,7 +78,7 @@ object Guards{
     }
   }
 
-	def checkArrayOptionValNulls[T <: AnyVal](values: Array[Option[T]]) {
+  def checkArrayOptionValNulls[T <: AnyVal](values: Array[Option[T]]) {
     if (values ne null) {
       var i = 0
       while (i < values.length) {
@@ -90,23 +90,23 @@ object Guards{
     }
   }
 
-	def checkCollectionOptionRefNulls[T <: AnyRef](values: Option[Traversable[Option[T]]]) {
+  def checkCollectionOptionRefNulls[T <: AnyRef](values: Option[Traversable[Option[T]]]) {
     if ((values ne null) && values.isDefined) checkCollectionOptionRefNulls(values.get)
   }
 
-	def checkArrayOptionRefNulls[T <: AnyRef](values: Option[Array[Option[T]]]) {
+  def checkArrayOptionRefNulls[T <: AnyRef](values: Option[Array[Option[T]]]) {
     if ((values ne null) && values.isDefined) checkArrayOptionRefNulls(values.get)
   }
 
-	def checkCollectionOptionValNulls[T <: AnyVal](values: Option[Traversable[Option[T]]]) {
+  def checkCollectionOptionValNulls[T <: AnyVal](values: Option[Traversable[Option[T]]]) {
     if ((values ne null) && values.isDefined) checkCollectionOptionValNulls(values.get)
   }
 
-	def checkArrayOptionValNulls[T <: AnyVal](values: Option[Array[Option[T]]]) {
+  def checkArrayOptionValNulls[T <: AnyVal](values: Option[Array[Option[T]]]) {
     if ((values ne null) && values.isDefined) checkArrayOptionValNulls(values.get)
   }
-			
-	def checkScale(value: BigDecimal, scale: Int) {
+
+  def checkScale(value: BigDecimal, scale: Int) {
     if (value ne null) {
       try {
         value.setScale(scale)
@@ -117,11 +117,11 @@ object Guards{
     }
   }
 
-	def checkScale(value: Option[BigDecimal], scale: Int) {
+  def checkScale(value: Option[BigDecimal], scale: Int) {
     if ((value ne null) && value.isDefined) checkScale(value.get, scale)
   }
 
-	def checkCollectionScale(values: Traversable[BigDecimal], scale: Int) {
+  def checkCollectionScale(values: Traversable[BigDecimal], scale: Int) {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
@@ -140,7 +140,7 @@ object Guards{
     }
   }
 
-	def checkArrayScale(values: Array[BigDecimal], scale: Int) {
+  def checkArrayScale(values: Array[BigDecimal], scale: Int) {
     if (values ne null) {
       var i = 0
       while (i < values.length) {
@@ -158,7 +158,7 @@ object Guards{
     }
   }
 
-	def checkCollectionOptionScale(values: Traversable[Option[BigDecimal]], scale: Int) {
+  def checkCollectionOptionScale(values: Traversable[Option[BigDecimal]], scale: Int) {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
@@ -178,7 +178,7 @@ object Guards{
     }
   }
 
-	def checkArrayOptionScale(values: Array[Option[BigDecimal]], scale: Int) {
+  def checkArrayOptionScale(values: Array[Option[BigDecimal]], scale: Int) {
     if (values ne null) {
       var i = 0
       while (i < values.length) {
@@ -197,23 +197,23 @@ object Guards{
     }
   }
 
-	def checkCollectionScale(values: Option[Traversable[BigDecimal]], scale: Int) {
+  def checkCollectionScale(values: Option[Traversable[BigDecimal]], scale: Int) {
     if ((values ne null) && values.isDefined) checkCollectionScale(values.get, scale)
   }
 
-	def checkArrayScale(values: Option[Array[BigDecimal]], scale: Int) {
+  def checkArrayScale(values: Option[Array[BigDecimal]], scale: Int) {
     if ((values ne null) && values.isDefined) checkArrayScale(values.get, scale)
   }
 
-	def checkCollectionOptionScale(values: Option[Traversable[Option[BigDecimal]]], scale: Int) {
+  def checkCollectionOptionScale(values: Option[Traversable[Option[BigDecimal]]], scale: Int) {
     if ((values ne null) && values.isDefined) checkCollectionOptionScale(values.get, scale)
   }
 
-	def checkArrayOptionScale(values: Option[Array[Option[BigDecimal]]], scale: Int) {
+  def checkArrayOptionScale(values: Option[Array[Option[BigDecimal]]], scale: Int) {
     if ((values ne null) && values.isDefined) checkArrayOptionScale(values.get, scale)
   }
 
-	def setScale(value: BigDecimal, scale: Int): BigDecimal = {
+  def setScale(value: BigDecimal, scale: Int): BigDecimal = {
     if (value ne null) {
       value.setScale(scale, BigDecimal.RoundingMode.HALF_UP)
     } else {
@@ -221,7 +221,7 @@ object Guards{
     }
   }
 
-	def setScale(value: Option[BigDecimal], scale: Int): Option[BigDecimal] = {
+  def setScale(value: Option[BigDecimal], scale: Int): Option[BigDecimal] = {
     if ((value ne null) && value.isDefined) {
       Some(setScale(value.get, scale))
     } else {
@@ -229,7 +229,7 @@ object Guards{
     }
   }
 
-	def setCollectionScale[That, Repr](values: GenTraversableLike[BigDecimal, Repr], scale: Int)(implicit bf: CanBuildFrom[Repr, BigDecimal, That]): That = {
+  def setCollectionScale[That, Repr](values: GenTraversableLike[BigDecimal, Repr], scale: Int)(implicit bf: CanBuildFrom[Repr, BigDecimal, That]): That = {
     if (values != null) {
       val builder = bf()
       val iterator = values.toIterator
@@ -242,7 +242,7 @@ object Guards{
     }
   }
 
-	def setArrayScale(values: Array[BigDecimal], scale: Int): Array[BigDecimal] = {
+  def setArrayScale(values: Array[BigDecimal], scale: Int): Array[BigDecimal] = {
     if (values ne null) {
       val buffer = new Array[BigDecimal](values.length)
       var i = 0
@@ -256,20 +256,20 @@ object Guards{
     }
   }
 
-	def setCollectionOptionScale[That, Repr](values: GenTraversableLike[Option[BigDecimal], Repr], scale: Int)(implicit bf: CanBuildFrom[Repr, Option[BigDecimal], That]): That = {
-		if (values != null) {
-			val builder = bf()
-			val iterator = values.toIterator
-			while (iterator.hasNext) {
-				builder += setScale(iterator.next(), scale)
-			}
-			builder.result
-		} else {
-			values.asInstanceOf[That]
-		}
-	}
+  def setCollectionOptionScale[That, Repr](values: GenTraversableLike[Option[BigDecimal], Repr], scale: Int)(implicit bf: CanBuildFrom[Repr, Option[BigDecimal], That]): That = {
+    if (values != null) {
+      val builder = bf()
+      val iterator = values.toIterator
+      while (iterator.hasNext) {
+        builder += setScale(iterator.next(), scale)
+      }
+      builder.result
+    } else {
+      values.asInstanceOf[That]
+    }
+  }
 
-	def setArrayOptionScale(values: Array[Option[BigDecimal]], scale: Int): Array[Option[BigDecimal]] = {
+  def setArrayOptionScale(values: Array[Option[BigDecimal]], scale: Int): Array[Option[BigDecimal]] = {
     if (values ne null) {
       val buffer = new Array[Option[BigDecimal]](values.length)
       var i = 0
@@ -283,7 +283,7 @@ object Guards{
     }
   }
 
-	def setCollectionScale[That, Repr](values: Option[GenTraversableLike[BigDecimal, Repr]], scale: Int)(implicit bf: CanBuildFrom[Repr, BigDecimal, That]): Option[That] = {
+  def setCollectionScale[That, Repr](values: Option[GenTraversableLike[BigDecimal, Repr]], scale: Int)(implicit bf: CanBuildFrom[Repr, BigDecimal, That]): Option[That] = {
     if ((values ne null) && values.isDefined) {
       Some(setCollectionScale(values.get, scale))
     } else {
@@ -291,7 +291,7 @@ object Guards{
     }
   }
 
-	def setArrayScale(values: Option[Array[BigDecimal]], scale: Int): Option[Array[BigDecimal]] = {
+  def setArrayScale(values: Option[Array[BigDecimal]], scale: Int): Option[Array[BigDecimal]] = {
     if ((values ne null) && values.isDefined) {
       Some(setArrayScale(values.get, scale))
     } else {
@@ -299,33 +299,33 @@ object Guards{
     }
   }
 
-	def setCollectionOptionScale[That, Repr](values: Option[GenTraversableLike[Option[BigDecimal], Repr]], scale: Int)(implicit bf: CanBuildFrom[Repr, Option[BigDecimal], That]): Option[That] = {
-		if ((values ne null) && values.isDefined) {
-			Some(setCollectionOptionScale(values.get, scale))
-		} else {
-			values.asInstanceOf[Option[That]]
-		}
-	}
+  def setCollectionOptionScale[That, Repr](values: Option[GenTraversableLike[Option[BigDecimal], Repr]], scale: Int)(implicit bf: CanBuildFrom[Repr, Option[BigDecimal], That]): Option[That] = {
+    if ((values ne null) && values.isDefined) {
+      Some(setCollectionOptionScale(values.get, scale))
+    } else {
+      values.asInstanceOf[Option[That]]
+    }
+  }
 
-	def setArrayOptionScale(values: Option[Array[Option[BigDecimal]]], scale: Int): Option[Array[Option[BigDecimal]]] = {
-		if ((values ne null) && values.isDefined) {
-			Some(setArrayOptionScale(values.get, scale))
-		} else {
-			values
-		}
-	}
+  def setArrayOptionScale(values: Option[Array[Option[BigDecimal]]], scale: Int): Option[Array[Option[BigDecimal]]] = {
+    if ((values ne null) && values.isDefined) {
+      Some(setArrayOptionScale(values.get, scale))
+    } else {
+      values
+    }
+  }
 
-	def checkLength(value: String, length: Int) {
+  def checkLength(value: String, length: Int) {
     if ((value ne null) && value.length > length) {
       throw new IllegalArgumentException("Maximum length allowed: " + length + ". Value: " + value)
     }
   }
 
-	def checkLength(value: Option[String], length: Int) {
+  def checkLength(value: Option[String], length: Int) {
     if ((value ne null) && value.isDefined) checkLength(value.get, length)
   }
 
-	def checkCollectionLength(values: Traversable[String], length: Int) {
+  def checkCollectionLength(values: Traversable[String], length: Int) {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
@@ -339,7 +339,7 @@ object Guards{
     }
   }
 
-	def checkArrayLength(values: Array[String], length: Int) {
+  def checkArrayLength(values: Array[String], length: Int) {
     if (values ne null) {
       var i = 0
       while (i < values.length) {
@@ -352,7 +352,7 @@ object Guards{
     }
   }
 
-	def checkCollectionOptionLength(values: Traversable[Option[String]], length: Int) {
+  def checkCollectionOptionLength(values: Traversable[Option[String]], length: Int) {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
@@ -369,7 +369,7 @@ object Guards{
     }
   }
 
-	def checkArrayOptionLength(values: Array[Option[String]], length: Int) {
+  def checkArrayOptionLength(values: Array[Option[String]], length: Int) {
     if (values ne null) {
       var i = 0
       while (i < values.length) {
@@ -385,20 +385,19 @@ object Guards{
     }
   }
 
-	def checkCollectionLength(values: Option[Traversable[String]], length: Int) {
+  def checkCollectionLength(values: Option[Traversable[String]], length: Int) {
     if ((values ne null) && values.isDefined) checkCollectionLength(values.get, length)
   }
 
-	def checkArrayLength(values: Option[Array[String]], length: Int) {
+  def checkArrayLength(values: Option[Array[String]], length: Int) {
     if ((values ne null) && values.isDefined) checkArrayLength(values.get, length)
   }
 
-	def checkCollectionOptionLength(values: Option[Traversable[Option[String]]], length: Int) {
+  def checkCollectionOptionLength(values: Option[Traversable[Option[String]]], length: Int) {
     if ((values ne null) && values.isDefined) checkCollectionOptionLength(values.get, length)
   }
 
-	def checkArrayOptionLength(values: Option[Array[Option[String]]], length: Int) {
+  def checkArrayOptionLength(values: Option[Array[Option[String]]], length: Int) {
     if ((values ne null) && values.isDefined) checkArrayOptionLength(values.get, length)
   }
-
 }

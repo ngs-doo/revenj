@@ -62,7 +62,7 @@ trait PersistableRepository[T <: AggregateRoot]
     * @param update aggregate root to update
     * @return       future for error checking
     */
-  def update(update: T): Future[Unit] =  {
+  def update(update: T): Future[Unit] = {
     import scala.concurrent.ExecutionContext.Implicits.global
     require(update ne null, "null value provided for update")
     persist(Seq.empty, Seq((null.asInstanceOf[T], update)), Seq.empty).map(_ => ())
@@ -74,7 +74,7 @@ trait PersistableRepository[T <: AggregateRoot]
     * @param deletes aggregate roots to delete
     * @return       future for error checking
     */
-  def delete(deletes: Seq[T]): Future[Unit] =  {
+  def delete(deletes: Seq[T]): Future[Unit] = {
     import scala.concurrent.ExecutionContext.Implicits.global
     require(deletes ne null, "null value provided for deletes")
     persist(Seq.empty, Seq.empty, deletes).map(_ => ())

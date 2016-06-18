@@ -25,10 +25,8 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
         sw.write('"')
         e.insertArray(sw, "0", mappings)
         sw.write('"')
-      }
-      else e.insertArray(sw, "", mappings)
-    }
-    else sw.write("NULL")
+      } else e.insertArray(sw, "", mappings)
+    } else sw.write("NULL")
     var i = 1
     while (i < elements.length) {
       sw.write(',')
@@ -38,10 +36,8 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
           sw.write('"')
           e.insertArray(sw, "0", mappings)
           sw.write('"')
-        }
-        else e.insertArray(sw, "", mappings)
-      }
-      else sw.write("NULL")
+        } else e.insertArray(sw, "", mappings)
+      } else sw.write("NULL")
       i += 1
     }
     sw.write('}')
@@ -70,10 +66,8 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
         mapQuote()
         e.insertArray(sw, newEscaping, mappings)
         mapQuote()
-      }
-      else e.insertArray(sw, escaping, mappings)
-    }
-    else sw.write("NULL")
+      } else e.insertArray(sw, escaping, mappings)
+    } else sw.write("NULL")
     var i = 1
     while (i < elements.length) {
       sw.write(',')
@@ -83,10 +77,8 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
           mapQuote()
           e.insertArray(sw, newEscaping, mappings)
           mapQuote()
-        }
-        else e.insertArray(sw, escaping, mappings)
-      }
-      else sw.write("NULL")
+        } else e.insertArray(sw, escaping, mappings)
+      } else sw.write("NULL")
       i += 1
     }
     sw.write('}')
@@ -122,8 +114,7 @@ object ArrayTuple {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
-    }
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {}
 
     override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
       sw.write("NULL")
