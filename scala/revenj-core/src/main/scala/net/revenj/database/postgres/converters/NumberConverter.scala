@@ -75,7 +75,7 @@ object NumberConverter {
   }
 
   def parseLong(number: String): Long = {
-    var value = 0
+    var value = 0L
     if (number.charAt(0) == '-') {
       var i = 1
       while (i < number.length) {
@@ -130,7 +130,7 @@ object NumberConverter {
   }
 
   def serialize(value: Long, buf: Array[Char]): Int = {
-    if (value == Int.MinValue) {
+    if (value == Long.MinValue) {
       "-9223372036854775808".getChars(0, 20, buf, 0)
       0
     } else if (value == 0) {

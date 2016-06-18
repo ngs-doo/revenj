@@ -48,7 +48,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     if (positionInInput >= length) {
       lastChar = -1
     } else {
-      lastChar = input.charAt(positionInInput)
+      lastChar = input.charAt(positionInInput).toInt
       positionInInput += 1
     }
     last
@@ -69,7 +69,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     if (positionInInput >= length) {
       -1
     } else {
-      input.charAt(positionInInput)
+      input.charAt(positionInInput).toInt
     }
   }
 
@@ -251,7 +251,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     if (i == -1) {
       result(0) = uri
     } else {
-      val sb = new StringBuilder
+      val sb = new java.lang.StringBuilder
       sb.append(uri, 0, i)
       while (i < uri.length) {
         val c = uri.charAt(i)
