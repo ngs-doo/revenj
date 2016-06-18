@@ -50,7 +50,7 @@ object OlapCubeQuery {
     private var resultOffset: Option[Int] = None
     private val order = ArrayBuffer.newBuilder[(String, Boolean)]
 
-    def use(dimensionOrFact: String): OlapCubeQueryBuilder[T] = {
+    def use(dimensionOrFact: String): this.type = {
       require(dimensionOrFact ne null, "null value provided for dimension or fact")
       require(dimensionOrFact.length != 0, "empty value provided for dimension or fact")
 
@@ -68,23 +68,23 @@ object OlapCubeQuery {
 
     def descending(result: String): OlapCubeQueryBuilder[T] = orderBy(result, ascending = false)
 
-    private def orderBy(result: String, ascending: Boolean) = {
+    private def orderBy(result: String, ascending: Boolean): this.type = {
       require(query.dimensions.contains(result) || query.facts.contains(result), "Unknown result: " + result + ". Result can be only field from used dimensions and facts.")
       order += result -> ascending
       this
     }
 
-    def take(count: Int): OlapCubeQueryBuilder[T] = limit(count)
+    def take(count: Int) = limit(count)
 
-    def limit(count: Int): OlapCubeQueryBuilder[T] = {
+    def limit(count: Int): this.type = {
       require(count > 0, "Invalid limit value. Limit must be positive")
       resultLimit = Some(count)
       this
     }
 
-    def drop(count: Int): OlapCubeQueryBuilder[T] = offset(count)
+    def drop(count: Int) = offset(count)
 
-    def offset(count: Int): OlapCubeQueryBuilder[T] = {
+    def offset(count: Int): this.type = {
       require(count > 0, "Invalid offset value. Offset must be positive")
       resultOffset = Some(count)
       this
