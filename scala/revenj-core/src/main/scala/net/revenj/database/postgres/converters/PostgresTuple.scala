@@ -11,11 +11,11 @@ trait PostgresTuple {
 
   def insertRecord(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit])
 
-  def insertArray(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+  def insertArray(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     insertRecord(writer, escaping, mappings)
   }
 
-  def buildTuple(sw: PostgresWriter, quote: Boolean) {
+  def buildTuple(sw: PostgresWriter, quote: Boolean): Unit = {
     if (quote) {
       sw.write('\'')
       insertRecord(sw, "", PostgresTuple.QUOTES)
@@ -51,9 +51,9 @@ object PostgresTuple {
     val mustEscapeRecord = false
     val mustEscapeArray = false
 
-    def insertRecord(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {}
+    def insertRecord(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {}
 
-    override def insertArray(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    override def insertArray(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       writer.write("NULL")
     }
   }
@@ -66,14 +66,14 @@ object PostgresTuple {
 
   val QUOTES: Option[(PostgresWriter, Char) => Unit] = Some(escapeQuote)
 
-  protected[converters] def escapeQuote(sw: PostgresWriter, c: Char) {
+  protected[converters] def escapeQuote(sw: PostgresWriter, c: Char): Unit = {
     if (c == '\'') {
       sw.write('\'')
     }
     sw.write(c)
   }
 
-  protected[converters] def escapeBulkCopy(sw: PostgresWriter, c: Char) {
+  protected[converters] def escapeBulkCopy(sw: PostgresWriter, c: Char): Unit = {
     c match {
       case '\\' => sw.write("\\\\")
       case '\t' => sw.write("\\t")

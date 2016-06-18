@@ -46,7 +46,7 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
     sw.toString
   }
 
-  def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+  def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     sw.write('(')
     val newEscaping = escaping + '1'
     lazy val quote = PostgresTuple.buildQuoteEscape(escaping)
@@ -100,11 +100,11 @@ object RecordTuple {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       sw.write("()")
     }
 
-    override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       sw.write("()")
     }
 
@@ -116,9 +116,9 @@ object RecordTuple {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {}
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {}
 
-    override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       sw.write("NULL")
     }
 

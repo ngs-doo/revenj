@@ -9,15 +9,15 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     new PostgresWriter
   }
 
-  def close() {
+  def close(): Unit = {
     position = 0
   }
 
-  def reset() {
+  def reset(): Unit = {
     position = 0
   }
 
-  def write(input: String) {
+  def write(input: String): Unit = {
     val len = input.length
     if (position + len >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + len)
@@ -26,7 +26,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     position += len
   }
 
-  def write(c: Byte) {
+  def write(c: Byte): Unit = {
     if (position == buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2)
     }
@@ -34,7 +34,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     position += 1
   }
 
-  def write(c: Char) {
+  def write(c: Char): Unit = {
     if (position == buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2)
     }
@@ -42,7 +42,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     position += 1
   }
 
-  def write(buf: Array[Char]) {
+  def write(buf: Array[Char]): Unit = {
     if (position + buf.length >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + buf.length)
     }
@@ -54,7 +54,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     position += buf.length
   }
 
-  def write(buf: Array[Char], len: Int) {
+  def write(buf: Array[Char], len: Int): Unit = {
     if (position + len >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + len)
     }
@@ -66,7 +66,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     position += len
   }
 
-  def write(buf: Array[Char], off: Int, end: Int) {
+  def write(buf: Array[Char], off: Int, end: Int): Unit = {
     if (position + end >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + end)
     }
@@ -78,7 +78,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     position += end - off
   }
 
-  def writeBuffer(len: Int) {
+  def writeBuffer(len: Int): Unit = {
     if (position + len >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + len)
     }
@@ -92,7 +92,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
 
   override def toString: String = new String(buffer, 0, position)
 
-  def writeSimpleUriList(sb: StringBuilder, uris: Array[String]) {
+  def writeSimpleUriList(sb: StringBuilder, uris: Array[String]): Unit = {
     sb.append('\'')
     var uri = uris(0)
     var ind = uri.indexOf('\'')
@@ -134,7 +134,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     sb.append('\'')
   }
 
-  def writeSimpleUri(sb: StringBuilder, uri: String) {
+  def writeSimpleUri(sb: StringBuilder, uri: String): Unit = {
     sb.append('\'')
     val ind: Int = uri.indexOf('\'')
     if (ind == -1) {
@@ -154,7 +154,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     sb.append('\'')
   }
 
-  private def findEscapedChar(input: String) = {
+  private def findEscapedChar(input: String): Int = {
     var i = 0
     var escapeAt = -1
     while (escapeAt == -1 && i < input.length) {
@@ -167,7 +167,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     escapeAt
   }
 
-  def writeCompositeUriList(sb: StringBuilder, uris: Array[String]) {
+  def writeCompositeUriList(sb: StringBuilder, uris: Array[String]): Unit = {
     sb.append("('")
     var uri = uris(0)
     var i = 0
@@ -219,7 +219,7 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     sb.append("')")
   }
 
-  def writeCompositeUri(sb: StringBuilder, uri: String) {
+  def writeCompositeUri(sb: StringBuilder, uri: String): Unit = {
     sb.append("('")
     var i = 0
     val ind: Int = findEscapedChar(uri)
@@ -246,32 +246,32 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
 
   def tempBuffer: Array[Char] = tmp
 
-  def initBuffer() {
+  def initBuffer(): Unit = {
     reset()
   }
 
-  def initBuffer(c: Char) {
+  def initBuffer(c: Char): Unit = {
     reset()
     write(c)
   }
 
-  def addToBuffer(c: Char) {
+  def addToBuffer(c: Char): Unit = {
     write(c)
   }
 
-  def addToBuffer(buf: Array[Char]) {
+  def addToBuffer(buf: Array[Char]): Unit = {
     write(buf)
   }
 
-  def addToBuffer(buf: Array[Char], len: Int) {
+  def addToBuffer(buf: Array[Char], len: Int): Unit = {
     write(buf, len)
   }
 
-  def addToBuffer(buf: Array[Char], off: Int, end: Int) {
+  def addToBuffer(buf: Array[Char], off: Int, end: Int): Unit = {
     write(buf, off, end)
   }
 
-  def addToBuffer(input: String) {
+  def addToBuffer(input: String): Unit = {
     write(input)
   }
 

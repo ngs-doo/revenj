@@ -19,7 +19,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
 
   def locator: Option[ServiceLocator] = serviceLocator
 
-  private[postgres] def reset(locator: ServiceLocator) {
+  private[postgres] def reset(locator: ServiceLocator): Unit = {
     positionInBuffer = 0
     positionInInput = 0
     this.serviceLocator = Option(locator)
@@ -29,14 +29,14 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     new PostgresReader(Option(locator))
   }
 
-  def close() {
+  def close(): Unit = {
     length = 0
     positionInBuffer = 0
     positionInInput = 0
     lastChar = -1
   }
 
-  def process(input: String) {
+  def process(input: String): Unit = {
     this.input = input
     this.length = input.length
     positionInInput = 0
@@ -77,16 +77,16 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
 
   def tempBuffer: Array[Char] = tmp
 
-  def initBuffer() {
+  def initBuffer(): Unit = {
     positionInBuffer = 0
   }
 
-  def initBuffer(c: Char) {
+  def initBuffer(c: Char): Unit = {
     positionInBuffer = 1
     buffer(0) = c
   }
 
-  def addToBuffer(c: Char) {
+  def addToBuffer(c: Char): Unit = {
     if (positionInBuffer == buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2)
     }
@@ -94,7 +94,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     positionInBuffer += 1
   }
 
-  def addToBuffer(buf: Array[Char]) {
+  def addToBuffer(buf: Array[Char]): Unit = {
     if (positionInBuffer + buf.length >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + buf.length)
     }
@@ -106,7 +106,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     positionInBuffer += buf.length
   }
 
-  def addToBuffer(buf: Array[Char], len: Int) {
+  def addToBuffer(buf: Array[Char], len: Int): Unit = {
     if (positionInBuffer + len >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + len)
     }
@@ -118,7 +118,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     positionInBuffer += len
   }
 
-  def addToBuffer(buf: Array[Char], offset: Int, end: Int) {
+  def addToBuffer(buf: Array[Char], offset: Int, end: Int): Unit = {
     if (positionInBuffer + end >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + end)
     }
@@ -130,7 +130,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     positionInBuffer += end - offset
   }
 
-  def addToBuffer(input: String) {
+  def addToBuffer(input: String): Unit = {
     val len = input.length
     if (positionInBuffer + len >= buffer.length) {
       buffer = java.util.Arrays.copyOf(buffer, buffer.length * 2 + len)
@@ -140,7 +140,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
   }
 
   @throws[IOException]
-  def fillUntil(c1: Char, c2: Char) {
+  def fillUntil(c1: Char, c2: Char): Unit = {
     var i = 0
     i = positionInInput
     var isEnd = false
@@ -181,7 +181,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
   }
 
   @throws[IOException]
-  def fillTotal(target: Array[Char], offset: Int, count: Int) {
+  def fillTotal(target: Array[Char], offset: Int, count: Int): Unit = {
     var i = 0
     while (i < count) {
       target(i + offset) = input.charAt(positionInInput + i)
@@ -245,7 +245,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
   }
 
   @throws[IOException]
-  def parseCompositeURI(uri: String, result: Array[String]) {
+  def parseCompositeURI(uri: String, result: Array[String]): Unit = {
     var index = 0
     var i = findEscapedChar(uri)
     if (i == -1) {

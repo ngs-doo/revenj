@@ -14,19 +14,19 @@ object NumberConverter {
     arr
   }
 
-  private[converters] def write2(number: Int, buffer: Array[Char], start: Int) {
+  private[converters] def write2(number: Int, buffer: Array[Char], start: Int): Unit = {
     val pair = NUMBERS(number)
     buffer(start) = (pair >> 8).toChar
     buffer(start + 1) = pair.toByte.toChar
   }
 
-  private[converters] def write2(number: Int, sw: PostgresWriter) {
+  private[converters] def write2(number: Int, sw: PostgresWriter): Unit = {
     val pair = NUMBERS(number)
     sw.write((pair >> 8).toChar)
     sw.write(pair.toByte)
   }
 
-  private[converters] def write4(number: Int, buffer: Array[Char], start: Int) {
+  private[converters] def write4(number: Int, buffer: Array[Char], start: Int): Unit = {
     val div = number / 100
     val pair1 = NUMBERS(div)
     buffer(start) = (pair1 >> 8).toChar
@@ -37,7 +37,7 @@ object NumberConverter {
     buffer(start + 3) = pair2.toByte.toChar
   }
 
-  private[converters] def write4(number: Int, sw: PostgresWriter) {
+  private[converters] def write4(number: Int, sw: PostgresWriter): Unit = {
     val div = number / 100
     val pair1 = NUMBERS(div)
     sw.write((pair1 >> 8).toChar)

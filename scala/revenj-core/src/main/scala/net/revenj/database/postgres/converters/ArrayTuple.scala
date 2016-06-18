@@ -11,7 +11,7 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
 
   val mustEscapeArray = true
 
-  override def buildTuple(sw: PostgresWriter, quote: Boolean) {
+  override def buildTuple(sw: PostgresWriter, quote: Boolean): Unit = {
     val mappings = {
       if (quote) {
         sw.write('\'')
@@ -46,7 +46,7 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
     }
   }
 
-  def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+  def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     sw.write('{')
     val newEscaping = escaping + "0"
     lazy val quote = PostgresTuple.buildQuoteEscape(escaping)
@@ -84,7 +84,7 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
     sw.write('}')
   }
 
-  override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+  override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     throw new RuntimeException("Should not happen. Insert array called on array tuple. Nested arrays are invalid construct.")
   }
 }
@@ -98,11 +98,11 @@ object ArrayTuple {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       sw.write("{}")
     }
 
-    override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       throw new RuntimeException("Should not happen. Insert array called on array tuple. Nested arrays are invalid construct.")
     }
 
@@ -114,9 +114,9 @@ object ArrayTuple {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {}
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {}
 
-    override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       sw.write("NULL")
     }
 

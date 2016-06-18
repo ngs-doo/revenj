@@ -3,7 +3,7 @@ package net.revenj.database.postgres.converters
 import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWriter}
 
 object IntConverter extends Converter[Int] {
-  def serializeURI(sw: PostgresBuffer, value: Int) {
+  def serializeURI(sw: PostgresBuffer, value: Int): Unit = {
     if (value == Integer.MIN_VALUE) {
       sw.addToBuffer("-2147483648")
     } else {
@@ -12,7 +12,7 @@ object IntConverter extends Converter[Int] {
     }
   }
 
-  def serializeURI(sw: PostgresBuffer, value: Option[Int]) {
+  def serializeURI(sw: PostgresBuffer, value: Option[Int]): Unit = {
     if (value.isDefined) {
       serializeURI(sw, value.get)
     }
@@ -93,7 +93,7 @@ object IntConverter extends Converter[Int] {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       val offset = NumberConverter.serialize(value, sw.tmp)
       sw.write(sw.tmp, offset, 11)
     }

@@ -10,7 +10,7 @@ class ValueTuple(value: String, hasMarkers: Boolean, val mustEscapeRecord: Boole
     else value
   }
 
-  private def escape(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+  private def escape(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     lazy val quoteEscape = PostgresTuple.buildQuoteEscape(escaping)
     lazy val slashEscape = PostgresTuple.buildSlashEscape(escaping.length)
     mappings match {
@@ -47,7 +47,7 @@ class ValueTuple(value: String, hasMarkers: Boolean, val mustEscapeRecord: Boole
     }
   }
 
-  def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+  def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     if (hasMarkers) escape(sw, escaping, mappings)
     else mappings match {
       case Some(m) =>
@@ -61,7 +61,7 @@ class ValueTuple(value: String, hasMarkers: Boolean, val mustEscapeRecord: Boole
     }
   }
 
-  override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+  override def insertArray(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     if (value == null) sw.write("NULL")
     else if (hasMarkers) escape(sw, escaping, mappings)
     else mappings match {
@@ -84,7 +84,7 @@ object ValueTuple {
 
     val mustEscapeArray = true
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {}
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {}
 
     override def buildTuple(quote: Boolean): String = if (quote) "'\"\"'" else "\"\""
   }
@@ -127,7 +127,7 @@ object ValueTuple {
     else apply(value)
   }
 
-  def apply(value: String, record: Boolean, array: Boolean) {
+  def apply(value: String, record: Boolean, array: Boolean): Unit = {
     new ValueTuple(value, hasMarkers = record || array, record, array)
   }
 }
