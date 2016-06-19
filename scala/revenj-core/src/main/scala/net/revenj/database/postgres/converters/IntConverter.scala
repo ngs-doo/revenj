@@ -46,12 +46,12 @@ object IntConverter extends Converter[Int] {
     if (cur == '-') {
       cur = reader.read()
       do {
-        res = (res << 3) + (res << 1) - (cur - 48)
+        res = (res << 3) + (res << 1) - (cur - '0')
         cur = reader.read()
       } while (cur != -1 && cur != ',' && cur != matchEnd)
     } else {
       do {
-        res = (res << 3) + (res << 1) + (cur - 48)
+        res = (res << 3) + (res << 1) + (cur - '0')
         cur = reader.read()
       } while (cur != -1 && cur != ',' && cur != matchEnd)
     }

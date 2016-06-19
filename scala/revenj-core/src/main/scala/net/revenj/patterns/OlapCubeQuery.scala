@@ -9,34 +9,35 @@ import scala.concurrent.Future
   * Cube can be made from various data sources: aggregates, snowflakes, SQL, LINQ, etc...
   *
   * DSL example:
-  * <pre>
+  * {{{
   * module Finance {
-  * aggregate Payment {
-  * DateTime createdAt { versioning; }
-  * String   account;
-  * Money    total;
-  * calculated Int year from 'it => it.Year';
-  * }
+  *   aggregate Payment {
+  *     Timestamp createdAt { versioning; }
+  *     String    account;
+  *     Money     total;
+  *     calculated Int year from 'it => it.Year';
+  *   }
   *
-  * cube&lt;Payment&gt; Analysis {
-  * dimension account;
-  * dimension year;
-  * count     createdAt;
-  * sum       total;
+  *   cube<Payment> Analysis {
+  *     dimension account;
+  *     dimension year;
+  *     count     createdAt;
+  *     sum       total;
+  *   }
   * }
-  * }
-  * </pre>
+  * }}}
   */
 trait OlapCubeQuery[T <: DataSource] {
   val dimensions: Set[String]
   val facts: Set[String]
 
-  def analyze(dimensions: Seq[String],
-              facts: Seq[String],
-              order: Seq[(String, Boolean)] = Seq.empty,
-              filter: Option[Specification[T]] = None,
-              limit: Option[Int] = None,
-              offset: Option[Int] = None): Future[IndexedSeq[Map[String, Any]]]
+  def analyze(
+      dimensions: Seq[String],
+      facts: Seq[String],
+      order: Seq[(String, Boolean)] = Seq.empty,
+      filter: Option[Specification[T]] = None,
+      limit: Option[Int] = None,
+      offset: Option[Int] = None): Future[IndexedSeq[Map[String, Any]]]
 }
 
 object OlapCubeQuery {

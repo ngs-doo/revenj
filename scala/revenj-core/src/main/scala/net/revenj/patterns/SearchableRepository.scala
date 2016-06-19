@@ -10,7 +10,7 @@ import scala.concurrent.Future
   */
 trait SearchableRepository[T <: DataSource] {
 
-  /** Returns an IndexedSeq of domain objects satisfying {@link Specification[T] specification}
+  /** Returns an IndexedSeq of domain objects satisfying {@link Specification specification}
     * with up to <code>limit</code> results.
     * <code>offset</code> can be used to skip initial results.
     *
