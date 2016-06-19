@@ -7,22 +7,22 @@ import scala.concurrent.Future
   * order, limit and offset using LINQ data will be populated on the server.
   *
   * DSL example:
-  * <pre>
+  * {{{
   * module Blog {
   *   aggregate Post {
-  *     DateTime createdAt { versioning; }
-  *     String   author;
-  *     String   content;
+  *     Timestamp createdAt { versioning; }
+  *     String    author;
+  *     String    content;
   *   }
   *
   *   report FindPosts {
   *     String? byAuthor;
   *     Date?   from;
-  *     Set&lt;Post&gt; postsFromAuthor 'it => it.author == byAuthor' ORDER BY createdAt;
-  *     Array&lt;Task&gt; recentPosts 'it => it.createdAt >= from' LIMIT 20 ORDER BY createdAt DESC;
+  *     Set<Post>   postsFromAuthor 'it => it.author == byAuthor' ORDER BY createdAt;
+  *     Array<Task> recentPosts 'it => it.createdAt >= from' LIMIT 20 ORDER BY createdAt DESC;
   *   }
   * }
-  * </pre>
+  * }}}
   */
 trait Report[T] {
   def populate(locator: ServiceLocator): Future[T]

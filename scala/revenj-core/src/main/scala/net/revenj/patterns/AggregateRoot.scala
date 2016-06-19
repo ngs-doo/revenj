@@ -10,13 +10,13 @@ package net.revenj.patterns
   * identification represented by its URI.
   *
   * DSL example:
-  * <pre>
+  * {{{
   * module Todo {
   *   aggregate Task {
   *     Timestamp  startedAt;
   *     Timestamp? finishedAt;
   *     Int?       priority;
-  *     Seq&lt;Note&gt; notes;
+  *     Seq<Note>  notes;
   *   }
   *
   *   value Note {
@@ -24,6 +24,6 @@ package net.revenj.patterns
   *     String remark;
   *   }
   * }
-  * </pre>
+  * }}}
   */
 trait AggregateRoot extends Identifiable

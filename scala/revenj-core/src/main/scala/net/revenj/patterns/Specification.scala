@@ -10,7 +10,7 @@ package net.revenj.patterns
   * can be used too.
   *
   * DSL example:
-  * <pre>
+  * {{{
   * module Todo {
   *   aggregate Task {
   *     Timestamp createdOn;
@@ -21,7 +21,7 @@ package net.revenj.patterns
   *     }
   *   }
   * }
-  * </pre>
+  * }}}
   *
   * @tparam T domain object on which search will be performed.
   */
