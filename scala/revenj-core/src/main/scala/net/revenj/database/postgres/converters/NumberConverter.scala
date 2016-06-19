@@ -49,15 +49,15 @@ object NumberConverter {
   }
 
   private[converters] def read2(source: Array[Char], start: Int): Int = {
-    val first = source(start) - 48
-    (first << 3) + (first << 1) + source(start + 1) - 48
+    val first = source(start) - '0'
+    (first << 3) + (first << 1) + source(start + 1) - '0'
   }
 
   private[converters] def read4(source: Array[Char], start: Int): Int = {
-    val first = source(start) - 48
-    val second = source(start + 1) - 48
-    val third = source(start + 2) - 48
-    first * 1000 + second * 100 + (third << 3) + (third << 1) + source(start + 3) - 48
+    val first = source(start) - '0'
+    val second = source(start + 1) - '0'
+    val third = source(start + 2) - '0'
+    first * 1000 + second * 100 + (third << 3) + (third << 1) + source(start + 3) - '0'
   }
 
   def tryParsePositiveInt(number: String): Option[Int] = {
@@ -79,13 +79,13 @@ object NumberConverter {
     if (number.charAt(0) == '-') {
       var i = 1
       while (i < number.length) {
-        value = (value << 3) + (value << 2) - number.charAt(i) + '0'
+        value = (value << 3) + (value << 1) - number.charAt(i) + '0'
         i += 1
       }
     } else {
       var i = 0
       while (i < number.length) {
-        value = (value << 3) + (value << 2) + number.charAt(i) - '0'
+        value = (value << 3) + (value << 1) + number.charAt(i) - '0'
         i += 1
       }
     }
@@ -94,7 +94,7 @@ object NumberConverter {
 
   def serialize(value: Int, buf: Array[Char]): Int = {
     if (value == Int.MinValue) {
-      "-2147483648".getChars(0, 10, buf, 0)
+      "-2147483648".getChars(0, 11, buf, 0)
       0
     } else if (value == 0) {
       buf(10) = '0'
@@ -134,12 +134,12 @@ object NumberConverter {
       "-9223372036854775808".getChars(0, 20, buf, 0)
       0
     } else if (value == 0) {
-      buf(20) = '0'
-      20
+      buf(19) = '0'
+      19
     } else {
       var q = 0L
       var r = 0
-      var charPos = 20
+      var charPos = 19
       var offset = 0
       var i = 0L
       if (value < 0) {
@@ -170,7 +170,7 @@ object NumberConverter {
     var res = 0
     var i = start
     while (i < source.length && i != end) {
-      res = res * 10 + (source(i) - 48)
+      res = res * 10 + (source(i) - '0')
       i += 1
     }
     res
