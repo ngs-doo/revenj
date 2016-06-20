@@ -35,7 +35,7 @@ public class ArrayTuple extends PostgresTuple {
 		return new ArrayTuple(elements);
 	}
 
-	static class EmptyArrayTuple extends PostgresTuple {
+	private static class EmptyArrayTuple extends PostgresTuple {
 		public boolean mustEscapeRecord() {
 			return false;
 		}
@@ -57,7 +57,7 @@ public class ArrayTuple extends PostgresTuple {
 		}
 	}
 
-	static class NullTuple extends PostgresTuple {
+	private static class NullTuple extends PostgresTuple {
 		public boolean mustEscapeRecord() {
 			return false;
 		}

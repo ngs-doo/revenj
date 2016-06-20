@@ -23,7 +23,7 @@ public class RecordTuple extends PostgresTuple {
 		return new RecordTuple(properties);
 	}
 
-	static class EmptyRecordTuple extends PostgresTuple {
+	private static class EmptyRecordTuple extends PostgresTuple {
 		public boolean mustEscapeRecord() {
 			return true;
 		}
@@ -45,7 +45,7 @@ public class RecordTuple extends PostgresTuple {
 		}
 	}
 
-	static class NullTuple extends PostgresTuple {
+	private static class NullTuple extends PostgresTuple {
 		public boolean mustEscapeRecord() {
 			return false;
 		}

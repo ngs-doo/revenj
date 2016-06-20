@@ -25,10 +25,6 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     this.serviceLocator = Option(locator)
   }
 
-  def create(locator: ServiceLocator): PostgresReader = {
-    new PostgresReader(Option(locator))
-  }
-
   def close(): Unit = {
     length = 0
     positionInBuffer = 0
@@ -139,7 +135,6 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     positionInBuffer += len
   }
 
-  @throws[IOException]
   def fillUntil(c1: Char, c2: Char): Unit = {
     var i = 0
     i = positionInInput
@@ -158,7 +153,6 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     }
   }
 
-  @throws[IOException]
   def fillUntil(target: Array[Char], offset: Int, c1: Char, c2: Char): Int = {
     var i = positionInInput
     val start = offset
@@ -180,7 +174,6 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     offset - start
   }
 
-  @throws[IOException]
   def fillTotal(target: Array[Char], offset: Int, count: Int): Unit = {
     var i = 0
     while (i < count) {
@@ -200,11 +193,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     }
   }
 
-  trait ConvertToValue[T] {
-    def to(buffer: Array[Char], offset: Int, len: Int): T
-  }
-
-  def bufferToValue[T](converter: ConvertToValue[T]): T = converter.to(buffer, 0, positionInBuffer)
+  def bufferToValue[T](converter: (Array[Char], Int, Int) => T): T = converter(buffer, 0, positionInBuffer)
 
   def bufferMatches(compare: String): Boolean = {
     if (compare.length != positionInBuffer) {
@@ -231,6 +220,12 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     hash.toInt
   }
 
+}
+object PostgresReader {
+  def create(locator: ServiceLocator): PostgresReader = {
+    new PostgresReader(Option(locator))
+  }
+
   private def findEscapedChar(input: String) = {
     var i = 0
     var found = -1
@@ -244,7 +239,6 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     found
   }
 
-  @throws[IOException]
   def parseCompositeURI(uri: String, result: Array[String]): Unit = {
     var index = 0
     var i = findEscapedChar(uri)
@@ -272,4 +266,5 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
       result(index) = sb.toString
     }
   }
+
 }

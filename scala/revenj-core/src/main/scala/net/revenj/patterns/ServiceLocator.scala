@@ -1,6 +1,9 @@
 package net.revenj.patterns
 
+import java.lang.reflect.Type
+
 import scala.reflect.runtime.universe.TypeTag
+import scala.util.Try
 
 /** Service for resolving other services.
   * One locator per project should be used.
@@ -16,13 +19,13 @@ trait ServiceLocator {
     * @tparam T Type info
     * @return registered implementation
     */
-  def resolve[T: TypeTag]: T
-
-  def tryResolve[T: TypeTag]: Option[T] = {
-    try {
-      Some(resolve[T])
-    } catch {
-      case _: Throwable => None
-    }
+  def resolve[T: TypeTag]: T = {
+    val result = tryResolve[T]
+    result.getOrElse(throw result.failed.get)
   }
+
+  def tryResolve[T : TypeTag]: Try[T]
+
+  def resolve(tpe: Type): Try[AnyRef]
+
 }

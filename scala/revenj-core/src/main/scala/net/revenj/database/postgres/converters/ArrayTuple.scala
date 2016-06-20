@@ -135,22 +135,6 @@ object ArrayTuple {
     }
   }
 
-  def create[T](elements: Array[T], converter: T => PostgresTuple): PostgresTuple = {
-    if (elements == null) {
-      NULL
-    } else if (elements.length == 0) {
-      EMPTY
-    } else {
-      val tuples = new Array[PostgresTuple](elements.length)
-      var i = 0
-      while (i < elements.length) {
-        tuples(i) = converter.apply(elements(i))
-        i += 1
-      }
-      new ArrayTuple(tuples)
-    }
-  }
-
   def create[T](elements: Seq[T], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
@@ -168,7 +152,24 @@ object ArrayTuple {
     }
   }
 
-  def parse[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int, Int) => T, default: () => T): Option[ArrayBuffer[T]] = {
+  def createOption[T](elements: Seq[Option[T]], converter: Option[T] => PostgresTuple): PostgresTuple = {
+    if (elements == null) {
+      NULL
+    } else if (elements.isEmpty) {
+      EMPTY
+    } else {
+      val tuples = new Array[PostgresTuple](elements.size)
+      var i = 0
+      val it = elements.iterator
+      while (it.hasNext) {
+        tuples(i) = converter(it.next())
+        i += 1
+      }
+      new ArrayTuple(tuples)
+    }
+  }
+
+  def parse[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int) => T, default: () => T): Option[ArrayBuffer[T]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None
@@ -199,7 +200,7 @@ object ArrayTuple {
             if (innerEscaped) {
               reader.read(arrayContext)
             }
-            result += converter(reader, 0, recordContext)
+            result += converter(reader, recordContext)
             if (innerEscaped) {
               cur = reader.read(arrayContext + 1)
             } else {
@@ -217,7 +218,7 @@ object ArrayTuple {
     }
   }
 
-  def parseOption[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int, Int) => T): Option[ArrayBuffer[Option[T]]] = {
+  def parse[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int) => T): Option[ArrayBuffer[Option[T]]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None
@@ -248,7 +249,7 @@ object ArrayTuple {
             if (innerEscaped) {
               reader.read(arrayContext)
             }
-            result += Some(converter(reader, 0, recordContext))
+            result += Some(converter(reader, recordContext))
             if (innerEscaped) {
               cur = reader.read(arrayContext + 1)
             } else {

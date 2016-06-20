@@ -1,4 +1,4 @@
-package net.revenj.database.postgres.converters
+package net.revenj.database.postgres
 
 case class ColumnInfo(
     typeSchema: String,

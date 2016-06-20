@@ -14,7 +14,7 @@ public interface Container extends ServiceLocator, AutoCloseable {
 
 	void registerFactory(Type type, Function<Container, ?> factory, boolean singleton);
 
-	<T> void registerGenerics(Class<T> container, BiFunction<Container, Type[], T> factory);
+	<T> void registerGenerics(Class<T> manifest, BiFunction<Container, Type[], T> factory);
 
 	default <T> void register(Class<T> manifest, boolean singleton) {
 		registerClass(manifest, manifest, singleton);

@@ -5,10 +5,6 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
   val tmp = new Array[Char](64)
   private var position = 0
 
-  def create(): PostgresWriter = {
-    new PostgresWriter
-  }
-
   def close(): Unit = {
     position = 0
   }
@@ -91,6 +87,49 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
   }
 
   override def toString: String = new String(buffer, 0, position)
+
+  def tempBuffer: Array[Char] = tmp
+
+  def initBuffer(): Unit = {
+    reset()
+  }
+
+  def initBuffer(c: Char): Unit = {
+    reset()
+    write(c)
+  }
+
+  def addToBuffer(c: Char): Unit = {
+    write(c)
+  }
+
+  def addToBuffer(buf: Array[Char]): Unit = {
+    write(buf)
+  }
+
+  def addToBuffer(buf: Array[Char], len: Int): Unit = {
+    write(buf, len)
+  }
+
+  def addToBuffer(buf: Array[Char], off: Int, end: Int): Unit = {
+    write(buf, off, end)
+  }
+
+  def addToBuffer(input: String): Unit = {
+    write(input)
+  }
+
+  def bufferToString(): String = {
+    val result = toString
+    position = 0
+    result
+  }
+}
+
+object PostgresWriter {
+  def create(): PostgresWriter = {
+    new PostgresWriter
+  }
 
   def writeSimpleUriList(sb: StringBuilder, uris: Array[String]): Unit = {
     sb.append('\'')
@@ -244,40 +283,4 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     sb.append("')")
   }
 
-  def tempBuffer: Array[Char] = tmp
-
-  def initBuffer(): Unit = {
-    reset()
-  }
-
-  def initBuffer(c: Char): Unit = {
-    reset()
-    write(c)
-  }
-
-  def addToBuffer(c: Char): Unit = {
-    write(c)
-  }
-
-  def addToBuffer(buf: Array[Char]): Unit = {
-    write(buf)
-  }
-
-  def addToBuffer(buf: Array[Char], len: Int): Unit = {
-    write(buf, len)
-  }
-
-  def addToBuffer(buf: Array[Char], off: Int, end: Int): Unit = {
-    write(buf, off, end)
-  }
-
-  def addToBuffer(input: String): Unit = {
-    write(input)
-  }
-
-  def bufferToString(): String = {
-    val result = toString
-    position = 0
-    result
-  }
 }

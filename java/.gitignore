@@ -12,3 +12,5 @@ out/
 .settings
 
 revenj-core/org.revenj.patterns.DomainEventHandler*
+revenj-core/revenj_container_Registrations*
+revenj-core/org.revenj.extensibility.SystemAspect
