@@ -8,17 +8,17 @@ import java.util.UUID
 import scala.collection.concurrent.TrieMap
 
 object Utils {
-  val MIN_LOCAL_DATE: LocalDate = LocalDate.of(1, 1, 1)
-  val MIN_LOCAL_DATE_TIME: LocalDateTime = LocalDateTime.of(1, 1, 1, 0, 0, 0, 0)
-  val MIN_DATE_TIME: OffsetDateTime = OffsetDateTime.of(MIN_LOCAL_DATE_TIME, ZoneOffset.UTC)
-  val MIN_UUID: UUID = new UUID(0L, 0L)
-  val EMPTY_BINARY: Array[Byte] = new Array[Byte](0)
-  val ZERO_0: BigDecimal = BigDecimal(0).setScale(0)
-  val ZERO_1: BigDecimal = BigDecimal(0).setScale(1)
-  val ZERO_2: BigDecimal = BigDecimal(0).setScale(2)
-  val ZERO_3: BigDecimal = BigDecimal(0).setScale(3)
-  val ZERO_4: BigDecimal = BigDecimal(0).setScale(4)
-  val LOOPBACK: InetAddress = InetAddress.getLoopbackAddress
+  val MIN_LOCAL_DATE = LocalDate.of(1, 1, 1)
+  val MIN_LOCAL_DATE_TIME = LocalDateTime.of(1, 1, 1, 0, 0, 0, 0)
+  val MIN_DATE_TIME = OffsetDateTime.of(MIN_LOCAL_DATE_TIME, ZoneOffset.UTC)
+  val MIN_UUID = new UUID(0L, 0L)
+  val EMPTY_BINARY = new Array[Byte](0)
+  val ZERO_0 = BigDecimal(0).setScale(0)
+  val ZERO_1 = BigDecimal(0).setScale(1)
+  val ZERO_2 = BigDecimal(0).setScale(2)
+  val ZERO_3 = BigDecimal(0).setScale(3)
+  val ZERO_4 = BigDecimal(0).setScale(4)
+  val LOOPBACK = InetAddress.getLoopbackAddress
   private val typeCache = new TrieMap[String, GenericType]
 
   private class GenericType(val name: String, val raw: Type, val arguments: Array[Type]) extends ParameterizedType {

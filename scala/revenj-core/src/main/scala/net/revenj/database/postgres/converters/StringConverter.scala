@@ -5,7 +5,7 @@ import java.io.IOException
 import net.revenj.database.postgres.{PostgresBuffer, PostgresReader}
 
 object StringConverter extends Converter[String] {
-  def serializeURI(sw: PostgresBuffer, value: String): Unit = {
+  override def serializeURI(sw: PostgresBuffer, value: String): Unit = {
     if (value != null) sw.addToBuffer(value)
   }
 
@@ -24,6 +24,7 @@ object StringConverter extends Converter[String] {
   }
 
   val dbName = "varchar"
+  def default() = ""
 
   def skip(reader: PostgresReader, context: Int): Unit = {
     var cur = reader.read()
@@ -51,12 +52,9 @@ object StringConverter extends Converter[String] {
     }
   }
 
-  override def parseRaw(reader: PostgresReader, context: Int, canBeNull: Boolean): String = {
-    val cur = reader.read()
-    if (cur == ',' || cur == ')') {
-      if (canBeNull) null else ""
-    } else if (cur != '"' && cur != '\\') {
-      reader.initBuffer(cur.toChar)
+  override def parseRaw(reader: PostgresReader, start: Int, context: Int): String = {
+    if (start != '"' && start != '\\') {
+      reader.initBuffer(start.toChar)
       reader.fillUntil(',', ')')
       reader.read()
       reader.bufferToString()

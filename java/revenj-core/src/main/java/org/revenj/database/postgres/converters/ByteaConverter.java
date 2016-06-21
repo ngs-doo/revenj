@@ -104,10 +104,10 @@ public abstract class ByteaConverter {
 		return value != null ? new ByteTuple(value) : null;
 	}
 
-	static class ByteTuple extends PostgresTuple {
+	private static class ByteTuple extends PostgresTuple {
 		private final byte[] value;
 
-		public ByteTuple(byte[] value) {
+		ByteTuple(byte[] value) {
 			this.value = value;
 		}
 

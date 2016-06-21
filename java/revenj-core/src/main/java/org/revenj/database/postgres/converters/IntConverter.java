@@ -109,10 +109,10 @@ public abstract class IntConverter {
 		return new IntTuple(value);
 	}
 
-	static class IntTuple extends PostgresTuple {
+	private static class IntTuple extends PostgresTuple {
 		private final int value;
 
-		public IntTuple(int value) {
+		IntTuple(int value) {
 			this.value = value;
 		}
 

@@ -72,11 +72,11 @@ public abstract class EnumConverter {
 		return new EnumTuple(value.name());
 	}
 
-	static class EnumTuple extends PostgresTuple {
+	private static class EnumTuple extends PostgresTuple {
 		private final String value;
 		private final boolean escapeArray;
 
-		public EnumTuple(String value) {
+		EnumTuple(String value) {
 			this.value = value;
 			escapeArray = "NULL".equals(value);
 		}
@@ -91,14 +91,6 @@ public abstract class EnumConverter {
 
 		public String buildTuple(boolean quote) {
 			return quote ? "'" + value + "'" : value;
-		}
-
-		private void escape(PostgresWriter sw, String escaping, Mapping mappings) {
-			if (mappings != null) {
-				for (int x = 0; x < value.length(); x++) {
-					mappings.map(sw, value.charAt(x));
-				}
-			} else sw.write(value);
 		}
 
 		public void insertRecord(PostgresWriter sw, String escaping, Mapping mappings) {

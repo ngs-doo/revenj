@@ -203,10 +203,10 @@ public abstract class UuidConverter {
 		return new UuidTuple(value);
 	}
 
-	static class UuidTuple extends PostgresTuple {
+	private static class UuidTuple extends PostgresTuple {
 		private final UUID value;
 
-		public UuidTuple(UUID value) {
+		UuidTuple(UUID value) {
 			this.value = value;
 		}
 

@@ -108,10 +108,10 @@ public abstract class LongConverter {
 		return new LongTuple(value);
 	}
 
-	static class LongTuple extends PostgresTuple {
+	private static class LongTuple extends PostgresTuple {
 		private final long value;
 
-		public LongTuple(long value) {
+		LongTuple(long value) {
 			this.value = value;
 		}
 

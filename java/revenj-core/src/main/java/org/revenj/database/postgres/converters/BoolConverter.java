@@ -44,8 +44,8 @@ public abstract class BoolConverter {
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur != '{';
-		if (espaced) {
+		boolean escaped = cur != '{';
+		if (escaped) {
 			reader.read(context);
 		}
 		List<Boolean> list = new ArrayList<>();
@@ -66,7 +66,7 @@ public abstract class BoolConverter {
 			}
 			cur = reader.read();
 		}
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();
@@ -83,10 +83,10 @@ public abstract class BoolConverter {
 		return new BoolTuple(value);
 	}
 
-	static class BoolTuple extends PostgresTuple {
+	private static class BoolTuple extends PostgresTuple {
 		private final char value;
 
-		public BoolTuple(boolean value) {
+		BoolTuple(boolean value) {
 			this.value = value ? 't' : 'f';
 		}
 
@@ -107,7 +107,7 @@ public abstract class BoolConverter {
 		}
 
 		public String buildTuple(boolean quote) {
-			return quote ? "'" + value + "'" : Character.toString(value);
+			return quote ? "'" + value + "'" : String.valueOf(value);
 		}
 	}
 }

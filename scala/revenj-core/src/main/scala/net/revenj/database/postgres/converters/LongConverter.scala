@@ -2,24 +2,24 @@ package net.revenj.database.postgres.converters
 
 import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWriter}
 
-object IntConverter extends Converter[Int] {
-  override def serializeURI(sw: PostgresBuffer, value: Int): Unit = {
+object LongConverter extends Converter[Long] {
+  override def serializeURI(sw: PostgresBuffer, value: Long): Unit = {
     if (value == Integer.MIN_VALUE) {
-      sw.addToBuffer("-2147483648")
+      sw.addToBuffer("-9223372036854775808")
     } else {
       val offset = NumberConverter.serialize(value, sw.tempBuffer)
-      sw.addToBuffer(sw.tempBuffer, offset, 11)
+      sw.addToBuffer(sw.tempBuffer, offset, 21)
     }
   }
 
-  val dbName = "int4"
+  val dbName = "int8"
 
-  def default() = 0
+  def default() = 0L
 
-  override def parseRaw(reader: PostgresReader, start: Int, context: Int): Int = parseInt(reader, start, ')')
+  override def parseRaw(reader: PostgresReader, start: Int, context: Int): Long = parseLong(reader, start, ')')
 
-  private def parseInt(reader: PostgresReader, start: Int, matchEnd: Char): Int = {
-    var res = 0
+  private def parseLong(reader: PostgresReader, start: Int, matchEnd: Char): Long = {
+    var res = 0L
     var cur = start
     if (cur == '-') {
       cur = reader.read()
@@ -36,48 +36,48 @@ object IntConverter extends Converter[Int] {
     res
   }
 
-  override def parseCollectionItem(reader: PostgresReader, context: Int): Int = {
+  override def parseCollectionItem(reader: PostgresReader, context: Int): Long = {
     val cur = reader.read()
     if (cur == 'N') {
       reader.read(4)
-      0
+      0L
     } else {
-      parseInt(reader, cur, '}')
+      parseLong(reader, cur, '}')
     }
   }
 
-  override def parseNullableCollectionItem(reader: PostgresReader, context: Int): Option[Int] = {
+  override def parseNullableCollectionItem(reader: PostgresReader, context: Int): Option[Long] = {
     val cur = reader.read()
     if (cur == 'N') {
       reader.read(4)
       None
     } else {
-      Some(parseInt(reader, cur, '}'))
+      Some(parseLong(reader, cur, '}'))
     }
   }
 
-  private val MIN_TUPLE: PostgresTuple = new ValueTuple("-2147483648", false, false, false)
+  private val MIN_TUPLE: PostgresTuple = new ValueTuple("-9223372036854775808", false, false, false)
 
-  override def toTuple(value: Int): PostgresTuple = {
+  override def toTuple(value: Long): PostgresTuple = {
     if (value == Integer.MIN_VALUE) {
       MIN_TUPLE
     } else {
-      new IntTuple(value)
+      new LongTuple(value)
     }
   }
 
-  private class IntTuple(val value: Int) extends PostgresTuple {
+  private class LongTuple(val value: Long) extends PostgresTuple {
     val mustEscapeRecord = false
 
     val mustEscapeArray = false
 
     def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       val offset = NumberConverter.serialize(value, sw.tmp)
-      sw.write(sw.tmp, offset, 11)
+      sw.write(sw.tmp, offset, 21)
     }
 
     override def buildTuple(quote: Boolean): String = {
-      java.lang.Integer.toString(value)
+      java.lang.Long.toString(value)
     }
   }
 

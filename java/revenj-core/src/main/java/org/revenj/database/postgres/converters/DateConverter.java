@@ -123,10 +123,10 @@ public abstract class DateConverter {
 		return new DateTuple(value);
 	}
 
-	static class DateTuple extends PostgresTuple {
+	private static class DateTuple extends PostgresTuple {
 		private final LocalDate value;
 
-		public DateTuple(LocalDate value) {
+		DateTuple(LocalDate value) {
 			this.value = value;
 		}
 

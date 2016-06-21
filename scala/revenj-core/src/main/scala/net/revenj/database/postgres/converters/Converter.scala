@@ -1,21 +1,40 @@
 package net.revenj.database.postgres.converters
 
-import net.revenj.database.postgres.PostgresReader
+import net.revenj.database.postgres.{PostgresBuffer, PostgresReader}
 
 import scala.collection.mutable.ArrayBuffer
 
 trait Converter[T] {
 
   val dbName: String
+  def default(): T
 
-  protected def parseRaw(reader: PostgresReader, context: Int, canBeNull: Boolean): T
+  def serializeURI(sw: PostgresBuffer, value: T): Unit = {
+    sw.addToBuffer(toTuple(value).buildTuple(false))
+  }
 
-  def parse(reader: PostgresReader, context: Int): T = parseRaw(reader, context, canBeNull = false)
+  def parseRaw(reader: PostgresReader, start: Int, context: Int): T
 
-  def parseOption(reader: PostgresReader, context: Int): Option[T] = Option(parseRaw(reader, context, canBeNull = true))
+  def parse(reader: PostgresReader, context: Int): T = {
+    val cur = reader.read()
+    if (cur == ',' || cur == ')') {
+      default()
+    } else {
+      parseRaw(reader, cur, context)
+    }
+  }
 
-  protected def parseCollectionItem(reader: PostgresReader, context: Int): T
-  protected def parseNullableCollectionItem(reader: PostgresReader, context: Int): Option[T]
+  def parseOption(reader: PostgresReader, context: Int): Option[T] = {
+    val cur = reader.read()
+    if (cur == ',' || cur == ')') {
+      None
+    } else {
+      Some(parseRaw(reader, cur, context))
+    }
+  }
+
+  def parseCollectionItem(reader: PostgresReader, context: Int): T
+  def parseNullableCollectionItem(reader: PostgresReader, context: Int): Option[T]
 
   def parseCollection(reader: PostgresReader, context: Int): ArrayBuffer[T] = {
     parseCollectionOption(reader, context).getOrElse(ArrayBuffer.empty[T])

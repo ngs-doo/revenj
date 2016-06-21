@@ -135,7 +135,42 @@ object ArrayTuple {
     }
   }
 
-  def create[T](elements: Seq[T], converter: T => PostgresTuple): PostgresTuple = {
+  def createIndexed[T](elements: IndexedSeq[T], converter: T => PostgresTuple): PostgresTuple = {
+    if (elements == null) {
+      NULL
+    } else if (elements.isEmpty) {
+      EMPTY
+    } else {
+      val tuples = new Array[PostgresTuple](elements.size)
+      var i = 0
+      while (i < elements.size) {
+        tuples(i) = converter(elements(i))
+        i += 1
+      }
+      new ArrayTuple(tuples)
+    }
+  }
+
+  def createIndexedOption[T](elements: IndexedSeq[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
+    if (elements == null) {
+      NULL
+    } else if (elements.isEmpty) {
+      EMPTY
+    } else {
+      val tuples = new Array[PostgresTuple](elements.size)
+      var i = 0
+      while (i < elements.size) {
+        elements(i) match {
+          case Some(el) => tuples(i) = converter(el)
+          case _ => tuples(i) = PostgresTuple.NULL
+        }
+        i += 1
+      }
+      new ArrayTuple(tuples)
+    }
+  }
+
+  def createSeq[T](elements: Seq[T], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
     } else if (elements.isEmpty) {
@@ -152,7 +187,27 @@ object ArrayTuple {
     }
   }
 
-  def createOption[T](elements: Seq[Option[T]], converter: Option[T] => PostgresTuple): PostgresTuple = {
+  def createSeqOption[T](elements: Seq[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
+    if (elements == null) {
+      NULL
+    } else if (elements.isEmpty) {
+      EMPTY
+    } else {
+      val tuples = new Array[PostgresTuple](elements.size)
+      var i = 0
+      val it = elements.iterator
+      while (it.hasNext) {
+        it.next() match {
+          case Some(el) => tuples(i) = converter(el)
+          case _ => tuples(i) = PostgresTuple.NULL
+        }
+        i += 1
+      }
+      new ArrayTuple(tuples)
+    }
+  }
+
+  def createSet[T](elements: Set[T], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
     } else if (elements.isEmpty) {
@@ -163,6 +218,26 @@ object ArrayTuple {
       val it = elements.iterator
       while (it.hasNext) {
         tuples(i) = converter(it.next())
+        i += 1
+      }
+      new ArrayTuple(tuples)
+    }
+  }
+
+  def createSetOption[T](elements: Set[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
+    if (elements == null) {
+      NULL
+    } else if (elements.isEmpty) {
+      EMPTY
+    } else {
+      val tuples = new Array[PostgresTuple](elements.size)
+      var i = 0
+      val it = elements.iterator
+      while (it.hasNext) {
+        it.next() match {
+          case Some(el) => tuples(i) = converter(el)
+          case _ => tuples(i) = PostgresTuple.NULL
+        }
         i += 1
       }
       new ArrayTuple(tuples)
@@ -218,7 +293,7 @@ object ArrayTuple {
     }
   }
 
-  def parse[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int) => T): Option[ArrayBuffer[Option[T]]] = {
+  def parseOption[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int) => T): Option[ArrayBuffer[Option[T]]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None

@@ -36,13 +36,13 @@ public abstract class DecimalConverter {
 		if (cur == ',' || cur == ')') {
 			return null;
 		}
-		boolean espaced = cur != '{';
-		if (espaced) {
+		boolean escaped = cur != '{';
+		if (escaped) {
 			reader.read(context);
 		}
 		cur = reader.peek();
 		if (cur == '}') {
-			if (espaced) {
+			if (escaped) {
 				reader.read(context + 2);
 			} else {
 				reader.read(2);
@@ -61,7 +61,7 @@ public abstract class DecimalConverter {
 				cur = reader.last();
 			}
 		} while (cur == ',');
-		if (espaced) {
+		if (escaped) {
 			reader.read(context + 1);
 		} else {
 			reader.read();
@@ -74,10 +74,10 @@ public abstract class DecimalConverter {
 		return new DecimalTuple(value);
 	}
 
-	static class DecimalTuple extends PostgresTuple {
+	private static class DecimalTuple extends PostgresTuple {
 		private final BigDecimal value;
 
-		public DecimalTuple(BigDecimal value) {
+		DecimalTuple(BigDecimal value) {
 			this.value = value;
 		}
 

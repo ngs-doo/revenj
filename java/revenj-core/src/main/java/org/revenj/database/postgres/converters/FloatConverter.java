@@ -97,10 +97,10 @@ public abstract class FloatConverter {
 		return value == null ? null : new FloatTuple(value);
 	}
 
-	static class FloatTuple extends PostgresTuple {
+	private static class FloatTuple extends PostgresTuple {
 		private final float value;
 
-		public FloatTuple(float value) {
+		FloatTuple(float value) {
 			this.value = value;
 		}
 

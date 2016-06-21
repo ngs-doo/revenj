@@ -38,6 +38,7 @@ class GlobalEventStore implements Closeable {
 		eventQueue.add(domainEvent);
 	}
 
+	@SuppressWarnings("unchecked")
 	private class WaitForEvents implements Runnable {
 		@Override
 		public void run() {

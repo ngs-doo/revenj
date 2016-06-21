@@ -97,10 +97,10 @@ public abstract class DoubleConverter {
 		return value == null ? null : new DoubleTuple(value);
 	}
 
-	static class DoubleTuple extends PostgresTuple {
+	private static class DoubleTuple extends PostgresTuple {
 		private final double value;
 
-		public DoubleTuple(double value) {
+		DoubleTuple(double value) {
 			this.value = value;
 		}
 
