@@ -273,7 +273,7 @@ final class SimpleContainer implements Container {
 						args[i] = tryResolve(nestedInfo.genericArguments[0], caller);
 					} else {
 						Map<Type, Type> nestedMappings = new HashMap<>(typeInfo.mappings);
-						for (Map.Entry<Type, Type> entry : typeInfo.mappings.entrySet()) {
+						for (Map.Entry<Type, Type> entry : nestedInfo.mappings.entrySet()) {
 							Type parentValue = nestedMappings.get(entry.getValue());
 							nestedMappings.put(entry.getKey(), parentValue != null ? parentValue : entry.getValue());
 						}
