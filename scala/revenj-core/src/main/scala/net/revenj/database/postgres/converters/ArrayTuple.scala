@@ -260,7 +260,7 @@ object ArrayTuple {
         } else {
           reader.read(2)
         }
-        Some(new ArrayBuffer[T](0))
+        Some(ArrayBuffer.empty[T])
       } else {
         val result = new ArrayBuffer[T]()
         val arrayContext: Int = Math.max(context << 1, 1)

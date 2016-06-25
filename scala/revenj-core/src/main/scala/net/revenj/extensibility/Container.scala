@@ -6,7 +6,7 @@ import net.revenj.patterns.ServiceLocator
 
 import scala.reflect.runtime.universe.TypeTag
 
-trait Container extends ServiceLocator {
+trait Container extends ServiceLocator with AutoCloseable {
 
   def registerClass[T: TypeTag](manifest: Class[T], singleton: Boolean = false): this.type
 
