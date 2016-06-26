@@ -173,6 +173,11 @@ namespace Revenj.Core
 				throw new InvalidOperationException("Transaction was already closed");
 			return Context.InvalidItems<TValidation, TResult>(specification);
 		}
+
+		public void Queue<T>(IEnumerable<T> events) where T : IDomainEvent
+		{
+			Context.Queue(events);
+		}
 	}
 
 	/// <summary>

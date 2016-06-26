@@ -35,6 +35,8 @@ namespace Revenj.Utility
 					 from asm in GetAssemblyAndAllReferencedAssemblies(refAsm)
 					 where !asm.IsDynamic
 						 && !asm.FullName.StartsWith("Microsoft.")
+						 && !asm.FullName.StartsWith("Mono.")
+						 && !asm.FullName.StartsWith("System,")
 						 && !asm.FullName.StartsWith("System.")
 						 && !asm.FullName.StartsWith("mscorlib")
 						 && !asm.FullName.StartsWith("Oracle.DataAccess")
