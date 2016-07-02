@@ -6,9 +6,9 @@ package example.test.postgres
 class AbcRepository(
 	   transactionConnection: Option[java.sql.Connection],
 	   dataSource: javax.sql.DataSource,
-	   converter: example.test.postgres.AbcConverter,
+	   implicit private val converter: example.test.postgres.AbcConverter,
 	   implicit private val context: scala.concurrent.ExecutionContext,
-	   locator: net.revenj.patterns.ServiceLocator
+	   implicit private val locator: net.revenj.patterns.ServiceLocator
 	) extends java.io.Closeable with net.revenj.patterns.SearchableRepository[example.test.Abc] with net.revenj.patterns.Repository[example.test.Abc] with net.revenj.patterns.PersistableRepository[example.test.Abc] {
 	
 	
@@ -32,8 +32,6 @@ class AbcRepository(
 		this(locator.resolve[Option[java.sql.Connection]], locator.resolve[javax.sql.DataSource], locator.resolve[example.test.postgres.AbcConverter], locator.resolve[scala.concurrent.ExecutionContext], locator)
 	}
 	
-
-	private val hasCustomSecurity = false
 
 	private def readFromDb(statement: java.sql.PreparedStatement, buffer: scala.collection.mutable.ArrayBuffer[example.test.Abc]): IndexedSeq[example.test.Abc] = {
 		val rs = statement.executeQuery()
@@ -185,22 +183,9 @@ class AbcRepository(
 			try {
 				val statement = connection.prepareStatement("""/*NO LOAD BALANCE*/SELECT "test"."persist_Abc"(?, ?, ?, ?)""")
 				val sw = net.revenj.database.postgres.PostgresWriter.create()
-				val result = new scala.collection.mutable.ArrayBuffer[String]()
+				val result = new scala.collection.mutable.ArrayBuffer[String](insert.size)
 				if (insert != null && insert.nonEmpty) {
-				
-			{
-				val st = connection.prepareStatement("""/*NO LOAD BALANCE*/SELECT nextval('"test"."Abc_ID_seq"'::regclass)::int FROM generate_series(1, ?)""")
-				st.setInt(1, insert.size)
-				val rs = st.executeQuery()
-				val iterator = insert.iterator
-				while (rs.next()) {
-					iterator.next().ID = rs.getInt(1)
-				}
-				rs.close()
-				st.close()
-			}
-
-					//insertLoop.accept(insert, new java.util.AbstractMap.SimpleEntry<>(sw, locator));
+					example.test.Abc.insertLoop(insert, sw, locator, converter, connection)
 					sw.reset()
 					val tuple = net.revenj.database.postgres.converters.ArrayTuple.createSeq(insert, converter.toTuple)
 					val pgo = new org.postgresql.util.PGobject
@@ -211,8 +196,9 @@ class AbcRepository(
 					statement.setObject(1, pgo)
 					var iter = insert.iterator
 					while (iter.hasNext) {
-						result += iter.next().URI
-						//trackChanges.apply(it);
+						val it = iter.next()
+						result += it.URI
+						example.test.Abc.trackChanges(it, locator)
 					}
 				} else {
 					statement.setArray(1, null)
@@ -223,14 +209,14 @@ class AbcRepository(
 					val missing = new scala.collection.mutable.HashMap[String, Int]()
 					var cnt = 0
 					update foreach { case (oldIt, newIt) =>
-						/*var oldValue = trackChanges.apply(newIt)
+						var oldValue = example.test.Abc.trackChanges(newIt, locator)
 						if (oldIt != null) {
 							oldValue = oldIt
-						}*/
-						oldUpdate(cnt) = oldIt// oldValue
-						/*if (oldValue == null) {
+						}
+						oldUpdate(cnt) = oldValue
+						if (oldValue == null) {
 							missing += newIt.URI -> cnt
-						}*/
+						}
 						newUpdate(cnt) = newIt
 						cnt += 1
 					}
@@ -240,7 +226,7 @@ class AbcRepository(
 							oldUpdate.update(missing.get(it.URI).get, it)
 						}
 					}
-					//updateLoop.accept(new java.util.AbstractMap.SimpleEntry<>(oldUpdate, newUpdate), new java.util.AbstractMap.SimpleEntry<>(sw, locator));
+					example.test.Abc.updateLoop(oldUpdate, newUpdate, sw, locator, converter)
 					val tupleOld = net.revenj.database.postgres.converters.ArrayTuple.createSeq(oldUpdate, converter.toTuple)
 					val tupleNew = net.revenj.database.postgres.converters.ArrayTuple.createSeq(newUpdate, converter.toTuple)
 					val pgOld = new org.postgresql.util.PGobject
@@ -260,7 +246,7 @@ class AbcRepository(
 					statement.setArray(3, null)
 				}
 				if (delete != null && delete.nonEmpty) {
-					//deleteLoop.accept(delete)
+					example.test.Abc.deleteLoop(delete, locator)
 					val tuple = net.revenj.database.postgres.converters.ArrayTuple.createSeq(delete, converter.toTuple)
 					val pgo = new org.postgresql.util.PGobject
 					pgo.setType(""""test"."Abc_entity"[]""")
@@ -286,4 +272,10 @@ class AbcRepository(
 		}
 	}
 
+}
+
+private object AbcRepository{
+
+	
+			private val hasCustomSecurity = false
 }

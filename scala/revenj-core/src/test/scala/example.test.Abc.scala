@@ -92,7 +92,7 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 	require(ent2 ne null, "Null value was provided for property \"ent2\"")
 	net.revenj.Guards.checkArrayNulls(ent2)
 	net.revenj.Guards.checkCollectionNulls(abc2)
-		new Abc(_URI = this.URI, _ID = _ID, _s = s, _ii = ii, _en = en, _en2 = en2, _en3 = en3, _i4 = i4, _another = another, _iii = iii, _iiii = iiii, _ss = ss, _sss = sss, _ssss = ssss, _v = v, _vv = vv, _vvv = vvv, _a = a, _ent1 = ent1, _ent2 = ent2, _abc1 = if(abc1 != null) abc1 else _abc1, _abc1URI = if (abc1 != null) abc1.map(_.URI) else this._abc1URI, _abc1ID = if(abc1 != null) abc1.map(_.ID) else this._abc1ID, _abc2 = if(abc2 != null) abc2 else _abc2, _abc2URI = if (abc2 != scala.collection.mutable.Queue.empty) abc2.toIndexedSeq.map(_.URI) else this._abc2URI, __locator = this.__locator)
+		new Abc(_URI = this.URI, _ID = _ID, _s = s, _ii = ii, _en = en, _en2 = en2, _en3 = en3, _i4 = i4, _another = another, _iii = iii, _iiii = iiii, _ss = ss, _sss = sss, _ssss = ssss, _v = v, _vv = vv, _vvv = vvv, _a = a, _ent1 = ent1, _ent2 = ent2, _abc1 = if(abc1 != null) abc1 else _abc1, _abc1URI = if (abc1 != null) abc1.map(_.URI) else this._abc1URI, _abc1ID = if(abc1 != null) abc1.map(_.ID) else this._abc1ID, _abc2 = if(abc2 != null) abc2 else _abc2, _abc2URI = if (abc2 != null) abc2.toIndexedSeq.map(_.URI) else this._abc2URI, __locator = this.__locator)
 	}
 
 	
@@ -415,8 +415,9 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 	def abc1(implicit ec: scala.concurrent.ExecutionContext, duration: scala.concurrent.duration.Duration) = { 
 		if (_abc1URI.isEmpty && (_abc1 == null || _abc1.isDefined)) _abc1 = None
 		if(__locator.isDefined) {
-			if (abc1URI.isDefined && (_abc1 == null || _abc1.isEmpty || _abc1.get.URI != abc1URI.get)) {
+			if (_abc1URI != null && abc1URI.isDefined && (_abc1 == null || _abc1.isEmpty || _abc1.get.URI != abc1URI.get)) {
 				_abc1 = scala.concurrent.Await.result(__locator.get.resolve[net.revenj.patterns.Repository[example.test.Abc]].find(abc1URI.get), duration)
+				_abc1URI = null
 			}
 		}			
 		_abc1
@@ -460,8 +461,9 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 	@com.fasterxml.jackson.annotation.JsonIgnore
 	def abc2(implicit ec: scala.concurrent.ExecutionContext, duration: scala.concurrent.duration.Duration) = { 
 		if(__locator.isDefined) {
-			if (_abc2 == null || _abc2.map(_.URI) != abc2URI) {
+			if (_abc2URI != null && (_abc2 == null || _abc2.map(_.URI) != abc2URI)) {
 				_abc2 = scala.concurrent.Await.result(__locator.get.resolve[net.revenj.patterns.Repository[example.test.Abc]].find(abc2URI).map(__col => scala.collection.mutable.Queue[example.test.Abc](__col:_*)), duration)
+				_abc2URI = null
 			}
 		}
 		_abc2
@@ -472,15 +474,16 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 		net.revenj.Guards.checkCollectionNulls(value)
 		_abc2 = value
 		
-		_abc2URI = value.toIndexedSeq.map(_.URI)
+		_abc2URI = null
 	}
 
 	
 	
 	@com.fasterxml.jackson.annotation.JsonProperty("abc2URI")
-	def abc2URI = {
-		
-		_abc2URI
+	def abc2URI: IndexedSeq[String] = {
+		if (_abc2 != null) _abc2.toIndexedSeq.map(_.URI).toIndexedSeq
+		else if (_abc2URI == null) IndexedSeq.empty[String]
+		else _abc2URI
 	}
 
 }
@@ -576,6 +579,50 @@ object Abc{
 	
 			def hasV(it : example.test.Abc):Boolean = it.vv.isDefined
 			def hasA(it : example.test.Abc): Boolean =  (it.a.size > 0)
+			
+	private [test] def insertLoop(aggregates: Seq[example.test.Abc], writer: net.revenj.database.postgres.PostgresWriter, locator: net.revenj.patterns.ServiceLocator, converter: example.test.postgres.AbcConverter, connection: java.sql.Connection): Unit = {
+		
+		val st = connection.prepareStatement("""/*NO LOAD BALANCE*/SELECT nextval('"test"."Abc_ID_seq"'::regclass)::int FROM generate_series(1, ?)""")
+		st.setInt(1, aggregates.size)
+		val rs = st.executeQuery()
+		val iterator = aggregates.iterator
+		while (rs.next()) {
+			iterator.next().ID = rs.getInt(1)
+		}
+		rs.close()
+		st.close()
+
+		val iter = aggregates.iterator
+		while (iter.hasNext) {
+			val agg = iter.next()
+			
+						example.test.Ent1.bindToent1(agg, writer, locator)
+						example.test.Ent2.bindToent2(agg, writer, locator) 
+			agg.URI = converter.buildURI(writer, agg)
+		}
+	}
+	private [test] def updateLoop(oldAggregates: Array[example.test.Abc], newAggregates: Array[example.test.Abc], writer: net.revenj.database.postgres.PostgresWriter, locator: net.revenj.patterns.ServiceLocator, converter: example.test.postgres.AbcConverter): Unit = {
+		var i = 0
+		while (i < newAggregates.length) {
+			val oldAgg = oldAggregates(i)
+			val newAgg = newAggregates(i)
+			
+						example.test.Ent1.bindToent1(newAgg, writer, locator)
+						example.test.Ent2.bindToent2(newAgg, writer, locator) 
+			newAgg.URI = converter.buildURI(writer, newAgg)
+			i += 1
+		}
+	}
+	private [test] def deleteLoop(aggregates: Seq[example.test.Abc], locator: net.revenj.patterns.ServiceLocator): Unit = {
+		val iter = aggregates.iterator
+		while (iter.hasNext) {
+			val agg = iter.next() 
+		}
+	}
+	private [test] def trackChanges(aggregate: example.test.Abc, locator: net.revenj.patterns.ServiceLocator): example.test.Abc = {
+		var result: example.test.Abc = null
+		result
+	}
 			
 	private[test] def buildInternal(
 		reader : net.revenj.database.postgres.PostgresReader,

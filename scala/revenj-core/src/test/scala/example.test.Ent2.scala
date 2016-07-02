@@ -110,6 +110,19 @@ object Ent2{
 
 	
 			
+	private [test] def bindToent2(parent: example.test.Abc, writer: net.revenj.database.postgres.PostgresWriter, locator: net.revenj.patterns.ServiceLocator): Unit = {
+		val converter = locator.resolve[example.test.postgres.Ent2Converter]
+		var i = 0
+		val iter = parent.ent2.iterator
+		while (iter.hasNext) { 
+			val e = iter.next()
+			e.AbcID = parent.ID
+			e.Index = i
+			i += 1
+			e.URI = converter.buildURI(writer, e)
+		}
+	}
+			
 	private[test] def buildInternal(
 		reader : net.revenj.database.postgres.PostgresReader,
 		context: Int,

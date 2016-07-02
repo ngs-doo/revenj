@@ -49,6 +49,7 @@ ORDER BY 1, 2, 6""")
 		
 		
 		container.registerInstance[net.revenj.database.postgres.converters.Converter[example.test.En]](example.test.postgres.EnConverter, handleClose = false)
+		val converter$test$AbcList = new example.test.postgres.AbcListConverter(columns, container)
 		val converter$test$Abc = new example.test.postgres.AbcConverter(columns, container)
 		val converter$test$Ent1 = new example.test.postgres.Ent1Converter(columns, container)
 		val converter$test$Ent2 = new example.test.postgres.Ent2Converter(columns, container)

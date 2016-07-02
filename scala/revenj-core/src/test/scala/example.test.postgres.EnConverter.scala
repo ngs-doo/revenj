@@ -35,7 +35,7 @@ object EnConverter extends Converter[example.test.En] {
 		result
 	}
 
-	override def parseNullableCollectionItem(reader: PostgresReader, context: Int): Option[example.test.En] = parseOption(reader, context)
+	override def parseNullableCollectionItem(reader: PostgresReader, context: Int): Option[example.test.En] = Some(parseCollectionItem(reader, context))
 
 	
 	

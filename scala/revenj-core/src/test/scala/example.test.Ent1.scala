@@ -93,6 +93,14 @@ object Ent1{
 
 	
 			
+	private [test] def bindToent1(parent: example.test.Abc, writer: net.revenj.database.postgres.PostgresWriter, locator: net.revenj.patterns.ServiceLocator): Unit = {
+		val e = parent.ent1
+		if (e != null) {
+			e.AbcID = parent.ID
+			e.URI = locator.resolve[example.test.postgres.Ent1Converter].buildURI(writer, e)
+		}
+	}
+			
 	private[test] def buildInternal(
 		reader : net.revenj.database.postgres.PostgresReader,
 		context: Int,
