@@ -20,7 +20,7 @@ case class Struct(
 object Struct{
 
 	
-			
+		
 	@com.fasterxml.jackson.annotation.JsonCreator def jackson(
 		@com.fasterxml.jackson.annotation.JsonProperty("ii") i: Int,
 		@com.fasterxml.jackson.annotation.JsonProperty("af") af: Array[Float],

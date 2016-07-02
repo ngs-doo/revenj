@@ -92,7 +92,7 @@ object Ent3{
 	}
 
 	
-			
+		
 	private[test] def buildInternal(
 		reader : net.revenj.database.postgres.PostgresReader,
 		context: Int,

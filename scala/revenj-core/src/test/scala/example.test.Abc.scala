@@ -577,9 +577,9 @@ object Abc{
 	}
 
 	
-			def hasV(it : example.test.Abc):Boolean = it.vv.isDefined
-			def hasA(it : example.test.Abc): Boolean =  (it.a.size > 0)
-			
+		def hasV(it : example.test.Abc):Boolean = it.vv.isDefined
+		def hasA(it : example.test.Abc): Boolean =  (it.a.size > 0)
+		
 	private [test] def insertLoop(aggregates: Seq[example.test.Abc], writer: net.revenj.database.postgres.PostgresWriter, locator: net.revenj.patterns.ServiceLocator, converter: example.test.postgres.AbcConverter, connection: java.sql.Connection): Unit = {
 		
 		val st = connection.prepareStatement("""/*NO LOAD BALANCE*/SELECT nextval('"test"."Abc_ID_seq"'::regclass)::int FROM generate_series(1, ?)""")
@@ -623,7 +623,7 @@ object Abc{
 		var result: example.test.Abc = null
 		result
 	}
-			
+		
 	private[test] def buildInternal(
 		reader : net.revenj.database.postgres.PostgresReader,
 		context: Int,

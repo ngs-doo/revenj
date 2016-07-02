@@ -69,4 +69,31 @@ module test {
 		calculated int enSize from 'it => it.en3.Count()';
 	}
 	value Another;
+	sql AbcSql from '"test"."AbcList"' {
+		string s; 
+		int[] ii; 
+		En en;
+		En? en2;
+		Linked list<En> en3;
+		linked list<int> i4;
+	}
+	sql AbcWrite from test.Abc(ID) {
+		int ID;
+		string s; 
+		int[] ii; 
+		En en;
+		En? en2;
+		Linked list<En> en3;
+		linked list<int> i4;
+		linked list<Another> another;
+		Val v;
+		Val? vv;
+		int[]? iii; 
+		int?[] iiii; 
+		string? ss; 
+		Vector<Val> vvv;
+		Set<Another?> a;
+		List<string> sss; 
+		List<string?>? ssss; 
+	}
 }

@@ -49,6 +49,10 @@ ORDER BY 1, 2, 6""")
 		
 		
 		container.registerInstance[net.revenj.database.postgres.converters.Converter[example.test.En]](example.test.postgres.EnConverter, handleClose = false)
+		
+		val converter$test$AbcSql = new example.test.postgres.AbcSqlConverter(Boot.loadQueryInfo(container, """SELECT * FROM "test"."AbcList" sq LIMIT 0""", "test", "AbcSql"), container)
+		
+		val converter$test$AbcWrite = new example.test.postgres.AbcWriteConverter(Boot.loadQueryInfo(container, """SELECT * FROM "test"."Abc" sq LIMIT 0""", "test", "AbcWrite"), container)
 		val converter$test$AbcList = new example.test.postgres.AbcListConverter(columns, container)
 		val converter$test$Abc = new example.test.postgres.AbcConverter(columns, container)
 		val converter$test$Ent1 = new example.test.postgres.Ent1Converter(columns, container)
@@ -60,10 +64,47 @@ ORDER BY 1, 2, 6""")
 		converter$test$Ent1.initialize()
 		converter$test$Ent2.initialize()
 		converter$test$Ent3.initialize()
+		converter$test$AbcSql.initialize()
+		converter$test$AbcWrite.initialize()
+		converter$test$AbcWrite.initialize()
 	}
 }
 
 object Boot {
+
+	
+	
+	private def loadQueryInfo(
+			container: net.revenj.extensibility.Container,
+			query: String,
+			module: String,
+			name: String): List[net.revenj.database.postgres.ColumnInfo] = {
+		val columns = new scala.collection.mutable.ListBuffer[net.revenj.database.postgres.ColumnInfo]()
+		val connection = container.resolve[javax.sql.DataSource].getConnection()
+		val statement = connection.createStatement
+		val rs = statement.executeQuery(query)
+		try {
+			val cols = rs.getMetaData.getColumnCount
+			for(i <- 0 until cols) {
+				val columnType = rs.getMetaData.getColumnTypeName(i + 1).split("\\.")
+				columns += net.revenj.database.postgres.ColumnInfo(
+								module,
+								name,
+								rs.getMetaData.getColumnLabel(i + 1),
+								if (columnType.length == 1) "pg_catalog" else columnType.head,
+								columnType.last,
+								(i + 1).asInstanceOf[Short],
+								false,
+								false)
+			}
+		} finally {
+			rs.close()
+			statement.close()
+			connection.close()
+		}
+		columns.result
+	}
+
 
 	def configure(jdbcUrl: String): net.revenj.patterns.ServiceLocator = {
 		val properties = new java.util.Properties

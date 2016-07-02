@@ -65,7 +65,7 @@ case class Val(
 object Val{
 
 	
-			
+		
 	@com.fasterxml.jackson.annotation.JsonCreator def jackson(
 		@com.fasterxml.jackson.databind.annotation.JsonDeserialize(contentAs = classOf[java.lang.Integer]) @com.fasterxml.jackson.annotation.JsonProperty("xx") x: Option[Int],
 		@com.fasterxml.jackson.annotation.JsonProperty("f") f: Float,
@@ -83,6 +83,6 @@ object Val{
 		Val(  x = x, f = f, ff = if (ff == null) Set.empty else ff, a = if (a == null) example.test.Another() else a, aa = aa, aaa = if (aaa == null) Array.empty else aaa, aaaa = if (aaaa == null) List.empty else aaaa, en = if (en == null) example.test.En.A else en, en2 = en2, en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, another = if (another == null) scala.collection.mutable.LinkedList.empty else another, d = d)
 	}
 
-			def hasD(it : example.test.Val):Boolean = it.d.isDefined
-			def enSize(it : example.test.Val): Int = (it.en3.size)
+		def hasD(it : example.test.Val):Boolean = it.d.isDefined
+		def enSize(it : example.test.Val): Int = (it.en3.size)
 }

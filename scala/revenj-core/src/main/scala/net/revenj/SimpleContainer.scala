@@ -207,9 +207,9 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
             }
           }
         }
-        result.getOrElse(errors.headOption.getOrElse(Failure(new ReflectiveOperationException("Unable to find constructors for: " + typeInfo.rawClass))))
+        result.getOrElse(errors.headOption.getOrElse(Failure(new ReflectiveOperationException("Unable to find constructors for: " + typeInfo.rawType))))
       case _ =>
-        Failure(new ReflectiveOperationException("Unable to find constructors for: " + typeInfo.rawClass))
+        Failure(new ReflectiveOperationException("Unable to find constructors for: " + typeInfo.rawType))
     }
   }
 

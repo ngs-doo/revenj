@@ -149,7 +149,7 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 	}		
 	private val aaaPos = columns.find(it => it.columnName == "aaa") match {
 		case Some(col) => col.order - 1
-		case None => throw new IllegalArgumentException("""Couldn't find column "aaa" in type test.Val_entity. Check if database is out of sync with code!""")
+		case None => throw new IllegalArgumentException("""Couldn't find column "aaa" in type test.Val. Check if database is out of sync with code!""")
 	}		
 	private val aaaPosExtended = extendedColumns.find(it => it.columnName == "aaa") match {
 		case Some(col) => col.order - 1
@@ -157,7 +157,7 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 	}		
 	private val aaaaPos = columns.find(it => it.columnName == "aaaa") match {
 		case Some(col) => col.order - 1
-		case None => throw new IllegalArgumentException("""Couldn't find column "aaaa" in type test.Val_entity. Check if database is out of sync with code!""")
+		case None => throw new IllegalArgumentException("""Couldn't find column "aaaa" in type test.Val. Check if database is out of sync with code!""")
 	}		
 	private val aaaaPosExtended = extendedColumns.find(it => it.columnName == "aaaa") match {
 		case Some(col) => col.order - 1
@@ -182,7 +182,7 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 	}		
 	private val en3Pos = columns.find(it => it.columnName == "en3") match {
 		case Some(col) => col.order - 1
-		case None => throw new IllegalArgumentException("""Couldn't find column "en3" in type test.Val_entity. Check if database is out of sync with code!""")
+		case None => throw new IllegalArgumentException("""Couldn't find column "en3" in type test.Val. Check if database is out of sync with code!""")
 	}		
 	private val en3PosExtended = extendedColumns.find(it => it.columnName == "en3") match {
 		case Some(col) => col.order - 1
@@ -198,7 +198,7 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 	}		
 	private val anotherPos = columns.find(it => it.columnName == "another") match {
 		case Some(col) => col.order - 1
-		case None => throw new IllegalArgumentException("""Couldn't find column "another" in type test.Val_entity. Check if database is out of sync with code!""")
+		case None => throw new IllegalArgumentException("""Couldn't find column "another" in type test.Val. Check if database is out of sync with code!""")
 	}		
 	private val anotherPosExtended = extendedColumns.find(it => it.columnName == "another") match {
 		case Some(col) => col.order - 1

@@ -80,6 +80,6 @@ case class AbcList @com.fasterxml.jackson.annotation.JsonIgnore() (
 object AbcList{
 
 	
-			def hasV2(it : example.test.AbcList):Boolean = it.hasV
-			def hasA2(it : example.test.AbcList): Boolean = it.hasA2
+		def hasV2(it : example.test.AbcList):Boolean = it.hasV
+		def hasA2(it : example.test.AbcList): Boolean = it.hasA2
 }

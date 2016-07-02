@@ -51,6 +51,7 @@ class DbCheck extends Specification with ScalaCheck {
       val ctx = container.resolve[DataContext]
       val oldAbcs = Await.result(ctx.search[Abc](), Duration.Inf)
       val oldLists = Await.result(ctx.search[AbcList](), Duration.Inf)
+      val abcSql = Await.result(ctx.search[AbcSql](), Duration.Inf)
       val abc = Abc(s = "defg", abc1 = oldAbcs.lastOption)
       if (oldAbcs.nonEmpty) {
         abc.abc2.enqueue(oldAbcs.last, oldAbcs.head)
@@ -99,8 +100,23 @@ class DbCheck extends Specification with ScalaCheck {
       abc.vvv = IndexedSeq(abc.v, abc.v)
       abc.ent2 = Array(Ent2(AbcID = abc.ID))
       Await.result(ctx.create(abc), Duration.Inf)
+      val find = Await.result(ctx.find[Abc](abc.URI), Duration.Inf).get
       container.close()
       ctx.commit(Duration.Inf).isSuccess === true
+      find.URI === abc.URI
+    }
+    "persistable sql" >> {
+      implicit val duration = Duration.Inf
+      val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+      val ctx = container.resolve[DataContext]
+      val abcWrite = Await.result(ctx.search[AbcWrite](), Duration.Inf)
+      val first = abcWrite.head
+      first.en = En.C
+      first.ii = Array(12,3) ++ first.ii
+      Await.result(ctx.update(abcWrite), Duration.Inf)
+      val find = Await.result(ctx.find[AbcWrite](first.URI), Duration.Inf).get
+      container.close()
+      find.URI === first.URI
     }
   }
 }
