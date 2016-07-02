@@ -6,7 +6,7 @@ import java.util.{Properties, ServiceLoader}
 import javax.sql.DataSource
 
 import net.revenj.extensibility.{Container, SystemAspect}
-import net.revenj.patterns.{DomainModel, ServiceLocator}
+import net.revenj.patterns._
 import org.postgresql.ds.PGPoolingDataSource
 
 import scala.collection.concurrent.TrieMap
@@ -132,6 +132,8 @@ object Revenj {
     val ns = properties.getProperty("revenj.namespace")
     val domainModel = new SimpleDomainModel(ns, loader)
     container.registerInstance[DomainModel](domainModel, handleClose = false)
+    container.registerFactory[DataContext](c => LocatorDataContext.asDataContext(c, loader), singleton = false)
+    container.registerFactory[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), singleton = false)
     var total: Int = 0
     if (aspects != null) {
       while (aspects.hasNext) {

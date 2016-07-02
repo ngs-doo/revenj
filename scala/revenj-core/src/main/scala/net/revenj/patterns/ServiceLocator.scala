@@ -24,8 +24,5 @@ trait ServiceLocator {
     result.getOrElse(throw result.failed.get)
   }
 
-  def tryResolve[T : TypeTag]: Try[T]
-
-  def resolve(tpe: Type): Try[AnyRef]
-
+  def tryResolve[T: TypeTag]: Try[T]
 }

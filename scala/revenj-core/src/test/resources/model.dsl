@@ -1,4 +1,28 @@
 module test {
+	snowflake<Abc> AbcList {
+		s;
+		ii;
+		en;
+		en2;
+		en3;
+		i4;
+		another;
+		v;
+		vv;
+		v.x;
+		v.f;
+		vvv;
+		hasV;
+		hasA;
+		calculated hasV2 from 'it => it.hasV';
+		calculated bool hasA2 from 'it => it.hasA2';
+		ent1;
+		ent1.i;
+		ent2;
+		abc1;
+		abc1.s s2;
+		abc2;
+	}
 	enum En { A; B; C; }
 	root Abc { 
 		string s; 

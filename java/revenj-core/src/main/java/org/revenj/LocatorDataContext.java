@@ -173,7 +173,7 @@ final class LocatorDataContext implements UnitOfWork {
 	}
 
 	@Override
-	public <T extends AggregateRoot> void update(Collection<Map.Entry<T, T>> pairs) throws IOException {
+	public <T extends AggregateRoot> void updatePairs(Collection<Map.Entry<T, T>> pairs) throws IOException {
 		if (pairs.size() == 0) {
 			return;
 		}

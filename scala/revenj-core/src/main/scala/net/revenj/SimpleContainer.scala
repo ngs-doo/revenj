@@ -10,7 +10,7 @@ import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe._
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 private[revenj] class SimpleContainer private(private val parent: Option[SimpleContainer], resolveUnknown: Boolean, mirror: Mirror) extends Container {
 
@@ -109,9 +109,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
         manifest.newInstance().asInstanceOf[AnyRef]
       })
     }
-    result.getOrElse(errors.headOption.getOrElse(Try {
-      throw new ReflectiveOperationException("Unable to find constructors for: " + manifest)
-    }))
+    result.getOrElse(errors.headOption.getOrElse(Failure(new ReflectiveOperationException("Unable to find constructors for: " + manifest))))
   }
 
   private def tryResolveType(paramType: ParameterizedType, caller: SimpleContainer): Try[AnyRef] = {
@@ -119,9 +117,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
       new TypeInfo(paramType)
     })
     if (typeInfo.rawClass.isEmpty) {
-      Try {
-        throw new ReflectiveOperationException(paramType + " is not an instance of Class<?> and cannot be resolved")
-      }
+      Failure(new ReflectiveOperationException(paramType + " is not an instance of Class<?> and cannot be resolved"))
     } else {
       getRegistration(typeInfo.rawClass.get) match {
         case Some(registration) if registration.biFactory.isDefined && typeInfo.genericArguments.isDefined =>
@@ -160,9 +156,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                 })
                 if (nestedInfo.rawClass.isEmpty) {
                   success = false
-                  errors += Try {
-                    throw new ReflectiveOperationException("Nested parametrized type: " + nestedType + " is not an instance of Class<?>. Error while resolving constructor: " + info.ctor)
-                  }
+                  errors += Failure(new ReflectiveOperationException("Nested parametrized type: " + nestedType + " is not an instance of Class<?>. Error while resolving constructor: " + info.ctor))
                 } else if (nestedInfo.rawClass.get eq classOf[Option[_]]) {
                   args(i) = tryResolve(nestedInfo.genericArguments.get(0), caller).toOption
                 } else {
@@ -187,9 +181,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   c = mappings.get(c.get)
                   if (c.isEmpty) {
                     success = false
-                    errors += Try {
-                      throw new ReflectiveOperationException("Unable to find mapping for " + p)
-                    }
+                    errors += Failure(new ReflectiveOperationException("Unable to find mapping for " + p))
                   }
                 }
                 if (success) {
@@ -215,13 +207,9 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
             }
           }
         }
-        result.getOrElse(errors.headOption.getOrElse(Try {
-          throw new ReflectiveOperationException("Unable to find constructors for: " + typeInfo.rawClass)
-        }))
+        result.getOrElse(errors.headOption.getOrElse(Failure(new ReflectiveOperationException("Unable to find constructors for: " + typeInfo.rawClass))))
       case _ =>
-        Try {
-          throw new ReflectiveOperationException("Unable to find constructors for: " + typeInfo.rawClass)
-        }
+        Failure(new ReflectiveOperationException("Unable to find constructors for: " + typeInfo.rawClass))
     }
   }
 
@@ -236,7 +224,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
 
   def resolve(tpe: Type): Try[AnyRef] = tryResolve(tpe, this)
 
-  def findType[T: TypeTag]: Option[Type] = {
+  private def findType[T: TypeTag]: Option[Type] = {
     typeOf[T] match {
       case TypeRef(_, sym, args) if args.isEmpty =>
         Some(mirror.runtimeClass(sym.asClass))
@@ -252,9 +240,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
   def tryResolve[T: TypeTag]: Try[T] = {
     findType[T] match {
       case Some(tpe) => resolve(tpe).map(_.asInstanceOf[T])
-      case _ => Try {
-        throw new ReflectiveOperationException("Invalid type tag argument")
-      }
+      case _ => Failure(new ReflectiveOperationException("Invalid type tag argument"))
     }
   }
 
@@ -293,25 +279,17 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   tryResolveCollection(target.getComponentType, target.getComponentType, caller)
                 } else if (resolveUnknown) {
                   if (target.isInterface) {
-                    Try {
-                      throw new ReflectiveOperationException(paramType + " is not an class and cannot be resolved since it's not registered in the container.\n" + "Try resolving implementation instead.")
-                    }
+                    Failure(new ReflectiveOperationException(paramType + " is not an class and cannot be resolved since it's not registered in the container.\n" + "Try resolving implementation instead."))
                   } else {
                     tryResolveClass(target, caller)
                   }
                 } else if (target.isInterface) {
-                  Try {
-                    throw new ReflectiveOperationException(paramType + " is not registered in the container.\n" + "Since " + paramType + " is an interface, it must be registered into the container.")
-                  }
+                  Failure(new ReflectiveOperationException(paramType + " is not registered in the container.\n" + "Since " + paramType + " is an interface, it must be registered into the container."))
                 } else {
-                  Try {
-                    throw new ReflectiveOperationException(paramType + " is not registered in the container.\n" + "If you wish to resolve types not registered in the container, specify revenj.resolveUnknown=true in Properties configuration.")
-                  }
+                  Failure(new ReflectiveOperationException(paramType + " is not registered in the container.\n" + "If you wish to resolve types not registered in the container, specify revenj.resolveUnknown=true in Properties configuration."))
                 }
               case _ =>
-                Try {
-                  throw new ReflectiveOperationException(paramType + " is not an instance of Class<?> and cannot be resolved since it's not registered in the container.")
-                }
+                Failure(new ReflectiveOperationException(paramType + " is not an instance of Class<?> and cannot be resolved since it's not registered in the container."))
             }
           }
           paramType match {
@@ -348,9 +326,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
       current = current.get.parent
     } while (current.isDefined)
     if (registrations.isEmpty) {
-      Try {
-        java.lang.reflect.Array.newInstance(container, 0)
-      }
+      Success(java.lang.reflect.Array.newInstance(container, 0))
     } else {
       val result = new mutable.ArrayBuffer[AnyRef](registrations.size)
       var i = 0
@@ -367,17 +343,13 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
         instance(i) = result(i)
         i += 1
       }
-      Try {
-        instance
-      }
+      Success(instance)
     }
   }
 
   private def resolveRegistration(registration: Registration[AnyRef], caller: SimpleContainer): Try[AnyRef] = {
     if (registration.instance.isDefined) {
-      Try {
-        registration.instance.get
-      }
+      Success(registration.instance.get)
     } else if (registration.singleFactory.isDefined) {
       Try {
         if (registration.singleton) {
@@ -403,9 +375,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
       if (registration.singleton) {
         this synchronized {
           if (registration.promoted) {
-            Try {
-              registration.instance
-            }
+            Success(registration.instance)
           } else if (registration.manifest.isDefined) {
             val tryInstance = tryResolveClass(registration.manifest.get, caller)
             if (tryInstance.isSuccess) {
@@ -418,17 +388,13 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
             }
             tryInstance
           } else {
-            Try {
-              throw new ReflectiveOperationException("Unable to resolve: " + registration)
-            }
+            Failure(new ReflectiveOperationException("Unable to resolve: " + registration))
           }
         }
       } else if (registration.manifest.isDefined) {
         tryResolveClass(registration.manifest.get, caller)
       } else {
-        Try {
-          throw new ReflectiveOperationException("Unable to resolve: " + registration)
-        }
+        Failure(new ReflectiveOperationException("Unable to resolve: " + registration))
       }
     }
   }

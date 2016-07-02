@@ -64,6 +64,9 @@ module test {
 		count enn as count;
 		sum hasEntities hasSum;
 		avg indexes avgInd;
+		specification FilterMax 'it => it.change >= value' {
+			date value;
+		}
 		specification ForSimple 'it => simples.Contains(it.simple)' {
 			List<Simple> simples;
 		}

@@ -222,7 +222,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
 
 }
 object PostgresReader {
-  def create(locator: ServiceLocator): PostgresReader = {
+  def create(implicit locator: ServiceLocator): PostgresReader = {
     new PostgresReader(Option(locator))
   }
 
