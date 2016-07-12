@@ -16,6 +16,8 @@ case class AbcList @com.fasterxml.jackson.annotation.JsonIgnore() (
 	   vv: Option[example.test.Val],
 	   x: Option[Int],
 	   f: Float,
+	   bytes: Array[Byte],
+	   bb: List[Array[Byte]],
 	   vvv: IndexedSeq[example.test.Val],
 	   hasV: Boolean,
 	   hasA: Boolean,
@@ -63,6 +65,8 @@ case class AbcList @com.fasterxml.jackson.annotation.JsonIgnore() (
 	, @com.fasterxml.jackson.annotation.JsonProperty("vv") vv: Option[example.test.Val]
 	, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(contentAs = classOf[java.lang.Integer]) @com.fasterxml.jackson.annotation.JsonProperty("x") x: Option[Int]
 	, @com.fasterxml.jackson.annotation.JsonProperty("f") f: Float
+	, @com.fasterxml.jackson.annotation.JsonProperty("bytes") bytes: Array[Byte]
+	, @com.fasterxml.jackson.annotation.JsonProperty("bb") bb: List[Array[Byte]]
 	, @com.fasterxml.jackson.annotation.JsonProperty("vvv") vvv: IndexedSeq[example.test.Val]
 	, @com.fasterxml.jackson.annotation.JsonProperty("hasV") hasV: Boolean
 	, @com.fasterxml.jackson.annotation.JsonProperty("hasA") hasA: Boolean
@@ -73,7 +77,7 @@ case class AbcList @com.fasterxml.jackson.annotation.JsonIgnore() (
 	, @com.fasterxml.jackson.annotation.JsonProperty("s2") s2: Option[String]
 	, @com.fasterxml.jackson.annotation.JsonProperty("abc2") abc2: scala.collection.mutable.Queue[example.test.Abc]
 	) =
-	  this(URI = URI, s = if (s == null) "" else s, ii = if (ii == null) Array.empty else ii, en = if (en == null) example.test.En.A else en, en2 = en2, en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, another = if (another == null) scala.collection.mutable.LinkedList.empty else another, v = if (v == null) example.test.Val() else v, vv = vv, x = x, f = f, vvv = if (vvv == null) IndexedSeq.empty else vvv, hasV = hasV, hasA = hasA, ent1 = ent1, i = i, ent2 = if (ent2 == null) Array.empty else ent2, abc1 = abc1, s2 = s2, abc2 = if (abc2 == null) scala.collection.mutable.Queue.empty else abc2)
+	  this(URI = URI, s = if (s == null) "" else s, ii = if (ii == null) Array.empty else ii, en = if (en == null) example.test.En.A else en, en2 = en2, en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, another = if (another == null) scala.collection.mutable.LinkedList.empty else another, v = if (v == null) example.test.Val() else v, vv = vv, x = x, f = f, bytes = if (bytes == null) Array[Byte]() else bytes, bb = if (bb == null) List.empty else bb, vvv = if (vvv == null) IndexedSeq.empty else vvv, hasV = hasV, hasA = hasA, ent1 = ent1, i = i, ent2 = if (ent2 == null) Array.empty else ent2, abc1 = abc1, s2 = s2, abc2 = if (abc2 == null) scala.collection.mutable.Queue.empty else abc2)
 
 }
 

@@ -41,7 +41,6 @@ public abstract class DateConverter {
 		NumberConverter.write2(value.getDayOfMonth(), buf, start + 8);
 	}
 
-
 	public static LocalDate parse(PostgresReader reader, boolean allowNulls) throws IOException {
 		int cur = reader.read();
 		if (cur == ',' || cur == ')') {

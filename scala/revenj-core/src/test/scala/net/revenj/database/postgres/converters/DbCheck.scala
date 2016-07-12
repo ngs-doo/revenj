@@ -36,7 +36,8 @@ class DbCheck extends Specification with ScalaCheck {
       abc.sss = List("a","b","C")
       abc.ssss = Some(List(Some("x"), None))
       abc.ent1.i = 555
-      abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C)
+      val bytes = Array(1,2,3,4).map(_.toByte)
+      abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C, bytes = bytes, bb = List(bytes, bytes))
       abc.vv = Some(abc.v)
       abc.vvv = IndexedSeq(abc.v, abc.v)
       abc.ent2 = Array(Ent2(AbcID = abc.ID))
@@ -66,7 +67,8 @@ class DbCheck extends Specification with ScalaCheck {
       abc.sss = List("a","b","C")
       abc.ssss = Some(List(Some("x"), None))
       abc.ent1.i = 555
-      abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C)
+      val bytes = Array(1,2,4).map(_.toByte)
+      abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C, bytes = bytes, bb = List(bytes, bytes))
       abc.vv = Some(abc.v)
       abc.vvv = IndexedSeq(abc.v, abc.v)
       abc.ent2 = Array(Ent2(AbcID = abc.ID))
@@ -95,7 +97,8 @@ class DbCheck extends Specification with ScalaCheck {
       abc.sss = List("a","b","C")
       abc.ssss = Some(List(Some("x"), None))
       abc.ent1.i = 555
-      abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C)
+      val bytes = Array(1,4).map(_.toByte)
+      abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C, bytes = bytes, bb = List(bytes, bytes))
       abc.vv = Some(abc.v)
       abc.vvv = IndexedSeq(abc.v, abc.v)
       abc.ent2 = Array(Ent2(AbcID = abc.ID))

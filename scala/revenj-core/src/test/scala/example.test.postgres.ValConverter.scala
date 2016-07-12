@@ -57,6 +57,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		items(aaaPos) = net.revenj.database.postgres.converters.ArrayTuple.createIndexedOption(item.aaa, converterexample_test_Another.toTuple)
 		items(aaaaPos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.aaaa, converterexample_test_Another.toTuple)
 		items(enPos) = converterexample_test_En.toTuple(item.en)
+		items(bytesPos) = net.revenj.database.postgres.converters.ByteaConverter.toTuple(item.bytes)
+		items(bbPos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.bb, net.revenj.database.postgres.converters.ByteaConverter.toTuple)
 		items(en2Pos) = if (item.en2.isEmpty) net.revenj.database.postgres.converters.PostgresTuple.NULL else converterexample_test_En.toTuple(item.en2.get)
 		items(en3Pos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.en3, converterexample_test_En.toTuple)
 		items(i4Pos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.i4, net.revenj.database.postgres.converters.IntConverter.toTuple)
@@ -75,6 +77,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		items(aaaPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createIndexedOption(item.aaa, converterexample_test_Another.toTupleExtended)
 		items(aaaaPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.aaaa, converterexample_test_Another.toTupleExtended)
 		items(enPosExtended) = converterexample_test_En.toTuple(item.en)
+		items(bytesPosExtended) = net.revenj.database.postgres.converters.ByteaConverter.toTuple(item.bytes)
+		items(bbPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.bb, net.revenj.database.postgres.converters.ByteaConverter.toTuple)
 		items(en2PosExtended) = if (item.en2.isEmpty) PostgresTuple.NULL else converterexample_test_En.toTuple(item.en2.get)
 		items(en3PosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.en3, converterexample_test_En.toTuple)
 		items(i4PosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.i4, net.revenj.database.postgres.converters.IntConverter.toTuple)
@@ -172,6 +176,22 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "en" in type test.Val. Check if database is out of sync with code!""")
 	}		
+	private val bytesPos = columns.find(it => it.columnName == "bytes") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "bytes" in type test.Val. Check if database is out of sync with code!""")
+	}		
+	private val bytesPosExtended = extendedColumns.find(it => it.columnName == "bytes") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "bytes" in type test.Val. Check if database is out of sync with code!""")
+	}		
+	private val bbPos = columns.find(it => it.columnName == "bb") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "bb" in type test.Val. Check if database is out of sync with code!""")
+	}		
+	private val bbPosExtended = extendedColumns.find(it => it.columnName == "bb") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "bb" in type test.Val. Check if database is out of sync with code!""")
+	}		
 	private val en2Pos = columns.find(it => it.columnName == "en2") match {
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "en2" in type test.Val. Check if database is out of sync with code!""")
@@ -232,6 +252,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		var _aaa_ :Array[Option[example.test.Another]] = null
 		var _aaaa_ :List[example.test.Another] = null
 		var _en_ :example.test.En = null
+		var _bytes_ :Array[Byte] = Array[Byte]()
+		var _bb_ :List[Array[Byte]] = null
 		var _en2_ :Option[example.test.En] = None
 		var _en3_ :scala.collection.mutable.LinkedList[example.test.En] = null
 		var _i4_ :scala.collection.mutable.LinkedList[Int] = null
@@ -248,6 +270,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 			if (aaaPos == i) { _aaa_ = net.revenj.database.postgres.converters.ArrayTuple.parseOption(reader, context, (rdr, ctx) => converterexample_test_Another.from(rdr, 0, ctx)).getOrElse(new scala.collection.mutable.ArrayBuffer[Option[example.test.Another]](0)).toArray; i += 1 }
 			if (aaaaPos == i) { _aaaa_ = net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Another.from(rdr, 0, ctx), () => example.test.Another()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Another](0)).toList; i += 1 }
 			if (enPos == i) { _en_ = converterexample_test_En.parse(reader, context); i += 1 }
+			if (bytesPos == i) { _bytes_ = net.revenj.database.postgres.converters.ByteaConverter.parse(reader, context); i += 1 }
+			if (bbPos == i) { _bb_ = net.revenj.database.postgres.converters.ByteaConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Array[Byte]](0)).toList; i += 1 }
 			if (en2Pos == i) { _en2_ = converterexample_test_En.parseOption(reader, context); i += 1 }
 			if (en3Pos == i) { _en3_ = scala.collection.mutable.LinkedList[example.test.En](example.test.postgres.EnConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.En](0)) :_*); i += 1 }
 			if (i4Pos == i) { _i4_ = scala.collection.mutable.LinkedList[Int](net.revenj.database.postgres.converters.IntConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Int](0)) :_*); i += 1 }
@@ -259,7 +283,7 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 			}
 		}
 		reader.read(outerContext)
-		example.test.Val(x = _x_, f = _f_, ff = _ff_, a = _a_, aa = _aa_, aaa = _aaa_, aaaa = _aaaa_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, d = _d_)
+		example.test.Val(x = _x_, f = _f_, ff = _ff_, a = _a_, aa = _aa_, aaa = _aaa_, aaaa = _aaaa_, en = _en_, bytes = _bytes_, bb = _bb_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, d = _d_)
 	}
 
 	def parseRawExtended(reader: PostgresReader, start: Int, context: Int): example.test.Val = {
@@ -280,6 +304,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		var _aaa_ :Array[Option[example.test.Another]] = null
 		var _aaaa_ :List[example.test.Another] = null
 		var _en_ :example.test.En = null
+		var _bytes_ :Array[Byte] = Array[Byte]()
+		var _bb_ :List[Array[Byte]] = null
 		var _en2_ :Option[example.test.En] = None
 		var _en3_ :scala.collection.mutable.LinkedList[example.test.En] = null
 		var _i4_ :scala.collection.mutable.LinkedList[Int] = null
@@ -296,6 +322,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 			if (aaaPosExtended == i) { _aaa_ = net.revenj.database.postgres.converters.ArrayTuple.parseOption(reader, context, (rdr, ctx) => converterexample_test_Another.fromExtended(rdr, 0, ctx)).getOrElse(new scala.collection.mutable.ArrayBuffer[Option[example.test.Another]](0)).toArray; i += 1 }
 			if (aaaaPosExtended == i) { _aaaa_ = net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Another.fromExtended(rdr, 0, ctx), () => example.test.Another()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Another](0)).toList; i += 1 }
 			if (enPosExtended == i) { _en_ = converterexample_test_En.parse(reader, context); i += 1 }
+			if (bytesPosExtended == i) { _bytes_ = net.revenj.database.postgres.converters.ByteaConverter.parse(reader, context); i += 1 }
+			if (bbPosExtended == i) { _bb_ = net.revenj.database.postgres.converters.ByteaConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Array[Byte]](0)).toList; i += 1 }
 			if (en2PosExtended == i) { _en2_ = converterexample_test_En.parseOption(reader, context); i += 1 }
 			if (en3PosExtended == i) { _en3_ = scala.collection.mutable.LinkedList[example.test.En](example.test.postgres.EnConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.En](0)) :_*); i += 1 }
 			if (i4PosExtended == i) { _i4_ = scala.collection.mutable.LinkedList[Int](net.revenj.database.postgres.converters.IntConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Int](0)) :_*); i += 1 }
@@ -307,7 +335,7 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 			}
 		}
 		reader.read(outerContext)
-		example.test.Val(x = _x_, f = _f_, ff = _ff_, a = _a_, aa = _aa_, aaa = _aaa_, aaaa = _aaaa_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, d = _d_)
+		example.test.Val(x = _x_, f = _f_, ff = _ff_, a = _a_, aa = _aa_, aaa = _aaa_, aaaa = _aaaa_, en = _en_, bytes = _bytes_, bb = _bb_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, d = _d_)
 	}
 
 	def initialize():Unit = {

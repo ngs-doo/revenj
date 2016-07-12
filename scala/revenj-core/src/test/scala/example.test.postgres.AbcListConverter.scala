@@ -61,6 +61,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		items(vvPos) = if (item.vv.isEmpty) net.revenj.database.postgres.converters.PostgresTuple.NULL else converterexample_test_Val.toTuple(item.vv.get)
 		items(xPos) = net.revenj.database.postgres.converters.IntConverter.toTuple(item.x)
 		items(fPos) = net.revenj.database.postgres.converters.FloatConverter.toTuple(item.f)
+		items(bytesPos) = net.revenj.database.postgres.converters.ByteaConverter.toTuple(item.bytes)
+		items(bbPos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.bb, net.revenj.database.postgres.converters.ByteaConverter.toTuple)
 		items(vvvPos) = net.revenj.database.postgres.converters.ArrayTuple.createIndexed(item.vvv, converterexample_test_Val.toTuple)
 		items(hasVPos) = net.revenj.database.postgres.converters.BoolConverter.toTuple(item.hasV)
 		items(hasAPos) = net.revenj.database.postgres.converters.BoolConverter.toTuple(item.hasA)
@@ -87,6 +89,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		items(vvPosExtended) = if (item.vv.isEmpty) PostgresTuple.NULL else converterexample_test_Val.toTupleExtended(item.vv.get)
 		items(xPosExtended) = net.revenj.database.postgres.converters.IntConverter.toTuple(item.x)
 		items(fPosExtended) = net.revenj.database.postgres.converters.FloatConverter.toTuple(item.f)
+		items(bytesPosExtended) = net.revenj.database.postgres.converters.ByteaConverter.toTuple(item.bytes)
+		items(bbPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.bb, net.revenj.database.postgres.converters.ByteaConverter.toTuple)
 		items(vvvPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createIndexed(item.vvv, converterexample_test_Val.toTupleExtended)
 		items(hasVPosExtended) = net.revenj.database.postgres.converters.BoolConverter.toTuple(item.hasV)
 		items(hasAPosExtended) = net.revenj.database.postgres.converters.BoolConverter.toTuple(item.hasA)
@@ -221,6 +225,22 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "f" in type test.AbcList. Check if database is out of sync with code!""")
 	}		
+	private val bytesPos = columns.find(it => it.columnName == "bytes") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "bytes" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val bytesPosExtended = extendedColumns.find(it => it.columnName == "bytes") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "bytes" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val bbPos = columns.find(it => it.columnName == "bb") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "bb" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val bbPosExtended = extendedColumns.find(it => it.columnName == "bb") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "bb" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
 	private val vvvPos = columns.find(it => it.columnName == "vvv") match {
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "vvv" in type test.AbcList_entity. Check if database is out of sync with code!""")
@@ -324,6 +344,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		var _vv_ :Option[example.test.Val] = None
 		var _x_ :Option[Int] = None
 		var _f_ :Float = 0.0f
+		var _bytes_ :Array[Byte] = Array[Byte]()
+		var _bb_ :List[Array[Byte]] = null
 		var _vvv_ :IndexedSeq[example.test.Val] = null
 		var _hasV_ :Boolean = false
 		var _hasA_ :Boolean = false
@@ -348,6 +370,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 			if (vvPos == i) { _vv_ = converterexample_test_Val.parseOption(reader, context); i += 1 }
 			if (xPos == i) { _x_ = net.revenj.database.postgres.converters.IntConverter.parseOption(reader, context); i += 1 }
 			if (fPos == i) { _f_ = net.revenj.database.postgres.converters.FloatConverter.parse(reader, context); i += 1 }
+			if (bytesPos == i) { _bytes_ = net.revenj.database.postgres.converters.ByteaConverter.parse(reader, context); i += 1 }
+			if (bbPos == i) { _bb_ = net.revenj.database.postgres.converters.ByteaConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Array[Byte]](0)).toList; i += 1 }
 			if (vvvPos == i) { _vvv_ = net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Val.from(rdr, 0, ctx), () => example.test.Val()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Val](0)).toIndexedSeq; i += 1 }
 			if (hasVPos == i) { _hasV_ = net.revenj.database.postgres.converters.BoolConverter.parse(reader, context); i += 1 }
 			if (hasAPos == i) { _hasA_ = net.revenj.database.postgres.converters.BoolConverter.parse(reader, context); i += 1 }
@@ -363,7 +387,7 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 			}
 		}
 		reader.read(outerContext)
-		example.test.AbcList(URI = _URI_, s = _s_, ii = _ii_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, v = _v_, vv = _vv_, x = _x_, f = _f_, vvv = _vvv_, hasV = _hasV_, hasA = _hasA_, ent1 = _ent1_, i = _i_, ent2 = _ent2_, abc1 = _abc1_, s2 = _s2_, abc2 = _abc2_)
+		example.test.AbcList(URI = _URI_, s = _s_, ii = _ii_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, v = _v_, vv = _vv_, x = _x_, f = _f_, bytes = _bytes_, bb = _bb_, vvv = _vvv_, hasV = _hasV_, hasA = _hasA_, ent1 = _ent1_, i = _i_, ent2 = _ent2_, abc1 = _abc1_, s2 = _s2_, abc2 = _abc2_)
 	}
 
 	def parseRawExtended(reader: PostgresReader, start: Int, context: Int): example.test.AbcList = {
@@ -388,6 +412,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		var _vv_ :Option[example.test.Val] = None
 		var _x_ :Option[Int] = None
 		var _f_ :Float = 0.0f
+		var _bytes_ :Array[Byte] = Array[Byte]()
+		var _bb_ :List[Array[Byte]] = null
 		var _vvv_ :IndexedSeq[example.test.Val] = null
 		var _hasV_ :Boolean = false
 		var _hasA_ :Boolean = false
@@ -412,6 +438,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 			if (vvPosExtended == i) { _vv_ = converterexample_test_Val.parseOptionExtended(reader, context); i += 1 }
 			if (xPosExtended == i) { _x_ = net.revenj.database.postgres.converters.IntConverter.parseOption(reader, context); i += 1 }
 			if (fPosExtended == i) { _f_ = net.revenj.database.postgres.converters.FloatConverter.parse(reader, context); i += 1 }
+			if (bytesPosExtended == i) { _bytes_ = net.revenj.database.postgres.converters.ByteaConverter.parse(reader, context); i += 1 }
+			if (bbPosExtended == i) { _bb_ = net.revenj.database.postgres.converters.ByteaConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Array[Byte]](0)).toList; i += 1 }
 			if (vvvPosExtended == i) { _vvv_ = net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Val.fromExtended(rdr, 0, ctx), () => example.test.Val()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Val](0)).toIndexedSeq; i += 1 }
 			if (hasVPosExtended == i) { _hasV_ = net.revenj.database.postgres.converters.BoolConverter.parse(reader, context); i += 1 }
 			if (hasAPosExtended == i) { _hasA_ = net.revenj.database.postgres.converters.BoolConverter.parse(reader, context); i += 1 }
@@ -427,7 +455,7 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 			}
 		}
 		reader.read(outerContext)
-		example.test.AbcList(URI = _URI_, s = _s_, ii = _ii_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, v = _v_, vv = _vv_, x = _x_, f = _f_, vvv = _vvv_, hasV = _hasV_, hasA = _hasA_, ent1 = _ent1_, i = _i_, ent2 = _ent2_, abc1 = _abc1_, s2 = _s2_, abc2 = _abc2_)
+		example.test.AbcList(URI = _URI_, s = _s_, ii = _ii_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, v = _v_, vv = _vv_, x = _x_, f = _f_, bytes = _bytes_, bb = _bb_, vvv = _vvv_, hasV = _hasV_, hasA = _hasA_, ent1 = _ent1_, i = _i_, ent2 = _ent2_, abc1 = _abc1_, s2 = _s2_, abc2 = _abc2_)
 	}
 
 	def initialize():Unit = {

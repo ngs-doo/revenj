@@ -11,6 +11,8 @@ module test {
 		vv;
 		v.x;
 		v.f;
+		v.bytes;
+		v.bb;
 		vvv;
 		hasV;
 		hasA;
@@ -60,6 +62,8 @@ module test {
 		Another?[] aaa;
 		List<Another> aaaa;
 		En en;
+		binary bytes;
+		List<binary> bb;
 		En? en2;
 		Linked list<En> en3;
 		linked list<int> i4;
