@@ -6,10 +6,12 @@ import org.specs2.mutable.Specification
 class ContainerCheck extends Specification with ScalaCheck {
   sequential
 
+  val cl = classOf[ContainerCheck].getClassLoader
+
   "simple resolutions" >> {
     "types" >> {
       B.counter = 0
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerClass(classOf[A])
       val tryA1 = container.tryResolve[A]
       tryA1.isSuccess === false
@@ -22,7 +24,7 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "option" >> {
       B.counter = 0
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerClass(classOf[A])
       container.registerClass(classOf[B])
       container.registerClass(classOf[C])
@@ -36,7 +38,7 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "generics" >> {
       B.counter = 0
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerClass(classOf[A])
       container.registerClass(classOf[B])
       container.registerClass(classOf[G[_]])
@@ -48,7 +50,7 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "complex generics" >> {
       B.counter = 0
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerClass(classOf[A])
       container.registerClass(classOf[B])
       container.registerClass(classOf[ComplexGenerics[_, _]])
@@ -62,7 +64,7 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "ctor raw generics" >> {
       B.counter = 0
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerClass(classOf[A])
       container.registerClass(classOf[B])
       container.registerClass(classOf[ComplexGenerics[_, _]])
@@ -77,7 +79,7 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "ctor partial generics" >> {
       B.counter = 0
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerClass(classOf[A])
       container.registerClass(classOf[B])
       container.registerClass(classOf[ComplexGenerics[_, _]])
@@ -91,7 +93,7 @@ class ContainerCheck extends Specification with ScalaCheck {
       classOf[B] === cg.generics.instance2.getClass
     }
     "pass exception" >> {
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerFactory[ContainerCheck](c => throw new RuntimeException("test me now"))
       val cc = container.tryResolve[ContainerCheck]
       cc.isFailure === true
@@ -99,27 +101,27 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "resolve unknown" >> {
       B.counter = 0
-      val container = new SimpleContainer(true, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(true, cl)
       val a = container.resolve[A]
       a !== null
       1 === B.counter
     }
     "resolve later" >> {
-      val container = new SimpleContainer(true, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(true, cl)
       val l = container.resolve[Later]
       l !== null
       val a = l.getA()
       a !== null
     }
     "self reference singleton" >> {
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerClass(classOf[SelfReference], singleton = true)
       val sr = container.resolve[SelfReference]
       val sr2 = sr.getSelf()
       sr === sr2
     }
     "singleton in context" >> {
-      val container = new SimpleContainer(false, ClassLoader.getSystemClassLoader)
+      val container = new SimpleContainer(false, cl)
       container.registerClass(classOf[Single], singleton = true)
       val nested = container.createScope()
       val s1 = nested.resolve[Single]

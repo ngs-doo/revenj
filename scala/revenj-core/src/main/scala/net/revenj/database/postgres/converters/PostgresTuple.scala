@@ -9,7 +9,7 @@ trait PostgresTuple {
 
   val mustEscapeArray: Boolean
 
-  def insertRecord(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit])
+  def insertRecord(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit
 
   def insertArray(writer: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     insertRecord(writer, escaping, mappings)

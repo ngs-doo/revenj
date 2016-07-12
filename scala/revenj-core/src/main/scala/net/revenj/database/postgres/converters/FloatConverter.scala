@@ -4,7 +4,7 @@ import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWri
 
 object FloatConverter extends Converter[Float] {
 
-  override def serializeURI(sw: PostgresBuffer, value: Float) {
+  override def serializeURI(sw: PostgresBuffer, value: Float): Unit = {
     sw.addToBuffer(value.toString)
   }
 
@@ -60,7 +60,7 @@ object FloatConverter extends Converter[Float] {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       sw.write(java.lang.Float.toString(value))
     }
 

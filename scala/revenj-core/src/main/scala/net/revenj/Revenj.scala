@@ -101,7 +101,7 @@ object Revenj {
     namespace = if (namespace != null && namespace.length > 0) namespace + "." else ""
     private val cache = new TrieMap[String, Class[_]]
 
-    def updateNamespace(value: String) {
+    def updateNamespace(value: String): Unit = {
       namespace = if (value != null && value.length > 0) value + "." else ""
     }
 

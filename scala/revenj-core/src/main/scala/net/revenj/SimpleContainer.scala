@@ -433,7 +433,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     new SimpleContainer(Some(this), resolveUnknown, mirror)
   }
 
-  def close() {
+  def close(): Unit = {
     container.clear
     val it = closeables.iterator
     while (it.hasNext) {
@@ -472,7 +472,7 @@ private object SimpleContainer {
 
     var promoted: Boolean = false
 
-    def promoteToSingleton(value: T) {
+    def promoteToSingleton(value: T): Unit = {
       promoted = true
       this.instance = Some(value)
     }

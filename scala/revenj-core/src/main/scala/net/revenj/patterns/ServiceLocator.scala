@@ -1,7 +1,5 @@
 package net.revenj.patterns
 
-import java.lang.reflect.Type
-
 import scala.reflect.runtime.universe.TypeTag
 import scala.util.Try
 

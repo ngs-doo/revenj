@@ -4,7 +4,7 @@ import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWri
 
 object BoolConverter extends Converter[Boolean] {
 
-  override def serializeURI(sw: PostgresBuffer, value: Boolean) {
+  override def serializeURI(sw: PostgresBuffer, value: Boolean): Unit = {
     sw.addToBuffer(if (value) "true" else "false")
   }
 
@@ -55,7 +55,7 @@ object BoolConverter extends Converter[Boolean] {
 
     val mustEscapeArray = false
 
-    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]) {
+    def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
       sw.write(charValue)
     }
 

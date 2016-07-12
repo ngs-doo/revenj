@@ -3,10 +3,11 @@
 lazy val core = (project in file("revenj-core")
   settings(commonSettings ++ publishSettings)
   settings(
-    version := "0.0.1-SNAPSHOT",
+    version := "0.1.0-SNAPSHOT",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1208",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4",
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4" % "test",
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % "test"
     )
   )
@@ -15,7 +16,7 @@ lazy val core = (project in file("revenj-core")
 lazy val storage = (project in file("revenj-storage")
   settings(commonSettings ++ publishSettings)
   settings(
-    version := "0.0.1-SNAPSHOT",
+    version := "0.1.0-SNAPSHOT",
     libraryDependencies ++= Seq(
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % "test"
     )
@@ -40,7 +41,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   name := baseDirectory.value.getName,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.11.8", "2.12.0-M4"),
+  crossScalaVersions := Seq("2.11.8", "2.12.0-M5"),
 
   scalacOptions ++= Seq(
     "-deprecation",
