@@ -141,7 +141,7 @@ object Revenj {
         total += 1
       }
     }
-    val nsAfter: String = properties.getProperty("revenj.namespace")
+    val nsAfter = properties.getProperty("revenj.namespace")
     if (ns != nsAfter) {
       domainModel.updateNamespace(nsAfter)
     }

@@ -6,6 +6,7 @@ lazy val core = (project in file("revenj-core")
     version := "0.1.0-SNAPSHOT",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1208",
+      "joda-time" % "joda-time" % "2.9.4",//TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4" % "test",
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % "test"

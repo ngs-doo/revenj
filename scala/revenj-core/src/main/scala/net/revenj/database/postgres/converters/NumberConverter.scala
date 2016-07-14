@@ -26,6 +26,15 @@ object NumberConverter {
     sw.write(pair.toByte)
   }
 
+  private[converters] def write3(number: Int, buffer: Array[Char], start: Int): Unit = {
+    val div = number / 100
+    buffer(start) = (div + '0').toChar
+    val rem = number - div * 100
+    val pair2 = NUMBERS(rem)
+    buffer(start + 1) = (pair2 >> 8).toChar
+    buffer(start + 2) = pair2.toByte.toChar
+  }
+
   private[converters] def write4(number: Int, buffer: Array[Char], start: Int): Unit = {
     val div = number / 100
     val pair1 = NUMBERS(div)
