@@ -42,15 +42,6 @@ class Ent1 @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 	}
 
 	
-	@com.fasterxml.jackson.annotation.JsonCreator private def this(
-		@com.fasterxml.jackson.annotation.JacksonInject("__locator") __locator__ : net.revenj.patterns.ServiceLocator
-	, @com.fasterxml.jackson.annotation.JsonProperty("URI") URI: String
-	, @com.fasterxml.jackson.annotation.JsonProperty("i") i: Int
-	, @com.fasterxml.jackson.annotation.JsonProperty("AbcID") AbcID: Int
-	) =
-	  this(_URI = URI, __locator = Some(__locator__), _i = i, _AbcID = AbcID)
-
-	
 	
 	@com.fasterxml.jackson.annotation.JsonProperty("i")
 	def i = { 
@@ -75,6 +66,15 @@ class Ent1 @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 		_AbcID = value
 		
 	}
+
+	
+	@com.fasterxml.jackson.annotation.JsonCreator private def this(
+		@com.fasterxml.jackson.annotation.JacksonInject("__locator") __locator__ : net.revenj.patterns.ServiceLocator
+	, @com.fasterxml.jackson.annotation.JsonProperty("URI") URI: String
+	, @com.fasterxml.jackson.annotation.JsonProperty("i") i: Int
+	, @com.fasterxml.jackson.annotation.JsonProperty("AbcID") AbcID: Int
+	) =
+	  this(_URI = URI, __locator = Some(__locator__), _i = i, _AbcID = AbcID)
 
 }
 

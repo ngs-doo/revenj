@@ -327,6 +327,28 @@ object AbcWrite{
 
 	
 		
+	@com.fasterxml.jackson.annotation.JsonCreator def jackson(
+		@com.fasterxml.jackson.annotation.JsonProperty("ID") ID: Int,
+		@com.fasterxml.jackson.annotation.JsonProperty("s") s: String,
+		@com.fasterxml.jackson.annotation.JsonProperty("ii") ii: Array[Int],
+		@com.fasterxml.jackson.annotation.JsonProperty("en") en: example.test.En,
+		@com.fasterxml.jackson.annotation.JsonProperty("en2") en2: Option[example.test.En],
+		@com.fasterxml.jackson.annotation.JsonProperty("en3") en3: scala.collection.mutable.LinkedList[example.test.En],
+		@com.fasterxml.jackson.annotation.JsonProperty("i4") i4: scala.collection.mutable.LinkedList[Int],
+		@com.fasterxml.jackson.annotation.JsonProperty("another") another: scala.collection.mutable.LinkedList[example.test.Another],
+		@com.fasterxml.jackson.annotation.JsonProperty("v") v: example.test.Val,
+		@com.fasterxml.jackson.annotation.JsonProperty("vv") vv: Option[example.test.Val],
+		@com.fasterxml.jackson.annotation.JsonProperty("iii") iii: Option[Array[Int]],
+		@com.fasterxml.jackson.annotation.JsonProperty("iiii") iiii: Array[Option[Int]],
+		@com.fasterxml.jackson.annotation.JsonProperty("ss") ss: Option[String],
+		@com.fasterxml.jackson.annotation.JsonProperty("vvv") vvv: IndexedSeq[example.test.Val],
+		@com.fasterxml.jackson.annotation.JsonProperty("a") a: Set[Option[example.test.Another]],
+		@com.fasterxml.jackson.annotation.JsonProperty("sss") sss: List[String],
+		@com.fasterxml.jackson.annotation.JsonProperty("ssss") ssss: Option[List[Option[String]]]) = {
+		AbcWrite(  ID = ID, s = if (s == null) "" else s, ii = if (ii == null) Array.empty else ii, en = if (en == null) example.test.En.A else en, en2 = en2, en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, another = if (another == null) scala.collection.mutable.LinkedList.empty else another, v = if (v == null) example.test.Val() else v, vv = vv, iii = iii, iiii = if (iiii == null) Array.empty else iiii, ss = ss, vvv = if (vvv == null) IndexedSeq.empty else vvv, a = if (a == null) Set.empty else a, sss = if (sss == null) List.empty else sss, ssss = ssss)
+	}
+
+		
 	private [test] def insertLoop(aggregates: Seq[example.test.AbcWrite], writer: net.revenj.database.postgres.PostgresWriter, locator: net.revenj.patterns.ServiceLocator, converter: example.test.postgres.AbcWriteConverter, connection: java.sql.Connection): Unit = {
 		val iter = aggregates.iterator
 		while (iter.hasNext) {
@@ -476,28 +498,6 @@ object AbcWrite{
 			converters(aPosExtended) = (item, reader, context) => { item._a = net.revenj.database.postgres.converters.ArrayTuple.parseOption(reader, context, (rdr, ctx) => _convertera.fromExtended(rdr, 0, ctx)).getOrElse(new scala.collection.mutable.ArrayBuffer[Option[example.test.Another]](0)).toSet; item }
 			converters(sssPosExtended) = (item, reader, context) => { item._sss = net.revenj.database.postgres.converters.StringConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[String](0)).toList; item }
 			converters(ssssPosExtended) = (item, reader, context) => { item._ssss = net.revenj.database.postgres.converters.StringConverter.parseNullableCollectionOption(reader, context).map(_.toList); item }
-	}
-
-		
-	@com.fasterxml.jackson.annotation.JsonCreator def jackson(
-		@com.fasterxml.jackson.annotation.JsonProperty("ID") ID: Int,
-		@com.fasterxml.jackson.annotation.JsonProperty("s") s: String,
-		@com.fasterxml.jackson.annotation.JsonProperty("ii") ii: Array[Int],
-		@com.fasterxml.jackson.annotation.JsonProperty("en") en: example.test.En,
-		@com.fasterxml.jackson.annotation.JsonProperty("en2") en2: Option[example.test.En],
-		@com.fasterxml.jackson.annotation.JsonProperty("en3") en3: scala.collection.mutable.LinkedList[example.test.En],
-		@com.fasterxml.jackson.annotation.JsonProperty("i4") i4: scala.collection.mutable.LinkedList[Int],
-		@com.fasterxml.jackson.annotation.JsonProperty("another") another: scala.collection.mutable.LinkedList[example.test.Another],
-		@com.fasterxml.jackson.annotation.JsonProperty("v") v: example.test.Val,
-		@com.fasterxml.jackson.annotation.JsonProperty("vv") vv: Option[example.test.Val],
-		@com.fasterxml.jackson.annotation.JsonProperty("iii") iii: Option[Array[Int]],
-		@com.fasterxml.jackson.annotation.JsonProperty("iiii") iiii: Array[Option[Int]],
-		@com.fasterxml.jackson.annotation.JsonProperty("ss") ss: Option[String],
-		@com.fasterxml.jackson.annotation.JsonProperty("vvv") vvv: IndexedSeq[example.test.Val],
-		@com.fasterxml.jackson.annotation.JsonProperty("a") a: Set[Option[example.test.Another]],
-		@com.fasterxml.jackson.annotation.JsonProperty("sss") sss: List[String],
-		@com.fasterxml.jackson.annotation.JsonProperty("ssss") ssss: Option[List[Option[String]]]) = {
-		AbcWrite(  ID = ID, s = if (s == null) "" else s, ii = if (ii == null) Array.empty else ii, en = if (en == null) example.test.En.A else en, en2 = en2, en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, another = if (another == null) scala.collection.mutable.LinkedList.empty else another, v = if (v == null) example.test.Val() else v, vv = vv, iii = iii, iiii = if (iiii == null) Array.empty else iiii, ss = ss, vvv = if (vvv == null) IndexedSeq.empty else vvv, a = if (a == null) Set.empty else a, sss = if (sss == null) List.empty else sss, ssss = ssss)
 	}
 
 }

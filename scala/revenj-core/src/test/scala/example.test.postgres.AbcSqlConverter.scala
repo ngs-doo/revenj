@@ -92,6 +92,9 @@ class AbcSqlConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo],
 	}
 
 	
+	
+	container.registerClass[example.test.postgres.AbcSqlRepository](classOf[example.test.postgres.AbcSqlRepository], singleton = false)
+	container.registerFactory[net.revenj.patterns.SearchableRepository[example.test.AbcSql]](c => new example.test.postgres.AbcSqlRepository(c), singleton = false)
 	private val sPos = columns.find(it => it.columnName == "s") match {
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "s" in type test.AbcSql. Check if database is out of sync with code!""")
@@ -141,9 +144,6 @@ class AbcSqlConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo],
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "i4" in type test.AbcSql. Check if database is out of sync with code!""")
 	}		
-	
-	container.registerClass[example.test.postgres.AbcSqlRepository](classOf[example.test.postgres.AbcSqlRepository], singleton = false)
-	container.registerFactory[net.revenj.patterns.SearchableRepository[example.test.AbcSql]](c => new example.test.postgres.AbcSqlRepository(c), singleton = false)
 
 	
 	override def parseRaw(reader: PostgresReader, start: Int, context: Int): example.test.AbcSql = {

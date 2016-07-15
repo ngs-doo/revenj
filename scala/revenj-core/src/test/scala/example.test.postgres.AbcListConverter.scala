@@ -63,6 +63,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		items(fPos) = net.revenj.database.postgres.converters.FloatConverter.toTuple(item.f)
 		items(bytesPos) = net.revenj.database.postgres.converters.ByteaConverter.toTuple(item.bytes)
 		items(bbPos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.bb, net.revenj.database.postgres.converters.ByteaConverter.toTuple)
+		items(dPos) = net.revenj.database.postgres.converters.JodaDateConverter.toTuple(item.d)
+		items(ddPos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.dd, net.revenj.database.postgres.converters.JodaDateConverter.toTuple)
 		items(vvvPos) = net.revenj.database.postgres.converters.ArrayTuple.createIndexed(item.vvv, converterexample_test_Val.toTuple)
 		items(hasVPos) = net.revenj.database.postgres.converters.BoolConverter.toTuple(item.hasV)
 		items(hasAPos) = net.revenj.database.postgres.converters.BoolConverter.toTuple(item.hasA)
@@ -72,6 +74,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		items(abc1Pos) = if (item.abc1.isEmpty) net.revenj.database.postgres.converters.PostgresTuple.NULL else converterexample_test_Abc.toTuple(item.abc1.get)
 		items(s2Pos) = net.revenj.database.postgres.converters.StringConverter.toTuple(item.s2)
 		items(abc2Pos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.abc2, converterexample_test_Abc.toTuple)
+		items(tPos) = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.toTuple(item.t)
+		items(ttPos) = if (item.tt.isEmpty) net.revenj.database.postgres.converters.PostgresTuple.NULL else net.revenj.database.postgres.converters.ArrayTuple.createSeqOption(item.tt.get, net.revenj.database.postgres.converters.JodaLocalTimestampConverter.toTuple)
 		RecordTuple(items)
 	}
 
@@ -91,6 +95,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		items(fPosExtended) = net.revenj.database.postgres.converters.FloatConverter.toTuple(item.f)
 		items(bytesPosExtended) = net.revenj.database.postgres.converters.ByteaConverter.toTuple(item.bytes)
 		items(bbPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.bb, net.revenj.database.postgres.converters.ByteaConverter.toTuple)
+		items(dPosExtended) = net.revenj.database.postgres.converters.JodaDateConverter.toTuple(item.d)
+		items(ddPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.dd, net.revenj.database.postgres.converters.JodaDateConverter.toTuple)
 		items(vvvPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createIndexed(item.vvv, converterexample_test_Val.toTupleExtended)
 		items(hasVPosExtended) = net.revenj.database.postgres.converters.BoolConverter.toTuple(item.hasV)
 		items(hasAPosExtended) = net.revenj.database.postgres.converters.BoolConverter.toTuple(item.hasA)
@@ -100,6 +106,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		items(abc1PosExtended) = if (item.abc1.isEmpty) PostgresTuple.NULL else converterexample_test_Abc.toTupleExtended(item.abc1.get)
 		items(s2PosExtended) = net.revenj.database.postgres.converters.StringConverter.toTuple(item.s2)
 		items(abc2PosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.abc2, converterexample_test_Abc.toTupleExtended)
+		items(tPosExtended) = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.toTuple(item.t)
+		items(ttPosExtended) = if (item.tt.isEmpty) net.revenj.database.postgres.converters.PostgresTuple.NULL else net.revenj.database.postgres.converters.ArrayTuple.createSeqOption(item.tt.get, net.revenj.database.postgres.converters.JodaLocalTimestampConverter.toTuple)
 		RecordTuple(items)
 	}
 
@@ -134,6 +142,10 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "URI" in type test.AbcList. Check if database is out of sync with code!""")
 	}		
+	
+	container.registerClass[example.test.postgres.AbcListRepository](classOf[example.test.postgres.AbcListRepository], singleton = false)
+	container.registerFactory[net.revenj.patterns.SearchableRepository[example.test.AbcList]](c => new example.test.postgres.AbcListRepository(c), singleton = false)
+	container.registerFactory[net.revenj.patterns.Repository[example.test.AbcList]](c => new example.test.postgres.AbcListRepository(c), singleton = false)
 	private val sPos = columns.find(it => it.columnName == "s") match {
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "s" in type test.AbcList. Check if database is out of sync with code!""")
@@ -241,6 +253,22 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "bb" in type test.AbcList. Check if database is out of sync with code!""")
 	}		
+	private val dPos = columns.find(it => it.columnName == "d") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "d" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val dPosExtended = extendedColumns.find(it => it.columnName == "d") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "d" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val ddPos = columns.find(it => it.columnName == "dd") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "dd" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val ddPosExtended = extendedColumns.find(it => it.columnName == "dd") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "dd" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
 	private val vvvPos = columns.find(it => it.columnName == "vvv") match {
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "vvv" in type test.AbcList_entity. Check if database is out of sync with code!""")
@@ -316,10 +344,22 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "abc2" in type test.AbcList. Check if database is out of sync with code!""")
 	}		
-	
-	container.registerClass[example.test.postgres.AbcListRepository](classOf[example.test.postgres.AbcListRepository], singleton = false)
-	container.registerFactory[net.revenj.patterns.SearchableRepository[example.test.AbcList]](c => new example.test.postgres.AbcListRepository(c), singleton = false)
-	container.registerFactory[net.revenj.patterns.Repository[example.test.AbcList]](c => new example.test.postgres.AbcListRepository(c), singleton = false)
+	private val tPos = columns.find(it => it.columnName == "t") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "t" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val tPosExtended = extendedColumns.find(it => it.columnName == "t") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "t" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val ttPos = columns.find(it => it.columnName == "tt") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "tt" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
+	private val ttPosExtended = extendedColumns.find(it => it.columnName == "tt") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "tt" in type test.AbcList. Check if database is out of sync with code!""")
+	}		
 
 	
 	override def parseRaw(reader: PostgresReader, start: Int, context: Int): example.test.AbcList = {
@@ -346,6 +386,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		var _f_ :Float = 0.0f
 		var _bytes_ :Array[Byte] = Array[Byte]()
 		var _bb_ :List[Array[Byte]] = null
+		var _d_ :Option[org.joda.time.LocalDate] = None
+		var _dd_ :List[org.joda.time.LocalDate] = null
 		var _vvv_ :IndexedSeq[example.test.Val] = null
 		var _hasV_ :Boolean = false
 		var _hasA_ :Boolean = false
@@ -355,6 +397,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		var _abc1_ :Option[example.test.Abc] = None
 		var _s2_ :Option[String] = None
 		var _abc2_ :scala.collection.mutable.Queue[example.test.Abc] = null
+		var _t_ :org.joda.time.DateTime = org.joda.time.DateTime.now()
+		var _tt_ :Option[List[Option[org.joda.time.DateTime]]] = None
 		while(i < readers.length) {
 			val started = i
 			
@@ -372,6 +416,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 			if (fPos == i) { _f_ = net.revenj.database.postgres.converters.FloatConverter.parse(reader, context); i += 1 }
 			if (bytesPos == i) { _bytes_ = net.revenj.database.postgres.converters.ByteaConverter.parse(reader, context); i += 1 }
 			if (bbPos == i) { _bb_ = net.revenj.database.postgres.converters.ByteaConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Array[Byte]](0)).toList; i += 1 }
+			if (dPos == i) { _d_ = net.revenj.database.postgres.converters.JodaDateConverter.parseOption(reader, context); i += 1 }
+			if (ddPos == i) { _dd_ = net.revenj.database.postgres.converters.JodaDateConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[org.joda.time.LocalDate](0)).toList; i += 1 }
 			if (vvvPos == i) { _vvv_ = net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Val.from(rdr, 0, ctx), () => example.test.Val()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Val](0)).toIndexedSeq; i += 1 }
 			if (hasVPos == i) { _hasV_ = net.revenj.database.postgres.converters.BoolConverter.parse(reader, context); i += 1 }
 			if (hasAPos == i) { _hasA_ = net.revenj.database.postgres.converters.BoolConverter.parse(reader, context); i += 1 }
@@ -381,13 +427,15 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 			if (abc1Pos == i) { _abc1_ = converterexample_test_Abc.parseOption(reader, context); i += 1 }
 			if (s2Pos == i) { _s2_ = net.revenj.database.postgres.converters.StringConverter.parseOption(reader, context); i += 1 }
 			if (abc2Pos == i) { _abc2_ = scala.collection.mutable.Queue[example.test.Abc](net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Abc.from(rdr, 0, ctx), () => example.test.Abc()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Abc](0)) :_*); i += 1 }
+			if (tPos == i) { _t_ = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.parse(reader, context); i += 1 }
+			if (ttPos == i) { _tt_ = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.parseNullableCollectionOption(reader, context).map(_.toList); i += 1 }
 			if (i == started) {
 				net.revenj.database.postgres.converters.StringConverter.skip(reader, context)
 				i += 1
 			}
 		}
 		reader.read(outerContext)
-		example.test.AbcList(URI = _URI_, s = _s_, ii = _ii_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, v = _v_, vv = _vv_, x = _x_, f = _f_, bytes = _bytes_, bb = _bb_, vvv = _vvv_, hasV = _hasV_, hasA = _hasA_, ent1 = _ent1_, i = _i_, ent2 = _ent2_, abc1 = _abc1_, s2 = _s2_, abc2 = _abc2_)
+		example.test.AbcList(URI = _URI_, s = _s_, ii = _ii_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, v = _v_, vv = _vv_, x = _x_, f = _f_, bytes = _bytes_, bb = _bb_, d = _d_, dd = _dd_, vvv = _vvv_, hasV = _hasV_, hasA = _hasA_, ent1 = _ent1_, i = _i_, ent2 = _ent2_, abc1 = _abc1_, s2 = _s2_, abc2 = _abc2_, t = _t_, tt = _tt_)
 	}
 
 	def parseRawExtended(reader: PostgresReader, start: Int, context: Int): example.test.AbcList = {
@@ -414,6 +462,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		var _f_ :Float = 0.0f
 		var _bytes_ :Array[Byte] = Array[Byte]()
 		var _bb_ :List[Array[Byte]] = null
+		var _d_ :Option[org.joda.time.LocalDate] = None
+		var _dd_ :List[org.joda.time.LocalDate] = null
 		var _vvv_ :IndexedSeq[example.test.Val] = null
 		var _hasV_ :Boolean = false
 		var _hasA_ :Boolean = false
@@ -423,6 +473,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 		var _abc1_ :Option[example.test.Abc] = None
 		var _s2_ :Option[String] = None
 		var _abc2_ :scala.collection.mutable.Queue[example.test.Abc] = null
+		var _t_ :org.joda.time.DateTime = org.joda.time.DateTime.now()
+		var _tt_ :Option[List[Option[org.joda.time.DateTime]]] = None
 		while(i < extendedReaders.length) {
 			val started = i
 			
@@ -440,6 +492,8 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 			if (fPosExtended == i) { _f_ = net.revenj.database.postgres.converters.FloatConverter.parse(reader, context); i += 1 }
 			if (bytesPosExtended == i) { _bytes_ = net.revenj.database.postgres.converters.ByteaConverter.parse(reader, context); i += 1 }
 			if (bbPosExtended == i) { _bb_ = net.revenj.database.postgres.converters.ByteaConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Array[Byte]](0)).toList; i += 1 }
+			if (dPosExtended == i) { _d_ = net.revenj.database.postgres.converters.JodaDateConverter.parseOption(reader, context); i += 1 }
+			if (ddPosExtended == i) { _dd_ = net.revenj.database.postgres.converters.JodaDateConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[org.joda.time.LocalDate](0)).toList; i += 1 }
 			if (vvvPosExtended == i) { _vvv_ = net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Val.fromExtended(rdr, 0, ctx), () => example.test.Val()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Val](0)).toIndexedSeq; i += 1 }
 			if (hasVPosExtended == i) { _hasV_ = net.revenj.database.postgres.converters.BoolConverter.parse(reader, context); i += 1 }
 			if (hasAPosExtended == i) { _hasA_ = net.revenj.database.postgres.converters.BoolConverter.parse(reader, context); i += 1 }
@@ -449,13 +503,15 @@ class AbcListConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo]
 			if (abc1PosExtended == i) { _abc1_ = converterexample_test_Abc.parseOptionExtended(reader, context); i += 1 }
 			if (s2PosExtended == i) { _s2_ = net.revenj.database.postgres.converters.StringConverter.parseOption(reader, context); i += 1 }
 			if (abc2PosExtended == i) { _abc2_ = scala.collection.mutable.Queue[example.test.Abc](net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Abc.fromExtended(rdr, 0, ctx), () => example.test.Abc()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Abc](0)) :_*); i += 1 }
+			if (tPosExtended == i) { _t_ = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.parse(reader, context); i += 1 }
+			if (ttPosExtended == i) { _tt_ = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.parseNullableCollectionOption(reader, context).map(_.toList); i += 1 }
 			if (i == started) {
 				net.revenj.database.postgres.converters.StringConverter.skip(reader, context)
 				i += 1
 			}
 		}
 		reader.read(outerContext)
-		example.test.AbcList(URI = _URI_, s = _s_, ii = _ii_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, v = _v_, vv = _vv_, x = _x_, f = _f_, bytes = _bytes_, bb = _bb_, vvv = _vvv_, hasV = _hasV_, hasA = _hasA_, ent1 = _ent1_, i = _i_, ent2 = _ent2_, abc1 = _abc1_, s2 = _s2_, abc2 = _abc2_)
+		example.test.AbcList(URI = _URI_, s = _s_, ii = _ii_, en = _en_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, v = _v_, vv = _vv_, x = _x_, f = _f_, bytes = _bytes_, bb = _bb_, d = _d_, dd = _dd_, vvv = _vvv_, hasV = _hasV_, hasA = _hasA_, ent1 = _ent1_, i = _i_, ent2 = _ent2_, abc1 = _abc1_, s2 = _s2_, abc2 = _abc2_, t = _t_, tt = _tt_)
 	}
 
 	def initialize():Unit = {

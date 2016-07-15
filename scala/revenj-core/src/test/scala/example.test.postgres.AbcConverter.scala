@@ -71,6 +71,8 @@ class AbcConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		items(abc1URIPos) = net.revenj.database.postgres.converters.StringConverter.toTuple(item.abc1URI)
 		items(abc1IDPos) = net.revenj.database.postgres.converters.IntConverter.toTuple(item.abc1ID)
 		items(abc2URIPos) = net.revenj.database.postgres.converters.ArrayTuple.createIndexed(item.abc2URI, net.revenj.database.postgres.converters.StringConverter.toTuple)
+		items(tPos) = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.toTuple(item.t)
+		items(ttPos) = if (item.tt.isEmpty) net.revenj.database.postgres.converters.PostgresTuple.NULL else net.revenj.database.postgres.converters.ArrayTuple.createSeqOption(item.tt.get, net.revenj.database.postgres.converters.JodaLocalTimestampConverter.toTuple)
 		RecordTuple(items)
 	}
 
@@ -98,6 +100,8 @@ class AbcConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		items(abc1URIPosExtended) = net.revenj.database.postgres.converters.StringConverter.toTuple(item.abc1URI)
 		items(abc1IDPosExtended) = net.revenj.database.postgres.converters.IntConverter.toTuple(item.abc1ID)
 		items(abc2URIPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createIndexed(item.abc2URI, net.revenj.database.postgres.converters.StringConverter.toTuple)
+		items(tPosExtended) = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.toTuple(item.t)
+		items(ttPosExtended) = if (item.tt.isEmpty) net.revenj.database.postgres.converters.PostgresTuple.NULL else net.revenj.database.postgres.converters.ArrayTuple.createSeqOption(item.tt.get, net.revenj.database.postgres.converters.JodaLocalTimestampConverter.toTuple)
 		RecordTuple(items)
 	}
 
@@ -321,6 +325,22 @@ class AbcConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "abc2URI" in type test.Abc. Check if database is out of sync with code!""")
 	}		
+	private val tPos = columns.find(it => it.columnName == "t") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "t" in type test.Abc_entity. Check if database is out of sync with code!""")
+	}		
+	private val tPosExtended = extendedColumns.find(it => it.columnName == "t") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "t" in type test.Abc. Check if database is out of sync with code!""")
+	}		
+	private val ttPos = columns.find(it => it.columnName == "tt") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "tt" in type test.Abc_entity. Check if database is out of sync with code!""")
+	}		
+	private val ttPosExtended = extendedColumns.find(it => it.columnName == "tt") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "tt" in type test.Abc. Check if database is out of sync with code!""")
+	}		
 	container.registerFactory[net.revenj.patterns.PersistableRepository[example.test.Abc]](c => new example.test.postgres.AbcRepository(c), singleton = false)
 
 	
@@ -353,7 +373,7 @@ class AbcConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 	def initialize():Unit = {
 		
 	
-		example.test.Abc.configureConverters(readers, IDPos, sPos, iiPos, enPos, en2Pos, en3Pos, i4Pos, anotherPos, converterexample_test_Another, iiiPos, iiiiPos, ssPos, sssPos, ssssPos, vPos, converterexample_test_Val, vvPos, converterexample_test_Val, vvvPos, converterexample_test_Val, aPos, converterexample_test_Another, ent1Pos, converterexample_test_Ent1, ent2Pos, converterexample_test_Ent2, abc1URIPos, abc1IDPos, abc2URIPos)
-		example.test.Abc.configureExtendedConverters(extendedReaders, IDPosExtended, sPosExtended, iiPosExtended, enPosExtended, en2PosExtended, en3PosExtended, i4PosExtended, anotherPosExtended, converterexample_test_Another, iiiPosExtended, iiiiPosExtended, ssPosExtended, sssPosExtended, ssssPosExtended, vPosExtended, converterexample_test_Val, vvPosExtended, converterexample_test_Val, vvvPosExtended, converterexample_test_Val, aPosExtended, converterexample_test_Another, ent1PosExtended, converterexample_test_Ent1, ent2PosExtended, converterexample_test_Ent2, abc1URIPosExtended, abc1IDPosExtended, abc2URIPosExtended)
+		example.test.Abc.configureConverters(readers, IDPos, sPos, iiPos, enPos, en2Pos, en3Pos, i4Pos, anotherPos, converterexample_test_Another, iiiPos, iiiiPos, ssPos, sssPos, ssssPos, vPos, converterexample_test_Val, vvPos, converterexample_test_Val, vvvPos, converterexample_test_Val, aPos, converterexample_test_Another, ent1Pos, converterexample_test_Ent1, ent2Pos, converterexample_test_Ent2, abc1URIPos, abc1IDPos, abc2URIPos, tPos, ttPos)
+		example.test.Abc.configureExtendedConverters(extendedReaders, IDPosExtended, sPosExtended, iiPosExtended, enPosExtended, en2PosExtended, en3PosExtended, i4PosExtended, anotherPosExtended, converterexample_test_Another, iiiPosExtended, iiiiPosExtended, ssPosExtended, sssPosExtended, ssssPosExtended, vPosExtended, converterexample_test_Val, vvPosExtended, converterexample_test_Val, vvvPosExtended, converterexample_test_Val, aPosExtended, converterexample_test_Another, ent1PosExtended, converterexample_test_Ent1, ent2PosExtended, converterexample_test_Ent2, abc1URIPosExtended, abc1IDPosExtended, abc2URIPosExtended, tPosExtended, ttPosExtended)
 	}
 }

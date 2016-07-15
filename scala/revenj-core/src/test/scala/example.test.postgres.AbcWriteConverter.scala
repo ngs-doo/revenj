@@ -114,7 +114,9 @@ class AbcWriteConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo
 	}
 
 	
-	container.registerFactory[net.revenj.patterns.PersistableRepository[example.test.AbcWrite]](c => new example.test.postgres.AbcWriteRepository(c), singleton = false)
+	
+	container.registerClass[example.test.postgres.AbcWriteRepository](classOf[example.test.postgres.AbcWriteRepository], singleton = false)
+	container.registerFactory[net.revenj.patterns.SearchableRepository[example.test.AbcWrite]](c => new example.test.postgres.AbcWriteRepository(c), singleton = false)
 	
 	def buildURI(_sw: net.revenj.database.postgres.PostgresBuffer, instance: example.test.AbcWrite): String = {
 		buildURI(instance.ID, _sw)
@@ -126,6 +128,7 @@ class AbcWriteConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo
 		net.revenj.database.postgres.converters.IntConverter.serializeURI(_sw, ID)
 		_sw.bufferToString()
 	}
+	container.registerFactory[net.revenj.patterns.PersistableRepository[example.test.AbcWrite]](c => new example.test.postgres.AbcWriteRepository(c), singleton = false)
 	private val IDPos = columns.find(it => it.columnName == "ID") match {
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "ID" in type test.AbcWrite. Check if database is out of sync with code!""")
@@ -265,9 +268,6 @@ class AbcWriteConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "ssss" in type test.AbcWrite. Check if database is out of sync with code!""")
 	}		
-	
-	container.registerClass[example.test.postgres.AbcWriteRepository](classOf[example.test.postgres.AbcWriteRepository], singleton = false)
-	container.registerFactory[net.revenj.patterns.SearchableRepository[example.test.AbcWrite]](c => new example.test.postgres.AbcWriteRepository(c), singleton = false)
 
 	
 	override def parseRaw(reader: PostgresReader, start: Int, context: Int): example.test.AbcWrite = {

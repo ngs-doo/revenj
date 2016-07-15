@@ -29,6 +29,8 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 	  private var _abc1ID: Option[Int],
 	  @transient private var _abc2: scala.collection.mutable.Queue[example.test.Abc],
 	  private var _abc2URI: IndexedSeq[String],
+	  private var _t: org.joda.time.DateTime,
+	  private var _tt: Option[List[Option[org.joda.time.DateTime]]],
 	  @transient private val __locator: Option[net.revenj.patterns.ServiceLocator]
 	) extends Serializable with net.revenj.patterns.AggregateRoot {
 	
@@ -56,7 +58,7 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 	override def toString = "Abc("+ URI +")"
 	
 		
-	 def copy(s: String = this._s, ii: Array[Int] = this._ii, en: example.test.En = this._en, en2: Option[example.test.En] = this._en2, en3: scala.collection.mutable.LinkedList[example.test.En] = this._en3, i4: scala.collection.mutable.LinkedList[Int] = this._i4, another: scala.collection.mutable.LinkedList[example.test.Another] = this._another, iii: Option[Array[Int]] = this._iii, iiii: Array[Option[Int]] = this._iiii, ss: Option[String] = this._ss, sss: List[String] = this._sss, ssss: Option[List[Option[String]]] = this._ssss, v: example.test.Val = this._v, vv: Option[example.test.Val] = this._vv, vvv: IndexedSeq[example.test.Val] = this._vvv, a: Set[Option[example.test.Another]] = this._a, ent1: example.test.Ent1 = this._ent1, ent2: Array[example.test.Ent2] = this._ent2, abc1: Option[example.test.Abc] = null, abc2: scala.collection.mutable.Queue[example.test.Abc] = null): Abc = {
+	 def copy(s: String = this._s, ii: Array[Int] = this._ii, en: example.test.En = this._en, en2: Option[example.test.En] = this._en2, en3: scala.collection.mutable.LinkedList[example.test.En] = this._en3, i4: scala.collection.mutable.LinkedList[Int] = this._i4, another: scala.collection.mutable.LinkedList[example.test.Another] = this._another, iii: Option[Array[Int]] = this._iii, iiii: Array[Option[Int]] = this._iiii, ss: Option[String] = this._ss, sss: List[String] = this._sss, ssss: Option[List[Option[String]]] = this._ssss, v: example.test.Val = this._v, vv: Option[example.test.Val] = this._vv, vvv: IndexedSeq[example.test.Val] = this._vvv, a: Set[Option[example.test.Another]] = this._a, ent1: example.test.Ent1 = this._ent1, ent2: Array[example.test.Ent2] = this._ent2, abc1: Option[example.test.Abc] = null, abc2: scala.collection.mutable.Queue[example.test.Abc] = null, t: org.joda.time.DateTime = this._t, tt: Option[List[Option[org.joda.time.DateTime]]] = this._tt): Abc = {
 		
 
 			
@@ -92,37 +94,12 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 	require(ent2 ne null, "Null value was provided for property \"ent2\"")
 	net.revenj.Guards.checkArrayNulls(ent2)
 	net.revenj.Guards.checkCollectionNulls(abc2)
-		new Abc(_URI = this.URI, _ID = _ID, _s = s, _ii = ii, _en = en, _en2 = en2, _en3 = en3, _i4 = i4, _another = another, _iii = iii, _iiii = iiii, _ss = ss, _sss = sss, _ssss = ssss, _v = v, _vv = vv, _vvv = vvv, _a = a, _ent1 = ent1, _ent2 = ent2, _abc1 = if(abc1 != null) abc1 else _abc1, _abc1URI = if (abc1 != null) abc1.map(_.URI) else this._abc1URI, _abc1ID = if(abc1 != null) abc1.map(_.ID) else this._abc1ID, _abc2 = if(abc2 != null) abc2 else _abc2, _abc2URI = if (abc2 != null) abc2.toIndexedSeq.map(_.URI) else this._abc2URI, __locator = this.__locator)
+	require(t ne null, "Null value was provided for property \"t\"")
+	require(tt ne null, "Null value was provided for property \"tt\"")
+	if(tt.isDefined) require(tt.get ne null, "Null value was provided for property \"tt\"")
+	net.revenj.Guards.checkCollectionOptionRefNulls(tt)
+		new Abc(_URI = this.URI, _ID = _ID, _s = s, _ii = ii, _en = en, _en2 = en2, _en3 = en3, _i4 = i4, _another = another, _iii = iii, _iiii = iiii, _ss = ss, _sss = sss, _ssss = ssss, _v = v, _vv = vv, _vvv = vvv, _a = a, _ent1 = ent1, _ent2 = ent2, _abc1 = if(abc1 != null) abc1 else _abc1, _abc1URI = if (abc1 != null) abc1.map(_.URI) else this._abc1URI, _abc1ID = if(abc1 != null) abc1.map(_.ID) else this._abc1ID, _abc2 = if(abc2 != null) abc2 else _abc2, _abc2URI = if (abc2 != null) abc2.toIndexedSeq.map(_.URI) else this._abc2URI, _t = t, _tt = tt, __locator = this.__locator)
 	}
-
-	
-	@com.fasterxml.jackson.annotation.JsonCreator private def this(
-		@com.fasterxml.jackson.annotation.JacksonInject("__locator") __locator__ : net.revenj.patterns.ServiceLocator
-	, @com.fasterxml.jackson.annotation.JsonProperty("URI") URI: String
-	, @com.fasterxml.jackson.annotation.JsonProperty("ID") ID: Int
-	, @com.fasterxml.jackson.annotation.JsonProperty("s") s: String
-	, @com.fasterxml.jackson.annotation.JsonProperty("ii") ii: Array[Int]
-	, @com.fasterxml.jackson.annotation.JsonProperty("en") en: example.test.En
-	, @com.fasterxml.jackson.annotation.JsonProperty("en2") en2: Option[example.test.En]
-	, @com.fasterxml.jackson.annotation.JsonProperty("en3") en3: scala.collection.mutable.LinkedList[example.test.En]
-	, @com.fasterxml.jackson.annotation.JsonProperty("i4") i4: scala.collection.mutable.LinkedList[Int]
-	, @com.fasterxml.jackson.annotation.JsonProperty("another") another: scala.collection.mutable.LinkedList[example.test.Another]
-	, @com.fasterxml.jackson.annotation.JsonProperty("iii") iii: Option[Array[Int]]
-	, @com.fasterxml.jackson.annotation.JsonProperty("iiii") iiii: Array[Option[Int]]
-	, @com.fasterxml.jackson.annotation.JsonProperty("ss") ss: Option[String]
-	, @com.fasterxml.jackson.annotation.JsonProperty("sss") sss: List[String]
-	, @com.fasterxml.jackson.annotation.JsonProperty("ssss") ssss: Option[List[Option[String]]]
-	, @com.fasterxml.jackson.annotation.JsonProperty("v") v: example.test.Val
-	, @com.fasterxml.jackson.annotation.JsonProperty("vv") vv: Option[example.test.Val]
-	, @com.fasterxml.jackson.annotation.JsonProperty("vvv") vvv: IndexedSeq[example.test.Val]
-	, @com.fasterxml.jackson.annotation.JsonProperty("a") a: Set[Option[example.test.Another]]
-	, @com.fasterxml.jackson.annotation.JsonProperty("ent1") ent1: example.test.Ent1
-	, @com.fasterxml.jackson.annotation.JsonProperty("ent2") ent2: Array[example.test.Ent2]
-	, @com.fasterxml.jackson.annotation.JsonProperty("abc1URI") abc1URI: Option[String]
-	, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(contentAs = classOf[java.lang.Integer]) @com.fasterxml.jackson.annotation.JsonProperty("abc1ID") abc1ID: Option[Int]
-	, @com.fasterxml.jackson.annotation.JsonProperty("abc2URI") abc2URI: IndexedSeq[String]
-	) =
-	  this(_URI = URI, __locator = Some(__locator__), _ID = ID, _s = if (s == null) "" else s, _ii = if (ii == null) Array.empty else ii, _en = if (en == null) example.test.En.A else en, _en2 = en2, _en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, _i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, _another = if (another == null) scala.collection.mutable.LinkedList.empty else another, _iii = iii, _iiii = if (iiii == null) Array.empty else iiii, _ss = ss, _sss = if (sss == null) List.empty else sss, _ssss = ssss, _v = if (v == null) example.test.Val() else v, _vv = vv, _vvv = if (vvv == null) IndexedSeq.empty else vvv, _a = if (a == null) Set.empty else a, _ent1 = ent1, _ent2 = if (ent2 == null) Array.empty else ent2, _abc1URI = abc1URI, _abc1 = null, _abc1ID = abc1ID, _abc2URI = if (abc2URI == null) IndexedSeq.empty else abc2URI, _abc2 = null)
 
 	
 	
@@ -427,12 +404,12 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 	def abc1_= (value: Option[example.test.Abc]) { 
 		_abc1 = value
 		
-		_abc1URI = value.map(_.URI)
 		
 		if (value.isEmpty && abc1ID != None)
 			abc1ID = None
 		else if(value.isDefined && abc1ID != value.map(_.ID))
 			abc1ID = value.map(_.ID)
+		_abc1URI = value.map(_.URI)
 	}
 
 	
@@ -486,6 +463,64 @@ class Abc @com.fasterxml.jackson.annotation.JsonIgnore()  private(
 		else _abc2URI
 	}
 
+	
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("t")
+	def t = { 
+		_t
+	}
+
+	
+	def t_= (value: org.joda.time.DateTime) { 
+		_t = value
+		
+	}
+
+	
+	
+	@com.fasterxml.jackson.annotation.JsonProperty("tt")
+	def tt = { 
+		_tt
+	}
+
+	
+	def tt_= (value: Option[List[Option[org.joda.time.DateTime]]]) { 
+		net.revenj.Guards.checkCollectionOptionRefNulls(value)
+		_tt = value
+		
+	}
+
+	
+	@com.fasterxml.jackson.annotation.JsonCreator private def this(
+		@com.fasterxml.jackson.annotation.JacksonInject("__locator") __locator__ : net.revenj.patterns.ServiceLocator
+	, @com.fasterxml.jackson.annotation.JsonProperty("URI") URI: String
+	, @com.fasterxml.jackson.annotation.JsonProperty("ID") ID: Int
+	, @com.fasterxml.jackson.annotation.JsonProperty("s") s: String
+	, @com.fasterxml.jackson.annotation.JsonProperty("ii") ii: Array[Int]
+	, @com.fasterxml.jackson.annotation.JsonProperty("en") en: example.test.En
+	, @com.fasterxml.jackson.annotation.JsonProperty("en2") en2: Option[example.test.En]
+	, @com.fasterxml.jackson.annotation.JsonProperty("en3") en3: scala.collection.mutable.LinkedList[example.test.En]
+	, @com.fasterxml.jackson.annotation.JsonProperty("i4") i4: scala.collection.mutable.LinkedList[Int]
+	, @com.fasterxml.jackson.annotation.JsonProperty("another") another: scala.collection.mutable.LinkedList[example.test.Another]
+	, @com.fasterxml.jackson.annotation.JsonProperty("iii") iii: Option[Array[Int]]
+	, @com.fasterxml.jackson.annotation.JsonProperty("iiii") iiii: Array[Option[Int]]
+	, @com.fasterxml.jackson.annotation.JsonProperty("ss") ss: Option[String]
+	, @com.fasterxml.jackson.annotation.JsonProperty("sss") sss: List[String]
+	, @com.fasterxml.jackson.annotation.JsonProperty("ssss") ssss: Option[List[Option[String]]]
+	, @com.fasterxml.jackson.annotation.JsonProperty("v") v: example.test.Val
+	, @com.fasterxml.jackson.annotation.JsonProperty("vv") vv: Option[example.test.Val]
+	, @com.fasterxml.jackson.annotation.JsonProperty("vvv") vvv: IndexedSeq[example.test.Val]
+	, @com.fasterxml.jackson.annotation.JsonProperty("a") a: Set[Option[example.test.Another]]
+	, @com.fasterxml.jackson.annotation.JsonProperty("ent1") ent1: example.test.Ent1
+	, @com.fasterxml.jackson.annotation.JsonProperty("ent2") ent2: Array[example.test.Ent2]
+	, @com.fasterxml.jackson.annotation.JsonProperty("abc1URI") abc1URI: Option[String]
+	, @com.fasterxml.jackson.databind.annotation.JsonDeserialize(contentAs = classOf[java.lang.Integer]) @com.fasterxml.jackson.annotation.JsonProperty("abc1ID") abc1ID: Option[Int]
+	, @com.fasterxml.jackson.annotation.JsonProperty("abc2URI") abc2URI: IndexedSeq[String]
+	, @com.fasterxml.jackson.annotation.JsonProperty("t") t: org.joda.time.DateTime
+	, @com.fasterxml.jackson.annotation.JsonProperty("tt") tt: Option[List[Option[org.joda.time.DateTime]]]
+	) =
+	  this(_URI = URI, __locator = Some(__locator__), _ID = ID, _s = if (s == null) "" else s, _ii = if (ii == null) Array.empty else ii, _en = if (en == null) example.test.En.A else en, _en2 = en2, _en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, _i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, _another = if (another == null) scala.collection.mutable.LinkedList.empty else another, _iii = iii, _iiii = if (iiii == null) Array.empty else iiii, _ss = ss, _sss = if (sss == null) List.empty else sss, _ssss = ssss, _v = if (v == null) example.test.Val() else v, _vv = vv, _vvv = if (vvv == null) IndexedSeq.empty else vvv, _a = if (a == null) Set.empty else a, _ent1 = ent1, _ent2 = if (ent2 == null) Array.empty else ent2, _abc1URI = abc1URI, _abc1 = null, _abc1ID = abc1ID, _abc2URI = if (abc2URI == null) IndexedSeq.empty else abc2URI, _abc2 = null, _t = if (t == null) org.joda.time.DateTime.now() else t, _tt = tt)
+
 }
 
 object Abc{
@@ -511,17 +546,19 @@ object Abc{
 	, ent2: Array[example.test.Ent2] = Array.empty
 	, abc1: Option[example.test.Abc] = None
 	, abc2: scala.collection.mutable.Queue[example.test.Abc] = scala.collection.mutable.Queue.empty
+	, t: org.joda.time.DateTime = org.joda.time.DateTime.now()
+	, tt: Option[List[Option[org.joda.time.DateTime]]] = None
 	) = {
 		require(s ne null, "Null value was provided for property \"s\"")
 		require(ii ne null, "Null value was provided for property \"ii\"")
 		require(en ne null, "Null value was provided for property \"en\"")
 		require(en2 ne null, "Null value was provided for property \"en2\"")
 		if (en2.isDefined) require(en2.get ne null, "Null value was provided for property \"en2\"")
-		require(en3 ne null, "Null value was provided for property \"en3\"")
 		net.revenj.Guards.checkCollectionNulls(en3)
+		require(en3 ne null, "Null value was provided for property \"en3\"")
 		require(i4 ne null, "Null value was provided for property \"i4\"")
-		require(another ne null, "Null value was provided for property \"another\"")
 		net.revenj.Guards.checkCollectionNulls(another)
+		require(another ne null, "Null value was provided for property \"another\"")
 		require(iii ne null, "Null value was provided for property \"iii\"")
 		if (iii.isDefined) require(iii.get ne null, "Null value was provided for property \"iii\"")
 		net.revenj.Guards.checkArrayOptionValNulls(iiii)
@@ -536,17 +573,21 @@ object Abc{
 		require(v ne null, "Null value was provided for property \"v\"")
 		require(vv ne null, "Null value was provided for property \"vv\"")
 		if (vv.isDefined) require(vv.get ne null, "Null value was provided for property \"vv\"")
-		require(vvv ne null, "Null value was provided for property \"vvv\"")
 		net.revenj.Guards.checkCollectionNulls(vvv)
-		require(a ne null, "Null value was provided for property \"a\"")
+		require(vvv ne null, "Null value was provided for property \"vvv\"")
 		net.revenj.Guards.checkCollectionOptionRefNulls(a)
+		require(a ne null, "Null value was provided for property \"a\"")
 		require(ent1 ne null, "Null value was provided for property \"ent1\"")
-		require(ent2 ne null, "Null value was provided for property \"ent2\"")
 		net.revenj.Guards.checkArrayNulls(ent2)
+		require(ent2 ne null, "Null value was provided for property \"ent2\"")
 		require(abc1 ne null, "Null value was provided for property \"abc1\"")
 		if (abc1.isDefined) require(abc1.get ne null, "Null value was provided for property \"abc1\"")
-		require(abc2 ne null, "Null value was provided for property \"abc2\"")
 		net.revenj.Guards.checkCollectionNulls(abc2)
+		require(abc2 ne null, "Null value was provided for property \"abc2\"")
+		require(t ne null, "Null value was provided for property \"t\"")
+		net.revenj.Guards.checkCollectionOptionRefNulls(tt)
+		require(tt ne null, "Null value was provided for property \"tt\"")
+		if (tt.isDefined) require(tt.get ne null, "Null value was provided for property \"tt\"")
 		new Abc(
 			_URI = java.util.UUID.randomUUID.toString
 		, _ID = 0
@@ -573,6 +614,8 @@ object Abc{
 		, _abc1ID = abc1.map(_.ID)
 		, _abc2 = abc2
 		, _abc2URI = abc2.toIndexedSeq.map(_.URI)
+		, _t = t
+		, _tt = tt
 		, __locator = None)
 	}
 
@@ -655,7 +698,9 @@ object Abc{
 			_abc1URI = None, 
 			_abc1ID = None, 
 			_abc2 = null, 
-			_abc2URI = null)
+			_abc2URI = null, 
+			_t = org.joda.time.DateTime.now(), 
+			_tt = None)
 		var i = 0
 		while (i < converters.length) {
 			instance = converters(i)(instance, reader, context)
@@ -695,7 +740,9 @@ object Abc{
 		_converterent2 : example.test.postgres.Ent2Converter, 
 			abc1URIPos: Int, 
 			abc1IDPos: Int, 
-			abc2URIPos: Int): Unit = {
+			abc2URIPos: Int, 
+			tPos: Int, 
+			ttPos: Int): Unit = {
 		
 			converters(IDPos) = (item, reader, context) => { item._ID = net.revenj.database.postgres.converters.IntConverter.parse(reader, context); item }
 			converters(sPos) = (item, reader, context) => { item._s = net.revenj.database.postgres.converters.StringConverter.parse(reader, context); item }
@@ -719,6 +766,8 @@ object Abc{
 			converters(abc1URIPos) = (item, reader, context) => { item._abc1URI = net.revenj.database.postgres.converters.StringConverter.parseOption(reader, context); item }
 			converters(abc1IDPos) = (item, reader, context) => { item._abc1ID = net.revenj.database.postgres.converters.IntConverter.parseOption(reader, context); item }
 			converters(abc2URIPos) = (item, reader, context) => { item._abc2URI = net.revenj.database.postgres.converters.StringConverter.parseCollection(reader, context); item }
+			converters(tPos) = (item, reader, context) => { item._t = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.parse(reader, context); item }
+			converters(ttPos) = (item, reader, context) => { item._tt = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.parseNullableCollectionOption(reader, context).map(_.toList); item }
 	}
 
 	private[test] def configureExtendedConverters(
@@ -751,7 +800,9 @@ object Abc{
 		_converterent2 : example.test.postgres.Ent2Converter, 
 			abc1URIPosExtended: Int, 
 			abc1IDPosExtended: Int, 
-			abc2URIPosExtended: Int): Unit = {
+			abc2URIPosExtended: Int, 
+			tPosExtended: Int, 
+			ttPosExtended: Int): Unit = {
 		
 			converters(IDPosExtended) = (item, reader, context) => { item._ID = net.revenj.database.postgres.converters.IntConverter.parse(reader, context); item }
 			converters(sPosExtended) = (item, reader, context) => { item._s = net.revenj.database.postgres.converters.StringConverter.parse(reader, context); item }
@@ -775,6 +826,8 @@ object Abc{
 			converters(abc1URIPosExtended) = (item, reader, context) => { item._abc1URI = net.revenj.database.postgres.converters.StringConverter.parseOption(reader, context); item }
 			converters(abc1IDPosExtended) = (item, reader, context) => { item._abc1ID = net.revenj.database.postgres.converters.IntConverter.parseOption(reader, context); item }
 			converters(abc2URIPosExtended) = (item, reader, context) => { item._abc2URI = net.revenj.database.postgres.converters.StringConverter.parseCollection(reader, context); item }
+			converters(tPosExtended) = (item, reader, context) => { item._t = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.parse(reader, context); item }
+			converters(ttPosExtended) = (item, reader, context) => { item._tt = net.revenj.database.postgres.converters.JodaLocalTimestampConverter.parseNullableCollectionOption(reader, context).map(_.toList); item }
 	}
 
 }

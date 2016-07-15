@@ -63,7 +63,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		items(en3Pos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.en3, converterexample_test_En.toTuple)
 		items(i4Pos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.i4, net.revenj.database.postgres.converters.IntConverter.toTuple)
 		items(anotherPos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.another, converterexample_test_Another.toTuple)
-		items(dPos) = net.revenj.database.postgres.converters.DateConverter.toTuple(item.d)
+		items(dPos) = net.revenj.database.postgres.converters.JodaDateConverter.toTuple(item.d)
+		items(ddPos) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.dd, net.revenj.database.postgres.converters.JodaDateConverter.toTuple)
 		RecordTuple(items)
 	}
 
@@ -83,7 +84,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		items(en3PosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.en3, converterexample_test_En.toTuple)
 		items(i4PosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.i4, net.revenj.database.postgres.converters.IntConverter.toTuple)
 		items(anotherPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.another, converterexample_test_Another.toTupleExtended)
-		items(dPosExtended) = net.revenj.database.postgres.converters.DateConverter.toTuple(item.d)
+		items(dPosExtended) = net.revenj.database.postgres.converters.JodaDateConverter.toTuple(item.d)
+		items(ddPosExtended) = net.revenj.database.postgres.converters.ArrayTuple.createSeq(item.dd, net.revenj.database.postgres.converters.JodaDateConverter.toTuple)
 		RecordTuple(items)
 	}
 
@@ -232,6 +234,14 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		case Some(col) => col.order - 1
 		case None => throw new IllegalArgumentException("""Couldn't find column "d" in type test.Val. Check if database is out of sync with code!""")
 	}		
+	private val ddPos = columns.find(it => it.columnName == "dd") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "dd" in type test.Val. Check if database is out of sync with code!""")
+	}		
+	private val ddPosExtended = extendedColumns.find(it => it.columnName == "dd") match {
+		case Some(col) => col.order - 1
+		case None => throw new IllegalArgumentException("""Couldn't find column "dd" in type test.Val. Check if database is out of sync with code!""")
+	}		
 
 	
 	override def parseRaw(reader: PostgresReader, start: Int, context: Int): example.test.Val = {
@@ -258,7 +268,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		var _en3_ :scala.collection.mutable.LinkedList[example.test.En] = null
 		var _i4_ :scala.collection.mutable.LinkedList[Int] = null
 		var _another_ :scala.collection.mutable.LinkedList[example.test.Another] = null
-		var _d_ :Option[java.time.LocalDate] = None
+		var _d_ :Option[org.joda.time.LocalDate] = None
+		var _dd_ :List[org.joda.time.LocalDate] = null
 		while(i < readers.length) {
 			val started = i
 			
@@ -276,14 +287,15 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 			if (en3Pos == i) { _en3_ = scala.collection.mutable.LinkedList[example.test.En](example.test.postgres.EnConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.En](0)) :_*); i += 1 }
 			if (i4Pos == i) { _i4_ = scala.collection.mutable.LinkedList[Int](net.revenj.database.postgres.converters.IntConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Int](0)) :_*); i += 1 }
 			if (anotherPos == i) { _another_ = scala.collection.mutable.LinkedList[example.test.Another](net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Another.from(rdr, 0, ctx), () => example.test.Another()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Another](0)) :_*); i += 1 }
-			if (dPos == i) { _d_ = net.revenj.database.postgres.converters.DateConverter.parseOption(reader, context); i += 1 }
+			if (dPos == i) { _d_ = net.revenj.database.postgres.converters.JodaDateConverter.parseOption(reader, context); i += 1 }
+			if (ddPos == i) { _dd_ = net.revenj.database.postgres.converters.JodaDateConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[org.joda.time.LocalDate](0)).toList; i += 1 }
 			if (i == started) {
 				net.revenj.database.postgres.converters.StringConverter.skip(reader, context)
 				i += 1
 			}
 		}
 		reader.read(outerContext)
-		example.test.Val(x = _x_, f = _f_, ff = _ff_, a = _a_, aa = _aa_, aaa = _aaa_, aaaa = _aaaa_, en = _en_, bytes = _bytes_, bb = _bb_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, d = _d_)
+		example.test.Val(x = _x_, f = _f_, ff = _ff_, a = _a_, aa = _aa_, aaa = _aaa_, aaaa = _aaaa_, en = _en_, bytes = _bytes_, bb = _bb_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, d = _d_, dd = _dd_)
 	}
 
 	def parseRawExtended(reader: PostgresReader, start: Int, context: Int): example.test.Val = {
@@ -310,7 +322,8 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 		var _en3_ :scala.collection.mutable.LinkedList[example.test.En] = null
 		var _i4_ :scala.collection.mutable.LinkedList[Int] = null
 		var _another_ :scala.collection.mutable.LinkedList[example.test.Another] = null
-		var _d_ :Option[java.time.LocalDate] = None
+		var _d_ :Option[org.joda.time.LocalDate] = None
+		var _dd_ :List[org.joda.time.LocalDate] = null
 		while(i < extendedReaders.length) {
 			val started = i
 			
@@ -328,14 +341,15 @@ class ValConverter(allColumns: List[net.revenj.database.postgres.ColumnInfo], co
 			if (en3PosExtended == i) { _en3_ = scala.collection.mutable.LinkedList[example.test.En](example.test.postgres.EnConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.En](0)) :_*); i += 1 }
 			if (i4PosExtended == i) { _i4_ = scala.collection.mutable.LinkedList[Int](net.revenj.database.postgres.converters.IntConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[Int](0)) :_*); i += 1 }
 			if (anotherPosExtended == i) { _another_ = scala.collection.mutable.LinkedList[example.test.Another](net.revenj.database.postgres.converters.ArrayTuple.parse(reader, context, (rdr, ctx) => converterexample_test_Another.fromExtended(rdr, 0, ctx), () => example.test.Another()).getOrElse(new scala.collection.mutable.ArrayBuffer[example.test.Another](0)) :_*); i += 1 }
-			if (dPosExtended == i) { _d_ = net.revenj.database.postgres.converters.DateConverter.parseOption(reader, context); i += 1 }
+			if (dPosExtended == i) { _d_ = net.revenj.database.postgres.converters.JodaDateConverter.parseOption(reader, context); i += 1 }
+			if (ddPosExtended == i) { _dd_ = net.revenj.database.postgres.converters.JodaDateConverter.parseCollectionOption(reader, context).getOrElse(new scala.collection.mutable.ArrayBuffer[org.joda.time.LocalDate](0)).toList; i += 1 }
 			if (i == started) {
 				net.revenj.database.postgres.converters.StringConverter.skip(reader, context)
 				i += 1
 			}
 		}
 		reader.read(outerContext)
-		example.test.Val(x = _x_, f = _f_, ff = _ff_, a = _a_, aa = _aa_, aaa = _aaa_, aaaa = _aaaa_, en = _en_, bytes = _bytes_, bb = _bb_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, d = _d_)
+		example.test.Val(x = _x_, f = _f_, ff = _ff_, a = _a_, aa = _aa_, aaa = _aaa_, aaaa = _aaaa_, en = _en_, bytes = _bytes_, bb = _bb_, en2 = _en2_, en3 = _en3_, i4 = _i4_, another = _another_, d = _d_, dd = _dd_)
 	}
 
 	def initialize():Unit = {

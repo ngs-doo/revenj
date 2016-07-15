@@ -18,7 +18,8 @@ case class Val(
 	  @com.fasterxml.jackson.annotation.JsonProperty("en3") en3: scala.collection.mutable.LinkedList[example.test.En] = scala.collection.mutable.LinkedList.empty,
 	  @com.fasterxml.jackson.annotation.JsonProperty("i4") i4: scala.collection.mutable.LinkedList[Int] = scala.collection.mutable.LinkedList.empty,
 	  @com.fasterxml.jackson.annotation.JsonProperty("another") another: scala.collection.mutable.LinkedList[example.test.Another] = scala.collection.mutable.LinkedList.empty,
-	  @com.fasterxml.jackson.annotation.JsonProperty("d") d: Option[java.time.LocalDate] = None
+	  @com.fasterxml.jackson.annotation.JsonProperty("d") d: Option[org.joda.time.LocalDate] = None,
+	  @com.fasterxml.jackson.annotation.JsonProperty("dd") dd: List[org.joda.time.LocalDate] = List.empty
 	) {
 	
 		require(x ne null, "Null value was provided for property \"x\"")
@@ -44,6 +45,8 @@ case class Val(
 		net.revenj.Guards.checkCollectionNulls(another)
 		require(d ne null, "Null value was provided for property \"d\"")
 		if (d.isDefined) require(d.get ne null, "Null value was provided for property \"d\"")
+		require(dd ne null, "Null value was provided for property \"dd\"")
+		net.revenj.Guards.checkCollectionNulls(dd)
 	
 	private var _hasD : Boolean = false
 	
@@ -70,6 +73,8 @@ case class Val(
 object Val{
 
 	
+		def hasD(it : example.test.Val):Boolean = it.d.isDefined
+		def enSize(it : example.test.Val): Int = (it.en3.size)
 		
 	@com.fasterxml.jackson.annotation.JsonCreator def jackson(
 		@com.fasterxml.jackson.databind.annotation.JsonDeserialize(contentAs = classOf[java.lang.Integer]) @com.fasterxml.jackson.annotation.JsonProperty("xx") x: Option[Int],
@@ -86,10 +91,9 @@ object Val{
 		@com.fasterxml.jackson.annotation.JsonProperty("en3") en3: scala.collection.mutable.LinkedList[example.test.En],
 		@com.fasterxml.jackson.annotation.JsonProperty("i4") i4: scala.collection.mutable.LinkedList[Int],
 		@com.fasterxml.jackson.annotation.JsonProperty("another") another: scala.collection.mutable.LinkedList[example.test.Another],
-		@com.fasterxml.jackson.annotation.JsonProperty("d") d: Option[java.time.LocalDate]) = {
-		Val(  x = x, f = f, ff = if (ff == null) Set.empty else ff, a = if (a == null) example.test.Another() else a, aa = aa, aaa = if (aaa == null) Array.empty else aaa, aaaa = if (aaaa == null) List.empty else aaaa, en = if (en == null) example.test.En.A else en, bytes = if (bytes == null) Array[Byte]() else bytes, bb = if (bb == null) List.empty else bb, en2 = en2, en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, another = if (another == null) scala.collection.mutable.LinkedList.empty else another, d = d)
+		@com.fasterxml.jackson.annotation.JsonProperty("d") d: Option[org.joda.time.LocalDate],
+		@com.fasterxml.jackson.annotation.JsonProperty("dd") dd: List[org.joda.time.LocalDate]) = {
+		Val(  x = x, f = f, ff = if (ff == null) Set.empty else ff, a = if (a == null) example.test.Another() else a, aa = aa, aaa = if (aaa == null) Array.empty else aaa, aaaa = if (aaaa == null) List.empty else aaaa, en = if (en == null) example.test.En.A else en, bytes = if (bytes == null) Array[Byte]() else bytes, bb = if (bb == null) List.empty else bb, en2 = en2, en3 = if (en3 == null) scala.collection.mutable.LinkedList.empty else en3, i4 = if (i4 == null) scala.collection.mutable.LinkedList.empty else i4, another = if (another == null) scala.collection.mutable.LinkedList.empty else another, d = d, dd = if (dd == null) List.empty else dd)
 	}
 
-		def hasD(it : example.test.Val):Boolean = it.d.isDefined
-		def enSize(it : example.test.Val): Int = (it.en3.size)
 }
