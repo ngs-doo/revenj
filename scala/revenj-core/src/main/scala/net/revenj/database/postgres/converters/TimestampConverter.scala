@@ -10,7 +10,7 @@ object UtcTimestampConverter extends TimestampConverter(true)
 
 object LocalTimestampConverter extends TimestampConverter(false)
 
-private class TimestampConverter(asUtc: Boolean) extends Converter[OffsetDateTime] {
+class TimestampConverter(asUtc: Boolean) extends Converter[OffsetDateTime] {
 
   import TimestampConverter._
 
@@ -31,7 +31,7 @@ private class TimestampConverter(asUtc: Boolean) extends Converter[OffsetDateTim
       reader.read(4)
       MIN_DATE_TIME_UTC
     } else {
-      parseOffsetTimestamp(reader, cur, asUtc)
+      parseOffsetTimestamp(reader, context, asUtc)
     }
   }
 
@@ -41,7 +41,7 @@ private class TimestampConverter(asUtc: Boolean) extends Converter[OffsetDateTim
       reader.read(4)
       None
     } else {
-      Some(parseOffsetTimestamp(reader, cur, asUtc))
+      Some(parseOffsetTimestamp(reader, context, asUtc))
     }
   }
 
@@ -55,7 +55,7 @@ object TimestampConverter {
   private val MIN_DATE_TIME_UTC = OffsetDateTime.of(MIN_LOCAL_DATE_TIME, ZoneOffset.UTC)
   private val TIMESTAMP_REMINDER = Array[Int](100000, 10000, 1000, 100, 10, 1)
 
-  def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: OffsetDateTime) {
+  def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: OffsetDateTime): Unit = {
     val pg: PGobject = new PGobject
     pg.setType("timestamptz")
     val buf = sw.tempBuffer
@@ -161,7 +161,7 @@ object TimestampConverter {
     val buf = reader.tmp
     buf(0) = cur.toChar
     val len = reader.fillUntil(buf, 1, '\\', '"') + 1
-    reader.read(context)
+    reader.read(context + 1)
     if (buf(10) != ' ') OffsetDateTime.parse(new String(buf, 0, len))
     else {
       val year = NumberConverter.read4(buf, 0)

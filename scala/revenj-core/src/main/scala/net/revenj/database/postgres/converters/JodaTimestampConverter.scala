@@ -10,7 +10,7 @@ object JodaUtcTimestampConverter extends JodaTimestampConverter(true)
 
 object JodaLocalTimestampConverter extends JodaTimestampConverter(false)
 
-private class JodaTimestampConverter(asUtc: Boolean) extends Converter[DateTime] {
+class JodaTimestampConverter(asUtc: Boolean) extends Converter[DateTime] {
 
   import JodaTimestampConverter._
 
@@ -23,7 +23,7 @@ private class JodaTimestampConverter(asUtc: Boolean) extends Converter[DateTime]
     sw.addToBuffer(sw.tempBuffer, len)
   }
 
-  override def parseRaw(reader: PostgresReader, start: Int, context: Int): DateTime = parseOffsetTimestamp(reader, context, asUtc)
+  override def parseRaw(reader: PostgresReader, start: Int, context: Int): DateTime = parseDateTime(reader, context, asUtc)
 
   override def parseCollectionItem(reader: PostgresReader, context: Int): DateTime = {
     val cur = reader.read()
@@ -31,7 +31,7 @@ private class JodaTimestampConverter(asUtc: Boolean) extends Converter[DateTime]
       reader.read(4)
       MIN_DATE_TIME_UTC
     } else {
-      parseOffsetTimestamp(reader, cur, asUtc)
+      parseDateTime(reader, context, asUtc)
     }
   }
 
@@ -41,7 +41,7 @@ private class JodaTimestampConverter(asUtc: Boolean) extends Converter[DateTime]
       reader.read(4)
       None
     } else {
-      Some(parseOffsetTimestamp(reader, cur, asUtc))
+      Some(parseDateTime(reader, context, asUtc))
     }
   }
 
@@ -54,7 +54,7 @@ object JodaTimestampConverter {
   private val MIN_DATE_TIME_UTC = DateTime.parse("0001-01-01T00:00:00Z")
   private val TIMESTAMP_REMINDER = Array[Int](100000, 10000, 1000, 100, 10, 1)
 
-  def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: DateTime) {
+  def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: DateTime): Unit = {
     val pg: PGobject = new PGobject
     pg.setType("timestamptz")
     val buf = sw.tempBuffer
@@ -76,11 +76,11 @@ object JodaTimestampConverter {
     NumberConverter.write2(value.getHourOfDay, buffer, pos + 11)
     NumberConverter.write2(value.getMinuteOfHour, buffer, pos + 14)
     NumberConverter.write2(value.getSecondOfMinute, buffer, pos + 17)
-    val milis = value.getMillisOfSecond
+    val millis = value.getMillisOfSecond
     var end = pos + 19
-    if (milis != 0) {
+    if (millis != 0) {
       buffer(pos + 19) = '.'
-      NumberConverter.write3(milis, buffer, 20)
+      NumberConverter.write3(millis, buffer, 20)
       end = pos + 22
       while (buffer(end) == '0') {
         end -= 1
@@ -127,11 +127,11 @@ object JodaTimestampConverter {
     NumberConverter.write2(value.getHourOfDay, buffer, pos + 11)
     NumberConverter.write2(value.getMinuteOfHour, buffer, pos + 14)
     NumberConverter.write2(value.getSecondOfMinute, buffer, pos + 17)
-    val milis = value.getMillisOfSecond
+    val millis = value.getMillisOfSecond
     var end = pos + 19
-    if (milis != 0) {
+    if (millis != 0) {
       buffer(pos + 19) = '.'
-      NumberConverter.write3(milis, buffer, 20)
+      NumberConverter.write3(millis, buffer, 20)
       end = pos + 22
       while (buffer(end) == '0') {
         end -= 1
@@ -148,13 +148,13 @@ object JodaTimestampConverter {
     end + 3
   }
 
-  private def parseOffsetTimestamp(reader: PostgresReader, context: Int, asUtc: Boolean): DateTime = {
+  private def parseDateTime(reader: PostgresReader, context: Int, asUtc: Boolean): DateTime = {
     //TODO: BC after date for year < 0 ... not supported by .NET, but supported by Java
     val cur = reader.read(context)
     val buf = reader.tmp
     buf(0) = cur.toChar
     val len = reader.fillUntil(buf, 1, '\\', '"') + 1
-    reader.read(context)
+    reader.read(context + 1)
     if (buf(10) != ' ') DateTime.parse(new String(buf, 0, len))
     else {
       val year = NumberConverter.read4(buf, 0)

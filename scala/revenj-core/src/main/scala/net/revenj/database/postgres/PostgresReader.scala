@@ -155,7 +155,6 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
 
   def fillUntil(target: Array[Char], offset: Int, c1: Char, c2: Char): Int = {
     var i = positionInInput
-    val start = offset
     var cur = offset
     var isEnd = false
     while (!isEnd && i < input.length) {
@@ -171,7 +170,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     if (positionInInput == input.length) {
       throw new IOException("End of input detected")
     }
-    offset - start
+    cur - offset
   }
 
   def fillTotal(target: Array[Char], offset: Int, count: Int): Unit = {

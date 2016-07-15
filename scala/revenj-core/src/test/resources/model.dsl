@@ -13,6 +13,8 @@ module test {
 		v.f;
 		v.bytes;
 		v.bb;
+		v.d;
+		v.dd;
 		vvv;
 		hasV;
 		hasA;
@@ -24,6 +26,8 @@ module test {
 		abc1;
 		abc1.s s2;
 		abc2;
+		t;
+		tt;
 	}
 	enum En { A; B; C; }
 	root Abc { 
@@ -49,12 +53,14 @@ module test {
 		Ent2[] ent2;
 		Abc? *abc1;
 		Queue<Abc> *abc2;
+		timestamp t;
+		List<timestamp?>? tt;
 	}
 	entity Ent1 { int i; }
 	entity Ent2 { float f; }
 	entity Ent3(id) { int id; int i; }
 	value Val {
-		int? x;
+		int? x { serialization name xx; }
 		float f;
 		Set<float?> ff;
 		Another a;
@@ -69,6 +75,7 @@ module test {
 		linked list<int> i4;
 		linked list<Another> another;
 		date? d;
+		List<date> dd;
 		calculated hasD from 'it => it.d != null';
 		calculated int enSize from 'it => it.en3.Count()';
 	}
