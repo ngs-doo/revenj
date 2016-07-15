@@ -3,7 +3,7 @@
 lazy val core = (project in file("revenj-core")
   settings(commonSettings ++ publishSettings)
   settings(
-    version := "0.1.0-SNAPSHOT",
+    version := "0.1.0",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1208",
       "joda-time" % "joda-time" % "2.9.4",//TODO: will be removed
@@ -95,7 +95,7 @@ val publishSettings = Seq(
   ),
 
   packageOptions := Seq(Package.ManifestAttributes(
-    ("Implementation-Vendor", "Nova Generacija Softvera d.o.o."),
+    ("Implementation-Vendor", "New Generation Software Ltd."),
     ("Sealed", "true")
   )),
 
@@ -103,10 +103,16 @@ val publishSettings = Seq(
   publishArtifact in Test := false,
   publishMavenStyle := true,
   pomIncludeRepository := { _ => false },
+  useGpg := true,
+
+  credentials ++= {
+    val creds = Path.userHome / ".config" / "revenj" / "nexus.config"
+    if (creds.exists) Some(Credentials(creds)) else None
+  }.toSeq,
 
   pomExtra :=
     <inceptionYear>2016</inceptionYear>
-    <url>https://github.com/ngs-doo/revenj/tree/master/scala</url>
+    <url>https://github.com/ngs-doo/revenj</url>
     <licenses>
       <license>
         <name>BSD 3-clause "New" or "Revised" License</name>
