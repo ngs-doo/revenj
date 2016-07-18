@@ -46,7 +46,7 @@ lazy val test = (project in file("tests")
       "ru.yandex.qatools.embed" % "embedded-services" % "1.20" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
     ),
-    compile in Compile <<= (compile in Compile).dependsOn(dslSource.toTask("")),
+    compile in Test <<= (compile in Test).dependsOn(dslSource.toTask("")),
     publishLocal := {},
     publish := {}
   )
