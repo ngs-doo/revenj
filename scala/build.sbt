@@ -26,27 +26,38 @@ lazy val storage = (project in file("revenj-storage")
   )
 )
 
-lazy val test = (project in file("tests")
+lazy val tests = (project in file("tests")
   enablePlugins(SbtDslPlatformPlugin)
   settings (
     dslNamespace := "example",
-    dslDslPath := sourceDirectory.value / "test" / "resources",
+    dslDslPath := (resourceDirectory in Test).value,
     dslSources := Map(
-      Targets.Option.REVENJ_SCALA -> sourceManaged.value / "revenj"
-    )
+      Targets.Option.REVENJ_SCALA -> (sourceManaged in Test).value / "revenj"
+    ),
+    sourceGenerators in Test += Def.task {
+      com.dslplatform.sbt.Actions.generateSource(
+        streams.value.log,
+        Targets.Option.REVENJ_SCALA,
+        (sourceManaged in Test).value / "revenj",
+        dslDslPath.value,
+        dslPlugins.value,
+        dslCompiler.value,
+        dslNamespace.value,
+        dslSettings.value,
+        dslLatest.value)
+    }.taskValue
   )
   settings (commonSettings)
   settings(
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "com.dslplatform" % "dsl-clc" % "1.7.1" % Test,
+      "com.dslplatform" % "dsl-clc" % "1.7.2" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test,
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.20" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
     ),
-    compile in Test <<= (compile in Test).dependsOn(dslSource.toTask("")),
     publishLocal := {},
     publish := {}
   )
@@ -61,7 +72,7 @@ lazy val root = (project in file(".")
     publishLocal := {},
     publish := {}
   )
-  aggregate(core, storage, test)
+  aggregate(core, storage, tests)
 )
 
 // ### COMMON SETTINGS ###

@@ -107,4 +107,8 @@ module test {
 		List<string> sss; 
 		List<string?>? ssss; 
 	}
+	struct Struct {
+		int i;
+		int j;
+	}
 }
