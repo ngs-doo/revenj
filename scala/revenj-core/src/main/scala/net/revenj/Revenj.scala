@@ -2,6 +2,7 @@ package net.revenj
 
 import java.io._
 import java.net.{URL, URLClassLoader}
+import java.sql.Connection
 import java.util.{Properties, ServiceLoader}
 import javax.sql.DataSource
 
@@ -134,10 +135,11 @@ object Revenj {
     container.registerInstance[DomainModel](domainModel, handleClose = false)
     container.registerFactory[DataContext](c => LocatorDataContext.asDataContext(c, loader), singleton = false)
     container.registerFactory[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), singleton = false)
-    var total: Int = 0
+    container.registerFactory[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), singleton = false)
+    var total = 0
     if (aspects != null) {
       while (aspects.hasNext) {
-        aspects.next.configure(container)
+        aspects.next().configure(container)
         total += 1
       }
     }

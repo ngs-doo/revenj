@@ -1,6 +1,7 @@
 package net.revenj
 
 import java.sql.{Connection, SQLException}
+import java.util.concurrent.TimeoutException
 
 import net.revenj.extensibility.Container
 import net.revenj.patterns._
@@ -8,11 +9,11 @@ import net.revenj.patterns._
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future, Promise}
+import scala.concurrent.{Await, Future}
 import scala.reflect.runtime.universe._
 import scala.util.{Failure, Success, Try}
 
-private[revenj] class LocatorDataContext(locator: Container, connection: Option[Connection], mirror: Mirror) extends UnitOfWork {
+private[revenj] class LocatorDataContext(locator: Container, manageConnection: Boolean, connection: Option[Connection], mirror: Mirror) extends UnitOfWork {
   private lazy val searchRepositories = new TrieMap[Class[_], SearchableRepository[_ <: DataSource]]()
   private lazy val lookupRepositories = new TrieMap[Class[_], Repository[_ <: Identifiable]]()
   private lazy val persistableRepositories = new TrieMap[Class[_], PersistableRepository[_ <: AggregateRoot]]()
@@ -146,10 +147,14 @@ private[revenj] class LocatorDataContext(locator: Container, connection: Option[
         changes.synchronized {
           changes foreach { c => Await.result(c, duration) }
         }
-        connection.get.commit()
       }
-      hasChanges = false
-      Success(())
+      if (changes.nonEmpty) {
+        Failure(new TimeoutException("Timed out waiting for commit"))
+      } else {
+        connection.get.commit()
+        hasChanges = false
+        Success(())
+      }
     } catch {
       case t: Throwable => Failure(t)
     }
@@ -161,10 +166,14 @@ private[revenj] class LocatorDataContext(locator: Container, connection: Option[
         changes.synchronized {
           changes foreach { c => Await.result(c, duration) }
         }
-        connection.get.rollback()
       }
-      hasChanges = false
-      Success(())
+      if (changes.nonEmpty) {
+        Failure(new TimeoutException("Timed out waiting for rollback"))
+      } else {
+        connection.get.rollback()
+        hasChanges = false
+        Success(())
+      }
     } catch {
       case t: Throwable => Failure(t)
     }
@@ -172,14 +181,14 @@ private[revenj] class LocatorDataContext(locator: Container, connection: Option[
 
   override def close(): Unit = {
     if (!closed) {
-      if (connection.isDefined) {
+      if (manageConnection && connection.isDefined) {
         if (hasChanges) {
           rollback(Duration.Inf)
         }
         connection.get.setAutoCommit(true)
         connection.get.close()
+        locator.close()
       }
-      locator.close()
       closed = true
     }
   }
@@ -190,29 +199,31 @@ private[revenj] object LocatorDataContext {
   import scala.reflect.runtime.universe._
 
   def asDataContext(container: Container, loader: ClassLoader): DataContext = {
-    new LocatorDataContext(container, None, runtimeMirror(loader))
+    new LocatorDataContext(container, false, None, runtimeMirror(loader))
   }
 
-  private[revenj] def asUnitOfWork(container: Container, loader: ClassLoader): UnitOfWork = {
+  def asDataContext(connection: Connection, container: Container, loader: ClassLoader): DataContext = {
+    new LocatorDataContext(container, false, Some(connection), runtimeMirror(loader))
+  }
+
+  def asUnitOfWork(container: Container, loader: ClassLoader): UnitOfWork = {
     val dataSource = container.resolve[javax.sql.DataSource]
-    val locator: Container = container.createScope()
+    val locator = container.createScope()
     var connection: Connection = null
     try {
       connection = dataSource.getConnection
       connection.setAutoCommit(false)
-    }
-    catch {
+    } catch {
       case e: SQLException =>
         try {
           if (connection != null) connection.close()
-        }
-        catch {
+        } catch {
           case _: SQLException =>
         }
         connection = dataSource.getConnection
         connection.setAutoCommit(false)
     }
     locator.registerInstance(connection, handleClose = false)
-    new LocatorDataContext(locator, Some(connection), runtimeMirror(loader))
+    new LocatorDataContext(locator, true, Some(connection), runtimeMirror(loader))
   }
 }

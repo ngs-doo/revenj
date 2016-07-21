@@ -1,11 +1,14 @@
 package net.revenj.database.postgres
 
 import java.io.IOException
+import java.sql.Connection
+import javax.sql.DataSource
 
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
 import example.test._
 import example.test.postgres.{AbcListRepository, AbcRepository}
+import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.Container
 import net.revenj.patterns.{DataContext, UnitOfWork}
 import org.specs2.ScalaCheck
@@ -95,9 +98,10 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       abc.vv = Some(abc.v)
       abc.vvv = IndexedSeq(abc.v, abc.v)
       abc.ent2 = Array(Ent2(AbcID = abc.ID))
+      val uri = abc.URI
       Await.result(ctx.create(abc), Duration.Inf)
       container.close()
-      abc.URI !== null
+      abc.URI !== uri
     }
     "unit of work usage" >> {
       val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
@@ -145,10 +149,26 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
           1 === 1
       }
     }
+    "context from connection" >> {
+      val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+      container.registerClass(classOf[MyService], singleton = false)
+      val ds = container.resolve[DataSource]
+      val conn = ds.getConnection
+      val service = container.resolve[MyService]
+      val ctx = service.factory(conn)
+      val abc = Abc(s = "ctx")
+      val uri = abc.URI
+      Await.result(ctx.create(abc), Duration.Inf)
+      conn.close()
+      container.close()
+      abc.URI !== uri
+    }
   }
 }
 
 object DbCheck {
+
+  class MyService(val factory: Connection => DataContext)
 
   private class TestContext extends Context {
     val error = new StringBuilder
