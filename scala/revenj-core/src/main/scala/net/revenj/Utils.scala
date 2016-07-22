@@ -1,11 +1,12 @@
 package net.revenj
 
-import java.lang.reflect.{ParameterizedType, Type}
+import java.lang.reflect.{GenericArrayType, ParameterizedType, Type => JavaType}
 import java.net.InetAddress
 import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
 
 import scala.collection.concurrent.TrieMap
+import scala.reflect.runtime.universe._
 
 object Utils {
   val MIN_LOCAL_DATE = LocalDate.of(1, 1, 1)
@@ -21,7 +22,7 @@ object Utils {
   val LOOPBACK = InetAddress.getLoopbackAddress
   private val typeCache = new TrieMap[String, GenericType]
 
-  private class GenericType(val name: String, val raw: Type, val arguments: Array[Type]) extends ParameterizedType {
+  private class GenericType(val name: String, val raw: JavaType, val arguments: Array[JavaType]) extends ParameterizedType {
     private val argObjects = arguments.map(_.asInstanceOf[AnyRef])
 
     override def hashCode: Int = {
@@ -37,16 +38,16 @@ object Utils {
       }
     }
 
-    def getActualTypeArguments: Array[Type] = arguments
+    def getActualTypeArguments: Array[JavaType] = arguments
 
-    def getRawType: Type = raw
+    def getRawType: JavaType = raw
 
-    def getOwnerType: Type = null
+    def getOwnerType: JavaType = null
 
     override def toString: String = name
   }
 
-  private[revenj] def makeGenericType(container: Class[_], arguments: List[Type]): ParameterizedType = {
+  private[revenj] def makeGenericType(container: Class[_], arguments: List[JavaType]): ParameterizedType = {
     val sb = new StringBuilder
     sb.append(container.getTypeName)
     sb.append("<")
@@ -62,7 +63,30 @@ object Utils {
     })
   }
 
-  def makeGenericType(container: Class[_], argument: Type, arguments: Type*): ParameterizedType = {
+  private class GenArrType(genType: JavaType) extends GenericArrayType {
+    def getGenericComponentType = genType
+  }
+
+  private[revenj] def findType(tpe: Type, mirror: Mirror): Option[JavaType] = {
+    tpe.dealias match {
+      case TypeRef(_, sym, args) if args.isEmpty =>
+        Some(mirror.runtimeClass(sym.asClass))
+      case TypeRef(_, sym, args) if sym.fullName == "scala.Array" && args.size == 1 =>
+        findType(args.head, mirror) match {
+          case Some(typeArg) => Some(new GenArrType(typeArg))
+          case _ => None
+        }
+      case TypeRef(_, sym, args) =>
+        val symClass = mirror.runtimeClass(sym.asClass)
+        val typeArgs = args.flatMap(it => findType(it, mirror))
+        if (typeArgs.size == args.size) Some(Utils.makeGenericType(symClass, typeArgs))
+        else None
+      case _ =>
+        None
+    }
+  }
+
+  def makeGenericType(container: Class[_], argument: JavaType, arguments: JavaType*): ParameterizedType = {
     val sb = new StringBuilder
     sb.append(container.getTypeName)
     sb.append("<")
@@ -74,7 +98,7 @@ object Utils {
     sb.append(">")
     val name = sb.toString
     typeCache.getOrElseUpdate(name, {
-      val genericArgs = new Array[Type](arguments.length + 1)
+      val genericArgs = new Array[JavaType](arguments.length + 1)
       genericArgs(0) = argument
       var i = 0
       while (i < arguments.length) {

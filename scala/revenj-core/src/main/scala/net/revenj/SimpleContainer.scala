@@ -1,6 +1,6 @@
 package net.revenj
 
-import java.lang.reflect.{Constructor, GenericArrayType, GenericDeclaration, ParameterizedType, Type, TypeVariable}
+import java.lang.reflect.{Constructor, GenericArrayType, GenericDeclaration, ParameterizedType, TypeVariable, Type => JavaType}
 import java.util.concurrent.CopyOnWriteArrayList
 
 import net.revenj.SimpleContainer.Registration
@@ -9,6 +9,7 @@ import net.revenj.extensibility.Container
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
 import scala.util.{Failure, Success, Try}
 
@@ -22,32 +23,32 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
   }
 
   private val classCache = new TrieMap[Class[_], Array[CtorInfo]]
-  private val typeCache = new TrieMap[Type, TypeInfo]
-  private val typeNameMappings = new TrieMap[String, Type]
+  private val typeCache = new TrieMap[JavaType, TypeInfo]
+  private val typeNameMappings = new TrieMap[String, JavaType]
 
   private class TypeInfo(val paramType: ParameterizedType) {
     val rawType = paramType.getRawType
-    val mappings = new mutable.HashMap[Type, Type]
+    val mappings = new mutable.HashMap[JavaType, JavaType]
     val (constructors, rawClass, genericArguments) = {
-      if (rawType.isInstanceOf[Class[_]]) {
-        val rawClass = rawType.asInstanceOf[Class[_]]
-        val genericArguments = paramType.getActualTypeArguments
-        val variables = rawClass.getTypeParameters
-        var i = 0
-        while (i < genericArguments.length) {
-          mappings += variables(i) -> genericArguments(i)
-          i += 1
-        }
-        val ctors = rawClass.getConstructors
-        val constructors = new Array[CtorInfo](ctors.length)
-        i = 0
-        while (i < ctors.length) {
-          constructors(i) = new CtorInfo(ctors(i))
-          i += 1
-        }
-        (Some(constructors), Some(rawClass), Some(genericArguments))
+      rawType match {
+        case rawClass: Class[_] =>
+          val genericArguments = paramType.getActualTypeArguments
+          val variables = rawClass.getTypeParameters
+          var i = 0
+          while (i < genericArguments.length) {
+            mappings += variables(i) -> genericArguments(i)
+            i += 1
+          }
+          val ctors = rawClass.getConstructors
+          val constructors = new Array[CtorInfo](ctors.length)
+          i = 0
+          while (i < ctors.length) {
+            constructors(i) = new CtorInfo(ctors(i))
+            i += 1
+          }
+          (Some(constructors), Some(rawClass), Some(genericArguments))
+        case _ => (None, None, None)
       }
-      else (None, None, None)
     }
     val name = paramType.toString
     val mappedType = typeNameMappings.get(name)
@@ -58,7 +59,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     val genTypes = ctor.getGenericParameterTypes
   }
 
-  private val container = new mutable.HashMap[Type, CopyOnWriteArrayList[Registration[AnyRef]]]
+  private val container = new mutable.HashMap[JavaType, CopyOnWriteArrayList[Registration[AnyRef]]]
   private val closeables = new CopyOnWriteArrayList[AutoCloseable]
 
   private def tryResolveClass(manifest: Class[_], caller: SimpleContainer): Try[AnyRef] = {
@@ -135,7 +136,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     }
   }
 
-  private def tryResolveTypeFrom(typeInfo: TypeInfo, mappings: mutable.HashMap[Type, Type], caller: SimpleContainer): Try[AnyRef] = {
+  private def tryResolveTypeFrom(typeInfo: TypeInfo, mappings: mutable.HashMap[JavaType, JavaType], caller: SimpleContainer): Try[AnyRef] = {
     typeInfo.constructors match {
       case Some(constructors) =>
         var result: Option[Try[AnyRef]] = None
@@ -160,7 +161,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                 } else if (nestedInfo.rawClass.get eq classOf[Option[_]]) {
                   args(i) = tryResolve(nestedInfo.genericArguments.get(0), caller).toOption
                 } else {
-                  val nestedMappings = new mutable.HashMap[Type, Type]
+                  val nestedMappings = new mutable.HashMap[JavaType, JavaType]
                   nestedMappings ++= typeInfo.mappings
                   val iter = nestedInfo.mappings.iterator
                   while(iter.hasNext) {
@@ -176,7 +177,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   }
                 }
               case p@_ =>
-                var c: Option[Type] = Some(p)
+                var c: Option[JavaType] = Some(p)
                 while (c.isDefined && c.get.isInstanceOf[TypeVariable[_ <: GenericDeclaration]]) {
                   c = mappings.get(c.get)
                   if (c.isEmpty) {
@@ -213,7 +214,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     }
   }
 
-  private def getRegistration(paramType: Type): Option[Registration[AnyRef]] = {
+  private def getRegistration(paramType: JavaType): Option[Registration[AnyRef]] = {
     container.get(paramType) match {
       case Some(registrations) =>
         Some(registrations.get(registrations.size - 1))
@@ -222,29 +223,16 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     }
   }
 
-  def resolve(tpe: Type): Try[AnyRef] = tryResolve(tpe, this)
-
-  private def findType[T: TypeTag]: Option[Type] = {
-    typeOf[T] match {
-      case TypeRef(_, sym, args) if args.isEmpty =>
-        Some(mirror.runtimeClass(sym.asClass))
-      case TypeRef(_, sym, args) =>
-        val symClass = mirror.runtimeClass(sym.asClass).asInstanceOf[Class[T]]
-        val typeArgs = args.map(t => mirror.runtimeClass(t))
-        Some(Utils.makeGenericType(symClass, typeArgs))
-      case _ =>
-        None
-    }
-  }
+  def resolve(tpe: JavaType): Try[AnyRef] = tryResolve(tpe, this)
 
   def tryResolve[T: TypeTag]: Try[T] = {
-    findType[T] match {
+    Utils.findType(typeOf[T], mirror) match {
       case Some(tpe) => resolve(tpe).map(_.asInstanceOf[T])
       case _ => Failure(new ReflectiveOperationException("Invalid type tag argument"))
     }
   }
 
-  private def tryResolve(paramType: Type, caller: SimpleContainer): Try[AnyRef] = {
+  private def tryResolve(paramType: JavaType, caller: SimpleContainer): Try[AnyRef] = {
     getRegistration(paramType) match {
       case Some(registration) =>
         if (registration.biFactory.isDefined && paramType.isInstanceOf[ParameterizedType]) {
@@ -292,22 +280,28 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                 Failure(new ReflectiveOperationException(paramType + " is not an instance of Class<?> and cannot be resolved since it's not registered in the container."))
             }
           }
+          def resolveArray(argumentType: JavaType) = {
+            argumentType match {
+              case pt: Class[_] =>
+                tryResolveCollection(pt, argumentType, caller)
+              case pt: ParameterizedType =>
+                pt.getRawType match {
+                  case rawClass: Class[_] =>
+                    tryResolveCollection(rawClass, pt, caller)
+                  case _ =>
+                    resolveClass()
+                }
+              case _ =>
+                resolveClass()
+            }
+          }
           paramType match {
+            case gat: GenericArrayType =>
+              resolveArray(gat.getGenericComponentType)
+            case pt: ParameterizedType if pt.getRawType == seqSignature =>
+              resolveArray(pt.getActualTypeArguments.head).map(_.asInstanceOf[Array[_]].toSeq)
             case pt: ParameterizedType =>
               tryResolveType(pt, caller)
-            case gat: GenericArrayType =>
-              gat.getGenericComponentType match {
-                case _: Class[_] =>
-                  tryResolveCollection(gat.getGenericComponentType.asInstanceOf[Class[_]], gat.getGenericComponentType, caller)
-                case pt: ParameterizedType =>
-                  if (pt.getRawType.isInstanceOf[Class[_]]) {
-                    tryResolveCollection(pt.getRawType.asInstanceOf[Class[_]], pt, caller)
-                  } else {
-                    resolveClass()
-                  }
-                case _ =>
-                  resolveClass()
-              }
             case _ =>
               resolveClass()
           }
@@ -315,7 +309,9 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     }
   }
 
-  private def tryResolveCollection(container: Class[_], element: Type, caller: SimpleContainer): Try[AnyRef] = {
+  private val seqSignature = classOf[scala.collection.Seq[_]]
+
+  private def tryResolveCollection(container: Class[_], element: JavaType, caller: SimpleContainer): Try[AnyRef] = {
     val registrations = new CopyOnWriteArrayList[Registration[AnyRef]]
     var current: Option[SimpleContainer] = Some(caller)
     do {
@@ -399,7 +395,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     }
   }
 
-  private def addToRegistry[T: TypeTag](paramType: Type, registration: Registration[T]): this.type = {
+  private def addToRegistry[T](paramType: JavaType, registration: Registration[T]): this.type = {
     val registrations = container.getOrElseUpdate(paramType, {
       new CopyOnWriteArrayList[Registration[AnyRef]]()
     })
@@ -408,28 +404,33 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     this
   }
 
-  def registerClass[T: TypeTag](manifest: Class[T], singleton: Boolean = false): this.type = {
-    addToRegistry(manifest, new Registration[T](this, manifest, singleton))
+  override def registerType[T](manifest: JavaType, implementation: Class[T], singleton: Boolean = false): this.type = {
+    addToRegistry(manifest, new Registration[T](this, implementation, singleton))
   }
 
-  def registerInstance[T: TypeTag](service: T, handleClose: Boolean = false): this.type = {
+  override def registerAs[T, S <: T](singleton: Boolean = false)(implicit manifest: TypeTag[T], implementation: ClassTag[S]): this.type = {
+    val signature = Utils.findType(manifest.tpe, mirror).getOrElse(throw new IllegalArgumentException("Unable to find Java type for " + manifest))
+    addToRegistry(signature, new Registration(this, implementation.runtimeClass, singleton))
+  }
+
+  override def registerInstance[T: TypeTag](service: T, handleClose: Boolean = false): this.type = {
     if (handleClose && service.isInstanceOf[AutoCloseable]) {
       closeables.add(service.asInstanceOf[AutoCloseable])
     }
-    val paramType = findType[T].getOrElse(throw new IllegalArgumentException("Unable to register " + typeOf[T] + " to container"))
+    val paramType = Utils.findType(typeOf[T], mirror).getOrElse(throw new IllegalArgumentException("Unable to register " + typeOf[T] + " to container"))
     addToRegistry(paramType, new Registration[T](this, service))
   }
 
-  def registerFactory[T: TypeTag](factory: Container => T, singleton: Boolean = false): this.type = {
-    val paramType = findType[T].getOrElse(throw new IllegalArgumentException("Unable to register " + typeOf[T] + " to container"))
+  override def registerFactory[T: TypeTag](factory: Container => T, singleton: Boolean = false): this.type = {
+    val paramType = Utils.findType(typeOf[T], mirror).getOrElse(throw new IllegalArgumentException("Unable to register " + typeOf[T] + " to container"))
     addToRegistry(paramType, new Registration[T](this, factory, singleton))
   }
 
-  def registerGenerics[T: TypeTag](factory: (Container, Array[Type]) => T): this.type = {
+  override def registerGenerics[T: TypeTag](factory: (Container, Array[JavaType]) => T): this.type = {
     addToRegistry(mirror.runtimeClass(typeOf[T]), new Registration[T](this, factory, singleton = false))
   }
 
-  def createScope(): Container = {
+  override def createScope(): Container = {
     new SimpleContainer(Some(this), resolveUnknown, mirror)
   }
 
@@ -451,7 +452,7 @@ private object SimpleContainer {
     val manifest: Option[Class[T]],
     var instance: Option[T],
     val singleFactory: Option[Container => T],
-    val biFactory: Option[(Container, Array[Type]) => T],
+    val biFactory: Option[(Container, Array[JavaType]) => T],
     val singleton: Boolean) {
 
     def this(owner: SimpleContainer, manifest: Class[T], singleton: Boolean) {
@@ -466,7 +467,7 @@ private object SimpleContainer {
       this(owner, None, None, Some(factory), None, singleton)
     }
 
-    def this(owner: SimpleContainer, factory: (Container, Array[Type]) => T, singleton: Boolean) {
+    def this(owner: SimpleContainer, factory: (Container, Array[JavaType]) => T, singleton: Boolean) {
       this(owner, None, None, None, Some(factory), singleton)
     }
 

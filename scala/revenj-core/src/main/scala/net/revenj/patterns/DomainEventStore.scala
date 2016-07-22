@@ -2,7 +2,7 @@ package net.revenj.patterns
 
 import scala.concurrent.Future
 
-trait DomainEventStore[T <: DomainEvent] {
+trait DomainEventStore[T <: DomainEvent] extends Repository[T] with SearchableRepository[T] {
 
   def submit(events: Seq[T]): Future[IndexedSeq[String]]
 

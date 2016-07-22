@@ -1,18 +1,20 @@
 package net.revenj
 
 import java.io._
+import java.lang.reflect.ParameterizedType
 import java.net.{URL, URLClassLoader}
 import java.sql.Connection
 import java.util.{Properties, ServiceLoader}
 import javax.sql.DataSource
 
-import net.revenj.extensibility.{Container, SystemAspect}
+import net.revenj.extensibility.{Container, PluginLoader, SystemAspect}
 import net.revenj.patterns._
 import org.postgresql.ds.PGPoolingDataSource
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext
+import scala.reflect.runtime.universe._
 
 object Revenj {
 
@@ -130,6 +132,8 @@ object Revenj {
     container.registerInstance[ServiceLocator](container, handleClose = false)
     container.registerInstance(dataSource, handleClose = false)
     container.registerInstance(loader, handleClose = false)
+    val plugins = new ServicesPluginLoader(loader)
+    container.registerInstance[PluginLoader](plugins)
     val ns = properties.getProperty("revenj.namespace")
     val domainModel = new SimpleDomainModel(ns, loader)
     container.registerInstance[DomainModel](domainModel, handleClose = false)
@@ -149,5 +153,37 @@ object Revenj {
     }
     properties.setProperty("revenj.aspectsCount", Integer.toString(total))
     container
+  }
+
+  def registerEvents[T <: DomainEvent : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
+    val javaClass = Utils.findType(typeOf[T], runtimeMirror(loader)) match {
+      case Some(p) =>
+        p match {
+          case cl: Class[_] => cl
+          case _ => throw new IllegalArgumentException("Only non-generic types supported. Found: " + typeOf[T])
+        }
+      case p => throw new IllegalArgumentException("Unable to detect type: " + typeOf[T])
+    }
+    def processHandlers[X: TypeTag](gt: ParameterizedType, eventHandlers: Seq[Class[DomainEventHandler[X]]]): Unit = {
+      for (h <- eventHandlers) {
+        container.registerType(h, h, singleton = false)
+        container.registerType(gt, h, singleton = false)
+      }
+    }
+    val arrInst = java.lang.reflect.Array.newInstance(javaClass, 0)
+    val gt = Utils.makeGenericType(classOf[DomainEventHandler[_]], javaClass)
+    val agt = Utils.makeGenericType(classOf[DomainEventHandler[_]], arrInst.getClass)
+    val ft = Utils.makeGenericType(classOf[Function0[_]], javaClass)
+    val fgt = Utils.makeGenericType(classOf[DomainEventHandler[_]], ft)
+    val aft = Utils.makeGenericType(classOf[Function0[_]], arrInst.getClass)
+    val afgt = Utils.makeGenericType(classOf[DomainEventHandler[_]], aft)
+    val simpleHandlers = plugins.find[DomainEventHandler[T]]
+    processHandlers(gt, simpleHandlers)
+    val simpleArrayHandlers = plugins.find[DomainEventHandler[Array[T]]]
+    processHandlers(agt, simpleArrayHandlers)
+    val funcHandlers = plugins.find[DomainEventHandler[Function0[T]]]
+    processHandlers(fgt, funcHandlers)
+    val arrayFuncHandlers = plugins.find[DomainEventHandler[Function0[Array[T]]]]
+    processHandlers(afgt, arrayFuncHandlers)
   }
 }

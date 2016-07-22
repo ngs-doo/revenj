@@ -4,7 +4,6 @@ import org.revenj.extensibility.PluginLoader;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;

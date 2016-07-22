@@ -1,7 +1,11 @@
 package net.revenj
 
+import net.revenj.extensibility.PluginLoader
+import net.revenj.patterns.{DomainEvent, DomainEventHandler}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
+
+import scala.concurrent.Future
 
 class ContainerCheck extends Specification with ScalaCheck {
   sequential
@@ -12,10 +16,10 @@ class ContainerCheck extends Specification with ScalaCheck {
     "types" >> {
       B.counter = 0
       val container = new SimpleContainer(false, cl)
-      container.registerClass(classOf[A])
+      container.register[A]()
       val tryA1 = container.tryResolve[A]
       tryA1.isSuccess === false
-      container.registerClass(classOf[B])
+      container.register[B]()
       val tryA2 = container.tryResolve[A]
       tryA2.isSuccess === true
       val a = tryA2.get
@@ -25,13 +29,13 @@ class ContainerCheck extends Specification with ScalaCheck {
     "option" >> {
       B.counter = 0
       val container = new SimpleContainer(false, cl)
-      container.registerClass(classOf[A])
-      container.registerClass(classOf[B])
-      container.registerClass(classOf[C])
+      container.register[A]()
+      container.register[B]()
+      container.register[C]()
       var c = container.resolve[C]
       c !== null
       1 === B.counter
-      container.registerClass(classOf[D])
+      container.register[D]()
       c = container.resolve[C]
       c !== null
       2 === B.counter
@@ -39,9 +43,9 @@ class ContainerCheck extends Specification with ScalaCheck {
     "generics" >> {
       B.counter = 0
       val container = new SimpleContainer(false, cl)
-      container.registerClass(classOf[A])
-      container.registerClass(classOf[B])
-      container.registerClass(classOf[G[_]])
+      container.register[A]()
+      container.register[B]()
+      container.register[G[_]]()
       val g = container.resolve[G[A]]
       g !== null
       1 === B.counter
@@ -51,9 +55,9 @@ class ContainerCheck extends Specification with ScalaCheck {
     "complex generics" >> {
       B.counter = 0
       val container = new SimpleContainer(false, cl)
-      container.registerClass(classOf[A])
-      container.registerClass(classOf[B])
-      container.registerClass(classOf[ComplexGenerics[_, _]])
+      container.register[A]()
+      container.register[B]()
+      container.register[ComplexGenerics[_, _]]()
       val cg = container.resolve[ComplexGenerics[A, B]]
       cg !== null
       2 === B.counter
@@ -65,10 +69,10 @@ class ContainerCheck extends Specification with ScalaCheck {
     "ctor raw generics" >> {
       B.counter = 0
       val container = new SimpleContainer(false, cl)
-      container.registerClass(classOf[A])
-      container.registerClass(classOf[B])
-      container.registerClass(classOf[ComplexGenerics[_, _]])
-      container.registerClass(classOf[CtorRawGenerics])
+      container.register[A]()
+      container.register[B]()
+      container.register[ComplexGenerics[_, _]]()
+      container.register[CtorRawGenerics]()
       val cg = container.resolve[CtorRawGenerics]
       cg !== null
       2 === B.counter
@@ -80,10 +84,10 @@ class ContainerCheck extends Specification with ScalaCheck {
     "ctor partial generics" >> {
       B.counter = 0
       val container = new SimpleContainer(false, cl)
-      container.registerClass(classOf[A])
-      container.registerClass(classOf[B])
-      container.registerClass(classOf[ComplexGenerics[_, _]])
-      container.registerClass(classOf[CtorPartialGenerics[_]])
+      container.register[A]()
+      container.register[B]()
+      container.register[ComplexGenerics[_, _]]()
+      container.register[CtorPartialGenerics[_]]()
       val cg = container.resolve[CtorPartialGenerics[A]]
       cg !== null
       2 === B.counter
@@ -115,18 +119,43 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "self reference singleton" >> {
       val container = new SimpleContainer(false, cl)
-      container.registerClass(classOf[SelfReference], singleton = true)
+      container.register[SelfReference](singleton = true)
       val sr = container.resolve[SelfReference]
       val sr2 = sr.getSelf()
       sr === sr2
     }
     "singleton in context" >> {
       val container = new SimpleContainer(false, cl)
-      container.registerClass(classOf[Single], singleton = true)
+      container.register[Single](singleton = true)
       val nested = container.createScope()
       val s1 = nested.resolve[Single]
       val s2 = container.resolve[Single]
       s1 === s2
+    }
+    "collection resolution" >> {
+      val container = new SimpleContainer(false, cl)
+      container.registerAs[DomainEventHandler[Single], Handler1]()
+      container.registerAs[DomainEventHandler[Single], Handler2]()
+      val found = container.resolve[Array[DomainEventHandler[Single]]]
+      found.length === 2
+    }
+    "collection signature resolution" >> {
+      val container = new SimpleContainer(false, cl)
+      container.registerAs[DomainEventHandler[Single], Handler1]()
+      container.registerAs[DomainEventHandler[Single], Handler2]()
+      container.registerAs[DomainEventHandler[Future[Single]], Handler3]()
+      val found1 = container.resolve[Array[DomainEventHandler[Single]]]
+      found1.length === 2
+      val found2 = container.resolve[Array[DomainEventHandler[Future[Single]]]]
+      found2.length === 1
+    }
+    "sequence resolution" >> {
+      val container = new SimpleContainer(false, cl)
+      container.registerAs[DomainEventHandler[Single], Handler1]()
+      container.registerAs[DomainEventHandler[Single], Handler2]()
+      container.registerAs[DomainEventHandler[Future[Single]], Handler3]()
+      val found = container.resolve[Seq[DomainEventHandler[Single]]]
+      found.length === 2
     }
   }
 }
@@ -162,3 +191,16 @@ class SelfReference(val self: () => SelfReference) {
 }
 
 class Single
+
+class Handler1 extends DomainEventHandler[Single] {
+  import scala.concurrent.ExecutionContext.Implicits.global
+  override def handle(domainEvent: Single): Future[Unit] = Future { () }
+}
+class Handler2 extends DomainEventHandler[Single] {
+  import scala.concurrent.ExecutionContext.Implicits.global
+  override def handle(domainEvent: Single): Future[Unit] = Future { () }
+}
+class Handler3 extends DomainEventHandler[Future[Single]] {
+  import scala.concurrent.ExecutionContext.Implicits.global
+  override def handle(domainEvent: Future[Single]): Future[Unit] = Future { () }
+}
