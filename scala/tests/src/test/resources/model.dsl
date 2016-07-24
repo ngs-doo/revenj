@@ -111,4 +111,10 @@ module test {
 		int i;
 		int j;
 	}
+	event TestMe {
+		int x;
+		string[] ss;
+		Val vv;
+		List<Val?>? vvv;
+	}	
 }

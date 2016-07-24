@@ -29,6 +29,6 @@ import java.time.OffsetDateTime
   */
 trait DomainEvent extends Identifiable {
 
-  def createdAt: OffsetDateTime
+  def queuedAt: OffsetDateTime
   def processedAt: Option[OffsetDateTime]
 }

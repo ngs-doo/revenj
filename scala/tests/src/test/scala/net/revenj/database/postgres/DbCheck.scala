@@ -163,6 +163,18 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       container.close()
       abc.URI !== uri
     }
+    "can submit events" >> {
+      val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+      val ctx = container.resolve[UnitOfWork]
+      val ev = TestMe(x = 100, ss = Array("1", "3"), vv = Val(x = Some(5)), vvv = Some(List(Some(Val(x = Some(3))))))
+      val total = Await.result(ctx.count[TestMe](), Duration.Inf)
+      Await.result(ctx.submit(ev), Duration.Inf)
+      val newTotal = Await.result(ctx.count[TestMe](), Duration.Inf)
+      val all = Await.result(ctx.search[TestMe](), Duration.Inf)
+      ctx.commit(Duration.Inf).isSuccess === true
+      container.close()
+      newTotal == total + 1
+    }
   }
 }
 
