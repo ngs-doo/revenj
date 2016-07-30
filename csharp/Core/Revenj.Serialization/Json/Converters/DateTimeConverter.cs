@@ -376,6 +376,16 @@ namespace Revenj.Serialization.Json.Converters
 			}
 		}
 
+		private static bool AllDigits(char[] buf, int start, int end)
+		{
+			for (var i = start; i < end; i++)
+			{
+				var ch = buf[i];
+				if (ch < '0' || ch > '9') return false;
+			}
+			return true;
+		}
+
 		public static DateTime DeserializeTimestamp(BufferedTextReader sr, int nextToken)
 		{
 			if (nextToken != '"') throw new SerializationException("Expecting '\"' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
@@ -387,7 +397,50 @@ namespace Revenj.Serialization.Json.Converters
 			try
 			{
 				if (i > 0 && buffer[i - 1] == 'Z')
+				{
+					if (i > 18 && i < 29 && buffer[4] == '-' && buffer[7] == '-'
+						&& (buffer[10] == 'T' || buffer[10] == 't' || buffer[10] == ' ')
+						&& buffer[13] == ':' && buffer[16] == ':' && AllDigits(buffer, 20, i - 1))
+					{
+						var year = 1000 * (buffer[0] - '0') + 100 * (buffer[1] - '0') + 10 * (buffer[2] - '0') + buffer[3] - '0';
+						var month = 10 * (buffer[5] - '0') + buffer[6] - '0';
+						var day = 10 * (buffer[8] - '0') + buffer[9] - '0';
+						var hour = 10 * (buffer[11] - '0') + buffer[12] - '0';
+						var min = 10 * (buffer[14] - '0') + buffer[15] - '0';
+						var sec = 10 * (buffer[17] - '0') + buffer[18] - '0';
+						if (buffer[19] == '.')
+						{
+							int nanos;
+							switch (i)
+							{
+								case 22:
+									nanos = 1000000 * (buffer[20] - 48);
+									break;
+								case 23:
+									nanos = 1000000 * (buffer[20] - 48) + 100000 * (buffer[21] - 48);
+									break;
+								case 24:
+									nanos = 1000000 * (buffer[20] - 48) + 100000 * (buffer[21] - 48) + 10000 * (buffer[22] - 48);
+									break;
+								case 25:
+									nanos = 1000000 * (buffer[20] - 48) + 100000 * (buffer[21] - 48) + 10000 * (buffer[22] - 48) + 1000 * (buffer[23] - 48);
+									break;
+								case 26:
+									nanos = 1000000 * (buffer[20] - 48) + 100000 * (buffer[21] - 48) + 10000 * (buffer[22] - 48) + 1000 * (buffer[23] - 48) + 100 * (buffer[24] - 48);
+									break;
+								case 27:
+									nanos = 1000000 * (buffer[20] - 48) + 100000 * (buffer[21] - 48) + 10000 * (buffer[22] - 48) + 1000 * (buffer[23] - 48) + 100 * (buffer[24] - 48) + 10 * (buffer[25] - 48);
+									break;
+								default:
+									nanos = 1000000 * (buffer[20] - 48) + 100000 * (buffer[21] - 48) + 10000 * (buffer[22] - 48) + 1000 * (buffer[23] - 48) + 100 * (buffer[24] - 48) + 10 * (buffer[25] - 48) + buffer[26] - 48;
+									break;
+							}
+							return new DateTime(year, month, day, hour, min, sec, DateTimeKind.Utc).AddTicks(nanos);
+						}
+						return new DateTime(year, month, day, hour, min, sec, DateTimeKind.Utc);
+					}
 					return DateTime.Parse(new string(buffer, 0, i), Invariant, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+				}
 				return DateTime.Parse(new string(buffer, 0, i), Invariant);
 			}
 			catch (Exception ex)
