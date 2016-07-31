@@ -12,10 +12,19 @@ trait DataContext {
   }
 
   def search[T <: DataSource : TypeTag](filter: Option[Specification[T]] = None, limit: Option[Int] = None, offset: Option[Int] = None): Future[IndexedSeq[T]]
+  def search[T <: DataSource : TypeTag](filter: Specification[T]): Future[IndexedSeq[T]] = {
+    search(Some(filter), None, None)
+  }
 
   def count[T <: DataSource : TypeTag](filter: Option[Specification[T]] = None): Future[Long]
+  def count[T <: DataSource : TypeTag](filter: Specification[T]): Future[Long] = {
+    count(Some(filter))
+  }
 
   def exists[T <: DataSource : TypeTag](filter: Option[Specification[T]]): Future[Boolean]
+  def exists[T <: DataSource : TypeTag](filter: Specification[T]): Future[Boolean] = {
+    exists(Some(filter))
+  }
 
   def create[T <: AggregateRoot : TypeTag](aggregates: Seq[T]): Future[Unit]
 

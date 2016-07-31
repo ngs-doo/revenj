@@ -25,6 +25,4 @@ package net.revenj.patterns
   *
   * @tparam T domain object on which search will be performed.
   */
-trait Specification[T <: DataSource] {
-  def isSatisfiedBy(value: T): Boolean
-}
+trait Specification[T <: DataSource] extends Function1[T, Boolean]

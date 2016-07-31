@@ -33,7 +33,7 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
     val reader = new BufferedReader(new InputStreamReader(stream, UTF8))
     try {
       var line: String = null
-      while ((line = reader.readLine()) != null) {
+      while ({line = reader.readLine(); line != null}) {
         val ci = line.indexOf('#')
         if (ci >= 0) line = line.substring(0, ci)
         line = line.trim

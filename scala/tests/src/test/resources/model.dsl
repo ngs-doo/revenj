@@ -28,6 +28,7 @@ module test {
 		abc2;
 		t;
 		tt;
+		specification Filter 'it => it.s.StartsWith(m)' { string m; }
 	}
 	enum En { A; B; C; }
 	root Abc { 
@@ -55,6 +56,7 @@ module test {
 		Queue<Abc> *abc2;
 		timestamp t;
 		List<timestamp?>? tt;
+		specification Filter 'it => it.t > at' { timestamp at; }
 	}
 	entity Ent1 { int i; }
 	entity Ent2 { float f; }
@@ -78,6 +80,7 @@ module test {
 		List<date> dd;
 		calculated hasD from 'it => it.d != null';
 		calculated int enSize from 'it => it.en3.Count()';
+		specification Filter 'it => it.d == d' { date d; }
 	}
 	value Another;
 	sql AbcSql from '"test"."AbcList"' {
@@ -87,6 +90,7 @@ module test {
 		En? en2;
 		Linked list<En> en3;
 		linked list<int> i4;
+		specification Filter 'it => it.s == s' { string s; }		
 	}
 	sql AbcWrite from test.Abc(ID) {
 		int ID;
@@ -116,5 +120,6 @@ module test {
 		string[] ss;
 		Val vv;
 		List<Val?>? vvv;
+		specification Filter 'it => it.x >= a && it.x <= b' { int a; int b; }		
 	}	
 }
