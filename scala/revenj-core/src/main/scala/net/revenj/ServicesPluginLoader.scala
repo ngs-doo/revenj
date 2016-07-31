@@ -17,7 +17,7 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
   def find[T: TypeTag]: Seq[Class[T]] = {
     val plugins = new ArrayBuffer[Class[T]]()
 
-    val fullName = PREFIX + typeOf[T]
+    val fullName = PREFIX + typeOf[T].toString.replace("[", "%3C").replace("]", "%3E")
     val manifest = mirror.runtimeClass(typeOf[T].dealias).asInstanceOf[Class[T]]
     //TODO: release class loader to avoid locking up jars on Windows
     val configs = loader.getResources(fullName)
@@ -42,7 +42,7 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
           if ((line.indexOf(' ') >= 0) || (line.indexOf('\t') >= 0)) throw new IOException("Invalid configuration for " + manifest + " in " + u)
           var cp = line.codePointAt(0)
           if (!Character.isJavaIdentifierStart(cp)) throw new IOException("Invalid configuration for " + manifest + " in " + u)
-          var i: Int = Character.charCount(cp)
+          var i = Character.charCount(cp)
           while (i < n) {
             cp = line.codePointAt(i)
             if (!Character.isJavaIdentifierPart(cp) && (cp != '.')) throw new IOException("Invalid configuration for " + manifest + " in " + u)
