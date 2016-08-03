@@ -34,8 +34,10 @@ lazy val tests = (project in file("tests")
     dslSources := Map(
       Targets.Option.REVENJ_SCALA -> (sourceManaged in Test).value / "revenj"
     ),
-    sourceGenerators in Test += Def.task {
+    resourceGenerators in Test += Def.task {
       com.dslplatform.sbt.Actions.scanEventHandlers(streams.value.log, target.value, (resourceManaged in Test).value / "META-INF" / "services")
+    }.taskValue,
+    sourceGenerators in Test += Def.task {
       com.dslplatform.sbt.Actions.generateSource(
         streams.value.log,
         Targets.Option.REVENJ_SCALA,
