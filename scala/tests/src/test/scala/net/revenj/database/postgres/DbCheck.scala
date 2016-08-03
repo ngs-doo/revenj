@@ -2,6 +2,7 @@ package net.revenj.database.postgres
 
 import java.io.IOException
 import java.sql.Connection
+import java.time.OffsetDateTime
 import javax.sql.DataSource
 
 import com.dslplatform.compiler.client.parameters._
@@ -10,14 +11,14 @@ import example.test._
 import example.test.postgres.{AbcListRepository, AbcRepository}
 import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.Container
-import net.revenj.patterns.{DataContext, UnitOfWork}
+import net.revenj.patterns.{DataContext, DomainEvent, DomainEventHandler, UnitOfWork}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeAfterAll
 import ru.yandex.qatools.embed.service.PostgresEmbeddedService
 
 import scala.collection.mutable
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 import scala.util.Try
 
@@ -168,12 +169,14 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       val ctx = container.resolve[UnitOfWork]
       val ev = TestMe(x = 100, ss = Array("1", "3"), vv = Val(x = Some(5)), vvv = Some(List(Some(Val(x = Some(3))))))
       val total = Await.result(ctx.count[TestMe](), Duration.Inf)
+      DbCheck.ExampleEventHandler.counter = 0
       Await.result(ctx.submit(ev), Duration.Inf)
       val newTotal = Await.result(ctx.count[TestMe](), Duration.Inf)
       val all = Await.result(ctx.search[TestMe](), Duration.Inf)
       ctx.commit(Duration.Inf).isSuccess === true
       container.close()
       newTotal == total + 1
+      DbCheck.ExampleEventHandler.counter === 1
     }
     "search with spec" >> {
       val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
@@ -191,6 +194,17 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
 }
 
 object DbCheck {
+
+  class ExampleEventHandler extends DomainEventHandler[TestMe] {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    override def handle(domainEvent: TestMe): Future[Unit] = {
+      ExampleEventHandler.counter += 1
+      Future { () }
+    }
+  }
+  object ExampleEventHandler {
+    var counter = 0
+  }
 
   class MyService(val factory: Connection => DataContext)
 

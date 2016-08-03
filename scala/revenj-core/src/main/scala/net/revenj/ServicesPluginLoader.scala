@@ -1,7 +1,7 @@
 package net.revenj
 
 import java.io.{BufferedReader, IOException, InputStreamReader}
-import java.net.URL
+import java.net.{URL, URLEncoder}
 import java.nio.charset.Charset
 
 import net.revenj.extensibility.PluginLoader
@@ -17,7 +17,7 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
   def find[T: TypeTag]: Seq[Class[T]] = {
     val plugins = new ArrayBuffer[Class[T]]()
 
-    val fullName = PREFIX + typeOf[T].toString.replace("[", "%3C").replace("]", "%3E")
+    val fullName = PREFIX + URLEncoder.encode(typeOf[T].toString.replace("[", "<").replace("]", ">"), "UTF-8")
     val manifest = mirror.runtimeClass(typeOf[T].dealias).asInstanceOf[Class[T]]
     //TODO: release class loader to avoid locking up jars on Windows
     val configs = loader.getResources(fullName)

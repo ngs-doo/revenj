@@ -5,7 +5,7 @@ import com.dslplatform.compiler.client.parameters.Targets
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.2.0",
+    version := "0.2.1",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1209",
       "joda-time" % "joda-time" % "2.9.4", //TODO: will be removed
@@ -35,6 +35,7 @@ lazy val tests = (project in file("tests")
       Targets.Option.REVENJ_SCALA -> (sourceManaged in Test).value / "revenj"
     ),
     sourceGenerators in Test += Def.task {
+      com.dslplatform.sbt.Actions.scanEventHandlers(streams.value.log, target.value, (resourceManaged in Test).value / "META-INF" / "services")
       com.dslplatform.sbt.Actions.generateSource(
         streams.value.log,
         Targets.Option.REVENJ_SCALA,
