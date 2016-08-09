@@ -121,5 +121,10 @@ module test {
 		Val vv;
 		List<Val?>? vvv;
 		specification Filter 'it => it.x >= a && it.x <= b' { int a; int b; }
-	}	
+	}
+	report ReportMe {
+	    int x;
+	    Vector<TestMe> events 'it => it.x == x';
+	    Abc firstAbc 'it => it.s == "xx"' ORDER BY ID DESC;
+	}
 }

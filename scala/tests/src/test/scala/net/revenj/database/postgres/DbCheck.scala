@@ -170,7 +170,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       val total = Await.result(ctx.count[TestMe](), Duration.Inf)
       DbCheck.EventHandlerCounters.resetCounters()
       Await.result(ctx.submit(ev), Duration.Inf)
-      ev.URI.length >== 0
+      ev.URI.length !== 0
       val newTotal = Await.result(ctx.count[TestMe](), Duration.Inf)
       val all = Await.result(ctx.search[TestMe](), Duration.Inf)
       val found = Await.result(ctx.find[TestMe](ev.URI), Duration.Inf)
@@ -195,6 +195,18 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       container.close()
       find.size === 1
       find.head.x === x
+    }
+    "report test" >> {
+      val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+      val ctx = container.resolve[UnitOfWork]
+      val x = (new java.util.Date().getTime / 10000).asInstanceOf[Int]
+      val ev = TestMe(x = x)
+      Await.result(ctx.submit(ev), Duration.Inf)
+      val rep = ReportMe(x = x)
+      val result = Await.result(ctx.populate(rep), Duration.Inf)
+      ctx.commit(Duration.Inf).isSuccess === true
+      container.close()
+      result.events.exists(_.URI == ev.URI) === true
     }
   }
 }
