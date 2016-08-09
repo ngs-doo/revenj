@@ -6,8 +6,7 @@ import scala.concurrent.Future
 
 class TestMeHandler extends DomainEventHandler[TestMe] {
   var called = 0
-  override def handle(event: TestMe): Future[Unit] = {
+  override def handle(event: TestMe): Unit = {
     called += 1
-    Future.successful(())
   }
 }

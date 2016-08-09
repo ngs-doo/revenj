@@ -1,11 +1,10 @@
 package net.revenj
 
-import net.revenj.extensibility.PluginLoader
-import net.revenj.patterns.{DomainEvent, DomainEventHandler}
+import net.revenj.patterns.DomainEventHandler
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
-import scala.concurrent.Future
+import scala.reflect.runtime.universe._
 
 class ContainerCheck extends Specification with ScalaCheck {
   sequential
@@ -143,17 +142,17 @@ class ContainerCheck extends Specification with ScalaCheck {
       val container = new SimpleContainer(false, cl)
       container.registerAs[DomainEventHandler[Single], Handler1]()
       container.registerAs[DomainEventHandler[Single], Handler2]()
-      container.registerAs[DomainEventHandler[Future[Single]], Handler3]()
+      container.registerAs[DomainEventHandler[Function0[Single]], Handler3]()
       val found1 = container.resolve[Array[DomainEventHandler[Single]]]
       found1.length === 2
-      val found2 = container.resolve[Array[DomainEventHandler[Future[Single]]]]
+      val found2 = container.resolve[Array[DomainEventHandler[Function0[Single]]]]
       found2.length === 1
     }
     "sequence resolution" >> {
       val container = new SimpleContainer(false, cl)
       container.registerAs[DomainEventHandler[Single], Handler1]()
       container.registerAs[DomainEventHandler[Single], Handler2]()
-      container.registerAs[DomainEventHandler[Future[Single]], Handler3]()
+      container.registerAs[DomainEventHandler[Function0[Single]], Handler3]()
       val found = container.resolve[Seq[DomainEventHandler[Single]]]
       found.length === 2
     }
@@ -193,14 +192,11 @@ class SelfReference(val self: () => SelfReference) {
 class Single
 
 class Handler1 extends DomainEventHandler[Single] {
-  import scala.concurrent.ExecutionContext.Implicits.global
-  override def handle(domainEvent: Single): Future[Unit] = Future { () }
+  override def handle(domainEvent: Single): Unit = ()
 }
 class Handler2 extends DomainEventHandler[Single] {
-  import scala.concurrent.ExecutionContext.Implicits.global
-  override def handle(domainEvent: Single): Future[Unit] = Future { () }
+  override def handle(domainEvent: Single): Unit = ()
 }
-class Handler3 extends DomainEventHandler[Future[Single]] {
-  import scala.concurrent.ExecutionContext.Implicits.global
-  override def handle(domainEvent: Future[Single]): Future[Unit] = Future { () }
+class Handler3 extends DomainEventHandler[Function0[Single]] {
+  override def handle(domainEvent: Function0[Single]): Unit = ()
 }

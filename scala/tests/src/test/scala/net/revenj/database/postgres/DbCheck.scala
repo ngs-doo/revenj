@@ -2,7 +2,6 @@ package net.revenj.database.postgres
 
 import java.io.IOException
 import java.sql.Connection
-import java.time.OffsetDateTime
 import javax.sql.DataSource
 
 import com.dslplatform.compiler.client.parameters._
@@ -11,14 +10,14 @@ import example.test._
 import example.test.postgres.{AbcListRepository, AbcRepository}
 import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.Container
-import net.revenj.patterns.{DataContext, DomainEvent, DomainEventHandler, UnitOfWork}
+import net.revenj.patterns.{DataContext, DomainEventHandler, UnitOfWork}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeAfterAll
 import ru.yandex.qatools.embed.service.PostgresEmbeddedService
 
 import scala.collection.mutable
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.Try
 
@@ -169,14 +168,21 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       val ctx = container.resolve[UnitOfWork]
       val ev = TestMe(x = 100, ss = Array("1", "3"), vv = Val(x = Some(5)), vvv = Some(List(Some(Val(x = Some(3))))))
       val total = Await.result(ctx.count[TestMe](), Duration.Inf)
-      DbCheck.ExampleEventHandler.counter = 0
+      DbCheck.EventHandlerCounters.resetCounters()
       Await.result(ctx.submit(ev), Duration.Inf)
+      ev.URI.length >== 0
       val newTotal = Await.result(ctx.count[TestMe](), Duration.Inf)
       val all = Await.result(ctx.search[TestMe](), Duration.Inf)
+      val found = Await.result(ctx.find[TestMe](ev.URI), Duration.Inf)
+      found.isDefined === true
+      ev.URI === found.get.URI
       ctx.commit(Duration.Inf).isSuccess === true
       container.close()
       newTotal == total + 1
-      DbCheck.ExampleEventHandler.counter === 1
+      DbCheck.EventHandlerCounters.simpleCounter === 1
+      DbCheck.EventHandlerCounters.arrayCounter === 1
+      DbCheck.EventHandlerCounters.funcCounter === 1
+      DbCheck.EventHandlerCounters.arrayFuncCounter === 1
     }
     "search with spec" >> {
       val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
@@ -196,14 +202,44 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
 object DbCheck {
 
   class ExampleEventHandler extends DomainEventHandler[TestMe] {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    override def handle(domainEvent: TestMe): Future[Unit] = {
-      ExampleEventHandler.counter += 1
-      Future { () }
+    override def handle(domainEvent: TestMe): Unit = {
+      if (domainEvent.URI.isEmpty) {
+        EventHandlerCounters.simpleCounter += 1
+      }
     }
   }
-  object ExampleEventHandler {
-    var counter = 0
+  class ExampleArrayEventHandler extends DomainEventHandler[Array[TestMe]] {
+    override def handle(events: Array[TestMe]): Unit = {
+      if (!events.exists(_.URI.nonEmpty)) {
+        EventHandlerCounters.arrayCounter += 1
+      }
+    }
+  }
+  class ExampleFuncEventHandler extends DomainEventHandler[Function0[TestMe]] {
+    override def handle(event: Function0[TestMe]): Unit = {
+      if (event().URI.nonEmpty) {
+        EventHandlerCounters.funcCounter += 1
+      }
+    }
+  }
+  class ExampleFuncArrayEventHandler extends DomainEventHandler[Function0[Array[TestMe]]] {
+    override def handle(events: Function0[Array[TestMe]]): Unit = {
+      if (!events().exists(_.URI.isEmpty)) {
+        EventHandlerCounters.arrayFuncCounter += 1
+      }
+    }
+  }
+  object EventHandlerCounters {
+    var simpleCounter = 0
+    var arrayCounter = 0
+    var funcCounter = 0
+    var arrayFuncCounter = 0
+    def resetCounters(): Unit = {
+      simpleCounter = 0
+      arrayCounter = 0
+      funcCounter = 0
+      arrayFuncCounter = 0
+    }
   }
 
   class MyService(val factory: Connection => DataContext)

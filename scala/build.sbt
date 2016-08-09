@@ -5,7 +5,7 @@ import com.dslplatform.compiler.client.parameters.Targets
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.2.1",
+    version := "0.2.2",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1209",
       "joda-time" % "joda-time" % "2.9.4", //TODO: will be removed

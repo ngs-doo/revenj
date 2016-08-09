@@ -64,7 +64,10 @@ object Utils {
   }
 
   private class GenArrType(genType: JavaType) extends GenericArrayType {
-    def getGenericComponentType = genType
+    lazy private val typeName = genType.getTypeName + "[]"
+    override def getGenericComponentType = genType
+    def getTypeName: String = typeName
+    override def toString: String = typeName
   }
 
   private[revenj] def findType(tpe: Type, mirror: Mirror): Option[JavaType] = {

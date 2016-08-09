@@ -90,7 +90,7 @@ module test {
 		En? en2;
 		Linked list<En> en3;
 		linked list<int> i4;
-		specification Filter 'it => it.s == s' { string s; }		
+		specification Filter 'it => it.s == s' { string s; }
 	}
 	sql AbcWrite from test.Abc(ID) {
 		int ID;
@@ -120,6 +120,6 @@ module test {
 		string[] ss;
 		Val vv;
 		List<Val?>? vvv;
-		specification Filter 'it => it.x >= a && it.x <= b' { int a; int b; }		
+		specification Filter 'it => it.x >= a && it.x <= b' { int a; int b; }
 	}	
 }
