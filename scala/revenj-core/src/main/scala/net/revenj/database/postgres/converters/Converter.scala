@@ -62,7 +62,7 @@ trait Converter[T] {
         }
         Some(ArrayBuffer.empty[T])
       } else {
-        val innerContext = context << 1
+        val innerContext = if (context == 0) 1 else context << 1
         val list = ArrayBuffer.newBuilder[T]
         do {
           list += parseCollectionItem(reader, innerContext)
@@ -95,7 +95,7 @@ trait Converter[T] {
         }
         Some(ArrayBuffer.empty[Option[T]])
       } else {
-        val innerContext = context << 1
+        val innerContext = if (context == 0) 1 else context << 1
         val list = ArrayBuffer.newBuilder[Option[T]]
         do {
           list += parseNullableCollectionItem(reader, innerContext)

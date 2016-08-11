@@ -121,10 +121,12 @@ object UuidConverter extends Converter[UUID] {
 
   def default() = Utils.MIN_UUID
 
-  override def parseRaw(reader: PostgresReader, start: Int, context: Int): UUID = {
+  override def parseRaw(reader: PostgresReader, start: Int, context: Int): UUID = parseUuid(reader, start, 36)
+
+  private def parseUuid(reader: PostgresReader, start: Int, len: Int) = {
     val buf = reader.tmp
     buf(0) = start.toChar
-    reader.fillTotal(buf, 1, 36)
+    reader.fillTotal(buf, 1, len)
     toUuid(buf)
   }
 
@@ -170,7 +172,9 @@ object UuidConverter extends Converter[UUID] {
       reader.read(4)
       Utils.MIN_UUID
     } else {
-      parseRaw(reader, cur, context)
+      val uuid = parseUuid(reader, cur, 35)
+      reader.read()
+      uuid
     }
   }
 
@@ -180,7 +184,9 @@ object UuidConverter extends Converter[UUID] {
       reader.read(4)
       None
     } else {
-      Some(parseRaw(reader, cur, context))
+      val uuid = parseUuid(reader, cur, 35)
+      reader.read()
+      Some(uuid)
     }
   }
 

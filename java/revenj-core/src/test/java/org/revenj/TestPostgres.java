@@ -65,7 +65,7 @@ public class TestPostgres {
 	@Test
 	public void zoneRange() throws IOException {
 		PostgresReader reader = new PostgresReader();
-		reader.process("[NULL,\"2015-09-28 13:35:42.973+02:00\",\"1970-01-01 01:00:00+01:00\",\"0001-01-01 00:00:00Z\",\"2038-02-13 00:45:30.647+01:00\"]");
+		reader.process("{NULL,\"2015-09-28 13:35:42.973+02:00\",\"1970-01-01 01:00:00+01:00\",\"0001-01-01 00:00:00Z\",\"2038-02-13 00:45:30.647+01:00\"}");
 		List<OffsetDateTime> values = TimestampConverter.parseOffsetCollection(reader, 0, true, true);
 		Assert.assertEquals(5, values.size());
 		Assert.assertNull(values.get(0));
@@ -74,12 +74,12 @@ public class TestPostgres {
 	@Test
 	public void timestampWithTimeOffset() throws IOException {
 		PostgresReader reader = new PostgresReader();
-		reader.process("[\"0001-01-01 00:00:00+01:22\"]");
+		reader.process("{\"0001-01-01 00:00:00+01:22\"}");
 		List<OffsetDateTime> values = TimestampConverter.parseOffsetCollection(reader, 0, true, false);
 		Assert.assertEquals(1, values.size());
 		Assert.assertEquals(4920, values.get(0).getOffset().getTotalSeconds());
 		Assert.assertEquals(0, values.get(0).getMinute());
-		reader.process("[\"0001-01-01 00:00:00+01:22\"]");
+		reader.process("{\"0001-01-01 00:00:00+01:22\"}");
 		values = TimestampConverter.parseOffsetCollection(reader, 0, true, true);
 		Assert.assertEquals(1, values.size());
 		Assert.assertEquals(0, values.get(0).getOffset().getTotalSeconds());
