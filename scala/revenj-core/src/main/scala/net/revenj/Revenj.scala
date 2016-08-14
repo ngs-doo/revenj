@@ -9,6 +9,7 @@ import javax.sql.DataSource
 
 import net.revenj.extensibility.{Container, PluginLoader, SystemAspect}
 import net.revenj.patterns._
+import net.revenj.serialization.{JacksonSerialization, Serialization}
 import org.postgresql.ds.PGPoolingDataSource
 
 import scala.collection.concurrent.TrieMap
@@ -61,16 +62,14 @@ object Revenj {
     val revUser = properties.getProperty("revenj.user")
     if (revUser != null && revUser.length > 0) {
       dataSource.setUser(revUser)
-    }
-    else if (user != null && user.length > 0) {
+    } else if (user != null && user.length > 0) {
       dataSource.setUser(user)
     }
     val password = properties.getProperty("password")
     val revPassword = properties.getProperty("revenj.password")
     if (revPassword != null && revPassword.length > 0) {
       dataSource.setPassword(revPassword)
-    }
-    else if (password != null && password.length > 0) {
+    } else if (password != null && password.length > 0) {
       dataSource.setPassword(password)
     }
     dataSource
@@ -85,13 +84,11 @@ object Revenj {
           }
         })
         val urls = new ArrayBuffer[URL]
-        for (j <- jars) {
-          urls += j.toURI.toURL
-        }
+        jars foreach { j => urls += j.toURI.toURL  }
         if (classLoader.isDefined) Some(new URLClassLoader(urls.toArray, classLoader.get))
         else Some(new URLClassLoader(urls.toArray))
       } else if (classLoader.isDefined) {
-        Some(classLoader.get)
+        classLoader
       } else {
         Option(Thread.currentThread.getContextClassLoader)
       }
@@ -137,6 +134,8 @@ object Revenj {
     val ns = properties.getProperty("revenj.namespace")
     val domainModel = new SimpleDomainModel(ns, loader)
     container.registerInstance[DomainModel](domainModel, handleClose = false)
+    container.registerAs[JacksonSerialization, JacksonSerialization](singleton = true)
+    container.registerAs[Serialization[String], JacksonSerialization](singleton = true)
     container.registerFactory[DataContext](c => LocatorDataContext.asDataContext(c, loader), singleton = false)
     container.registerFactory[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), singleton = false)
     container.registerFactory[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), singleton = false)

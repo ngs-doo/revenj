@@ -8,8 +8,7 @@ trait PluginLoader {
   def resolve[T : TypeTag](container: Container, manifest: Class[T]): Array[T] = {
     val scope = container.createScope()
     try {
-      val manifests = find[T]
-      for (sc <- manifests) {
+      find[T] foreach { sc =>
         scope.registerType(manifest, sc, singleton = false)
       }
       scope.resolve[Array[T]]

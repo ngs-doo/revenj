@@ -38,13 +38,24 @@ trait OlapCubeQuery[T <: DataSource] {
       filter: Option[Specification[T]] = None,
       limit: Option[Int] = None,
       offset: Option[Int] = None): Future[IndexedSeq[Map[String, Any]]]
+
+  def analyze(dimensionsAndFacts: Seq[String], filter: Specification[T]): Future[IndexedSeq[Map[String, Any]]] = {
+    analyze(
+      dimensionsAndFacts.filter(dimensions.contains),
+      dimensionsAndFacts.filter(facts.contains),
+      Seq.empty,
+      Option(filter),
+      None,
+      None
+    )
+  }
 }
 
 object OlapCubeQuery {
 
-  //TODO: pimp for builder
+  implicit def builder[T <: DataSource](query: OlapCubeQuery[T]): OlapCubeQueryBuilder[T] = new OlapCubeQueryBuilder(query)
 
-  private class OlapCubeQueryBuilder[T <: DataSource](query: OlapCubeQuery[T]) {
+  class OlapCubeQueryBuilder[T <: DataSource](query: OlapCubeQuery[T]) {
     private val dimensions = ArrayBuffer.newBuilder[String]
     private val facts = ArrayBuffer.newBuilder[String]
     private var resultLimit: Option[Int] = None

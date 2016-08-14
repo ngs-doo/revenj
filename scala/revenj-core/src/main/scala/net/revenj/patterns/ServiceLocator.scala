@@ -1,5 +1,9 @@
 package net.revenj.patterns
 
+import java.lang.reflect.Type
+
+import net.revenj.Utils
+
 import scala.reflect.runtime.universe.TypeTag
 import scala.util.Try
 
@@ -23,4 +27,9 @@ trait ServiceLocator {
   }
 
   def tryResolve[T: TypeTag]: Try[T]
+
+  private[revenj] def resolve(tpe: Type): Try[AnyRef]
+  private[revenj] def resolve[T](container: Class[T], argument: Type, arguments: Type*): Try[T] = {
+    resolve(Utils.makeGenericType(container, argument, arguments: _*)).map(_.asInstanceOf[T])
+  }
 }

@@ -1,4 +1,4 @@
-import com.dslplatform.compiler.client.parameters.Targets
+import com.dslplatform.compiler.client.parameters.{Settings, Targets}
 
 // ### PROJECT SETTINGS ###
 
@@ -11,9 +11,25 @@ lazy val core = (project in file("revenj-core")
       "joda-time" % "joda-time" % "2.9.4", //TODO: will be removed
       "org.joda" % "joda-convert" % "1.8.1",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.7.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.7.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.7.4",
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test
     )
   )
+)
+
+lazy val akka = (project in file("revenj-akka")
+  settings (commonSettings ++ publishSettings)
+  settings(
+  version := "0.2.2",
+  libraryDependencies ++= Seq(
+    "com.typesafe" % "config" % "1.3.0",
+    "com.typesafe.akka" %% "akka-http-core" % "2.4.9-RC2"
+    )
+  )
+  dependsOn(core)
 )
 
 lazy val storage = (project in file("revenj-storage")
@@ -34,6 +50,7 @@ lazy val tests = (project in file("tests")
     dslSources := Map(
       Targets.Option.REVENJ_SCALA -> (sourceManaged in Test).value / "revenj"
     ),
+    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME),
     resourceGenerators in Test += Def.task {
       com.dslplatform.sbt.Actions.scanEventHandlers(streams.value.log, target.value, (resourceManaged in Test).value / "META-INF" / "services")
     }.taskValue,
@@ -57,7 +74,6 @@ lazy val tests = (project in file("tests")
     libraryDependencies ++= Seq(
       "com.dslplatform" % "dsl-clc" % "1.7.2" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test,
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.20" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
     ),
@@ -75,7 +91,7 @@ lazy val root = (project in file(".")
     publishLocal := {},
     publish := {}
   )
-  aggregate(core, storage, tests)
+  aggregate(core, akka, storage, tests)
 )
 
 // ### COMMON SETTINGS ###
