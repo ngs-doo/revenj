@@ -68,6 +68,19 @@ trait PersistableRepository[T <: AggregateRoot]
     persist(Seq.empty, Seq((null.asInstanceOf[T], update)), Seq.empty).map(_ => ())
   }
 
+  /** Changing state of an aggregate root.
+    *
+    * @param old old version of aggregate root
+    * @param current current version of aggregate root
+    * @return       future for error checking
+    */
+  def update(old: T, current: T): Future[Unit] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    require(old ne null, "null value provided for old")
+    require(current ne null, "null value provided for current")
+    persist(Seq.empty, Seq((old, current)), Seq.empty).map(_ => ())
+  }
+
   /** Bulk delete.
     * Remote multiple {@link AggregateRoot aggregates}.
     *

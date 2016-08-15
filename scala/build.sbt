@@ -111,7 +111,6 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
     "-unchecked",
     "-Xfuture",
     "-Xlint",
-    "-Xno-forwarders",
     "-Xverify",
     "-Yrepl-sync",
     "-Ywarn-adapted-args",

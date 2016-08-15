@@ -131,6 +131,9 @@ public abstract class Revenj {
 
 		@Override
 		public Optional<Class<?>> find(String name) {
+			if (name == null) {
+				return Optional.empty();
+			}
 			Class<?> found = cache.get(name);
 			if (found != null) {
 				return Optional.of(found);

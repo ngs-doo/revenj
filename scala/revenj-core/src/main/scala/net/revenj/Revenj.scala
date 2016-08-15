@@ -106,7 +106,8 @@ object Revenj {
     }
 
     def find(name: String): Option[Class[_]] = {
-      cache.get(name) match {
+      if (name == null) None
+      else cache.get(name) match {
         case res@Some(_) => res
         case _ =>
           try {

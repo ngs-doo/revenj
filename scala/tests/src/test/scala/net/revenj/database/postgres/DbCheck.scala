@@ -48,6 +48,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       val repoAbcList = container.resolve[AbcListRepository]
       val oldAbcs = Await.result(repoAbc.search(), Duration.Inf)
       val oldLists = Await.result(repoAbcList.search(), Duration.Inf)
+      oldAbcs.size === oldLists.size
       val abc = Abc(s = "defg", abc1 = oldAbcs.lastOption)
       if (oldAbcs.nonEmpty) {
         abc.abc2.enqueue(oldAbcs.last, oldAbcs.head)

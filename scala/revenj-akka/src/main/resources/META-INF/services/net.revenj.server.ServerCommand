@@ -1,2 +1,4 @@
 net.revenj.server.commands.crud.Create
+net.revenj.server.commands.crud.Delete
 net.revenj.server.commands.crud.Read
+net.revenj.server.commands.crud.Update

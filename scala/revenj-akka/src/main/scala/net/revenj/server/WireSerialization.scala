@@ -32,12 +32,10 @@ trait WireSerialization {
 
   def deserialize[T: TypeTag](stream: InputStream, contentType: String): Try[T]
 
-  @SuppressWarnings(Array("unchecked"))
   def deserialize[T](content: Array[Byte], length: Int, contentType: String, container: Class[T], argument: Type, arguments: Type*): Try[T] = {
     deserialize(Utils.makeGenericType(container, argument, arguments: _*), content, length, contentType).map(_.asInstanceOf[T])
   }
 
-  @SuppressWarnings(Array("unchecked"))
   def deserialize[T](stream: InputStream, contentType: String, container: Class[T], argument: Type, arguments: Type*): Try[T] = {
     deserialize(Utils.makeGenericType(container, argument, arguments: _*), stream, contentType).map(_.asInstanceOf[T])
   }

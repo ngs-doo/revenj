@@ -16,7 +16,7 @@ public final class ProcessingResult<TFormat> {
 		this.executedCommandResults = executedCommandResults != null
 				? executedCommandResults.toArray(new CommandResultDescription[executedCommandResults.size()])
 				: EMPTY;
-		this.duration = (start - System.nanoTime()) / 1000;
+		this.duration = (System.nanoTime() - start) / 1_000;
 	}
 
 	public static <T> ProcessingResult<T> badRequest(String message, long start) {

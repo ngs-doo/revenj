@@ -2,7 +2,7 @@ package net.revenj
 
 import java.util
 
-final class TreePath private(val value: String, val parts: Array[String]) {
+final class TreePath private(private val value: String, private val parts: Array[String]) {
 
   override def hashCode: Int = value.hashCode
 
@@ -42,7 +42,7 @@ object TreePath {
   val EMPTY: TreePath = new TreePath("", new Array[String](0))
 
   def create(value: String): TreePath = {
-    if (value == null || value.length == 0) EMPTY
+    if (value == null || value.isEmpty) EMPTY
     else {
       val parts = value.split("\\.")
       checkParts(parts)

@@ -1,6 +1,6 @@
 package net.revenj.server
 
-final class ServerCommandDescription[TFormat](
-  val requestID: String,
-  val commandClass: Class[_ <: ServerCommand],
-  val data: TFormat)
+case class ServerCommandDescription[TFormat](
+  requestID: String,
+  commandClass: Class[_ <: ServerCommand],
+  data: TFormat)

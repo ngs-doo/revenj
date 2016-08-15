@@ -2,12 +2,12 @@ package net.revenj.server.commands.crud
 
 import net.revenj.patterns.{AggregateRoot, DomainModel, PersistableRepository, ServiceLocator}
 import net.revenj.serialization.Serialization
-import net.revenj.server.commands.crud.Create.Argument
+import net.revenj.server.commands.crud.Update.Argument
 import net.revenj.server.{CommandResult, ServerCommand}
 
 import scala.concurrent.Future
 
-class Create(domainModel: DomainModel) extends ServerCommand {
+class Update(domainModel: DomainModel) extends ServerCommand {
 
   override def execute[TInput, TOutput](
     locator: ServiceLocator,
@@ -35,14 +35,18 @@ class Create(domainModel: DomainModel) extends ServerCommand {
           CommandResult.badRequest(s"Error resolving repository for: ${arg.get.Name}. Reason: ${tryRepository.failed.get.getMessage}")
         } else {
           import scala.concurrent.ExecutionContext.Implicits.global
-          tryRepository.get.insert(instance.get).map { uri =>
-            val returnInstance = arg.get.ReturnInstance.getOrElse(false)
-            val response = output.serializeRuntime(if (returnInstance) instance.get else uri)
-            if (response.isSuccess) {
-              CommandResult[TOutput](Some(response.get), "Object created", 201)
-            } else {
-              CommandResult[TOutput](None, response.failed.get.getMessage, 500)
-            }
+          tryRepository.get.find(arg.get.Uri).flatMap {
+            case Some(found) =>
+              tryRepository.get.update(found, instance.get).map { _ =>
+                val response = output.serializeRuntime(found)
+                if (response.isSuccess) {
+                  CommandResult[TOutput](Some(response.get), "Object changed", 200)
+                } else {
+                  CommandResult[TOutput](None, response.failed.get.getMessage, 500)
+                }
+              }
+            case _ =>
+              CommandResult.badRequest(s"Can't find ${arg.get.Name} with uri: ${arg.get.Uri}")
           }
         }
       }
@@ -50,8 +54,8 @@ class Create(domainModel: DomainModel) extends ServerCommand {
   }
 }
 
-object Create {
+object Update {
 
-  case class Argument[TFormat](Name: String, Data: TFormat, ReturnInstance: Option[Boolean])
+  case class Argument[TFormat](Name: String, Uri: String, Data: TFormat, ReturnInstance: Option[Boolean])
 
 }

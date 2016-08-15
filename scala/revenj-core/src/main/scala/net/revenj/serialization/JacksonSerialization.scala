@@ -143,10 +143,10 @@ object JacksonSerialization {
           if (parts.length == 2) new Point(parts(0).toInt, parts(1).toInt)
           else throw new IOException("Unable to parse \"number,number\" format for point")
         } else {
-          val tree: JsonNode = parser.getCodec.readTree(parser)
-          var x: JsonNode = tree.get("X")
+          val tree = parser.getCodec.readTree[JsonNode](parser)
+          var x = tree.get("X")
           if (x == null) x = tree.get("x")
-          var y: JsonNode = tree.get("Y")
+          var y = tree.get("Y")
           if (y == null) y = tree.get("y")
           new Point(if (x != null) x.asInt else 0, if (y != null) y.asInt else 0)
         }
@@ -159,10 +159,10 @@ object JacksonSerialization {
           if (parts.length == 2) new Point2D.Double(parts(0).toDouble, parts(1).toDouble)
           else throw new IOException("Unable to parse \"number,number\" format for point")
         } else {
-          val tree: JsonNode = parser.getCodec.readTree(parser)
-          var x: JsonNode = tree.get("X")
+          val tree = parser.getCodec.readTree[JsonNode](parser)
+          var x = tree.get("X")
           if (x == null) x = tree.get("x")
-          var y: JsonNode = tree.get("Y")
+          var y = tree.get("Y")
           if (y == null) y = tree.get("y")
           new Point2D.Double(if (x != null) x.asDouble else 0, if (y != null) y.asDouble else 0)
         }
@@ -175,14 +175,14 @@ object JacksonSerialization {
           if (parts.length == 4) new Rectangle2D.Double(parts(0).toDouble, parts(1).toDouble, parts(2).toDouble, parts(3).toDouble)
           else throw new IOException("Unable to parse \"number,number,number,number\" format for rectangle")
         } else {
-          val tree: JsonNode = parser.getCodec.readTree(parser)
-          var x: JsonNode = tree.get("X")
+          val tree = parser.getCodec.readTree[JsonNode](parser)
+          var x = tree.get("X")
           if (x == null) x = tree.get("x")
-          var y: JsonNode = tree.get("Y")
+          var y = tree.get("Y")
           if (y == null) y = tree.get("y")
-          var width: JsonNode = tree.get("Width")
+          var width = tree.get("Width")
           if (width == null) width = tree.get("width")
-          var height: JsonNode = tree.get("Height")
+          var height = tree.get("Height")
           if (height == null) height = tree.get("height")
           new Rectangle2D.Double(if (x != null) x.asDouble else 0, if (y != null) y.asDouble else 0, if (width != null) width.asDouble else 0, if (height != null) height.asDouble else 0)
         }

@@ -8,7 +8,7 @@ public final class CommandResultDescription<TFormat> {
 	CommandResultDescription(String requestID, CommandResult<TFormat> result, long start) {
 		this.requestID = requestID;
 		this.result = result;
-		duration = (start - System.nanoTime()) / 1000;
+		duration = (System.nanoTime() - start) / 1_000;
 	}
 
 	public static <TFormat> CommandResultDescription<TFormat> create(String requestID, CommandResult<TFormat> result, long start) {

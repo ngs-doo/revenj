@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
 import scala.reflect.runtime.universe._
 
-final class ProcessingEngine(
+class ProcessingEngine(
   container: Container,
   dataSource: DataSource,
   serialization: WireSerialization,
@@ -55,8 +55,10 @@ final class ProcessingEngine(
             connection.setAutoCommit(false)
             runCommands(scope, connection, startProcessing, commandDescriptions, input, output, executed, 0)
           } catch {
-            case _: Throwable =>
-              Future.successful(new ProcessingResult[TOutput]("Unable to create database connection", 503, null, startProcessing))
+            case sql: SQLException =>
+              Future.successful(ProcessingResult[TOutput]("Unable to create database connection", 503, null, startProcessing))
+            case ex: Throwable =>
+              Future.successful(ProcessingResult.error(ex, startProcessing))
           }
         case (None, _) =>
           Future.failed(new RuntimeException("Invalid serialization format: " + typeOf[TInput]))
@@ -82,11 +84,11 @@ final class ProcessingEngine(
     serverCommands.get(cd.commandClass) match {
       case Some(com) =>
         com.execute(scope, input, output, cd.data) flatMap { r =>
-          executed += new CommandResultDescription[TOutput](cd.requestID, r, startCommand)
+          executed += CommandResultDescription[TOutput](cd.requestID, r, startCommand)
           if (r.status >= 400) {
             connection.rollback()
             cleanup(scope, connection)
-            Future.successful(new ProcessingResult[TOutput](r.message, r.status, Nil, startProcessing))
+            Future.successful(ProcessingResult[TOutput](r.message, r.status, Nil, startProcessing))
           } else if (index + 1 < commandDescriptions.length) {
             runCommands(scope, connection, startProcessing, commandDescriptions, input, output, executed, index + 1)
           } else {
@@ -98,12 +100,12 @@ final class ProcessingEngine(
           case e: IOException =>
             connection.rollback()
             cleanup(scope, connection)
-            if (e.getCause.isInstanceOf[SQLException]) new ProcessingResult[TOutput](e.getCause.getMessage, 409, Nil, startProcessing)
-            else new ProcessingResult[TOutput](e.getMessage, 500, Nil, startProcessing)
+            if (e.getCause.isInstanceOf[SQLException]) ProcessingResult.error(e.getCause.getMessage, startProcessing, 409)
+            else ProcessingResult.error(e, startProcessing)
           case e: SecurityException =>
             connection.rollback()
             cleanup(scope, connection)
-            new ProcessingResult[TOutput](e.getMessage, 403, Nil, startProcessing)
+            ProcessingResult.error(e.getMessage, startProcessing, 403)
           case e: Exception =>
             connection.rollback()
             cleanup(scope, connection)
@@ -112,7 +114,7 @@ final class ProcessingEngine(
       case _ =>
         connection.rollback()
         cleanup(scope, connection)
-        Future.successful(new ProcessingResult[TOutput]("Command not registered: " + cd.commandClass, 500, Nil, startProcessing))
+        Future.successful(ProcessingResult.error(s"Command not registered: ${cd.commandClass}", startProcessing))
     }
   }
 

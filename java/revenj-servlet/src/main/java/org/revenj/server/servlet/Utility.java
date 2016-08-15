@@ -41,6 +41,7 @@ abstract class Utility {
 		if (result.executedCommandResults.length == 1) {
 			CommandResult<Object> command = result.executedCommandResults[0].result;
 			response.setStatus(command.status);
+			response.setHeader("X-Duration", BigDecimal.valueOf(result.duration, 3).toPlainString());
 			if (command.data != null) {
 				response.setContentType(serialization.serialize(command.data, response.getOutputStream(), request.getHeader("accept")));
 			} else if (result.message != null) {

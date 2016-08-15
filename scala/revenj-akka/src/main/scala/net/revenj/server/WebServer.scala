@@ -11,7 +11,7 @@ import akka.stream.scaladsl.Flow
 import com.typesafe.config.ConfigFactory
 import net.revenj.Revenj
 import net.revenj.extensibility.PluginLoader
-import net.revenj.server.handlers.FlowBinding
+import net.revenj.server.handlers.RequestBinding
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -19,7 +19,7 @@ import scala.concurrent.Future
 object WebServer {
   private[this] def parseArgs(args: Array[String]): (String, Int) = {
     if (args.isEmpty) {
-      ("localhost", 8888)
+      ("localhost", 8080)
     } else {
       (args(0), args(1).toInt)
     }
@@ -67,7 +67,7 @@ class WebServer(address: String, port: Int) {
     revenj.registerAs[ProcessingEngine, ProcessingEngine](singleton = true)
 
     val plugins = revenj.resolve[PluginLoader]
-    val bindings = plugins.resolve(revenj, classOf[FlowBinding])
+    val bindings = plugins.resolve(revenj, classOf[RequestBinding])
     val flow = Flow[HttpRequest]
     val cputCount = Runtime.getRuntime.availableProcessors
     val asyncBuilder = new mutable.HashMap[Path#Head, HttpRequest => Future[HttpResponse]]()

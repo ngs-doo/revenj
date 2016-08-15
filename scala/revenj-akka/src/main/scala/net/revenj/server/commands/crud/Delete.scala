@@ -2,12 +2,12 @@ package net.revenj.server.commands.crud
 
 import net.revenj.patterns._
 import net.revenj.serialization.Serialization
-import net.revenj.server.commands.crud.Read.Argument
+import net.revenj.server.commands.crud.Delete.Argument
 import net.revenj.server.{CommandResult, ServerCommand}
 
 import scala.concurrent.Future
 
-class Read(domainModel: DomainModel) extends ServerCommand {
+class Delete(domainModel: DomainModel) extends ServerCommand {
 
   override def execute[TInput, TOutput](
     locator: ServiceLocator,
@@ -23,29 +23,34 @@ class Read(domainModel: DomainModel) extends ServerCommand {
       CommandResult.badRequest(s"Unable to find specified domain object: ${arg.get.Name}")
     } else if (arg.get.Uri == null) {
       CommandResult.badRequest("Uri to find not specified.")
-    } else if (!classOf[Identifiable].isAssignableFrom(manifest.get)) {
-      CommandResult.badRequest(s"Specified type is not an identifiable: ${arg.get.Name}")
+    } else if (!classOf[AggregateRoot].isAssignableFrom(manifest.get)) {
+      CommandResult.badRequest(s"Specified type is not an aggregate root: ${arg.get.Name}")
     } else {
-      val tryRepository = locator.resolve(classOf[Repository[Identifiable]], manifest.get)
+      val tryRepository = locator.resolve(classOf[PersistableRepository[AggregateRoot]], manifest.get)
       if (!tryRepository.isSuccess) {
         CommandResult.badRequest(s"Error resolving repository for: ${arg.get.Name}. Reason: ${tryRepository.failed.get.getMessage}")
       } else {
         import scala.concurrent.ExecutionContext.Implicits.global
-        tryRepository.get.find(arg.get.Uri).map {
+        tryRepository.get.find(arg.get.Uri).flatMap {
           case Some(found) =>
-            val response = output.serializeRuntime(found)
-            if (response.isSuccess) {
-              CommandResult[TOutput](Some(response.get), "Object found", 200)
-            } else {
-              CommandResult[TOutput](None, response.failed.get.getMessage, 500)
+            tryRepository.get.delete(found).map { _ =>
+              val response = output.serializeRuntime(found)
+              if (response.isSuccess) {
+                CommandResult[TOutput](Some(response.get), "Object deleted", 200)
+              } else {
+                CommandResult[TOutput](None, response.failed.get.getMessage, 500)
+              }
             }
           case _ =>
-            CommandResult[TOutput](None, "Object not found", 404)
+            CommandResult.badRequest(s"Can't find ${arg.get.Name} with uri: ${arg.get.Uri}")
         }
       }
     }
   }
 }
-object Read {
+
+object Delete {
+
   case class Argument(Name: String, Uri: String)
+
 }
