@@ -36,7 +36,7 @@ class Create(domainModel: DomainModel) extends ServerCommand {
         } else {
           import scala.concurrent.ExecutionContext.Implicits.global
           tryRepository.get.insert(instance.get).map { uri =>
-            val returnInstance = arg.get.ReturnInstance.getOrElse(false)
+            val returnInstance = arg.get.ReturnInstance.getOrElse(true)
             val response = output.serializeRuntime(if (returnInstance) instance.get else uri)
             if (response.isSuccess) {
               CommandResult[TOutput](Some(response.get), "Object created", 201)
