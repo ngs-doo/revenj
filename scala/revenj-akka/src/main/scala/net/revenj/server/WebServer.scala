@@ -15,14 +15,30 @@ import net.revenj.server.handlers.FlowBinding
 
 import scala.collection.mutable
 import scala.concurrent.Future
-import scala.io.StdIn
 
 object WebServer {
-  def main(args: Array[String]): Unit = {
-    setup("localhost", 8080)
+  private[this] def parseArgs(args: Array[String]): (String, Int) = {
+    if (args.isEmpty) {
+      ("localhost", 8888)
+    } else {
+      (args(0), args(1).toInt)
+    }
   }
 
-  def setup(address: String, port: Int): Unit = {
+  def main(args: Array[String]): Unit = {
+    val (address, port) = parseArgs(args)
+    val server = new WebServer(address, port)
+    server.start()
+    // server.shutdown()
+  }
+}
+
+class WebServer(address: String, port: Int) {
+  val url = s"http://${address}:$port"
+
+  def start(): Unit = {
+    require(shutdownPosibility.isEmpty, "Server has already been started!")
+    shutdownPosibility = Some(() => ())
 
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
@@ -73,9 +89,23 @@ object WebServer {
     }
 
     val bindingFuture = Http().bindAndHandle(routes, address, port)
-    println(s"Server online at http://$address:$port/\nPress RETURN to stop...")
-    StdIn.readLine()
+    println(s"Starting server at $url ...")
+    bindingFuture foreach { bind =>
+      println(s"Started server at $url")
+      shutdownPosibility = Some { () =>
+        println(s"Shutting down server at $url ...")
+        bind.unbind() map { _ =>
+          system.terminate()
+          println(s"Shut down server at $url")
+        }
+      }
+    }
+  }
 
-    bindingFuture.flatMap(_.unbind()).onComplete(_ => system.terminate())
+  private[this] var shutdownPosibility = Option.empty[() => Unit]
+  def shutdown(): Unit = {
+    require(shutdownPosibility.isDefined, "Server has not yet been started!")
+    shutdownPosibility.get.apply()
+    shutdownPosibility = None
   }
 }
