@@ -10,6 +10,7 @@ import net.revenj.server.{ProcessingEngine, ServerCommand, ServerCommandDescript
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
+import scala.reflect.runtime.universe.TypeTag
 
 private[revenj] object Utils {
   def badResponse(message: String): HttpResponse = {
@@ -18,8 +19,14 @@ private[revenj] object Utils {
 
   case class NameInfo(manifest: Class[_], name: String)
 
-  def findClass(uri: Uri, model: DomainModel): Either[NameInfo, HttpResponse] = {
-    val name = uri.path.tail.tail.tail.toString()
+  def findClass(uri: Uri, model: DomainModel, skip: Int): Either[NameInfo, HttpResponse] = {
+    var i = 0
+    var path = uri.path
+    while (i < skip) {
+      path = path.tail
+      i += 1
+    }
+    val name = path.toString()
     model.find(name) match {
       case Some(manifest) => Left(NameInfo(manifest, name))
       case _ => Right(badResponse(s"Unknown domain object: $name"))
@@ -34,6 +41,16 @@ private[revenj] object Utils {
 
     entity.dataBytes.runFold(ByteString.empty)(_ ++ _).map { b =>
       serialization.deserialize(manifest, b.toArray[Byte], b.length, "application/json")
+    }
+  }
+
+  def getInstance[T: TypeTag](
+    serialization: WireSerialization,
+    entity: RequestEntity)
+    (implicit materializer: Materializer, ec: ExecutionContext): Future[Try[T]] = {
+
+    entity.dataBytes.runFold(ByteString.empty)(_ ++ _).map { b =>
+      serialization.deserialize[T](b.toArray[Byte], b.length, "application/json")
     }
   }
 

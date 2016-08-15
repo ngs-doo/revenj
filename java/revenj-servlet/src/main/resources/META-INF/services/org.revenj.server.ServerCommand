@@ -4,10 +4,11 @@ org.revenj.server.commands.crud.Update
 org.revenj.server.commands.crud.Delete
 org.revenj.server.commands.reporting.AnalyzeOlapCube
 org.revenj.server.commands.reporting.PopulateReport
+org.revenj.server.commands.search.CheckDomainObject
+org.revenj.server.commands.search.CountDomainObject
+org.revenj.server.commands.search.DomainObjectExists
+org.revenj.server.commands.search.GetDomainObject
 org.revenj.server.commands.search.SearchDomainObject
-org.revenj.server.commands.CountDomainObject
-org.revenj.server.commands.DomainObjectExists
 org.revenj.server.commands.ExecuteService
-org.revenj.server.commands.GetDomainObject
 org.revenj.server.commands.PersistAggregateRoot
 org.revenj.server.commands.SubmitEvent

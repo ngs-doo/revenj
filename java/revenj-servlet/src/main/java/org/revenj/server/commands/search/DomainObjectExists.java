@@ -1,4 +1,4 @@
-package org.revenj.server.commands;
+package org.revenj.server.commands.search;
 
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;

@@ -3,7 +3,7 @@ package org.revenj.server.servlet;
 import org.revenj.patterns.*;
 import org.revenj.server.ProcessingEngine;
 import org.revenj.server.commands.*;
-import org.revenj.server.commands.search.SearchDomainObject;
+import org.revenj.server.commands.search.*;
 import org.revenj.serialization.WireSerialization;
 
 import javax.servlet.ServletException;
@@ -70,6 +70,17 @@ public class DomainServlet extends HttpServlet {
 				}
 				DomainObjectExists.Argument arg = new DomainObjectExists.Argument<>(name.get(), spec, specification.orElse(null));
 				Utility.execute(engine, req, res, serialization, DomainObjectExists.class, arg);
+			}
+		} else if (path.startsWith("/check/")) {
+			Optional<String> name = Utility.findName(model, path, "/check/", res);
+			if (name.isPresent()) {
+				String uri = req.getParameter("uri");
+				if (uri == null) {
+					res.sendError(400, "Uri parameter not set. Expecting /module.name?uri=value");
+					return;
+				}
+				CheckDomainObject.Argument arg = new CheckDomainObject.Argument(name.get(), uri);
+				Utility.execute(engine, req, res, serialization, CheckDomainObject.class, arg);
 			}
 		} else {
 			res.sendError(405, "Unknown URL path: " + path);

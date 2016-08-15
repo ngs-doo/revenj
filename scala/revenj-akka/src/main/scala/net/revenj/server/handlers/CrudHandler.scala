@@ -35,7 +35,7 @@ class CrudHandler(
     import scala.concurrent.ExecutionContext.Implicits.global
     req match {
       case HttpRequest(GET, uri, _, _, _) =>
-        Utils.findClass(uri, model) match {
+        Utils.findClass(uri, model, 3) match {
           case Left(info) =>
             getURI(uri) match {
               case Left(id) =>
@@ -47,7 +47,7 @@ class CrudHandler(
             Future.successful(response)
         }
       case HttpRequest(POST, uri, _, entity, _) =>
-        Utils.findClass(uri, model) match {
+        Utils.findClass(uri, model, 3) match {
           case Left(info) =>
             Utils.getInstance(serialization, info.manifest, entity).flatMap { inst =>
               if (inst.isSuccess) {
@@ -62,7 +62,7 @@ class CrudHandler(
             Future.successful(response)
         }
       case HttpRequest(PUT, uri, _, entity, _) =>
-        Utils.findClass(uri, model) match {
+        Utils.findClass(uri, model, 3) match {
           case Left(info) =>
             getURI(uri) match {
               case Left(id) =>
@@ -82,7 +82,7 @@ class CrudHandler(
             Future.successful(response)
         }
       case HttpRequest(DELETE, uri, _, _, _) =>
-        Utils.findClass(uri, model) match {
+        Utils.findClass(uri, model, 3) match {
           case Left(info) =>
             getURI(uri) match {
               case Left(id) =>

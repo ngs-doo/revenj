@@ -67,10 +67,10 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CommandResult.cs" />
-    <Compile Include="CheckDomainObject.cs" />
+    <Compile Include="Search\CheckDomainObject.cs" />
     <Compile Include="QueueAggregateEvent.cs" />
     <Compile Include="QueueEvent.cs" />
-    <Compile Include="DomainObjectExists.cs" />
+    <Compile Include="Search\DomainObjectExists.cs" />
     <Compile Include="Search\GenericSearchFilter.cs" />
     <Compile Include="Search\GenericSpecification.cs" />
     <Compile Include="SubmitAggregateEvent.cs" />
@@ -83,12 +83,12 @@
     <Compile Include="CRUD\Read.cs" />
     <Compile Include="CRUD\Update.cs" />
     <Compile Include="CRUD\Create.cs" />
-    <Compile Include="CountDomainObject.cs" />
+    <Compile Include="Search\CountDomainObject.cs" />
     <Compile Include="SubmitEvent.cs" />
     <Compile Include="Reporting\GetRootHistory.cs" />
     <Compile Include="Reporting\TemplaterProcessDocument.cs" />
     <Compile Include="Reporting\FindInvalidData.cs" />
-    <Compile Include="GetDomainObject.cs" />
+    <Compile Include="Search\GetDomainObject.cs" />
     <Compile Include="PersistAggregateRoot.cs" />
     <Compile Include="Search\SearchDomainObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
