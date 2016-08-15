@@ -4,7 +4,7 @@ import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.server.CommandResult;
-import org.revenj.server.ServerCommand;
+import org.revenj.server.ReadOnlyServerCommand;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class AnalyzeOlapCube implements ServerCommand {
+public class AnalyzeOlapCube implements ReadOnlyServerCommand {
 
 	private final DomainModel domainModel;
 	private final PermissionManager permissions;

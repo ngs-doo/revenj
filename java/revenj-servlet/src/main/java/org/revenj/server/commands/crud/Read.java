@@ -7,13 +7,13 @@ import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.revenj.server.CommandResult;
-import org.revenj.server.ServerCommand;
+import org.revenj.server.ReadOnlyServerCommand;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Optional;
 
-public final class Read implements ServerCommand {
+public final class Read implements ReadOnlyServerCommand {
 
 	private final DomainModel domainModel;
 	private final PermissionManager permissions;

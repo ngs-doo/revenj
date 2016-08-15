@@ -4,13 +4,13 @@ import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.server.CommandResult;
-import org.revenj.server.ServerCommand;
+import org.revenj.server.ReadOnlyServerCommand;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Optional;
 
-public class PopulateReport implements ServerCommand {
+public class PopulateReport implements ReadOnlyServerCommand {
 
 	private final DomainModel domainModel;
 	private final PermissionManager permissions;

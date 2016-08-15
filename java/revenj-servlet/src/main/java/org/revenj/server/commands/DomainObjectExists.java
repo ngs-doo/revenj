@@ -2,7 +2,7 @@ package org.revenj.server.commands;
 
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
-import org.revenj.server.ServerCommand;
+import org.revenj.server.ReadOnlyServerCommand;
 import org.revenj.server.CommandResult;
 import org.revenj.serialization.Serialization;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
 import java.security.Principal;
 import java.util.Optional;
 
-public class DomainObjectExists implements ServerCommand {
+public class DomainObjectExists implements ReadOnlyServerCommand {
 
 	private final DomainModel domainModel;
 	private final PermissionManager permissions;

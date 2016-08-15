@@ -12,3 +12,5 @@ trait ServerCommand {
     output: Serialization[TOutput],
     data: TInput): Future[CommandResult[TOutput]]
 }
+
+trait ReadOnlyServerCommand extends ServerCommand

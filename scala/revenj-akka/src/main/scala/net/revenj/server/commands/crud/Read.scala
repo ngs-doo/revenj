@@ -3,11 +3,11 @@ package net.revenj.server.commands.crud
 import net.revenj.patterns._
 import net.revenj.serialization.Serialization
 import net.revenj.server.commands.crud.Read.Argument
-import net.revenj.server.{CommandResult, ServerCommand}
+import net.revenj.server.{CommandResult, ReadOnlyServerCommand}
 
 import scala.concurrent.Future
 
-class Read(domainModel: DomainModel) extends ServerCommand {
+class Read(domainModel: DomainModel) extends ReadOnlyServerCommand {
 
   override def execute[TInput, TOutput](
     locator: ServiceLocator,

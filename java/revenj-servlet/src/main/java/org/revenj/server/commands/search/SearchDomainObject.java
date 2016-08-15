@@ -4,7 +4,7 @@ import org.revenj.patterns.*;
 import org.revenj.database.postgres.jinq.JinqMetaModel;
 import org.revenj.security.PermissionManager;
 import org.revenj.server.CommandResult;
-import org.revenj.server.ServerCommand;
+import org.revenj.server.ReadOnlyServerCommand;
 import org.revenj.serialization.Serialization;
 
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class SearchDomainObject implements ServerCommand {
+public class SearchDomainObject implements ReadOnlyServerCommand {
 
 	private final DomainModel domainModel;
 	private final PermissionManager permissions;

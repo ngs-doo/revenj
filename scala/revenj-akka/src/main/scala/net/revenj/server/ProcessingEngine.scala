@@ -48,12 +48,21 @@ class ProcessingEngine(
       (serialization.find[TInput](), serialization.find[TOutput]()) match {
         case (Some(input), Some(output)) =>
           val executed = new ArrayBuffer[CommandResultDescription[TOutput]](commandDescriptions.length)
+          var withTransaction = false
+          var i = 0
+          while (i < commandDescriptions.length) {
+            val cd = commandDescriptions(i)
+            i += 1
+            if (!classOf[ReadOnlyServerCommand].isAssignableFrom(cd.commandClass)) {
+              withTransaction = true
+            }
+          }
           try {
             val connection = dataSource.getConnection
             val scope = container.createScope()
             scope.registerInstance(connection)
-            connection.setAutoCommit(false)
-            runCommands(scope, connection, startProcessing, commandDescriptions, input, output, executed, 0)
+            connection.setAutoCommit(!withTransaction)
+            runCommands(scope, withTransaction, connection, startProcessing, commandDescriptions, input, output, executed, 0)
           } catch {
             case sql: SQLException =>
               Future.successful(ProcessingResult[TOutput]("Unable to create database connection", 503, null, startProcessing))
@@ -70,6 +79,7 @@ class ProcessingEngine(
 
   private def runCommands[TInput: TypeTag, TOutput: TypeTag](
     scope: Container,
+    withTransaction: Boolean,
     connection: java.sql.Connection,
     startProcessing: Long,
     commandDescriptions: Array[ServerCommandDescription[TInput]],
@@ -86,40 +96,54 @@ class ProcessingEngine(
         com.execute(scope, input, output, cd.data) flatMap { r =>
           executed += CommandResultDescription[TOutput](cd.requestID, r, startCommand)
           if (r.status >= 400) {
-            connection.rollback()
-            cleanup(scope, connection)
+            if (withTransaction) {
+              connection.rollback()
+            }
+            cleanup(scope, withTransaction, connection)
             Future.successful(ProcessingResult[TOutput](r.message, r.status, Nil, startProcessing))
           } else if (index + 1 < commandDescriptions.length) {
-            runCommands(scope, connection, startProcessing, commandDescriptions, input, output, executed, index + 1)
+            runCommands(scope, withTransaction, connection, startProcessing, commandDescriptions, input, output, executed, index + 1)
           } else {
-            connection.commit()
-            cleanup(scope, connection)
+            if (withTransaction) {
+              connection.commit()
+            }
+            cleanup(scope, withTransaction, connection)
             Future.successful(ProcessingResult.success(executed, startProcessing))
           }
         } recover {
           case e: IOException =>
-            connection.rollback()
-            cleanup(scope, connection)
+            if (withTransaction) {
+              connection.rollback()
+            }
+            cleanup(scope, withTransaction, connection)
             if (e.getCause.isInstanceOf[SQLException]) ProcessingResult.error(e.getCause.getMessage, startProcessing, 409)
             else ProcessingResult.error(e, startProcessing)
           case e: SecurityException =>
-            connection.rollback()
-            cleanup(scope, connection)
+            if (withTransaction) {
+              connection.rollback()
+            }
+            cleanup(scope, withTransaction, connection)
             ProcessingResult.error(e.getMessage, startProcessing, 403)
           case e: Exception =>
-            connection.rollback()
-            cleanup(scope, connection)
+            if (withTransaction) {
+              connection.rollback()
+            }
+            cleanup(scope, withTransaction, connection)
             ProcessingResult.error(e, startProcessing)
         }
       case _ =>
-        connection.rollback()
-        cleanup(scope, connection)
+        if (withTransaction) {
+          connection.rollback()
+        }
+        cleanup(scope, withTransaction, connection)
         Future.successful(ProcessingResult.error(s"Command not registered: ${cd.commandClass}", startProcessing))
     }
   }
 
-  private def cleanup(scope: Container, connection: Connection): Unit = {
-    connection.setAutoCommit(true)
+  private def cleanup(scope: Container, withTransaction: Boolean, connection: Connection): Unit = {
+    if (withTransaction) {
+      connection.setAutoCommit(true)
+    }
     connection.close()
     scope.close()
   }
