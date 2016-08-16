@@ -103,7 +103,7 @@ object TimestampConverter {
   def serialize(buffer: Array[Char], start: Int, value: OffsetDateTime): Int = {
     val offset = value.getOffset.getTotalSeconds
     if (value.getYear < 1884) {
-      val at122 = value.toLocalDateTime.plusSeconds(ZERO_OFFSET.getTotalSeconds - offset)
+      val at122 = value.toLocalDateTime.plusSeconds((ZERO_OFFSET.getTotalSeconds - offset).toLong)
       val pos = serialize(buffer, start, at122)
       buffer(pos - 1) = '1'
       buffer(pos) = ':'
@@ -113,7 +113,7 @@ object TimestampConverter {
     } else {
       val offsetHours = offset / 3600
       val offsetDiff = offset - offsetHours * 3600
-      if (offsetDiff != 0) serializeNormalized(buffer, start, value.toLocalDateTime.minusSeconds(offsetDiff), offsetHours)
+      if (offsetDiff != 0) serializeNormalized(buffer, start, value.toLocalDateTime.minusSeconds(offsetDiff.toLong), offsetHours)
       else serializeNormalized(buffer, start, value.toLocalDateTime, offsetHours)
     }
   }
@@ -190,7 +190,7 @@ object TimestampConverter {
           r += 1
         }
         val pos = buf(max) == '+'
-        if (asUtc) OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC).plusSeconds(if (pos) -offsetSeconds else offsetSeconds)
+        if (asUtc) OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC).plusSeconds((if (pos) -offsetSeconds else offsetSeconds).toLong)
         else if (offsetSeconds != 0) OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.ofTotalSeconds(if (pos) offsetSeconds else -offsetSeconds))
         else OffsetDateTime.of(year, month, date, hour, minutes, seconds, nano * 1000, ZoneOffset.UTC)
       } else if (len == 20 && buf(19) == 'Z') {
@@ -198,13 +198,13 @@ object TimestampConverter {
       } else if (len == 22) {
         val pos = buf(19) == '+'
         val offset = NumberConverter.read2(buf, 20)
-        if (asUtc) OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC).plusHours(if (pos) -offset else offset)
+        if (asUtc) OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC).plusHours((if (pos) -offset else offset).toLong)
         else if (offset != 0) OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.ofHours(if (pos) offset else -offset))
         else OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC)
       } else if (len == 25) {
         val pos = buf(19) == '+'
         val offsetSeconds = NumberConverter.read2(buf, 20) * 3600 + NumberConverter.read2(buf, 23) * 60
-        if (asUtc) OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC).plusSeconds(if (pos) -offsetSeconds else offsetSeconds)
+        if (asUtc) OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.UTC).plusSeconds((if (pos) -offsetSeconds else offsetSeconds).toLong)
         else OffsetDateTime.of(year, month, date, hour, minutes, seconds, 0, ZoneOffset.ofTotalSeconds(if (pos) offsetSeconds else -offsetSeconds))
       } else {
         buf(10) = 'T'
