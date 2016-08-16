@@ -12,7 +12,7 @@ object ByteaConverter extends Converter[Array[Byte]] {
     val result = new Array[Int]('f' + 1)
     var i = 0
     while (i < charMap.length) {
-      result(charMap(i)) = i
+      result(charMap(i).toInt) = i
       i += 1
     }
     result

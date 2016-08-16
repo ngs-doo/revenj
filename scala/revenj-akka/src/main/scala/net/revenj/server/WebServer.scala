@@ -74,7 +74,7 @@ class WebServer(address: String, port: Int) {
     bindings.foreach(_.bind(asyncBuilder))
     val asyncUrls = asyncBuilder.toMap
     val routes = flow.mapAsync(cputCount / 2 + 1) {
-      case req@HttpRequest(_, uri, _, _, _) =>
+      case req@HttpRequest(_, uri, _, _, _) if !uri.path.tail.isEmpty =>
         asyncUrls.get(uri.path.tail.head) match {
           case Some(handler) => handler(req)
           case _ =>
