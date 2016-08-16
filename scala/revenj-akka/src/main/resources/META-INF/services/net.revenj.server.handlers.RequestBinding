@@ -1,2 +1,3 @@
 net.revenj.server.handlers.CrudHandler
 net.revenj.server.handlers.DomainHandler
+net.revenj.server.handlers.RpcHandler

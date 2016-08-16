@@ -17,7 +17,7 @@ class ProcessingEngine(
   serialization: WireSerialization,
   commands: Array[ServerCommand]) {
 
-  private val serverCommands: Map[Class[_], ServerCommand] = commands.map(c => c.getClass -> c).toMap
+  private val serverCommands: Map[Class[_ <: ServerCommand], ServerCommand] = commands.map(c => c.getClass -> c).toMap
 
   def this(container: Container, dataSource: DataSource, serialization: WireSerialization, extensibility: Option[PluginLoader]) {
     this(container,
@@ -26,8 +26,8 @@ class ProcessingEngine(
       extensibility.map(_.resolve(container, classOf[ServerCommand])).getOrElse(Array.empty[ServerCommand]))
   }
 
-  def findCommand(name: String): Option[Class[_]] = {
-    var found: Option[Class[_]] = None
+  def findCommand(name: String): Option[Class[_ <: ServerCommand]] = {
+    var found: Option[Class[_ <: ServerCommand]] = None
     val iter = serverCommands.keys.iterator
     while (found.isEmpty && iter.hasNext) {
       val command = iter.next()

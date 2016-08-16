@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.headers.CustomHeader
 import akka.stream.Materializer
 import akka.util.ByteString
 import net.revenj.patterns.DomainModel
-import net.revenj.server.{ProcessingEngine, ServerCommand, ServerCommandDescription, WireSerialization}
+import net.revenj.server._
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,7 +56,9 @@ private[revenj] object Utils {
 
   private case class DurationHeader(total: Long) extends CustomHeader {
     val name = "X-Duration"
+
     override def lowercaseName = "x-duration"
+
     val value = BigDecimal(total, 3).toString
     val renderInRequests = false
     val renderInResponses = true
@@ -70,8 +72,13 @@ private[revenj] object Utils {
     argument: Any): Future[HttpResponse] = {
 
     val scd = Array[ServerCommandDescription[Any]](new ServerCommandDescription[Any]("", commandType, argument))
+    val result = engine.execute[Any, Any](scd)
+    returnResponse(serialization, result)
+  }
+
+  def returnResponse(serialization: WireSerialization, response: Future[ProcessingResult[Any]]): Future[HttpResponse] = {
     import scala.concurrent.ExecutionContext.Implicits.global
-    engine.execute[Any, Any](scd).map { result =>
+    response.map { result =>
       if (result.executedCommandResults.length == 1) {
         val command = result.executedCommandResults.head.result
         if (command.data.isDefined) {
@@ -82,13 +89,25 @@ private[revenj] object Utils {
                 headers = immutable.Seq(DurationHeader(result.duration)),
                 entity = HttpEntity(ContentTypes.`application/json`, os.toByteArray))
             case Failure(err) =>
-              HttpResponse(status = 500, entity = HttpEntity(ContentTypes.`text/plain(UTF-8)`, err.getMessage))
+              HttpResponse(
+                status = 500,
+                entity = HttpEntity(
+                  ContentTypes.`text/plain(UTF-8)`,
+                  if (err.getMessage == null) err.toString else err.getMessage))
           }
         } else {
-          HttpResponse(status = command.status, entity = HttpEntity(ContentTypes.`text/plain(UTF-8)`, command.message))
+          HttpResponse(
+            status = command.status,
+            entity = HttpEntity(
+              ContentTypes.`text/plain(UTF-8)`,
+              if (command.message == null) "" else command.message))
         }
       } else {
-        HttpResponse(status = result.status, entity = HttpEntity(ContentTypes.`text/plain(UTF-8)`, result.message))
+        HttpResponse(
+          status = result.status,
+          entity = HttpEntity(
+            ContentTypes.`text/plain(UTF-8)`,
+            if (result.message == null) "" else result.message))
       }
     }.recover {
       case ex: Throwable =>
