@@ -56,6 +56,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       abc.ii = Array(1, 2, 3)
       abc.iii = Some(Array(2, 3, 4))
       abc.iiii = Array(Some(2), None, Some(5))
+      abc.ll = Array(0L,1L,1000000000000000000L,-1000000000000000000L,-9223372036854775808L,9223372036854775807L)
       abc.en = En.B
       abc.en2 = Some(En.C)
       abc.en3 = mutable.LinkedList(En.B)
@@ -86,6 +87,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       abc.ii = Array(1, 2, 3)
       abc.iii = Some(Array(2, 3, 4))
       abc.iiii = Array(Some(2), None, Some(5))
+      abc.ll = Array(0L,1L,1000000000000000000L,-1000000000000000000L,-9223372036854775808L,9223372036854775807L)
       abc.en = En.B
       abc.en2 = Some(En.C)
       abc.en3 = mutable.LinkedList(En.B)
@@ -116,6 +118,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       abc.ii = Array(1, 2, 3)
       abc.iii = Some(Array(2, 3, 4))
       abc.iiii = Array(Some(2), None, Some(5))
+      abc.ll = Array(0L,1L,1000000000000000000L,-1000000000000000000L,-9223372036854775808L,9223372036854775807L)
       abc.en = En.B
       abc.en2 = Some(En.C)
       abc.en3 = mutable.LinkedList(En.B)

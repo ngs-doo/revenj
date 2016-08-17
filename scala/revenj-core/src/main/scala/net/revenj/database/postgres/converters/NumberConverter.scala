@@ -140,15 +140,15 @@ object NumberConverter {
 
   def serialize(value: Long, buf: Array[Char]): Int = {
     if (value == Long.MinValue) {
-      "-9223372036854775808".getChars(0, 20, buf, 0)
-      0
+      "-9223372036854775808".getChars(0, 20, buf, 1)
+      1
     } else if (value == 0) {
-      buf(19) = '0'
-      19
+      buf(20) = '0'
+      20
     } else {
       var q = 0L
       var r = 0
-      var charPos = 19
+      var charPos = 20
       var offset = 0
       var i = 0L
       if (value < 0) {

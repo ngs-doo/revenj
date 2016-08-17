@@ -39,10 +39,8 @@ class SearchDomainObject(domainModel: DomainModel) extends ReadOnlyServerCommand
           } else {
             Success(
               arg.get.Specification match {
-                case Some(spec) if spec.isInstanceOf[Specification[DataSource]] =>
-                  spec.asInstanceOf[Specification[DataSource]]
-                case _ =>
-                  null
+                case Some(spec: Specification[DataSource] @unchecked) => spec
+                case _ => null
               }
             )
           }

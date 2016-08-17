@@ -2,6 +2,7 @@ module test {
 	snowflake<Abc> AbcList {
 		s;
 		ii;
+		ll;
 		en;
 		en2;
 		en3;
@@ -33,7 +34,8 @@ module test {
 	enum En { A; B; C; }
 	root Abc { 
 		string s; 
-		int[] ii; 
+		int[] ii;
+		long[] ll;
 		En en;
 		En? en2;
 		Linked list<En> en3;

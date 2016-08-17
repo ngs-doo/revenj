@@ -172,5 +172,25 @@ class ConverterCheck extends Specification with ScalaCheck {
       PostgresWriter.writeCompositeUri(sb, "ab\\\\cd/de''fg")
       "('ab\\cd','de''''fg')" === sb.toString
     }
+
+    "ints" >> {
+      val reader = new PostgresReader
+      val ints = List(0, 1, -1, Int.MaxValue, Int.MinValue, Int.MaxValue - 1, Int.MinValue + 1)
+      val tuple = ArrayTuple.createSeq(ints, IntConverter.toTuple)
+      val value = tuple.buildTuple(false)
+      reader.process(value)
+      val result = IntConverter.parseCollection(reader, 0).toList
+      ints === result
+    }
+
+    "longs" >> {
+      val reader = new PostgresReader
+      val longs = List(0L, 1L, -1L, Long.MaxValue, Long.MinValue, Long.MaxValue - 1, Long.MinValue + 1)
+      val tuple = ArrayTuple.createSeq(longs, LongConverter.toTuple)
+      val value = tuple.buildTuple(false)
+      reader.process(value)
+      val result = LongConverter.parseCollection(reader, 0).toList
+      longs === result
+    }
   }
 }

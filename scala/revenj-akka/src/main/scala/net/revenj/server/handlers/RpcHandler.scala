@@ -14,7 +14,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class RpcHandler(
   ec: ExecutionContext,
-  model: DomainModel,
   engine: ProcessingEngine,
   serialization: WireSerialization,
   implicit private val materializer: Materializer) extends RequestBinding {
@@ -22,13 +21,6 @@ class RpcHandler(
   override def bind(requests: mutable.Map[Path#Head, HttpRequest => Future[HttpResponse]]): Unit = {
 
     requests.put(Uri.Path("RestApplication.svc").head, matchRequest)
-  }
-
-  private def getURI(uri: Uri): Either[String, HttpResponse] = {
-    uri.query().get("uri") match {
-      case Some(id) => Left(id)
-      case _ => Right(Utils.badResponse("URI query param not provided"))
-    }
   }
 
   private def executeRequest(req: HttpRequest, uri: Uri, withBody: Boolean): Future[HttpResponse] = {

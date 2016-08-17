@@ -130,4 +130,15 @@ public class TestPostgres {
 		PostgresWriter.writeCompositeUri(sb, "ab\\\\cd/de''fg");
 		Assert.assertEquals("('ab\\cd','de''''fg')", sb.toString());
 	}
+
+	@Test
+	public void longIssue() throws IOException {
+		PostgresReader reader = new PostgresReader();
+		List<Long> longs = Arrays.asList(0L, 1L, -1L, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE - 1, Long.MIN_VALUE + 1);
+		PostgresTuple tuple = ArrayTuple.create(longs, LongConverter::toTuple);
+		String value = tuple.buildTuple(false);
+		reader.process(value);
+		List<Long> result = LongConverter.parseCollection(reader, 0, false);
+		Assert.assertEquals(longs, result);
+	}
 }

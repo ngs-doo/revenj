@@ -4,7 +4,7 @@ import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWri
 
 object IntConverter extends Converter[Int] {
   override def serializeURI(sw: PostgresBuffer, value: Int): Unit = {
-    if (value == Integer.MIN_VALUE) {
+    if (value == Int.MinValue) {
       sw.addToBuffer("-2147483648")
     } else {
       val offset = NumberConverter.serialize(value, sw.tempBuffer)
@@ -56,11 +56,11 @@ object IntConverter extends Converter[Int] {
     }
   }
 
-  private val MIN_TUPLE: PostgresTuple = new ValueTuple("-2147483648", false, false, false)
+  private val MinTuple: PostgresTuple = new ValueTuple("-2147483648", false, false, false)
 
   override def toTuple(value: Int): PostgresTuple = {
-    if (value == Integer.MIN_VALUE) {
-      MIN_TUPLE
+    if (value == Int.MinValue) {
+      MinTuple
     } else {
       new IntTuple(value)
     }
