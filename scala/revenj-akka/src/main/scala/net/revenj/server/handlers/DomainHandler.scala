@@ -36,6 +36,7 @@ class DomainHandler(
   private val findPath = Path("/Domain.svc/find/")
   private val searchPath = Path("/Domain.svc/search/")
   private val countPath = Path("/Domain.svc/count/")
+  private val existsPath = Path("/Domain.svc/exists/")
 
   private def matchRequest(req: HttpRequest): Future[HttpResponse] = {
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -65,6 +66,13 @@ class DomainHandler(
         Utils.findClass(uri, model, 5) match {
           case Left(info) =>
             Utils.executeJson(req, engine, serialization, classOf[CountDomainObject], CountDomainObject.Argument[Any](info.name, None, None))
+          case Right(response) =>
+            Future.successful(response)
+        }
+      case HttpRequest(GET, uri, _, _, _) if uri.path.startsWith(existsPath) =>
+        Utils.findClass(uri, model, 5) match {
+          case Left(info) =>
+            Utils.executeJson(req, engine, serialization, classOf[DomainObjectExists], DomainObjectExists.Argument[Any](info.name, None, None))
           case Right(response) =>
             Future.successful(response)
         }
@@ -123,6 +131,30 @@ class DomainHandler(
                 specification.flatMap { s =>
                   if (s.isSuccess) {
                     Utils.executeJson(req, engine, serialization, classOf[CountDomainObject], CountDomainObject.Argument[Any](info.name, Some(spec), Some(s.get)))
+                  } else {
+                    Future.successful(Utils.badResponse(s.failed.get.getMessage))
+                  }
+                }
+              case _ =>
+                Future.successful(Utils.badResponse("specification query param not specified"))
+            }
+          case Right(response) =>
+            Future.successful(response)
+        }
+      case HttpRequest(PUT, uri, _, entity, _) if uri.path.startsWith(existsPath) =>
+        Utils.findClass(uri, model, 5) match {
+          case Left(info) =>
+            uri.query().get("specification") match {
+              case Some(spec) =>
+                val shortSpec = model.find(info.name + "+" + spec)
+                lazy val fullSpec = model.find(spec)
+                val specification =
+                  if (shortSpec.isDefined) Utils.getInstance(serialization, shortSpec.get, entity)
+                  else if (fullSpec.isDefined) Utils.getInstance(serialization, fullSpec.get, entity)
+                  else Future.successful(Failure(new IllegalArgumentException(s"Unable to find specification type: $spec")))
+                specification.flatMap { s =>
+                  if (s.isSuccess) {
+                    Utils.executeJson(req, engine, serialization, classOf[DomainObjectExists], DomainObjectExists.Argument[Any](info.name, Some(spec), Some(s.get)))
                   } else {
                     Future.successful(Utils.badResponse(s.failed.get.getMessage))
                   }
