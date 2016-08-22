@@ -11,7 +11,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
 import scala.reflect.runtime.universe._
 
-class ProcessingEngine(
+class ProcessingEngine private(
   container: Container,
   dataSource: DataSource,
   serialization: WireSerialization,

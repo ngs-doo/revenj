@@ -13,6 +13,7 @@ import org.revenj.serialization.WireSerialization;
 import org.revenj.server.ProcessingEngine;
 import org.revenj.server.ServerCommand;
 import org.revenj.server.ServerService;
+import org.revenj.server.TestProcessingEngine;
 import org.revenj.server.commands.ExecuteService;
 
 import javax.servlet.*;
@@ -176,13 +177,12 @@ public class ServiceTest extends Mockito {
 		when(container.createScope()).thenReturn(container);
 		when(container.resolve((Type) MyService.class)).thenReturn(new MyService());
 
-		ProcessingEngine engine =
-				new ProcessingEngine(
-						container,
-						dataSource,
-						serialization,
-						permissions,
-						new ServerCommand[]{new ExecuteService(Thread.currentThread().getContextClassLoader(), permissions)});
+		ProcessingEngine engine = TestProcessingEngine.create(
+			container,
+			dataSource,
+			serialization,
+			permissions,
+			new ExecuteService(Thread.currentThread().getContextClassLoader(), permissions));
 		StandardServlet servlet = new StandardServlet(model, engine, serialization);
 		servlet.doPost(request, response);
 

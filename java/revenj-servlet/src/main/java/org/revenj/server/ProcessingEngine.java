@@ -34,7 +34,7 @@ public final class ProcessingEngine {
 				extensibility.isPresent() ? extensibility.get().resolve(container, ServerCommand.class) : new ServerCommand[0]);
 	}
 
-	public ProcessingEngine(
+	ProcessingEngine(
 			Container container,
 			DataSource dataSource,
 			WireSerialization serialization,
