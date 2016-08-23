@@ -8,3 +8,4 @@ net.revenj.server.commands.search.DomainObjectExists
 net.revenj.server.commands.search.GetDomainObject
 net.revenj.server.commands.search.SearchDomainObject
 net.revenj.server.commands.PersistAggregateRoot
+net.revenj.server.commands.SubmitEvent
