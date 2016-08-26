@@ -8,7 +8,7 @@ using Oracle.DataAccess.Types;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-NGS-.DATE_ARR")]
+	[OracleCustomTypeMapping("-DSL-.DATE_ARR")]
 	public class DateArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -75,7 +75,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<DateTime?>();
-			return "new \"-NGS-\".DATE_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-DSL-\".DATE_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public DbParameter ToParameter(object value)
@@ -85,7 +85,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public DbParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<DateTime?>()), UdtTypeName = "-NGS-.DATE_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<DateTime?>()), UdtTypeName = "-DSL-.DATE_ARR" };
 		}
 	}
 }

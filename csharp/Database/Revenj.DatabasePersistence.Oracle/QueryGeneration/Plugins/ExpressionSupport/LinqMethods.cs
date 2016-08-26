@@ -48,23 +48,23 @@ namespace Revenj.DatabasePersistence.Oracle.Plugins.ExpressionSupport
 			if (element == null)
 				return null;
 			if (element == typeof(string))
-				return "\"-NGS-\".CLOB_ARR";
+				return "\"-DSL-\".CLOB_ARR";
 			if (element == typeof(bool) || element == typeof(bool?))
-				return "\"-NGS-\".BOOL_ARR";
+				return "\"-DSL-\".BOOL_ARR";
 			if (element == typeof(int) || element == typeof(int?))
-				return "\"-NGS-\".INT_ARR";
+				return "\"-DSL-\".INT_ARR";
 			if (element == typeof(decimal) || element == typeof(decimal?))
-				return "\"-NGS-\".NUMBER_ARR";
+				return "\"-DSL-\".NUMBER_ARR";
 			if (element == typeof(long) || element == typeof(long?))
-				return "\"-NGS-\".LONG_ARR";
+				return "\"-DSL-\".LONG_ARR";
 			if (element == typeof(float) || element == typeof(float?))
-				return "\"-NGS-\".FLOAT_ARR";
+				return "\"-DSL-\".FLOAT_ARR";
 			if (element == typeof(double) || element == typeof(double?))
-				return "\"-NGS-\".DOUBLE_ARR";
+				return "\"-DSL-\".DOUBLE_ARR";
 			if (element == typeof(DateTime) || element == typeof(DateTime?))
-				return "\"-NGS-\".TWTZ_ARR";
+				return "\"-DSL-\".TWTZ_ARR";
 			if (element == typeof(Guid) || element == typeof(Guid?))
-				return "\"-NGS-\".GUID_ARR";
+				return "\"-DSL-\".GUID_ARR";
 			if (typeof(IAggregateRoot).IsAssignableFrom(element))
 				return "\"" + element.Namespace + "\".\"-" + element.Name + "-EA-\"";
 			if (typeof(IAggregateRoot).IsAssignableFrom(element))

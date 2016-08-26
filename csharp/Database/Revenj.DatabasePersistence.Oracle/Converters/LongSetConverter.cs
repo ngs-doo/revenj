@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
-using System.Data.Common;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-NGS-.LONG_SET")]
+	[OracleCustomTypeMapping("-DSL-.LONG_SET")]
 	public class LongSetConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -80,7 +80,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<long?>();
-			return "new \"-NGS-\".LONG_SET(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-DSL-\".LONG_SET(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public DbParameter ToParameter(object value)
@@ -90,7 +90,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public DbParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<long?>()), UdtTypeName = "-NGS-.LONG_SET" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<long?>()), UdtTypeName = "-DSL-.LONG_SET" };
 		}
 	}
 }

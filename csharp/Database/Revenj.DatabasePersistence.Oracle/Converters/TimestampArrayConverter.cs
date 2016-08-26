@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
-using System.Data.Common;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-NGS-.TWTZ_ARR")]
+	[OracleCustomTypeMapping("-DSL-.TWTZ_ARR")]
 	public class TimestampArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		private readonly static string TimeZoneWithDaylightSaving;
@@ -170,7 +170,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<DateTime?>();
-			return "new \"-NGS-\".TWTZ_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-DSL-\".TWTZ_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public DbParameter ToParameter(object value)
@@ -184,7 +184,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public DbParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<DateTime?>()), UdtTypeName = "-NGS-.TWTZ_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<DateTime?>()), UdtTypeName = "-DSL-.TWTZ_ARR" };
 		}
 	}
 }

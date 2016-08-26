@@ -8,7 +8,7 @@ using Oracle.DataAccess.Types;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-NGS-.URL_ARR")]
+	[OracleCustomTypeMapping("-DSL-.URL_ARR")]
 	public class UrlArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -77,7 +77,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<Uri>();
-			return "new \"-NGS-\".URL_ARR(" + string.Join(",", values.Select(it => Convert(it))) + ")";
+			return "new \"-DSL-\".URL_ARR(" + string.Join(",", values.Select(it => Convert(it))) + ")";
 		}
 
 		public DbParameter ToParameter(object value)
@@ -87,7 +87,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public DbParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<Uri>()), UdtTypeName = "-NGS-.URL_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<Uri>()), UdtTypeName = "-DSL-.URL_ARR" };
 		}
 	}
 }

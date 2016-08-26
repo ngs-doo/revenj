@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
-using System.Data.Common;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-NGS-.URI_ARR")]
+	[OracleCustomTypeMapping("-DSL-.URI_ARR")]
 	public class UriArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -70,7 +70,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<string>();
-			return "new \"-NGS-\".URI_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-DSL-\".URI_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public DbParameter ToParameter(object value)
@@ -80,7 +80,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public DbParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-NGS-.URI_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-DSL-.URI_ARR" };
 		}
 	}
 }

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.Linq;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
-using System.Data.Common;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-NGS-.NUMBER_ARR")]
+	[OracleCustomTypeMapping("-DSL-.NUMBER_ARR")]
 	public class DecimalArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -76,7 +76,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<decimal?>();
-			return "new \"-NGS-\".NUMBER_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-DSL-\".NUMBER_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public DbParameter ToParameter(object value)
@@ -86,7 +86,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public DbParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<decimal?>()), UdtTypeName = "-NGS-.NUMBER_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<decimal?>()), UdtTypeName = "-DSL-.NUMBER_ARR" };
 		}
 	}
 }

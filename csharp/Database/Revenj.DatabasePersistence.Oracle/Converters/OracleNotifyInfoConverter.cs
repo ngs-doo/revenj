@@ -7,7 +7,7 @@ using Revenj.DomainPatterns;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
-	[OracleCustomTypeMapping("-NGS-.NOTIFY_INFO_TYPE")]
+	[OracleCustomTypeMapping("-DSL-.NOTIFY_INFO_TYPE")]
 	public class OracleNotifyInfoConverter : IOracleCustomType, IOracleCustomTypeFactory, INullable
 	{
 		[OracleObjectMapping("SOURCE")]

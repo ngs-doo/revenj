@@ -52,7 +52,7 @@ namespace Revenj.DatabasePersistence.Oracle
 			Queue =
 				new Lazy<OracleAQQueue>(() =>
 				{
-					var q = new OracleAQQueue("\"-NGS-\".NOTIFY_QUEUE", Connection, OracleAQMessageType.Udt, "-NGS-.NOTIFY_INFO_TYPE");
+					var q = new OracleAQQueue("\"-DSL-\".NOTIFY_QUEUE", Connection, OracleAQMessageType.Udt, "-DSL-.NOTIFY_INFO_TYPE");
 					q.EnqueueOptions.Visibility = OracleAQVisibilityMode.OnCommit;
 					q.EnqueueOptions.DeliveryMode = OracleAQMessageDeliveryMode.Persistent;
 					return q;

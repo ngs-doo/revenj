@@ -75,7 +75,7 @@ namespace Revenj.DatabasePersistence.Oracle
 				CommitCommand = Connection.CreateCommand();
 				CommitCommand.CommandText = "COMMIT";
 				Connection.StateChange += Connection_StateChange;
-				Queue = new OracleAQQueue("\"-NGS-\".NOTIFY_QUEUE", Connection, OracleAQMessageType.Udt, "-NGS-.NOTIFY_INFO_TYPE");
+				Queue = new OracleAQQueue("\"-DSL-\".NOTIFY_QUEUE", Connection, OracleAQMessageType.Udt, "-DSL-.NOTIFY_INFO_TYPE");
 				Queue.NotificationConsumers = new[] { ConsumerName };
 				Queue.DequeueOptions.ConsumerName = ConsumerName;
 				Queue.DequeueOptions.DequeueMode = OracleAQDequeueMode.Remove;

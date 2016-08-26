@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using Oracle.DataAccess.Client;
 using Oracle.DataAccess.Types;
-using System.Data.Common;
 
 namespace Revenj.DatabasePersistence.Oracle.Converters
 {
 	//TODO merge with string array converter
-	[OracleCustomTypeMapping("-NGS-.TEXT_ARR")]
+	[OracleCustomTypeMapping("-DSL-.TEXT_ARR")]
 	public class TextArrayConverter : IOracleCustomType, IOracleCustomTypeFactory, IOracleArrayTypeFactory, INullable, IOracleTypeConverter, IOracleVarrayConverter
 	{
 		[OracleArrayMappingAttribute]
@@ -71,7 +71,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 		public string ToStringVarray(IEnumerable value)
 		{
 			var values = value.Cast<string>();
-			return "new \"-NGS-\".TEXT_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
+			return "new \"-DSL-\".TEXT_ARR(" + string.Join(",", values.Select(it => ToString(it))) + ")";
 		}
 
 		public DbParameter ToParameter(object value)
@@ -84,7 +84,7 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public DbParameter ToParameterVarray(IEnumerable value)
 		{
-			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-NGS-.TEXT_ARR" };
+			return new OracleParameter { OracleDbType = OracleDbType.Array, Value = Create(value.Cast<string>()), UdtTypeName = "-DSL-.TEXT_ARR" };
 		}
 	}
 }
