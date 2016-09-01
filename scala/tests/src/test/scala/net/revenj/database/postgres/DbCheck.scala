@@ -212,6 +212,17 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck {
       container.close()
       result.events.exists(_.URI == ev.URI) === true
     }
+    "bool arr pk" >> {
+      val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+      val ctx = container.resolve[UnitOfWork]
+      val root = bpk(b = Array(None, Some(true), Some(false)))
+      Await.result(ctx.create(root), Duration.Inf)
+      val find = Await.result(ctx.find[bpk](root.URI), Duration.Inf).get
+      container.close()
+      ctx.rollback(Duration.Inf).isSuccess === true
+      find.URI === root.URI
+      root.b === find.b
+    }
   }
 }
 

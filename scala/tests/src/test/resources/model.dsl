@@ -37,6 +37,7 @@ module test {
 		int[] ii;
 		long[] ll;
 		En en;
+		Set<long> lll;
 		En? en2;
 		Linked list<En> en3;
 		linked list<int> i4;
@@ -61,8 +62,9 @@ module test {
 		specification Filter 'it => it.t > at' { timestamp at; }
 	}
 	entity Ent1 { int i; }
-	entity Ent2 { float f; }
+	entity Ent2 { float f; Ent4[] ee; }
 	entity Ent3(id) { int id; int i; }
+	entity Ent4;
 	value Val {
 		int? x { serialization name xx; }
 		float f;
@@ -85,6 +87,7 @@ module test {
 		specification Filter 'it => it.d == d' { date d; }
 	}
 	value Another;
+	struct Struct { int i { serialization name ii; } array<float> af; Another a; Set<Val> vals {serialization name v; } }
 	sql AbcSql from '"test"."AbcList"' {
 		string s; 
 		int[] ii; 
@@ -128,5 +131,13 @@ module test {
 	    int x;
 	    Vector<TestMe> events 'it => it.x == x';
 	    Abc firstAbc 'it => it.s == "xx"' ORDER BY ID DESC;
+	}
+	root ComplexPk(a,b,c) {
+		int a;
+		string b;
+		decimal?[] c;
+	}
+	root bpk(b) {
+		bool?[] b;
 	}
 }

@@ -26,7 +26,7 @@ object BoolConverter extends Converter[Boolean] {
       reader.read()
       false
     } else {
-      reader.read(3)
+      reader.read(4)
       false
     }
   }
@@ -40,7 +40,7 @@ object BoolConverter extends Converter[Boolean] {
       reader.read()
       Some(false)
     } else {
-      reader.read(3)
+      reader.read(4)
       None
     }
   }
