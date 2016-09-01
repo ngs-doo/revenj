@@ -2,6 +2,7 @@ net.revenj.server.commands.crud.Create
 net.revenj.server.commands.crud.Delete
 net.revenj.server.commands.crud.Read
 net.revenj.server.commands.crud.Update
+net.revenj.server.commands.reporting.PopulateReport
 net.revenj.server.commands.search.CountDomainObject
 net.revenj.server.commands.search.CheckDomainObject
 net.revenj.server.commands.search.DomainObjectExists

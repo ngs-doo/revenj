@@ -6,6 +6,7 @@ import akka.http.scaladsl.model._
 import akka.stream.Materializer
 import net.revenj.patterns.DomainModel
 import net.revenj.server._
+import net.revenj.server.commands.reporting.PopulateReport
 import net.revenj.server.commands.{SubmitEvent, Utils}
 import net.revenj.server.commands.search._
 
@@ -38,6 +39,7 @@ class DomainHandler(
   private val countPath = Path("/Domain.svc/count/")
   private val existsPath = Path("/Domain.svc/exists/")
   private val submitPath = Path("/Domain.svc/submit/")
+  private val reportPath = Path("/Domain.svc/report/")
 
   private def matchRequest(req: HttpRequest): Future[HttpResponse] = {
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -162,6 +164,20 @@ class DomainHandler(
                 }
               case _ =>
                 Future.successful(Utils.badResponse("specification query param not specified"))
+            }
+          case Right(response) =>
+            Future.successful(response)
+        }
+      case HttpRequest(PUT, uri, _, entity, _) if uri.path.startsWith(reportPath) =>
+        Utils.findClass(uri, model, 5) match {
+          case Left(info) =>
+            val report = Utils.getInstance(serialization, info.manifest, entity)
+            report.flatMap { r =>
+              if (r.isSuccess) {
+                Utils.executeJson(req, engine, serialization, classOf[PopulateReport], PopulateReport.Argument[Any](info.name, r.get))
+              } else {
+                Future.successful(Utils.badResponse(r.failed.get.getMessage))
+              }
             }
           case Right(response) =>
             Future.successful(response)
