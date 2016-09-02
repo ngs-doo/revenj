@@ -1,7 +1,6 @@
 package net.revenj
 
 import java.sql.{Connection, SQLException}
-import java.util.concurrent.TimeoutException
 
 import net.revenj.extensibility.Container
 import net.revenj.patterns._
@@ -11,16 +10,18 @@ import scala.collection.mutable
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.reflect.runtime.universe._
-import scala.util.{Failure, Success, Try}
+
 
 private[revenj] class LocatorDataContext(locator: Container, manageConnection: Boolean, connection: Option[Connection], mirror: Mirror) extends UnitOfWork {
+  private implicit val ctx = scala.concurrent.ExecutionContext.Implicits.global
+
   private lazy val searchRepositories = new TrieMap[Class[_], SearchableRepository[_ <: DataSource]]()
   private lazy val lookupRepositories = new TrieMap[Class[_], Repository[_ <: Identifiable]]()
   private lazy val persistableRepositories = new TrieMap[Class[_], PersistableRepository[_ <: AggregateRoot]]()
   private lazy val eventStores = new TrieMap[Class[_], DomainEventStore[_ <: DomainEvent]]()
   private var hasChanges: Boolean = false
   private var closed: Boolean = false
-  private val changes = new mutable.HashSet[Future[_]]
+  private val changes = new mutable.HashSet[Future[Any]]
 
   private def getSearchableRepository[T <: DataSource : TypeTag](manifest: Class[_]): SearchableRepository[T] = {
     if (closed) throw new RuntimeException("Unit of work has been closed")
@@ -67,7 +68,6 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     changes.synchronized {
       changes += result
     }
-    import scala.concurrent.ExecutionContext.Implicits.global
     result.onComplete(_ => changes.synchronized {
       changes -= result
     })
@@ -98,7 +98,6 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     if (aggregates.isEmpty) {
       Future.successful(())
     } else {
-      import scala.concurrent.ExecutionContext.Implicits.global
       val result = getPersistableRepository[T](findManifest[T]).insert(aggregates).map(_ => ())
       hasChanges = true
       trackChange(result)
@@ -109,7 +108,6 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     if (pairs.isEmpty) {
       Future.successful(())
     } else {
-      import scala.concurrent.ExecutionContext.Implicits.global
       val result = getPersistableRepository[T](findManifest[T]).persist(Nil, pairs, Nil).map(_ => ())
       hasChanges = true
       trackChange(result)
@@ -130,7 +128,6 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     if (events.isEmpty) {
       Future.successful(())
     } else {
-      import scala.concurrent.ExecutionContext.Implicits.global
       val result = getEventStore[T](findManifest[T]).submit(events).map(_ => ())
       hasChanges = true
       trackChange(result)
@@ -141,57 +138,44 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     report.populate(locator)
   }
 
-  override def commit(implicit duration: Duration): Try[Unit] = {
-    try {
-      if (hasChanges) {
-        changes.synchronized {
-          changes foreach { c => Await.result(c, duration) }
-        }
-      }
-      if (changes.nonEmpty) {
-        Failure(new TimeoutException("Timed out waiting for commit"))
-      } else {
+  override def commit: Future[Unit] = {
+    Future
+      .sequence[Any, Set](changes.toSet)
+      .map(_ => {
         connection.get.commit()
         hasChanges = false
-        Success(())
+      })
+  }
+
+  override def rollback: Future[Unit] = changes.synchronized {
+    Future.sequence(
+      changes.map {
+        _.recover {
+          case t: Throwable => ()
+        }
       }
-    } catch {
-      case t: Throwable => Failure(t)
+    ) map { _ =>
+      connection.get.rollback()
+      hasChanges = false
     }
   }
 
-  override def rollback(implicit duration: Duration): Try[Unit] = {
-    try {
-      if (hasChanges) {
-        changes.synchronized {
-          changes foreach { c => Await.result(c, duration) }
-        }
-      }
-      if (changes.nonEmpty) {
-        Failure(new TimeoutException("Timed out waiting for rollback"))
-      } else {
-        connection.get.rollback()
-        hasChanges = false
-        Success(())
-      }
-    } catch {
-      case t: Throwable => Failure(t)
-    }
-  }
+  override def close(): Unit =
+    connection
+      .filter(!_.isClosed && manageConnection)
+      .map(connection => {
+        val waitForChanges = if(hasChanges) Future.successful(()) else rollback
+        val rollbackAndClose = waitForChanges.map(_ => {
+          if (hasChanges) rollback
+          connection.setAutoCommit(true)
+          connection.close()
+          locator.close()
+        })
+        Await.result(rollbackAndClose, Duration.Inf)
+      })
 
-  override def close(): Unit = {
-    if (!closed) {
-      if (manageConnection && connection.isDefined) {
-        if (hasChanges) {
-          rollback(Duration.Inf)
-        }
-        connection.get.setAutoCommit(true)
-        connection.get.close()
-        locator.close()
-      }
-      closed = true
-    }
-  }
+
+
 }
 
 private[revenj] object LocatorDataContext {
