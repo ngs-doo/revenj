@@ -138,7 +138,7 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     report.populate(locator)
   }
 
-  override def commit: Future[Unit] = {
+  override def commit(): Future[Unit] = {
     Future
       .sequence[Any, Set](changes.toSet)
       .map(_ => {
@@ -147,7 +147,7 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
       })
   }
 
-  override def rollback: Future[Unit] = changes.synchronized {
+  override def rollback(): Future[Unit] = changes.synchronized {
     Future.sequence(
       changes.map {
         _.recover {
@@ -164,9 +164,8 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     connection
       .filter(!_.isClosed && manageConnection)
       .map(connection => {
-        val waitForChanges = if(hasChanges) Future.successful(()) else rollback
+        val waitForChanges = if(hasChanges) Future.successful(()) else rollback()
         val rollbackAndClose = waitForChanges.map(_ => {
-          if (hasChanges) rollback
           connection.setAutoCommit(true)
           connection.close()
           locator.close()

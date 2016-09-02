@@ -142,7 +142,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         Await.result(ctx.create(abc), Duration.Inf)
         val find = Await.result(ctx.find[Abc](abc.URI), Duration.Inf).get
         container.close()
-        ctx.commit must be_==(()).await
+        ctx.commit() must be_==(()).await
         find.URI === abc.URI
       }
       "persistable sql" >> {
@@ -188,7 +188,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val found = Await.result(ctx.find[TestMe](ev.URI), Duration.Inf)
         found.isDefined === true
         ev.URI === found.get.URI
-        ctx.commit must beEqualTo(()).await
+        ctx.commit() must beEqualTo(()).await
         container.close()
         newTotal == total + 1
         DbCheck.EventHandlerCounters.simpleCounter === 1
@@ -203,7 +203,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val ev = TestMe(x = x)
         Await.result(ctx.submit(ev), Duration.Inf)
         val find = Await.result(ctx.search(TestMe.Filter(x, x)), Duration.Inf)
-        ctx.commit must beEqualTo(()).await
+        ctx.commit() must beEqualTo(()).await
         container.close()
         find.size === 1
         find.head.x === x
@@ -216,7 +216,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         Await.result(ctx.submit(ev), Duration.Inf)
         val rep = ReportMe(x = x)
         val result = Await.result(ctx.populate(rep), Duration.Inf)
-        ctx.commit must beEqualTo(()).await
+        ctx.commit() must beEqualTo(()).await
         container.close()
         result.events.exists(_.URI == ev.URI) === true
       }
@@ -227,7 +227,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         Await.result(ctx.create(root), Duration.Inf)
         val find = Await.result(ctx.find[bpk](root.URI), Duration.Inf).get
         container.close()
-        ctx.rollback must beEqualTo(()).await
+        ctx.rollback() must beEqualTo(()).await
         find.URI === root.URI
         root.b === find.b
       }
