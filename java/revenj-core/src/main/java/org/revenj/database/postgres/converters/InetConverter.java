@@ -1,24 +1,15 @@
 package org.revenj.database.postgres.converters;
 
+import org.revenj.Utils;
 import org.revenj.database.postgres.PostgresBuffer;
 import org.revenj.database.postgres.PostgresReader;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class InetConverter {
-
-	private static InetAddress LOCALHOST;
-
-	static {
-		try {
-			LOCALHOST = InetAddress.getByName("127.0.0.1");
-		} catch (UnknownHostException ignore) {
-		}
-	}
 
 	public static void serializeURI(PostgresBuffer sw, InetAddress value) throws IOException {
 		if (value == null) return;
@@ -28,7 +19,7 @@ public abstract class InetConverter {
 	public static InetAddress parse(PostgresReader reader, int context, boolean nullable) throws IOException {
 		String value = StringConverter.parse(reader, context, true);
 		if (value == null) {
-			return nullable ? null : LOCALHOST;
+			return nullable ? null : Utils.LOOPBACK;
 		}
 		return InetAddress.getByName(value);
 	}
@@ -52,7 +43,7 @@ public abstract class InetConverter {
 			return new ArrayList<>(0);
 		}
 		ArrayList<InetAddress> list = new ArrayList<>();
-		InetAddress defaultValue = nullable ? null : LOCALHOST;
+		InetAddress defaultValue = nullable ? null : Utils.LOOPBACK;
 		do {
 			cur = reader.read();
 			if (cur == 'N') {

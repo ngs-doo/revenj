@@ -9,17 +9,17 @@ import scala.collection.concurrent.TrieMap
 import scala.reflect.runtime.universe._
 
 object Utils {
-  val MIN_LOCAL_DATE = LocalDate.of(1, 1, 1)
-  val MIN_LOCAL_DATE_TIME = LocalDateTime.of(1, 1, 1, 0, 0, 0, 0)
-  val MIN_DATE_TIME = OffsetDateTime.of(MIN_LOCAL_DATE_TIME, ZoneOffset.UTC)
-  val MIN_UUID = new UUID(0L, 0L)
-  val EMPTY_BINARY = new Array[Byte](0)
-  val ZERO_0 = BigDecimal(0).setScale(0)
-  val ZERO_1 = BigDecimal(0).setScale(1)
-  val ZERO_2 = BigDecimal(0).setScale(2)
-  val ZERO_3 = BigDecimal(0).setScale(3)
-  val ZERO_4 = BigDecimal(0).setScale(4)
-  val LOOPBACK = InetAddress.getLoopbackAddress
+  val MinLocalDate = LocalDate.of(1, 1, 1)
+  val MinLocalDateTime = LocalDateTime.of(1, 1, 1, 0, 0, 0, 0)
+  val MinDateTime = OffsetDateTime.of(MinLocalDateTime, ZoneOffset.UTC)
+  val MinUuid = new UUID(0L, 0L)
+  val EmptyBinary = new Array[Byte](0)
+  val Zero0 = BigDecimal(0).setScale(0)
+  val Zero1 = BigDecimal(0).setScale(1)
+  val Zero2 = BigDecimal(0).setScale(2)
+  val Zero3 = BigDecimal(0).setScale(3)
+  val Zero4 = BigDecimal(0).setScale(4)
+  val Loopback = InetAddress.getLoopbackAddress
   private val typeCache = new TrieMap[String, GenericType]
 
   private class GenericType(val name: String, val raw: JavaType, val arguments: Array[JavaType]) extends ParameterizedType {

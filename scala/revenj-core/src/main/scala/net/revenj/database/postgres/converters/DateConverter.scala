@@ -32,7 +32,7 @@ object DateConverter extends Converter[LocalDate] {
 
   val dbName = "date"
 
-  def default() = Utils.MIN_LOCAL_DATE
+  def default() = Utils.MinLocalDate
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): LocalDate = parseDate(reader, start)
 
@@ -79,7 +79,7 @@ object DateConverter extends Converter[LocalDate] {
     val cur = reader.read()
     if (cur == 'N') {
       reader.read(4)
-      Utils.MIN_LOCAL_DATE
+      Utils.MinLocalDate
     } else {
       parseDate(reader, cur)
     }

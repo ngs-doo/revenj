@@ -10,7 +10,7 @@ object DecimalConverter extends Converter[BigDecimal] {
 
   val dbName = "numeric"
 
-  def default() = Utils.ZERO_0
+  def default() = Utils.Zero0
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): BigDecimal = parseDecimal(reader, start, ')')
 
@@ -25,7 +25,7 @@ object DecimalConverter extends Converter[BigDecimal] {
     val cur = reader.read()
     if (cur == 'N') {
       reader.read(4)
-      Utils.ZERO_0
+      Utils.Zero0
     } else {
       parseDecimal(reader, cur, '}')
     }

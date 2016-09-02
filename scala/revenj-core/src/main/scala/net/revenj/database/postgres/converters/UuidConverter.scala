@@ -119,7 +119,7 @@ object UuidConverter extends Converter[UUID] {
 
   val dbName = "uuid"
 
-  def default() = Utils.MIN_UUID
+  def default() = Utils.MinUuid
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): UUID = parseUuid(reader, start, 36)
 
@@ -170,7 +170,7 @@ object UuidConverter extends Converter[UUID] {
     val cur = reader.read()
     if (cur == 'N') {
       reader.read(4)
-      Utils.MIN_UUID
+      Utils.MinUuid
     } else {
       val uuid = parseUuid(reader, cur, 35)
       reader.read()
