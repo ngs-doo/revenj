@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D0582F75-2EDA-4381-AA64-BF9B2B6F6B0D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Revenj.DatabasePersistence.Oracle</RootNamespace>
+    <AssemblyName>Revenj.Oracle32</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Oracle.DataAccess">
+      <HintPath>..\..\..\Dependencies\Oracle32\Oracle.DataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="Remotion.Linq">
+      <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Reactive.Core">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Attributes\DatabaseFunctionAttribute.cs">
+      <Link>Attributes\DatabaseFunctionAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Attributes\RepositoryAttribute.cs">
+      <Link>Attributes\RepositoryAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Attributes\SqlSourceAttribute.cs">
+      <Link>Attributes\SqlSourceAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\ConnectionInfo.cs">
+      <Link>ConnectionInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\BinaryArrayConverter.cs">
+      <Link>Converters\BinaryArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\BoolArrayConverter.cs">
+      <Link>Converters\BoolArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\DateArrayConverter.cs">
+      <Link>Converters\DateArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\DecimalArrayConverter.cs">
+      <Link>Converters\DecimalArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\DoubleArrayConverter.cs">
+      <Link>Converters\DoubleArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\FloatArrayConverter.cs">
+      <Link>Converters\FloatArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\GuidArrayConverter.cs">
+      <Link>Converters\GuidArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\IntegerArrayConverter.cs">
+      <Link>Converters\IntegerArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\IOracleTypeConverter.cs">
+      <Link>Converters\IOracleTypeConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\IPAddressArrayConverter.cs">
+      <Link>Converters\IPAddressArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\LongArrayConverter.cs">
+      <Link>Converters\LongArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\LongSetConverter.cs">
+      <Link>Converters\LongSetConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\OracleNotifyInfoConverter.cs">
+      <Link>Converters\OracleNotifyInfoConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\StringArrayConverter.cs">
+      <Link>Converters\StringArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\TextArrayConverter.cs">
+      <Link>Converters\TextArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\TimestampArrayConverter.cs">
+      <Link>Converters\TimestampArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\UriArrayConverter.cs">
+      <Link>Converters\UriArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\UriSetConverter.cs">
+      <Link>Converters\UriSetConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\UrlArrayConverter.cs">
+      <Link>Converters\UrlArrayConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\IOracleDto.cs">
+      <Link>IOracleDto.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\IOracleReader.cs">
+      <Link>IOracleReader.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\OracleAdvancedQueueNotification.cs">
+      <Link>OracleAdvancedQueueNotification.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\OracleDatabaseQuery.cs">
+      <Link>OracleDatabaseQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\OracleObjectFactory.cs">
+      <Link>OracleObjectFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\OracleOlapCubeQuery.cs">
+      <Link>OracleOlapCubeQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\OracleQueryManager.cs">
+      <Link>OracleQueryManager.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\OracleSequence.cs">
+      <Link>OracleSequence.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\OracleUriConverter.cs">
+      <Link>OracleUriConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\ParameterAggregator.cs">
+      <Link>QueryGeneration\ParameterAggregator.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Plugins\ExpressionSupport\LikeStringComparison.cs">
+      <Link>QueryGeneration\Plugins\ExpressionSupport\LikeStringComparison.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Plugins\ExpressionSupport\LinqMethods.cs">
+      <Link>QueryGeneration\Plugins\ExpressionSupport\LinqMethods.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Plugins\ExpressionSupport\StringMethods.cs">
+      <Link>QueryGeneration\Plugins\ExpressionSupport\StringMethods.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Plugins\MemberSupport\CommonMembers.cs">
+      <Link>QueryGeneration\Plugins\MemberSupport\CommonMembers.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Plugins\MemberSupport\DateTimeMembers.cs">
+      <Link>QueryGeneration\Plugins\MemberSupport\DateTimeMembers.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Plugins\MemberSupport\EnumerableMembers.cs">
+      <Link>QueryGeneration\Plugins\MemberSupport\EnumerableMembers.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Queryable.cs">
+      <Link>QueryGeneration\Queryable.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\QueryComposition\IQuerySimplification.cs">
+      <Link>QueryGeneration\QueryComposition\IQuerySimplification.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\QueryComposition\MainQueryParts.cs">
+      <Link>QueryGeneration\QueryComposition\MainQueryParts.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\QueryComposition\QueryContext.cs">
+      <Link>QueryGeneration\QueryComposition\QueryContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\QueryComposition\QueryParts.cs">
+      <Link>QueryGeneration\QueryComposition\QueryParts.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\QueryComposition\SubqueryParts.cs">
+      <Link>QueryGeneration\QueryComposition\SubqueryParts.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\QueryExecutor.cs">
+      <Link>QueryGeneration\QueryExecutor.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\QuerySourceConverterFactory.cs">
+      <Link>QueryGeneration\QuerySourceConverterFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\ResultObjectMapping.cs">
+      <Link>QueryGeneration\ResultObjectMapping.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\SelectSubqueryData.cs">
+      <Link>QueryGeneration\SelectSubqueryData.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\SqlCommandData.cs">
+      <Link>QueryGeneration\SqlCommandData.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\TypeUtility.cs">
+      <Link>QueryGeneration\TypeUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\IExpressionMatcher.cs">
+      <Link>QueryGeneration\Visitors\IExpressionMatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\IMemberMatcher.cs">
+      <Link>QueryGeneration\Visitors\IMemberMatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\IProjectionMatcher.cs">
+      <Link>QueryGeneration\Visitors\IProjectionMatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\ProjectorBuildingExpressionTreeVisitor.cs">
+      <Link>QueryGeneration\Visitors\ProjectorBuildingExpressionTreeVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\SelectExpressionTreeVisitor.cs">
+      <Link>QueryGeneration\Visitors\SelectExpressionTreeVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\SqlGeneratorExpressionTreeVisitor.cs">
+      <Link>QueryGeneration\Visitors\SqlGeneratorExpressionTreeVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\SqlGeneratorQueryModelVisitor.cs">
+      <Link>QueryGeneration\Visitors\SqlGeneratorQueryModelVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\SubqueryGeneratorQueryModelVisitor.cs">
+      <Link>QueryGeneration\Visitors\SubqueryGeneratorQueryModelVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\QueryGeneration\Visitors\SubquerySelectExpressionTreeVisitor.cs">
+      <Link>QueryGeneration\Visitors\SubquerySelectExpressionTreeVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Setup.cs">
+      <Link>Setup.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Revenj.Core.Interface\Revenj.Core.Interface.csproj">
+      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
+      <Name>Revenj.Core.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Revenj.Core\Revenj.Core.csproj">
+      <Project>{A01BD986-6602-44CF-B27B-1370E9BF7CF8}</Project>
+      <Name>Revenj.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

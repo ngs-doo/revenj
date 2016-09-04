@@ -1,0 +1,901 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A01BD986-6602-44CF-B27B-1370E9BF7CF8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Revenj.Core</RootNamespace>
+    <AssemblyName>Revenj.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Castle.Core">
+      <HintPath>..\..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>..\..\..\Dependencies\Npgsql\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\Dependencies\Json.NET\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NGS.Templater">
+      <HintPath>..\..\..\Dependencies\Templater\NGS.Templater.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>..\..\..\Dependencies\Protobuf\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="Remotion.Linq">
+      <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Reactive.Core">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Core.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Attributes\DatabaseFunctionAttribute.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Attributes\RepositoryAttribute.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Attributes\SqlSourceAttribute.cs" />
+    <Compile Include="DatabasePersistence\Postgres\BulkRead.cs" />
+    <Compile Include="DatabasePersistence\Postgres\ConnectionInfo.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\ArrayTuple.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\BoolConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\ByteaConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\DateConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\DecimalConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\DoubleConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\DrawingConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\EnumConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\FloatConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\GuidConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\HstoreConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\ImageConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\IntConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\IPostgresTypeConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\LongConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\NumberConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\PostgresTuple.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\RecordTuple.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\S3Converter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\SecretConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\StringConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\TimestampConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\ValueTuple.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\XmlConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\ArrayHandling.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\BitString.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\DateDatatypes.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\FastPath.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\FastPathArg.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\LargeObject.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\LargeObjectManager.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\NpgsqlDbType.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\NpgsqlTypeConverters.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\NpgsqlTypes.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\NpgsqlTypesHelper.cs" />
+    <Compile Include="DatabasePersistence\Postgres\NpgsqlTypes\TypeConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\ByteBuffer.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Cache.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Copy\NpgsqlCopyFormat.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Copy\NpgsqlCopyIn.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Copy\NpgsqlCopyInStream.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Copy\NpgsqlCopyOut.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Copy\NpgsqlCopyOutStream.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Copy\NpgsqlCopySerializer.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\LargeMemoryStream.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\ClientMessage.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlBind.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlCancelRequest.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlDescribe.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlExecute.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlFlush.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlMessageTypes.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlParse.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlPasswordPacket.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlQuery.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlStartupPacket.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Message\NpgsqlSync.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlAsciiRow.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlBackEndKeyData.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlBufferedStream.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlCommandBuilder.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlConnectionStringBuilder.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlConnector.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlConnectorPool.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlDataAdapter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlDataReader.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlError.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlException.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlFactory.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlMediator.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlNotificationEventArgs.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlPromotableSinglePhaseNotification.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlResourceManager.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlRow.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlRowDescription.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlSchema.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlTransaction.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\NpgsqlTransactionCallbacks.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Parameter\NpgsqlParameter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Parameter\NpgsqlParameterCollection.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Parameter\NpgsqlParameterStatus.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\PGUtil.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Security\HashAlgorithm.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Security\MD5.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Security\MD5CryptoServiceProvider.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\Security\SSPIHandler.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlClosedState.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlConnectedState.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlCopyInState.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlCopyOutState.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlReadyState.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlStartupState.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlState.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresConnectionPool.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresDatabaseNotification.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresDatabaseQuery.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresException.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresObjectFactory.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresOlapCubeQuery.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresQueryManager.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresRecordConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresSequence.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresTypedArray.cs" />
+    <Compile Include="DatabasePersistence\Postgres\PostgresVersionInfo.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\ArrayMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\DatabaseSpecificationFunctions.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\DateTimeMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\DecimalMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\DictionaryMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\ExpressionShortCircuiting.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\LikeStringComparison.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\LinqMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\MathMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\NullValuesImpedanceMismatch.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\SetMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\StringMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ExpressionSupport\TreeMethods.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\MemberSupport\CommonMembers.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\MemberSupport\DateTimeMembers.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\MemberSupport\DictionaryMembers.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\MemberSupport\EnumerableMembers.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ProjectionSimplifications\CountProjection.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\ProjectionSimplifications\SumProjection.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\QuerySimplifications\ArraySizeSubquery.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\QuerySimplifications\ContainsSubquery.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\QuerySimplifications\ExistsSubquery.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\QuerySimplifications\FastCountWithoutPredicate.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\QuerySimplifications\InverseExistsSubquery.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Plugins\Utility.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Queryable.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\QueryComposition\IQuerySimplification.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\QueryComposition\MainQueryParts.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\QueryComposition\QueryContext.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\QueryComposition\QueryParts.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\QueryComposition\SubqueryParts.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\QueryExecutor.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\QuerySourceConverterFactory.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\ResultObjectMapping.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\SelectSubqueryData.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\SqlCommandData.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\TypeUtility.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\IExpressionMatcher.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\IMemberMatcher.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\IProjectionMatcher.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\ProjectorBuildingExpressionTreeVisitor.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\SelectExpressionTreeVisitor.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\SqlGeneratorExpressionTreeVisitor.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\SqlGeneratorQueryModelVisitor.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\SubqueryGeneratorQueryModelVisitor.cs" />
+    <Compile Include="DatabasePersistence\Postgres\QueryGeneration\Visitors\SubquerySelectExpressionTreeVisitor.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Setup.cs" />
+    <Compile Include="DomainPatterns\Aspects\EventProcessorAspect.cs" />
+    <Compile Include="DomainPatterns\Aspects\SystemStartupAspect.cs" />
+    <Compile Include="DomainPatterns\Cache\EagerCache.cs" />
+    <Compile Include="DomainPatterns\Cache\LazyCache.cs" />
+    <Compile Include="DomainPatterns\Cache\LookupCache.cs" />
+    <Compile Include="DomainPatterns\Cache\WeakCache.cs" />
+    <Compile Include="DomainPatterns\ChangeNotifications.cs" />
+    <Compile Include="DomainPatterns\DataContext.cs" />
+    <Compile Include="DomainPatterns\DocumentReport.cs" />
+    <Compile Include="DomainPatterns\DomainEventSource.cs" />
+    <Compile Include="DomainPatterns\DomainEventStore.cs" />
+    <Compile Include="DomainPatterns\DomainModel.cs" />
+    <Compile Include="DomainPatterns\DomainTypeResolver.cs" />
+    <Compile Include="DomainPatterns\GlobalEventStore.cs" />
+    <Compile Include="DomainPatterns\History.cs" />
+    <Compile Include="DomainPatterns\Signature\DomainEvent.cs" />
+    <Compile Include="DomainPatterns\Signature\DomainObjects.cs" />
+    <Compile Include="DomainPatterns\SingleDomainEventSource.cs" />
+    <Compile Include="DomainPatterns\Specifications\SpecificationByExpression.cs" />
+    <Compile Include="DomainPatterns\Specifications\SpecificationByUri.cs" />
+    <Compile Include="DomainPatterns\Validation.cs" />
+    <Compile Include="Extensibility\Aspects\AspectConfiguration.cs" />
+    <Compile Include="Extensibility\Aspects\AspectRepository.cs" />
+    <Compile Include="Extensibility\Aspects\IAspectComposer.cs" />
+    <Compile Include="Extensibility\Attributes\PluginAspect.cs" />
+    <Compile Include="Extensibility\Attributes\ServiceAspect.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\ConcreteReflectionActivatorData.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\ContainerBuildOptions.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\DynamicRegistrationStyle.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\IConcreteActivatorData.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\IHideObjectMembers.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\IRegistrationBuilder.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\MetadataConfiguration.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\ReflectionActivatorData.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\RegistrationBuilder.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\RegistrationBuilderOfTLAR.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\RegistrationBuilderResources.Designer.cs">
+      <DependentUpon>RegistrationBuilderResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Builder\RegistrationData.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\RegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\SimpleActivatorData.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\SingleRegistrationStyle.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\AssemblyElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\AssemblyElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ComponentElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ComponentElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ConfigurationElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ConfigurationSettingsReader.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ConfigurationSettingsReaderResources.Designer.cs">
+      <DependentUpon>ConfigurationSettingsReaderResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Configuration\DictionaryElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\FileElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\FileElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ListElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ListItemElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\MetadataElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\MetadataElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ModuleElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ModuleElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\NamedConfigurationElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ParameterElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ParameterElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\PropertyElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\PropertyElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\SectionHandler.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ServiceElement.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\ServiceElementCollection.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\TypeManipulation.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\Util\Enforce.cs" />
+    <Compile Include="Extensibility\Autofac\Configuration\Util\ReflectionExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\ContainerBuilder.cs" />
+    <Compile Include="Extensibility\Autofac\ContainerBuilderResources.Designer.cs">
+      <DependentUpon>ContainerBuilderResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\ActivatedEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\ActivatingEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Delegate\DelegateActivator.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Delegate\DelegateActivatorResources.Designer.cs">
+      <DependentUpon>DelegateActivatorResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Activators\InstanceActivator.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\ProvidedInstance\ProvidedInstanceActivator.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\ProvidedInstance\ProvidedInstanceActivatorResources.Designer.cs">
+      <DependentUpon>ProvidedInstanceActivatorResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\AutowiringParameter.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\AutowiringPropertyInjector.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\BindingFlagsConstructorFinder.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\BindingFlagsConstructorFinderResources.Designer.cs">
+      <DependentUpon>BindingFlagsConstructorFinderResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\ConstructorParameterBinding.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\ConstructorParameterBindingResources.Designer.cs">
+      <DependentUpon>ConstructorParameterBindingResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\DefaultValueParameter.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\IConstructorFinder.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\IConstructorSelector.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\MatchingSignatureConstructorSelector.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\MatchingSignatureConstructorSelectorResources.Designer.cs">
+      <DependentUpon>MatchingSignatureConstructorSelectorResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\MostParametersConstructorSelector.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\ReflectionActivator.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\ReflectionActivatorResources.Designer.cs">
+      <DependentUpon>ReflectionActivatorResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\ComponentRegisteredEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\ConstantParameter.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Container.cs" />
+    <Compile Include="Extensibility\Autofac\Core\ContainerResources.Designer.cs">
+      <DependentUpon>ContainerResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\DependencyResolutionException.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Diagnostics\IContainerAwareComponent.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Disposer.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IActivatedEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IActivatingEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IComponentLifetime.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IComponentRegistration.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IComponentRegistry.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IDisposer.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IInstanceActivator.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IModule.cs" />
+    <Compile Include="Extensibility\Autofac\Core\InstanceOwnership.cs" />
+    <Compile Include="Extensibility\Autofac\Core\InstanceSharing.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Core\IServiceWithType.cs" />
+    <Compile Include="Extensibility\Autofac\Core\ISharingLifetimeScope.cs" />
+    <Compile Include="Extensibility\Autofac\Core\KeyedService.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Lifetime\CurrentScopeLifetime.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Lifetime\LifetimeScope.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Lifetime\LifetimeScopeBeginningEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Lifetime\LifetimeScopeEndingEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Lifetime\LifetimeScopeResources.Designer.cs">
+      <DependentUpon>LifetimeScopeResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Lifetime\MatchingScopeLifetime.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Lifetime\MatchingScopeLifetimeResources.Designer.cs">
+      <DependentUpon>MatchingScopeLifetimeResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Lifetime\RootScopeLifetime.cs" />
+    <Compile Include="Extensibility\Autofac\Core\NamedPropertyParameter.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Parameter.cs" />
+    <Compile Include="Extensibility\Autofac\Core\PreparingEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\RegistrationSourceAddedEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\AdaptationSandbox.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentNotRegisteredException.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentNotRegisteredExceptionResources.Designer.cs">
+      <DependentUpon>ComponentNotRegisteredExceptionResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistration.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistrationLifetimeDecorator.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistrationResources.Designer.cs">
+      <DependentUpon>ComponentRegistrationResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistry.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\CopyOnWriteRegistry.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ExternalRegistrySource.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ScopeRestrictedRegistry.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ServiceRegistrationInfo.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Registration\ServiceRegistrationInfoResources.Designer.cs">
+      <DependentUpon>ServiceRegistrationInfoResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\ResolvedParameter.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Resolving\CircularDependencyDetectorResources.Designer.cs">
+      <DependentUpon>CircularDependencyDetectorResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Resolving\ComponentActivationResources.Designer.cs">
+      <DependentUpon>ComponentActivationResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\Resolving\IInstanceLookup.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookup.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookupBeginningEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookupCompletionBeginningEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookupCompletionEndingEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookupEndingEventArgs.cs" />
+    <Compile Include="Extensibility\Autofac\Core\Service.cs" />
+    <Compile Include="Extensibility\Autofac\Core\ServiceResources.Designer.cs">
+      <DependentUpon>ServiceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Core\TypedService.cs" />
+    <Compile Include="Extensibility\Autofac\Core\UniqueService.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Collections\CollectionRegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Collections\CollectionRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Collections\CollectionRegistrationSourceResources.Designer.cs">
+      <DependentUpon>CollectionRegistrationSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\FactoryGenerator.cs" />
+    <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryActivatorData.cs" />
+    <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryRegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryRegistrationSourceResources.Designer.cs">
+      <DependentUpon>GeneratedFactoryRegistrationSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\ParameterMapping.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Indexed\IIndex.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Indexed\KeyedServiceIndex.cs" />
+    <Compile Include="Extensibility\Autofac\Features\LazyDependencies\LazyRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\LazyDependencies\LazyRegistrationSourceResources.Designer.cs">
+      <DependentUpon>LazyRegistrationSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\LazyDependencies\LazyWithMetadataRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterActivatorData.cs" />
+    <Compile Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterRegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterRegistrationSourceResources.Designer.cs">
+      <DependentUpon>LightweightAdapterRegistrationSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\Metadata\Meta.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Metadata\MetaRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Metadata\MetaRegistrationSourceResources.Designer.cs">
+      <DependentUpon>MetaRegistrationSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\Metadata\StronglyTypedMeta.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Metadata\StronglyTypedMetaRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorActivatorData.cs" />
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorActivatorDataResources.Designer.cs">
+      <DependentUpon>OpenGenericDecoratorActivatorDataResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorRegistrationSourceResources.Designer.cs">
+      <DependentUpon>OpenGenericDecoratorRegistrationSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationExtensionsResources.Designer.cs">
+      <DependentUpon>OpenGenericRegistrationExtensionsResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationSourceResources.Designer.cs">
+      <DependentUpon>OpenGenericRegistrationSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericServiceBinder.cs" />
+    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericServiceBinderResources.Designer.cs">
+      <DependentUpon>OpenGenericServiceBinderResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\OwnedInstances\Owned.cs" />
+    <Compile Include="Extensibility\Autofac\Features\OwnedInstances\OwnedInstanceRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\OwnedInstances\OwnedInstanceRegistrationSourceResources.Designer.cs">
+      <DependentUpon>OwnedInstanceRegistrationSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\ResolveAnything\AnyConcreteTypeNotAlreadyRegisteredSource.cs" />
+    <Compile Include="Extensibility\Autofac\Features\ResolveAnything\AnyConcreteTypeNotAlreadyRegisteredSourceResources.Designer.cs">
+      <DependentUpon>AnyConcreteTypeNotAlreadyRegisteredSourceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Features\Scanning\ScanningActivatorData.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Scanning\ScanningRegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Features\Variance\ContravariantRegistrationSource.cs" />
+    <Compile Include="Extensibility\Autofac\IComponentContext.cs" />
+    <Compile Include="Extensibility\Autofac\IContainer.cs" />
+    <Compile Include="Extensibility\Autofac\ILifetimeScope.cs" />
+    <Compile Include="Extensibility\Autofac\Integration\Mef\ContractBasedService.cs" />
+    <Compile Include="Extensibility\Autofac\Integration\Mef\ContractBasedServiceResources.Designer.cs">
+      <DependentUpon>ContractBasedServiceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Integration\Mef\ExportConfigurationBuilder.cs" />
+    <Compile Include="Extensibility\Autofac\Integration\Mef\RegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Integration\Mef\RegistrationExtensionsResources.Designer.cs">
+      <DependentUpon>RegistrationExtensionsResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\IStartable.cs" />
+    <Compile Include="Extensibility\Autofac\Module.cs" />
+    <Compile Include="Extensibility\Autofac\NamedParameter.cs" />
+    <Compile Include="Extensibility\Autofac\ParameterExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\PositionalParameter.cs" />
+    <Compile Include="Extensibility\Autofac\PropertyWiringFlags.cs" />
+    <Compile Include="Extensibility\Autofac\RegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\RegistrationExtensionsResources.Designer.cs">
+      <DependentUpon>RegistrationExtensionsResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\ResolutionExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\TypedParameter.cs" />
+    <Compile Include="Extensibility\Autofac\TypeExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\TypeExtensionsResources.Designer.cs">
+      <DependentUpon>TypeExtensionsResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Util\Disposable.cs" />
+    <Compile Include="Extensibility\Autofac\Util\Enforce.cs" />
+    <Compile Include="Extensibility\Autofac\Util\EnforceResources.Designer.cs">
+      <DependentUpon>EnforceResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Util\ReflectionExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Util\ReflectionExtensionsResources.Designer.cs">
+      <DependentUpon>ReflectionExtensionsResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Extensibility\Autofac\Util\ReleaseAction.cs" />
+    <Compile Include="Extensibility\Autofac\Util\SequenceExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Util\Silverlight\AllowPartiallyTrustedCallerAttribute.cs" />
+    <Compile Include="Extensibility\Autofac\Util\Silverlight\SerializableAttribute.cs" />
+    <Compile Include="Extensibility\Autofac\Util\Traverse.cs" />
+    <Compile Include="Extensibility\Autofac\Util\TypeExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Util\WindowsPhone\Wp7Extensions.cs" />
+    <Compile Include="Extensibility\Autofac\Util\WindowsPhone\Wp7FactoryGenerator.cs" />
+    <Compile Include="Extensibility\Container\AutofacObjectFactory.cs" />
+    <Compile Include="Extensibility\Container\DryIoc.cs" />
+    <Compile Include="Extensibility\Container\DryIocObjectFactory.cs" />
+    <Compile Include="Extensibility\DynamicProxy\CastleDynamicProxyProvider.cs" />
+    <Compile Include="Extensibility\DynamicProxy\CastleInterceptor.cs" />
+    <Compile Include="Extensibility\DynamicProxy\CastleSelector.cs" />
+    <Compile Include="Extensibility\DynamicProxy\IDynamicProxyProvider.cs" />
+    <Compile Include="Extensibility\DynamicProxy\IInterceptorRegistrator.cs" />
+    <Compile Include="Extensibility\Plugins\AutofacMefProvider.cs" />
+    <Compile Include="Extensibility\Plugins\DryIocMefProvider.cs" />
+    <Compile Include="Extensibility\Plugins\PluginRepository.cs" />
+    <Compile Include="Extensibility\Plugins\PluginsConfiguration.cs" />
+    <Compile Include="Extensibility\Plugins\PluginsProvider.cs" />
+    <Compile Include="Extensibility\Setup.cs" />
+    <Compile Include="Extensibility\SystemInitialization.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\IGlobalPermission.cs" />
+    <Compile Include="Security\IRolePermission.cs" />
+    <Compile Include="Security\IUser.cs" />
+    <Compile Include="Security\IUserRoles.cs" />
+    <Compile Include="Security\PermissionManager.cs" />
+    <Compile Include="Security\RepositoryAuthentication.cs" />
+    <Compile Include="Security\RepositoryPrincipalFactory.cs" />
+    <Compile Include="Security\UserPrincipal.cs" />
+    <Compile Include="Serialization\BinarySerialization.cs" />
+    <Compile Include="Serialization\GenericDataContractResolver.cs" />
+    <Compile Include="Serialization\GenericDeserializationBinder.cs" />
+    <Compile Include="Serialization\Json\Converters\BinaryConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\BoolConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\DateTimeConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\DictionaryConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\DrawingConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\GuidConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\NetConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\NumberConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\PointConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\SecretConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\StringConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\TreePathConverter.cs" />
+    <Compile Include="Serialization\Json\Converters\XmlConverter.cs" />
+    <Compile Include="Serialization\Json\IJsonObject.cs" />
+    <Compile Include="Serialization\Json\JsonSerialization.cs" />
+    <Compile Include="Serialization\Json\TextReaderConverter.cs" />
+    <Compile Include="Serialization\Json\TreePathConverter.cs" />
+    <Compile Include="Serialization\PassThroughSerialization.cs" />
+    <Compile Include="Serialization\Protobuf\Converters\ProtoMemoryStream.cs" />
+    <Compile Include="Serialization\Protobuf\Converters\ProtoStream.cs" />
+    <Compile Include="Serialization\Protobuf\ProtobufSerialization.cs" />
+    <Compile Include="Serialization\Setup.cs" />
+    <Compile Include="Serialization\WireSerialization.cs" />
+    <Compile Include="Serialization\XmlSerialization.cs" />
+    <Compile Include="SystemState.cs" />
+    <Compile Include="UnitOfWork.cs" />
+    <Compile Include="Utility\DynamicOrderBy.cs" />
+    <Compile Include="Utility\ExpandoHelper.cs" />
+    <Compile Include="Utility\PdfConverter.cs" />
+    <Compile Include="Utility\Reflection\AssemblyScanner.cs" />
+    <Compile Include="Utility\Reflection\TypeUtility.cs" />
+    <Compile Include="Utility\StableHashCode.cs" />
+    <Compile Include="Utility\Streams\BufferedTextReader.cs" />
+    <Compile Include="Utility\Streams\ChunkedMemoryStream.cs" />
+    <Compile Include="Utility\TemporaryResources.cs" />
+    <Compile Include="Utility\TopologicalSort.cs" />
+    <Compile Include="Utility\TreePath.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Revenj.Core.Interface\Revenj.Core.Interface.csproj">
+      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
+      <Name>Revenj.Core.Interface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
+    </None>
+    <None Include="Security\DSL\Security.dsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\NpgsqlTypes\NpgsqlTypesHelper.resx">
+      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlCommand.resx">
+      <DependentUpon>NpgsqlCommand.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlCommandBuilder.resx">
+      <DependentUpon>NpgsqlCommandBuilder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlConnection.resx">
+      <DependentUpon>NpgsqlConnection.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlConnectionStringBuilder.resx">
+      <DependentUpon>NpgsqlConnectionStringBuilder.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlException.resx">
+      <DependentUpon>NpgsqlException.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlRow.resx">
+      <DependentUpon>NpgsqlRow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlTransaction.resx">
+      <DependentUpon>NpgsqlTransaction.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\PGUtil.resx">
+      <DependentUpon>PGUtil.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlReadyState.resx">
+      <DependentUpon>NpgsqlReadyState.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlState.resx">
+      <DependentUpon>NpgsqlState.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Builder\RegistrationBuilderResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>RegistrationBuilderResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Configuration\ConfigurationSettingsReaderResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ConfigurationSettingsReaderResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\ContainerBuilderResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ContainerBuilderResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Delegate\DelegateActivatorResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DelegateActivatorResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\ProvidedInstance\ProvidedInstanceActivatorResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ProvidedInstanceActivatorResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Reflection\BindingFlagsConstructorFinderResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BindingFlagsConstructorFinderResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Reflection\ConstructorParameterBindingResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ConstructorParameterBindingResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Reflection\MatchingSignatureConstructorSelectorResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MatchingSignatureConstructorSelectorResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Reflection\ReflectionActivatorResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ReflectionActivatorResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\ContainerResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ContainerResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Lifetime\LifetimeScopeResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LifetimeScopeResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Lifetime\MatchingScopeLifetimeResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MatchingScopeLifetimeResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Registration\ComponentNotRegisteredExceptionResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ComponentNotRegisteredExceptionResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Registration\ComponentRegistrationResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ComponentRegistrationResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Registration\ServiceRegistrationInfoResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ServiceRegistrationInfoResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Resolving\CircularDependencyDetectorResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CircularDependencyDetectorResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\Resolving\ComponentActivationResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ComponentActivationResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Core\ServiceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ServiceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\Collections\CollectionRegistrationSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CollectionRegistrationSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryRegistrationSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>GeneratedFactoryRegistrationSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\LazyDependencies\LazyRegistrationSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LazyRegistrationSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterRegistrationSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LightweightAdapterRegistrationSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\Metadata\MetaRegistrationSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MetaRegistrationSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorActivatorDataResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OpenGenericDecoratorActivatorDataResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorRegistrationSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OpenGenericDecoratorRegistrationSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationExtensionsResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OpenGenericRegistrationExtensionsResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OpenGenericRegistrationSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericServiceBinderResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OpenGenericServiceBinderResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\OwnedInstances\OwnedInstanceRegistrationSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OwnedInstanceRegistrationSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Features\ResolveAnything\AnyConcreteTypeNotAlreadyRegisteredSourceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AnyConcreteTypeNotAlreadyRegisteredSourceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Integration\Mef\ContractBasedServiceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ContractBasedServiceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Integration\Mef\RegistrationExtensionsResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>RegistrationExtensionsResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\RegistrationExtensionsResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>RegistrationExtensionsResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\TypeExtensionsResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TypeExtensionsResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Util\EnforceResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>EnforceResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Extensibility\Autofac\Util\ReflectionExtensionsResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ReflectionExtensionsResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DatabasePersistence\Postgres\Npgsql\NpgsqlMetaData.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -39,7 +39,7 @@ namespace DSL
 				: Revenj.Extensibility.Setup.UseDryIoc(null, dllPlugins);
 			builder.RegisterSingleton<ISystemState>(state);
 			if (container == Container.DryIoc)
-				StandardModule.Configure(builder, StandardModule.Database.Postgres);
+				StandardModule.Configure(builder, StandardModule.SetupPostgres);
 			foreach (var t in types)
 				builder.RegisterType(t, InstanceScope.Transient, false, new[] { t }.Union(t.GetInterfaces()).ToArray());
 			if (types.Length == 0 && typeof(TService).IsClass)

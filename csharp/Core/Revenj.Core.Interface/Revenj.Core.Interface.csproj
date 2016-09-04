@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Revenj.Core</RootNamespace>
+    <AssemblyName>Revenj.Core.Interface</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Revenj.Core.Interface.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mono|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Mono\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\CollectionExtensions.cs" />
+    <Compile Include="Common\FrameworkException.cs" />
+    <Compile Include="Common\StringExtensions.cs" />
+    <Compile Include="Database\IDatabaseQuery.cs" />
+    <Compile Include="Database\IDatabaseQueryManager.cs" />
+    <Compile Include="DomainPatterns\Cache.cs" />
+    <Compile Include="DomainPatterns\DataContext.cs" />
+    <Compile Include="DomainPatterns\Notification.cs" />
+    <Compile Include="DomainPatterns\Reporting.cs" />
+    <Compile Include="DomainPatterns\DomainEvent.cs" />
+    <Compile Include="DomainPatterns\DomainModel.cs" />
+    <Compile Include="DomainPatterns\History.cs" />
+    <Compile Include="DomainPatterns\ServiceLocator.cs" />
+    <Compile Include="DomainPatterns\SystemStartup.cs" />
+    <Compile Include="DomainPatterns\Tracking.cs" />
+    <Compile Include="DomainPatterns\Validation.cs" />
+    <Compile Include="DomainPatterns\DomainObjects.cs" />
+    <Compile Include="DomainPatterns\Repository.cs" />
+    <Compile Include="DomainPatterns\Specification.cs" />
+    <Compile Include="Extensibility\Aspects\IDslAspect.cs" />
+    <Compile Include="Extensibility\Aspects\ISystemAspect.cs" />
+    <Compile Include="Extensibility\Attributes\PluginAttribute.cs" />
+    <Compile Include="Extensibility\Attributes\ServiceAttribute.cs" />
+    <Compile Include="Extensibility\IAspectRegistrator.cs" />
+    <Compile Include="Extensibility\IExtensibilityProvider.cs" />
+    <Compile Include="Extensibility\IMixinProvider.cs" />
+    <Compile Include="Extensibility\IObjectFactory.cs" />
+    <Compile Include="Extensibility\IObjectFactoryBuilder.cs" />
+    <Compile Include="Extensibility\IPluginRepository.cs" />
+    <Compile Include="Extensibility\ISystemState.cs" />
+    <Compile Include="Extensibility\ITypeResolver.cs" />
+    <Compile Include="Utility\Exceptions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\IAuthentication.cs" />
+    <Compile Include="Security\IPermissionManager.cs" />
+    <Compile Include="Security\IPrincipalFactory.cs" />
+    <Compile Include="Security\Roles.cs" />
+    <Compile Include="Serialization\ISerialization.cs" />
+    <Compile Include="Serialization\IWireSerialization.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

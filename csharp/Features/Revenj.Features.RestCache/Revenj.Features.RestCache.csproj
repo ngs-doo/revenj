@@ -57,21 +57,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Revenj.Security.Interface\Revenj.Security.Interface.csproj">
-      <Project>{6745FC14-607B-440B-AF83-19C460695C10}</Project>
-      <Name>Revenj.Security.Interface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Core\Revenj.Serialization.Interface\Revenj.Serialization.Interface.csproj">
-      <Project>{9C4534E8-B8EB-44F6-A759-C752F0DEA675}</Project>
-      <Name>Revenj.Serialization.Interface</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Core\Revenj.Utility\Revenj.Utility.csproj">
-      <Project>{0058C57F-1D45-408B-B681-336889B0111E}</Project>
-      <Name>Revenj.Utility</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Domain\Revenj.DomainPatterns.Interface\Revenj.DomainPatterns.Interface.csproj">
+    <ProjectReference Include="..\..\Core\Revenj.Core.Interface\Revenj.Core.Interface.csproj">
       <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
-      <Name>Revenj.DomainPatterns.Interface</Name>
+      <Name>Revenj.Core.Interface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Core\Revenj.Core\Revenj.Core.csproj">
+      <Project>{A01BD986-6602-44CF-B27B-1370E9BF7CF8}</Project>
+      <Name>Revenj.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Plugins\Revenj.Plugins.Rest.Commands\Revenj.Plugins.Rest.Commands.csproj">
       <Project>{C06DA32E-8685-4D7A-806F-8A95E85C13EA}</Project>

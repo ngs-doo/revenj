@@ -3,43 +3,29 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using DSL;
 using Revenj.Api;
-using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Processing;
-using Revenj.Security;
-using Revenj.Serialization;
 
 namespace Revenj.Wcf
 {
 	public class StandardModuleNoDatabase : StandardModule
 	{
-		public StandardModuleNoDatabase() : base(Database.None) { }
-	}
-
-	public class StandardModuleOracle : StandardModule
-	{
-		public StandardModuleOracle() : base(Database.Oracle) { }
+		public StandardModuleNoDatabase() : base(_ => { }) { }
 	}
 
 	public class StandardModule : Revenj.Extensibility.Autofac.Module
 	{
-		public enum Database
+		private readonly Action<IObjectFactoryBuilder> DB;
+
+		public StandardModule() : this(SetupPostgres) { }
+		protected StandardModule(Action<IObjectFactoryBuilder> db)
 		{
-			Postgres,
-			Oracle,
-			None
+			this.DB = db;
 		}
 
-		private readonly Database DB;
-
-		public StandardModule() : this(Database.Postgres) { }
-		protected StandardModule(Database database)
-		{
-			this.DB = database;
-		}
-
-		public static void Configure(IObjectFactoryBuilder builder, Database db)
+		public static void Configure(IObjectFactoryBuilder builder, Action<IObjectFactoryBuilder> db)
 		{
 			//TODO: register applications as implementation only
 			builder.RegisterType<RestApplication>();
@@ -48,23 +34,8 @@ namespace Revenj.Wcf
 			builder.RegisterType<SoapApplication, ISoapApplication>();
 			builder.RegisterType<CommandConverter, ICommandConverter>();
 
-			var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
-			if (db == Database.Postgres)
-			{
-				if (string.IsNullOrEmpty(cs))
-					throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
-Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
-
-				SetupPostgres(builder, cs);
-			}
-			else if (db == Database.Oracle)
-			{
-				if (string.IsNullOrEmpty(cs))
-					throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
-Example: <add key=""ConnectionString"" value=""Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=MyOracleHost)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=xe)));User Id=oracle;Password=123456;"" />");
-
-				SetupOracle(builder, cs);
-			}
+			if (db != null)
+				db(builder);
 			var serverModels =
 				(from key in ConfigurationManager.AppSettings.AllKeys
 				 where key.StartsWith("ServerAssembly", StringComparison.OrdinalIgnoreCase)
@@ -91,14 +62,14 @@ Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
 			builder.ConfigureProcessing();
 		}
 
-		private static void SetupPostgres(IObjectFactoryBuilder builder, string connectionString)
+		internal static void SetupPostgres(IObjectFactoryBuilder builder)
 		{
-			Revenj.DatabasePersistence.Postgres.Setup.ConfigurePostgres(builder, connectionString);
-		}
+			var cs = ConfigurationManager.AppSettings["Revenj.ConnectionString"] ?? ConfigurationManager.AppSettings["ConnectionString"];
+			if (string.IsNullOrEmpty(cs))
+				throw new ConfigurationErrorsException(@"ConnectionString is missing from configuration. Add ConnectionString to <appSettings>
+Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=5432;database=MyDatabase;user=postgres;password=123456;encoding=unicode"" />");
 
-		private static void SetupOracle(IObjectFactoryBuilder builder, string connectionString)
-		{
-			Revenj.DatabasePersistence.Oracle.Setup.ConfigureOracle(builder, connectionString);
+			Revenj.DatabasePersistence.Postgres.Setup.ConfigurePostgres(builder, cs);
 		}
 
 		protected override void Load(Revenj.Extensibility.Autofac.ContainerBuilder builder)
