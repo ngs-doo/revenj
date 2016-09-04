@@ -172,8 +172,8 @@ object Guards {
             case e: ArithmeticException =>
               throw new IllegalArgumentException("Invalid value for element at index " + i + ". Decimal places allowed: " + scale + ". Value: " + it, e)
           }
-          i += 1
         }
+        i += 1
       }
     }
   }
@@ -191,8 +191,8 @@ object Guards {
             case e: ArithmeticException =>
               throw new IllegalArgumentException("Invalid value for element at index " + i + ". Decimal places allowed: " + scale + ". Value: " + it, e)
           }
-          i += 1
         }
+        i += 1
       }
     }
   }
