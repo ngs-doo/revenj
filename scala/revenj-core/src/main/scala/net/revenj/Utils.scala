@@ -13,7 +13,6 @@ object Utils {
   val MinLocalDateTime = LocalDateTime.of(1, 1, 1, 0, 0, 0, 0)
   val MinDateTime = OffsetDateTime.of(MinLocalDateTime, ZoneOffset.UTC)
   val MinUuid = new UUID(0L, 0L)
-  val EmptyBinary = new Array[Byte](0)
   val Zero0 = BigDecimal(0).setScale(0)
   val Zero1 = BigDecimal(0).setScale(1)
   val Zero2 = BigDecimal(0).setScale(2)
