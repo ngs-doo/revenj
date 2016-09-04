@@ -26,6 +26,7 @@
 
 
 using System.IO;
+using System.Threading;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -83,6 +84,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				commandStream.CopyTo(stream);
 				stream.WriteByte(0);
 			}
+			Thread.Yield();
 		}
 
 		public override void WriteToStream(Stream outputStream)
