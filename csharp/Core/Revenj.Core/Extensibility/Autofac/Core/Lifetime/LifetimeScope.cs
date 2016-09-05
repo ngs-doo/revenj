@@ -30,7 +30,6 @@ using System.Linq;
 using Revenj.Extensibility.Autofac.Core.Registration;
 using Revenj.Extensibility.Autofac.Core.Resolving;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Core.Extensibility.Autofac.Core.Lifetime;
 
 namespace Revenj.Extensibility.Autofac.Core.Lifetime
 {
@@ -353,7 +352,7 @@ namespace Revenj.Extensibility.Autofac.Core.Lifetime
 		void CheckNotDisposed()
 		{
 			if (IsDisposed)
-				throw new ObjectDisposedException(LifetimeScopeResources.ScopeIsDisposed, innerException: null);
+				throw new ObjectDisposedException("Instances cannot be resolved and nested lifetimes cannot be created from this LifetimeScope as it has already been disposed.", innerException: null);
 		}
 
 		/// <summary>

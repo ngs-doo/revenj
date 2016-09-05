@@ -286,11 +286,6 @@
     <Compile Include="Extensibility\Autofac\Builder\ReflectionActivatorData.cs" />
     <Compile Include="Extensibility\Autofac\Builder\RegistrationBuilder.cs" />
     <Compile Include="Extensibility\Autofac\Builder\RegistrationBuilderOfTLAR.cs" />
-    <Compile Include="Extensibility\Autofac\Builder\RegistrationBuilderResources.Designer.cs">
-      <DependentUpon>RegistrationBuilderResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Builder\RegistrationData.cs" />
     <Compile Include="Extensibility\Autofac\Builder\RegistrationExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Builder\SimpleActivatorData.cs" />
@@ -301,11 +296,6 @@
     <Compile Include="Extensibility\Autofac\Configuration\ComponentElementCollection.cs" />
     <Compile Include="Extensibility\Autofac\Configuration\ConfigurationElementCollection.cs" />
     <Compile Include="Extensibility\Autofac\Configuration\ConfigurationSettingsReader.cs" />
-    <Compile Include="Extensibility\Autofac\Configuration\ConfigurationSettingsReaderResources.Designer.cs">
-      <DependentUpon>ConfigurationSettingsReaderResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Configuration\DictionaryElementCollection.cs" />
     <Compile Include="Extensibility\Autofac\Configuration\FileElement.cs" />
     <Compile Include="Extensibility\Autofac\Configuration\FileElementCollection.cs" />
@@ -327,64 +317,24 @@
     <Compile Include="Extensibility\Autofac\Configuration\Util\Enforce.cs" />
     <Compile Include="Extensibility\Autofac\Configuration\Util\ReflectionExtensions.cs" />
     <Compile Include="Extensibility\Autofac\ContainerBuilder.cs" />
-    <Compile Include="Extensibility\Autofac\ContainerBuilderResources.Designer.cs">
-      <DependentUpon>ContainerBuilderResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\ActivatedEventArgs.cs" />
     <Compile Include="Extensibility\Autofac\Core\ActivatingEventArgs.cs" />
     <Compile Include="Extensibility\Autofac\Core\Activators\Delegate\DelegateActivator.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Activators\Delegate\DelegateActivatorResources.Designer.cs">
-      <DependentUpon>DelegateActivatorResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Activators\InstanceActivator.cs" />
     <Compile Include="Extensibility\Autofac\Core\Activators\ProvidedInstance\ProvidedInstanceActivator.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Activators\ProvidedInstance\ProvidedInstanceActivatorResources.Designer.cs">
-      <DependentUpon>ProvidedInstanceActivatorResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\AutowiringParameter.cs" />
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\AutowiringPropertyInjector.cs" />
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\BindingFlagsConstructorFinder.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\BindingFlagsConstructorFinderResources.Designer.cs">
-      <DependentUpon>BindingFlagsConstructorFinderResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\ConstructorParameterBinding.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\ConstructorParameterBindingResources.Designer.cs">
-      <DependentUpon>ConstructorParameterBindingResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\DefaultValueParameter.cs" />
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\IConstructorFinder.cs" />
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\IConstructorSelector.cs" />
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\MatchingSignatureConstructorSelector.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\MatchingSignatureConstructorSelectorResources.Designer.cs">
-      <DependentUpon>MatchingSignatureConstructorSelectorResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\MostParametersConstructorSelector.cs" />
     <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\ReflectionActivator.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Activators\Reflection\ReflectionActivatorResources.Designer.cs">
-      <DependentUpon>ReflectionActivatorResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\ComponentRegisteredEventArgs.cs" />
     <Compile Include="Extensibility\Autofac\Core\ConstantParameter.cs" />
     <Compile Include="Extensibility\Autofac\Core\Container.cs" />
-    <Compile Include="Extensibility\Autofac\Core\ContainerResources.Designer.cs">
-      <DependentUpon>ContainerResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\DependencyResolutionException.cs" />
     <Compile Include="Extensibility\Autofac\Core\Diagnostics\IContainerAwareComponent.cs" />
     <Compile Include="Extensibility\Autofac\Core\Disposer.cs" />
@@ -406,17 +356,7 @@
     <Compile Include="Extensibility\Autofac\Core\Lifetime\LifetimeScope.cs" />
     <Compile Include="Extensibility\Autofac\Core\Lifetime\LifetimeScopeBeginningEventArgs.cs" />
     <Compile Include="Extensibility\Autofac\Core\Lifetime\LifetimeScopeEndingEventArgs.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Lifetime\LifetimeScopeResources.Designer.cs">
-      <DependentUpon>LifetimeScopeResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Lifetime\MatchingScopeLifetime.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Lifetime\MatchingScopeLifetimeResources.Designer.cs">
-      <DependentUpon>MatchingScopeLifetimeResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Lifetime\RootScopeLifetime.cs" />
     <Compile Include="Extensibility\Autofac\Core\NamedPropertyParameter.cs" />
     <Compile Include="Extensibility\Autofac\Core\Parameter.cs" />
@@ -424,40 +364,15 @@
     <Compile Include="Extensibility\Autofac\Core\RegistrationSourceAddedEventArgs.cs" />
     <Compile Include="Extensibility\Autofac\Core\Registration\AdaptationSandbox.cs" />
     <Compile Include="Extensibility\Autofac\Core\Registration\ComponentNotRegisteredException.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentNotRegisteredExceptionResources.Designer.cs">
-      <DependentUpon>ComponentNotRegisteredExceptionResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistration.cs" />
     <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistrationExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistrationLifetimeDecorator.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistrationResources.Designer.cs">
-      <DependentUpon>ComponentRegistrationResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Registration\ComponentRegistry.cs" />
     <Compile Include="Extensibility\Autofac\Core\Registration\CopyOnWriteRegistry.cs" />
     <Compile Include="Extensibility\Autofac\Core\Registration\ExternalRegistrySource.cs" />
     <Compile Include="Extensibility\Autofac\Core\Registration\ScopeRestrictedRegistry.cs" />
     <Compile Include="Extensibility\Autofac\Core\Registration\ServiceRegistrationInfo.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Registration\ServiceRegistrationInfoResources.Designer.cs">
-      <DependentUpon>ServiceRegistrationInfoResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\ResolvedParameter.cs" />
-    <Compile Include="Extensibility\Autofac\Core\Resolving\CircularDependencyDetectorResources.Designer.cs">
-      <DependentUpon>CircularDependencyDetectorResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Extensibility\Autofac\Core\Resolving\ComponentActivationResources.Designer.cs">
-      <DependentUpon>ComponentActivationResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\Resolving\IInstanceLookup.cs" />
     <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookup.cs" />
     <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookupBeginningEventArgs.cs" />
@@ -465,99 +380,34 @@
     <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookupCompletionEndingEventArgs.cs" />
     <Compile Include="Extensibility\Autofac\Core\Resolving\InstanceLookupEndingEventArgs.cs" />
     <Compile Include="Extensibility\Autofac\Core\Service.cs" />
-    <Compile Include="Extensibility\Autofac\Core\ServiceResources.Designer.cs">
-      <DependentUpon>ServiceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Core\TypedService.cs" />
     <Compile Include="Extensibility\Autofac\Core\UniqueService.cs" />
     <Compile Include="Extensibility\Autofac\Features\Collections\CollectionRegistrationExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Features\Collections\CollectionRegistrationSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\Collections\CollectionRegistrationSourceResources.Designer.cs">
-      <DependentUpon>CollectionRegistrationSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\FactoryGenerator.cs" />
     <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryActivatorData.cs" />
     <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryRegistrationExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryRegistrationSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryRegistrationSourceResources.Designer.cs">
-      <DependentUpon>GeneratedFactoryRegistrationSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\GeneratedFactories\ParameterMapping.cs" />
     <Compile Include="Extensibility\Autofac\Features\Indexed\IIndex.cs" />
     <Compile Include="Extensibility\Autofac\Features\Indexed\KeyedServiceIndex.cs" />
     <Compile Include="Extensibility\Autofac\Features\LazyDependencies\LazyRegistrationSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\LazyDependencies\LazyRegistrationSourceResources.Designer.cs">
-      <DependentUpon>LazyRegistrationSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\LazyDependencies\LazyWithMetadataRegistrationSource.cs" />
     <Compile Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterActivatorData.cs" />
     <Compile Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterRegistrationExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterRegistrationSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterRegistrationSourceResources.Designer.cs">
-      <DependentUpon>LightweightAdapterRegistrationSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\Metadata\Meta.cs" />
     <Compile Include="Extensibility\Autofac\Features\Metadata\MetaRegistrationSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\Metadata\MetaRegistrationSourceResources.Designer.cs">
-      <DependentUpon>MetaRegistrationSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\Metadata\StronglyTypedMeta.cs" />
     <Compile Include="Extensibility\Autofac\Features\Metadata\StronglyTypedMetaRegistrationSource.cs" />
     <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorActivatorData.cs" />
-    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorActivatorDataResources.Designer.cs">
-      <DependentUpon>OpenGenericDecoratorActivatorDataResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorRegistrationSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorRegistrationSourceResources.Designer.cs">
-      <DependentUpon>OpenGenericDecoratorRegistrationSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationExtensions.cs" />
-    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationExtensionsResources.Designer.cs">
-      <DependentUpon>OpenGenericRegistrationExtensionsResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationSourceResources.Designer.cs">
-      <DependentUpon>OpenGenericRegistrationSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericServiceBinder.cs" />
-    <Compile Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericServiceBinderResources.Designer.cs">
-      <DependentUpon>OpenGenericServiceBinderResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\OwnedInstances\Owned.cs" />
     <Compile Include="Extensibility\Autofac\Features\OwnedInstances\OwnedInstanceRegistrationSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\OwnedInstances\OwnedInstanceRegistrationSourceResources.Designer.cs">
-      <DependentUpon>OwnedInstanceRegistrationSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\ResolveAnything\AnyConcreteTypeNotAlreadyRegisteredSource.cs" />
-    <Compile Include="Extensibility\Autofac\Features\ResolveAnything\AnyConcreteTypeNotAlreadyRegisteredSourceResources.Designer.cs">
-      <DependentUpon>AnyConcreteTypeNotAlreadyRegisteredSourceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Features\Scanning\ScanningActivatorData.cs" />
     <Compile Include="Extensibility\Autofac\Features\Scanning\ScanningRegistrationExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Features\Variance\ContravariantRegistrationSource.cs" />
@@ -565,18 +415,8 @@
     <Compile Include="Extensibility\Autofac\IContainer.cs" />
     <Compile Include="Extensibility\Autofac\ILifetimeScope.cs" />
     <Compile Include="Extensibility\Autofac\Integration\Mef\ContractBasedService.cs" />
-    <Compile Include="Extensibility\Autofac\Integration\Mef\ContractBasedServiceResources.Designer.cs">
-      <DependentUpon>ContractBasedServiceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Integration\Mef\ExportConfigurationBuilder.cs" />
     <Compile Include="Extensibility\Autofac\Integration\Mef\RegistrationExtensions.cs" />
-    <Compile Include="Extensibility\Autofac\Integration\Mef\RegistrationExtensionsResources.Designer.cs">
-      <DependentUpon>RegistrationExtensionsResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\IStartable.cs" />
     <Compile Include="Extensibility\Autofac\Module.cs" />
     <Compile Include="Extensibility\Autofac\NamedParameter.cs" />
@@ -584,32 +424,12 @@
     <Compile Include="Extensibility\Autofac\PositionalParameter.cs" />
     <Compile Include="Extensibility\Autofac\PropertyWiringFlags.cs" />
     <Compile Include="Extensibility\Autofac\RegistrationExtensions.cs" />
-    <Compile Include="Extensibility\Autofac\RegistrationExtensionsResources.Designer.cs">
-      <DependentUpon>RegistrationExtensionsResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\ResolutionExtensions.cs" />
     <Compile Include="Extensibility\Autofac\TypedParameter.cs" />
     <Compile Include="Extensibility\Autofac\TypeExtensions.cs" />
-    <Compile Include="Extensibility\Autofac\TypeExtensionsResources.Designer.cs">
-      <DependentUpon>TypeExtensionsResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Util\Disposable.cs" />
     <Compile Include="Extensibility\Autofac\Util\Enforce.cs" />
-    <Compile Include="Extensibility\Autofac\Util\EnforceResources.Designer.cs">
-      <DependentUpon>EnforceResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Util\ReflectionExtensions.cs" />
-    <Compile Include="Extensibility\Autofac\Util\ReflectionExtensionsResources.Designer.cs">
-      <DependentUpon>ReflectionExtensionsResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Extensibility\Autofac\Util\ReleaseAction.cs" />
     <Compile Include="Extensibility\Autofac\Util\SequenceExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Util\Silverlight\AllowPartiallyTrustedCallerAttribute.cs" />
@@ -733,150 +553,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlState.resx">
       <DependentUpon>NpgsqlState.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Builder\RegistrationBuilderResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>RegistrationBuilderResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Configuration\ConfigurationSettingsReaderResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ConfigurationSettingsReaderResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\ContainerBuilderResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ContainerBuilderResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Delegate\DelegateActivatorResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>DelegateActivatorResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\ProvidedInstance\ProvidedInstanceActivatorResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ProvidedInstanceActivatorResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Reflection\BindingFlagsConstructorFinderResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>BindingFlagsConstructorFinderResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Reflection\ConstructorParameterBindingResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ConstructorParameterBindingResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Reflection\MatchingSignatureConstructorSelectorResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MatchingSignatureConstructorSelectorResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Activators\Reflection\ReflectionActivatorResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ReflectionActivatorResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\ContainerResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ContainerResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Lifetime\LifetimeScopeResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LifetimeScopeResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Lifetime\MatchingScopeLifetimeResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MatchingScopeLifetimeResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Registration\ComponentNotRegisteredExceptionResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ComponentNotRegisteredExceptionResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Registration\ComponentRegistrationResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ComponentRegistrationResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Registration\ServiceRegistrationInfoResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ServiceRegistrationInfoResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Resolving\CircularDependencyDetectorResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CircularDependencyDetectorResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\Resolving\ComponentActivationResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ComponentActivationResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Core\ServiceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ServiceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\Collections\CollectionRegistrationSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CollectionRegistrationSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\GeneratedFactories\GeneratedFactoryRegistrationSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>GeneratedFactoryRegistrationSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\LazyDependencies\LazyRegistrationSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LazyRegistrationSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\LightweightAdapters\LightweightAdapterRegistrationSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LightweightAdapterRegistrationSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\Metadata\MetaRegistrationSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MetaRegistrationSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorActivatorDataResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>OpenGenericDecoratorActivatorDataResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericDecoratorRegistrationSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>OpenGenericDecoratorRegistrationSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationExtensionsResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>OpenGenericRegistrationExtensionsResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericRegistrationSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>OpenGenericRegistrationSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\OpenGenerics\OpenGenericServiceBinderResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>OpenGenericServiceBinderResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\OwnedInstances\OwnedInstanceRegistrationSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>OwnedInstanceRegistrationSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Features\ResolveAnything\AnyConcreteTypeNotAlreadyRegisteredSourceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>AnyConcreteTypeNotAlreadyRegisteredSourceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Integration\Mef\ContractBasedServiceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ContractBasedServiceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Integration\Mef\RegistrationExtensionsResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>RegistrationExtensionsResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\RegistrationExtensionsResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>RegistrationExtensionsResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\TypeExtensionsResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TypeExtensionsResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Util\EnforceResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>EnforceResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Extensibility\Autofac\Util\ReflectionExtensionsResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ReflectionExtensionsResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -94,7 +94,7 @@ namespace Revenj.Extensibility.Autofac.Core.Activators.Reflection
 			var _availableConstructors = _constructorFinder.FindConstructors(_implementationType);
 
 			if (_availableConstructors == null || _availableConstructors.Length == 0)
-				throw new DependencyResolutionException(string.Format(ReflectionActivatorResources.NoConstructorsAvailable, _implementationType, _constructorFinder));
+				throw new DependencyResolutionException(string.Format("No constructors on type '{0}' can be found with '{1}'.", _implementationType, _constructorFinder));
 
 			var constructorBindings = GetConstructorBindings(
 				context,
@@ -132,7 +132,7 @@ namespace Revenj.Extensibility.Autofac.Core.Activators.Reflection
 			}
 
 			return string.Format(
-				ReflectionActivatorResources.NoConstructorsBindable,
+				"None of the constructors found with '{0}' on type '{1}' can be invoked with the available services and parameters:{2}",
 				_constructorFinder, _implementationType, reasons);
 		}
 

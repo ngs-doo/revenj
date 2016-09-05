@@ -216,7 +216,7 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 		{
 			// Activator = {0}, Services = [{1}], Lifetime = {2}, Sharing = {3}, Ownership = {4}
 			return string.Format(CultureInfo.CurrentCulture,
-				ComponentRegistrationResources.ToStringFormat,
+				"Activator = {0}, Services = [{1}], Lifetime = {2}, Sharing = {3}, Ownership = {4}",
 				Activator,
 				Services.Select(s => s.Description).JoinWith(", "),
 				Lifetime,

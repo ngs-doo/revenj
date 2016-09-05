@@ -89,7 +89,7 @@ namespace Revenj.Extensibility.Autofac.Features.OwnedInstances
 
 		public override string ToString()
 		{
-			return OwnedInstanceRegistrationSourceResources.OwnedInstanceRegistrationSourceDescription;
+			return "Owned<T> Support";
 		}
 	}
 }

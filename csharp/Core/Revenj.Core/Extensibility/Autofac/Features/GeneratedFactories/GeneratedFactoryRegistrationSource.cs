@@ -82,7 +82,7 @@ namespace Revenj.Extensibility.Autofac.Features.GeneratedFactories
 
 		public override string ToString()
 		{
-			return GeneratedFactoryRegistrationSourceResources.GeneratedFactoryRegistrationSourceDescription;
+			return "Delegate Support (Func<T>and Custom Delegates)";
 		}
 	}
 }

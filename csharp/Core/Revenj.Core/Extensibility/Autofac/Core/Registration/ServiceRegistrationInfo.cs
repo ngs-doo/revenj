@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Revenj.Core.Extensibility.Autofac.Core.Registration;
 
 namespace Revenj.Extensibility.Autofac.Core.Registration
 {
@@ -56,7 +55,7 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 		void RequiresInitialization()
 		{
 			if (!IsInitialized)
-				throw new InvalidOperationException(ServiceRegistrationInfoResources.NotInitialised);
+				throw new InvalidOperationException("The operation is not valid until the object is initalised.");
 		}
 
 		/// <summary>
@@ -139,7 +138,7 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 		void EnforceDuringInitialization()
 		{
 			if (!IsInitializing)
-				throw new InvalidOperationException(ServiceRegistrationInfoResources.NotDuringInitialisation);
+				throw new InvalidOperationException("The operation is only valid during intialisation.");
 		}
 
 		public IRegistrationSource DequeueNextSource()

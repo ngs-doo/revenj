@@ -28,8 +28,8 @@ using System.Collections.Generic;
 using Revenj.Extensibility.Autofac.Core.Activators.Delegate;
 using Revenj.Extensibility.Autofac.Core.Lifetime;
 using Revenj.Extensibility.Autofac.Core.Registration;
-using Revenj.Extensibility.Autofac.Util;
 using Revenj.Extensibility.Autofac.Core.Resolving;
+using Revenj.Extensibility.Autofac.Util;
 
 namespace Revenj.Extensibility.Autofac.Core
 {
@@ -61,7 +61,7 @@ namespace Revenj.Extensibility.Autofac.Core
 				LifetimeScope.SelfRegistrationId,
 				new DelegateActivator(typeof(LifetimeScope), (c, p) =>
 				{
-					throw new InvalidOperationException(ContainerResources.SelfRegistrationCannotBeActivated);
+					throw new InvalidOperationException("The container's self-registration of context interfaces should never be activated as it is hard-wired into the LifetimeScope class.");
 				}),
 				new CurrentScopeLifetime(),
 				InstanceSharing.Shared,

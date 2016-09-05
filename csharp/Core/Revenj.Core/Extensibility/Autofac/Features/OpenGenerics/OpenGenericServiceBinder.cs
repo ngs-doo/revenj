@@ -26,135 +26,133 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Core.Extensibility.Autofac.Features.OpenGenerics;
 
 namespace Revenj.Extensibility.Autofac.Features.OpenGenerics
 {
-    static class OpenGenericServiceBinder
-    {
-        public static bool TryBindServiceType(
-            Service service,
-            IEnumerable<Service> configuredOpenGenericServices,
-            Type openGenericImplementationType,
-            out Type constructedImplementationType,
-            out IEnumerable<Service> constructedServices)
-        {
-            var swt = service as IServiceWithType;
-            if (swt != null && swt.ServiceType.IsGenericType)
-            {
-                var definitionService = (IServiceWithType)swt.ChangeType(swt.ServiceType.GetGenericTypeDefinition());
-                var serviceGenericArguments = swt.ServiceType.GetGenericArguments();
+	static class OpenGenericServiceBinder
+	{
+		public static bool TryBindServiceType(
+			Service service,
+			IEnumerable<Service> configuredOpenGenericServices,
+			Type openGenericImplementationType,
+			out Type constructedImplementationType,
+			out IEnumerable<Service> constructedServices)
+		{
+			var swt = service as IServiceWithType;
+			if (swt != null && swt.ServiceType.IsGenericType)
+			{
+				var definitionService = (IServiceWithType)swt.ChangeType(swt.ServiceType.GetGenericTypeDefinition());
+				var serviceGenericArguments = swt.ServiceType.GetGenericArguments();
 
-                if (configuredOpenGenericServices.Cast<IServiceWithType>().Any(s => s.Equals(definitionService)))
-                {
-                    var implementorGenericArguments = TryMapImplementationGenericArguments(
-                        openGenericImplementationType, swt.ServiceType, definitionService.ServiceType, serviceGenericArguments);
+				if (configuredOpenGenericServices.Cast<IServiceWithType>().Any(s => s.Equals(definitionService)))
+				{
+					var implementorGenericArguments = TryMapImplementationGenericArguments(
+						openGenericImplementationType, swt.ServiceType, definitionService.ServiceType, serviceGenericArguments);
 
-                    if (!implementorGenericArguments.Any(a => a == null) &&
-                        openGenericImplementationType.IsCompatibleWithGenericParameterConstraints(implementorGenericArguments))
-                    {
-                        var constructedImplementationTypeTmp = openGenericImplementationType.MakeGenericType(implementorGenericArguments);
+					if (!implementorGenericArguments.Any(a => a == null) &&
+						openGenericImplementationType.IsCompatibleWithGenericParameterConstraints(implementorGenericArguments))
+					{
+						var constructedImplementationTypeTmp = openGenericImplementationType.MakeGenericType(implementorGenericArguments);
 
-                        // This needs looking at
-                        var implementedServices = (from IServiceWithType s in configuredOpenGenericServices
-                                                   let genericService = s.ServiceType.MakeGenericType(serviceGenericArguments)
-                                                   where genericService.IsAssignableFrom(constructedImplementationTypeTmp)
-                                                   select s.ChangeType(genericService)).ToArray();
+						// This needs looking at
+						var implementedServices = (from IServiceWithType s in configuredOpenGenericServices
+												   let genericService = s.ServiceType.MakeGenericType(serviceGenericArguments)
+												   where genericService.IsAssignableFrom(constructedImplementationTypeTmp)
+												   select s.ChangeType(genericService)).ToArray();
 
-                        if (implementedServices.Length > 0)
-                        {
-                            constructedImplementationType = constructedImplementationTypeTmp;
-                            constructedServices = implementedServices;
-                            return true;
-                        }
-                    }
-                }
-            }
+						if (implementedServices.Length > 0)
+						{
+							constructedImplementationType = constructedImplementationTypeTmp;
+							constructedServices = implementedServices;
+							return true;
+						}
+					}
+				}
+			}
 
-            constructedImplementationType = null;
-            constructedServices = null;
-            return false;
-        }
+			constructedImplementationType = null;
+			constructedServices = null;
+			return false;
+		}
 
-        static Type[] TryMapImplementationGenericArguments(Type implementationType, Type serviceType, Type serviceTypeDefinition, Type[] serviceGenericArguments)
-        {
-            if (serviceTypeDefinition == implementationType)
-                return serviceGenericArguments;
+		static Type[] TryMapImplementationGenericArguments(Type implementationType, Type serviceType, Type serviceTypeDefinition, Type[] serviceGenericArguments)
+		{
+			if (serviceTypeDefinition == implementationType)
+				return serviceGenericArguments;
 
-            var implementationGenericArgumentDefinitions = implementationType.GetGenericArguments();
-            var serviceArgumentDefinitions = serviceType.IsInterface ?
-                    GetInterface(implementationType, serviceType).GetGenericArguments() :
-                    serviceTypeDefinition.GetGenericArguments();
+			var implementationGenericArgumentDefinitions = implementationType.GetGenericArguments();
+			var serviceArgumentDefinitions = serviceType.IsInterface ?
+					GetInterface(implementationType, serviceType).GetGenericArguments() :
+					serviceTypeDefinition.GetGenericArguments();
 
-            var serviceArgumentDefinitionToArgumentMapping = serviceArgumentDefinitions.Zip(serviceGenericArguments, (a, b) => new KeyValuePair<Type, Type>(a, b));
+			var serviceArgumentDefinitionToArgumentMapping = serviceArgumentDefinitions.Zip(serviceGenericArguments, (a, b) => new KeyValuePair<Type, Type>(a, b));
 
-            return implementationGenericArgumentDefinitions
-                .Select(implementationGenericArgumentDefinition => TryFindServiceArgumentForImplementationArgumentDefinition(
-                    implementationGenericArgumentDefinition, serviceArgumentDefinitionToArgumentMapping))
-                .ToArray();
-        }
+			return implementationGenericArgumentDefinitions
+				.Select(implementationGenericArgumentDefinition => TryFindServiceArgumentForImplementationArgumentDefinition(
+					implementationGenericArgumentDefinition, serviceArgumentDefinitionToArgumentMapping))
+				.ToArray();
+		}
 
-        static Type GetInterface(Type implementationType, Type serviceType)
-        {
-            return
+		static Type GetInterface(Type implementationType, Type serviceType)
+		{
+			return
 #if SILVERLIGHT     
                 implementationType.GetInterfaces().Single(i => i.Name == serviceType.Name);
 #else
-                implementationType.GetInterface(serviceType.Name);
+ implementationType.GetInterface(serviceType.Name);
 #endif
-        }
+		}
 
-        static Type TryFindServiceArgumentForImplementationArgumentDefinition(Type implementationGenericArgumentDefinition, IEnumerable<KeyValuePair<Type, Type>> serviceArgumentDefinitionToArgument)
-        {
-            var matchingRegularType = serviceArgumentDefinitionToArgument
-                .Where(argdef => !argdef.Key.IsGenericType && implementationGenericArgumentDefinition.Name == argdef.Key.Name)
-                .Select(argdef => argdef.Value)
-                .FirstOrDefault();
+		static Type TryFindServiceArgumentForImplementationArgumentDefinition(Type implementationGenericArgumentDefinition, IEnumerable<KeyValuePair<Type, Type>> serviceArgumentDefinitionToArgument)
+		{
+			var matchingRegularType = serviceArgumentDefinitionToArgument
+				.Where(argdef => !argdef.Key.IsGenericType && implementationGenericArgumentDefinition.Name == argdef.Key.Name)
+				.Select(argdef => argdef.Value)
+				.FirstOrDefault();
 
-            if (matchingRegularType != null)
-                return matchingRegularType;
+			if (matchingRegularType != null)
+				return matchingRegularType;
 
-            return serviceArgumentDefinitionToArgument
-                .Where(argdef => argdef.Key.IsGenericType && argdef.Value.GetGenericArguments().Length > 0)
-                .Select(argdef => TryFindServiceArgumentForImplementationArgumentDefinition(
-                    implementationGenericArgumentDefinition, argdef.Key.GetGenericArguments().Zip(argdef.Value.GetGenericArguments(), (a, b) => new KeyValuePair<Type, Type>(a, b))))
-                .FirstOrDefault();
-        }
+			return serviceArgumentDefinitionToArgument
+				.Where(argdef => argdef.Key.IsGenericType && argdef.Value.GetGenericArguments().Length > 0)
+				.Select(argdef => TryFindServiceArgumentForImplementationArgumentDefinition(
+					implementationGenericArgumentDefinition, argdef.Key.GetGenericArguments().Zip(argdef.Value.GetGenericArguments(), (a, b) => new KeyValuePair<Type, Type>(a, b))))
+				.FirstOrDefault();
+		}
 
-        public static void EnforceBindable(Type implementationType, IEnumerable<Service> services)
-        {
-            if (implementationType == null) throw new ArgumentNullException("implementationType");
-            if (services == null) throw new ArgumentNullException("services");
+		public static void EnforceBindable(Type implementationType, IEnumerable<Service> services)
+		{
+			if (implementationType == null) throw new ArgumentNullException("implementationType");
+			if (services == null) throw new ArgumentNullException("services");
 
-            if (!implementationType.IsGenericTypeDefinition)
-                throw new ArgumentException(
-                    string.Format(OpenGenericServiceBinderResources.ImplementorMustBeOpenGenericTypeDefinition, implementationType));
+			if (!implementationType.IsGenericTypeDefinition)
+				throw new ArgumentException(
+					string.Format("The implementation type '{0}' is not an open generic type definition.", implementationType));
 
-            foreach (IServiceWithType service in services)
-            {
-                if (!service.ServiceType.IsGenericTypeDefinition)
-                    throw new ArgumentException(
-                        string.Format(OpenGenericServiceBinderResources.ServiceTypeMustBeOpenGenericTypeDefinition, service));
+			foreach (IServiceWithType service in services)
+			{
+				if (!service.ServiceType.IsGenericTypeDefinition)
+					throw new ArgumentException(
+						string.Format("The service '{0}' is not an open generic type definition.", service));
 
-                if (service.ServiceType.IsInterface)
-                {
-                    if (GetInterface(implementationType, service.ServiceType) == null)
-                        throw new ArgumentException(string.Format(OpenGenericServiceBinderResources.InterfaceIsNotImplemented, implementationType, service));
-                }
-                else
-                {
-                    if (!Traverse.Across(implementationType, t => t.BaseType).Any(t => IsCompatibleGenericClassDefinition(t, service.ServiceType)))
-                        throw new ArgumentException(string.Format(OpenGenericServiceBinderResources.TypesAreNotConvertible, implementationType, service));
-                }
-            }
-        }
+				if (service.ServiceType.IsInterface)
+				{
+					if (GetInterface(implementationType, service.ServiceType) == null)
+						throw new ArgumentException(string.Format("The implementation type '{0}' does not support the interface '{1}'.", implementationType, service));
+				}
+				else
+				{
+					if (!Traverse.Across(implementationType, t => t.BaseType).Any(t => IsCompatibleGenericClassDefinition(t, service.ServiceType)))
+						throw new ArgumentException(string.Format("The service '{1}' is not assignable from implementation type '{0}'.", implementationType, service));
+				}
+			}
+		}
 
-        static bool IsCompatibleGenericClassDefinition(Type implementor, Type serviceType)
-        {
-            return implementor == serviceType || implementor.IsGenericType && implementor.GetGenericTypeDefinition() == serviceType;
-        }
-    }
+		static bool IsCompatibleGenericClassDefinition(Type implementor, Type serviceType)
+		{
+			return implementor == serviceType || implementor.IsGenericType && implementor.GetGenericTypeDefinition() == serviceType;
+		}
+	}
 }

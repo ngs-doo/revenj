@@ -25,53 +25,52 @@
 
 using System;
 using System.Linq;
-using Revenj.Core.Extensibility.Autofac.Core.Activators.Reflection;
 
 namespace Revenj.Extensibility.Autofac.Core.Activators.Reflection
 {
-    /// <summary>
-    /// Selects a constructor based on its signature.
-    /// </summary>
-    public class MatchingSignatureConstructorSelector : IConstructorSelector
-    {
-        readonly Type[] _signature;
+	/// <summary>
+	/// Selects a constructor based on its signature.
+	/// </summary>
+	public class MatchingSignatureConstructorSelector : IConstructorSelector
+	{
+		readonly Type[] _signature;
 
-        /// <summary>
-        /// Match constructors with the provided signature.
-        /// </summary>
-        /// <param name="signature">Signature to match.</param>
-        public MatchingSignatureConstructorSelector(params Type[] signature)
-        {
-            if (signature == null) throw new ArgumentNullException("signature");
-            _signature = signature;
-        }
+		/// <summary>
+		/// Match constructors with the provided signature.
+		/// </summary>
+		/// <param name="signature">Signature to match.</param>
+		public MatchingSignatureConstructorSelector(params Type[] signature)
+		{
+			if (signature == null) throw new ArgumentNullException("signature");
+			_signature = signature;
+		}
 
-        /// <summary>
-        /// Selects the best constructor from the available constructors.
-        /// </summary>
-        /// <param name="constructorBindings">Available constructors.</param>
-        /// <returns>The best constructor.</returns>
-        public ConstructorParameterBinding SelectConstructorBinding(ConstructorParameterBinding[] constructorBindings)
-        {
-            if (constructorBindings == null) throw new ArgumentNullException("constructorBindings");
-            
-            var result = constructorBindings
-                .Where(b => b.TargetConstructor.GetParameters().Select(p => p.ParameterType).SequenceEqual(_signature))
-                .ToArray();
+		/// <summary>
+		/// Selects the best constructor from the available constructors.
+		/// </summary>
+		/// <param name="constructorBindings">Available constructors.</param>
+		/// <returns>The best constructor.</returns>
+		public ConstructorParameterBinding SelectConstructorBinding(ConstructorParameterBinding[] constructorBindings)
+		{
+			if (constructorBindings == null) throw new ArgumentNullException("constructorBindings");
 
-            if (result.Length == 1)
-                return result[0];
+			var result = constructorBindings
+				.Where(b => b.TargetConstructor.GetParameters().Select(p => p.ParameterType).SequenceEqual(_signature))
+				.ToArray();
 
-            if (!constructorBindings.Any())
-                throw new ArgumentException(MatchingSignatureConstructorSelectorResources.AtLeastOneBindingRequired);
+			if (result.Length == 1)
+				return result[0];
 
-            var targetTypeName = constructorBindings.First().TargetConstructor.DeclaringType.Name;
-            var signature = string.Join(", ", _signature.Select(t => t.Name).ToArray());
+			if (!constructorBindings.Any())
+				throw new ArgumentException("At least one binding must be provided in order to select a constructor.");
 
-            if (result.Length == 0)
-                throw new DependencyResolutionException(string.Format(MatchingSignatureConstructorSelectorResources.RequiredConstructorNotAvailable, targetTypeName, signature));
-            
-            throw new DependencyResolutionException(string.Format(MatchingSignatureConstructorSelectorResources.TooManyConstructorsMatch, signature));
-        }
-    }
+			var targetTypeName = constructorBindings.First().TargetConstructor.DeclaringType.Name;
+			var signature = string.Join(", ", _signature.Select(t => t.Name).ToArray());
+
+			if (result.Length == 0)
+				throw new DependencyResolutionException(string.Format("The required constructor on type '{0}'  with signature '{1}' is unavailable.", targetTypeName, signature));
+
+			throw new DependencyResolutionException(string.Format("More than one constructor matches the signature '{0}'.", signature));
+		}
+	}
 }

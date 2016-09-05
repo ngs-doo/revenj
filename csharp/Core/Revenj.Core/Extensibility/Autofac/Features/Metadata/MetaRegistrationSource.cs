@@ -30,7 +30,6 @@ using System.Reflection;
 using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Core.Extensibility.Autofac.Features.Metadata;
 
 namespace Revenj.Extensibility.Autofac.Features.Metadata
 {
@@ -68,7 +67,7 @@ namespace Revenj.Extensibility.Autofac.Features.Metadata
 
 		public override string ToString()
 		{
-			return MetaRegistrationSourceResources.MetaRegistrationSourceDescription;
+			return "Meta<T> Support";
 		}
 
 		static IComponentRegistration CreateMetaRegistration<T>(Service providedService, IComponentRegistration valueRegistration)

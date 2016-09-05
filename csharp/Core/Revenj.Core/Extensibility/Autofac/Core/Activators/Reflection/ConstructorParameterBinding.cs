@@ -29,7 +29,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
-using Revenj.Core.Extensibility.Autofac.Core.Activators.Reflection;
 
 namespace Revenj.Extensibility.Autofac.Core.Activators.Reflection
 {
@@ -109,7 +108,7 @@ namespace Revenj.Extensibility.Autofac.Core.Activators.Reflection
 		public object Instantiate()
 		{
 			if (!CanInstantiate)
-				throw new InvalidOperationException(ConstructorParameterBindingResources.CannotInstantitate);
+				throw new InvalidOperationException("The binding cannot be instantiated.");
 
 			var values = new object[_valueRetrievers.Length];
 			for (var i = 0; i < _valueRetrievers.Length; ++i)
@@ -129,12 +128,12 @@ namespace Revenj.Extensibility.Autofac.Core.Activators.Reflection
 			catch (TargetInvocationException ex)
 			{
 				throw new DependencyResolutionException(
-					string.Format(CultureInfo.CurrentCulture, ConstructorParameterBindingResources.ExceptionDuringInstantiation, TargetConstructor, TargetConstructor.DeclaringType.Name), ex.InnerException);
+					string.Format(CultureInfo.CurrentCulture, "An exception was thrown while invoking the constructor '{0}' on type '{1}'.", TargetConstructor, TargetConstructor.DeclaringType.Name), ex.InnerException);
 			}
 			catch (Exception ex)
 			{
 				throw new DependencyResolutionException(
-					string.Format(CultureInfo.CurrentCulture, ConstructorParameterBindingResources.ExceptionDuringInstantiation, TargetConstructor, TargetConstructor.DeclaringType.Name), ex);
+					string.Format(CultureInfo.CurrentCulture, "An exception was thrown while invoking the constructor '{0}' on type '{1}'.", TargetConstructor, TargetConstructor.DeclaringType.Name), ex);
 			}
 		}
 
@@ -146,8 +145,8 @@ namespace Revenj.Extensibility.Autofac.Core.Activators.Reflection
 			get
 			{
 				return CanInstantiate
-					? string.Format(CultureInfo.CurrentCulture, ConstructorParameterBindingResources.BoundConstructor, _ci)
-					: string.Format(CultureInfo.CurrentCulture, ConstructorParameterBindingResources.NonBindableConstructor, _ci, _firstNonBindableParameter);
+					? string.Format(CultureInfo.CurrentCulture, "Bound constructor '{0}'.", _ci)
+					: string.Format(CultureInfo.CurrentCulture, "Cannot resolve parameter '{1}' of constructor '{0}'.", _ci, _firstNonBindableParameter);
 			}
 		}
 

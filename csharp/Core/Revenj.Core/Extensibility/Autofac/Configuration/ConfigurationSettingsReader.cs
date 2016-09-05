@@ -33,7 +33,6 @@ using System.Reflection;
 using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Core.Activators.Reflection;
-using Revenj.Core.Extensibility.Autofac.Configuration;
 
 namespace Revenj.Extensibility.Autofac.Configuration
 {
@@ -81,7 +80,7 @@ namespace Revenj.Extensibility.Autofac.Configuration
 
 			if (_sectionHandler == null)
 				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
-						  ConfigurationSettingsReaderResources.SectionNotFound, sectionName));
+						  "The configuration section '{0}' could not be read.", sectionName));
 		}
 
 		/// <summary>
@@ -96,7 +95,7 @@ namespace Revenj.Extensibility.Autofac.Configuration
 
 			if (_sectionHandler == null)
 				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
-						  ConfigurationSettingsReaderResources.SectionNotFound, sectionName));
+						  "The configuration section '{0}' could not be read.", sectionName));
 		}
 
 		/// <summary>
@@ -161,7 +160,7 @@ namespace Revenj.Extensibility.Autofac.Configuration
 				{
 					if (!string.IsNullOrEmpty(component.Name))
 						throw new ConfigurationErrorsException(string.Format(
-							ConfigurationSettingsReaderResources.ServiceTypeMustBeSpecified, component.Name));
+							"If 'name' is specified, 'service' must also be specified (component name='{0}'.)", component.Name));
 				}
 
 				foreach (ServiceElement service in component.Services)
@@ -229,7 +228,7 @@ namespace Revenj.Extensibility.Autofac.Configuration
 						break;
 					default:
 						throw new ConfigurationErrorsException(string.Format(CultureInfo.CurrentCulture,
-							ConfigurationSettingsReaderResources.UnrecognisedInjectProperties, component.InjectProperties));
+							"The value '{0}' is not valid for the inject-properties attribute. Valid values are 'yes' and 'no'.", component.InjectProperties));
 				}
 			}
 		}
@@ -258,7 +257,7 @@ namespace Revenj.Extensibility.Autofac.Configuration
 						break;
 					default:
 						throw new ConfigurationErrorsException(string.Format(CultureInfo.CurrentCulture,
-							ConfigurationSettingsReaderResources.UnrecognisedOwnership, component.Ownership));
+							"The value '{0}' is not valid for the ownership attribute. Valid values are 'lifetime-scope' (the default) and 'external'.", component.Ownership));
 				}
 			}
 		}
@@ -290,7 +289,7 @@ namespace Revenj.Extensibility.Autofac.Configuration
 						break;
 					default:
 						throw new ConfigurationErrorsException(string.Format(CultureInfo.CurrentCulture,
-							ConfigurationSettingsReaderResources.UnrecognisedScope, component.InstanceScope));
+							"The value '{0}' is not valid for the instance-scope attribute. Valid values are 'single-instance', 'per-dependency' (the default) and 'per-lifetime-scope'.", component.InstanceScope));
 				}
 			}
 		}
@@ -314,7 +313,7 @@ namespace Revenj.Extensibility.Autofac.Configuration
 
 			if (type == null)
 				throw new ConfigurationErrorsException(string.Format(CultureInfo.CurrentCulture,
-					ConfigurationSettingsReaderResources.TypeNotFound, typeName));
+					"The type '{0}' could not be found. It may require assembly qualification, e.g. \"MyType, MyAssembly\".", typeName));
 
 			return type;
 		}

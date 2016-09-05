@@ -24,48 +24,46 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Revenj.Extensibility.Autofac.Core.Activators.Reflection
 {
-    /// <summary>
-    /// Finds constructors based on their binding flags.
-    /// </summary>
-    public class BindingFlagsConstructorFinder : IConstructorFinder
-    {
-        readonly BindingFlags _bindingFlags;
+	/// <summary>
+	/// Finds constructors based on their binding flags.
+	/// </summary>
+	public class BindingFlagsConstructorFinder : IConstructorFinder
+	{
+		readonly BindingFlags _bindingFlags;
 
-        /// <summary>
-        /// Create an instance matching constructors with the supplied binding flags.
-        /// </summary>
-        /// <param name="bindingFlags">Binding flags to match.</param>
-        public BindingFlagsConstructorFinder(BindingFlags bindingFlags)
-        {
-            _bindingFlags = bindingFlags;
-        }
+		/// <summary>
+		/// Create an instance matching constructors with the supplied binding flags.
+		/// </summary>
+		/// <param name="bindingFlags">Binding flags to match.</param>
+		public BindingFlagsConstructorFinder(BindingFlags bindingFlags)
+		{
+			_bindingFlags = bindingFlags;
+		}
 
-        /// <summary>
-        /// Finds suitable constructors on the target type.
-        /// </summary>
-        /// <param name="targetType">Type to search for constructors.</param>
-        /// <returns>Suitable constructors.</returns>
-        public ConstructorInfo[] FindConstructors(Type targetType)
-        {
-            return targetType.GetConstructors(BindingFlags.Instance | _bindingFlags);
-        }
+		/// <summary>
+		/// Finds suitable constructors on the target type.
+		/// </summary>
+		/// <param name="targetType">Type to search for constructors.</param>
+		/// <returns>Suitable constructors.</returns>
+		public ConstructorInfo[] FindConstructors(Type targetType)
+		{
+			return targetType.GetConstructors(BindingFlags.Instance | _bindingFlags);
+		}
 
-        /// <summary>
-        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
-        /// </returns>
-        /// <filterpriority>2</filterpriority>
-        public override string ToString()
-        {
-            return string.Format(BindingFlagsConstructorFinderResources.HasBindingFlags, _bindingFlags);
-        }
-    }
+		/// <summary>
+		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </returns>
+		/// <filterpriority>2</filterpriority>
+		public override string ToString()
+		{
+			return string.Format("{0} binding flags", _bindingFlags);
+		}
+	}
 }

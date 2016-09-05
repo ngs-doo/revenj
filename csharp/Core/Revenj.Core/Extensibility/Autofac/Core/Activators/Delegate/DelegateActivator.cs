@@ -26,7 +26,6 @@
 using System;
 using System.Collections.Generic;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Core.Extensibility.Autofac.Core.Activators.Delegate;
 
 namespace Revenj.Extensibility.Autofac.Core.Activators.Delegate
 {
@@ -68,7 +67,7 @@ namespace Revenj.Extensibility.Autofac.Core.Activators.Delegate
 				var result = _activationFunction(context, parameters);
 				if (result == null)
 					throw new DependencyResolutionException(string.Format(
-						DelegateActivatorResources.NullFromActivationDelegateFor, LimitType));
+						"A delegate registered to create instances of '{0}' returned null.", LimitType));
 
 				return result;
 			};

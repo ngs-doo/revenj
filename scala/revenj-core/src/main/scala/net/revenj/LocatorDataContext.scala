@@ -160,21 +160,20 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     }
   }
 
-  override def close(): Unit =
+  override def close(): Unit = {
     connection
-      .filter(!_.isClosed && manageConnection)
-      .map(connection => {
-        val waitForChanges = if(hasChanges) Future.successful(()) else rollback()
+      .filter(!_.isClosed && manageConnection && !closed)
+      .foreach(conn => {
+        val waitForChanges = if (hasChanges) Future.successful(()) else rollback()
         val rollbackAndClose = waitForChanges.map(_ => {
-          connection.setAutoCommit(true)
-          connection.close()
+          conn.setAutoCommit(true)
+          conn.close()
           locator.close()
         })
         Await.result(rollbackAndClose, Duration.Inf)
       })
-
-
-
+    closed = true
+  }
 }
 
 private[revenj] object LocatorDataContext {

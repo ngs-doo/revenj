@@ -29,7 +29,6 @@ using System.Linq;
 using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Core.Activators.Reflection;
-using Revenj.Core.Extensibility.Autofac.Features.OpenGenerics;
 
 namespace Revenj.Extensibility.Autofac.Features.OpenGenerics
 {
@@ -49,7 +48,7 @@ namespace Revenj.Extensibility.Autofac.Features.OpenGenerics
 
 			if (registrationData.Services.Contains((Service)activatorData.FromService))
 				throw new ArgumentException(string.Format(
-					OpenGenericDecoratorRegistrationSourceResources.FromAndToMustDiffer, activatorData.FromService));
+					"The service {0} cannot be both the adapter's from and to parameters - these must differ.", activatorData.FromService));
 
 			_registrationData = registrationData;
 			_activatorData = activatorData;
@@ -100,7 +99,7 @@ namespace Revenj.Extensibility.Autofac.Features.OpenGenerics
 
 		public override string ToString()
 		{
-			return string.Format(OpenGenericDecoratorRegistrationSourceResources.OpenGenericDecoratorRegistrationSourceImplFromTo,
+			return string.Format("Open Generic Decorator {0} from {1} to {2}",
 				_activatorData.ImplementationType.FullName,
 				((Service)_activatorData.FromService).Description,
 				string.Join(", ", _registrationData.Services.Select(s => s.Description).ToArray()));

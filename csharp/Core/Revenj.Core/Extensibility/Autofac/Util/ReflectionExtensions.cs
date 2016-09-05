@@ -29,69 +29,69 @@ using System.Reflection;
 
 namespace Revenj.Extensibility.Autofac.Util
 {
-    /// <summary>
-    /// Extension methods for reflection-related types.
-    /// </summary>
-    static class ReflectionExtensions
-    {
-        /// <summary>
-        /// Maps from a property-set-value parameter to the declaring property.
-        /// </summary>
-        /// <param name="pi">Parameter to the property setter.</param>
-        /// <param name="prop">The property info on which the setter is specified.</param>
-        /// <returns>True if the parameter is a property setter.</returns>
-        public static bool TryGetDeclaringProperty(this ParameterInfo pi, out PropertyInfo prop)
-        {
-            var mi = pi.Member as MethodInfo;
-            if (mi != null && mi.IsSpecialName && mi.Name.StartsWith("set_"))
-            {
-                prop = mi.DeclaringType.GetProperty(mi.Name.Substring(4));
-                return true;
-            }
+	/// <summary>
+	/// Extension methods for reflection-related types.
+	/// </summary>
+	static class ReflectionExtensions
+	{
+		/// <summary>
+		/// Maps from a property-set-value parameter to the declaring property.
+		/// </summary>
+		/// <param name="pi">Parameter to the property setter.</param>
+		/// <param name="prop">The property info on which the setter is specified.</param>
+		/// <returns>True if the parameter is a property setter.</returns>
+		public static bool TryGetDeclaringProperty(this ParameterInfo pi, out PropertyInfo prop)
+		{
+			var mi = pi.Member as MethodInfo;
+			if (mi != null && mi.IsSpecialName && mi.Name.StartsWith("set_"))
+			{
+				prop = mi.DeclaringType.GetProperty(mi.Name.Substring(4));
+				return true;
+			}
 
-            prop = null;
-            return false;
-        }
+			prop = null;
+			return false;
+		}
 
-        /// <summary>
-        /// Get a PropertyInfo object from an expression of the form
-        /// x =&gt; x.P.
-        /// </summary>
-        /// <typeparam name="TDeclaring">Type declaring the property.</typeparam>
-        /// <typeparam name="TProperty">The type of the property.</typeparam>
-        /// <param name="propertyAccessor">Expression mapping an instance of the
-        /// declaring type to the property value.</param>
-        /// <returns>Property info.</returns>
-        public static PropertyInfo GetProperty<TDeclaring, TProperty>(
-            Expression<Func<TDeclaring, TProperty>> propertyAccessor)
-        {
-            if (propertyAccessor == null) throw new ArgumentNullException("propertyAccessor");
-            var mex = propertyAccessor.Body as MemberExpression;
-            if (mex == null ||
-                mex.Member.MemberType != MemberTypes.Property)
-                throw new ArgumentException(string.Format(
-                    ReflectionExtensionsResources.ExpressionNotPropertyAccessor,
-                    propertyAccessor));
-            return (PropertyInfo) mex.Member;
-        }
+		/// <summary>
+		/// Get a PropertyInfo object from an expression of the form
+		/// x =&gt; x.P.
+		/// </summary>
+		/// <typeparam name="TDeclaring">Type declaring the property.</typeparam>
+		/// <typeparam name="TProperty">The type of the property.</typeparam>
+		/// <param name="propertyAccessor">Expression mapping an instance of the
+		/// declaring type to the property value.</param>
+		/// <returns>Property info.</returns>
+		public static PropertyInfo GetProperty<TDeclaring, TProperty>(
+			Expression<Func<TDeclaring, TProperty>> propertyAccessor)
+		{
+			if (propertyAccessor == null) throw new ArgumentNullException("propertyAccessor");
+			var mex = propertyAccessor.Body as MemberExpression;
+			if (mex == null ||
+				mex.Member.MemberType != MemberTypes.Property)
+				throw new ArgumentException(string.Format(
+					"The provided expression must be of the form x =>x.P, but the provided expression was {0}.",
+					propertyAccessor));
+			return (PropertyInfo)mex.Member;
+		}
 
-        /// <summary>
-        /// Get the MethodInfo for a method called in the
-        /// expression.
-        /// </summary>
-        /// <typeparam name="TDeclaring">Type on which the method is called.</typeparam>
-        /// <param name="methodCallExpression">Expression demonstrating how the method appears.</param>
-        /// <returns>The method info for the called method.</returns>
-        public static MethodInfo GetMethod<TDeclaring>(
-            Expression<Action<TDeclaring>> methodCallExpression)
-        {
-            if (methodCallExpression == null) throw new ArgumentNullException("methodCallExpression");
-            var callExpression = methodCallExpression.Body as MethodCallExpression;
-            if (callExpression == null)
-                throw new ArgumentException(string.Format(
-                    ReflectionExtensionsResources.ExpressionNotMethodCall,
-                    methodCallExpression));
-            return callExpression.Method;
-        }
-    }
+		/// <summary>
+		/// Get the MethodInfo for a method called in the
+		/// expression.
+		/// </summary>
+		/// <typeparam name="TDeclaring">Type on which the method is called.</typeparam>
+		/// <param name="methodCallExpression">Expression demonstrating how the method appears.</param>
+		/// <returns>The method info for the called method.</returns>
+		public static MethodInfo GetMethod<TDeclaring>(
+			Expression<Action<TDeclaring>> methodCallExpression)
+		{
+			if (methodCallExpression == null) throw new ArgumentNullException("methodCallExpression");
+			var callExpression = methodCallExpression.Body as MethodCallExpression;
+			if (callExpression == null)
+				throw new ArgumentException(string.Format(
+					"The provided expression must be of the form x =>x.M(), but the provided expression was {0}.",
+					methodCallExpression));
+			return callExpression.Method;
+		}
+	}
 }

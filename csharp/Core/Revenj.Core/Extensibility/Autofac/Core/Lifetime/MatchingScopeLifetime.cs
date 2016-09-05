@@ -26,29 +26,28 @@
 using System;
 using System.Globalization;
 using System.Linq.Expressions;
-using Revenj.Core.Extensibility.Autofac.Core.Lifetime;
 
 namespace Revenj.Extensibility.Autofac.Core.Lifetime
 {
-    /// <summary>
-    /// Attaches the component's lifetime to scopes matching a supplied expression.
-    /// </summary>
-    public class MatchingScopeLifetime : IComponentLifetime
-    {
-        readonly Func<ILifetimeScope, bool> _matcher;
-        readonly string _matchExpressionCode;
+	/// <summary>
+	/// Attaches the component's lifetime to scopes matching a supplied expression.
+	/// </summary>
+	public class MatchingScopeLifetime : IComponentLifetime
+	{
+		readonly Func<ILifetimeScope, bool> _matcher;
+		readonly string _matchExpressionCode;
 
 #if !WINDOWS_PHONE
-        /// <summary>
-        /// Match scopes based on the provided expression.
-        /// </summary>
-        /// <param name="matchExpression">Expression describing scopes that will match.</param>
-        public MatchingScopeLifetime(Expression<Func<ILifetimeScope, bool>> matchExpression)
-        {
-            if (matchExpression == null) throw new ArgumentNullException("matchExpression");
-            _matcher = matchExpression.Compile();
-            _matchExpressionCode = matchExpression.Body.ToString();
-        }
+		/// <summary>
+		/// Match scopes based on the provided expression.
+		/// </summary>
+		/// <param name="matchExpression">Expression describing scopes that will match.</param>
+		public MatchingScopeLifetime(Expression<Func<ILifetimeScope, bool>> matchExpression)
+		{
+			if (matchExpression == null) throw new ArgumentNullException("matchExpression");
+			_matcher = matchExpression.Compile();
+			_matchExpressionCode = matchExpression.Body.ToString();
+		}
 #else
         /// <summary>
         /// Match scopes based on the provided expression.
@@ -62,38 +61,38 @@ namespace Revenj.Extensibility.Autofac.Core.Lifetime
         }
 #endif
 
-        /// <summary>
-        /// Match scopes by comparing tags for equality.
-        /// </summary>
-        /// <param name="lifetimeScopeTagToMatch">The tag applied to matching scopes.</param>
-        public MatchingScopeLifetime(object lifetimeScopeTagToMatch)
-        {
-            if (lifetimeScopeTagToMatch == null) throw new ArgumentNullException("lifetimeScopeTagToMatch");
-            _matcher = ls => lifetimeScopeTagToMatch.Equals(ls.Tag);
-            _matchExpressionCode = lifetimeScopeTagToMatch.ToString();
-        }
+		/// <summary>
+		/// Match scopes by comparing tags for equality.
+		/// </summary>
+		/// <param name="lifetimeScopeTagToMatch">The tag applied to matching scopes.</param>
+		public MatchingScopeLifetime(object lifetimeScopeTagToMatch)
+		{
+			if (lifetimeScopeTagToMatch == null) throw new ArgumentNullException("lifetimeScopeTagToMatch");
+			_matcher = ls => lifetimeScopeTagToMatch.Equals(ls.Tag);
+			_matchExpressionCode = lifetimeScopeTagToMatch.ToString();
+		}
 
-        /// <summary>
-        /// Given the most nested scope visible within the resolve operation, find
-        /// the scope for the component.
-        /// </summary>
-        /// <param name="mostNestedVisibleScope">The most nested visible scope.</param>
-        /// <returns>The scope for the component.</returns>
-        public ISharingLifetimeScope FindScope(ISharingLifetimeScope mostNestedVisibleScope)
-        {
-            if (mostNestedVisibleScope == null) throw new ArgumentNullException("mostNestedVisibleScope");
+		/// <summary>
+		/// Given the most nested scope visible within the resolve operation, find
+		/// the scope for the component.
+		/// </summary>
+		/// <param name="mostNestedVisibleScope">The most nested visible scope.</param>
+		/// <returns>The scope for the component.</returns>
+		public ISharingLifetimeScope FindScope(ISharingLifetimeScope mostNestedVisibleScope)
+		{
+			if (mostNestedVisibleScope == null) throw new ArgumentNullException("mostNestedVisibleScope");
 
-            var next = mostNestedVisibleScope;
-            while (next != null)
-            {
-                if (_matcher(next))
-                    return next;
+			var next = mostNestedVisibleScope;
+			while (next != null)
+			{
+				if (_matcher(next))
+					return next;
 
-                next = next.ParentLifetimeScope;
-            }
+				next = next.ParentLifetimeScope;
+			}
 
-            throw new DependencyResolutionException(string.Format(
-                CultureInfo.CurrentCulture, MatchingScopeLifetimeResources.MatchingScopeNotFound, _matchExpressionCode));
-        }
-    }
+			throw new DependencyResolutionException(string.Format(
+				CultureInfo.CurrentCulture, "No scope with a Tag matching '{0}' is visible from the scope in which the instance was requested. This generally indicates that a component registered as per-HTTP request is being reqested by a SingleInstance() component (or a similar scenario.) Under the web integration always request dependencies from the DependencyResolver.Current or ILifetimeScopeProvider.RequestLifetime, never from the container itself.", _matchExpressionCode));
+		}
+	}
 }

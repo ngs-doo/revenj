@@ -35,7 +35,7 @@ using Revenj.Extensibility.Autofac.Util;
 
 #if !(NET35 || WINDOWS_PHONE)
 using Revenj.Extensibility.Autofac.Features.LazyDependencies;
-using Revenj.Core.Extensibility.Autofac;
+
 
 #endif
 
@@ -123,7 +123,7 @@ namespace Revenj.Extensibility.Autofac
 			if (componentRegistry == null) throw new ArgumentNullException("componentRegistry");
 
 			if (_wasBuilt)
-				throw new InvalidOperationException(ContainerBuilderResources.BuildCanOnlyBeCalledOnce);
+				throw new InvalidOperationException("Build() or Update() can only be called once on a ContainerBuilder.");
 
 			_wasBuilt = true;
 			AutofacObjectFactory.RegisterToContainer(this, this, null);

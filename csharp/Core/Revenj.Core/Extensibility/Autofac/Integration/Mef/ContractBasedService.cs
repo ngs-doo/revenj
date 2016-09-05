@@ -78,7 +78,7 @@ namespace Revenj.Extensibility.Autofac.Integration.Mef
 		{
 			get
 			{
-				return string.Format(ContractBasedServiceResources.DescriptionFormat, ContractName);
+				return string.Format("ContractName={0}", ContractName);
 			}
 		}
 

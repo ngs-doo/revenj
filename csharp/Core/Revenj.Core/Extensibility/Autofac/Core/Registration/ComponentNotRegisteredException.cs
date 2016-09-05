@@ -27,7 +27,6 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Core.Extensibility.Autofac.Core.Registration;
 
 namespace Revenj.Extensibility.Autofac.Core.Registration
 {
@@ -37,44 +36,44 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 	/// method to resolve an optional dependency.
 	/// </summary>
 	/// <remarks>This exception is fatal. See <see cref="DependencyResolutionException"/> for more information.</remarks>
-    [Serializable]
-    public class ComponentNotRegisteredException : DependencyResolutionException
+	[Serializable]
+	public class ComponentNotRegisteredException : DependencyResolutionException
 	{
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentNotRegisteredException"/> class.
-        /// </summary>
-        /// <param name="service">The service.</param>
-        public ComponentNotRegisteredException(Service service)
-            : base(string.Format(CultureInfo.CurrentCulture,
-            ComponentNotRegisteredExceptionResources.Message, 
-            Enforce.ArgumentNotNull(service, "service")))
-        {
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ComponentNotRegisteredException"/> class.
+		/// </summary>
+		/// <param name="service">The service.</param>
+		public ComponentNotRegisteredException(Service service)
+			: base(string.Format(CultureInfo.CurrentCulture,
+			"The requested service '{0}' has not been registered. To avoid this exception, either register a component to provide the service, check for service registration using IsRegistered(), or use the ResolveOptional() method to resolve an optional dependency.",
+			Enforce.ArgumentNotNull(service, "service")))
+		{
+		}
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentNotRegisteredException"/> class.
-        /// </summary>
-        /// <param name="service">The service.</param>
-        /// <param name="innerException">The inner exception.</param>
-        public ComponentNotRegisteredException(Service service, Exception innerException)
-            : base(string.Format(CultureInfo.CurrentCulture,
-            ComponentNotRegisteredExceptionResources.Message, 
-            Enforce.ArgumentNotNull(service, "service")),
-            innerException)
-        {
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ComponentNotRegisteredException"/> class.
+		/// </summary>
+		/// <param name="service">The service.</param>
+		/// <param name="innerException">The inner exception.</param>
+		public ComponentNotRegisteredException(Service service, Exception innerException)
+			: base(string.Format(CultureInfo.CurrentCulture,
+			"The requested service '{0}' has not been registered. To avoid this exception, either register a component to provide the service, check for service registration using IsRegistered(), or use the ResolveOptional() method to resolve an optional dependency.",
+			Enforce.ArgumentNotNull(service, "service")),
+			innerException)
+		{
+		}
 #if !SILVERLIGHT
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentNotRegisteredException"/> class.
-        /// </summary>
-        /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
-        /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the source or destination.</param>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="info"/> parameter is null. </exception>
-        /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"/> is zero (0). </exception>
-        protected ComponentNotRegisteredException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ComponentNotRegisteredException"/> class.
+		/// </summary>
+		/// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+		/// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the source or destination.</param>
+		/// <exception cref="T:System.ArgumentNullException">The <paramref name="info"/> parameter is null. </exception>
+		/// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"/> is zero (0). </exception>
+		protected ComponentNotRegisteredException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
 #endif
-    }
+	}
 }

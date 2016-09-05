@@ -29,78 +29,77 @@ using System.Linq;
 using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Core.Extensibility.Autofac.Features.ResolveAnything;
 
 namespace Revenj.Extensibility.Autofac.Features.ResolveAnything
 {
 
-    /// <summary>
-    /// Provides registrations on-the-fly for any concrete type not already registered with
-    /// the container.
-    /// </summary>
-    public class AnyConcreteTypeNotAlreadyRegisteredSource : IRegistrationSource
-    {
-        readonly Func<Type, bool> _predicate;
+	/// <summary>
+	/// Provides registrations on-the-fly for any concrete type not already registered with
+	/// the container.
+	/// </summary>
+	public class AnyConcreteTypeNotAlreadyRegisteredSource : IRegistrationSource
+	{
+		readonly Func<Type, bool> _predicate;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnyConcreteTypeNotAlreadyRegisteredSource"/> class.
-        /// </summary>
-        public AnyConcreteTypeNotAlreadyRegisteredSource()
-            : this (t => true)
-        {
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AnyConcreteTypeNotAlreadyRegisteredSource"/> class.
+		/// </summary>
+		public AnyConcreteTypeNotAlreadyRegisteredSource()
+			: this(t => true)
+		{
+		}
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnyConcreteTypeNotAlreadyRegisteredSource"/> class.
-        /// </summary>
-        /// <param name="predicate">A predicate that selects types the source will register.</param>
-        public AnyConcreteTypeNotAlreadyRegisteredSource(Func<Type, bool> predicate)
-        {
-            _predicate = Enforce.ArgumentNotNull(predicate, "predicate");
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AnyConcreteTypeNotAlreadyRegisteredSource"/> class.
+		/// </summary>
+		/// <param name="predicate">A predicate that selects types the source will register.</param>
+		public AnyConcreteTypeNotAlreadyRegisteredSource(Func<Type, bool> predicate)
+		{
+			_predicate = Enforce.ArgumentNotNull(predicate, "predicate");
+		}
 
-        /// <summary>
-        /// Retrieve registrations for an unregistered service, to be used
-        /// by the container.
-        /// </summary>
-        /// <param name="service">The service that was requested.</param>
-        /// <param name="registrationAccessor">A function that will return existing registrations for a service.</param>
-        /// <returns>Registrations providing the service.</returns>
-        public IEnumerable<IComponentRegistration> RegistrationsFor(
-            Service service,
-            Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
-        {
-            var ts = service as TypedService;
-            if (ts == null ||
-                !ts.ServiceType.IsClass ||
-                ts.ServiceType.IsSubclassOf(typeof(Delegate)) ||
-                ts.ServiceType.IsAbstract ||
-                !_predicate(ts.ServiceType) ||
-                registrationAccessor(service).Any())
-                return Enumerable.Empty<IComponentRegistration>();
+		/// <summary>
+		/// Retrieve registrations for an unregistered service, to be used
+		/// by the container.
+		/// </summary>
+		/// <param name="service">The service that was requested.</param>
+		/// <param name="registrationAccessor">A function that will return existing registrations for a service.</param>
+		/// <returns>Registrations providing the service.</returns>
+		public IEnumerable<IComponentRegistration> RegistrationsFor(
+			Service service,
+			Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
+		{
+			var ts = service as TypedService;
+			if (ts == null ||
+				!ts.ServiceType.IsClass ||
+				ts.ServiceType.IsSubclassOf(typeof(Delegate)) ||
+				ts.ServiceType.IsAbstract ||
+				!_predicate(ts.ServiceType) ||
+				registrationAccessor(service).Any())
+				return Enumerable.Empty<IComponentRegistration>();
 
-            return new[] { RegistrationBuilder.ForType(ts.ServiceType).CreateRegistration() };
-        }
+			return new[] { RegistrationBuilder.ForType(ts.ServiceType).CreateRegistration() };
+		}
 
-        /// <summary>
-        /// Gets whether the registrations provided by this source are 1:1 adapters on top
-        /// of other components (I.e. like Meta, Func or Owned.)
-        /// </summary>
-        public bool IsAdapterForIndividualComponents
-        {
-            get { return false; }
-        }
+		/// <summary>
+		/// Gets whether the registrations provided by this source are 1:1 adapters on top
+		/// of other components (I.e. like Meta, Func or Owned.)
+		/// </summary>
+		public bool IsAdapterForIndividualComponents
+		{
+			get { return false; }
+		}
 
-        /// <summary>
-        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
-        /// </returns>
-        /// <filterpriority>2</filterpriority>
-        public override string ToString()
-        {
-            return AnyConcreteTypeNotAlreadyRegisteredSourceResources.AnyConcreteTypeNotAlreadyRegisteredSourceDescription;
-        }
-    }
+		/// <summary>
+		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+		/// </returns>
+		/// <filterpriority>2</filterpriority>
+		public override string ToString()
+		{
+			return "\"Resolve Anything\" Support";
+		}
+	}
 }

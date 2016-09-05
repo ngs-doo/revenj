@@ -42,7 +42,7 @@ class ConverterCheck extends Specification with ScalaCheck {
 
     "serialize Long" >> {
       Prop.forAllNoShrink { longValue: Long =>
-        val buffer = new Array[Char](20)
+        val buffer = new Array[Char](21)
         val length = NumberConverter.serialize(longValue, buffer)
         val strValue = longValue.toString.toCharArray
         buffer.drop(length) ==== strValue

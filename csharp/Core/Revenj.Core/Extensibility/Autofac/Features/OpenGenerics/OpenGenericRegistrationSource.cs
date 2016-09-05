@@ -29,63 +29,62 @@ using System.Linq;
 using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Core.Activators.Reflection;
-using Revenj.Core.Extensibility.Autofac.Features.OpenGenerics;
 
 namespace Revenj.Extensibility.Autofac.Features.OpenGenerics
 {
-    /// <summary>
-    /// Generates activators for open generic types.
-    /// </summary>
-    class OpenGenericRegistrationSource : IRegistrationSource
-    {
-        readonly RegistrationData _registrationData;
-        readonly ReflectionActivatorData _activatorData;
+	/// <summary>
+	/// Generates activators for open generic types.
+	/// </summary>
+	class OpenGenericRegistrationSource : IRegistrationSource
+	{
+		readonly RegistrationData _registrationData;
+		readonly ReflectionActivatorData _activatorData;
 
-        public OpenGenericRegistrationSource(
-            RegistrationData registrationData,
-            ReflectionActivatorData activatorData)
-        {
-            if (registrationData == null) throw new ArgumentNullException("registrationData");
-            if (activatorData == null) throw new ArgumentNullException("activatorData");
+		public OpenGenericRegistrationSource(
+			RegistrationData registrationData,
+			ReflectionActivatorData activatorData)
+		{
+			if (registrationData == null) throw new ArgumentNullException("registrationData");
+			if (activatorData == null) throw new ArgumentNullException("activatorData");
 
-            OpenGenericServiceBinder.EnforceBindable(activatorData.ImplementationType, registrationData.Services);
+			OpenGenericServiceBinder.EnforceBindable(activatorData.ImplementationType, registrationData.Services);
 
-            _registrationData = registrationData;
-            _activatorData = activatorData;
-        }
+			_registrationData = registrationData;
+			_activatorData = activatorData;
+		}
 
-        public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
-        {
-            if (service == null) throw new ArgumentNullException("service");
-            if (registrationAccessor == null) throw new ArgumentNullException("registrationAccessor");
+		public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
+		{
+			if (service == null) throw new ArgumentNullException("service");
+			if (registrationAccessor == null) throw new ArgumentNullException("registrationAccessor");
 
-            Type constructedImplementationType;
-            IEnumerable<Service> services;
-            if (OpenGenericServiceBinder.TryBindServiceType(service, _registrationData.Services, _activatorData.ImplementationType, out constructedImplementationType, out services))
-            {
-                yield return RegistrationBuilder.CreateRegistration(
-                    Guid.NewGuid(),
-                    _registrationData,
-                    new ReflectionActivator(
-                        constructedImplementationType,
-                        _activatorData.ConstructorFinder,
-                        _activatorData.ConstructorSelector,
-                        _activatorData.ConfiguredParameters,
-                        _activatorData.ConfiguredProperties),
-                    services);
-            }
-        }
+			Type constructedImplementationType;
+			IEnumerable<Service> services;
+			if (OpenGenericServiceBinder.TryBindServiceType(service, _registrationData.Services, _activatorData.ImplementationType, out constructedImplementationType, out services))
+			{
+				yield return RegistrationBuilder.CreateRegistration(
+					Guid.NewGuid(),
+					_registrationData,
+					new ReflectionActivator(
+						constructedImplementationType,
+						_activatorData.ConstructorFinder,
+						_activatorData.ConstructorSelector,
+						_activatorData.ConfiguredParameters,
+						_activatorData.ConfiguredProperties),
+					services);
+			}
+		}
 
-        public bool IsAdapterForIndividualComponents
-        {
-            get { return false; }
-        }
+		public bool IsAdapterForIndividualComponents
+		{
+			get { return false; }
+		}
 
-        public override string ToString()
-        {
-            return string.Format(OpenGenericRegistrationSourceResources.OpenGenericRegistrationSourceDescription,
-                _activatorData.ImplementationType.FullName,
-                string.Join(", ", _registrationData.Services.Select(s => s.Description).ToArray()));
-        }
-    }
+		public override string ToString()
+		{
+			return string.Format("{0} providing {1}",
+				_activatorData.ImplementationType.FullName,
+				string.Join(", ", _registrationData.Services.Select(s => s.Description).ToArray()));
+		}
+	}
 }

@@ -29,68 +29,68 @@ using Revenj.Extensibility.Autofac.Util;
 
 namespace Revenj.Extensibility.Autofac
 {
-    /// <summary>
-    /// Extends <see cref="System.Type"/> with methods that are useful in
-    /// building scanning rules for <see cref="RegistrationExtensions.RegisterAssemblyTypes"/>.
-    /// </summary>
-    public static class TypeExtensions
-    {
-        /// <summary>
-        /// Returns true if this type is in the <paramref name="namespace"/> namespace
-        /// or one of its sub-namespaces.
-        /// </summary>
-        /// <param name="this">The type to test.</param>
-        /// <param name="namespace">The namespace to test.</param>
-        /// <returns>True if this type is in the <paramref name="namespace"/> namespace
-        /// or one of its sub-namespaces; otherwise, false.</returns>
-        public static bool IsInNamespace(this Type @this, string @namespace)
-        {
-            if (@this == null) throw new ArgumentNullException("this");
-            if (@namespace == null) throw new ArgumentNullException("namespace");
-            return @this.Namespace != null &&
-                (@this.Namespace == @namespace || @this.Namespace.StartsWith(@namespace + "."));
-        }
+	/// <summary>
+	/// Extends <see cref="System.Type"/> with methods that are useful in
+	/// building scanning rules for <see cref="RegistrationExtensions.RegisterAssemblyTypes"/>.
+	/// </summary>
+	public static class TypeExtensions
+	{
+		/// <summary>
+		/// Returns true if this type is in the <paramref name="namespace"/> namespace
+		/// or one of its sub-namespaces.
+		/// </summary>
+		/// <param name="this">The type to test.</param>
+		/// <param name="namespace">The namespace to test.</param>
+		/// <returns>True if this type is in the <paramref name="namespace"/> namespace
+		/// or one of its sub-namespaces; otherwise, false.</returns>
+		public static bool IsInNamespace(this Type @this, string @namespace)
+		{
+			if (@this == null) throw new ArgumentNullException("this");
+			if (@namespace == null) throw new ArgumentNullException("namespace");
+			return @this.Namespace != null &&
+				(@this.Namespace == @namespace || @this.Namespace.StartsWith(@namespace + "."));
+		}
 
-        /// <summary>
-        /// Returns true if this type is in the same namespace as <typeparamref name="T"/>
-        /// or one of its sub-namespaces.
-        /// </summary>
-        /// <param name="this">The type to test.</param>
-        /// <returns>True if this type is in the same namespace as <typeparamref name="T"/>
-        /// or one of its sub-namespaces; otherwise, false.</returns>
-        public static bool IsInNamespaceOf<T>(this Type @this)
-        {
-            if (@this == null) throw new ArgumentNullException("this");
-            return IsInNamespace(@this, typeof (T).Namespace);
-        }
+		/// <summary>
+		/// Returns true if this type is in the same namespace as <typeparamref name="T"/>
+		/// or one of its sub-namespaces.
+		/// </summary>
+		/// <param name="this">The type to test.</param>
+		/// <returns>True if this type is in the same namespace as <typeparamref name="T"/>
+		/// or one of its sub-namespaces; otherwise, false.</returns>
+		public static bool IsInNamespaceOf<T>(this Type @this)
+		{
+			if (@this == null) throw new ArgumentNullException("this");
+			return IsInNamespace(@this, typeof(T).Namespace);
+		}
 
-        /// <summary>Determines whether the candidate type supports any base or 
-        /// interface that closes the provided generic type.</summary>
-        /// <param name="this"></param>
-        /// <param name="openGeneric"></param>
-        /// <returns></returns>
-        public static bool IsClosedTypeOf(this Type @this, Type openGeneric)
-        {
-            if (@this == null) throw new ArgumentNullException("this");
-            if (openGeneric == null) throw new ArgumentNullException("openGeneric");
+		/// <summary>Determines whether the candidate type supports any base or 
+		/// interface that closes the provided generic type.</summary>
+		/// <param name="this"></param>
+		/// <param name="openGeneric"></param>
+		/// <returns></returns>
+		public static bool IsClosedTypeOf(this Type @this, Type openGeneric)
+		{
+			if (@this == null) throw new ArgumentNullException("this");
+			if (openGeneric == null) throw new ArgumentNullException("openGeneric");
 
-            if (!(openGeneric.IsGenericTypeDefinition || openGeneric.ContainsGenericParameters))
-                throw new ArgumentException(string.Format(TypeExtensionsResources.NotOpenGenericType, openGeneric.FullName));
+			if (!(openGeneric.IsGenericTypeDefinition || openGeneric.ContainsGenericParameters))
+				throw new ArgumentException(string.Format("The type '{0}' is not an open generic class or interface type.", openGeneric.FullName));
 
-            return @this.GetTypesThatClose(openGeneric).Any();
-        }
+			return @this.GetTypesThatClose(openGeneric).Any();
+		}
 
-        /// <summary>
-        /// Determines whether this type is assignable to <typeparamref name="T"/>.
-        /// </summary>
-        /// <typeparam name="T">The type to test assignability to.</typeparam>
-        /// <returns>True if this type is assignable to references of type
-        /// <typeparamref name="T"/>; otherwise, False.</returns>
-        public static bool IsAssignableTo<T>(this Type @this)
-        {
-            if (@this == null) throw new ArgumentNullException("this");
-            return typeof (T).IsAssignableFrom(@this);
-        }
+		/// <summary>
+		/// Determines whether this type is assignable to <typeparamref name="T"/>.
+		/// </summary>
+		/// <typeparam name="T">The type to test assignability to.</typeparam>
+		/// <returns>True if this type is assignable to references of type
+		/// <typeparamref name="T"/>; otherwise, False.</returns>
+		public static bool IsAssignableTo<T>(this Type @this)
+		{
+			if (@this == null) throw new ArgumentNullException("this");
+			return typeof(T).IsAssignableFrom(@this);
+		}
 
-    }
+	}
 }

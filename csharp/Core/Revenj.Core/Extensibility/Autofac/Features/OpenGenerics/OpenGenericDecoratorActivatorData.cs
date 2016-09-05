@@ -29,34 +29,34 @@ using Revenj.Extensibility.Autofac.Core;
 
 namespace Revenj.Extensibility.Autofac.Features.OpenGenerics
 {
-    /// <summary>
-    /// Describes the activator for an open generic decorator.
-    /// </summary>
-    public class OpenGenericDecoratorActivatorData : ReflectionActivatorData
-    {
-        readonly IServiceWithType _fromService;
+	/// <summary>
+	/// Describes the activator for an open generic decorator.
+	/// </summary>
+	public class OpenGenericDecoratorActivatorData : ReflectionActivatorData
+	{
+		readonly IServiceWithType _fromService;
 
-        /// <summary>
-        /// Construct an <see cref="OpenGenericDecoratorActivatorData"/>.
-        /// </summary>
-        /// <param name="implementor">The decorator type.</param>
-        /// <param name="fromService">The open generic service type to decorate.</param>
-        public OpenGenericDecoratorActivatorData(Type implementor, IServiceWithType fromService)
-            : base(implementor)
-        {
-            if (fromService == null) throw new ArgumentNullException("fromService");
-            if (!fromService.ServiceType.IsGenericTypeDefinition)
-                throw new ArgumentException(string.Format(OpenGenericDecoratorActivatorDataResources.DecoratedServiceIsNotOpenGeneric, fromService));
+		/// <summary>
+		/// Construct an <see cref="OpenGenericDecoratorActivatorData"/>.
+		/// </summary>
+		/// <param name="implementor">The decorator type.</param>
+		/// <param name="fromService">The open generic service type to decorate.</param>
+		public OpenGenericDecoratorActivatorData(Type implementor, IServiceWithType fromService)
+			: base(implementor)
+		{
+			if (fromService == null) throw new ArgumentNullException("fromService");
+			if (!fromService.ServiceType.IsGenericTypeDefinition)
+				throw new ArgumentException(string.Format("The service '{0}' is not an open generic type.", fromService));
 
-            _fromService = fromService;
-        }
+			_fromService = fromService;
+		}
 
-        /// <summary>
-        /// The open generic service type to decorate.
-        /// </summary>
-        public IServiceWithType FromService
-        {
-            get { return _fromService; }
-        }
-    }
+		/// <summary>
+		/// The open generic service type to decorate.
+		/// </summary>
+		public IServiceWithType FromService
+		{
+			get { return _fromService; }
+		}
+	}
 }

@@ -31,7 +31,6 @@ using Revenj.Extensibility.Autofac.Core.Activators.Delegate;
 using Revenj.Extensibility.Autofac.Core.Lifetime;
 using Revenj.Extensibility.Autofac.Core.Registration;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Core.Extensibility.Autofac.Features.Collections;
 
 namespace Revenj.Extensibility.Autofac.Features.Collections
 {
@@ -103,7 +102,7 @@ namespace Revenj.Extensibility.Autofac.Features.Collections
 
 		public override string ToString()
 		{
-			return CollectionRegistrationSourceResources.CollectionRegistrationSourceDescription;
+			return "Collection Support (Arrays and Generic Collection Interfaces)";
 		}
 	}
 }

@@ -28,7 +28,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
-using Revenj.Core.Extensibility.Autofac.Features.LightweightAdapters;
 
 namespace Revenj.Extensibility.Autofac.Features.LightweightAdapters
 {
@@ -49,7 +48,7 @@ namespace Revenj.Extensibility.Autofac.Features.LightweightAdapters
 
 			if (registrationData.Services.Contains(activatorData.FromService))
 				throw new ArgumentException(string.Format(
-					LightweightAdapterRegistrationSourceResources.FromAndToMustDiffer, activatorData.FromService));
+					"The service {0} cannot be both the adapter's from and to parameters - these must differ.", activatorData.FromService));
 		}
 
 		public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
@@ -82,7 +81,7 @@ namespace Revenj.Extensibility.Autofac.Features.LightweightAdapters
 
 		public override string ToString()
 		{
-			return string.Format(LightweightAdapterRegistrationSourceResources.AdapterFromToDescription,
+			return string.Format("Lightweight Adapter from {0} to {1}",
 				_activatorData.FromService.Description,
 				string.Join(", ", _registrationData.Services.Select(s => s.Description).ToArray()));
 		}

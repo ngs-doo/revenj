@@ -28,7 +28,6 @@ using System.Collections;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using Revenj.Core.Extensibility.Autofac.Util;
 
 namespace Revenj.Extensibility.Autofac.Util
 {
@@ -71,7 +70,7 @@ namespace Revenj.Extensibility.Autofac.Util
 
 			// Contains(null) does not work on Mono, must use Any(...)
 			if (value.Cast<object>().Any(v => v == null))
-				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, EnforceResources.ElementCannotBeNull, name));
+				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "The sequence provided as argument '{0}' cannot contain null elements.", name));
 
 			return value;
 		}
@@ -87,7 +86,7 @@ namespace Revenj.Extensibility.Autofac.Util
 		{
 			if (value == null)
 				throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-					EnforceResources.CannotBeNull, typeof(T).FullName));
+					"The object of type '{0}' cannot be null.", typeof(T).FullName));
 
 			return value;
 		}
@@ -107,7 +106,7 @@ namespace Revenj.Extensibility.Autofac.Util
 
 			if (value == string.Empty)
 				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
-					EnforceResources.CannotBeEmpty, description));
+					"The argument '{0}' cannot be empty.", description));
 
 			return value;
 		}
@@ -123,10 +122,10 @@ namespace Revenj.Extensibility.Autofac.Util
 			MethodInfo invoke = delegateType.GetMethod("Invoke");
 			if (invoke == null)
 				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
-					EnforceResources.NotDelegate, delegateType));
+					"Type {0} is not a delegate type.", delegateType));
 			else if (invoke.ReturnType == typeof(void))
 				throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
-					EnforceResources.DelegateReturnsVoid, delegateType));
+					"Type {0} returns void.", delegateType));
 		}
 	}
 }

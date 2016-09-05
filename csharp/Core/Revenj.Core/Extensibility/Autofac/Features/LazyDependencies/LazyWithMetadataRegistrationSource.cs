@@ -32,7 +32,6 @@ using System.Reflection;
 using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Util;
-using Revenj.Core.Extensibility.Autofac.Features.LazyDependencies;
 
 namespace Revenj.Extensibility.Autofac.Features.LazyDependencies
 {
@@ -76,7 +75,7 @@ namespace Revenj.Extensibility.Autofac.Features.LazyDependencies
 
 		public override string ToString()
 		{
-			return LazyRegistrationSourceResources.LazyWithMetadataRegistrationSourceDescription;
+			return "Lazy<T, TMetadata> Support";
 		}
 
 		// ReSharper disable UnusedMember.Local

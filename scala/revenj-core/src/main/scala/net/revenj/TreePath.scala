@@ -39,10 +39,10 @@ final class TreePath private(private val value: String, private val parts: Array
 }
 
 object TreePath {
-  val EMPTY: TreePath = new TreePath("", new Array[String](0))
+  val Empty: TreePath = new TreePath("", new Array[String](0))
 
   def create(value: String): TreePath = {
-    if (value == null || value.isEmpty) EMPTY
+    if (value == null || value.isEmpty) Empty
     else {
       val parts = value.split("\\.")
       checkParts(parts)
