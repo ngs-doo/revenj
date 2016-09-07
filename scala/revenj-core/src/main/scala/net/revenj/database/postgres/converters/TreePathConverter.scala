@@ -10,7 +10,7 @@ object TreePathConverter extends Converter[TreePath] {
 
   val dbName = "ltree"
 
-  def default() = TreePath.EMPTY
+  def default() = TreePath.Empty
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): TreePath = {
     reader.initBuffer(start.toChar)
@@ -25,7 +25,7 @@ object TreePathConverter extends Converter[TreePath] {
     reader.fillUntil(',', '}')
     reader.read()
     if (reader.bufferMatches("NULL")) {
-      TreePath.EMPTY
+      TreePath.Empty
     } else {
       TreePath.create(reader.bufferToString())
     }
