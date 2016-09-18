@@ -81,6 +81,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 				buffer[end] = '+';
 			else
 				buffer[end] = '-';
+			if (value.Year == 1 && value.Month == 1 && value.Day == 1 && (value.Hour - hours) < 0)
+				throw new ArgumentOutOfRangeException("Detected DateTime bellow minimum range: " + value);
 			NumberConverter.Write2(hours, buffer, end + 1);
 			return end + 3;
 		}
