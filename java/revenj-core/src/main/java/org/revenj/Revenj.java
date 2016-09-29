@@ -116,17 +116,21 @@ public abstract class Revenj {
 
 	private static class SimpleDomainModel implements DomainModel {
 
-		private String namespace;
+		private String[] namespaces = new String[0];
 		private final ClassLoader loader;
 		private final ConcurrentMap<String, Class<?>> cache = new ConcurrentHashMap<>();
 
-		SimpleDomainModel(String namespace, ClassLoader loader) {
-			this.namespace = namespace != null && namespace.length() > 0 ? namespace + "." : "";
+		SimpleDomainModel(ClassLoader loader) {
 			this.loader = loader;
 		}
 
-		void updateNamespace(String namespace) {
-			this.namespace = namespace != null && namespace.length() > 0 ? namespace + "." : "";
+		void setNamespace(String namespaces) {
+			String[] parts = namespaces.split(",");
+			this.namespaces = new String[parts.length];
+			for(int i = 0; i < parts.length; i++) {
+				String ns = parts[i];
+				this.namespaces[i] = ns.length() > 0 ? ns + "." : "";
+			}
 		}
 
 		@Override
@@ -138,14 +142,16 @@ public abstract class Revenj {
 			if (found != null) {
 				return Optional.of(found);
 			}
-			try {
-				String className = name.indexOf('+') != -1 ? name.replace('+', '$') : name;
-				Class<?> manifest = Class.forName(namespace + className, true, loader);
-				cache.put(name, manifest);
-				return Optional.of(manifest);
-			} catch (ClassNotFoundException ignore) {
-				return Optional.empty();
+			String className = name.indexOf('+') != -1 ? name.replace('+', '$') : name;
+			for (String ns : namespaces) {
+				try {
+					Class<?> manifest = Class.forName(ns + className, true, loader);
+					cache.put(name, manifest);
+					return Optional.of(manifest);
+				} catch (ClassNotFoundException ignore) {
+				}
 			}
+			return Optional.empty();
 		}
 	}
 
@@ -163,8 +169,7 @@ public abstract class Revenj {
 		container.registerInstance(DataSource.class, dataSource, false);
 		container.registerInstance(ClassLoader.class, loader, false);
 		container.register(GlobalEventStore.class, true);
-		String ns = properties.getProperty("revenj.namespace");
-		SimpleDomainModel domainModel = new SimpleDomainModel(ns, loader);
+		SimpleDomainModel domainModel = new SimpleDomainModel(loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
 		container.registerFactory(DataContext.class, LocatorDataContext::asDataContext, false);
 		container.registerFactory(UnitOfWork.class, LocatorDataContext::asUnitOfWork, false);
@@ -196,10 +201,7 @@ public abstract class Revenj {
 				total++;
 			}
 		}
-		String nsAfter = properties.getProperty("revenj.namespace");
-		if (!Objects.equals(ns, nsAfter)) {
-			domainModel.updateNamespace(nsAfter);
-		}
+		domainModel.setNamespace(properties.getProperty("revenj.namespace"));
 		properties.setProperty("revenj.aspectsCount", Integer.toString(total));
 		state.started(container);
 		return container;

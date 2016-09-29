@@ -97,12 +97,15 @@ object Revenj {
     setup(dataSource, properties, loader, context, aspects.iterator)
   }
 
-  private class SimpleDomainModel(var namespace: String, loader: ClassLoader) extends DomainModel {
-    namespace = if (namespace != null && namespace.length > 0) namespace + "." else ""
+  private class SimpleDomainModel(loader: ClassLoader) extends DomainModel {
+    private var namespaces = Array.empty[String]
     private val cache = new TrieMap[String, Class[_]]
 
-    def updateNamespace(value: String): Unit = {
-      namespace = if (value != null && value.length > 0) value + "." else ""
+    def setNamespace(value: String): Unit = {
+      val parts = value.split(",").distinct
+      namespaces = parts map { ns =>
+        if (ns.nonEmpty) ns + "." else ""
+      }
     }
 
     def find(name: String): Option[Class[_]] = {
@@ -110,14 +113,18 @@ object Revenj {
       else cache.get(name) match {
         case res@Some(_) => res
         case _ =>
-          try {
-            val className = if (name.indexOf('+') != -1) name.replace('+', '$') else name
-            val manifest = Class.forName(namespace + className, true, loader)
-            cache.put(name, manifest)
-            Option(manifest)
-          } catch {
-            case _: Throwable => None
+          val className = if (name.indexOf('+') != -1) name.replace('+', '$') else name
+          var found: Option[Class[_]] = None
+          namespaces foreach { ns =>
+            try {
+              val manifest = Class.forName(ns + className, true, loader)
+              cache.put(name, manifest)
+              found = Option(manifest)
+            } catch {
+              case _: Throwable =>
+            }
           }
+          found
       }
     }
   }
@@ -132,8 +139,7 @@ object Revenj {
     container.registerInstance(loader, handleClose = false)
     val plugins = new ServicesPluginLoader(loader)
     container.registerInstance[PluginLoader](plugins)
-    val ns = properties.getProperty("revenj.namespace")
-    val domainModel = new SimpleDomainModel(ns, loader)
+    val domainModel = new SimpleDomainModel(loader)
     container.registerInstance[DomainModel](domainModel, handleClose = false)
     container.registerAs[JacksonSerialization, JacksonSerialization](singleton = true)
     container.registerAs[Serialization[String], JacksonSerialization](singleton = true)
@@ -147,10 +153,7 @@ object Revenj {
         total += 1
       }
     }
-    val nsAfter = properties.getProperty("revenj.namespace")
-    if (ns != nsAfter) {
-      domainModel.updateNamespace(nsAfter)
-    }
+    domainModel.setNamespace(properties.getProperty("revenj.namespace"))
     properties.setProperty("revenj.aspectsCount", Integer.toString(total))
     container
   }
