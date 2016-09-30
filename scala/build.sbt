@@ -11,6 +11,7 @@ lazy val core = (project in file("revenj-core")
       "joda-time" % "joda-time" % "2.9.4", //TODO: will be removed
       "org.joda" % "joda-convert" % "1.8.1",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      "io.monix" %% "monix" % "2.0.2",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.7.4",

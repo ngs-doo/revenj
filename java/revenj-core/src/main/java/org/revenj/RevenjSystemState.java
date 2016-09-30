@@ -7,7 +7,7 @@ import rx.subjects.PublishSubject;
 
 class RevenjSystemState implements SystemState {
 
-	private boolean systemBoooting = true;
+	private boolean systemBooting = true;
 	private boolean systemReady = false;
 	private final PublishSubject<SystemEvent> changeSubject = PublishSubject.create();
 	private final PublishSubject<Container> startupSubject = PublishSubject.create();
@@ -21,7 +21,7 @@ class RevenjSystemState implements SystemState {
 
 	@Override
 	public boolean isBooting() {
-		return systemBoooting;
+		return systemBooting;
 	}
 
 	@Override
@@ -30,7 +30,7 @@ class RevenjSystemState implements SystemState {
 	}
 
 	void started(Container container) {
-		systemBoooting = false;
+		systemBooting = false;
 		systemReady = true;
 		startupSubject.onNext(container);
 	}

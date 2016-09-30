@@ -37,7 +37,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 	private final ConcurrentMap<String, HashSet<Class<?>>> targets = new ConcurrentHashMap<>();
 
 	private int retryCount;
-	private final int timeout;
+	private final int maxTimeout;
 
 	private boolean isClosed;
 
@@ -56,12 +56,12 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		String timeoutValue = properties.getProperty("revenj.notifications.timeout");
 		if (timeoutValue != null) {
 			try {
-				timeout = Integer.parseInt(timeoutValue);
+				maxTimeout = Integer.parseInt(timeoutValue);
 			} catch (NumberFormatException e) {
 				throw new RuntimeException("Error parsing notificationTimeout setting");
 			}
 		} else {
-			timeout = 500;
+			maxTimeout = 1000;
 		}
 		if ("disabled".equals(properties.getProperty("revenj.notifications.status"))) {
 			isClosed = true;
@@ -134,6 +134,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		@Override
 		public void run() {
 			PostgresReader reader = new PostgresReader();
+			int timeout = maxTimeout;
 			while (!isClosed) {
 				try {
 					ping.execute("");
@@ -144,7 +145,12 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
+						if (timeout < maxTimeout) {
+							timeout++;
+						}
 						continue;
+					} else {
+						timeout = 0;
 					}
 					for (PGNotification n : notifications) {
 						if (!"events".equals(n.getName()) && !"aggregate_roots".equals(n.getName())) {

@@ -4,10 +4,10 @@ import java.io._
 import java.lang.reflect.ParameterizedType
 import java.net.{URL, URLClassLoader}
 import java.sql.Connection
-import java.util.{Properties, ServiceLoader}
+import java.util.{Optional, Properties, ServiceLoader}
 import javax.sql.DataSource
 
-import net.revenj.extensibility.{Container, PluginLoader, SystemAspect}
+import net.revenj.extensibility.{Container, PluginLoader, SystemAspect, SystemState}
 import net.revenj.patterns._
 import net.revenj.serialization.{JacksonSerialization, Serialization}
 import org.postgresql.ds.PGPoolingDataSource
@@ -129,10 +129,18 @@ object Revenj {
     }
   }
 
-  def setup(dataSource: DataSource, properties: Properties, classLoader: Option[ClassLoader], context: Option[ExecutionContext], aspects: java.util.Iterator[SystemAspect]): Container = {
+  def setup(
+    dataSource: DataSource,
+    properties: Properties,
+    classLoader: Option[ClassLoader],
+    context: Option[ExecutionContext],
+    aspects: java.util.Iterator[SystemAspect]): Container = {
+
+    val state = new RevenjSystemState
     val loader = classLoader.getOrElse(Thread.currentThread.getContextClassLoader)
     val container = new SimpleContainer("true" == properties.getProperty("revenj.resolveUnknown"), loader)
     container.registerInstance(properties)
+    container.registerInstance[SystemState](state, handleClose = false)
     container.registerInstance(context.getOrElse(ExecutionContext.global.prepare()))
     container.registerInstance[ServiceLocator](container, handleClose = false)
     container.registerInstance(dataSource, handleClose = false)
@@ -141,6 +149,10 @@ object Revenj {
     container.registerInstance[PluginLoader](plugins)
     val domainModel = new SimpleDomainModel(loader)
     container.registerInstance[DomainModel](domainModel, handleClose = false)
+    val databaseNotification = new PostgresDatabaseNotification(dataSource, Some(domainModel), properties, state, container)
+    container.registerInstance[EagerNotification](databaseNotification, handleClose = false)
+    container.registerInstance[DataChangeNotification](databaseNotification, handleClose = true)
+    ChangeNotification.registerContainer(container, databaseNotification)
     container.registerAs[JacksonSerialization, JacksonSerialization](singleton = true)
     container.registerAs[Serialization[String], JacksonSerialization](singleton = true)
     container.registerFactory[DataContext](c => LocatorDataContext.asDataContext(c, loader), singleton = false)
@@ -155,6 +167,7 @@ object Revenj {
     }
     domainModel.setNamespace(properties.getProperty("revenj.namespace"))
     properties.setProperty("revenj.aspectsCount", Integer.toString(total))
+    state.started(container)
     container
   }
 

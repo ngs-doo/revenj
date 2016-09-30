@@ -1,7 +1,6 @@
 package net.revenj.database.postgres
 
 import java.io.IOException
-import java.net.URL
 import java.sql.Connection
 import javax.sql.DataSource
 
@@ -15,12 +14,13 @@ import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeAfterAll
 import ru.yandex.qatools.embed.service.PostgresEmbeddedService
 
-import scala.collection.mutable
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 import scala.util.Try
 import example.test.postgres._
 import example.test._
+import monix.eval.Task
+import monix.reactive.Observable
 import org.specs2.concurrent.{ExecutionEnv, NoImplicitExecutionContextFromExecutionEnv}
 import org.specs2.matcher.FutureMatchers
 import org.specs2.specification.mutable.ExecutionEnvironment
@@ -50,6 +50,8 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
       "db initialized" >> {
         tryDb.isSuccess === true
       }
+    }
+    "simple usage" >> {
       "resolve repo" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val repoAbc = container.resolve[AbcRepository]
@@ -67,7 +69,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.ll = Array(0L, 1L, 1000000000000000000L, -1000000000000000000L, -9223372036854775808L, 9223372036854775807L)
         abc.en = En.B
         abc.en2 = Some(En.C)
-        abc.en3 = mutable.LinkedList(En.B)
+        abc.en3 = List(En.B)
         abc.ss = Some("xxx")
         abc.sss = List("a", "b", "C")
         abc.ssss = Some(List(Some("x"), None))
@@ -98,7 +100,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.ll = Array(0L, 1L, 1000000000000000000L, -1000000000000000000L, -9223372036854775808L, 9223372036854775807L)
         abc.en = En.B
         abc.en2 = Some(En.C)
-        abc.en3 = mutable.LinkedList(En.B)
+        abc.en3 = List(En.B)
         abc.ss = Some("xxx")
         abc.sss = List("a", "b", "C")
         abc.ssss = Some(List(Some("x"), None))
@@ -129,7 +131,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.ll = Array(0L, 1L, 1000000000000000000L, -1000000000000000000L, -9223372036854775808L, 9223372036854775807L)
         abc.en = En.B
         abc.en2 = Some(En.C)
-        abc.en3 = mutable.LinkedList(En.B)
+        abc.en3 = List(En.B)
         abc.ss = Some("xxx")
         abc.sss = List("a", "b", "C")
         abc.ssss = Some(List(Some("x"), None))
@@ -232,7 +234,32 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         root.b === find.b
       }
     }
-
+    "notifications" >> {
+      "manual" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val obs1 = container.resolve[Observable[Future[Seq[TestMe]]]]
+        val obs2 = container.resolve[Observable[Function0[Future[TestMe]]]]
+        val obs3 = container.resolve[Observable[Task[Seq[TestMe]]]]
+        var (l1, l2, l3) = (false, false, false)
+        obs1.doOnNext(_ => l1 = true)
+        obs2.doOnNext(_ => l2 = true)
+        obs3.doOnNext(_ => l3 = true)
+        val ctx = container.resolve[DataContext]
+        val ev = TestMe(x = 101)
+        val uri = Await.result(ctx.submit(ev), Duration.Inf)
+        Thread.sleep(100)
+        var i = 0
+        while (i < 100) {
+          if (l1) i = 100
+          Thread.sleep(50)
+          i += 1
+        }
+        container.close()
+        l1 === true
+        l2 === true
+        l3 === true
+      }
+    }
   }
 }
 

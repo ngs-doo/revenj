@@ -98,7 +98,7 @@ module test {
 		specification Filter 'it => it.s == s' { string s; }
 	}
 	sql AbcWrite from test.Abc(ID) {
-		int ID;
+		int ID { sequence 'test."Abc_ID_seq"'; } 
 		string s; 
 		int[] ii; 
 		En en;
