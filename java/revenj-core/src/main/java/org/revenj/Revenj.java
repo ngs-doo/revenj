@@ -125,7 +125,7 @@ public abstract class Revenj {
 		}
 
 		void setNamespace(String namespaces) {
-			String[] parts = namespaces.split(",");
+			String[] parts = namespaces == null ? new String[0] : namespaces.split(",");
 			this.namespaces = new String[parts.length];
 			for(int i = 0; i < parts.length; i++) {
 				String ns = parts[i];

@@ -21,24 +21,15 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 		return new RevenjQuery<>(query);
 	}
 
-	@FunctionalInterface
-	interface CustomAnalysis {
-		LambdaInfo getAnalysisLambda(int index);
-	}
-
 	private RevenjQueryComposer applyWhere(Specification predicate) {
 		if (predicate == null) {
 			return queryComposer;
 		}
-		return predicate instanceof CustomAnalysis
-				? queryComposer.where(((CustomAnalysis) predicate).getAnalysisLambda(queryComposer.getLambdaCount()))
-				: queryComposer.where(LambdaInfo.analyze(queryComposer.rewrite(predicate), queryComposer.getLambdaCount(), true));
+		return queryComposer.where(LambdaInfo.analyze(queryComposer.rewrite(predicate), queryComposer.getLambdaCount(), true));
 	}
 
 	private RevenjQueryComposer applyOrder(Compare order, boolean ascending) {
-		return order instanceof CustomAnalysis
-				? queryComposer.sortedBy(((CustomAnalysis) order).getAnalysisLambda(queryComposer.getLambdaCount()), ascending)
-				: queryComposer.sortedBy(LambdaInfo.analyze(order, queryComposer.getLambdaCount(), true), ascending);
+		return queryComposer.sortedBy(LambdaInfo.analyze(order, queryComposer.getLambdaCount(), true), ascending);
 	}
 
 	@Override
@@ -90,9 +81,7 @@ final class RevenjQuery<T extends DataSource> implements Query<T> {
 	@Override
 	public boolean allMatch(Specification<? super T> predicate) throws IOException {
 		try {
-			LambdaInfo lambda = predicate instanceof CustomAnalysis
-					? ((CustomAnalysis) predicate).getAnalysisLambda(queryComposer.getLambdaCount())
-					: LambdaInfo.analyze(queryComposer.rewrite(predicate), queryComposer.getLambdaCount(), true);
+			LambdaInfo lambda = LambdaInfo.analyze(queryComposer.rewrite(predicate), queryComposer.getLambdaCount(), true);
 			return queryComposer.all(lambda);
 		} catch (SQLException e) {
 			throw new IOException(e);

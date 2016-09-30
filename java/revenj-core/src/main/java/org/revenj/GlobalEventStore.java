@@ -100,10 +100,6 @@ class GlobalEventStore implements Closeable {
 	public void close() throws IOException {
 		isClosed = true;
 		try {
-			//TODO: add something else like special stop event!?
-			if (loop.isAlive()) {
-				loop.stop();
-			}
 			container.close();
 		} catch (Exception ignore) {
 		}

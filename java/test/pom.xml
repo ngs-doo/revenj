@@ -37,18 +37,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.alchim31.maven</groupId>
-			<artifactId>scala-maven-plugin</artifactId>
-			<version>3.2.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>2.11.8</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
@@ -63,7 +51,13 @@
 		<dependency>
 			<groupId>com.dslplatform</groupId>
 			<artifactId>dsl-clc</artifactId>
-			<version>1.7.2</version>
+			<version>1.8.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -85,7 +79,7 @@
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>0.9</version>
+                <version>1.0.1</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>

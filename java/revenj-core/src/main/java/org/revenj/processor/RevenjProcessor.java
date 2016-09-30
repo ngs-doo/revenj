@@ -33,9 +33,9 @@ public class RevenjProcessor extends AbstractProcessor {
 		eventTypeElement = processingEnv.getElementUtils().getTypeElement("org.revenj.patterns.EventHandler");
 		eventDeclaredType = processingEnv.getTypeUtils().getDeclaredType(eventTypeElement);
 		injectTypeElement = processingEnv.getElementUtils().getTypeElement("javax.inject.Inject");
-		injectDeclaredType = processingEnv.getTypeUtils().getDeclaredType(injectTypeElement);
+		injectDeclaredType = injectTypeElement != null ? processingEnv.getTypeUtils().getDeclaredType(injectTypeElement) : null;
 		singletonTypeElement = processingEnv.getElementUtils().getTypeElement("javax.inject.Singleton");
-		singletonDeclaredType = processingEnv.getTypeUtils().getDeclaredType(singletonTypeElement);
+		singletonDeclaredType = singletonTypeElement != null ? processingEnv.getTypeUtils().getDeclaredType(singletonTypeElement) : null;
 	}
 
 	@Override
@@ -44,8 +44,8 @@ public class RevenjProcessor extends AbstractProcessor {
 			return false;
 		}
 		Set<? extends Element> events = roundEnv.getElementsAnnotatedWith(eventTypeElement);
-		Set<? extends Element> injects = roundEnv.getElementsAnnotatedWith(injectTypeElement);
-		Set<? extends Element> singletons = roundEnv.getElementsAnnotatedWith(singletonTypeElement);
+		Set<? extends Element> injects = injectTypeElement != null ? roundEnv.getElementsAnnotatedWith(injectTypeElement) : new HashSet<>();
+		Set<? extends Element> singletons = singletonTypeElement != null ? roundEnv.getElementsAnnotatedWith(singletonTypeElement) : new HashSet<>();
 		Map<String, List<String>> handlers = new HashMap<>();
 		StringBuilder registrations = new StringBuilder();
 		findEventHandlers(events, handlers);
