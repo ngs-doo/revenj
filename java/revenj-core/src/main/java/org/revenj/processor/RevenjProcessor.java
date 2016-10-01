@@ -49,8 +49,8 @@ public class RevenjProcessor extends AbstractProcessor {
 		Map<String, List<String>> handlers = new HashMap<>();
 		StringBuilder registrations = new StringBuilder();
 		findEventHandlers(events, handlers);
-		findInjections(injects, registrations);
-		registerTypes(singletons, registrations, true, singletonDeclaredType);
+		Set<TypeElement> added = findInjections(injects, registrations, singletons);
+		registerTypes(singletons, added, registrations, true, singletonDeclaredType);
 		if (!handlers.isEmpty()) {
 			try {
 				for (Map.Entry<String, List<String>> kv : handlers.entrySet()) {
@@ -87,7 +87,10 @@ public class RevenjProcessor extends AbstractProcessor {
 				fo = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/org.revenj.extensibility.SystemAspect");
 				file = new File(fo.toUri());
 				if (file.exists()) {
-					Files.write(Paths.get(fo.toUri()), "revenj_container_Registrations\n".getBytes("UTF-8"), StandardOpenOption.APPEND);
+					List<String> content = Files.readAllLines(file.toPath());
+					if (!content.contains("revenj_container_Registrations")) {
+						Files.write(Paths.get(fo.toUri()), ("revenj_container_Registrations\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+					}
 				} else {
 					writer = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/org.revenj.extensibility.SystemAspect").openWriter();
 					writer.write("revenj_container_Registrations\n");
@@ -142,7 +145,8 @@ public class RevenjProcessor extends AbstractProcessor {
 		}
 	}
 
-	private void findInjections(Set<? extends Element> injects, StringBuilder registrations) {
+	private Set<TypeElement> findInjections(Set<? extends Element> injects, StringBuilder registrations, Set<? extends Element> singletons) {
+		Set<TypeElement> registered = new HashSet<>();
 		for (Element el : injects) {
 			Element p = el.getEnclosingElement();
 			if (!(el instanceof ExecutableElement) || !(p instanceof TypeElement)) {
@@ -182,12 +186,12 @@ public class RevenjProcessor extends AbstractProcessor {
 								element,
 								getAnnotation(element, injectDeclaredType));
 						registrations.setLength(position);
-						return;
+						return registered;
 					}
 					if (genInd > 0) {
 						if (!checkGenericArguments(typeName, element)) {
 							registrations.setLength(position);
-							return;
+							return registered;
 						}
 						registrations.append("new org.revenj.patterns.Generic<");
 						registrations.append(typeName);
@@ -202,9 +206,15 @@ public class RevenjProcessor extends AbstractProcessor {
 				if (element.getParameters().size() > 0) {
 					registrations.setLength(registrations.length() - 1);
 				}
-				registrations.append("), false);\n");
+				if (singletons.contains(parent)) {
+					registrations.append("), true);\n");
+				} else {
+					registrations.append("), false);\n");
+				}
+				registered.add(parent);
 			}
 		}
+		return registered;
 	}
 
 	private boolean checkGenericArguments(String typeName, ExecutableElement element) {
@@ -226,7 +236,12 @@ public class RevenjProcessor extends AbstractProcessor {
 		return true;
 	}
 
-	private void registerTypes(Set<? extends Element> types, StringBuilder registrations, boolean singleton, DeclaredType declaredType) {
+	private void registerTypes(
+			Set<? extends Element> types,
+			Set<TypeElement> injections,
+			StringBuilder registrations,
+			boolean singleton,
+			DeclaredType declaredType) {
 		for (Element el : types) {
 			if (!(el instanceof TypeElement)) {
 				continue;
@@ -238,7 +253,7 @@ public class RevenjProcessor extends AbstractProcessor {
 						(singleton ? "@Singleton" : "@Transient") + " used on '" + element.asType() + "' can only be used on a public type",
 						element,
 						getAnnotation(element, declaredType));
-			} else {
+			} else if (!injections.contains(element)) {
 				registrations.append("    container.register(");
 				registrations.append(element.asType());
 				registrations.append(".class, ");

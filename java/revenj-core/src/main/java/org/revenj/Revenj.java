@@ -155,8 +155,16 @@ public abstract class Revenj {
 		}
 	}
 
-	public static Container container(boolean resolveUnknown) {
-		return new SimpleContainer(resolveUnknown);
+	public static Container container(boolean resolveUnknown, ClassLoader loader) {
+		Container container = new SimpleContainer(resolveUnknown);
+		for (SystemAspect aspect : ServiceLoader.load(SystemAspect.class, loader)) {
+			try {
+				aspect.configure(container);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return container;
 	}
 
 	public static Container setup(
