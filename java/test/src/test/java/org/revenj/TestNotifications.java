@@ -13,6 +13,8 @@ import rx.Observable;
 import javax.sql.DataSource;
 import java.io.Closeable;
 import java.sql.Connection;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class TestNotifications extends Setup {
 
@@ -71,28 +73,56 @@ public class TestNotifications extends Setup {
 	public void observableSignatures() throws Exception {
 		ServiceLocator locator = container;
 		DataContext context = locator.resolve(DataContext.class);
-		Observable<Composite> notification = new Generic<Observable<Composite>>() {
+		Observable<Callable<List<Composite>>> notification0 = new Generic<Observable<Callable<List<Composite>>>>() {
 		}.resolve(locator);
-		boolean[] hasRead = new boolean[1];
-		String[] uris = new String[1];
+		Observable<Composite> notification1 = new Generic<Observable<Composite>>() {
+		}.resolve(locator);
+		Observable<Callable<Composite>> notification2 = new Generic<Observable<Callable<Composite>>>() {
+		}.resolve(locator);
+		boolean[] hasRead = new boolean[3];
+		String[] uris = new String[3];
 		Composite co = new Composite();
-		notification.subscribe(n -> {
+		notification0.subscribe(n -> {
+			try {
+				uris[0] = n.call().get(0).getURI();
+				Assert.assertEquals(co, n.call().get(0));
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			}
 			hasRead[0] = true;
-			uris[0] = n.getURI();
+		});
+		notification1.subscribe(n -> {
+			uris[1] = n.getURI();
 			try {
 				Assert.assertEquals(co, n);
 			} catch (Exception e) {
 				Assert.fail(e.getMessage());
 			}
+			hasRead[1] = true;
+		});
+		notification2.subscribe(n -> {
+			try {
+				uris[2] = n.call().getURI();
+				Assert.assertEquals(co, n.call());
+			} catch (Exception e) {
+				Assert.fail(e.getMessage());
+			}
+			hasRead[2] = true;
 		});
 		Assert.assertFalse(hasRead[0]);
+		Assert.assertFalse(hasRead[1]);
+		Assert.assertFalse(hasRead[2]);
 		context.create(co);
 		for (int i = 0; i < 30; i++) {
+			if (hasRead[0] && hasRead[1] && hasRead[2]) break;
 			Thread.sleep(100);
-			if (hasRead[0]) break;
 		}
 		Assert.assertTrue(hasRead[0]);
+		Assert.assertTrue(hasRead[1]);
+		Assert.assertTrue(hasRead[2]);
 		Assert.assertEquals(co.getURI(), uris[0]);
+		Assert.assertEquals(co.getURI(), uris[1]);
+		Assert.assertEquals(co.getURI(), uris[2]);
 		((AutoCloseable) locator).close();
 	}
 
@@ -107,7 +137,7 @@ public class TestNotifications extends Setup {
 		Connection sql = locator.resolve(DataSource.class).getConnection();
 		sql.createStatement().execute("SELECT pg_notify('migration', 'new')");
 		sql.close();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 20; i++) {
 			if (changes[0]) break;
 			Thread.sleep(100);
 		}

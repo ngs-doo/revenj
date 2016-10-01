@@ -9,7 +9,6 @@ import monix.reactive.subjects.PublishSubject
 import net.revenj.extensibility.Container
 import net.revenj.patterns.DataChangeNotification._
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
 
 
@@ -19,39 +18,36 @@ private [revenj] class ChangeNotification[T](manifest: Class[T], notifications: 
   private val subscription = notifications.track[T](manifest).subscribe(subject)
   private val lazySeqChanges = subject.map(_.result)
   private val lazyFlattenChanges = subject.flatMap { it =>
-    val results = ArrayBuffer[Function0[Future[T]]]()
-    results.sizeHint(it.uris.size)
+    val results = new Array[Function0[Future[T]]](it.uris.size)
     var i = 0
-    while (i < results.size) {
+    while (i < results.length) {
       val cur = i
-      results += (() => it.result().flatMap(r => Future.successful(r(cur))))
+      results(i) = () => it.result().flatMap(r => Future.successful(r(cur)))
       i += 1
     }
-    Observable(results)
+    Observable(results:_*)
   }
   private val futureSeqChanges = subject.map(_.result())
   private val futureFlattenChanges = subject.flatMap { it =>
-    val results = ArrayBuffer[Future[T]]()
-    results.sizeHint(it.uris.size)
+    val results = new Array[Future[T]](it.uris.size)
     var i = 0
-    while (i < results.size) {
+    while (i < results.length) {
       val cur = i
-      results += it.result().flatMap(r => Future.successful(r(cur)))
+      results(i) = it.result().flatMap(r => Future.successful(r(cur)))
       i += 1
     }
-    Observable(results)
+    Observable(results:_*)
   }
   private val taskSeqChanges = subject.map ( it => Task.defer({ Task.fromFuture(it.result()) }) )
   private val taskFlattenChanges = subject.flatMap { it =>
-    val results = ArrayBuffer[Task[T]]()
-    results.sizeHint(it.uris.size)
+    val results = new Array[Task[T]](it.uris.size)
     var i = 0
-    while (i < results.size) {
+    while (i < results.length) {
       val cur = i
-      results += Task.defer({Task.fromFuture(it.result().flatMap(r => Future.successful(r(cur))))})
+      results(i) = Task.defer({Task.fromFuture(it.result().flatMap(r => Future.successful(r(cur))))})
       i += 1
     }
-    Observable(results)
+    Observable(results:_*)
   }
 
   def close(): Unit = {

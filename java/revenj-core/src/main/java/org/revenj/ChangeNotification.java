@@ -62,22 +62,28 @@ final class ChangeNotification<T> implements Closeable {
 							return cn.eagerChanges;
 						} else if (arg instanceof ParameterizedType && ((ParameterizedType) arg).getRawType() == Callable.class) {
 							Type[] genericArguments = ((ParameterizedType) arg).getActualTypeArguments();
-							if (genericArguments[0] instanceof Class<?>) {
-								Class<?> clazz = (Class<?>) genericArguments[0];
-								if (genericArguments[0] instanceof ParameterizedType && Collection.class.isAssignableFrom(clazz)) {
-									ChangeNotification<?> cn = new ChangeNotification(clazz.getComponentType(), notification);
-									return cn.bulkChanges;
-								} else {
-									ChangeNotification<?> cn = new ChangeNotification(clazz, notification);
+							if (genericArguments.length == 1) {
+								Type first = genericArguments[0];
+								if (first instanceof Class<?>) {
+									ChangeNotification<?> cn = new ChangeNotification((Class<?>) first, notification);
 									return cn.lazyChanges;
+								}
+								if (first instanceof ParameterizedType) {
+									ParameterizedType npt = (ParameterizedType) first;
+									if (npt.getActualTypeArguments().length == 1
+											&& npt.getRawType() instanceof Class<?>
+											&& npt.getActualTypeArguments()[0] instanceof Class<?>
+											&& Collection.class.isAssignableFrom((Class<?>) npt.getRawType())) {
+										ChangeNotification<?> cn = new ChangeNotification((Class<?>) npt.getActualTypeArguments()[0], notification);
+										return cn.bulkChanges;
+									}
 								}
 							}
 						}
 					}
-					throw new RuntimeException("Invalid arguments for Observable<T>");
+					throw new RuntimeException("Invalid arguments for Observable<T>. Supported arguments: Observable<Callable<List<T>>>, Observable<T> and Observable<Callable<T>>");
 				}
 		);
-
 	}
 
 	public void close() {

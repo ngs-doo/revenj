@@ -4,7 +4,7 @@ import java.io._
 import java.lang.reflect.ParameterizedType
 import java.net.{URL, URLClassLoader}
 import java.sql.Connection
-import java.util.{Optional, Properties, ServiceLoader}
+import java.util.{Properties, ServiceLoader}
 import javax.sql.DataSource
 
 import net.revenj.extensibility.{Container, PluginLoader, SystemAspect, SystemState}
@@ -83,18 +83,21 @@ object Revenj {
             pathname.getPath.toLowerCase.endsWith(".jar")
           }
         })
-        val urls = new ArrayBuffer[URL]
-        jars foreach { j => urls += j.toURI.toURL  }
-        if (classLoader.isDefined) Some(new URLClassLoader(urls.toArray, classLoader.get))
-        else Some(new URLClassLoader(urls.toArray))
+        val urls = if (jars == null) Array.empty[URL] else jars.map(_.toURI.toURL)
+        if (classLoader.isDefined) Some(new URLClassLoader(urls, classLoader.get))
+        else Some(new URLClassLoader(urls))
       } else if (classLoader.isDefined) {
         classLoader
       } else {
         Option(Thread.currentThread.getContextClassLoader)
       }
     }
-    val aspects = ServiceLoader.load(classOf[SystemAspect], loader.orNull)
-    setup(dataSource, properties, loader, context, aspects.iterator)
+    val aspects = ServiceLoader.load(classOf[SystemAspect], loader.orNull).iterator()
+    val buf = ArrayBuffer[SystemAspect]()
+    while (aspects.hasNext) {
+      buf += aspects.next()
+    }
+    setup(dataSource, properties, loader, context, buf)
   }
 
   private class SimpleDomainModel(loader: ClassLoader) extends DomainModel {
@@ -102,9 +105,9 @@ object Revenj {
     private val cache = new TrieMap[String, Class[_]]
 
     def setNamespace(value: String): Unit = {
-      val parts = value.split(",").distinct
+      val parts = if (value == null) Array.empty[String] else value.split(",").distinct
       namespaces = parts map { ns =>
-        if (ns.nonEmpty) ns + "." else ""
+        if (ns.isEmpty) "" else ns + "."
       }
     }
 
@@ -116,12 +119,14 @@ object Revenj {
           val className = if (name.indexOf('+') != -1) name.replace('+', '$') else name
           var found: Option[Class[_]] = None
           namespaces foreach { ns =>
-            try {
-              val manifest = Class.forName(ns + className, true, loader)
-              cache.put(name, manifest)
-              found = Option(manifest)
-            } catch {
-              case _: Throwable =>
+            if (found.isEmpty) {
+              try {
+                val manifest = Class.forName(ns + className, true, loader)
+                cache.put(name, manifest)
+                found = Option(manifest)
+              } catch {
+                case _: Throwable =>
+              }
             }
           }
           found
@@ -129,12 +134,32 @@ object Revenj {
     }
   }
 
+  def container(resolveUnknown: Boolean, loader: ClassLoader): Container = {
+    new SimpleContainer(resolveUnknown, loader)
+  }
+
+  @deprecated("will be removed", "0.3.0")
   def setup(
     dataSource: DataSource,
     properties: Properties,
     classLoader: Option[ClassLoader],
     context: Option[ExecutionContext],
     aspects: java.util.Iterator[SystemAspect]): Container = {
+    val buf = ArrayBuffer[SystemAspect]()
+    if (aspects != null) {
+      while (aspects.hasNext) {
+        buf += aspects.next()
+      }
+    }
+    setup(dataSource, properties, classLoader, context, buf)
+  }
+
+  def setup(
+    dataSource: DataSource,
+    properties: Properties,
+    classLoader: Option[ClassLoader],
+    context: Option[ExecutionContext],
+    aspects: Seq[SystemAspect]): Container = {
 
     val state = new RevenjSystemState
     val loader = classLoader.getOrElse(Thread.currentThread.getContextClassLoader)
@@ -158,15 +183,9 @@ object Revenj {
     container.registerFactory[DataContext](c => LocatorDataContext.asDataContext(c, loader), singleton = false)
     container.registerFactory[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), singleton = false)
     container.registerFactory[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), singleton = false)
-    var total = 0
-    if (aspects != null) {
-      while (aspects.hasNext) {
-        aspects.next().configure(container)
-        total += 1
-      }
-    }
+    aspects foreach { a => a.configure(container) }
     domainModel.setNamespace(properties.getProperty("revenj.namespace"))
-    properties.setProperty("revenj.aspectsCount", Integer.toString(total))
+    properties.setProperty("revenj.aspectsCount", Integer.toString(aspects.size))
     state.started(container)
     container
   }

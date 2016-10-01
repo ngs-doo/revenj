@@ -6,9 +6,13 @@ import javax.sql.DataSource
 
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
+import monix.execution.Ack
+import monix.execution.Ack.Continue
+import monix.reactive.observers.Subscriber
 import net.revenj.database.postgres.DbCheck.MyService
-import net.revenj.extensibility.Container
-import net.revenj.patterns.{DataContext, DomainEventHandler, UnitOfWork}
+import net.revenj.extensibility.{SystemState, Container}
+import net.revenj.patterns.DataChangeNotification.NotifyInfo
+import net.revenj.patterns.{DataChangeNotification, DataContext, DomainEventHandler, UnitOfWork}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeAfterAll
@@ -20,7 +24,7 @@ import scala.util.Try
 import example.test.postgres._
 import example.test._
 import monix.eval.Task
-import monix.reactive.Observable
+import monix.reactive.{Observer, Observable}
 import org.specs2.concurrent.{ExecutionEnv, NoImplicitExecutionContextFromExecutionEnv}
 import org.specs2.matcher.FutureMatchers
 import org.specs2.specification.mutable.ExecutionEnvironment
@@ -235,29 +239,92 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
       }
     }
     "notifications" >> {
-      "manual" >> {
+      implicit val scheduler = monix.execution.Scheduler.Implicits.global
+      "will raise" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val changes = container.resolve[DataChangeNotification]
+        var changed = false
+        val reg = changes.notifications.subscribe(new Observer[NotifyInfo] {
+          override def onNext(elem: NotifyInfo): Future[Ack] = {
+            changed = true
+            Future.successful(Ack.Continue)
+          }
+          override def onError(ex: Throwable): Unit = ()
+          override def onComplete(): Unit = ()
+        })
+        val ctx = container.resolve[DataContext]
+        val ev = TestMe(x = 102)
+        changed === false
+        Await.result(ctx.submit(ev), Duration.Inf)
+        var i = 0
+        while (i < 50) {
+          if (changed) i = 50
+          Thread.sleep(100)
+          i += 1
+        }
+        container.close()
+        changed === true
+      }
+      "can track" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val changes = container.resolve[DataChangeNotification]
+        var changed = false
+        changes.track[TestMe].doOnNext(_ => changed = true).subscribe()
+        val ctx = container.resolve[DataContext]
+        val ev = TestMe(x = 103)
+        changed === false
+        Await.result(ctx.submit(ev), Duration.Inf)
+        var i = 0
+        while (i < 50) {
+          if (changed) i = 50
+          Thread.sleep(100)
+          i += 1
+        }
+        container.close()
+        changed === true
+      }
+      "observables" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val obs1 = container.resolve[Observable[Future[Seq[TestMe]]]]
         val obs2 = container.resolve[Observable[Function0[Future[TestMe]]]]
         val obs3 = container.resolve[Observable[Task[Seq[TestMe]]]]
         var (l1, l2, l3) = (false, false, false)
-        obs1.doOnNext(_ => l1 = true)
-        obs2.doOnNext(_ => l2 = true)
-        obs3.doOnNext(_ => l3 = true)
+        obs1.doOnNext(_ => l1 = true).subscribe()
+        obs2.doOnNext(_ => l2 = true).subscribe()
+        obs3.doOnNext(_ => l3 = true).subscribe()
         val ctx = container.resolve[DataContext]
         val ev = TestMe(x = 101)
         val uri = Await.result(ctx.submit(ev), Duration.Inf)
-        Thread.sleep(100)
         var i = 0
-        while (i < 100) {
-          if (l1) i = 100
-          Thread.sleep(50)
+        while (i < 50) {
+          if (l1 && l2 && l3) i = 50
+          Thread.sleep(100)
           i += 1
         }
         container.close()
         l1 === true
         l2 === true
         l3 === true
+      }
+      "migration" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val state = container.resolve[SystemState]
+        val ds = container.resolve[DataSource]
+        val con = ds.getConnection
+        var migration = false
+        state.change.filter(_.id == "migration").doOnNext(_ => migration = true).subscribe()
+        val stmt = con.createStatement()
+        stmt.execute("SELECT pg_notify('migration', 'new')")
+        stmt.close()
+        con.close()
+        var i = 0
+        while (i < 50) {
+          if (migration) i = 50
+          Thread.sleep(100)
+          i += 1
+        }
+        container.close()
+        migration === true
       }
     }
   }

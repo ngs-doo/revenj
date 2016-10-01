@@ -5,7 +5,9 @@ import java.sql.{Connection, SQLException, Statement}
 import java.util.Properties
 import javax.sql.DataSource
 
+import monix.execution.Cancelable
 import monix.reactive.Observable
+import monix.reactive.observers.Subscriber
 import monix.reactive.subjects.PublishSubject
 import net.revenj.database.postgres.PostgresReader
 import net.revenj.database.postgres.converters.StringConverter
@@ -30,8 +32,8 @@ private [revenj] class PostgresDatabaseNotification(
   private val notificationStream = subject.map(identity)
   private val repositories = new TrieMap[Class[_], AnyRef]
   private val targets = new TrieMap[String, Set[Class[_]]]
-  private var retryCount: Int = 0
-  private var isClosed: Boolean = false
+  private var retryCount = 0
+  private var isClosed = false
 
   private val maxTimeout = {
     val timeoutValue = properties.getProperty("revenj.notifications.timeout")
@@ -43,8 +45,9 @@ private [revenj] class PostgresDatabaseNotification(
       }
     } else 1000
   }
-  if ("disabled" == properties.getProperty("revenj.notifications.status")) isClosed = true
-  else {
+  if ("disabled" == properties.getProperty("revenj.notifications.status")) {
+    isClosed = true
+  } else {
     setupPooling()
     Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
       override def run(): Unit = isClosed = true
@@ -170,7 +173,7 @@ private [revenj] class PostgresDatabaseNotification(
   private def getRepository[T <: Identifiable](manifest: Class[T]): Repository[T] = {
     repositories.getOrElseUpdate(manifest, {
       val clazz = Utils.makeGenericType(classOf[Repository[_]], manifest)
-      locator.resolve(clazz)
+      locator.resolve(clazz).getOrElse(throw new RuntimeException("Unable to resolve Repository[" + manifest + "]"))
     }).asInstanceOf[Repository[T]]
   }
 
@@ -186,13 +189,20 @@ private [revenj] class PostgresDatabaseNotification(
     track[T](manifest.runtimeClass.asInstanceOf[Class[T]])
   }
 
+  class TrackObservable() extends Observable[NotifyInfo] {
+    override def unsafeSubscribeFn(subscriber: Subscriber[NotifyInfo]): Cancelable = {
+      subject.unsafeSubscribeFn(subscriber)
+    }
+  }
+
   private implicit val ctx = ExecutionContext.Implicits.global
 
   private [revenj] def track[T](manifest: Class[T]): Observable[TrackInfo[T]] = {
-    notificationStream filter { it =>
+    val dm = domainModel.get
+    val observable = new TrackObservable().filter { it =>
       val set = targets.getOrElseUpdate(it.name, {
         val ns = new mutable.HashSet[Class[_]]()
-        domainModel.get.find(it.name) match {
+        dm.find(it.name) match {
           case Some(dt) =>
             ns += dt
             ns ++= dt.getInterfaces
@@ -202,10 +212,10 @@ private [revenj] class PostgresDatabaseNotification(
       })
       set.contains(manifest)
     } map { it =>
-      lazy val dm = domainModel.getOrElse({ throw new RuntimeException("Unable to track if domain model is not provided")})
-      lazy val sourceManifest = dm.find(it.name).asInstanceOf[Class[_ <: Identifiable]]
-      TrackInfo[T](it.uris, () => getRepository(sourceManifest).find(it.uris).map(_.asInstanceOf[IndexedSeq[T]]) )
+      lazy val sourceManifest = dm.find(it.name).asInstanceOf[Option[Class[_ <: Identifiable]]]
+      TrackInfo[T](it.uris, () => getRepository(sourceManifest.get).find(it.uris).map(_.asInstanceOf[IndexedSeq[T]]) )
     }
+    observable
   }
 
   private def cleanupConnection(connection: Connection): Unit = {

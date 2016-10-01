@@ -155,6 +155,10 @@ public abstract class Revenj {
 		}
 	}
 
+	public static Container container(boolean resolveUnknown) {
+		return new SimpleContainer(resolveUnknown);
+	}
+
 	public static Container setup(
 			DataSource dataSource,
 			Properties properties,
