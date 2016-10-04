@@ -18,7 +18,7 @@ import org.postgresql.core.BaseConnection
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
 private [revenj] class PostgresDatabaseNotification(
@@ -212,10 +212,23 @@ private [revenj] class PostgresDatabaseNotification(
       })
       set.contains(manifest)
     } map { it =>
-      lazy val sourceManifest = dm.find(it.name).asInstanceOf[Option[Class[_ <: Identifiable]]]
-      TrackInfo[T](it.uris, () => getRepository(sourceManifest.get).find(it.uris).map(_.asInstanceOf[IndexedSeq[T]]) )
+      TrackInfo[T](it.uris, new LazyResult[T](it.name, dm, it.uris))
     }
     observable
+  }
+
+  private class LazyResult[T](name: String, dm: DomainModel, uris: Seq[String]) extends Function0[Future[IndexedSeq[T]]] {
+    private var result: Option[Future[IndexedSeq[T]]] = None
+
+    override def apply(): Future[IndexedSeq[T]] = result match {
+      case Some(f) => f
+      case _ =>
+        val manifest = dm.find(name).getOrElse(throw new RuntimeException(s"Unable to find domain type: $name")).asInstanceOf[Class[_ <: Identifiable]]
+        val repository = getRepository(manifest)
+        val found = repository.find(uris).map(_.asInstanceOf[IndexedSeq[T]])
+        result = Some(found)
+        found
+    }
   }
 
   private def cleanupConnection(connection: Connection): Unit = {

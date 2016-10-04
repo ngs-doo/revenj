@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -232,7 +233,28 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 				targets.put(it.name, set);
 			}
 			return set.contains(manifest);
-		}).map(it -> new TrackInfo<T>(it.uris, () -> getRepository(manifest).find(it.uris)));
+		}).map(it -> new TrackInfo<T>(it.uris, new LazyResult<T>(manifest, it.uris)));
+	}
+
+	class LazyResult<T> implements Callable<List<T>> {
+
+		private final Class<T> manifest;
+		private final String[] uris;
+		private List<T> result;
+
+		LazyResult(Class<T> manifest, String[] uris) {
+			this.manifest = manifest;
+			this.uris = uris;
+		}
+
+		@Override
+		public List<T> call() throws Exception {
+			if (result == null) {
+				Repository repository = getRepository(manifest);
+				result = repository.find(uris);
+			}
+			return result;
+		}
 	}
 
 	private synchronized void cleanupConnection(Connection connection) {
