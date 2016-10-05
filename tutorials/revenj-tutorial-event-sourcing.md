@@ -2,7 +2,7 @@
 
 [Event sourcing](http://martinfowler.com/eaaDev/EventSourcing.html) is an old concept with basic premise to capture changes to the system, instead of tracking the state of the system. 
 State can be always reconstructed by replaying captured events. 
-Revenj has [support for event sourcing](https://github.com/ngs-doo/revenj/blob/master/csharp/Domain/Revenj.DomainPatterns.Interface/DomainEvent.cs) with few signatures and services.
+Revenj has [support for event sourcing](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core.Interface/DomainPatterns/DomainEvent.cs) with few signatures and services.
 
 ###Events in DSL
 
@@ -97,7 +97,7 @@ In the above example, requested `IDataContext` will come with `IDatabaseQuery` b
 
 In the provided example a naive implementation of downvotes explains how to load an aggregate, change it and store it to the database. 
 Some features are enabled by default, which will help with the processing of such a code. 
-For example, *VoteStats* has [change tracking](https://github.com/ngs-doo/revenj/blob/master/csharp/Domain/Revenj.DomainPatterns.Interface/Tracking.cs) enabled on it, so `Context.Update` will use that information to avoid another database lookup during save.
+For example, *VoteStats* has [change tracking](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core.Interface/DomainPatterns/Tracking.cs) enabled on it, so `Context.Update` will use that information to avoid another database lookup during save.
 
 We can of course disable change tracking, which is useful in mostly read scenarios and then we could either create our own clone of the vote, just after we've loaded it from the database, or let repository do another query to fetch the current version of it.
 

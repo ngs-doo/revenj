@@ -24,7 +24,7 @@ If Revenj is used as a library from some other framework such as ASP.NET, then s
 
 ####Authorization service
 
-[Permission manager](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Security.Interface/IPermissionManager.cs) is a singleton service which should be used to configure access to data available through repositories. It can be configured from DSL or by code. Depending on the DSL configuration, security checks will be injected directly into repository and executed as a part of SQL query. This means permission manager can be used to implement features such as multi-tenancy on a single database. To globally disable application of security checks during DB queries, default needs to be changed in DSL as:
+[Permission manager](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core.Interface/Security/IPermissionManager.cs) is a singleton service which should be used to configure access to data available through repositories. It can be configured from DSL or by code. Depending on the DSL configuration, security checks will be injected directly into repository and executed as a part of SQL query. This means permission manager can be used to implement features such as multi-tenancy on a single database. To globally disable application of security checks during DB queries, default needs to be changed in DSL as:
 
     defaults { external permissions disabled; }
 
@@ -77,7 +77,7 @@ Other than those, access can be changed from open by default to closed by defaul
       </appSettings>
     </configuration>
 
-[Default security DSL](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Security/DSL/Security.dsl) can be used to set up simple tables for defining security configuration. Identifiers follow simple dot pattern for defining security access, meaning to disable globally access to *Todo* module we can insert { Name = 'Todo', IsAllowed = false } into *GlobalPermission* table.
+[Default security DSL](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core/Security/DSL/Security.dsl) can be used to set up simple tables for defining security configuration. Identifiers follow simple dot pattern for defining security access, meaning to disable globally access to *Todo* module we can insert { Name = 'Todo', IsAllowed = false } into *GlobalPermission* table.
 To grant access *User* role to *Todo.Task* aggregate we can override global configuration with an insert to { Name = 'Todo.Task', IsAllowed = true, RoleId = 'User' } *RolePermission* table.
 
 Access to server commands can be controlled in the same way, just `Name` will be type name of that class (for example Name = 'Revenj.Plugins.Server.Commands.Create' represents a Crud create command found in [plugin project](https://github.com/ngs-doo/revenj/blob/master/csharp/Plugins/Revenj.Plugins.Server.Commands/CRUD/Create.cs))

@@ -6,7 +6,7 @@ Revenj leverages database notifications, such as [LISTEN/NOTIFY](http://www.post
 
 ####How to use it
 
-This allows it to provide several complex features through some simple services such as [`IDataChangeNotification`](https://github.com/ngs-doo/revenj/blob/master/csharp/Domain/Revenj.DomainPatterns.Interface/Notification.cs) or through `IDataContext`. Change notification is a singleton which is getting invoked asyncly from database on commit. Thus events will be raised with a small delay. An example of registering for changes on an aggregate root Post will look like:
+This allows it to provide several complex features through some simple services such as [`IDataChangeNotification`](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core.Interface/DomainPatterns/Notification.cs) or through `IDataContext`. Change notification is a singleton which is getting invoked asynchronously from database on commit. Thus events will be raised with a small delay. An example of registering for changes on an aggregate root Post will look like:
 
     IDataContext ctx = ...
     var changes = ctx.Track<Post>();
