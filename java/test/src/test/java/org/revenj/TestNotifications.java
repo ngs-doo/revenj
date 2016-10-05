@@ -42,6 +42,37 @@ public class TestNotifications extends Setup {
 	}
 
 	@Test
+	public void willRaiseMultipleNotifications() throws Exception {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		DataChangeNotification notification = locator.resolve(DataChangeNotification.class);
+		int[] hasRead = new int[1];
+		String[] uris = new String[1];
+		notification.getNotifications().subscribe(n -> {
+			hasRead[0] = hasRead[0] + 1;
+			uris[0] = n.uris[0];
+		});
+		Assert.assertEquals(0, hasRead[0]);
+		Composite co = new Composite();
+		context.create(co);
+		for (int i = 0; i < 30; i++) {
+			Thread.sleep(100);
+			if (hasRead[0] > 0) break;
+		}
+		Assert.assertEquals(1, hasRead[0]);
+		Assert.assertEquals(co.getURI(), uris[0]);
+		co = new Composite();
+		context.create(co);
+		for (int i = 0; i < 30; i++) {
+			Thread.sleep(100);
+			if (hasRead[0] > 1) break;
+		}
+		Assert.assertEquals(2, hasRead[0]);
+		Assert.assertEquals(co.getURI(), uris[0]);
+		((Closeable) notification).close();
+	}
+
+	@Test
 	public void canTrack() throws Exception {
 		ServiceLocator locator = container;
 		DataContext context = locator.resolve(DataContext.class);

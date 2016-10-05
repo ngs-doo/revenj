@@ -1,6 +1,6 @@
 package net.revenj
 
-import java.io.Closeable
+import java.io.{Closeable, IOException}
 import java.sql.{Connection, SQLException, Statement}
 import java.util.Properties
 import javax.sql.DataSource
@@ -14,7 +14,10 @@ import net.revenj.database.postgres.converters.StringConverter
 import net.revenj.extensibility.SystemState
 import net.revenj.patterns.DataChangeNotification.{NotifyInfo, Operation, TrackInfo}
 import net.revenj.patterns._
-import org.postgresql.core.BaseConnection
+import org.postgresql.PGNotification
+import org.postgresql.core.{BaseConnection, Notification, PGStream}
+import org.postgresql.core.v3.RevenjConnectionFactory
+import org.postgresql.util.HostSpec
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
@@ -47,8 +50,13 @@ private [revenj] class PostgresDatabaseNotification(
   }
   if ("disabled" == properties.getProperty("revenj.notifications.status")) {
     isClosed = true
-  } else {
+  } else if ("pooling" == properties.getProperty("revenj.notifications.type")) {
     setupPooling()
+    Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
+      override def run(): Unit = isClosed = true
+    }))
+  } else {
+    setupListening()
     Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
       override def run(): Unit = isClosed = true
     }))
@@ -126,33 +134,7 @@ private [revenj] class PostgresDatabaseNotification(
             }
           } else {
             timeout = 0
-            messages foreach { n =>
-              if ("events" == n.getName || "aggregate_roots" == n.getName) {
-                val param = n.getParameter
-                val ident = param.substring(0, param.indexOf(':'))
-                val op = param.substring(ident.length + 1, param.indexOf(':', ident.length + 1))
-                val values = param.substring(ident.length + op.length + 2)
-                reader.process(values)
-                StringConverter.parseCollectionOption(reader, 0) match {
-                  case Some(ids) if ids.nonEmpty =>
-                    op match {
-                      case "Update" =>
-                        subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Update, ids))
-                      case "Change" =>
-                        subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Change, ids))
-                      case "Delete" =>
-                        subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Delete, ids))
-                      case _ =>
-                        subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Insert, ids))
-                    }
-                  case _ =>
-                }
-              } else {
-                if ("migration" == n.getName) {
-                  systemState.notify(SystemState.SystemEvent("migration", n.getParameter))
-                }
-              }
-            }
+            messages foreach { n => processNotification(reader, n) }
           }
         } catch {
           case _: Throwable =>
@@ -167,6 +149,133 @@ private [revenj] class PostgresDatabaseNotification(
         }
       }
       cleanupConnection(connection)
+    }
+  }
+
+  def processNotification(reader: PostgresReader, n: PGNotification): Any = {
+    if ("events" == n.getName || "aggregate_roots" == n.getName) {
+      val param = n.getParameter
+      val ident = param.substring(0, param.indexOf(':'))
+      val op = param.substring(ident.length + 1, param.indexOf(':', ident.length + 1))
+      val values = param.substring(ident.length + op.length + 2)
+      reader.process(values)
+      StringConverter.parseCollectionOption(reader, 0) match {
+        case Some(ids) if ids.nonEmpty =>
+          op match {
+            case "Update" =>
+              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Update, ids))
+            case "Change" =>
+              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Change, ids))
+            case "Delete" =>
+              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Delete, ids))
+            case _ =>
+              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Insert, ids))
+          }
+        case _ =>
+      }
+    } else {
+      if ("migration" == n.getName) {
+        systemState.notify(SystemState.SystemEvent("migration", n.getParameter))
+      }
+    }
+  }
+
+  private def setupListening(): Unit = {
+    retryCount += 1
+    if (retryCount > 60) retryCount = 30
+    val jdbcUrl = properties.getProperty("revenj.jdbcUrl")
+    if (jdbcUrl == null || jdbcUrl.isEmpty) throw new RuntimeException("Unable to read jdbcUrl from properties. Listening notification is not supported without it")
+    try {
+      val parsed = org.postgresql.Driver.parseURL(jdbcUrl, properties)
+      val user = if (properties.containsKey("revenj.user")) properties.getProperty("revenj.user")
+      else parsed.getProperty("user", "")
+      val password = if (properties.containsKey("revenj.password")) properties.getProperty("revenj.password")
+      else parsed.getProperty("password", "")
+      val db = parsed.getProperty("PGDBNAME")
+      val host = new HostSpec(parsed.getProperty("PGHOST").split(",")(0), parsed.getProperty("PGPORT").split(",")(0).toInt)
+      val pgStream = RevenjConnectionFactory.openConnection(host, user, password, db, properties)
+      retryCount = 0
+      val listening = new Listening(pgStream)
+      val thread = new Thread(listening)
+      thread.setDaemon(true)
+      thread.start()
+    } catch {
+      case ex: Exception =>
+        try {
+          Thread.sleep(1000 * retryCount)
+        } catch {
+          case e: InterruptedException =>
+            e.printStackTrace()
+        }
+    }
+  }
+
+  private class Listening (stream: PGStream) extends Runnable {
+    private val command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration".getBytes("UTF-8")
+    private val rawStream = stream.getSocket.getInputStream
+    stream.SendChar('Q')
+    stream.SendInteger4(command.length + 5)
+    stream.Send(command)
+    stream.SendChar(0)
+    stream.flush()
+    receiveCommand(stream)
+    receiveCommand(stream)
+    receiveCommand(stream)
+    if (stream.ReceiveChar != 'Z') throw new IOException("Unable to setup Postgres listener")
+    private val num = stream.ReceiveInteger4
+    if (num != 5) throw new IOException("Unable to setup Postgres listener. Expecting 5. Got " + num)
+    stream.ReceiveChar
+
+    private def receiveCommand(pgStream: PGStream): Unit = {
+      pgStream.ReceiveChar
+      val len: Int = pgStream.ReceiveInteger4
+      pgStream.Skip(len - 4)
+    }
+
+    def run(): Unit = {
+      val reader = new PostgresReader
+      val pgStream = stream
+      var threadAlive = true
+      while (threadAlive && !isClosed) {
+        try {
+          while (!isClosed && rawStream.available == 0) {
+            Thread.sleep(1)
+          }
+          if (!isClosed) {
+            pgStream.ReceiveChar match {
+              case 'A' =>
+                pgStream.ReceiveInteger4
+                val pidA = pgStream.ReceiveInteger4
+                val msgA = pgStream.ReceiveString
+                val paramA = pgStream.ReceiveString
+                processNotification(reader, new Notification(msgA, pidA, paramA))
+              case 'E' =>
+                val e_len = pgStream.ReceiveInteger4
+                val err = pgStream.ReceiveString(e_len - 4)
+                throw new IOException(err)
+              case _ =>
+                throw new IOException("Unexpected packet type")
+            }
+          }
+        } catch {
+          case ex: Exception =>
+            try {
+              threadAlive = false
+              pgStream.close()
+              Thread.sleep(1000)
+            } catch {
+              case e: Exception => e.printStackTrace()
+            }
+            setupListening()
+        }
+      }
+      if (threadAlive) {
+        try {
+          pgStream.close()
+        } catch {
+          case _: Throwable =>
+        }
+      }
     }
   }
 

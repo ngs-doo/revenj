@@ -2,19 +2,20 @@ package org.revenj;
 
 import org.postgresql.PGNotification;
 import org.postgresql.core.BaseConnection;
+import org.postgresql.core.PGStream;
+import org.postgresql.core.v3.RevenjConnectionFactory;
+import org.postgresql.util.HostSpec;
 import org.revenj.extensibility.SystemState;
 import org.revenj.database.postgres.PostgresReader;
 import org.revenj.database.postgres.converters.StringConverter;
-import org.revenj.patterns.DomainModel;
-import org.revenj.patterns.EagerNotification;
-import org.revenj.patterns.Repository;
-import org.revenj.patterns.ServiceLocator;
+import org.revenj.patterns.*;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
 import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -66,19 +67,23 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		}
 		if ("disabled".equals(properties.getProperty("revenj.notifications.status"))) {
 			isClosed = true;
-		} else {
+		} else if ("pooling".equals(properties.getProperty("revenj.notifications.type"))) {
 			setupPooling();
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> isClosed = true));
+		} else {
+			setupListening();
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> isClosed = true));
 		}
 	}
 
 	private void setupPooling() {
+		if (dataSource == null) return;
 		retryCount++;
 		if (retryCount > 60) {
 			retryCount = 30;
 		}
 		try {
-			Connection connection = dataSource != null ? dataSource.getConnection() : null;
+			Connection connection = dataSource.getConnection();
 			BaseConnection bc = null;
 			if (connection instanceof BaseConnection) {
 				bc = (BaseConnection) connection;
@@ -154,35 +159,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 						timeout = 0;
 					}
 					for (PGNotification n : notifications) {
-						if (!"events".equals(n.getName()) && !"aggregate_roots".equals(n.getName())) {
-							if ("migration".equals(n.getName())) {
-								systemState.notify(new SystemState.SystemEvent("migration", n.getParameter()));
-							}
-							continue;
-						}
-						String param = n.getParameter();
-						String ident = param.substring(0, param.indexOf(':'));
-						String op = param.substring(ident.length() + 1, param.indexOf(':', ident.length() + 1));
-						String values = param.substring(ident.length() + op.length() + 2);
-						reader.process(values);
-						List<String> ids = StringConverter.parseCollection(reader, 0, false);
-						if (ids != null && ids.size() > 0) {
-							String[] uris = ids.toArray(new String[ids.size()]);
-							switch (op) {
-								case "Update":
-									subject.onNext(new NotifyInfo(ident, Operation.Update, uris));
-									break;
-								case "Change":
-									subject.onNext(new NotifyInfo(ident, Operation.Change, uris));
-									break;
-								case "Delete":
-									subject.onNext(new NotifyInfo(ident, Operation.Delete, uris));
-									break;
-								default:
-									subject.onNext(new NotifyInfo(ident, Operation.Insert, uris));
-									break;
-							}
-						}
+						processNotification(reader, n);
 					}
 				} catch (SQLException | IOException ex) {
 					try {
@@ -196,6 +173,138 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 				}
 			}
 			cleanupConnection(connection);
+		}
+	}
+
+	private void setupListening() {
+		retryCount++;
+		if (retryCount > 60) {
+			retryCount = 30;
+		}
+		String jdbcUrl = properties.getProperty("revenj.jdbcUrl");
+		if (jdbcUrl == null || jdbcUrl.isEmpty()) throw new RuntimeException("Unable to read jdbcUrl from properties. Listening notification is not supported without it")
+		try {
+			Properties parsed = org.postgresql.Driver.parseURL(jdbcUrl, properties);
+			String user = properties.containsKey("revenj.user") ? properties.getProperty("revenj.user") : parsed.getProperty("user", "");
+			String password = properties.containsKey("revenj.password") ? properties.getProperty("revenj.password") : parsed.getProperty("password", "");
+			String db = parsed.getProperty("PGDBNAME");
+			HostSpec host = new HostSpec(parsed.getProperty("PGHOST").split(",")[0], Integer.parseInt(parsed.getProperty("PGPORT").split(",")[0]));
+			PGStream pgStream = RevenjConnectionFactory.openConnection(host, user, password, db, properties);
+			retryCount = 0;
+			Listening listening = new Listening(pgStream);
+			Thread thread = new Thread(listening);
+			thread.setDaemon(true);
+			thread.start();
+		} catch (Exception ex) {
+			try {
+				Thread.sleep(1000 * retryCount);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private class Listening implements Runnable {
+		private final PGStream stream;
+		private final InputStream rawStream;
+
+		Listening(PGStream stream) throws IOException {
+			this.stream = stream;
+			byte[] command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration".getBytes("UTF-8");
+			rawStream = stream.getSocket().getInputStream();
+			stream.SendChar('Q');
+			stream.SendInteger4(command.length + 5);
+			stream.Send(command);
+			stream.SendChar(0);
+			stream.flush();
+			receiveCommand(stream);
+			receiveCommand(stream);
+			receiveCommand(stream);
+			int end = stream.ReceiveChar();
+			if (end != 'Z') throw new IOException("Unable to setup Postgres listener");
+			int num = stream.ReceiveInteger4();
+			if (num != 5) throw new IOException("Unable to setup Postgres listener. Expecting 5. Got " + num);
+			stream.ReceiveChar();
+		}
+
+		private void receiveCommand(PGStream pgStream) throws IOException {
+			pgStream.ReceiveChar();
+			int len = pgStream.ReceiveInteger4();
+			pgStream.Skip(len - 4);
+		}
+
+		@Override
+		public void run() {
+			PostgresReader reader = new PostgresReader();
+			final PGStream pgStream = stream;
+			while (!isClosed) {
+				try {
+					while (!isClosed && rawStream.available() == 0) {
+						Thread.sleep(1);
+					}
+					if (isClosed) break;
+					switch (pgStream.ReceiveChar()) {
+						case 'A':
+							pgStream.ReceiveInteger4();
+							int pidA = pgStream.ReceiveInteger4();
+							String msgA = pgStream.ReceiveString();
+							String paramA = pgStream.ReceiveString();
+							processNotification(reader, new org.postgresql.core.Notification(msgA, pidA, paramA));
+							break;
+						case 'E':
+							int e_len = pgStream.ReceiveInteger4();
+							String err = pgStream.ReceiveString(e_len - 4);
+							throw new IOException(err);
+						default:
+							throw new IOException("Unexpected packet type");
+					}
+				} catch (Exception ex) {
+					try {
+						pgStream.close();
+						Thread.sleep(1000);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					setupListening();
+					return;
+				}
+			}
+			try {
+				pgStream.close();
+			} catch (Exception ignore) {
+			}
+		}
+	}
+
+	private void processNotification(PostgresReader reader, PGNotification n) throws IOException {
+		if (!"events".equals(n.getName()) && !"aggregate_roots".equals(n.getName())) {
+			if ("migration".equals(n.getName())) {
+				systemState.notify(new SystemState.SystemEvent("migration", n.getParameter()));
+			}
+			return;
+		}
+		String param = n.getParameter();
+		String ident = param.substring(0, param.indexOf(':'));
+		String op = param.substring(ident.length() + 1, param.indexOf(':', ident.length() + 1));
+		String values = param.substring(ident.length() + op.length() + 2);
+		reader.process(values);
+		List<String> ids = StringConverter.parseCollection(reader, 0, false);
+		if (ids != null && ids.size() > 0) {
+			String[] uris = ids.toArray(new String[ids.size()]);
+			switch (op) {
+				case "Update":
+					subject.onNext(new NotifyInfo(ident, Operation.Update, uris));
+					break;
+				case "Change":
+					subject.onNext(new NotifyInfo(ident, Operation.Change, uris));
+					break;
+				case "Delete":
+					subject.onNext(new NotifyInfo(ident, Operation.Delete, uris));
+					break;
+				default:
+					subject.onNext(new NotifyInfo(ident, Operation.Insert, uris));
+					break;
+			}
 		}
 	}
 
@@ -236,7 +345,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		}).map(it -> new TrackInfo<T>(it.uris, new LazyResult<T>(manifest, it.uris)));
 	}
 
-	class LazyResult<T> implements Callable<List<T>> {
+	private class LazyResult<T> implements Callable<List<T>> {
 
 		private final Class<T> manifest;
 		private final String[] uris;

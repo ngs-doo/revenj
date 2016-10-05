@@ -7,8 +7,6 @@ import javax.sql.DataSource
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
 import monix.execution.Ack
-import monix.execution.Ack.Continue
-import monix.reactive.observers.Subscriber
 import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.{SystemState, Container}
 import net.revenj.patterns.DataChangeNotification.NotifyInfo
@@ -25,7 +23,7 @@ import example.test.postgres._
 import example.test._
 import monix.eval.Task
 import monix.reactive.{Observer, Observable}
-import org.specs2.concurrent.{ExecutionEnv, NoImplicitExecutionContextFromExecutionEnv}
+import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.FutureMatchers
 import org.specs2.specification.mutable.ExecutionEnvironment
 
@@ -282,6 +280,33 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         }
         container.close()
         changed === true
+      }
+      "can track multiple" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val changes = container.resolve[DataChangeNotification]
+        var changed = 0
+        changes.track[TestMe].doOnNext(_ => changed += 1).subscribe()
+        val ctx = container.resolve[DataContext]
+        val ev = TestMe(x = 104)
+        changed === 0
+        Await.result(ctx.submit(ev), Duration.Inf)
+        var i = 0
+        while (i < 50) {
+          if (changed > 0) i = 50
+          Thread.sleep(100)
+          i += 1
+        }
+        val ev2 = TestMe(x = 105)
+        changed === 1
+        Await.result(ctx.submit(ev2), Duration.Inf)
+        i = 0
+        while (i < 50) {
+          if (changed > 1) i = 50
+          Thread.sleep(100)
+          i += 1
+        }
+        container.close()
+        changed === 2
       }
       "observables" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
