@@ -36,8 +36,8 @@ While this works very well for lookups, it's not ideal way to query complex data
 ORDMBS support for alternative query methods, such as:
 
     SELECT m, AGGREGATE(SELECT d FROM Detail d WHERE d.masterID = m.number) as details
-    FROM Master
-    WHERE number = @id
+    FROM Master m
+    WHERE m.number = @id
 
 which is more generalized query projection of such a model and can be arbitrarily nested.
 

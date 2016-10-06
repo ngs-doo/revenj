@@ -66,7 +66,10 @@ DSL compiler acts as a developer in your team which does all the boring work you
 
 There are mostly two reasons to use it:
 
- * **ease of development** - but this is hard to explain since you need to experience it for yourself
+ * **ease of development** - but this is hard to explain since you need to experience it for yourself, but in a nutshell there are several benefits:
+	* **automatic migrations** - when the model changes, SQL migration script will be provided. This means that developers can utilize typesafety of relational SQL database and get ease of use from JSON NoSQL solution
+	* **less manual boilerplate** - most of the boilerplate (DTOs, repositories, ...) will be automatically maintained. This will speed up development and reduce the cost of changing the model
+	* **evolution** - reduced cost of changing the model should allow for both fast prototyping and low maintenance cost later in the project
  * **performance** - DSL Platform will provide libraries for Revenj which are faster than anything you could write by hand or by picking some other libraries/frameworks
 
 Benchmarks:
@@ -78,6 +81,10 @@ Benchmarks:
  * [JSON benchmark](https://github.com/ngs-doo/json-benchmark)
 
 ![JSON bench](tutorials/pictures/json-bench.png)
+
+ * [Techempower benchmark](https://www.techempower.com/benchmarks/previews/round13/)
+
+![Framework bench](tutorials/pictures/techempower-single-13.png)
 
 ##Getting started:
 
@@ -282,6 +289,7 @@ Custom permissions can be registered by hand if they don't really belong to the 
 ##External tools and libraries
 
 DSL can be written in Visual studio with the help of [DDD for DSL](http://visualstudiogallery.msdn.microsoft.com/5b8a140c-5c84-40fc-a551-b255ba7676f4) plugin.
+There is also syntax highlighting plugin for [IntelliJ IDEA](https://plugins.jetbrains.com/plugin/8227)
 
 Revenj can be also used as a NoSQL database through a REST API and consumed from other languages:
 
@@ -289,4 +297,8 @@ Revenj can be also used as a NoSQL database through a REST API and consumed from
  * [PHP](https://github.com/ngs-doo/dsl-client-php)
  * [Scala](https://github.com/ngs-doo/dsl-client-scala)
 
-[Command line client](https://github.com/ngs-doo/dsl-compiler-client) and Eclipse plugin can be used to automate various aspects of the process or have IDE support on the *nix environments.
+[Various tools](https://github.com/ngs-doo/dsl-compiler-client) can be used to setup environment/compilation:
+
+ * [Command line client](https://github.com/ngs-doo/dsl-compiler-client/releases/latest)
+ * [Maven plugin](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dsl-platform-maven-plugin%22)
+ * [SBT plugin](https://bintray.com/dsl-platform/sbt-dsl-platform)

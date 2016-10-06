@@ -74,9 +74,9 @@ instead of resolving services through the locator
 
 Of course, it's preferred to have such dependencies in the constructor, instead of resolving them through the locator.
 
-Revenj container is reflection based, but it's very performant (it only pays 2x penalty due to reflection). It could be made more performant by annotation processor on the @Inject, but gains would be slim and probably not worth it.
+While Revenj container supports reflection based, which it's very performant (it only pays 2x penalty due) for best performance it's recommended to use Java @Singleton and @Inject attributes. Revenj processor will wire up components at compile time, meaning there won't be any reflection penalty.
 
-Revenj will only resolve from public constructors in the order of constructor definition. Therefore if constructor order is important when there are multiple public constructors.
+Revenj will only resolve from public constructors in the order of constructor definition. Therefore if constructor order is important when there are multiple public constructors. If @Inject is used on specific constructor, Revenj will construct object instance using the specified constructor.
 
 It's preferred to register services into the container, but if that is not possible, resolve unknown option can be used. It can be enabled in `revenj.properties` file through
 
