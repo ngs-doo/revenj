@@ -9,14 +9,13 @@ import monix.execution.Cancelable
 import monix.reactive.Observable
 import monix.reactive.observers.Subscriber
 import monix.reactive.subjects.PublishSubject
-import net.revenj.database.postgres.PostgresReader
+import net.revenj.database.postgres.{ConnectionFactory, PostgresReader}
 import net.revenj.database.postgres.converters.StringConverter
 import net.revenj.extensibility.SystemState
 import net.revenj.patterns.DataChangeNotification.{NotifyInfo, Operation, TrackInfo}
 import net.revenj.patterns._
 import org.postgresql.PGNotification
 import org.postgresql.core.{BaseConnection, Notification, PGStream}
-import org.postgresql.core.v3.RevenjConnectionFactory
 import org.postgresql.util.HostSpec
 
 import scala.collection.concurrent.TrieMap
@@ -200,7 +199,7 @@ Either disable notifications, change it to pooling or provide revenj.jdbcUrl to 
       else parsed.getProperty("password", "")
       val db = parsed.getProperty("PGDBNAME")
       val host = new HostSpec(parsed.getProperty("PGHOST").split(",")(0), parsed.getProperty("PGPORT").split(",")(0).toInt)
-      val pgStream = RevenjConnectionFactory.openConnection(host, user, password, db, properties)
+      val pgStream = ConnectionFactory.openConnection(host, user, password, db, properties)
       retryCount = 0
       val listening = new Listening(pgStream)
       val thread = new Thread(listening)
@@ -232,7 +231,8 @@ Either disable notifications, change it to pooling or provide revenj.jdbcUrl to 
     receiveCommand(stream)
     if (stream.ReceiveChar != 'Z') throw new IOException("Unable to setup Postgres listener")
     private val num = stream.ReceiveInteger4
-    stream.Skip(num - 1)
+    if (num != 5) throw new IOException("unexpected length of ReadyForQuery packet")
+    stream.ReceiveChar()
 
     private def receiveCommand(pgStream: PGStream): Unit = {
       pgStream.ReceiveChar

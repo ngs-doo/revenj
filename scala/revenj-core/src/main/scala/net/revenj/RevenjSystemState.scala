@@ -5,8 +5,8 @@ import monix.reactive.subjects.PublishSubject
 import net.revenj.extensibility.{Container, SystemState}
 
 private[revenj] class RevenjSystemState extends SystemState {
-  private var systemBooting: Boolean = true
-  private var systemReady: Boolean = false
+  private var systemBooting = true
+  private var systemReady = false
   private val changeSubject = PublishSubject[SystemState.SystemEvent]()
   private val startupSubject = PublishSubject[Container]()
   private val changeEvents = changeSubject.map(identity)

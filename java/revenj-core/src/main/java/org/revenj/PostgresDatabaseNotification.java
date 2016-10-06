@@ -3,7 +3,7 @@ package org.revenj;
 import org.postgresql.PGNotification;
 import org.postgresql.core.BaseConnection;
 import org.postgresql.core.PGStream;
-import org.postgresql.core.v3.RevenjConnectionFactory;
+import org.revenj.database.postgres.ConnectionFactory;
 import org.postgresql.util.HostSpec;
 import org.revenj.extensibility.SystemState;
 import org.revenj.database.postgres.PostgresReader;
@@ -197,7 +197,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			String password = properties.containsKey("revenj.password") ? properties.getProperty("revenj.password") : parsed.getProperty("password", "");
 			String db = parsed.getProperty("PGDBNAME");
 			HostSpec host = new HostSpec(parsed.getProperty("PGHOST").split(",")[0], Integer.parseInt(parsed.getProperty("PGPORT").split(",")[0]));
-			PGStream pgStream = RevenjConnectionFactory.openConnection(host, user, password, db, properties);
+			PGStream pgStream = ConnectionFactory.openConnection(host, user, password, db, properties);
 			retryCount = 0;
 			Listening listening = new Listening(pgStream);
 			Thread thread = new Thread(listening);
@@ -230,10 +230,10 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			receiveCommand(stream);
 			receiveCommand(stream);
 			receiveCommand(stream);
-			int end = stream.ReceiveChar();
-			if (end != 'Z') throw new IOException("Unable to setup Postgres listener");
+			if (stream.ReceiveChar() != 'Z') throw new IOException("Unable to setup Postgres listener");
 			int num = stream.ReceiveInteger4();
-			stream.Skip(num - 4);
+			if (num != 5) throw new IOException("unexpected length of ReadyForQuery packet");
+			stream.ReceiveChar();
 		}
 
 		private void receiveCommand(PGStream pgStream) throws IOException {

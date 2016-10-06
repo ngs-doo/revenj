@@ -7,7 +7,7 @@
 *-------------------------------------------------------------------------
 */
 
-package org.postgresql.core.v3;
+package org.revenj.database.postgres;
 
 import org.postgresql.PGProperty;
 import org.postgresql.core.Encoding;
@@ -47,14 +47,11 @@ import javax.net.SocketFactory;
  * @author Oliver Jowett (oliver@opencloud.com), based on the previous implementation
  *         modified by Rikard Pavelic
  */
-public class RevenjConnectionFactory {
+public class ConnectionFactory {
 	private static final int AUTH_REQ_OK = 0;
-	private static final int AUTH_REQ_KRB4 = 1;
-	private static final int AUTH_REQ_KRB5 = 2;
 	private static final int AUTH_REQ_PASSWORD = 3;
 	private static final int AUTH_REQ_CRYPT = 4;
 	private static final int AUTH_REQ_MD5 = 5;
-	private static final int AUTH_REQ_SCM = 6;
 	private static final int AUTH_REQ_GSS = 7;
 	private static final int AUTH_REQ_GSS_CONTINUE = 8;
 	private static final int AUTH_REQ_SSPI = 9;
@@ -74,8 +71,7 @@ public class RevenjConnectionFactory {
 			Class[] cArg = new Class[]{PGStream.class, String.class, boolean.class, Logger.class};
 			return (ISSPIClient) c.getDeclaredConstructor(cArg)
 					.newInstance(pgStream, spnServiceClass, enableNegotiate, logger);
-		} catch (Exception e) {
-			// This catched quite a lot exceptions, but until Java 7 there is no ReflectiveOperationException
+		} catch (ReflectiveOperationException e) {
 			throw new IllegalStateException("Unable to load org.postgresql.sspi.SSPIClient."
 					+ " Please check that SSPIClient is included in your pgjdbc distribution.", e);
 		}
@@ -103,33 +99,11 @@ public class RevenjConnectionFactory {
 			}
 		}
 
-
-		// NOTE: To simplify this code, it is assumed that if we are
-		// using the V3 protocol, then the database is at least 7.4. That
-		// eliminates the need to check database versions and maintain
-		// backward-compatible code here.
-		//
-		// Change by Chris Smith <cdsmith@twu.net>
-
 		int connectTimeout = PGProperty.CONNECT_TIMEOUT.getInt(info) * 1000;
-
-		// - the targetServerType setting
-		HostRequirement targetServerType;
-		try {
-			targetServerType =
-					HostRequirement.valueOf(info.getProperty("targetServerType", HostRequirement.any.name()));
-		} catch (IllegalArgumentException ex) {
-			throw new PSQLException(
-					GT.tr("Invalid targetServerType value: {0}", info.getProperty("targetServerType")),
-					PSQLState.CONNECTION_UNABLE_TO_CONNECT);
-		}
 
 		SocketFactory socketFactory = SocketFactoryFactory.getSocketFactory(info);
 
 
-		//
-		// Establish a connection.
-		//
 		PGStream newStream = null;
 
 		try {
@@ -149,34 +123,14 @@ public class RevenjConnectionFactory {
 			// Enable TCP keep-alive probe if required.
 			newStream.getSocket().setKeepAlive(true);
 
-			// Try to set SO_SNDBUF and SO_RECVBUF socket options, if requested.
-			// If receiveBufferSize and send_buffer_size are set to a value greater
-			// than 0, adjust. -1 means use the system default, 0 is ignored since not
-			// supported.
-
-			// Set SO_RECVBUF read buffer size
 			int receiveBufferSize = PGProperty.RECEIVE_BUFFER_SIZE.getInt(info);
-			if (receiveBufferSize > -1) {
-				// value of 0 not a valid buffer size value
-				if (receiveBufferSize > 0) {
-					newStream.getSocket().setReceiveBufferSize(receiveBufferSize);
-				} else {
-					logger.info("Ignore invalid value for receiveBufferSize: " + receiveBufferSize);
-				}
+			if (receiveBufferSize > -1 && receiveBufferSize > 0) {
+				newStream.getSocket().setReceiveBufferSize(receiveBufferSize);
 			}
-
-			// Set SO_SNDBUF write buffer size
 			int sendBufferSize = PGProperty.SEND_BUFFER_SIZE.getInt(info);
-			if (sendBufferSize > -1) {
-				if (sendBufferSize > 0) {
-					newStream.getSocket().setSendBufferSize(sendBufferSize);
-				} else {
-					logger.info("Ignore invalid value for sendBufferSize: " + sendBufferSize);
-				}
+			if (sendBufferSize > -1 && sendBufferSize > 0) {
+				newStream.getSocket().setSendBufferSize(sendBufferSize);
 			}
-
-			logger.info("Receive Buffer Size is " + newStream.getSocket().getReceiveBufferSize());
-			logger.info("Send Buffer Size is " + newStream.getSocket().getSendBufferSize());
 
 			List<String[]> paramList = new ArrayList<String[]>();
 			paramList.add(new String[]{"user", user});
@@ -185,18 +139,10 @@ public class RevenjConnectionFactory {
 			paramList.add(new String[]{"DateStyle", "ISO"});
 			paramList.add(new String[]{"TimeZone", createPostgresTimeZone()});
 			String assumeMinServerVersion = PGProperty.ASSUME_MIN_SERVER_VERSION.get(info);
-			if (Utils.parseServerVersionStr(assumeMinServerVersion)
-					>= ServerVersion.v9_0.getVersionNum()) {
-				// User is explicitly telling us this is a 9.0+ server so set properties here:
-				paramList.add(new String[]{"extra_float_digits", "3"});
-				String appName = PGProperty.APPLICATION_NAME.get(info);
-				if (appName != null) {
-					paramList.add(new String[]{"application_name", appName});
-				}
-			} else {
-				// User has not explicitly told us that this is a 9.0+ server so stick to old default:
-				paramList.add(new String[]{"extra_float_digits", "2"});
-			}
+			// User is explicitly telling us this is a 9.0+ server so set properties here:
+			paramList.add(new String[]{"extra_float_digits", "3"});
+			String appName = PGProperty.APPLICATION_NAME.get(info);
+			paramList.add(new String[]{"application_name", appName == null ? "Revenj" : appName});
 
 			String currentSchema = PGProperty.CURRENT_SCHEMA.get(info);
 			if (currentSchema != null) {
@@ -209,45 +155,19 @@ public class RevenjConnectionFactory {
 			doAuthentication(newStream, hostSpec.getHost(), user, password, info, logger);
 
 			// Do final startup.
-			ProtocolConnectionImpl protoConnection =
-					new ProtocolConnectionImpl(newStream, user, database, info, logger, connectTimeout);
-			readStartupMessages(newStream, protoConnection, logger);
-
-			// Check Master or Slave
-			HostStatus hostStatus = HostStatus.ConnectOK;
-			if (targetServerType != HostRequirement.any) {
-				hostStatus = isMaster(protoConnection, logger) ? HostStatus.Master : HostStatus.Slave;
-			}
-			GlobalHostStatusTracker.reportHostStatus(hostSpec, hostStatus);
-			if (!targetServerType.allowConnectingTo(hostStatus)) {
-				protoConnection.close();
-				throw new PSQLException(GT
-						.tr("Could not find a server with specified targetServerType: {0}", targetServerType),
-						PSQLState.CONNECTION_UNABLE_TO_CONNECT);
-			}
-
-			runInitialQueries(protoConnection, info, logger);
+			readStartupMessages(newStream, logger);
 
 			// And we're done.
 			return newStream;
 		} catch (UnsupportedProtocolException upe) {
-			// Swallow this and return null so ConnectionFactory tries the next protocol.
-			if (logger.logDebug()) {
-				logger.debug("Protocol not supported, abandoning connection.");
-			}
 			closeStream(newStream);
 			throw new PSQLException(GT.tr("Unsupported protocol"), PSQLState.CONNECTION_UNABLE_TO_CONNECT, upe);
 		} catch (ConnectException cex) {
-			// Added by Peter Mount <peter@retep.org.uk>
-			// ConnectException is thrown when the connection cannot be made.
-			// we trap this an return a more meaningful message for the end user
-			GlobalHostStatusTracker.reportHostStatus(hostSpec, HostStatus.ConnectFail);
 			throw new PSQLException(GT.tr(
 					"Connection to {0} refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.",
 					hostSpec), PSQLState.CONNECTION_UNABLE_TO_CONNECT, cex);
 		} catch (IOException ioe) {
 			closeStream(newStream);
-			GlobalHostStatusTracker.reportHostStatus(hostSpec, HostStatus.ConnectFail);
 			throw new PSQLException(GT.tr("The connection attempt failed."),
 					PSQLState.CONNECTION_UNABLE_TO_CONNECT, ioe);
 		} catch (SQLException se) {
@@ -292,10 +212,6 @@ public class RevenjConnectionFactory {
 
 	private static PGStream enableSSL(PGStream pgStream, boolean requireSSL, Properties info, Logger logger,
 							   int connectTimeout) throws IOException, SQLException {
-		if (logger.logDebug()) {
-			logger.debug(" FE=> SSLRequest");
-		}
-
 		// Send SSL request packet
 		pgStream.SendInteger4(8);
 		pgStream.SendInteger2(1234);
@@ -306,10 +222,6 @@ public class RevenjConnectionFactory {
 		int beresp = pgStream.ReceiveChar();
 		switch (beresp) {
 			case 'E':
-				if (logger.logDebug()) {
-					logger.debug(" <=BE SSLError");
-				}
-
 				// Server doesn't even know about the SSL handshake protocol
 				if (requireSSL) {
 					throw new PSQLException(GT.tr("The server does not support SSL."),
@@ -321,10 +233,6 @@ public class RevenjConnectionFactory {
 				return new PGStream(pgStream.getSocketFactory(), pgStream.getHostSpec(), connectTimeout);
 
 			case 'N':
-				if (logger.logDebug()) {
-					logger.debug(" <=BE SSLRefused");
-				}
-
 				// Server does not support ssl
 				if (requireSSL) {
 					throw new PSQLException(GT.tr("The server does not support SSL."),
@@ -334,10 +242,6 @@ public class RevenjConnectionFactory {
 				return pgStream;
 
 			case 'S':
-				if (logger.logDebug()) {
-					logger.debug(" <=BE SSLOk");
-				}
-
 				// Server supports ssl
 				org.postgresql.ssl.MakeSSL.convert(pgStream, info, logger);
 				return pgStream;
@@ -350,19 +254,6 @@ public class RevenjConnectionFactory {
 
 	private static void sendStartupPacket(PGStream pgStream, List<String[]> params, Logger logger)
 			throws IOException {
-		if (logger.logDebug()) {
-			StringBuilder details = new StringBuilder();
-			for (int i = 0; i < params.size(); ++i) {
-				if (i != 0) {
-					details.append(", ");
-				}
-				details.append(params.get(i)[0]);
-				details.append("=");
-				details.append(params.get(i)[1]);
-			}
-			logger.debug(" FE=> StartupPacket(" + details + ")");
-		}
-
 		// Precalculate message length and encode params.
 		int length = 4 + 4;
 		byte[][] encodedParams = new byte[params.size() * 2][];
@@ -417,9 +308,6 @@ public class RevenjConnectionFactory {
 
 						ServerErrorMessage errorMsg =
 								new ServerErrorMessage(pgStream.ReceiveString(l_elen - 4), logger.getLogLevel());
-						if (logger.logDebug()) {
-							logger.debug(" <=BE ErrorMessage(" + errorMsg + ")");
-						}
 						throw new PSQLException(errorMsg);
 
 					case 'R':
@@ -435,24 +323,13 @@ public class RevenjConnectionFactory {
 							case AUTH_REQ_CRYPT: {
 								byte[] salt = pgStream.Receive(2);
 
-								if (logger.logDebug()) {
-									logger.debug(
-											" <=BE AuthenticationReqCrypt(salt='" + new String(salt, "US-ASCII") + "')");
-								}
-
 								if (password == null) {
 									throw new PSQLException(
-											GT.tr(
-													"The server requested password-based authentication, but no password was provided."),
+											GT.tr("The server requested password-based authentication, but no password was provided."),
 											PSQLState.CONNECTION_REJECTED);
 								}
 
 								byte[] encodedResult = UnixCrypt.crypt(salt, password.getBytes("UTF-8"));
-
-								if (logger.logDebug()) {
-									logger.debug(
-											" FE=> Password(crypt='" + new String(encodedResult, "US-ASCII") + "')");
-								}
 
 								pgStream.SendChar('p');
 								pgStream.SendInteger4(4 + encodedResult.length + 1);
@@ -465,24 +342,14 @@ public class RevenjConnectionFactory {
 
 							case AUTH_REQ_MD5: {
 								byte[] md5Salt = pgStream.Receive(4);
-								if (logger.logDebug()) {
-									logger
-											.debug(" <=BE AuthenticationReqMD5(salt=" + Utils.toHexString(md5Salt) + ")");
-								}
 
 								if (password == null) {
 									throw new PSQLException(
-											GT.tr(
-													"The server requested password-based authentication, but no password was provided."),
+											GT.tr("The server requested password-based authentication, but no password was provided."),
 											PSQLState.CONNECTION_REJECTED);
 								}
 
-								byte[] digest =
-										MD5Digest.encode(user.getBytes("UTF-8"), password.getBytes("UTF-8"), md5Salt);
-
-								if (logger.logDebug()) {
-									logger.debug(" FE=> Password(md5digest=" + new String(digest, "US-ASCII") + ")");
-								}
+								byte[] digest = MD5Digest.encode(user.getBytes("UTF-8"), password.getBytes("UTF-8"), md5Salt);
 
 								pgStream.SendChar('p');
 								pgStream.SendInteger4(4 + digest.length + 1);
@@ -501,8 +368,7 @@ public class RevenjConnectionFactory {
 
 								if (password == null) {
 									throw new PSQLException(
-											GT.tr(
-													"The server requested password-based authentication, but no password was provided."),
+											GT.tr("The server requested password-based authentication, but no password was provided."),
 											PSQLState.CONNECTION_REJECTED);
 								}
 
@@ -558,9 +424,6 @@ public class RevenjConnectionFactory {
 											areq == AUTH_REQ_SSPI || (areq == AUTH_REQ_GSS && usespnego), logger);
 
 									useSSPI = sspiClient.isSSPISupported();
-									if (logger.logDebug()) {
-										logger.debug("SSPI support detected: " + useSSPI);
-									}
 
 									if (!useSSPI) {
 										/* No need to dispose() if no SSPI used */
@@ -571,11 +434,6 @@ public class RevenjConnectionFactory {
 													"SSPI forced with gsslib=sspi, but SSPI not available; set loglevel=2 for details",
 													PSQLState.CONNECTION_UNABLE_TO_CONNECT);
 										}
-									}
-
-									if (logger.logDebug()) {
-										logger.debug("Using SSPI: " + useSSPI + ", gsslib=" + gsslib
-												+ " and SSPI support detected");
 									}
 								}
 
@@ -599,18 +457,10 @@ public class RevenjConnectionFactory {
 								break;
 
 							case AUTH_REQ_OK:
-								/* Cleanup after successful authentication */
-								if (logger.logDebug()) {
-									logger.debug(" <=BE AuthenticationOk");
-								}
 
 								break authloop; // We're done.
 
 							default:
-								if (logger.logDebug()) {
-									logger.debug(" <=BE AuthenticationReq (unsupported type " + (areq) + ")");
-								}
-
 								throw new PSQLException(GT.tr(
 										"The authentication type {0} is not supported. Check that you have configured the pg_hba.conf file to include the client''s IP address or subnet, and that it is using an authentication scheme supported by the driver.",
 										areq), PSQLState.CONNECTION_REJECTED);
@@ -637,8 +487,7 @@ public class RevenjConnectionFactory {
 
 	}
 
-	private static void readStartupMessages(PGStream pgStream, ProtocolConnectionImpl protoConnection,
-									 Logger logger) throws IOException, SQLException {
+	private static void readStartupMessages(PGStream pgStream, Logger logger) throws IOException, SQLException {
 		while (true) {
 			int beresp = pgStream.ReceiveChar();
 			switch (beresp) {
@@ -648,26 +497,7 @@ public class RevenjConnectionFactory {
 						throw new IOException("unexpected length of ReadyForQuery packet");
 					}
 
-					char tStatus = (char) pgStream.ReceiveChar();
-					if (logger.logDebug()) {
-						logger.debug(" <=BE ReadyForQuery(" + tStatus + ")");
-					}
-
-					// Update connection state.
-					switch (tStatus) {
-						case 'I':
-							protoConnection.setTransactionState(ProtocolConnection.TRANSACTION_IDLE);
-							break;
-						case 'T':
-							protoConnection.setTransactionState(ProtocolConnection.TRANSACTION_OPEN);
-							break;
-						case 'E':
-							protoConnection.setTransactionState(ProtocolConnection.TRANSACTION_FAILED);
-							break;
-						default:
-							// Huh?
-							break;
-					}
+					pgStream.ReceiveChar();
 
 					return;
 
@@ -679,14 +509,8 @@ public class RevenjConnectionFactory {
 								PSQLState.PROTOCOL_VIOLATION);
 					}
 
-					int pid = pgStream.ReceiveInteger4();
-					int ckey = pgStream.ReceiveInteger4();
-
-					if (logger.logDebug()) {
-						logger.debug(" <=BE BackendKeyData(pid=" + pid + ",ckey=" + ckey + ")");
-					}
-
-					protoConnection.setBackendKeyData(pid, ckey);
+					pgStream.ReceiveInteger4();
+					pgStream.ReceiveInteger4();
 					break;
 
 				case 'E':
@@ -695,28 +519,17 @@ public class RevenjConnectionFactory {
 					ServerErrorMessage l_errorMsg =
 							new ServerErrorMessage(pgStream.ReceiveString(l_elen - 4), logger.getLogLevel());
 
-					if (logger.logDebug()) {
-						logger.debug(" <=BE ErrorMessage(" + l_errorMsg + ")");
-					}
-
 					throw new PSQLException(l_errorMsg);
 
 				case 'N':
 					// Warning
 					int l_nlen = pgStream.ReceiveInteger4();
-					ServerErrorMessage l_warnMsg =
-							new ServerErrorMessage(pgStream.ReceiveString(l_nlen - 4), logger.getLogLevel());
-
-					if (logger.logDebug()) {
-						logger.debug(" <=BE NoticeResponse(" + l_warnMsg + ")");
-					}
-
-					protoConnection.addWarning(new PSQLWarning(l_warnMsg));
+					pgStream.ReceiveString(l_nlen - 4);
 					break;
 
 				case 'S':
 					// ParameterStatus
-					int l_len = pgStream.ReceiveInteger4();
+					pgStream.ReceiveInteger4();
 					String name = pgStream.ReceiveString();
 					String value = pgStream.ReceiveString();
 
@@ -724,79 +537,20 @@ public class RevenjConnectionFactory {
 						logger.debug(" <=BE ParameterStatus(" + name + " = " + value + ")");
 					}
 
-					if (name.equals("server_version_num")) {
-						protoConnection.setServerVersionNum(Integer.parseInt(value));
-					}
-					if (name.equals("server_version")) {
-						protoConnection.setServerVersion(value);
-					} else if (name.equals("client_encoding")) {
+					if (name.equals("client_encoding")) {
 						if (!value.equals("UTF8")) {
 							throw new PSQLException(GT.tr("Protocol error.  Session setup failed."),
 									PSQLState.PROTOCOL_VIOLATION);
 						}
 						pgStream.setEncoding(Encoding.getDatabaseEncoding("UTF8"));
-					} else if (name.equals("standard_conforming_strings")) {
-						if (value.equals("on")) {
-							protoConnection.setStandardConformingStrings(true);
-						} else if (value.equals("off")) {
-							protoConnection.setStandardConformingStrings(false);
-						} else {
-							throw new PSQLException(GT.tr("Protocol error.  Session setup failed."),
-									PSQLState.PROTOCOL_VIOLATION);
-						}
-					} else if (name.equals("integer_datetimes")) {
-						if (value.equals("on")) {
-							protoConnection.setIntegerDateTimes(true);
-						} else if (value.equals("off")) {
-							protoConnection.setIntegerDateTimes(false);
-						} else {
-							throw new PSQLException(GT.tr("Protocol error.  Session setup failed."),
-									PSQLState.PROTOCOL_VIOLATION);
-						}
 					}
 
 					break;
 
 				default:
-					if (logger.logDebug()) {
-						logger.debug("invalid message type=" + (char) beresp);
-					}
 					throw new PSQLException(GT.tr("Protocol error.  Session setup failed."),
 							PSQLState.PROTOCOL_VIOLATION);
 			}
 		}
-	}
-
-	private static void runInitialQueries(ProtocolConnection protoConnection, Properties info, Logger logger)
-			throws SQLException {
-		String assumeMinServerVersion = PGProperty.ASSUME_MIN_SERVER_VERSION.get(info);
-		if (Utils.parseServerVersionStr(assumeMinServerVersion) >= ServerVersion.v9_0.getVersionNum()) {
-			// We already sent the parameter values in the StartupMessage so skip this
-			return;
-		}
-
-		final int dbVersion = protoConnection.getServerVersionNum();
-
-		if (dbVersion >= ServerVersion.v9_0.getVersionNum()) {
-			SetupQueryRunner.run(protoConnection, "SET extra_float_digits = 3", false);
-		}
-
-		String appName = PGProperty.APPLICATION_NAME.get(info);
-		if (appName == null) appName = "Revenj";
-		if (dbVersion >= ServerVersion.v9_0.getVersionNum()) {
-			StringBuilder sql = new StringBuilder();
-			sql.append("SET application_name = '");
-			Utils.escapeLiteral(sql, appName, protoConnection.getStandardConformingStrings());
-			sql.append("'");
-			SetupQueryRunner.run(protoConnection, sql.toString(), false);
-		}
-
-	}
-
-	private static boolean isMaster(ProtocolConnectionImpl protoConnection, Logger logger)
-			throws SQLException, IOException {
-		byte[][] results = SetupQueryRunner.run(protoConnection, "show transaction_read_only", true);
-		String value = protoConnection.getEncoding().decode(results[0]);
-		return value.equalsIgnoreCase("off");
 	}
 }
