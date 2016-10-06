@@ -97,7 +97,7 @@ private [revenj] class PostgresDatabaseNotification(
       }
       if (bc.isDefined) {
         val stmt = bc.get.createStatement
-        stmt.execute("LISTEN events; LISTEN aggregate_roots; LISTEN migration;")
+        stmt.execute("LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj")
         retryCount = 0
         val pooling = new Pooling(bc.get, stmt)
         val thread = new Thread(pooling)
@@ -107,6 +107,7 @@ private [revenj] class PostgresDatabaseNotification(
     } catch {
       case ex: Exception =>
         try {
+          systemState.notify(SystemState.SystemEvent("notification", "issue: " + ex.getMessage))
           Thread.sleep(1000 * retryCount)
         } catch {
           case e: InterruptedException =>
@@ -137,8 +138,9 @@ private [revenj] class PostgresDatabaseNotification(
             messages foreach { n => processNotification(reader, n) }
           }
         } catch {
-          case _: Throwable =>
+          case ex: Throwable =>
             try {
+              systemState.notify(SystemState.SystemEvent("notification", "error: " + ex.getMessage))
               Thread.sleep(1000)
             } catch {
               case e: InterruptedException => e.printStackTrace()
@@ -174,9 +176,7 @@ private [revenj] class PostgresDatabaseNotification(
         case _ =>
       }
     } else {
-      if ("migration" == n.getName) {
-        systemState.notify(SystemState.SystemEvent("migration", n.getParameter))
-      }
+      systemState.notify(SystemState.SystemEvent(n.getName, n.getParameter))
     }
   }
 
@@ -184,9 +184,16 @@ private [revenj] class PostgresDatabaseNotification(
     retryCount += 1
     if (retryCount > 60) retryCount = 30
     val jdbcUrl = properties.getProperty("revenj.jdbcUrl")
-    if (jdbcUrl == null || jdbcUrl.isEmpty) throw new RuntimeException("Unable to read jdbcUrl from properties. Listening notification is not supported without it")
+    if (jdbcUrl == null || jdbcUrl.isEmpty) {
+      throw new RuntimeException("""Unable to read revenj.jdbcUrl from properties. Listening notification is not supported without it.
+Either disable notifications, change it to pooling or provide revenj.jdbcUrl to properties.""")
+    }
+    val pgUrl =
+      if (!jdbcUrl.startsWith("jdbc:postgresql:") && jdbcUrl.contains("://")) "jdbc:postgresql" + jdbcUrl.substring(jdbcUrl.indexOf("://"))
+      else jdbcUrl
+    val parsed = org.postgresql.Driver.parseURL(pgUrl, properties)
+    if (parsed == null) throw new RuntimeException("Unable to parse revenj.jdbcUrl")
     try {
-      val parsed = org.postgresql.Driver.parseURL(jdbcUrl, properties)
       val user = if (properties.containsKey("revenj.user")) properties.getProperty("revenj.user")
       else parsed.getProperty("user", "")
       val password = if (properties.containsKey("revenj.password")) properties.getProperty("revenj.password")
@@ -202,6 +209,7 @@ private [revenj] class PostgresDatabaseNotification(
     } catch {
       case ex: Exception =>
         try {
+          systemState.notify(SystemState.SystemEvent("notification", "issue: " + ex.getMessage))
           Thread.sleep(1000 * retryCount)
         } catch {
           case e: InterruptedException =>
@@ -211,7 +219,7 @@ private [revenj] class PostgresDatabaseNotification(
   }
 
   private class Listening (stream: PGStream) extends Runnable {
-    private val command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration".getBytes("UTF-8")
+    private val command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj".getBytes("UTF-8")
     private val rawStream = stream.getSocket.getInputStream
     stream.SendChar('Q')
     stream.SendInteger4(command.length + 5)
@@ -221,10 +229,10 @@ private [revenj] class PostgresDatabaseNotification(
     receiveCommand(stream)
     receiveCommand(stream)
     receiveCommand(stream)
+    receiveCommand(stream)
     if (stream.ReceiveChar != 'Z') throw new IOException("Unable to setup Postgres listener")
     private val num = stream.ReceiveInteger4
-    if (num != 5) throw new IOException("Unable to setup Postgres listener. Expecting 5. Got " + num)
-    stream.ReceiveChar
+    stream.Skip(num - 1)
 
     private def receiveCommand(pgStream: PGStream): Unit = {
       pgStream.ReceiveChar
@@ -235,6 +243,7 @@ private [revenj] class PostgresDatabaseNotification(
     def run(): Unit = {
       val reader = new PostgresReader
       val pgStream = stream
+      systemState.notify(SystemState.SystemEvent("notification", "started"))
       var threadAlive = true
       while (threadAlive && !isClosed) {
         try {
@@ -262,6 +271,7 @@ private [revenj] class PostgresDatabaseNotification(
             try {
               threadAlive = false
               pgStream.close()
+              systemState.notify(SystemState.SystemEvent("notification", "error: " + ex.getMessage))
               Thread.sleep(1000)
             } catch {
               case e: Exception => e.printStackTrace()

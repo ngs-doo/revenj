@@ -112,7 +112,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			}
 			if (bc != null) {
 				Statement stmt = bc.createStatement();
-				stmt.execute("LISTEN events; LISTEN aggregate_roots; LISTEN migration;");
+				stmt.execute("LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj");
 				retryCount = 0;
 				Pooling pooling = new Pooling(bc, stmt);
 				Thread thread = new Thread(pooling);
@@ -121,6 +121,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			} else cleanupConnection(connection);
 		} catch (Exception ex) {
 			try {
+				systemState.notify(new SystemState.SystemEvent("notification", "issue: " + ex.getMessage()));
 				Thread.sleep(1000 * retryCount);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -141,6 +142,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		public void run() {
 			PostgresReader reader = new PostgresReader();
 			int timeout = maxTimeout;
+			systemState.notify(new SystemState.SystemEvent("notification", "started"));
 			while (!isClosed) {
 				try {
 					ping.execute("");
@@ -163,6 +165,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 					}
 				} catch (SQLException | IOException ex) {
 					try {
+						systemState.notify(new SystemState.SystemEvent("notification", "error: " + ex.getMessage()));
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -182,9 +185,14 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			retryCount = 30;
 		}
 		String jdbcUrl = properties.getProperty("revenj.jdbcUrl");
-		if (jdbcUrl == null || jdbcUrl.isEmpty()) throw new RuntimeException("Unable to read jdbcUrl from properties. Listening notification is not supported without it")
+		if (jdbcUrl == null || jdbcUrl.isEmpty()) {
+			throw new RuntimeException("Unable to read revenj.jdbcUrl from properties. Listening notification is not supported without it.\n"
+			+"Either disable notifications, change it to pooling or provide revenj.jdbcUrl to properties.");
+		}
+		if (!jdbcUrl.startsWith("jdbc:postgresql:") && jdbcUrl.contains("://")) jdbcUrl = "jdbc:postgresql" + jdbcUrl.substring(jdbcUrl.indexOf("://"));
+		Properties parsed = org.postgresql.Driver.parseURL(jdbcUrl, properties);
+		if (parsed == null) throw new RuntimeException("Unable to parse revenj.jdbcUrl");
 		try {
-			Properties parsed = org.postgresql.Driver.parseURL(jdbcUrl, properties);
 			String user = properties.containsKey("revenj.user") ? properties.getProperty("revenj.user") : parsed.getProperty("user", "");
 			String password = properties.containsKey("revenj.password") ? properties.getProperty("revenj.password") : parsed.getProperty("password", "");
 			String db = parsed.getProperty("PGDBNAME");
@@ -197,6 +205,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			thread.start();
 		} catch (Exception ex) {
 			try {
+				systemState.notify(new SystemState.SystemEvent("notification", "issue: " + ex.getMessage()));
 				Thread.sleep(1000 * retryCount);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -210,7 +219,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 
 		Listening(PGStream stream) throws IOException {
 			this.stream = stream;
-			byte[] command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration".getBytes("UTF-8");
+			byte[] command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj".getBytes("UTF-8");
 			rawStream = stream.getSocket().getInputStream();
 			stream.SendChar('Q');
 			stream.SendInteger4(command.length + 5);
@@ -220,11 +229,11 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			receiveCommand(stream);
 			receiveCommand(stream);
 			receiveCommand(stream);
+			receiveCommand(stream);
 			int end = stream.ReceiveChar();
 			if (end != 'Z') throw new IOException("Unable to setup Postgres listener");
 			int num = stream.ReceiveInteger4();
-			if (num != 5) throw new IOException("Unable to setup Postgres listener. Expecting 5. Got " + num);
-			stream.ReceiveChar();
+			stream.Skip(num - 4);
 		}
 
 		private void receiveCommand(PGStream pgStream) throws IOException {
@@ -237,6 +246,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		public void run() {
 			PostgresReader reader = new PostgresReader();
 			final PGStream pgStream = stream;
+			systemState.notify(new SystemState.SystemEvent("notification", "started"));
 			while (!isClosed) {
 				try {
 					while (!isClosed && rawStream.available() == 0) {
@@ -261,6 +271,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 				} catch (Exception ex) {
 					try {
 						pgStream.close();
+						systemState.notify(new SystemState.SystemEvent("notification", "error: " + ex.getMessage()));
 						Thread.sleep(1000);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -277,34 +288,32 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 	}
 
 	private void processNotification(PostgresReader reader, PGNotification n) throws IOException {
-		if (!"events".equals(n.getName()) && !"aggregate_roots".equals(n.getName())) {
-			if ("migration".equals(n.getName())) {
-				systemState.notify(new SystemState.SystemEvent("migration", n.getParameter()));
+		if ("events".equals(n.getName()) || "aggregate_roots".equals(n.getName())) {
+			String param = n.getParameter();
+			String ident = param.substring(0, param.indexOf(':'));
+			String op = param.substring(ident.length() + 1, param.indexOf(':', ident.length() + 1));
+			String values = param.substring(ident.length() + op.length() + 2);
+			reader.process(values);
+			List<String> ids = StringConverter.parseCollection(reader, 0, false);
+			if (ids != null && ids.size() > 0) {
+				String[] uris = ids.toArray(new String[ids.size()]);
+				switch (op) {
+					case "Update":
+						subject.onNext(new NotifyInfo(ident, Operation.Update, uris));
+						break;
+					case "Change":
+						subject.onNext(new NotifyInfo(ident, Operation.Change, uris));
+						break;
+					case "Delete":
+						subject.onNext(new NotifyInfo(ident, Operation.Delete, uris));
+						break;
+					default:
+						subject.onNext(new NotifyInfo(ident, Operation.Insert, uris));
+						break;
+				}
 			}
-			return;
-		}
-		String param = n.getParameter();
-		String ident = param.substring(0, param.indexOf(':'));
-		String op = param.substring(ident.length() + 1, param.indexOf(':', ident.length() + 1));
-		String values = param.substring(ident.length() + op.length() + 2);
-		reader.process(values);
-		List<String> ids = StringConverter.parseCollection(reader, 0, false);
-		if (ids != null && ids.size() > 0) {
-			String[] uris = ids.toArray(new String[ids.size()]);
-			switch (op) {
-				case "Update":
-					subject.onNext(new NotifyInfo(ident, Operation.Update, uris));
-					break;
-				case "Change":
-					subject.onNext(new NotifyInfo(ident, Operation.Change, uris));
-					break;
-				case "Delete":
-					subject.onNext(new NotifyInfo(ident, Operation.Delete, uris));
-					break;
-				default:
-					subject.onNext(new NotifyInfo(ident, Operation.Insert, uris));
-					break;
-			}
+		} else {
+			systemState.notify(new SystemState.SystemEvent(n.getName(), n.getParameter()));
 		}
 	}
 
