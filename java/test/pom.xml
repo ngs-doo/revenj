@@ -45,13 +45,13 @@
 		<dependency>
 			<groupId>ru.yandex.qatools.embed</groupId>
 			<artifactId>embedded-services</artifactId>
-			<version>1.20</version>
+			<version>1.21</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.dslplatform</groupId>
 			<artifactId>dsl-clc</artifactId>
-			<version>1.8.0</version>
+			<version>1.8.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -3,11 +3,9 @@ package org.revenj;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
-import org.revenj.extensibility.SystemAspect;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ServiceLoader;
 
 public class TestContainer {
 
@@ -49,11 +47,7 @@ public class TestContainer {
 
 	@Test
 	public void willRespectInjectAnnotation() throws Exception {
-		Container container = new SimpleContainer(false);
-		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class);
-		for(SystemAspect a : aspects) {
-			a.configure(container);
-		}
+		Container container = Revenj.container(false, TestContainer.class.getClassLoader());
 		WithInject wi = container.resolve(WithInject.class);
 		Assert.assertEquals(42, wi.value);
 		A1 a = container.resolve(A1.class);
@@ -62,22 +56,14 @@ public class TestContainer {
 
 	@Test
 	public void canResolveGenerics() throws Exception {
-		Container container = new SimpleContainer(false);
-		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class);
-		for(SystemAspect a : aspects) {
-			a.configure(container);
-		}
+		Container container = Revenj.container(false, TestContainer.class.getClassLoader());
 		Generics<A1> wi = container.resolve(Generics.class, A1.class);
 		Assert.assertTrue(wi.t instanceof A1);
 	}
 
 	@Test
 	public void canResolveGenericArg() throws Exception {
-		Container container = new SimpleContainer(false);
-		ServiceLoader<SystemAspect> aspects = ServiceLoader.load(SystemAspect.class);
-		for(SystemAspect a : aspects) {
-			a.configure(container);
-		}
+		Container container = Revenj.container(false, TestContainer.class.getClassLoader());
 		GenArg wi = container.resolve(GenArg.class);
 		Assert.assertTrue(wi.g.t instanceof A1);
 	}

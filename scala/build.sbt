@@ -74,9 +74,9 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "com.dslplatform" % "dsl-clc" % "1.7.2" % Test,
+      "com.dslplatform" % "dsl-clc" % "1.8.1" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test,
-      "ru.yandex.qatools.embed" % "embedded-services" % "1.20" % Test
+      "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
     ),
     publishLocal := {},

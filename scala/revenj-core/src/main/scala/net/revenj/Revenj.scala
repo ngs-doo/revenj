@@ -57,7 +57,7 @@ object Revenj {
       throw new IOException("revenj.jdbcUrl is missing from Properties")
     }
     if (!jdbcUrl.startsWith("jdbc:postgresql:")) {
-      throw new IOException("""Invalid revenj.jdbcUrl provided. Expecting: 'jdbc:postgresql:...'. Found: '$jdbcUrl'.
+      throw new IOException(s"""Invalid revenj.jdbcUrl provided. Expecting: 'jdbc:postgresql:...'. Found: '$jdbcUrl'.
 If you wish to use custom jdbc driver provide custom data source instead of using Postgres builtin data source.""")
     }
     val dataSource = new PGPoolingDataSource

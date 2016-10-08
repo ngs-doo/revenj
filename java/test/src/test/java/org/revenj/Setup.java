@@ -30,6 +30,14 @@ public abstract class Setup {
 		public void log(char[] value, int len) {
 		}
 
+		public void warning(String value) {
+			error.append(value);
+		}
+
+		public void warning(Exception ex) {
+			error.append(ex.getMessage());
+		}
+
 		public void error(String value) {
 			error.append(value);
 		}
@@ -37,7 +45,6 @@ public abstract class Setup {
 		public void error(Exception ex) {
 			error.append(ex.getMessage());
 		}
-
 	}
 
 	private static PostgresEmbeddedService postgres;
