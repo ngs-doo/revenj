@@ -187,7 +187,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		String jdbcUrl = properties.getProperty("revenj.jdbcUrl");
 		if (jdbcUrl == null || jdbcUrl.isEmpty()) {
 			throw new RuntimeException("Unable to read revenj.jdbcUrl from properties. Listening notification is not supported without it.\n"
-			+"Either disable notifications, change it to pooling or provide revenj.jdbcUrl to properties.");
+			+"Either disable notifications (revenj.notifications.status=disabled), change it to pooling (revenj.notifications.type=pooling) or provide revenj.jdbcUrl to properties.");
 		}
 		if (!jdbcUrl.startsWith("jdbc:postgresql:") && jdbcUrl.contains("://")) jdbcUrl = "jdbc:postgresql" + jdbcUrl.substring(jdbcUrl.indexOf("://"));
 		Properties parsed = org.postgresql.Driver.parseURL(jdbcUrl, properties);

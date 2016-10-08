@@ -141,4 +141,16 @@ public class TestPostgres {
 		List<Long> result = LongConverter.parseCollection(reader, 0, false);
 		Assert.assertEquals(longs, result);
 	}
+
+	@Test
+	public void invalidUrl() throws IOException {
+		try {
+			Properties p = new Properties();
+			p.setProperty("revenj.jdbcUrl", "jdbc:logging:postgres://localhost/db");
+			Revenj.dataSource(p);
+			Assert.fail("Expecting IOException");
+		} catch (IOException ex) {
+			Assert.assertTrue(ex.getMessage().contains("Invalid revenj.jdbcUrl provided. Expecting: 'jdbc:postgresql"));
+		}
+	}
 }

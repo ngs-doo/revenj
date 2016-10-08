@@ -67,6 +67,10 @@ public abstract class Revenj {
 		if (jdbcUrl == null) {
 			throw new IOException("revenj.jdbcUrl is missing from Properties");
 		}
+		if (!jdbcUrl.startsWith("jdbc:postgresql:")) {
+			throw new IOException("Invalid revenj.jdbcUrl provided. Expecting: 'jdbc:postgresql:...'. Found: '" + jdbcUrl + "'.\n" +
+					"If you wish to use custom jdbc driver provide custom data source instead of using Postgres builtin data source.");
+		}
 		org.postgresql.ds.PGPoolingDataSource dataSource = new PGPoolingDataSource();
 		dataSource.setUrl(jdbcUrl);
 		String user = properties.getProperty("user");

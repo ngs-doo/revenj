@@ -185,7 +185,7 @@ private [revenj] class PostgresDatabaseNotification(
     val jdbcUrl = properties.getProperty("revenj.jdbcUrl")
     if (jdbcUrl == null || jdbcUrl.isEmpty) {
       throw new RuntimeException("""Unable to read revenj.jdbcUrl from properties. Listening notification is not supported without it.
-Either disable notifications, change it to pooling or provide revenj.jdbcUrl to properties.""")
+Either disable notifications (revenj.notifications.status=disabled), change it to pooling (revenj.notifications.type=pooling) or provide revenj.jdbcUrl to properties.""")
     }
     val pgUrl =
       if (!jdbcUrl.startsWith("jdbc:postgresql:") && jdbcUrl.contains("://")) "jdbc:postgresql" + jdbcUrl.substring(jdbcUrl.indexOf("://"))
