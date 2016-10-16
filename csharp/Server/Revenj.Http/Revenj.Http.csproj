@@ -163,7 +163,6 @@
     <PostBuildEvent>copy ..\..\..\..\Plugins\Revenj.Plugins.Aspects\bin\$(ConfigurationName)\Revenj.Plugins.Aspects.dll .
 copy ..\..\..\..\Plugins\Revenj.Plugins.Server.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Server.Commands.dll .
 copy ..\..\..\..\Plugins\Revenj.Plugins.Rest.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Rest.Commands.dll .
-copy ..\..\..\..\Features\Revenj.Features.RestCache\bin\$(ConfigurationName)\Revenj.Features.RestCache.dll .
 copy ..\..\..\..\Features\Revenj.Features.Mailer\bin\$(ConfigurationName)\Revenj.Features.Mailer.dll .
 copy ..\..\..\..\Features\Revenj.Features.Storage\bin\$(ConfigurationName)\Revenj.Features.Storage.dll .
 copy ..\..\..\..\..\Dependencies\Templater\NGS.Templater.dll .
