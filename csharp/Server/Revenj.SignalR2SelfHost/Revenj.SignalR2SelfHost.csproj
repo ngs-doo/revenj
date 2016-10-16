@@ -107,9 +107,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Domain\Revenj.DomainPatterns.Interface\Revenj.DomainPatterns.Interface.csproj">
-      <Project>{1BC1AA42-67B6-4EFD-B717-2AB6FEB981B8}</Project>
-      <Name>Revenj.DomainPatterns.Interface</Name>
+    <ProjectReference Include="..\..\Core\Revenj.Core.Interface\Revenj.Core.Interface.csproj">
+      <Project>{1bc1aa42-67b6-4efd-b717-2ab6feb981b8}</Project>
+      <Name>Revenj.Core.Interface</Name>
     </ProjectReference>
     <ProjectReference Include="..\Revenj.Wcf\Revenj.Wcf.csproj">
       <Project>{30CDA3F6-A7A1-499B-B209-118079235744}</Project>
