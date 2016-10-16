@@ -9,7 +9,6 @@ using System.Security;
 using System.Security.Principal;
 using System.ServiceModel;
 using System.Threading;
-using System.Threading.Tasks;
 using Revenj.Api;
 using Revenj.DomainPatterns;
 
@@ -118,7 +117,7 @@ Please check settings: " + string.Join(", ", endpoints));
 				ThreadPool.SetMinThreads(64 + Environment.ProcessorCount * 3, 64 + Environment.ProcessorCount * 3);
 				Console.WriteLine("Http server running");
 				var ctx = Context.Value;
-				var loops = Math.Max(1, Environment.ProcessorCount / 2);
+				var loops = Math.Max(1, Environment.ProcessorCount * 3 / 4);
 				for (int i = 0; i < loops; i++)
 				{
 					var thread = new Thread(ProcessSocketLoop);
@@ -134,7 +133,7 @@ Please check settings: " + string.Join(", ", endpoints));
 						{
 							socket.Blocking = true;
 							if (Requests.TryAdd(new RequestInfo(socket)))
-								Task.Factory.StartNew(TryProcessSocket);
+								ThreadPool.QueueUserWorkItem(TryProcessSocket);
 							else
 								ctx.ReturnError(socket, 503);
 						}
@@ -196,7 +195,7 @@ Please check settings: " + string.Join(", ", endpoints));
 			}
 		}
 
-		private void TryProcessSocket()
+		private void TryProcessSocket(object _)
 		{
 			RequestInfo request;
 			if (Requests.TryTake(out request))
