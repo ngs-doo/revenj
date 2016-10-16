@@ -212,6 +212,17 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         find.size === 1
         find.head.x === x
       }
+      "search with spec on sql" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ctx = container.resolve[UnitOfWork]
+        val x = (new java.util.Date().getTime / 10000).asInstanceOf[Int]
+        val abc = Abc(s = "ctx")
+        Await.result(ctx.create(abc), Duration.Inf)
+        val find = Await.result(ctx.search(AbcSql.Filter(s = "ctx")), Duration.Inf)
+        ctx.commit() must beEqualTo(()).await
+        container.close()
+        find.size >= 1
+      }
       "report test" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val ctx = container.resolve[UnitOfWork]
