@@ -15,7 +15,6 @@ import rx.subjects.PublishSubject;
 import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -42,6 +41,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 	private final int maxTimeout;
 
 	private boolean isClosed;
+	private PGStream currentStream;
 
 	public PostgresDatabaseNotification(
 			DataSource dataSource,
@@ -171,7 +171,9 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 						e.printStackTrace();
 					}
 					cleanupConnection(connection);
-					setupPooling();
+					if (!isClosed) {
+						setupPooling();
+					}
 					return;
 				}
 			}
@@ -198,6 +200,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			String db = parsed.getProperty("PGDBNAME");
 			HostSpec host = new HostSpec(parsed.getProperty("PGHOST").split(",")[0], Integer.parseInt(parsed.getProperty("PGPORT").split(",")[0]));
 			PGStream pgStream = ConnectionFactory.openConnection(host, user, password, db, properties);
+			currentStream = pgStream;
 			retryCount = 0;
 			Listening listening = new Listening(pgStream);
 			Thread thread = new Thread(listening);
@@ -215,12 +218,10 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 
 	private class Listening implements Runnable {
 		private final PGStream stream;
-		private final InputStream rawStream;
 
 		Listening(PGStream stream) throws IOException {
 			this.stream = stream;
 			byte[] command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj".getBytes("UTF-8");
-			rawStream = stream.getSocket().getInputStream();
 			stream.SendChar('Q');
 			stream.SendInteger4(command.length + 5);
 			stream.Send(command);
@@ -249,10 +250,6 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			systemState.notify(new SystemState.SystemEvent("notification", "started"));
 			while (!isClosed) {
 				try {
-					while (!isClosed && rawStream.available() == 0) {
-						Thread.sleep(1);
-					}
-					if (isClosed) break;
 					switch (pgStream.ReceiveChar()) {
 						case 'A':
 							pgStream.ReceiveInteger4();
@@ -262,25 +259,33 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 							processNotification(reader, new org.postgresql.core.Notification(msgA, pidA, paramA));
 							break;
 						case 'E':
-							int e_len = pgStream.ReceiveInteger4();
-							String err = pgStream.ReceiveString(e_len - 4);
-							throw new IOException(err);
+							if (!isClosed) {
+								int e_len = pgStream.ReceiveInteger4();
+								String err = pgStream.ReceiveString(e_len - 4);
+								throw new IOException(err);
+							} else break;
 						default:
-							throw new IOException("Unexpected packet type");
+							if (!isClosed) {
+								throw new IOException("Unexpected packet type");
+							} else break;
 					}
 				} catch (Exception ex) {
 					try {
-						pgStream.close();
+						currentStream = null;
 						systemState.notify(new SystemState.SystemEvent("notification", "error: " + ex.getMessage()));
+						pgStream.close();
 						Thread.sleep(1000);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					setupListening();
+					if (!isClosed) {
+						setupListening();
+					}
 					return;
 				}
 			}
 			try {
+				currentStream = null;
 				pgStream.close();
 			} catch (Exception ignore) {
 			}
@@ -387,5 +392,11 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 
 	public void close() {
 		isClosed = true;
+		try {
+			if (currentStream != null) {
+				currentStream.close();
+			}
+		} catch (Exception ignore) {
+		}
 	}
 }

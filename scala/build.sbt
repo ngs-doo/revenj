@@ -5,7 +5,7 @@ import com.dslplatform.compiler.client.parameters.{Settings, Targets}
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.3.1",
+    version := "0.3.2",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1209",
       "joda-time" % "joda-time" % "2.9.4", //TODO: will be removed
@@ -25,7 +25,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.3.1",
+  version := "0.3.2",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.0",
     "com.typesafe.akka" %% "akka-http-core" % "2.4.9"
@@ -54,7 +54,13 @@ lazy val tests = (project in file("tests")
     ),
     dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME),
     resourceGenerators in Test += Def.task {
-      com.dslplatform.sbt.Actions.scanEventHandlers(streams.value.log, target.value, (resourceManaged in Test).value / "META-INF" / "services")
+      com.dslplatform.sbt.Actions.generateResources(
+        streams.value.log,
+        Targets.Option.REVENJ_SCALA,
+        (resourceManaged in Test).value / "META-INF" / "services",
+        Seq(target.value),
+        (dependencyClasspath in Test).value
+      )
     }.taskValue,
     sourceGenerators in Test += Def.task {
       com.dslplatform.sbt.Actions.generateSource(
@@ -64,6 +70,8 @@ lazy val tests = (project in file("tests")
         dslDslPath.value,
         dslPlugins.value,
         dslCompiler.value,
+        dslServerMode.value,
+        dslServerPort.value,
         dslNamespace.value,
         dslSettings.value,
         dslLatest.value)

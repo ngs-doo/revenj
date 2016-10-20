@@ -36,6 +36,7 @@ private [revenj] class PostgresDatabaseNotification(
   private val targets = new TrieMap[String, Set[Class[_]]]
   private var retryCount = 0
   private var isClosed = false
+  private var currentStream: Option[PGStream] = None
 
   private val maxTimeout = {
     val timeoutValue = properties.getProperty("revenj.notifications.timeout")
@@ -106,7 +107,7 @@ private [revenj] class PostgresDatabaseNotification(
     } catch {
       case ex: Exception =>
         try {
-          systemState.notify(SystemState.SystemEvent("notification", "issue: " + ex.getMessage))
+          systemState.notify(SystemState.SystemEvent("notification", s"issue: ${ex.getMessage}"))
           Thread.sleep(1000 * retryCount)
         } catch {
           case e: InterruptedException =>
@@ -119,7 +120,9 @@ private [revenj] class PostgresDatabaseNotification(
     def run(): Unit = {
       val reader = new PostgresReader
       var timeout = maxTimeout
-      while (!isClosed) {
+      systemState.notify(SystemState.SystemEvent("notification", "started"))
+      var threadAlive = true
+      while (threadAlive && !isClosed) {
         try {
           ping.execute("")
           val messages = connection.getNotifications
@@ -127,7 +130,9 @@ private [revenj] class PostgresDatabaseNotification(
             try {
               Thread.sleep(timeout)
             } catch {
-              case e: InterruptedException => e.printStackTrace()
+              case e: InterruptedException =>
+                threadAlive = false
+                e.printStackTrace()
             }
             if (timeout < maxTimeout) {
               timeout += 1
@@ -138,18 +143,22 @@ private [revenj] class PostgresDatabaseNotification(
           }
         } catch {
           case ex: Throwable =>
+            threadAlive = false
             try {
-              systemState.notify(SystemState.SystemEvent("notification", "error: " + ex.getMessage))
+              systemState.notify(SystemState.SystemEvent("notification", s"error: ${ex.getMessage}"))
               Thread.sleep(1000)
             } catch {
               case e: InterruptedException => e.printStackTrace()
             }
             cleanupConnection(connection)
-            setupPooling()
-            return
+            if (!isClosed) {
+              setupPooling()
+            }
         }
       }
-      cleanupConnection(connection)
+      if (threadAlive) {
+        cleanupConnection(connection)
+      }
     }
   }
 
@@ -200,6 +209,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
       val db = parsed.getProperty("PGDBNAME")
       val host = new HostSpec(parsed.getProperty("PGHOST").split(",")(0), parsed.getProperty("PGPORT").split(",")(0).toInt)
       val pgStream = ConnectionFactory.openConnection(host, user, password, db, properties)
+      currentStream = Some(pgStream)
       retryCount = 0
       val listening = new Listening(pgStream)
       val thread = new Thread(listening)
@@ -208,7 +218,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     } catch {
       case ex: Exception =>
         try {
-          systemState.notify(SystemState.SystemEvent("notification", "issue: " + ex.getMessage))
+          systemState.notify(SystemState.SystemEvent("notification", s"issue: ${ex.getMessage}"))
           Thread.sleep(1000 * retryCount)
         } catch {
           case e: InterruptedException =>
@@ -219,7 +229,6 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
 
   private class Listening (stream: PGStream) extends Runnable {
     private val command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj".getBytes("UTF-8")
-    private val rawStream = stream.getSocket.getInputStream
     stream.SendChar('Q')
     stream.SendInteger4(command.length + 5)
     stream.Send(command)
@@ -247,9 +256,6 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
       var threadAlive = true
       while (threadAlive && !isClosed) {
         try {
-          while (!isClosed && rawStream.available == 0) {
-            Thread.sleep(1)
-          }
           if (!isClosed) {
             pgStream.ReceiveChar match {
               case 'A' =>
@@ -259,32 +265,35 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
                 val paramA = pgStream.ReceiveString
                 processNotification(reader, new Notification(msgA, pidA, paramA))
               case 'E' =>
-                val e_len = pgStream.ReceiveInteger4
-                val err = pgStream.ReceiveString(e_len - 4)
-                throw new IOException(err)
-              case _ =>
-                throw new IOException("Unexpected packet type")
+                if (!isClosed) {
+                  val e_len = pgStream.ReceiveInteger4
+                  val err = pgStream.ReceiveString(e_len - 4)
+                  throw new IOException(err)
+                }
+              case x =>
+                if (!isClosed) {
+                  throw new IOException(s"Unexpected packet type $x")
+                }
             }
           }
         } catch {
           case ex: Exception =>
             try {
               threadAlive = false
+              currentStream = None
+              systemState.notify(SystemState.SystemEvent("notification", s"error: ${ex.getMessage}"))
               pgStream.close()
-              systemState.notify(SystemState.SystemEvent("notification", "error: " + ex.getMessage))
               Thread.sleep(1000)
             } catch {
               case e: Exception => e.printStackTrace()
             }
-            setupListening()
+            if (!isClosed) {
+              setupListening()
+            }
         }
       }
       if (threadAlive) {
-        try {
-          pgStream.close()
-        } catch {
-          case _: Throwable =>
-        }
+        closeStream(pgStream)
       }
     }
   }
@@ -360,8 +369,21 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     }
   }
 
+  private def closeStream(stream: PGStream): Unit = {
+    try {
+      stream.close()
+    } catch {
+      case _: Throwable =>
+    }
+    currentStream = None
+  }
+
   def close(): Unit = {
     isClosed = true
+    currentStream match {
+      case Some(stream) => closeStream(stream)
+      case _ =>
+    }
   }
 
 }
