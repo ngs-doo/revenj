@@ -5,11 +5,12 @@ using Revenj.DatabasePersistence;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 
-namespace Revenj.Core
+namespace Revenj
 {
 	/// <summary>
 	/// Unit of work pattern.
 	/// IDataContext with a transaction.
+	/// Don't forget to Commit() before disposing
 	/// </summary>
 	public interface IUnitOfWork : IDataContext, IDisposable
 	{

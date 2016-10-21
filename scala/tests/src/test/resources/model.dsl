@@ -37,7 +37,9 @@ module test {
 		int[] ii;
 		long[] ll;
 		En en;
-		Set<long> lll;
+		Set<long>? lll;
+		List<long?> llll;
+		Set<long?>? lllll;
 		En? en2;
 		Linked list<En> en3;
 		linked list<int> i4;

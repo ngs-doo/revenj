@@ -21,7 +21,13 @@ object DataChangeNotification {
     case object Delete extends Operation
   }
 
-  case class NotifyInfo(name: String, operation: Operation, uris: IndexedSeq[String])
+  sealed trait Source
+  object Source {
+    case object Database extends Source
+    case object Local extends Source
+  }
+
+  case class NotifyInfo(name: String, operation: Operation, source: Source, uris: IndexedSeq[String])
   case class TrackInfo[T](uris: IndexedSeq[String], result: Function0[Future[IndexedSeq[T]]])
 
 }

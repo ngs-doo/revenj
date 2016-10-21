@@ -12,7 +12,7 @@ import monix.reactive.subjects.PublishSubject
 import net.revenj.database.postgres.{ConnectionFactory, PostgresReader}
 import net.revenj.database.postgres.converters.StringConverter
 import net.revenj.extensibility.SystemState
-import net.revenj.patterns.DataChangeNotification.{NotifyInfo, Operation, TrackInfo}
+import net.revenj.patterns.DataChangeNotification.{NotifyInfo, Operation, Source, TrackInfo}
 import net.revenj.patterns._
 import org.postgresql.PGNotification
 import org.postgresql.core.{BaseConnection, Notification, PGStream}
@@ -173,13 +173,13 @@ private [revenj] class PostgresDatabaseNotification(
         case Some(ids) if ids.nonEmpty =>
           op match {
             case "Update" =>
-              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Update, ids))
+              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Update, Source.Database, ids))
             case "Change" =>
-              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Change, ids))
+              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Change, Source.Database, ids))
             case "Delete" =>
-              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Delete, ids))
+              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Delete, Source.Database, ids))
             case _ =>
-              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Insert, ids))
+              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Insert, Source.Database, ids))
           }
         case _ =>
       }

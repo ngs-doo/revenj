@@ -5,13 +5,13 @@ import com.dslplatform.compiler.client.parameters.{Settings, Targets}
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.3.2",
+    version := "0.3.3",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1209",
       "joda-time" % "joda-time" % "2.9.4", //TODO: will be removed
       "org.joda" % "joda-convert" % "1.8.1",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix" % "2.0.2",
+      "io.monix" %% "monix" % "2.0.4",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.7.4",
@@ -25,10 +25,10 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.3.2",
+  version := "0.3.3",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.0",
-    "com.typesafe.akka" %% "akka-http-core" % "2.4.9"
+    "com.typesafe.akka" %% "akka-http-core" % "2.4.11"
     )
   )
   dependsOn(core)
@@ -111,7 +111,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   name := baseDirectory.value.getName,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.11.8", "2.12.0-M5"),
+  crossScalaVersions := Seq("2.11.8", "2.12.0-RC2"),
 
   scalacOptions ++= Seq(
     "-deprecation",

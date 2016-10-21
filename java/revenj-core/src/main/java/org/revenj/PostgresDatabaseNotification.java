@@ -304,16 +304,16 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 				String[] uris = ids.toArray(new String[ids.size()]);
 				switch (op) {
 					case "Update":
-						subject.onNext(new NotifyInfo(ident, Operation.Update, uris));
+						subject.onNext(new NotifyInfo(ident, Operation.Update, Source.Database, uris));
 						break;
 					case "Change":
-						subject.onNext(new NotifyInfo(ident, Operation.Change, uris));
+						subject.onNext(new NotifyInfo(ident, Operation.Change, Source.Database, uris));
 						break;
 					case "Delete":
-						subject.onNext(new NotifyInfo(ident, Operation.Delete, uris));
+						subject.onNext(new NotifyInfo(ident, Operation.Delete, Source.Database, uris));
 						break;
 					default:
-						subject.onNext(new NotifyInfo(ident, Operation.Insert, uris));
+						subject.onNext(new NotifyInfo(ident, Operation.Insert, Source.Database, uris));
 						break;
 				}
 			}
