@@ -11,8 +11,8 @@ using System.Threading;
 using Revenj.DatabasePersistence.Postgres.Converters;
 using Revenj.DatabasePersistence.Postgres.Npgsql;
 using Revenj.DomainPatterns;
-using Revenj.Utility;
 using Revenj.Extensibility;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
@@ -127,16 +127,16 @@ namespace Revenj.DatabasePersistence.Postgres
 						switch (op)
 						{
 							case "Update":
-								Subject.OnNext(new NotifyInfo(name, NotifyInfo.OperationEnum.Update, uris));
+								Subject.OnNext(new NotifyInfo(name, NotifyInfo.OperationEnum.Update, NotifyInfo.SourceEnum.Database, uris));
 								break;
 							case "Change":
-								Subject.OnNext(new NotifyInfo(name, NotifyInfo.OperationEnum.Change, uris));
+								Subject.OnNext(new NotifyInfo(name, NotifyInfo.OperationEnum.Change, NotifyInfo.SourceEnum.Database, uris));
 								break;
 							case "Delete":
-								Subject.OnNext(new NotifyInfo(name, NotifyInfo.OperationEnum.Delete, uris));
+								Subject.OnNext(new NotifyInfo(name, NotifyInfo.OperationEnum.Delete, NotifyInfo.SourceEnum.Database, uris));
 								break;
 							default:
-								Subject.OnNext(new NotifyInfo(name, NotifyInfo.OperationEnum.Insert, uris));
+								Subject.OnNext(new NotifyInfo(name, NotifyInfo.OperationEnum.Insert, NotifyInfo.SourceEnum.Database, uris));
 								break;
 						}
 					}

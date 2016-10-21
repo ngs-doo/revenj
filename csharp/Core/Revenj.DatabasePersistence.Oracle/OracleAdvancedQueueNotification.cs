@@ -156,16 +156,16 @@ namespace Revenj.DatabasePersistence.Oracle
 				switch (it.Operation)
 				{
 					case "Update":
-						Subject.OnNext(new NotifyInfo(it.Source, NotifyInfo.OperationEnum.Update, it.Uris.ToArray()));
+						Subject.OnNext(new NotifyInfo(it.Source, NotifyInfo.OperationEnum.Update, NotifyInfo.SourceEnum.Database, it.Uris.ToArray()));
 						break;
 					case "Change":
-						Subject.OnNext(new NotifyInfo(it.Source, NotifyInfo.OperationEnum.Change, it.Uris.ToArray()));
+						Subject.OnNext(new NotifyInfo(it.Source, NotifyInfo.OperationEnum.Change, NotifyInfo.SourceEnum.Database, it.Uris.ToArray()));
 						break;
 					case "Delete":
-						Subject.OnNext(new NotifyInfo(it.Source, NotifyInfo.OperationEnum.Delete, it.Uris.ToArray()));
+						Subject.OnNext(new NotifyInfo(it.Source, NotifyInfo.OperationEnum.Delete, NotifyInfo.SourceEnum.Database, it.Uris.ToArray()));
 						break;
 					default:
-						Subject.OnNext(new NotifyInfo(it.Source, NotifyInfo.OperationEnum.Insert, it.Uris.ToArray()));
+						Subject.OnNext(new NotifyInfo(it.Source, NotifyInfo.OperationEnum.Insert, NotifyInfo.SourceEnum.Database, it.Uris.ToArray()));
 						break;
 				}
 			}

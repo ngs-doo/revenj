@@ -17,6 +17,10 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		public readonly OperationEnum Operation;
 		/// <summary>
+		/// Source of notification
+		/// </summary>
+		public readonly SourceEnum Source;
+		/// <summary>
 		/// Object identifiers
 		/// </summary>
 		public readonly string[] URI;
@@ -44,17 +48,42 @@ namespace Revenj.DomainPatterns
 			//TODO: mark and submit for events!?
 		};
 		/// <summary>
+		/// Where did the notification originate from
+		/// </summary>
+		public enum SourceEnum
+		{
+			/// <summary>
+			/// Notification originated from the database
+			/// </summary>
+			Database,
+			/// <summary>
+			/// Notification originated from the local server
+			/// </summary>
+			Local
+		};
+		/// <summary>
 		/// Create notification information
 		/// </summary>
 		/// <param name="name">domain object name</param>
 		/// <param name="operation">operation type</param>
+		/// <param name="source">notification source</param>
 		/// <param name="uri">identifiers</param>
-		public NotifyInfo(string name, OperationEnum operation, string[] uri)
+		public NotifyInfo(string name, OperationEnum operation, SourceEnum source, string[] uri)
 		{
 			this.Name = name;
 			this.Operation = operation;
+			this.Source = source;
 			this.URI = uri;
 		}
+		/// <summary>
+		/// Create notification information originating from local server
+		/// </summary>
+		/// <param name="name">domain object name</param>
+		/// <param name="operation">operation type</param>
+		/// <param name="source">notification source</param>
+		/// <param name="uri">identifiers</param>
+		public NotifyInfo(string name, OperationEnum operation, string[] uri)
+			: this(name, operation, SourceEnum.Local, uri) { }
 	}
 	/// <summary>
 	/// Change notification service.
