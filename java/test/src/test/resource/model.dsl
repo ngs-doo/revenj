@@ -103,6 +103,15 @@ module test {
 		date? date;
 		decimal? number;
 	}
+	sql ClickedSeq test.Clicked(id) {
+		long id from _event_id { sequence 'test.""Clicked__event_id_seq""'; }
+		date? date;
+		decimal? number;
+		specification OnDateOrNumber 'it => it.date == date || it.number >= number || it.date.Value.Year == number' {
+			date date;
+			int number;
+		}
+	}	
 	specification<ClickedList> FindAt 'it => it.date == date' {
 		date date;
 	}
