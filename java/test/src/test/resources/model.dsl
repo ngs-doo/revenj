@@ -104,7 +104,7 @@ module test {
 		decimal? number;
 	}
 	sql ClickedSeq test.Clicked(id) {
-		long id from _event_id { sequence 'test.""Clicked__event_id_seq""'; }
+		long id from _event_id { sequence 'test."Clicked__event_id_seq"'; }
 		date? date;
 		decimal? number;
 		specification OnDateOrNumber 'it => it.date == date || it.number >= number || it.date.Value.Year == number' {

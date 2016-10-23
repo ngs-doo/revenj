@@ -12,8 +12,6 @@ import javax.tools.StandardLocation;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 @SupportedAnnotationTypes({"org.revenj.patterns.EventHandler", "javax.inject.Inject", "javax.inject.Singleton"})
@@ -54,16 +52,22 @@ public class RevenjProcessor extends AbstractProcessor {
 		if (!handlers.isEmpty()) {
 			try {
 				for (Map.Entry<String, List<String>> kv : handlers.entrySet()) {
-					FileObject rfo = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/" + URLEncoder.encode(kv.getKey(), "UTF-8"));
-					BufferedWriter bw = new BufferedWriter(rfo.openWriter());
+					String path = "META-INF/services/" + URLEncoder.encode(kv.getKey(), "UTF-8");
+					FileObject fo = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", path);
+					File file = new File(fo.toUri());
+					Writer writer;
+					if (!file.exists()) {
+						fo = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", path);
+						writer = fo.openWriter();
+					} else writer = new OutputStreamWriter(new FileOutputStream(file));
 					for (String impl : kv.getValue()) {
-						bw.write(impl);
-						bw.newLine();
+						writer.write(impl);
+						writer.write('\n');
 					}
-					bw.close();
+					writer.close();
 				}
 			} catch (IOException e) {
-				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed saving event handler registrations");
+				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed saving event handler registrations: " + e.getMessage());
 			}
 		}
 		if (registrations.length() > 0) {
@@ -71,14 +75,10 @@ public class RevenjProcessor extends AbstractProcessor {
 				FileObject fo = processingEnv.getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "", "revenj_container_Registrations.java");
 				File file = new File(fo.toUri());
 				Writer writer;
-				if (file.exists()) {
-					if (!file.delete()) {
-						processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Failed to delete container registrations: " + file.getAbsolutePath());
-					}
-					writer = new OutputStreamWriter(new FileOutputStream(file));
-				} else {
-					writer = processingEnv.getFiler().createSourceFile("revenj_container_Registrations").openWriter();
-				}
+				if (!file.exists()) {
+					fo = processingEnv.getFiler().createSourceFile("revenj_container_Registrations");
+					writer = fo.openWriter();
+				} else writer = new OutputStreamWriter(new FileOutputStream(file));
 				writer.write("public class revenj_container_Registrations implements org.revenj.extensibility.SystemAspect {\n");
 				writer.write("  @Override\n  public void configure(org.revenj.extensibility.Container container) {\n");
 				writer.write(registrations.toString());
@@ -89,15 +89,17 @@ public class RevenjProcessor extends AbstractProcessor {
 				if (file.exists()) {
 					List<String> content = Files.readAllLines(file.toPath());
 					if (!content.contains("revenj_container_Registrations")) {
-						Files.write(Paths.get(fo.toUri()), ("revenj_container_Registrations\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+						writer = new OutputStreamWriter(new FileOutputStream(file, true));
+						writer.write("revenj_container_Registrations\n");
+						writer.close();
 					}
 				} else {
-					writer = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/services/org.revenj.extensibility.SystemAspect").openWriter();
+					writer = new OutputStreamWriter(new FileOutputStream(file));
 					writer.write("revenj_container_Registrations\n");
 					writer.close();
 				}
 			} catch (IOException e) {
-				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed saving container registrations");
+				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed saving container registrations: " + e.getMessage());
 			}
 		}
 		return false;

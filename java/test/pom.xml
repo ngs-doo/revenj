@@ -86,7 +86,7 @@
                         <configuration>
                             <target>revenj.java</target>
                             <namespace>gen.model</namespace>
-                            <dsl>${project.basedir}/src/test/resource</dsl>
+                            <dsl>${project.basedir}/src/test/resources</dsl>
                             <generatedSources>${project.build.directory}/generated-test-sources</generatedSources>
                             <servicesManifest>${project.build.directory}/test-classes/META-INF/services</servicesManifest>
                             <options>

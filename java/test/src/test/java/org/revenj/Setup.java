@@ -88,7 +88,7 @@ public abstract class Setup {
 		context.put(ApplyMigration.INSTANCE, null);
 		context.put(DisablePrompt.INSTANCE, null);
 		context.put(PostgresConnection.INSTANCE, "localhost:5555/revenj?user=revenj&password=revenj");
-		context.put(DslPath.INSTANCE, "src/test/resource");
+		context.put(DslPath.INSTANCE, "src/test/resources");
 		List<CompileParameter> params = Main.initializeParameters(context, ".");
 		if (!Main.processContext(context, params)) {
 			try {
