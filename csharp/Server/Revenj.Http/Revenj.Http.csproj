@@ -86,6 +86,7 @@
     <Compile Include="HttpSocketContext.cs" />
     <Compile Include="HttpSocketServer.cs" />
     <Compile Include="HttpListenerContex.cs" />
+    <Compile Include="IHtmlView.cs" />
     <Compile Include="NoAuth.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

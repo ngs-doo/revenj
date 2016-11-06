@@ -58,6 +58,27 @@ namespace Revenj.Serialization
 			sw.Flush();
 			stream.Position = 0;
 		}
+		public static void Serialize<T>(this ArraySegment<T> segment, ChunkedMemoryStream stream)
+			where T : IJsonObject
+		{
+			stream.Reset();
+			var sw = stream.GetWriter();
+			sw.Write('[');
+			if (segment.Count > 0)
+			{
+				var array = segment.Array;
+				var off = segment.Offset;
+				array[off].Serialize(sw, false, null);
+				for (int i = 1; i < segment.Count; i++)
+				{
+					sw.Write(',');
+					array[off + i].Serialize(sw, false, null);
+				}
+			}
+			sw.Write(']');
+			sw.Flush();
+			stream.Position = 0;
+		}
 		public static void Serialize<T>(this List<T> values, ChunkedMemoryStream stream) where T : IJsonObject
 		{
 			stream.Reset();

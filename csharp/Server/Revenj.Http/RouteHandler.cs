@@ -53,7 +53,11 @@ namespace Revenj.Http
 					expArgs[i] = lamParams[3];
 			}
 			var mce = Expression.Call(Expression.Constant(instance, instance.GetType()), method, expArgs);
-			if (!typeof(Stream).IsAssignableFrom(method.ReturnType) && method.ReturnType != typeof(void))
+			if (typeof(IHtmlView).IsAssignableFrom(method.ReturnType))
+			{
+				mce = Expression.Call(null, RenderFunc.Method, mce, lamParams[2], lamParams[4]);
+			}
+			else if (!typeof(Stream).IsAssignableFrom(method.ReturnType) && method.ReturnType != typeof(void))
 			{
 				var ws = Expression.Constant(serialization);
 				mce = Expression.Call(null, SerializeFunc.Method, ws, lamParams[1], lamParams[2], mce, lamParams[4]);
@@ -64,6 +68,7 @@ namespace Revenj.Http
 
 		private static Func<IWireSerialization, Stream, Type, string, StreamingContext, object> DeserializeFunc = Deserialize;
 		private static Func<IWireSerialization, IRequestContext, IResponseContext, object, ChunkedMemoryStream, Stream> SerializeFunc = Serialize;
+		private static Func<IHtmlView, IResponseContext, ChunkedMemoryStream, Stream> RenderFunc = Render;
 
 		public static object Deserialize(
 			IWireSerialization serialization,
@@ -87,6 +92,18 @@ namespace Revenj.Http
 			response.ContentLength = outputStream.Position;
 			outputStream.Position = 0;
 			return outputStream;
+		}
+
+		public static Stream Render(IHtmlView html, IResponseContext response, ChunkedMemoryStream stream)
+		{
+			stream.Reset();
+			response.ContentType = "text/html; charset=UTF-8";
+			var sw = stream.GetWriter();
+			html.Render(sw);
+			sw.Flush();
+			response.ContentLength = stream.Position;
+			stream.Position = 0;
+			return stream;
 		}
 
 		internal Stream Handle(
