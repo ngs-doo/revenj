@@ -75,6 +75,7 @@
     <Compile Include="..\..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Attributes.cs" />
     <Compile Include="HttpListenerServer.cs" />
     <Compile Include="HttpService.cs">
       <SubType>Component</SubType>

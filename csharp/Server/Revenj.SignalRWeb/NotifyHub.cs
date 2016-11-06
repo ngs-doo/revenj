@@ -14,13 +14,13 @@ namespace Revenj.SignalRWeb
 		private static bool IsRunning = true;
 		internal static IDomainModel Model;
 		internal static IDataChangeNotification ChangeNotification;
-		private static ConcurrentDictionary<Type, ConcurrentDictionary<string, IDisposable>> Listeners =
+		private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, IDisposable>> Listeners =
 			new ConcurrentDictionary<Type, ConcurrentDictionary<string, IDisposable>>(1, 127);
 
-		private static ConcurrentDictionary<string, ConcurrentBag<Type>> Connections =
+		private static readonly ConcurrentDictionary<string, ConcurrentBag<Type>> Connections =
 			new ConcurrentDictionary<string, ConcurrentBag<Type>>();
 
-		private static BlockingCollection<Action> Messages = new BlockingCollection<Action>(new ConcurrentQueue<Action>());
+		private static readonly BlockingCollection<Action> Messages = new BlockingCollection<Action>(new ConcurrentQueue<Action>());
 
 		static NotifyHub()
 		{

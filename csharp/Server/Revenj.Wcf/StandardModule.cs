@@ -51,9 +51,16 @@ namespace Revenj.Wcf
 					 select asm)
 					.ToList();
 				if (serverModels.Count == 0)
-					throw new ConfigurationErrorsException(@"Server assemblies not found. When running in compiled mode, server assemblies must be deployed with other assemblies.
+				{
+					if (ConfigurationManager.AppSettings["ServerModel"] != "None")
+					{
+						throw new ConfigurationErrorsException(@"Server assemblies not found. When running in compiled mode, server assemblies must be deployed with other assemblies.
 Alternatively, explicitly specify sever assembly in the configuration file.
-Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />");
+Example: <add key=""ServerAssembly_Domain"" value=""AppDomainModel.dll"" />
+If you wish to run Revenj without server assemblies specify ServerModel = None as:
+<add key=""ServerModel"" value=""None"" />");
+					}
+				}
 			}
 
 			builder.ConfigurePatterns(_ => serverModels);

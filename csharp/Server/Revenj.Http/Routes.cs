@@ -4,6 +4,8 @@ using System.Configuration;
 using System.Linq;
 using System.ServiceModel.Web;
 using System.Xml.Linq;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Http
 {
@@ -12,38 +14,63 @@ namespace Revenj.Http
 		private readonly Dictionary<string, Dictionary<string, List<RouteHandler>>> MethodRoutes = new Dictionary<string, Dictionary<string, List<RouteHandler>>>();
 		private Dictionary<ReqId, RouteHandler> Cache = new Dictionary<ReqId, RouteHandler>();
 
-		public Routes(IServiceProvider locator)
+		public Routes(IServiceProvider locator, IWireSerialization serialization)
 		{
+			var totalControllers = 0;
+			foreach (var t in AssemblyScanner.GetAllTypes())
+			{
+				if (t.IsClass && !t.IsAbstract && (t.IsPublic || t.IsNestedPublic))
+				{
+					var attr = t.GetCustomAttributes(typeof(ControllerAttribute), false) as ControllerAttribute[];
+					if (attr != null && attr.Length > 0)
+					{
+						totalControllers++;
+						foreach (var a in attr)
+							ConfigureService(locator, serialization, a.RootUrl, t);
+					}
+				}
+			}
 			var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 			var xml = XElement.Load(config.FilePath, LoadOptions.None);
 			var sm = xml.Element("system.serviceModel");
 			if (sm == null)
+			{
+				if (totalControllers > 0) return;
 				throw new ConfigurationErrorsException("Services not defined. system.serviceModel missing from configuration");
+			}
 			var she = sm.Element("serviceHostingEnvironment");
 			if (she == null)
+			{
+				if (totalControllers > 0) return;
 				throw new ConfigurationErrorsException("Services not defined. serviceHostingEnvironment missing from configuration");
+			}
 			var sa = she.Element("serviceActivations");
 			if (sa == null)
+			{
+				if (totalControllers > 0) return;
 				throw new ConfigurationErrorsException("Services not defined. serviceActivations missing from configuration");
+			}
 			var services = sa.Elements("add").ToList();
-			if (services.Count == 0)
-				throw new ConfigurationErrorsException("Services not defined. serviceActivations elements not defined in configuration");
+			if (services.Count == 0 && totalControllers == 0)
+				throw new ConfigurationErrorsException("Services not defined and controllers not found on path. serviceActivations elements not defined in configuration");
 			foreach (XElement s in services)
-				ConfigureService(s, locator);
+			{
+				var attributes = s.Attributes().ToList();
+				var ra = attributes.FirstOrDefault(it => "relativeAddress".Equals(it.Name.LocalName, StringComparison.InvariantCultureIgnoreCase));
+				var serv = attributes.FirstOrDefault(it => "service".Equals(it.Name.LocalName, StringComparison.InvariantCultureIgnoreCase));
+				if (serv == null || string.IsNullOrEmpty(serv.Value))
+					throw new ConfigurationErrorsException("Missing service type on serviceActivation element: " + s.ToString());
+				if (ra == null || string.IsNullOrEmpty(ra.Value))
+					throw new ConfigurationErrorsException("Missing relative address on serviceActivation element: " + s.ToString());
+				var type = Type.GetType(serv.Value);
+				if (type == null)
+					throw new ConfigurationErrorsException("Invalid service defined in " + ra.Value + ". Type " + serv.Value + " not found.");
+				ConfigureService(locator, serialization, ra.Value, type);
+			}
 		}
 
-		private void ConfigureService(XElement service, IServiceProvider locator)
+		private void ConfigureService(IServiceProvider locator, IWireSerialization serialization, string name, Type type)
 		{
-			var attributes = service.Attributes().ToList();
-			var ra = attributes.FirstOrDefault(it => "relativeAddress".Equals(it.Name.LocalName, StringComparison.InvariantCultureIgnoreCase));
-			var serv = attributes.FirstOrDefault(it => "service".Equals(it.Name.LocalName, StringComparison.InvariantCultureIgnoreCase));
-			if (serv == null || string.IsNullOrEmpty(serv.Value))
-				throw new ConfigurationErrorsException("Missing service type on serviceActivation element: " + service.ToString());
-			if (ra == null || string.IsNullOrEmpty(ra.Value))
-				throw new ConfigurationErrorsException("Missing relative address on serviceActivation element: " + service.ToString());
-			var type = Type.GetType(serv.Value);
-			if (type == null)
-				throw new ConfigurationErrorsException("Invalid service defined in " + ra.Value + ". Type " + serv.Value + " not found.");
 			var instance = locator.GetService(type);
 			foreach (var i in new[] { type }.Union(type.GetInterfaces()))
 			{
@@ -51,15 +78,21 @@ namespace Revenj.Http
 				{
 					var inv = (WebInvokeAttribute[])m.GetCustomAttributes(typeof(WebInvokeAttribute), false);
 					var get = (WebGetAttribute[])m.GetCustomAttributes(typeof(WebGetAttribute), false);
+					var route = (RouteAttribute[])m.GetCustomAttributes(typeof(RouteAttribute), false);
 					foreach (var at in inv)
 					{
-						var rh = new RouteHandler(ra.Value, at.UriTemplate, instance, m);
+						var rh = new RouteHandler(name, at.UriTemplate, instance, m, locator, serialization);
 						Add(at.Method, rh);
 					}
 					foreach (var at in get)
 					{
-						var rh = new RouteHandler(ra.Value, at.UriTemplate, instance, m);
+						var rh = new RouteHandler(name, at.UriTemplate, instance, m, locator, serialization);
 						Add("GET", rh);
+					}
+					foreach (var at in route)
+					{
+						var rh = new RouteHandler(name, at.Path, instance, m, locator, serialization);
+						Add(at.Method, rh);
 					}
 				}
 			}

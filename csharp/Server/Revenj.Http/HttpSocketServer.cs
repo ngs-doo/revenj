@@ -86,7 +86,7 @@ Please check settings: " + string.Join(", ", endpoints));
 			if (!string.IsNullOrEmpty(maxLen)) MessageSizeLimit = int.Parse(maxLen);
 			var ka = ConfigurationManager.AppSettings["Revenj.KeepAliveLimit"];
 			if (!string.IsNullOrEmpty(ka)) KeepAliveTimeout = int.Parse(ka);
-			Routes = new Routes(locator);
+			Routes = locator.Resolve<Routes>();
 			var customAuth = ConfigurationManager.AppSettings["CustomAuth"];
 			if (!string.IsNullOrEmpty(customAuth))
 			{
@@ -237,7 +237,7 @@ Please check settings: " + string.Join(", ", endpoints));
 						ThreadContext.Response = ctx;
 						if (principal != auth.Principal)
 							Thread.CurrentPrincipal = principal = auth.Principal;
-						using (var stream = route.Handle(match.OrderedArgs, ctx.Stream))
+						using (var stream = route.Handle(match.OrderedArgs, ctx, ctx, ctx.InputStream, ctx.OutputStream))
 						{
 							var keepAlive = ctx.Return(stream, socket);
 							if (keepAlive)

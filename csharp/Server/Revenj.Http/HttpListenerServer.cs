@@ -33,7 +33,7 @@ namespace Revenj.Http
 			}
 			if (Listener.Prefixes.Count == 0)
 				Listener.Prefixes.Add("http://*:8999/");
-			Routes = new Routes(locator);
+			Routes = locator.Resolve<Routes>();
 			var customAuth = ConfigurationManager.AppSettings["CustomAuth"];
 			if (!string.IsNullOrEmpty(customAuth))
 			{
@@ -98,6 +98,9 @@ namespace Revenj.Http
 			}
 		}
 
+		private readonly ThreadLocal<ChunkedMemoryStream> LocalStream =
+			new ThreadLocal<ChunkedMemoryStream>(() => ChunkedMemoryStream.Static());
+
 		private void ProcessMessageThread(object state)
 		{
 			var context = (HttpListenerContext)state;
@@ -116,7 +119,7 @@ namespace Revenj.Http
 						ThreadContext.Request = ctx;
 						ThreadContext.Response = ctx;
 						Thread.CurrentPrincipal = auth.Principal;
-						using (var stream = route.Handle(match.OrderedArgs, context.Request.InputStream))
+						using (var stream = route.Handle(match.OrderedArgs, ctx, ctx, context.Request.InputStream, LocalStream.Value))
 						{
 							var cms = stream as ChunkedMemoryStream;
 							if (cms != null)

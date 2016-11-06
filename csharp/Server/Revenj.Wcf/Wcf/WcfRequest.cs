@@ -19,7 +19,7 @@ namespace Revenj.Wcf
 			get { return Request.UriTemplateMatch; }
 			set { Request.UriTemplateMatch = value; }
 		}
-		public string GetHeader(string name) { return Request.Headers[name]; }
+		public string GetHeaderLowercase(string name) { return Request.Headers[name]; }
 
 		public Uri RequestUri
 		{

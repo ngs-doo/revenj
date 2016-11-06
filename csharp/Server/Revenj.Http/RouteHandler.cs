@@ -1,8 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Serialization;
+using Revenj.Api;
+using Revenj.Serialization;
+using Revenj.Utility;
 
 namespace Revenj.Http
 {
@@ -13,10 +16,15 @@ namespace Revenj.Http
 		internal readonly UriPattern Pattern;
 		private readonly bool WithStream;
 		private readonly int TotalParams;
-		private readonly Dictionary<string, int> ArgumentOrder = new Dictionary<string, int>();
-		private readonly Func<string[], Stream, Stream> Invocation;
+		private readonly Func<string[], IRequestContext, IResponseContext, Stream, ChunkedMemoryStream, Stream> Invocation;
 
-		public RouteHandler(string service, string template, object instance, MethodInfo method)
+		public RouteHandler(
+			string service,
+			string template,
+			object instance,
+			MethodInfo method,
+			IServiceProvider locator,
+			IWireSerialization serialization)
 		{
 			this.Service = "/" + service.ToLowerInvariant();
 			this.Template = template;
@@ -24,35 +32,71 @@ namespace Revenj.Http
 			var methodParams = method.GetParameters();
 			TotalParams = methodParams.Length;
 			WithStream = TotalParams != 0 && methodParams[TotalParams - 1].ParameterType == typeof(Stream);
-			var lamParams = new ParameterExpression[2];
+			var lamParams = new ParameterExpression[5];
 			lamParams[0] = Expression.Parameter(typeof(string[]), "strArr");
-			lamParams[1] = Expression.Parameter(typeof(Stream), "input");
+			lamParams[1] = Expression.Parameter(typeof(IRequestContext), "request");
+			lamParams[2] = Expression.Parameter(typeof(IResponseContext), "response");
+			lamParams[3] = Expression.Parameter(typeof(Stream), "input");
+			lamParams[4] = Expression.Parameter(typeof(ChunkedMemoryStream), "output");
 			var expArgs = new Expression[TotalParams];
+			var argInd = 0;
 			for (int i = 0; i < TotalParams; i++)
 			{
-				ArgumentOrder[methodParams[i].Name.ToUpperInvariant()] = i;
-				if (i < TotalParams - 1 || !WithStream)
-					expArgs[i] = Expression.ArrayIndex(lamParams[0], Expression.Constant(i));
-				else
+				var mp = methodParams[i];
+				if (mp.ParameterType == typeof(IRequestContext))
 					expArgs[i] = lamParams[1];
+				else if (mp.ParameterType == typeof(IResponseContext))
+					expArgs[i] = lamParams[2];
+				else if (i < TotalParams - 1 || !WithStream)
+					expArgs[i] = Expression.ArrayIndex(lamParams[0], Expression.Constant(argInd++));
+				else
+					expArgs[i] = lamParams[3];
 			}
 			var mce = Expression.Call(Expression.Constant(instance, instance.GetType()), method, expArgs);
-			var lambda = Expression.Lambda<Func<string[], Stream, Stream>>(mce, lamParams);
+			if (!typeof(Stream).IsAssignableFrom(method.ReturnType) && method.ReturnType != typeof(void))
+			{
+				var ws = Expression.Constant(serialization);
+				mce = Expression.Call(null, SerializeFunc.Method, ws, lamParams[1], lamParams[2], mce, lamParams[4]);
+			}
+			var lambda = Expression.Lambda<Func<string[], IRequestContext, IResponseContext, Stream, ChunkedMemoryStream, Stream>>(mce, lamParams);
 			Invocation = lambda.Compile();
 		}
 
-		public Stream Handle(Dictionary<string, string> boundVars, Stream stream)
-		{
-			var args = new string[TotalParams];
-			foreach (var kv in boundVars)
-				args[ArgumentOrder[kv.Key]] = kv.Value;
+		private static Func<IWireSerialization, Stream, Type, string, StreamingContext, object> DeserializeFunc = Deserialize;
+		private static Func<IWireSerialization, IRequestContext, IResponseContext, object, ChunkedMemoryStream, Stream> SerializeFunc = Serialize;
 
-			return Invocation(args, stream);
+		public static object Deserialize(
+			IWireSerialization serialization,
+			Stream input,
+			Type target,
+			string contentType,
+			StreamingContext context)
+		{
+			return serialization.Deserialize(input, target, contentType, context);
 		}
 
-		internal Stream Handle(string[] args, Stream stream)
+		public static Stream Serialize(
+			IWireSerialization serialization,
+			IRequestContext request,
+			IResponseContext response,
+			object result,
+			ChunkedMemoryStream outputStream)
 		{
-			return Invocation(args, stream);
+			outputStream.Reset();
+			response.ContentType = serialization.Serialize(result, request.Accept, outputStream);
+			response.ContentLength = outputStream.Position;
+			outputStream.Position = 0;
+			return outputStream;
+		}
+
+		internal Stream Handle(
+			string[] args,
+			IRequestContext request,
+			IResponseContext response,
+			Stream inputStream,
+			ChunkedMemoryStream outputStream)
+		{
+			return Invocation(args, request, response, inputStream, outputStream);
 		}
 	}
 }

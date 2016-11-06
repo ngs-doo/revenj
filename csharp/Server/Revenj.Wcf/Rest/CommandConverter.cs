@@ -42,7 +42,7 @@ namespace Revenj.Wcf
 			var response = ThreadContext.Response;
 			var start = Stopwatch.GetTimestamp();
 			var engine = ProcessingEngine;
-			var sessionID = request.GetHeader("x-revenj-session-id");
+			var sessionID = request.GetHeaderLowercase("x-revenj-session-id");
 			if (sessionID != null)
 			{
 				var scope = ObjectFactory.FindScope(sessionID);

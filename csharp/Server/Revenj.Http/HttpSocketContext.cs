@@ -105,7 +105,8 @@ namespace Revenj.Http
 			response[405] = ASCII.GetBytes(method + " 505 HTTP Version Not Supported\r\n");
 		}
 
-		public readonly ChunkedMemoryStream Stream;
+		public readonly ChunkedMemoryStream InputStream;
+		public readonly ChunkedMemoryStream OutputStream;
 		private readonly byte[] InputTemp = new byte[8192];
 		private readonly byte[] OutputTemp = new byte[8192];
 		private readonly char[] TmpCharBuf = new char[8192];
@@ -121,7 +122,8 @@ namespace Revenj.Http
 		{
 			this.Prefix = prefix;
 			this.Limit = limit;
-			Stream = ChunkedMemoryStream.Static();
+			InputStream = ChunkedMemoryStream.Static();
+			OutputStream = ChunkedMemoryStream.Static();
 		}
 
 		private int ReadUntil(Socket socket, byte match, int position)
@@ -309,18 +311,18 @@ namespace Revenj.Http
 					if (len > Limit) return ReturnError(socket, 413);
 				}
 				else return ReturnError(socket, 411);
-				Stream.Reset();
+				InputStream.Reset();
 				var size = totalBytes - rowEnd;
-				Stream.Write(InputTemp, rowEnd, size);
+				InputStream.Write(InputTemp, rowEnd, size);
 				len -= size;
 				while (len > 0)
 				{
 					size = socket.Receive(InputTemp, Math.Min(len, InputTemp.Length), SocketFlags.None);
 					if (size < 1) return ReturnError(socket, 408);
-					Stream.Write(InputTemp, 0, size);
+					InputStream.Write(InputTemp, 0, size);
 					len -= size;
 				}
-				Stream.Position = 0;
+				InputStream.Position = 0;
 				rowEnd = totalBytes;
 				totalBytes = 0;
 			}
@@ -680,7 +682,7 @@ namespace Revenj.Http
 			set { TemplateMatch = value; }
 		}
 
-		string IRequestContext.GetHeader(string name)
+		string IRequestContext.GetHeaderLowercase(string name)
 		{
 			return GetRequestHeader(name);
 		}

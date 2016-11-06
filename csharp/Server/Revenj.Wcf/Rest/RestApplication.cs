@@ -104,7 +104,7 @@ namespace Revenj.Wcf
 			var accept = (request.Accept ?? "application/json").ToLowerInvariant();
 
 			var engine = ProcessingEngine;
-			var sessionID = request.GetHeader("x-revenj-session-id");
+			var sessionID = request.GetHeaderLowercase("x-revenj-session-id");
 			if (sessionID != null)
 			{
 				var scope = ObjectFactory.FindScope(sessionID);

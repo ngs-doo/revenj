@@ -37,10 +37,19 @@ namespace Revenj.Api
 		/// </summary>
 		/// <param name="name">header name</param>
 		/// <returns>found value</returns>
-		string GetHeader(string name);
+		string GetHeaderLowercase(string name);
 		/// <summary>
 		/// Security context
 		/// </summary>
 		IPrincipal Principal { get; }
+	}
+
+	public static class RequestContextHelper
+	{
+		public static string GetHeader(this IRequestContext request, string name)
+		{
+			if (name == null) return null;
+			return request.GetHeaderLowercase(name.ToLowerInvariant());
+		}
 	}
 }

@@ -93,7 +93,7 @@ namespace Revenj.Wcf
 			object obj;
 			if (!evaluationContext.Properties.TryGetValue("Identities", out obj))
 			{
-				var authorization = ThreadContext.Request.GetHeader("authorization") ?? DefaultAuthorization;
+				var authorization = ThreadContext.Request.GetHeaderLowercase("authorization") ?? DefaultAuthorization;
 				if (authorization == null)
 					throw new UnauthorizedAccessException("Authorization header not provided.");
 

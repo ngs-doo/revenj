@@ -302,13 +302,13 @@ Example:
 
 		public static bool? ReturnInstance(string argument, IRequestContext request)
 		{
-			var result = argument ?? request.GetHeader("x-revenj-result");
+			var result = argument ?? request.GetHeaderLowercase("x-revenj-result");
 			return result == "instance" ? true : result == "uri" ? (bool?)false : null;
 		}
 
 		public static bool IncludeCount(string argument, IRequestContext request)
 		{
-			var result = argument ?? request.GetHeader("x-revenj-includecount");
+			var result = argument ?? request.GetHeaderLowercase("x-revenj-includecount");
 			return result == "yes";
 		}
 	}

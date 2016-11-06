@@ -55,7 +55,7 @@ namespace Revenj.Http
 			}
 			set { TemplateMatch = value; }
 		}
-		public string GetHeader(string name)
+		public string GetHeaderLowercase(string name)
 		{
 			return Request.Headers.Get(name);
 		}
