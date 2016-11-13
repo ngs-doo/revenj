@@ -39,22 +39,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core">
-      <HintPath>..\..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
+      <HintPath>..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Security">
-      <HintPath>..\..\..\Dependencies\Npgsql\Mono.Security.dll</HintPath>
+      <HintPath>..\..\Dependencies\Npgsql\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\Dependencies\Json.NET\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\Dependencies\Json.NET\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NGS.Templater">
-      <HintPath>..\..\..\Dependencies\Templater\NGS.Templater.dll</HintPath>
+      <HintPath>..\..\Dependencies\Templater\NGS.Templater.dll</HintPath>
     </Reference>
     <Reference Include="protobuf-net">
-      <HintPath>..\..\..\Dependencies\Protobuf\protobuf-net.dll</HintPath>
+      <HintPath>..\..\Dependencies\Protobuf\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="Remotion.Linq">
-      <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
+      <HintPath>..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -62,13 +62,13 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Reactive.Core">
-      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
+      <HintPath>..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Interfaces">
-      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Interfaces.dll</HintPath>
+      <HintPath>..\..\Dependencies\ReactiveExtensions\System.Reactive.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Linq">
-      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
+      <HintPath>..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />

@@ -51,10 +51,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core">
-      <HintPath>..\..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
+      <HintPath>..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Remotion.Linq">
-      <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
+      <HintPath>..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.IdentityModel" />
@@ -169,9 +169,9 @@ copy ..\..\..\Plugins\Revenj.Plugins.Rest.Commands\bin\$(ConfigurationName)\Reve
 copy ..\..\..\Plugins\Revenj.Plugins.Aspects\bin\$(ConfigurationName)\Revenj.Plugins.Aspects.dll .
 copy ..\..\..\Features\Revenj.Features.Mailer\bin\$(ConfigurationName)\Revenj.Features.Mailer.dll .
 copy ..\..\..\Features\Revenj.Features.Storage\bin\$(ConfigurationName)\Revenj.Features.Storage.dll .
-copy ..\..\..\..\Dependencies\Templater\NGS.Templater.dll .
-copy ..\..\..\..\Dependencies\LitS3\LitS3.dll .
-copy ..\..\..\..\Dependencies\Serialize.Linq\Serialize.Linq.dll .
+copy ..\..\..\Dependencies\Templater\NGS.Templater.dll .
+copy ..\..\..\Dependencies\LitS3\LitS3.dll .
+copy ..\..\..\Dependencies\Serialize.Linq\Serialize.Linq.dll .
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

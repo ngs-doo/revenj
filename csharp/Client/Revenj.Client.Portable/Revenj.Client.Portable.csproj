@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AAF92D7A-37E8-4A8E-859F-2D63E06677CD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Revenj</RootNamespace>
+    <AssemblyName>Revenj.Client</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile2</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;PORTABLE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;PORTABLE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\DomainEvent.cs">
+      <Link>Interface\DomainEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\DomainObjects.cs">
+      <Link>Interface\DomainObjects.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\History.cs">
+      <Link>Interface\History.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Reporting.cs">
+      <Link>Interface\Reporting.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Repositories.cs">
+      <Link>Interface\Repositories.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\ServiceProvider.cs">
+      <Link>Interface\ServiceProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Specification.cs">
+      <Link>Interface\Specification.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Templater.cs">
+      <Link>Interface\Templater.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Tracking.cs">
+      <Link>Interface\Tracking.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Server\IApplicationProxy.cs">
+      <Link>Interface\IApplicationProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Server\ICrudProxy.cs">
+      <Link>Interface\ICrudProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Server\IDomainProxy.cs">
+      <Link>Interface\IDomainProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Server\IReportingProxy.cs">
+      <Link>Interface\IReportingProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Server\IStandardProxy.cs">
+      <Link>Interface\IStandardProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client.Interface\Storage\IS3Repository.cs">
+      <Link>Interface\IS3Repository.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Configuration.cs">
+      <Link>Implementation\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\ClientDomainStore.cs">
+      <Link>Implementation\ClientDomainStore.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\ClientPersistableRepository.cs">
+      <Link>Implementation\ClientPersistableRepository.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\ClientRepository.cs">
+      <Link>Implementation\ClientRepository.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\ClientSearchableRepository.cs">
+      <Link>Implementation\ClientSearchableRepository.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\ClientTemplaterService.cs">
+      <Link>Implementation\ClientTemplaterService.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\DictionaryServiceLocator.cs">
+      <Link>Implementation\DictionaryServiceLocator.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\History.cs">
+      <Link>Implementation\History.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\Search\GenericSearchFilter.cs">
+      <Link>Implementation\GenericSearchFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\Search\GenericSpecification.cs">
+      <Link>Implementation\GenericSpecification.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Patterns\Search\SearchBuilder.cs">
+      <Link>Implementation\SearchBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Serialization\ProtobufSerialization.cs">
+      <Link>Implementation\ProtobufSerialization.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Serialization\ProtoMemoryStream.cs">
+      <Link>Implementation\ProtoMemoryStream.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Server\ApplicationProxy.cs">
+      <Link>Implementation\ApplicationProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Server\CrudProxy.cs">
+      <Link>Implementation\CrudProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Server\DomainProxy.cs">
+      <Link>Implementation\DomainProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Server\HttpClient.cs">
+      <Link>Implementation\HttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Server\ProxyHelper.cs">
+      <Link>Implementation\ProxyHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Server\ReportingProxy.cs">
+      <Link>Implementation\ReportingProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Server\StandardProxy.cs">
+      <Link>Implementation\StandardProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Startup.cs">
+      <Link>Implementation\Startup.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\StaticLocator.cs">
+      <Link>Implementation\StaticLocator.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Storage\S3\LitS3Repository.cs">
+      <Link>Implementation\LitS3Repository.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Storage\S3\S3.cs">
+      <Link>Implementation\S3.cs</Link>
+    </Compile>
+    <Compile Include="..\Revenj.Client\Stream\ChunkedMemoryStream.cs">
+      <Link>Implementation\ChunkedMemoryStream.cs</Link>
+    </Compile>
+    <Compile Include="RequestUtils.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamUtils.cs" />
+    <Compile Include="Task.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="LitS3">
+      <HintPath>..\..\Dependencies\LitS3\LitS3.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>..\..\Dependencies\Portable\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{ABDD7603-8539-4C36-B205-4B2B7B2D289A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Revenj</RootNamespace>
+    <AssemblyName>Revenj.Client</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LitS3, Version=1.0.1.0, Culture=neutral, PublicKeyToken=dea4f62beafbd724, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\LitS3\LitS3.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net, Version=2.0.0.622, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Protobuf\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="Serialize.Linq, Version=1.1.4794.14573, Culture=neutral, PublicKeyToken=149c0fba958b3a36, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Serialize.Linq\Serialize.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Patterns\DictionaryServiceLocator.cs" />
+    <Compile Include="Patterns\ClientDomainStore.cs" />
+    <Compile Include="Patterns\ClientSearchableRepository.cs" />
+    <Compile Include="Patterns\ClientRepository.cs" />
+    <Compile Include="Patterns\ClientPersistableRepository.cs" />
+    <Compile Include="Patterns\Search\ExpressionSpecification.cs" />
+    <Compile Include="Patterns\Search\GenericSearchFilter.cs" />
+    <Compile Include="Patterns\Search\GenericSpecification.cs" />
+    <Compile Include="Patterns\History.cs" />
+    <Compile Include="Patterns\Search\SearchBuilder.cs" />
+    <Compile Include="Patterns\ClientTemplaterService.cs" />
+    <Compile Include="Startup.cs" />
+    <Compile Include="Serialization\ProtobufSerialization.cs" />
+    <Compile Include="Serialization\ProtoMemoryStream.cs" />
+    <Compile Include="Server\ApplicationProxy.cs" />
+    <Compile Include="Server\ProxyHelper.cs" />
+    <Compile Include="Server\StandardProxy.cs" />
+    <Compile Include="Server\ReportingProxy.cs" />
+    <Compile Include="Server\DomainProxy.cs" />
+    <Compile Include="Server\CrudProxy.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\HttpClient.cs" />
+    <Compile Include="StaticLocator.cs" />
+    <Compile Include="Storage\S3\LitS3Repository.cs" />
+    <Compile Include="Storage\S3\S3.cs" />
+    <Compile Include="Stream\ChunkedMemoryStream.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Revenj.Client.Interface\Revenj.Client.Interface.csproj">
+      <Project>{72D88322-DECC-4072-8A82-C35A360DC28B}</Project>
+      <Name>Revenj.Client.Interface</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

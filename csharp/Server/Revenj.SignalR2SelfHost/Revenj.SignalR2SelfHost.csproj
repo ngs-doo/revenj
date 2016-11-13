@@ -57,34 +57,34 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.AspNet.SignalR.Core">
-      <HintPath>..\..\..\Dependencies\SignalR2\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+      <HintPath>..\..\Dependencies\SignalR2\Microsoft.AspNet.SignalR.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin">
-      <HintPath>..\..\..\Dependencies\SignalR2\Microsoft.Owin.dll</HintPath>
+      <HintPath>..\..\Dependencies\SignalR2\Microsoft.Owin.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Diagnostics">
-      <HintPath>..\..\..\Dependencies\SignalR2\Microsoft.Owin.Diagnostics.dll</HintPath>
+      <HintPath>..\..\Dependencies\SignalR2\Microsoft.Owin.Diagnostics.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Host.HttpListener">
-      <HintPath>..\..\..\Dependencies\SignalR2\Microsoft.Owin.Host.HttpListener.dll</HintPath>
+      <HintPath>..\..\Dependencies\SignalR2\Microsoft.Owin.Host.HttpListener.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Hosting">
-      <HintPath>..\..\..\Dependencies\SignalR2\Microsoft.Owin.Hosting.dll</HintPath>
+      <HintPath>..\..\Dependencies\SignalR2\Microsoft.Owin.Hosting.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin.Security">
-      <HintPath>..\..\..\Dependencies\SignalR2\Microsoft.Owin.Security.dll</HintPath>
+      <HintPath>..\..\Dependencies\SignalR2\Microsoft.Owin.Security.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\Dependencies\SignalR2\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\Dependencies\SignalR2\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Owin">
-      <HintPath>..\..\..\Dependencies\SignalR2\Owin.dll</HintPath>
+      <HintPath>..\..\Dependencies\SignalR2\Owin.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reactive.Core">
-      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
+      <HintPath>..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />

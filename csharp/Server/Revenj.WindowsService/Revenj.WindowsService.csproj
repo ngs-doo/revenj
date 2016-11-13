@@ -63,13 +63,13 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Reactive.Core">
-      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
+      <HintPath>..\..\Dependencies\ReactiveExtensions\System.Reactive.Core.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Interfaces">
-      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Interfaces.dll</HintPath>
+      <HintPath>..\..\Dependencies\ReactiveExtensions\System.Reactive.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.Linq">
-      <HintPath>..\..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
+      <HintPath>..\..\Dependencies\ReactiveExtensions\System.Reactive.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Web.Extensions" />
@@ -150,7 +150,7 @@
   <PropertyGroup>
     <PostBuildEvent>copy ..\..\..\..\Features\Revenj.Features.Mailer\bin\$(ConfigurationName)\Revenj.Features.Mailer.dll .
 copy ..\..\..\..\Plugins\Revenj.Plugins.DatabasePersistence.Postgres\bin\$(ConfigurationName)\Revenj.Plugins.DatabasePersistence.Postgres.dll .
-copy ..\..\..\..\..\Dependencies\Templater\NGS.Templater.dll .
+copy ..\..\..\..\Dependencies\Templater\NGS.Templater.dll .
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

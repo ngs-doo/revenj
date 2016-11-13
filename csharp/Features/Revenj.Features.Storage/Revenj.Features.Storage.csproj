@@ -53,7 +53,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LitS3">
-      <HintPath>..\..\..\Dependencies\LitS3\LitS3.dll</HintPath>
+      <HintPath>..\..\Dependencies\LitS3\LitS3.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />

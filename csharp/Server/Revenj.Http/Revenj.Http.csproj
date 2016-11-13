@@ -53,7 +53,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Remotion.Linq">
-      <HintPath>..\..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
+      <HintPath>..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -167,9 +167,9 @@ copy ..\..\..\..\Plugins\Revenj.Plugins.Server.Commands\bin\$(ConfigurationName)
 copy ..\..\..\..\Plugins\Revenj.Plugins.Rest.Commands\bin\$(ConfigurationName)\Revenj.Plugins.Rest.Commands.dll .
 copy ..\..\..\..\Features\Revenj.Features.Mailer\bin\$(ConfigurationName)\Revenj.Features.Mailer.dll .
 copy ..\..\..\..\Features\Revenj.Features.Storage\bin\$(ConfigurationName)\Revenj.Features.Storage.dll .
-copy ..\..\..\..\..\Dependencies\Templater\NGS.Templater.dll .
-copy ..\..\..\..\..\Dependencies\LitS3\LitS3.dll .
-copy ..\..\..\..\..\Dependencies\Serialize.Linq\Serialize.Linq.dll .
+copy ..\..\..\..\Dependencies\Templater\NGS.Templater.dll .
+copy ..\..\..\..\Dependencies\LitS3\LitS3.dll .
+copy ..\..\..\..\Dependencies\Serialize.Linq\Serialize.Linq.dll .
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
