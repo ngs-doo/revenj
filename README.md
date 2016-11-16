@@ -82,7 +82,7 @@ Benchmarks:
 
 ![JSON bench](tutorials/pictures/json-bench.png)
 
- * [Techempower benchmark](https://www.techempower.com/benchmarks/previews/round13/)
+ * [Techempower benchmark](https://www.techempower.com/benchmarks/#section=data-r13)
 
 ![Framework bench](tutorials/pictures/techempower-single-13.png)
 
