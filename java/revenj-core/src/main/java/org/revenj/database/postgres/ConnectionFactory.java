@@ -10,34 +10,14 @@
 package org.revenj.database.postgres;
 
 import org.postgresql.PGProperty;
-import org.postgresql.core.Encoding;
-import org.postgresql.core.Logger;
-import org.postgresql.core.PGStream;
-import org.postgresql.core.ProtocolConnection;
-import org.postgresql.core.ServerVersion;
-import org.postgresql.core.SetupQueryRunner;
-import org.postgresql.core.Utils;
-import org.postgresql.core.v2.SocketFactoryFactory;
-import org.postgresql.hostchooser.GlobalHostStatusTracker;
-import org.postgresql.hostchooser.HostRequirement;
-import org.postgresql.hostchooser.HostStatus;
+import org.postgresql.core.*;
 import org.postgresql.sspi.ISSPIClient;
-import org.postgresql.util.GT;
-import org.postgresql.util.HostSpec;
-import org.postgresql.util.MD5Digest;
-import org.postgresql.util.PSQLException;
-import org.postgresql.util.PSQLState;
-import org.postgresql.util.PSQLWarning;
-import org.postgresql.util.ServerErrorMessage;
-import org.postgresql.util.UnixCrypt;
+import org.postgresql.util.*;
 
 import java.io.IOException;
 import java.net.ConnectException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 
 import javax.net.SocketFactory;
 
@@ -213,13 +193,13 @@ public class ConnectionFactory {
 	private static PGStream enableSSL(PGStream pgStream, boolean requireSSL, Properties info, Logger logger,
 							   int connectTimeout) throws IOException, SQLException {
 		// Send SSL request packet
-		pgStream.SendInteger4(8);
-		pgStream.SendInteger2(1234);
-		pgStream.SendInteger2(5679);
+		pgStream.sendInteger4(8);
+		pgStream.sendInteger2(1234);
+		pgStream.sendInteger2(5679);
 		pgStream.flush();
 
 		// Now get the response from the backend, one of N, E, S.
-		int beresp = pgStream.ReceiveChar();
+		int beresp = pgStream.receiveChar();
 		switch (beresp) {
 			case 'E':
 				// Server doesn't even know about the SSL handshake protocol
@@ -266,15 +246,15 @@ public class ConnectionFactory {
 		length += 1; // Terminating \0
 
 		// Send the startup message.
-		pgStream.SendInteger4(length);
-		pgStream.SendInteger2(3); // protocol major
-		pgStream.SendInteger2(0); // protocol minor
+		pgStream.sendInteger4(length);
+		pgStream.sendInteger2(3); // protocol major
+		pgStream.sendInteger2(0); // protocol minor
 		for (byte[] encodedParam : encodedParams) {
-			pgStream.Send(encodedParam);
-			pgStream.SendChar(0);
+			pgStream.send(encodedParam);
+			pgStream.sendChar(0);
 		}
 
-		pgStream.SendChar(0);
+		pgStream.sendChar(0);
 		pgStream.flush();
 	}
 
@@ -289,7 +269,7 @@ public class ConnectionFactory {
 		try {
 			authloop:
 			while (true) {
-				int beresp = pgStream.ReceiveChar();
+				int beresp = pgStream.receiveChar();
 
 				switch (beresp) {
 					case 'E':
@@ -299,7 +279,7 @@ public class ConnectionFactory {
 						// The most common one to be thrown here is:
 						// "User authentication failed"
 						//
-						int l_elen = pgStream.ReceiveInteger4();
+						int l_elen = pgStream.receiveInteger4();
 						if (l_elen > 30000) {
 							// if the error length is > than 30000 we assume this is really a v2 protocol
 							// server, so trigger fallback.
@@ -307,21 +287,21 @@ public class ConnectionFactory {
 						}
 
 						ServerErrorMessage errorMsg =
-								new ServerErrorMessage(pgStream.ReceiveString(l_elen - 4), logger.getLogLevel());
+								new ServerErrorMessage(pgStream.receiveString(l_elen - 4), logger.getLogLevel());
 						throw new PSQLException(errorMsg);
 
 					case 'R':
 						// Authentication request.
 						// Get the message length
-						int l_msgLen = pgStream.ReceiveInteger4();
+						int l_msgLen = pgStream.receiveInteger4();
 
 						// Get the type of request
-						int areq = pgStream.ReceiveInteger4();
+						int areq = pgStream.receiveInteger4();
 
 						// Process the request.
 						switch (areq) {
 							case AUTH_REQ_CRYPT: {
-								byte[] salt = pgStream.Receive(2);
+								byte[] salt = pgStream.receive(2);
 
 								if (password == null) {
 									throw new PSQLException(
@@ -331,17 +311,17 @@ public class ConnectionFactory {
 
 								byte[] encodedResult = UnixCrypt.crypt(salt, password.getBytes("UTF-8"));
 
-								pgStream.SendChar('p');
-								pgStream.SendInteger4(4 + encodedResult.length + 1);
-								pgStream.Send(encodedResult);
-								pgStream.SendChar(0);
+								pgStream.sendChar('p');
+								pgStream.sendInteger4(4 + encodedResult.length + 1);
+								pgStream.send(encodedResult);
+								pgStream.sendChar(0);
 								pgStream.flush();
 
 								break;
 							}
 
 							case AUTH_REQ_MD5: {
-								byte[] md5Salt = pgStream.Receive(4);
+								byte[] md5Salt = pgStream.receive(4);
 
 								if (password == null) {
 									throw new PSQLException(
@@ -351,10 +331,10 @@ public class ConnectionFactory {
 
 								byte[] digest = MD5Digest.encode(user.getBytes("UTF-8"), password.getBytes("UTF-8"), md5Salt);
 
-								pgStream.SendChar('p');
-								pgStream.SendInteger4(4 + digest.length + 1);
-								pgStream.Send(digest);
-								pgStream.SendChar(0);
+								pgStream.sendChar('p');
+								pgStream.sendInteger4(4 + digest.length + 1);
+								pgStream.send(digest);
+								pgStream.sendChar(0);
 								pgStream.flush();
 
 								break;
@@ -374,10 +354,10 @@ public class ConnectionFactory {
 
 								byte[] encodedPassword = password.getBytes("UTF-8");
 
-								pgStream.SendChar('p');
-								pgStream.SendInteger4(4 + encodedPassword.length + 1);
-								pgStream.Send(encodedPassword);
-								pgStream.SendChar(0);
+								pgStream.sendChar('p');
+								pgStream.sendInteger4(4 + encodedPassword.length + 1);
+								pgStream.send(encodedPassword);
+								pgStream.sendChar(0);
 								pgStream.flush();
 
 								break;
@@ -489,49 +469,49 @@ public class ConnectionFactory {
 
 	private static void readStartupMessages(PGStream pgStream, Logger logger) throws IOException, SQLException {
 		while (true) {
-			int beresp = pgStream.ReceiveChar();
+			int beresp = pgStream.receiveChar();
 			switch (beresp) {
 				case 'Z':
 					// Ready For Query; we're done.
-					if (pgStream.ReceiveInteger4() != 5) {
+					if (pgStream.receiveInteger4() != 5) {
 						throw new IOException("unexpected length of ReadyForQuery packet");
 					}
 
-					pgStream.ReceiveChar();
+					pgStream.receiveChar();
 
 					return;
 
 				case 'K':
 					// BackendKeyData
-					int l_msgLen = pgStream.ReceiveInteger4();
+					int l_msgLen = pgStream.receiveInteger4();
 					if (l_msgLen != 12) {
 						throw new PSQLException(GT.tr("Protocol error.  Session setup failed."),
 								PSQLState.PROTOCOL_VIOLATION);
 					}
 
-					pgStream.ReceiveInteger4();
-					pgStream.ReceiveInteger4();
+					pgStream.receiveInteger4();
+					pgStream.receiveInteger4();
 					break;
 
 				case 'E':
 					// Error
-					int l_elen = pgStream.ReceiveInteger4();
+					int l_elen = pgStream.receiveInteger4();
 					ServerErrorMessage l_errorMsg =
-							new ServerErrorMessage(pgStream.ReceiveString(l_elen - 4), logger.getLogLevel());
+							new ServerErrorMessage(pgStream.receiveString(l_elen - 4), logger.getLogLevel());
 
 					throw new PSQLException(l_errorMsg);
 
 				case 'N':
 					// Warning
-					int l_nlen = pgStream.ReceiveInteger4();
-					pgStream.ReceiveString(l_nlen - 4);
+					int l_nlen = pgStream.receiveInteger4();
+					pgStream.receiveString(l_nlen - 4);
 					break;
 
 				case 'S':
 					// ParameterStatus
-					pgStream.ReceiveInteger4();
-					String name = pgStream.ReceiveString();
-					String value = pgStream.ReceiveString();
+					pgStream.receiveInteger4();
+					String name = pgStream.receiveString();
+					String value = pgStream.receiveString();
 
 					if (logger.logDebug()) {
 						logger.debug(" <=BE ParameterStatus(" + name + " = " + value + ")");

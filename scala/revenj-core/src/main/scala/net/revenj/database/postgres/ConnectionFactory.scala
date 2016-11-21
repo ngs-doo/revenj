@@ -8,7 +8,6 @@ import java.util.{Properties, TimeZone}
 
 import org.postgresql.PGProperty
 import org.postgresql.core._
-import org.postgresql.core.v2.SocketFactoryFactory
 import org.postgresql.sspi.ISSPIClient
 import org.postgresql.util._
 
@@ -149,12 +148,12 @@ private [revenj] object ConnectionFactory {
 
   private def enableSSL(pgStream: PGStream, requireSSL: Boolean, logger: Logger, info: Properties, connectTimeout: Int): PGStream = {
     // Send SSL request packet
-    pgStream.SendInteger4(8)
-    pgStream.SendInteger2(1234)
-    pgStream.SendInteger2(5679)
+    pgStream.sendInteger4(8)
+    pgStream.sendInteger2(1234)
+    pgStream.sendInteger2(5679)
     pgStream.flush()
     // Now get the response from the backend, one of N, E, S.
-    val beresp = pgStream.ReceiveChar
+    val beresp = pgStream.receiveChar
     beresp match {
       case 'E' =>
         // Server doesn't even know about the SSL handshake protocol
@@ -187,14 +186,14 @@ private [revenj] object ConnectionFactory {
     }
     length += 1 // Terminating \0
     // Send the startup message.
-    pgStream.SendInteger4(length)
-    pgStream.SendInteger2(3) // protocol major
-    pgStream.SendInteger2(0) // protocol minor
+    pgStream.sendInteger4(length)
+    pgStream.sendInteger2(3) // protocol major
+    pgStream.sendInteger2(0) // protocol minor
     encodedParams foreach { ep =>
-      pgStream.Send(ep)
-      pgStream.SendChar(0)
+      pgStream.send(ep)
+      pgStream.sendChar(0)
     }
-    pgStream.SendChar(0)
+    pgStream.sendChar(0)
     pgStream.flush()
   }
 
@@ -206,53 +205,52 @@ private [revenj] object ConnectionFactory {
     try {
       var isAuthenticating = true
       while (isAuthenticating) {
-        val beresp = pgStream.ReceiveChar
-        beresp match {
+        pgStream.receiveChar match {
           case 'E' =>
             // The most common one to be thrown here is:
             // "User authentication failed"
             //
-            val l_elen = pgStream.ReceiveInteger4
+            val l_elen = pgStream.receiveInteger4
             if (l_elen > 30000) {
               // if the error length is > than 30000 we assume this is really a v2 protocol
               // server, so trigger fallback.
               throw new ConnectionFactory.UnsupportedProtocolException
             }
-            val errorMsg = new ServerErrorMessage(pgStream.ReceiveString(l_elen - 4), logger.getLogLevel)
+            val errorMsg = new ServerErrorMessage(pgStream.receiveString(l_elen - 4), logger.getLogLevel)
             throw new PSQLException(errorMsg)
           case 'R' =>
             // Authentication request.
             // Get the message length
-            val l_msgLen = pgStream.ReceiveInteger4
+            val l_msgLen = pgStream.receiveInteger4
             // Get the type of request
-            val areq = pgStream.ReceiveInteger4
+            val areq = pgStream.receiveInteger4
             // Process the request.
             areq match {
               case AUTH_REQ_CRYPT =>
-                val salt = pgStream.Receive(2)
+                val salt = pgStream.receive(2)
                 if (password == null) throw new PSQLException(GT.tr("The server requested password-based authentication, but no password was provided."), PSQLState.CONNECTION_REJECTED)
                 val encodedResult = UnixCrypt.crypt(salt, password.getBytes("UTF-8"))
-                pgStream.SendChar('p')
-                pgStream.SendInteger4(4 + encodedResult.length + 1)
-                pgStream.Send(encodedResult)
-                pgStream.SendChar(0)
+                pgStream.sendChar('p')
+                pgStream.sendInteger4(4 + encodedResult.length + 1)
+                pgStream.send(encodedResult)
+                pgStream.sendChar(0)
                 pgStream.flush()
               case AUTH_REQ_MD5 =>
-                val md5Salt = pgStream.Receive(4)
+                val md5Salt = pgStream.receive(4)
                 if (password == null) throw new PSQLException(GT.tr("The server requested password-based authentication, but no password was provided."), PSQLState.CONNECTION_REJECTED)
                 val digest = MD5Digest.encode(user.getBytes("UTF-8"), password.getBytes("UTF-8"), md5Salt)
-                pgStream.SendChar('p')
-                pgStream.SendInteger4(4 + digest.length + 1)
-                pgStream.Send(digest)
-                pgStream.SendChar(0)
+                pgStream.sendChar('p')
+                pgStream.sendInteger4(4 + digest.length + 1)
+                pgStream.send(digest)
+                pgStream.sendChar(0)
                 pgStream.flush()
               case AUTH_REQ_PASSWORD =>
                 if (password == null) throw new PSQLException(GT.tr("The server requested password-based authentication, but no password was provided."), PSQLState.CONNECTION_REJECTED)
                 val encodedPassword = password.getBytes("UTF-8")
-                pgStream.SendChar('p')
-                pgStream.SendInteger4(4 + encodedPassword.length + 1)
-                pgStream.Send(encodedPassword)
-                pgStream.SendChar(0)
+                pgStream.sendChar('p')
+                pgStream.sendInteger4(4 + encodedPassword.length + 1)
+                pgStream.send(encodedPassword)
+                pgStream.sendChar(0)
                 pgStream.flush()
               case AUTH_REQ_GSS =>
               case AUTH_REQ_SSPI =>
@@ -291,7 +289,7 @@ private [revenj] object ConnectionFactory {
                     /* No need to dispose() if no SSPI used */ sspiClient = null
                     if (gsslib == "sspi") throw new PSQLException("SSPI forced with gsslib=sspi, but SSPI not available; set loglevel=2 for details", PSQLState.CONNECTION_UNABLE_TO_CONNECT)
                   }
-                  if (logger.logDebug) logger.debug("Using SSPI: " + useSSPI + ", gsslib=" + gsslib + " and SSPI support detected")
+                  if (logger.logDebug) logger.debug(s"Using SSPI: $useSSPI, gsslib=$gsslib and SSPI support detected")
                 }
                 /* SSPI requested and detected as available */
                 if (useSSPI) sspiClient.startSSPI()
@@ -305,7 +303,7 @@ private [revenj] object ConnectionFactory {
               case AUTH_REQ_OK =>
                 isAuthenticating = false
               case _ =>
-                throw new PSQLException(GT.tr("The authentication type {0} is not supported. Check that you have configured the pg_hba.conf file to include the client''s IP address or subnet, and that it is using an authentication scheme supported by the driver.", areq), PSQLState.CONNECTION_REJECTED)
+                throw new PSQLException(GT.tr("The authentication type {0} is not supported. Check that you have configured the pg_hba.conf file to include the client''s IP address or subnet, and that it is using an authentication scheme supported by the driver.", Integer.valueOf(areq)), PSQLState.CONNECTION_REJECTED)
             }
           case _ =>
             throw new PSQLException(GT.tr("Protocol error.  Session setup failed."), PSQLState.PROTOCOL_VIOLATION)
@@ -327,31 +325,30 @@ private [revenj] object ConnectionFactory {
   private def readStartupMessages(pgStream: PGStream, logger: Logger): Unit = {
     var isEnd = false
     while (!isEnd) {
-      val beresp = pgStream.ReceiveChar
-      beresp match {
+      pgStream.receiveChar match {
         case 'Z' =>
-          if (pgStream.ReceiveInteger4 != 5) throw new IOException("unexpected length of ReadyForQuery packet")
-          pgStream.ReceiveChar
+          if (pgStream.receiveInteger4 != 5) throw new IOException("unexpected length of ReadyForQuery packet")
+          pgStream.receiveChar
           isEnd = true
         case 'K' =>
-          val l_msgLen: Int = pgStream.ReceiveInteger4
+          val l_msgLen = pgStream.receiveInteger4
           if (l_msgLen != 12) throw new PSQLException(GT.tr("Protocol error.  Session setup failed."), PSQLState.PROTOCOL_VIOLATION)
-          pgStream.ReceiveInteger4
-          pgStream.ReceiveInteger4
+          pgStream.receiveInteger4
+          pgStream.receiveInteger4
         case 'E' =>
           // Error
-          val l_elen = pgStream.ReceiveInteger4
-          val l_errorMsg = new ServerErrorMessage(pgStream.ReceiveString(l_elen - 4), logger.getLogLevel)
+          val l_elen = pgStream.receiveInteger4
+          val l_errorMsg = new ServerErrorMessage(pgStream.receiveString(l_elen - 4), logger.getLogLevel)
           throw new PSQLException(l_errorMsg)
         case 'N' =>
           // Warning
-          val l_nlen = pgStream.ReceiveInteger4
-          pgStream.ReceiveString(l_nlen - 4)
+          val l_nlen = pgStream.receiveInteger4
+          pgStream.receiveString(l_nlen - 4)
         case 'S' =>
           // ParameterStatus
-          pgStream.ReceiveInteger4
-          val name = pgStream.ReceiveString
-          val value = pgStream.ReceiveString
+          pgStream.receiveInteger4
+          val name = pgStream.receiveString
+          val value = pgStream.receiveString
           if (name == "client_encoding") {
             if (value != "UTF8") throw new PSQLException(GT.tr("Protocol error.  Session setup failed."), PSQLState.PROTOCOL_VIOLATION)
             pgStream.setEncoding(Encoding.getDatabaseEncoding("UTF8"))

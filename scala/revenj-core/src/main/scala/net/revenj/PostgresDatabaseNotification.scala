@@ -229,24 +229,24 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
 
   private class Listening (stream: PGStream) extends Runnable {
     private val command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj".getBytes("UTF-8")
-    stream.SendChar('Q')
-    stream.SendInteger4(command.length + 5)
-    stream.Send(command)
-    stream.SendChar(0)
+    stream.sendChar('Q')
+    stream.sendInteger4(command.length + 5)
+    stream.send(command)
+    stream.sendChar(0)
     stream.flush()
     receiveCommand(stream)
     receiveCommand(stream)
     receiveCommand(stream)
     receiveCommand(stream)
-    if (stream.ReceiveChar != 'Z') throw new IOException("Unable to setup Postgres listener")
-    private val num = stream.ReceiveInteger4
+    if (stream.receiveChar != 'Z') throw new IOException("Unable to setup Postgres listener")
+    private val num = stream.receiveInteger4
     if (num != 5) throw new IOException("unexpected length of ReadyForQuery packet")
-    stream.ReceiveChar()
+    stream.receiveChar()
 
     private def receiveCommand(pgStream: PGStream): Unit = {
-      pgStream.ReceiveChar
-      val len: Int = pgStream.ReceiveInteger4
-      pgStream.Skip(len - 4)
+      pgStream.receiveChar
+      val len = pgStream.receiveInteger4
+      pgStream.skip(len - 4)
     }
 
     def run(): Unit = {
@@ -257,17 +257,17 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
       while (threadAlive && !isClosed) {
         try {
           if (!isClosed) {
-            pgStream.ReceiveChar match {
+            pgStream.receiveChar match {
               case 'A' =>
-                pgStream.ReceiveInteger4
-                val pidA = pgStream.ReceiveInteger4
-                val msgA = pgStream.ReceiveString
-                val paramA = pgStream.ReceiveString
+                pgStream.receiveInteger4
+                val pidA = pgStream.receiveInteger4
+                val msgA = pgStream.receiveString
+                val paramA = pgStream.receiveString
                 processNotification(reader, new Notification(msgA, pidA, paramA))
               case 'E' =>
                 if (!isClosed) {
-                  val e_len = pgStream.ReceiveInteger4
-                  val err = pgStream.ReceiveString(e_len - 4)
+                  val e_len = pgStream.receiveInteger4
+                  val err = pgStream.receiveString(e_len - 4)
                   throw new IOException(err)
                 }
               case x =>

@@ -81,7 +81,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C, bytes = bytes, bb = List(bytes, bytes))
         abc.vv = Some(abc.v)
         abc.vvv = IndexedSeq(abc.v, abc.v)
-        abc.ent2 = Array(Ent2(AbcID = abc.ID))
+        abc.ent2 = Array(Ent2())
         val uri = Await.result(repoAbc.insert(abc), Duration.Inf)
         container.close()
         uri === abc.URI
@@ -112,7 +112,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C, bytes = bytes, bb = List(bytes, bytes))
         abc.vv = Some(abc.v)
         abc.vvv = IndexedSeq(abc.v, abc.v)
-        abc.ent2 = Array(Ent2(AbcID = abc.ID))
+        abc.ent2 = Array(Ent2())
         val uri = abc.URI
         Await.result(ctx.create(abc), Duration.Inf)
         container.close()
@@ -142,7 +142,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C, bytes = bytes, bb = List(bytes, bytes))
         abc.vv = Some(abc.v)
         abc.vvv = IndexedSeq(abc.v, abc.v)
-        abc.ent2 = Array(Ent2(AbcID = abc.ID))
+        abc.ent2 = Array(Ent2())
         Await.result(ctx.create(abc), Duration.Inf)
         val find = Await.result(ctx.find[Abc](abc.URI), Duration.Inf).get
         container.close()

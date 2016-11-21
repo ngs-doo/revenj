@@ -5,18 +5,18 @@ import com.dslplatform.compiler.client.parameters.{Settings, Targets}
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.3.3",
+    version := "0.3.4",
     libraryDependencies ++= Seq(
-      "org.postgresql" % "postgresql" % "9.4.1209",
+      "org.postgresql" % "postgresql" % "9.4.1212",
       "joda-time" % "joda-time" % "2.9.4", //TODO: will be removed
       "org.joda" % "joda-convert" % "1.8.1",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix" % "2.0.4",
+      "io.monix" %% "monix" % "2.1.0",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.7.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.7.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.7.4",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.8",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.7.8",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.7.8",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.7.8",
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test
     )
   )
@@ -25,7 +25,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.3.3",
+  version := "0.3.4",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.0",
     "com.typesafe.akka" %% "akka-http-core" % "2.4.11"
@@ -82,7 +82,7 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "com.dslplatform" % "dsl-clc" % "1.8.1" % Test,
+      "com.dslplatform" % "dsl-clc" % "1.8.3" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
@@ -111,7 +111,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   name := baseDirectory.value.getName,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.11.8", "2.12.0-RC2"),
+  crossScalaVersions := Seq("2.11.8", "2.12.0"),
 
   scalacOptions ++= Seq(
     "-deprecation",

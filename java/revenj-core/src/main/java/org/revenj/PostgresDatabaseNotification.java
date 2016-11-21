@@ -222,25 +222,25 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		Listening(PGStream stream) throws IOException {
 			this.stream = stream;
 			byte[] command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj".getBytes("UTF-8");
-			stream.SendChar('Q');
-			stream.SendInteger4(command.length + 5);
-			stream.Send(command);
-			stream.SendChar(0);
+			stream.sendChar('Q');
+			stream.sendInteger4(command.length + 5);
+			stream.send(command);
+			stream.sendChar(0);
 			stream.flush();
 			receiveCommand(stream);
 			receiveCommand(stream);
 			receiveCommand(stream);
 			receiveCommand(stream);
-			if (stream.ReceiveChar() != 'Z') throw new IOException("Unable to setup Postgres listener");
-			int num = stream.ReceiveInteger4();
+			if (stream.receiveChar() != 'Z') throw new IOException("Unable to setup Postgres listener");
+			int num = stream.receiveInteger4();
 			if (num != 5) throw new IOException("unexpected length of ReadyForQuery packet");
-			stream.ReceiveChar();
+			stream.receiveChar();
 		}
 
 		private void receiveCommand(PGStream pgStream) throws IOException {
-			pgStream.ReceiveChar();
-			int len = pgStream.ReceiveInteger4();
-			pgStream.Skip(len - 4);
+			pgStream.receiveChar();
+			int len = pgStream.receiveInteger4();
+			pgStream.skip(len - 4);
 		}
 
 		@Override
@@ -250,18 +250,18 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			systemState.notify(new SystemState.SystemEvent("notification", "started"));
 			while (!isClosed) {
 				try {
-					switch (pgStream.ReceiveChar()) {
+					switch (pgStream.receiveChar()) {
 						case 'A':
-							pgStream.ReceiveInteger4();
-							int pidA = pgStream.ReceiveInteger4();
-							String msgA = pgStream.ReceiveString();
-							String paramA = pgStream.ReceiveString();
+							pgStream.receiveInteger4();
+							int pidA = pgStream.receiveInteger4();
+							String msgA = pgStream.receiveString();
+							String paramA = pgStream.receiveString();
 							processNotification(reader, new org.postgresql.core.Notification(msgA, pidA, paramA));
 							break;
 						case 'E':
 							if (!isClosed) {
-								int e_len = pgStream.ReceiveInteger4();
-								String err = pgStream.ReceiveString(e_len - 4);
+								int e_len = pgStream.receiveInteger4();
+								String err = pgStream.receiveString(e_len - 4);
 								throw new IOException(err);
 							} else break;
 						default:
