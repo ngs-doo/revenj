@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
@@ -175,12 +176,12 @@ namespace Revenj.Serialization
 					}
 					sw.Write(']');
 				}
-				else if (value is ICollection<IJsonObject>)
+				else if (value is IEnumerable<IJsonObject>)
 				{
-					var col = value as ICollection<IJsonObject>;
+					var col = value as IEnumerable<IJsonObject>;
 					sw.Write('[');
-					var total = col.Count - 1;
-					if (total > 0)
+					var total = col.Count() - 1;
+					if (total >= 0)
 					{
 						var enumerator = col.GetEnumerator();
 						IJsonObject item;

@@ -22,7 +22,7 @@ namespace Revenj.Serialization
 		public string Serialize(object value, string accept, Stream destination)
 		{
 			//fast path
-			if (accept == "application/json")
+			if (accept == "application/json" || accept == null)
 			{
 				Json.Serialize(value, destination, false);
 				return "application/json";
@@ -42,8 +42,18 @@ namespace Revenj.Serialization
 				Xml.Serialize(value, destination);
 				return "application/xml";
 			}
+			if (accept.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+			{
+				Json.Serialize(value, destination, false);
+				return "application/json";
+			}
 			//Slow path
 			accept = (accept ?? "application/json").ToLowerInvariant();
+			if (accept.Contains("application/json"))
+			{
+				Json.Serialize(value, destination, false);
+				return "application/json";
+			}
 			if (accept.Contains("application/xml"))
 			{
 				Xml.Serialize(value, destination);
