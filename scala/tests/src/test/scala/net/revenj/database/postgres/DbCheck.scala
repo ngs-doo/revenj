@@ -167,7 +167,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
       }
       "context from connection" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
-        container.registerClass(classOf[MyService], singleton = false)
+        container.register[MyService](singleton = false)
         val ds = container.resolve[DataSource]
         val conn = ds.getConnection
         val service = container.resolve[MyService]
@@ -361,6 +361,28 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         }
         container.close()
         migration === true
+      }
+    }
+    "analysis" >> {
+      "simple cube" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ds = container.resolve[DataSource]
+        val con = ds.getConnection
+        val cube = new AbcCube(container)
+        val res = cube.analyze(con, Seq(AbcCube.s), Seq(AbcCube.i), Seq(AbcCube.s -> true), None, None, None)
+        con.close()
+        container.close()
+        res.nonEmpty === true
+      }
+      "cube with filter" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ds = container.resolve[DataSource]
+        val con = ds.getConnection
+        val cube = new AbcCube(container)
+        val res = cube.analyze(con, Seq(AbcCube.s), Seq(AbcCube.i, AbcCube.en2), Nil, Some(AbcList.Filter("")), None, None)
+        con.close()
+        container.close()
+        res.nonEmpty === true
       }
     }
   }

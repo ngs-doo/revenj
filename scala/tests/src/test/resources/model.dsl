@@ -31,6 +31,13 @@ module test {
 		tt;
 		specification Filter 'it => it.s.StartsWith(m)' { string m; }
 	}
+	cube<AbcList> AbcCube {
+		dimension s;
+		count ii;
+		count en as entC;
+		count en2;
+		sum i;
+	}
 	enum En { A; B; C; }
 	root Abc { 
 		string s; 
@@ -130,9 +137,9 @@ module test {
 		specification Filter 'it => it.x >= a && it.x <= b' { int a; int b; }
 	}
 	report ReportMe {
-	    int x;
-	    Vector<TestMe> events 'it => it.x == x';
-	    Abc firstAbc 'it => it.s == "xx"' ORDER BY ID DESC;
+		int x;
+		Vector<TestMe> events 'it => it.x == x';
+		Abc firstAbc 'it => it.s == "xx"' ORDER BY ID DESC;
 	}
 	root ComplexPk(a,b,c) {
 		int a;

@@ -14,7 +14,9 @@ object DateConverter extends Converter[LocalDate] {
   }
 
   private def serialize(buf: Array[Char], start: Int, value: LocalDate): Unit = {
-    NumberConverter.write4(value.getYear, buf, start)
+    val year = value.getYear
+    if (year > 9999) throw new IllegalArgumentException(s"Invalid year detected: $value. Only dates up to 9999-12-31 are allowed")
+    NumberConverter.write4(year, buf, start)
     buf(start + 4) = '-'
     NumberConverter.write2(value.getMonthValue, buf, start + 5)
     buf(start + 7) = '-'

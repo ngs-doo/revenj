@@ -15,11 +15,6 @@ trait Container extends ServiceLocator with AutoCloseable {
     registerType(manifest.runtimeClass, manifest.runtimeClass, singleton)
   }
 
-  @deprecated("will be removed in next version", "0.2.0")
-  def registerClass[T](manifest: Class[T], singleton: Boolean = false): this.type = {
-    registerType(manifest, manifest, singleton)
-  }
-
   def registerAs[T, S <: T](singleton: Boolean = false)(implicit manifest: TypeTag[T], implementation: ClassTag[S]): this.type
 
   def registerInstance[T: TypeTag](service: T, handleClose: Boolean = false): this.type

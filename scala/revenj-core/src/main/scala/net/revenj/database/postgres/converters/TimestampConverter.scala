@@ -120,12 +120,14 @@ object TimestampConverter {
 
   private def serializeNormalized(buffer: Array[Char], pos: Int, value: LocalDateTime, offsetHours: Int): Int = {
     //TODO: Java supports wider range of dates
+    val year = value.getYear
+    if (year > 9999) throw new IllegalArgumentException(s"Invalid year detected: $value. Only dates up to 9999-12-31 are allowed")
     buffer(pos + 4) = '-'
     buffer(pos + 7) = '-'
     buffer(pos + 10) = ' '
     buffer(pos + 13) = ':'
     buffer(pos + 16) = ':'
-    NumberConverter.write4(value.getYear, buffer, pos)
+    NumberConverter.write4(year, buffer, pos)
     NumberConverter.write2(value.getMonthValue, buffer, pos + 5)
     NumberConverter.write2(value.getDayOfMonth, buffer, pos + 8)
     NumberConverter.write2(value.getHour, buffer, pos + 11)
