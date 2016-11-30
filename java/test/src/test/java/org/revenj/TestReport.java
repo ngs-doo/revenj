@@ -9,7 +9,11 @@ import org.junit.Test;
 import org.revenj.patterns.DataContext;
 import org.revenj.patterns.ServiceLocator;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 public class TestReport extends Setup {
@@ -102,5 +106,30 @@ public class TestReport extends Setup {
 						.use(CompositeCube.simple)
 						.analyze(new CompositeList.ForSimple(Arrays.asList(co.getSimple())));
 		Assert.assertEquals(1, results.size());
+	}
+
+	@Test
+	public void canStreamCube() throws IOException, SQLException {
+		ServiceLocator locator = container;
+		DataSource ds = locator.resolve(DataSource.class);
+		Connection conn = ds.getConnection();
+		DataContext context = locator.resolve(DataContext.class);
+		Composite co = new Composite();
+		co.getSimple().setNumber(5432);
+		context.create(co);
+		CompositeCube cube = new CompositeCube(locator);
+		ResultSet rs = cube.stream(
+				conn,
+				Collections.singletonList(CompositeCube.number),
+				Arrays.asList(CompositeCube.count, CompositeCube.max),
+				null,
+				it -> it.getNumber() == 5432,
+				null,
+				null);
+		Assert.assertTrue(rs.next());
+		Assert.assertEquals(5432, rs.getInt(1));
+		Assert.assertFalse(rs.next());
+		rs.close();
+		conn.close();
 	}
 }

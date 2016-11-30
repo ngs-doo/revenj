@@ -384,6 +384,18 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         container.close()
         res.nonEmpty === true
       }
+      "stream cube " >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ds = container.resolve[DataSource]
+        val con = ds.getConnection
+        val cube = new AbcCube(container)
+        val res = cube.stream(con, Seq(AbcCube.s), Nil, Nil, None, None, None)
+        val hasData = res.next()
+        res.close()
+        con.close()
+        container.close()
+        hasData === true
+      }
     }
   }
 }

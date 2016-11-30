@@ -1,6 +1,6 @@
 package net.revenj.database.postgres
 
-import java.sql.{Connection, PreparedStatement}
+import java.sql.{Connection, PreparedStatement, ResultSet}
 
 import net.revenj.patterns.{DataSource, OlapCubeQuery, ServiceLocator, Specification}
 
@@ -66,6 +66,7 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
 
   def prepareSql(
     sb: StringBuilder,
+    asRecord: Boolean,
     usedDimensions: Seq[String],
     usedFacts: Seq[String],
     order: Seq[(String, Boolean)],
@@ -76,7 +77,10 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
 
     validateInput(usedDimensions, usedFacts, order.map(_._1))
     val alias = "_it"
-    sb.append("SELECT ROW(")
+    sb.append("SELECT ")
+    if (asRecord) {
+      sb.append("ROW(")
+    }
     usedDimensions foreach { d =>
       sb.append(cubeDimensions(d)(alias)).append(',')
     }
@@ -84,7 +88,10 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
       sb.append(cubeFacts(f)(alias)).append(',')
     }
     sb.setLength(sb.length - 1)
-    sb.append(") ")
+    if (asRecord) {
+      sb.append(")")
+    }
+    sb.append(" ")
     if (filter.isDefined) {
       handleFilter(sb, filter.get, parameters)
     } else {
@@ -158,7 +165,7 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
 
     val sb = new StringBuilder
     val params = new ArrayBuffer[PreparedStatement => Unit]()
-    prepareSql(sb, usedDimensions, usedFacts, order, filter, limit, offset, params)
+    prepareSql(sb, true, usedDimensions, usedFacts, order, filter, limit, offset, params)
     val converters = prepareConverters(usedDimensions, usedFacts)
     val result = new ArrayBuffer[Map[String, Any]]()
     val ps = connection.prepareStatement(sb.toString)
@@ -183,5 +190,22 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     }
 
     result
+  }
+
+  def stream(
+    connection: Connection,
+    usedDimensions: Seq[String],
+    usedFacts: Seq[String],
+    order: Seq[(String, Boolean)],
+    filter: Option[Specification[T]],
+    limit: Option[Int],
+    offset: Option[Int]): ResultSet = {
+
+    val sb = new StringBuilder
+    val params = new ArrayBuffer[PreparedStatement => Unit]()
+    prepareSql(sb, false, usedDimensions, usedFacts, order, filter, limit, offset, params)
+    val ps = connection.prepareStatement(sb.toString)
+    params foreach { p => p(ps) }
+    ps.executeQuery()
   }
 }

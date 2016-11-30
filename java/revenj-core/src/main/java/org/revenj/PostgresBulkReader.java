@@ -175,7 +175,7 @@ class PostgresBulkReader implements RepositoryBulkReader, BulkReaderQuery, AutoC
 		}
 		List<GeneratedQueryParameter> parameters = filter != null ? new ArrayList<>() : null;
 		List<LambdaInfo> lambdas = filter != null ? new ArrayList<>(1) : null;
-		cube.prepareSql(builder, dimensions, facts, order, filter, limit, offset, parameters, lambdas);
+		cube.prepareSql(builder, true, dimensions, facts, order, filter, limit, offset, parameters, lambdas);
 		PostgresOlapCubeQuery.Converter[] converters = cube.prepareConverters(dimensions, facts);
 		String[] columnNames = new String[dimensionsAndFacts.size()];
 		for (int x = 0; x < dimensions.size(); x++) {

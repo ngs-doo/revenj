@@ -132,6 +132,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 
 	public void prepareSql(
 			StringBuilder sb,
+			boolean asRecord,
 			List<String> usedDimensions,
 			List<String> usedFacts,
 			Collection<Map.Entry<String, Boolean>> order,
@@ -152,7 +153,10 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		validateInput(usedDimensions, usedFacts, customOrder.keySet());
 
 		String alias = "_it";
-		sb.append("SELECT ROW(");
+		sb.append("SELECT ");
+		if (asRecord) {
+			sb.append("ROW(");
+		}
 		for (String d : usedDimensions) {
 			sb.append(cubeDimensions.get(d).apply(alias)).append(',');
 		}
@@ -160,7 +164,10 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 			sb.append(cubeFacts.get(f).apply(alias)).append(',');
 		}
 		sb.setLength(sb.length() - 1);
-		sb.append(") FROM ").append(getSource()).append(" \"").append(alias).append("\"");
+		if (asRecord) {
+			sb.append(")");
+		}
+		sb.append(" FROM ").append(getSource()).append(" \"").append(alias).append("\"");
 
 		if (filter != null) {
 			LambdaInfo lambdaInfo = LambdaInfo.analyze(rewriteSpecification(filter), 0, true);
@@ -237,7 +244,7 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 		List<GeneratedQueryParameter> parameters = filter != null ? new ArrayList<>() : null;
 		List<LambdaInfo> lambdas = filter != null ? new ArrayList<>(1) : null;
 		StringBuilder sb = new StringBuilder();
-		prepareSql(sb, usedDimensions, usedFacts, order, filter, limit, offset, parameters, lambdas);
+		prepareSql(sb, true, usedDimensions, usedFacts, order, filter, limit, offset, parameters, lambdas);
 		Converter[] converters = prepareConverters(usedDimensions, usedFacts);
 
 		Connection connection = getConnection();
@@ -274,5 +281,41 @@ public abstract class PostgresOlapCubeQuery<TSource extends DataSource> implemen
 			throw new RuntimeException(ex);
 		}
 		return result;
+	}
+
+	public ResultSet stream(
+			Connection connection,
+			List<String> dimensions,
+			List<String> facts,
+			Collection<Map.Entry<String, Boolean>> order,
+			Specification<TSource> filter,
+			Integer limit,
+			Integer offset) throws SQLException {
+		List<String> usedDimensions = new ArrayList<>();
+		List<String> usedFacts = new ArrayList<>();
+
+		if (dimensions != null) {
+			usedDimensions.addAll(dimensions);
+		}
+		if (facts != null) {
+			usedFacts.addAll(facts);
+		}
+
+		List<GeneratedQueryParameter> parameters = filter != null ? new ArrayList<>() : null;
+		List<LambdaInfo> lambdas = filter != null ? new ArrayList<>(1) : null;
+		StringBuilder sb = new StringBuilder();
+		prepareSql(sb, false, usedDimensions, usedFacts, order, filter, limit, offset, parameters, lambdas);
+
+		PreparedStatement ps = connection.prepareStatement(sb.toString());
+		if (parameters != null && parameters.size() > 0) {
+			RevenjQueryComposer.fillQueryParameters(
+					connection,
+					locator,
+					ps,
+					0,
+					parameters,
+					lambdas);
+		}
+		return ps.executeQuery();
 	}
 }
