@@ -1,6 +1,7 @@
 package org.revenj;
 
 import org.postgresql.ds.PGPoolingDataSource;
+import org.revenj.database.postgres.converters.JsonConverter;
 import org.revenj.extensibility.Container;
 import org.revenj.extensibility.SystemState;
 import org.revenj.serialization.json.DslJsonSerialization;
@@ -185,6 +186,7 @@ public abstract class Revenj {
 		container.registerInstance(DataSource.class, dataSource, false);
 		container.registerInstance(ClassLoader.class, loader, false);
 		container.register(GlobalEventStore.class, true);
+		container.register(JsonConverter.class, true);;
 		SimpleDomainModel domainModel = new SimpleDomainModel(loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
 		container.registerFactory(DataContext.class, LocatorDataContext::asDataContext, false);

@@ -30,7 +30,7 @@ Domain is described using various modeling building blocks in a DSL, for example
         Set<string(10)> tags { index; }
         Document? *parent;
         List<Part> parts;
-        Map metadata;
+        Properties metadata;
         persistence { history; }
       }
       value Part {
@@ -152,7 +152,7 @@ DSL model:
         VersionInfo? info;        
       }
       value VersionInfo {
-        Map dictionary;
+        Properties dictionary;
         Stack<Date> dates;
         decimal(3) quantity;
         set<decimal(2)?>? numbers;

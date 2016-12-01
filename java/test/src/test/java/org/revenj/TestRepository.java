@@ -631,4 +631,17 @@ public class TestRepository extends Setup {
 		Assert.assertTrue(found.get().deepEquals(original));
 		Assert.assertTrue(found.get().getBars().get(0).getMixin() instanceof ImplVoid);
 	}
+
+	@Test
+	public void canSaveJsonB() throws IOException {
+		ServiceLocator locator = container;
+		PersistableRepository<gen.model.security.Document> repository = locator.resolve(gen.model.security.repositories.DocumentRepository.class);
+		gen.model.security.Document value = new gen.model.security.Document();
+		value.getData().put("abc", 123);
+		String uri = repository.insert(value);
+		Optional<gen.model.security.Document> found = repository.find(uri);
+		Assert.assertTrue(found.isPresent());
+		//Assert.assertTrue(found.get().deepEquals(value));
+		Assert.assertEquals(123L, found.get().getData().get("abc"));
+	}
 }
