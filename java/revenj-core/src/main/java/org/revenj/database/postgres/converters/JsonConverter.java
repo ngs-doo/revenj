@@ -20,6 +20,7 @@ public class JsonConverter {
 	}
 
 	private String toJson(Map<String, Object> value) {
+		if (value.isEmpty()) return "{}";
 		try {
 			return serialization.serialize(Map.class, value);
 		} catch (IOException e) {
@@ -64,8 +65,11 @@ public class JsonConverter {
 		return list;
 	}
 
+	private static final PostgresTuple EMPTY = ValueTuple.from("{}");
+
 	public PostgresTuple toTuple(Map<String, Object> value) {
 		if (value == null) return null;
+		else if (value.isEmpty()) return EMPTY;
 		try {
 			return ValueTuple.from(serialization.serialize(value));
 		} catch (IOException e) {

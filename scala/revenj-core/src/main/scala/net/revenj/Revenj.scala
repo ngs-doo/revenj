@@ -7,6 +7,7 @@ import java.sql.Connection
 import java.util.{Properties, ServiceLoader}
 import javax.sql.DataSource
 
+import net.revenj.database.postgres.converters.JsonConverter
 import net.revenj.extensibility.{Container, PluginLoader, SystemAspect, SystemState}
 import net.revenj.patterns._
 import net.revenj.serialization.{JacksonSerialization, Serialization}
@@ -31,10 +32,10 @@ object Revenj {
         if (revProps.exists && revProps.isFile) {
           properties.load(new FileReader(revProps))
         } else {
-          throw new IOException("Unable to find revenj.properties in alternative location. Searching in: " + revProps.getAbsolutePath)
+          throw new IOException(s"Unable to find revenj.properties in alternative location. Searching in: ${revProps.getAbsolutePath}")
         }
       } else {
-        throw new IOException("Unable to find revenj.properties. Searching in: " + revProps.getAbsolutePath)
+        throw new IOException(s"Unable to find revenj.properties. Searching in: ${revProps.getAbsolutePath}")
       }
     }
     setup(properties)
@@ -142,22 +143,6 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     new SimpleContainer(resolveUnknown, loader)
   }
 
-  @deprecated("will be removed", "0.3.0")
-  def setup(
-    dataSource: DataSource,
-    properties: Properties,
-    classLoader: Option[ClassLoader],
-    context: Option[ExecutionContext],
-    aspects: java.util.Iterator[SystemAspect]): Container = {
-    val buf = ArrayBuffer[SystemAspect]()
-    if (aspects != null) {
-      while (aspects.hasNext) {
-        buf += aspects.next()
-      }
-    }
-    setup(dataSource, properties, classLoader, context, buf)
-  }
-
   def setup(
     dataSource: DataSource,
     properties: Properties,
@@ -174,6 +159,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.registerInstance[ServiceLocator](container, handleClose = false)
     container.registerInstance(dataSource, handleClose = false)
     container.registerInstance(loader, handleClose = false)
+    container.register[JsonConverter](singleton = true)
     val plugins = new ServicesPluginLoader(loader)
     container.registerInstance[PluginLoader](plugins)
     val domainModel = new SimpleDomainModel(loader)
@@ -199,9 +185,9 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
       case Some(p) =>
         p match {
           case cl: Class[_] => cl
-          case _ => throw new IllegalArgumentException("Only non-generic types supported. Found: " + typeOf[T])
+          case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${typeOf[T]}")
         }
-      case p => throw new IllegalArgumentException("Unable to detect type: " + typeOf[T])
+      case p => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
     }
     def processHandlers[X: TypeTag](gt: ParameterizedType, eventHandlers: Seq[Class[DomainEventHandler[X]]]): Unit = {
       for (h <- eventHandlers) {
