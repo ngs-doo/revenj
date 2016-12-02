@@ -377,9 +377,11 @@ public class TestRepository extends Setup {
 		ServiceLocator locator = container;
 		PersistableRepository<PksV> repository = locator.resolve(PersistableRepository.class, PksV.class);
 		Random rnd = new Random();
+		Map map = new HashMap<>();
+		map.put("abc", 123L);
 		PksV pks = new PksV()
 				.setE(E.B).setV(new v().setX(rnd.nextInt()))
-				.setVv(new v[]{new v(rnd.nextInt()), new v().setX(55)})
+				.setVv(new v[]{new v(rnd.nextInt(), new Map[] { map }), new v().setX(55)})
 				.setP(new Point(1, 2))
 				.setLl(Arrays.asList(new Point2D.Double(6.6, 8.8), new Point2D.Double(-5.5, -4.3)));
 		pks.getEe().add(E.C);
@@ -637,11 +639,11 @@ public class TestRepository extends Setup {
 		ServiceLocator locator = container;
 		PersistableRepository<gen.model.security.Document> repository = locator.resolve(gen.model.security.repositories.DocumentRepository.class);
 		gen.model.security.Document value = new gen.model.security.Document();
-		value.getData().put("abc", 123);
+		value.getData().put("abc", 123L);
 		String uri = repository.insert(value);
 		Optional<gen.model.security.Document> found = repository.find(uri);
 		Assert.assertTrue(found.isPresent());
-		//Assert.assertTrue(found.get().deepEquals(value));
+		Assert.assertTrue(found.get().deepEquals(value));
 		Assert.assertEquals(123L, found.get().getData().get("abc"));
 	}
 }

@@ -64,8 +64,12 @@ public class JsonConverter {
 		return list;
 	}
 
-	public PostgresTuple toTuple(Map<String, Object> value) throws IOException {
+	public PostgresTuple toTuple(Map<String, Object> value) {
 		if (value == null) return null;
-		return ValueTuple.from(serialization.serialize(value));
+		try {
+			return ValueTuple.from(serialization.serialize(value));
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
 }

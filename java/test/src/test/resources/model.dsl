@@ -200,7 +200,21 @@ module security {
 	mixin Dummy { with mixin Document; }
 	root Document {
 		map data;
+		List<map?>? maps;
 		static MEANING_OF_LIFE '42';
+	}
+	snowflake<Document> DocumentMaps {
+	    data;
+		maps;
+	}
+	sql LegacyWriteDocument from Document(ID) {
+		int ID;
+		map data;
+		List<map?>? maps;
+	}
+	sql LegacyReadDocument from 'SELECT data, maps FROM security."Document"' {
+		map data;
+		List<map?>? maps;
 	}
 	permissions {
 		filter IsActive 'it -> !it.getDeactivated()' except Admin;
@@ -214,7 +228,7 @@ module egzotics {
 		point[] pp;
 		location l;
 	}
-	value v { int x; }
+	value v { int x; map[] maps; }
 	root PksV(vv, e, ee) {
 		v v;
 		v[] vv;

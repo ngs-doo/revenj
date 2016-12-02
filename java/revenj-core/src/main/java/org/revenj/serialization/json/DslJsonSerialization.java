@@ -14,7 +14,7 @@ import java.util.ServiceLoader;
 public class DslJsonSerialization extends DslJson<ServiceLocator> implements Serialization<String> {
 
 	public DslJsonSerialization(final ServiceLocator locator, Optional<Fallback<ServiceLocator>> fallback) {
-		super(locator, false, true, false, fallback.orElse(null), false, ServiceLoader.load(Configuration.class));
+		super(locator, true, fallback.orElse(null), false, null, ServiceLoader.load(Configuration.class));
 		registerReader(TreePath.class, TreePathConverter.Reader);
 		registerWriter(TreePath.class, TreePathConverter.Writer);
 	}
