@@ -437,6 +437,23 @@ namespace Revenj.Utility
 		}
 
 		/// <summary>
+		/// Copy stream to target buffer
+		/// </summary>
+		/// <param name="target">target array buffer</param>
+		/// <param name="offset">start at offset</param>
+		public void CopyTo(byte[] target, int offset)
+		{
+			var total = TotalSize >> BlockShift;
+			var remaining = TotalSize & BlockAnd;
+			for (int i = 0; i < total; i++)
+			{
+				Buffer.BlockCopy(Blocks[i], 0, target, offset, BlockSize);
+				offset += BlockSize;
+			}
+			Buffer.BlockCopy(Blocks[total], 0, target, offset, remaining);
+		}
+
+		/// <summary>
 		/// Send entire stream to provided socket.
 		/// </summary>
 		/// <param name="socket">where to send</param>

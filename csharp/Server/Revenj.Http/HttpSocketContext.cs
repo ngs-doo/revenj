@@ -433,8 +433,17 @@ namespace Revenj.Http
 			if (cms != null)
 			{
 				offset = AddContentLength(cms.Length, offset);
-				socket.Send(OutputTemp, offset, SocketFlags.Partial);
-				cms.Send(socket);
+				var len = offset + cms.Length;
+				if (len < 512)
+				{
+					cms.CopyTo(OutputTemp, offset);
+					socket.Send(OutputTemp, (int)len, SocketFlags.None);
+				}
+				else
+				{
+					socket.Send(OutputTemp, offset, SocketFlags.Partial);
+					cms.Send(socket);
+				}
 				cms.Dispose();
 			}
 			else if (stream != null)
