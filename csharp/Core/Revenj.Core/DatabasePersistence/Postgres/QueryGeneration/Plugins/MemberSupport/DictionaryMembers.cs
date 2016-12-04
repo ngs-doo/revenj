@@ -22,6 +22,10 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMembers.Add(typeof(Dictionary<string, string>).GetProperty("Values"), GetValues);
 			SupportedMembers.Add(typeof(Dictionary<string, string>.KeyCollection).GetProperty("Count"), GetCount);
 			SupportedMembers.Add(typeof(Dictionary<string, string>.ValueCollection).GetProperty("Count"), GetCount);
+			SupportedMembers.Add(typeof(Dictionary<string, object>).GetProperty("Keys"), GetKeys);
+			SupportedMembers.Add(typeof(Dictionary<string, object>).GetProperty("Values"), GetValues);
+			SupportedMembers.Add(typeof(Dictionary<string, object>.KeyCollection).GetProperty("Count"), GetCount);
+			SupportedMembers.Add(typeof(Dictionary<string, object>.ValueCollection).GetProperty("Count"), GetCount);
 		}
 
 		public bool TryMatch(MemberExpression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)

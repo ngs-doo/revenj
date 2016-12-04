@@ -20,6 +20,8 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMethods = new Dictionary<MethodInfo, MethodCallDelegate>();
 			SupportedMethods.Add(typeof(Dictionary<string, string>).GetMethod("ContainsKey", new Type[] { typeof(string) }), ContainsKey);
 			SupportedMethods.Add(typeof(Dictionary<string, string>).GetMethod("get_Item", new Type[] { typeof(string) }), GetValue);
+			SupportedMethods.Add(typeof(Dictionary<string, object>).GetMethod("ContainsKey", new Type[] { typeof(string) }), ContainsKey);
+			SupportedMethods.Add(typeof(Dictionary<string, object>).GetMethod("get_Item", new Type[] { typeof(string) }), GetValue);
 		}
 
 		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)

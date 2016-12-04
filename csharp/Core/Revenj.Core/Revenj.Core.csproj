@@ -487,7 +487,6 @@
     <Compile Include="Serialization\Protobuf\Converters\ProtoMemoryStream.cs" />
     <Compile Include="Serialization\Protobuf\Converters\ProtoStream.cs" />
     <Compile Include="Serialization\Protobuf\ProtobufSerialization.cs" />
-    <Compile Include="Serialization\Setup.cs" />
     <Compile Include="Serialization\WireSerialization.cs" />
     <Compile Include="Serialization\XmlSerialization.cs" />
     <Compile Include="SystemState.cs" />
