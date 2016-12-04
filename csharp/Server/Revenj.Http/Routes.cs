@@ -81,17 +81,17 @@ namespace Revenj.Http
 					var route = (RouteAttribute[])m.GetCustomAttributes(typeof(RouteAttribute), false);
 					foreach (var at in inv)
 					{
-						var rh = new RouteHandler(name, at.UriTemplate, instance, m, locator, serialization);
+						var rh = new RouteHandler(name, at.UriTemplate, instance, true, m, locator, serialization);
 						Add(at.Method, rh);
 					}
 					foreach (var at in get)
 					{
-						var rh = new RouteHandler(name, at.UriTemplate, instance, m, locator, serialization);
+						var rh = new RouteHandler(name, at.UriTemplate, instance, true, m, locator, serialization);
 						Add("GET", rh);
 					}
 					foreach (var at in route)
 					{
-						var rh = new RouteHandler(name, at.Path, instance, m, locator, serialization);
+						var rh = new RouteHandler(name, at.Path, instance, at.IsAsync, m, locator, serialization);
 						Add(at.Method, rh);
 					}
 				}

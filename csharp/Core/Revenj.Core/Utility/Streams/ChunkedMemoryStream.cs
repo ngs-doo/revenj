@@ -436,6 +436,21 @@ namespace Revenj.Utility
 			stream.Write(Blocks[total], 0, remaining);
 		}
 
+		public void CopyTo(ChunkedMemoryStream other)
+		{
+			other.CurrentPosition = CurrentPosition;
+			var total = TotalSize >> BlockShift;
+			var remaining = TotalSize & BlockAnd;
+			if (other.TotalSize < total)
+			{
+				for (int i = other.Blocks.Count; i < total; i++)
+					other.Blocks.Add(new byte[BlockSize]);
+			}
+			for (int i = 0; i < total; i++)
+				Buffer.BlockCopy(Blocks[i], 0, other.Blocks[i], 0, BlockSize);
+			Buffer.BlockCopy(Blocks[total], 0, other.Blocks[total], 0, remaining);
+		}
+
 		/// <summary>
 		/// Copy stream to target buffer
 		/// </summary>

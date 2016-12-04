@@ -17,16 +17,20 @@ namespace Revenj.Http
 	{
 		public readonly string Path;
 		public readonly string Method;
+		public readonly bool IsAsync;
 
-		public RouteAttribute(HTTP http, string path)
+		public RouteAttribute(HTTP http, string path) : this(http, path, true) { }
+		public RouteAttribute(HTTP http, string path, bool isAsync)
 		{
 			this.Method = http.ToString();
 			this.Path = path;
+			this.IsAsync = isAsync;
 		}
-		public RouteAttribute(string path, string method)
+		public RouteAttribute(string path, string method, bool isAsync = true)
 		{
 			this.Path = path;
 			this.Method = method.ToUpperInvariant();
+			this.IsAsync = isAsync;
 		}
 	}
 	public enum HTTP

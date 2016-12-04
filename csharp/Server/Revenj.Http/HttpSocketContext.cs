@@ -248,7 +248,12 @@ namespace Revenj.Http
 			positionInTmp = 0;
 			Pipeline = false;
 			var methodEnd = ReadUntil(socket, Space, 0);
-			if (methodEnd == -1) return ReturnError(socket, 505);
+			if (methodEnd == -1)
+			{
+				if (!socket.Connected) return false;
+				else if (positionInTmp == 0) return ReturnError(socket, 408);
+				else return ReturnError(socket, 505);
+			}
 			HttpMethod = ReadMethod(methodEnd, InputTemp);
 			var rowEnd = ReadUntil(socket, LF, methodEnd + 1);
 			if (rowEnd == -1 || rowEnd < 12) return ReturnError(socket, 505);
@@ -735,6 +740,35 @@ namespace Revenj.Http
 		{
 			get { return ResponseStatus; }
 			set { ResponseStatus = value; }
+		}
+
+		public void CopyFrom(HttpSocketContext other)
+		{
+			RequestHeadersLength = other.RequestHeadersLength;
+			ResponseHeadersLength = 0;
+			if (RequestHeaders.Length < RequestHeadersLength)
+			{
+				var newHeaders = new HeaderPair[other.RequestHeaders.Length];
+				Array.Copy(other.RequestHeaders, newHeaders, RequestHeadersLength);
+				RequestHeaders = newHeaders;
+			}
+			else Array.Copy(other.RequestHeaders, RequestHeaders, RequestHeadersLength);
+			RawUrl = other.RawUrl;
+			positionInTmp = other.positionInTmp;
+			Pipeline = other.Pipeline;
+			IsHttp10 = other.IsHttp10;
+			totalBytes = other.totalBytes;
+			Buffer.BlockCopy(other.InputTemp, 0, InputTemp, 0, positionInTmp);
+			other.InputStream.CopyTo(InputStream);
+			HttpMethod = other.HttpMethod;
+			HttpProtocolVersion = other.HttpProtocolVersion;
+			AbsolutePath = other.AbsolutePath;
+			TemplateMatch = other.TemplateMatch;
+			ResponseStatus = HttpStatusCode.OK;
+			ResponseLength = null;
+			ResponseContentType = null;
+			ResponseIsJson = false;
+			ContentTypeResponseIndex = -1;
 		}
 	}
 }

@@ -14,6 +14,7 @@ namespace Revenj.Http
 		internal readonly string Service;
 		internal readonly string Template;
 		internal readonly UriPattern Pattern;
+		internal readonly bool IsAsync;
 		private readonly bool WithStream;
 		private readonly int TotalParams;
 		private readonly Func<string[], IRequestContext, IResponseContext, Stream, ChunkedMemoryStream, Stream> Invocation;
@@ -22,6 +23,7 @@ namespace Revenj.Http
 			string service,
 			string template,
 			object instance,
+			bool isAsync,
 			MethodInfo method,
 			IServiceProvider locator,
 			IWireSerialization serialization)
@@ -29,6 +31,7 @@ namespace Revenj.Http
 			this.Service = "/" + service.ToLowerInvariant();
 			this.Template = template;
 			this.Pattern = new UriPattern(template == "*" ? "/*" : template);
+			this.IsAsync = isAsync;
 			var methodParams = method.GetParameters();
 			TotalParams = methodParams.Length;
 			WithStream = TotalParams != 0 && methodParams[TotalParams - 1].ParameterType == typeof(Stream);
