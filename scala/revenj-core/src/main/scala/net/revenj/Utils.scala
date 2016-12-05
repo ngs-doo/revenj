@@ -65,7 +65,7 @@ object Utils {
   private class GenArrType(genType: JavaType) extends GenericArrayType {
     lazy private val typeName = genType.getTypeName + "[]"
     override def getGenericComponentType = genType
-    def getTypeName: String = typeName
+    override def getTypeName: String = typeName
     override def toString: String = typeName
   }
 

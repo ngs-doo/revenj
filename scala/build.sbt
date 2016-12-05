@@ -8,16 +8,16 @@ lazy val core = (project in file("revenj-core")
     version := "0.4.0",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1212",
-      "joda-time" % "joda-time" % "2.9.4", //TODO: will be removed
-      "org.joda" % "joda-convert" % "1.8.1",
+      "joda-time" % "joda-time" % "2.9.6",   // TODO: will be removed
+      "org.joda" % "joda-convert" % "1.8.1", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix" % "2.1.0",
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.8",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.7.8",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.7.8",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.7.8",
-      "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test
+      "io.monix" %% "monix" % "2.1.1",
+      "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.8.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.8.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.8.4",
+      "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
     )
   )
 )
@@ -27,8 +27,8 @@ lazy val akka = (project in file("revenj-akka")
   settings(
   version := "0.4.0",
   libraryDependencies ++= Seq(
-    "com.typesafe" % "config" % "1.3.0",
-    "com.typesafe.akka" %% "akka-http-core" % "2.4.11"
+    "com.typesafe" % "config" % "1.3.1",
+    "com.typesafe.akka" %% "akka-http-core" % "10.0.0"
     )
   )
   dependsOn(core)
@@ -39,7 +39,7 @@ lazy val storage = (project in file("revenj-storage")
   settings(
     version := "0.1.0-SNAPSHOT",
     libraryDependencies ++= Seq(
-      "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test
+      "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
     )
   )
 )
@@ -83,7 +83,7 @@ lazy val tests = (project in file("tests")
     version := "0.0.0",
     libraryDependencies ++= Seq(
       "com.dslplatform" % "dsl-clc" % "1.8.3" % Test,
-      "org.specs2" %% "specs2-scalacheck" % "3.8.3" % Test,
+      "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
     ),
@@ -111,37 +111,35 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   name := baseDirectory.value.getName,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.11.8", "2.12.0"),
-
+  crossScalaVersions := Seq("2.11.8", "2.12.1"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",
     "-feature",
     "-language:_",
+    "-target:jvm-1.8",
     "-unchecked",
+    "-Xexperimental",
     "-Xfuture",
-    "-Xlint",
+    "-Xlint:_",
     "-Xverify",
+    "-Yno-adapted-args",
+    "-Yrangepos",
     "-Yrepl-sync",
-    "-Ywarn-adapted-args",
     "-Ywarn-dead-code",
-    "-Ywarn-inaccessible",
-    "-Ywarn-infer-any",
-    "-Ywarn-nullary-override",
-    "-Ywarn-nullary-unit",
     "-Ywarn-numeric-widen",
+    "-Ywarn-unused-import",
     "-Ywarn-unused"
   ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 11)) => Seq(
-      "-optimise",
       "-Yclosure-elim",
       "-Yconst-opt",
       "-Ydead-code",
       "-Yinline",
-      "-Yinline-warnings"
+      "-Yinline-warnings:false"
     )
     case _ => Seq(
-      "-Yopt:_"
+      "-opt:_"
     )
   }),
 

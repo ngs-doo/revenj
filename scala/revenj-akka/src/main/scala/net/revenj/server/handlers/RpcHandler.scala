@@ -5,7 +5,6 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
 import akka.http.scaladsl.model.Uri.Path
 import akka.stream.Materializer
 import akka.util.ByteString
-import net.revenj.patterns.DomainModel
 import net.revenj.server.{ProcessingEngine, ServerCommandDescription, WireSerialization}
 import net.revenj.server.commands.Utils
 

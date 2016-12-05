@@ -1,0 +1,20 @@
+language: scala
+
+branches:
+  only:
+    - travis
+
+jdk:
+  - oraclejdk8
+
+sudo: false
+
+notifications:
+  email:
+    recipients:
+      - marko.elezovic@oradian.com
+
+before_script: cd scala
+
+script:
+  - sbt +publishLocal
