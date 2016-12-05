@@ -18,7 +18,10 @@ scala:
 before_script: cd scala
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION publishLocal test
+  - sbt ++$TRAVIS_SCALA_VERSION publishLocal clean coverage test coverageReport
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email:
