@@ -179,6 +179,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         container.close()
         abc.URI !== uri
       }
+/*
       "can submit events" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val ctx = container.resolve[UnitOfWork]
@@ -200,6 +201,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         DbCheck.EventHandlerCounters.funcCounter === 1
         DbCheck.EventHandlerCounters.arrayFuncCounter === 1
       }
+*/
       "search with spec" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val ctx = container.resolve[UnitOfWork]
