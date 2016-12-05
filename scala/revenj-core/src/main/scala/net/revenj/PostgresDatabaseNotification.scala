@@ -108,7 +108,7 @@ private [revenj] class PostgresDatabaseNotification(
       case ex: Exception =>
         try {
           systemState.notify(SystemState.SystemEvent("notification", s"issue: ${ex.getMessage}"))
-          Thread.sleep(1000 * retryCount)
+          Thread.sleep(1000L * retryCount)
         } catch {
           case e: InterruptedException =>
             e.printStackTrace()
@@ -128,7 +128,7 @@ private [revenj] class PostgresDatabaseNotification(
           val messages = connection.getNotifications
           if (messages == null || messages.isEmpty) {
             try {
-              Thread.sleep(timeout)
+              Thread.sleep(timeout.toLong)
             } catch {
               case e: InterruptedException =>
                 threadAlive = false
@@ -219,7 +219,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
       case ex: Exception =>
         try {
           systemState.notify(SystemState.SystemEvent("notification", s"issue: ${ex.getMessage}"))
-          Thread.sleep(1000 * retryCount)
+          Thread.sleep(1000L * retryCount)
         } catch {
           case e: InterruptedException =>
             e.printStackTrace()

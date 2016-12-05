@@ -2,7 +2,7 @@ package net.revenj.database.postgres.converters
 
 import java.io.IOException
 
-import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWriter}
+import net.revenj.database.postgres.{PostgresBuffer, PostgresReader}
 import net.revenj.serialization.Serialization
 
 class JsonConverter(serialization: Serialization[String]) extends Converter[Map[String, Any]] {
