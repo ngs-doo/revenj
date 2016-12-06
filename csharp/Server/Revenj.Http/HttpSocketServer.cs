@@ -271,7 +271,7 @@ Please check settings: " + string.Join(", ", endpoints));
 							Thread.CurrentPrincipal = principal = auth.Principal;
 						using (var stream = route.Handle(match.OrderedArgs, ctx, ctx, ctx.InputStream, ctx.OutputStream))
 						{
-							var keepAlive = ctx.Return(stream, socket);
+							var keepAlive = ctx.Return(stream, socket, threadSync == null);
 							if (keepAlive)
 							{
 								if (ctx.Pipeline) continue;
@@ -354,7 +354,7 @@ Please check settings: " + string.Join(", ", endpoints));
 				ctx.ForRouteWithAuth(arg.Match, principal);
 				using (var stream = arg.Route.Handle(arg.Match.OrderedArgs, ctx, ctx, ctx.InputStream, ctx.OutputStream))
 				{
-					var keepAlive = ctx.Return(stream, socket);
+					var keepAlive = ctx.Return(stream, socket, true);
 					if (!keepAlive)
 					{
 						socket.Close();

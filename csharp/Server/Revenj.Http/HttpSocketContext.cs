@@ -250,8 +250,22 @@ namespace Revenj.Http
 			var methodEnd = ReadUntil(socket, Space, 0);
 			if (methodEnd == -1)
 			{
-				if (!socket.Connected) return false;
-				else if (positionInTmp == 0) return ReturnError(socket, 408);
+				if (!socket.Connected)
+				{
+					offsetInOutput = 0;
+					return false;
+				}
+				else if (positionInTmp == 0)
+				{
+					if (offsetInOutput != 0)
+					{
+						socket.Send(OutputTemp, offsetInOutput, SocketFlags.None);
+						offsetInOutput = 0;
+						socket.Close();
+						return false;
+					}
+					else return ReturnError(socket, 408);
+				}
 				else return ReturnError(socket, 505);
 			}
 			HttpMethod = ReadMethod(methodEnd, InputTemp);
@@ -374,12 +388,15 @@ namespace Revenj.Http
 			this.Principal = principal;
 		}
 
-		internal bool Return(Stream stream, Socket socket)
+		private int offsetInOutput;
+
+		internal bool Return(Stream stream, Socket socket, bool forceFlush)
 		{
+			var offset = offsetInOutput;
 			int responseCode = (int)ResponseStatus;
 			var http = HttpResponse[responseCode - 100];
-			Buffer.BlockCopy(http, 0, OutputTemp, 0, http.Length);
-			var offset = http.Length;
+			Buffer.BlockCopy(http, 0, OutputTemp, offset, http.Length);
+			offset += http.Length;
 			if (ResponseIsJson)
 			{
 				Buffer.BlockCopy(JsonContentType, 0, OutputTemp, offset, JsonContentType.Length);
@@ -435,6 +452,7 @@ namespace Revenj.Http
 			}
 			offset = AddServerAndDate(offset);
 			var cms = stream as ChunkedMemoryStream;
+			var mustFlushResponse = forceFlush || !keepAlive || !Pipeline;
 			if (cms != null)
 			{
 				offset = AddContentLength(cms.Length, offset);
@@ -442,12 +460,18 @@ namespace Revenj.Http
 				if (len < 512)
 				{
 					cms.CopyTo(OutputTemp, offset);
-					socket.Send(OutputTemp, (int)len, SocketFlags.None);
+					if (mustFlushResponse)
+					{
+						offsetInOutput = 0;
+						socket.Send(OutputTemp, (int)len, SocketFlags.None);
+					}
+					else offsetInOutput = (int)len;
 				}
 				else
 				{
 					socket.Send(OutputTemp, offset, SocketFlags.Partial);
 					cms.Send(socket);
+					offsetInOutput = 0;
 				}
 				cms.Dispose();
 			}
@@ -471,7 +495,13 @@ namespace Revenj.Http
 						{
 							pos += stream.Read(OutputTemp, pos + offset, size - pos);
 						} while (pos < len);
-						socket.Send(OutputTemp, size + offset, SocketFlags.None);
+						offset += size;
+						if (mustFlushResponse)
+						{
+							socket.Send(OutputTemp, offset, SocketFlags.None);
+							offsetInOutput = 0;
+						}
+						else offsetInOutput = offset;
 					}
 					else
 					{
@@ -483,6 +513,7 @@ namespace Revenj.Http
 							pos = stream.Read(OutputTemp, 0, OutputTemp.Length);
 							socket.Send(OutputTemp, pos, SocketFlags.None);
 						} while (pos != 0);
+						offsetInOutput = 0;
 					}
 				}
 				finally
@@ -493,7 +524,13 @@ namespace Revenj.Http
 			else
 			{
 				Buffer.BlockCopy(ZeroContentLength, 0, OutputTemp, offset, ZeroContentLength.Length);
-				socket.Send(OutputTemp, offset + ZeroContentLength.Length, SocketFlags.None);
+				offset += ZeroContentLength.Length;
+				if (mustFlushResponse)
+				{
+					socket.Send(OutputTemp, offset, SocketFlags.None);
+					offsetInOutput = 0;
+				}
+				else offsetInOutput = offset;
 			}
 			return keepAlive;
 		}
@@ -507,10 +544,15 @@ namespace Revenj.Http
 		internal void ReturnError(Socket socket, int status, string message, bool withHeaders)
 		{
 			if (!socket.Connected)
+			{
+				offsetInOutput = 0;
 				return;
+			}
 			var http = HttpResponse[status - 100];
-			Buffer.BlockCopy(http, 0, OutputTemp, 0, http.Length);
-			var offset = http.Length;
+			var offset = offsetInOutput;
+			Buffer.BlockCopy(http, 0, OutputTemp, offset, http.Length);
+			offset += http.Length;
+			offsetInOutput = 0;
 			Buffer.BlockCopy(ConnectionClose, 0, OutputTemp, offset, ConnectionClose.Length);
 			offset += ConnectionClose.Length;
 			offset = AddServerAndDate(offset);
@@ -769,6 +811,7 @@ namespace Revenj.Http
 			ResponseContentType = null;
 			ResponseIsJson = false;
 			ContentTypeResponseIndex = -1;
+			offsetInOutput = 0;
 		}
 	}
 }
