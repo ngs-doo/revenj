@@ -499,6 +499,7 @@
     <Compile Include="Utility\StableHashCode.cs" />
     <Compile Include="Utility\Streams\BufferedTextReader.cs" />
     <Compile Include="Utility\Streams\ChunkedMemoryStream.cs" />
+    <Compile Include="Utility\StringCache.cs" />
     <Compile Include="Utility\TemporaryResources.cs" />
     <Compile Include="Utility\TopologicalSort.cs" />
     <Compile Include="Utility\TreePath.cs" />

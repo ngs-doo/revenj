@@ -32,7 +32,6 @@ namespace Revenj.Http
 
 		private readonly IServiceProvider Locator;
 		private readonly Socket Socket;
-		private readonly Routes Routes;
 		private readonly HttpAuth Authentication;
 
 		private readonly ThreadLocal<HttpSocketContext> Context;
@@ -90,7 +89,6 @@ Please check settings: " + string.Join(", ", endpoints));
 				Socket.Bind(ep);
 				Console.WriteLine("Bound to: " + ep);
 			}
-			Routes = locator.Resolve<Routes>();
 			var customAuth = ConfigurationManager.AppSettings["CustomAuth"];
 			if (!string.IsNullOrEmpty(customAuth))
 			{
@@ -100,7 +98,8 @@ Please check settings: " + string.Join(", ", endpoints));
 				Authentication = locator.Resolve<HttpAuth>(authType);
 			}
 			else Authentication = locator.Resolve<HttpAuth>();
-			Context = new ThreadLocal<HttpSocketContext>(() => new HttpSocketContext("http://127.0.0.1/", MessageSizeLimit));
+			var routes = locator.Resolve<Routes>();
+			Context = new ThreadLocal<HttpSocketContext>(() => new HttpSocketContext("http://127.0.0.1/", MessageSizeLimit, routes));
 			var ca = ConfigurationManager.AppSettings["Revenj.HttpCapacity"];
 			if (!string.IsNullOrEmpty(ca))
 				Requests = new BlockingCollection<RequestInfo>(new ConcurrentQueue<RequestInfo>(), int.Parse(ca));
@@ -244,16 +243,10 @@ Please check settings: " + string.Join(", ", endpoints));
 
 		private void ProcessAllMessages(Socket socket, HttpSocketContext ctx, IPrincipal principal, ManualResetEventSlim threadSync)
 		{
-			while (ctx.Parse(socket))
+			RouteMatch match;
+			RouteHandler route;
+			while (ctx.Parse(socket, out match, out route))
 			{
-				RouteMatch match;
-				var route = Routes.Find(ctx.HttpMethod, ctx.RawUrl, ctx.AbsolutePath, out match);
-				if (route == null)
-				{
-					var unknownRoute = "Unknown route " + ctx.RawUrl + " on method " + ctx.HttpMethod;
-					ctx.ReturnError(socket, 404, unknownRoute, false);
-					return;
-				}
 				var auth = Authentication.TryAuthorize(ctx.GetRequestHeader("authorization"), ctx.RawUrl, route);
 				if (auth.Principal != null)
 				{

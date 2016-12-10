@@ -12,7 +12,7 @@ namespace Revenj.Http
 	internal class Routes
 	{
 		private readonly Dictionary<string, Dictionary<string, List<RouteHandler>>> MethodRoutes = new Dictionary<string, Dictionary<string, List<RouteHandler>>>();
-		private Dictionary<ReqId, RouteHandler> Cache = new Dictionary<ReqId, RouteHandler>();
+		private Dictionary<int, RouteHandler> Cache = new Dictionary<int, RouteHandler>();
 
 		public Routes(IServiceProvider locator, IWireSerialization serialization)
 		{
@@ -113,34 +113,45 @@ namespace Revenj.Http
 				list.Add(handler);
 		}
 
-		struct ReqId : IEquatable<ReqId>
+		internal RouteHandler Find(string httpMethod, char[] buffer, int len, out RouteMatch routeMatch)
 		{
-			private readonly int HashCode;
-			private readonly string Http;
-			private readonly string Path;
-			public ReqId(string http, string path)
+			RouteHandler handler;
+			var reqHash = StringCache.CalcHash(httpMethod, buffer, len);
+			int askSign = -1;
+			for (int i = 0; i < len; i++)
 			{
-				this.HashCode = http.GetHashCode() + path.GetHashCode();
-				this.Http = http;
-				this.Path = path;
+				if (buffer[i] == '?')
+				{
+					askSign = i;
+					break;
+				}
 			}
-			public override int GetHashCode() { return HashCode; }
-			public override bool Equals(object obj) { return Equals((ReqId)obj); }
-			public bool Equals(ReqId other)
+			if (askSign == -1 && Cache.TryGetValue(reqHash, out handler))
 			{
-				return this.Http == other.Http && this.Path == other.Path;
+				if (handler.Pattern.IsStatic)
+				{
+					routeMatch = handler.Pattern.ExtractMatch(handler.Url, 0);
+					return handler;
+				}
 			}
+			var rawUrl = new string(buffer, 0, len);
+			return FindRoute(httpMethod, rawUrl, reqHash, out routeMatch);
 		}
 
 		public RouteHandler Find(string httpMethod, string rawUrl, string absolutePath, out RouteMatch routeMatch)
 		{
-			var reqId = new ReqId(httpMethod, absolutePath);
+			var reqHash = StringCache.CalcHash(httpMethod, absolutePath);
 			RouteHandler handler;
-			if (Cache.TryGetValue(reqId, out handler))
+			if (Cache.TryGetValue(reqHash, out handler))
 			{
 				routeMatch = handler.Pattern.ExtractMatch(rawUrl, handler.Service.Length);
 				return handler;
 			}
+			return FindRoute(httpMethod, rawUrl, reqHash, out routeMatch);
+		}
+
+		private RouteHandler FindRoute(string httpMethod, string rawUrl, int reqHash, out RouteMatch routeMatch)
+		{
 			routeMatch = null;
 			Dictionary<string, List<RouteHandler>> handlers;
 			if (!MethodRoutes.TryGetValue(httpMethod, out handlers))
@@ -162,8 +173,8 @@ namespace Revenj.Http
 				if (match != null)
 				{
 					routeMatch = match;
-					var newCache = new Dictionary<ReqId, RouteHandler>(Cache);
-					newCache[reqId] = h;
+					var newCache = new Dictionary<int, RouteHandler>(Cache);
+					newCache[reqHash] = h;
 					Cache = newCache;
 					return h;
 				}

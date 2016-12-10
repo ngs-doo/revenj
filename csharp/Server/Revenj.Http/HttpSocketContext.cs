@@ -117,11 +117,13 @@ namespace Revenj.Http
 		public readonly int Limit;
 
 		private readonly string Prefix;
+		private readonly Routes Routes;
 
-		public HttpSocketContext(string prefix, int limit)
+		public HttpSocketContext(string prefix, int limit, Routes routes)
 		{
 			this.Prefix = prefix;
 			this.Limit = limit;
+			this.Routes = routes;
 			InputStream = ChunkedMemoryStream.Static();
 			OutputStream = ChunkedMemoryStream.Static();
 		}
@@ -151,7 +153,6 @@ namespace Revenj.Http
 		public string HttpMethod;
 		public string RawUrl;
 		public string HttpProtocolVersion;
-		public string AbsolutePath;
 
 		struct HeaderPair
 		{
@@ -243,13 +244,18 @@ namespace Revenj.Http
 			totalBytes = 0;
 		}
 
-		public bool Parse(Socket socket)
+		private static readonly StringCache KeyCache = new StringCache(12);
+		private readonly StringCache ValueCache = new StringCache(14);
+
+		public bool Parse(Socket socket, out RouteMatch match, out RouteHandler route)
 		{
 			positionInTmp = 0;
 			Pipeline = false;
 			var methodEnd = ReadUntil(socket, Space, 0);
 			if (methodEnd == -1)
 			{
+				match = null;
+				route = null;
 				if (!socket.Connected)
 				{
 					offsetInOutput = 0;
@@ -270,18 +276,29 @@ namespace Revenj.Http
 			}
 			HttpMethod = ReadMethod(methodEnd, InputTemp);
 			var rowEnd = ReadUntil(socket, LF, methodEnd + 1);
-			if (rowEnd == -1 || rowEnd < 12) return ReturnError(socket, 505);
+			if (rowEnd == -1 || rowEnd < 12)
+			{
+				match = null;
+				route = null;
+				return ReturnError(socket, 505);
+			}
 			RequestHeadersLength = 0;
 			ResponseHeadersLength = 0;
 			HttpProtocolVersion = ReadProtocol(rowEnd - 2);
 			if (HttpProtocolVersion == null)
 			{
+				match = null;
+				route = null;
 				ReturnError(socket, 505, "Only HTTP/1.1 and HTTP/1.0 supported (partially)", false);
 				return false;
 			}
-			ReadUrl(rowEnd);
-			int askSign = RawUrl.IndexOf('?');
-			AbsolutePath = askSign == -1 ? RawUrl : RawUrl.Substring(0, askSign);
+			route = ReadUrl(rowEnd, out match);
+			if (route == null)
+			{
+				var unknownRoute = "Unknown route " + RawUrl + " on method " + HttpMethod;
+				ReturnError(socket, 404, unknownRoute, false);
+				return false;
+			}
 			ResponseStatus = HttpStatusCode.OK;
 			ResponseLength = null;
 			ResponseContentType = null;
@@ -304,11 +321,11 @@ namespace Revenj.Http
 					var nameBuf = TmpCharBuf;
 					for (int x = start; x < i; x++)
 						nameBuf[x - start] = Lower[InputTemp[x]];
-					string name = new string(nameBuf, 0, i - start);
+					var name = KeyCache.Get(nameBuf, i - start);
 					if (InputTemp[i + 1] == 32) i++;
 					for (int x = i + 1; x < rowEnd; x++)
 						nameBuf[x - i - 1] = (char)InputTemp[x];
-					string value = new string(nameBuf, 0, rowEnd - i - 1);
+					var value = ValueCache.Get(nameBuf, rowEnd - i - 1);
 					if (RequestHeadersLength == RequestHeaders.Length)
 					{
 						var newHeaders = new HeaderPair[RequestHeaders.Length * 2];
@@ -361,7 +378,7 @@ namespace Revenj.Http
 			return true;
 		}
 
-		private void ReadUrl(int rowEnd)
+		private RouteHandler ReadUrl(int rowEnd, out RouteMatch match)
 		{
 			var httpLen1 = HttpMethod.Length + 1;
 			var charBuf = TmpCharBuf;
@@ -372,11 +389,18 @@ namespace Revenj.Http
 				if (tb > 250)
 				{
 					RawUrl = UTF8.GetString(InputTemp, httpLen1, end - httpLen1);
-					return;
+					var askSign = RawUrl.IndexOf('?');
+					var absolutePath = askSign == -1 ? RawUrl : RawUrl.Substring(0, askSign);
+					return Routes.Find(HttpMethod, RawUrl, absolutePath, out match);
 				}
 				charBuf[x - httpLen1] = (char)tb;
 			}
-			RawUrl = new string(charBuf, 0, end - httpLen1);
+			var route = Routes.Find(HttpMethod, charBuf, end - httpLen1, out match);
+			if (route == null)
+				RawUrl = new string(charBuf, 0, end - httpLen1);
+			else
+				RawUrl = route.Url;
+			return route;
 		}
 
 		private RouteMatch Route;
@@ -804,7 +828,6 @@ namespace Revenj.Http
 			other.InputStream.CopyTo(InputStream);
 			HttpMethod = other.HttpMethod;
 			HttpProtocolVersion = other.HttpProtocolVersion;
-			AbsolutePath = other.AbsolutePath;
 			TemplateMatch = other.TemplateMatch;
 			ResponseStatus = HttpStatusCode.OK;
 			ResponseLength = null;

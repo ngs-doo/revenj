@@ -17,6 +17,7 @@ namespace Revenj.Http
 		internal readonly bool IsAsync;
 		private readonly bool WithStream;
 		private readonly int TotalParams;
+		internal readonly string Url;
 		private readonly Func<string[], IRequestContext, IResponseContext, Stream, ChunkedMemoryStream, Stream> Invocation;
 
 		public RouteHandler(
@@ -32,6 +33,7 @@ namespace Revenj.Http
 			this.Template = template;
 			this.Pattern = new UriPattern(template == "*" ? "/*" : template);
 			this.IsAsync = isAsync;
+			this.Url = Service + template;
 			var methodParams = method.GetParameters();
 			TotalParams = methodParams.Length;
 			WithStream = TotalParams != 0 && methodParams[TotalParams - 1].ParameterType == typeof(Stream);
