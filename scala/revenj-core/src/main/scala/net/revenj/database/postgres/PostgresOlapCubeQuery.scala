@@ -154,7 +154,7 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     }(executionContext)
   }
 
-  def analyze(
+  def analyzeAsMap(
     connection: Connection,
     usedDimensions: Seq[String],
     usedFacts: Seq[String],
@@ -162,6 +162,26 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     filter: Option[Specification[T]] = None,
     limit: Option[Int] = None,
     offset: Option[Int] = None): IndexedSeq[Map[String, Any]] = {
+
+    analyze(
+      connection,
+      usedDimensions,
+      usedFacts,
+      order,
+      filter,
+      limit,
+      offset
+    )
+  }
+
+  def analyze(
+    connection: Connection,
+    usedDimensions: Seq[String],
+    usedFacts: Seq[String],
+    order: Seq[(String, Boolean)],
+    filter: Option[Specification[T]],
+    limit: Option[Int],
+    offset: Option[Int]): IndexedSeq[Map[String, Any]] = {
 
     val sb = new StringBuilder
     val params = new ArrayBuffer[PreparedStatement => Unit]()
@@ -209,7 +229,7 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     ps.executeQuery()
   }
 
-  def analyze[R](
+  def analyzeWith[R](
     builder: ResultSet => R,
     connection: Connection,
     usedDimensions: Seq[String],
@@ -218,6 +238,28 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     filter: Option[Specification[T]] = None,
     limit: Option[Int] = None,
     offset: Option[Int] = None): Seq[R] = {
+
+    analyze(
+      builder,
+      connection,
+      usedDimensions,
+      usedFacts,
+      order,
+      filter,
+      limit,
+      offset
+    )
+  }
+
+  def analyze[R](
+    builder: ResultSet => R,
+    connection: Connection,
+    usedDimensions: Seq[String],
+    usedFacts: Seq[String],
+    order: Seq[(String, Boolean)],
+    filter: Option[Specification[T]],
+    limit: Option[Int],
+    offset: Option[Int]): Seq[R] = {
 
     val sb = new StringBuilder
     val params = new ArrayBuffer[PreparedStatement => Unit]()
