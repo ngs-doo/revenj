@@ -56,7 +56,7 @@ object TimestampConverter {
   private val TIMESTAMP_REMINDER = Array[Int](100000, 10000, 1000, 100, 10, 1)
 
   def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: OffsetDateTime): Unit = {
-    val pg: PGobject = new PGobject
+    val pg = new PGobject
     pg.setType("timestamptz")
     val buf = sw.tempBuffer
     val len = serialize(buf, 0, value)
@@ -65,13 +65,15 @@ object TimestampConverter {
   }
 
   private def serialize(buffer: Array[Char], pos: Int, value: LocalDateTime): Int = {
+    val year = value.getYear
+    if (year > 9999) throw new IllegalArgumentException(s"Invalid year detected: $value. Only dates up to 9999-12-31 are allowed")
     //TODO: Java supports wider range of dates
     buffer(pos + 4) = '-'
     buffer(pos + 7) = '-'
     buffer(pos + 10) = ' '
     buffer(pos + 13) = ':'
     buffer(pos + 16) = ':'
-    NumberConverter.write4(value.getYear, buffer, pos)
+    NumberConverter.write4(year, buffer, pos)
     NumberConverter.write2(value.getMonthValue, buffer, pos + 5)
     NumberConverter.write2(value.getDayOfMonth, buffer, pos + 8)
     NumberConverter.write2(value.getHour, buffer, pos + 11)

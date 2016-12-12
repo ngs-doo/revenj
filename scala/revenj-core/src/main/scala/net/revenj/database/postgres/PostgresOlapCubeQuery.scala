@@ -158,10 +158,10 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     connection: Connection,
     usedDimensions: Seq[String],
     usedFacts: Seq[String],
-    order: Seq[(String, Boolean)],
-    filter: Option[Specification[T]],
-    limit: Option[Int],
-    offset: Option[Int]): IndexedSeq[Map[String, Any]] = {
+    order: Seq[(String, Boolean)] = Nil,
+    filter: Option[Specification[T]] = None,
+    limit: Option[Int] = None,
+    offset: Option[Int] = None): IndexedSeq[Map[String, Any]] = {
 
     val sb = new StringBuilder
     val params = new ArrayBuffer[PreparedStatement => Unit]()
@@ -196,10 +196,10 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     connection: Connection,
     usedDimensions: Seq[String],
     usedFacts: Seq[String],
-    order: Seq[(String, Boolean)],
-    filter: Option[Specification[T]],
-    limit: Option[Int],
-    offset: Option[Int]): ResultSet = {
+    order: Seq[(String, Boolean)] = Nil,
+    filter: Option[Specification[T]] = None,
+    limit: Option[Int] = None,
+    offset: Option[Int] = None): ResultSet = {
 
     val sb = new StringBuilder
     val params = new ArrayBuffer[PreparedStatement => Unit]()
@@ -207,5 +207,29 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     val ps = connection.prepareStatement(sb.toString)
     params foreach { p => p(ps) }
     ps.executeQuery()
+  }
+
+  def analyze[R](
+    builder: ResultSet => R,
+    connection: Connection,
+    usedDimensions: Seq[String],
+    usedFacts: Seq[String],
+    order: Seq[(String, Boolean)] = Nil,
+    filter: Option[Specification[T]] = None,
+    limit: Option[Int] = None,
+    offset: Option[Int] = None): Seq[R] = {
+
+    val sb = new StringBuilder
+    val params = new ArrayBuffer[PreparedStatement => Unit]()
+    prepareSql(sb, false, usedDimensions, usedFacts, order, filter, limit, offset, params)
+    val ps = connection.prepareStatement(sb.toString)
+    params foreach { p => p(ps) }
+    val buffer = new ArrayBuffer[R]()
+    val rs = ps.executeQuery()
+    while (rs.next()) {
+      buffer += builder(rs)
+    }
+    rs.close()
+    buffer
   }
 }

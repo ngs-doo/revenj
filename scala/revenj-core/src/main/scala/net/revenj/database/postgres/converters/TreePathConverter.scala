@@ -1,11 +1,21 @@
 package net.revenj.database.postgres.converters
 
+import java.sql.PreparedStatement
+
 import net.revenj.TreePath
 import net.revenj.database.postgres.{PostgresBuffer, PostgresReader}
+import org.postgresql.util.PGobject
 
 object TreePathConverter extends Converter[TreePath] {
   override def serializeURI(sw: PostgresBuffer, value: TreePath): Unit = {
     if (value != null) sw.addToBuffer(value.toString)
+  }
+
+  def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: TreePath): Unit = {
+    val pg = new PGobject
+    pg.setType("ltree")
+    pg.setValue(value.toString)
+    ps.setObject(index, pg)
   }
 
   val dbName = "ltree"
