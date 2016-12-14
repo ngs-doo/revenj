@@ -1,5 +1,4 @@
-﻿
-namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
+﻿namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 {
 	public interface IQuerySimplification
 	{

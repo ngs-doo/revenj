@@ -30,7 +30,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.QuerySimplifications
 					return
 						"EXISTS (SELECT * FROM UNNEST((\"{0}\").\"{1}\"))".With(
 							qse.ReferencedQuerySource.ItemName,
-							me.Member.Name);
+							query.ConverterFactory.GetName(me.Member));
 			}
 
 			return "EXISTS (SELECT * {0} {1})".With(parts.GetFromPart(), parts.GetWherePart());

@@ -33,7 +33,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			DynamicSupportedMethods.Add(typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) }), SubtractDateTime);
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
 		{
 			var mce = expression as MethodCallExpression;
 			if (mce == null)

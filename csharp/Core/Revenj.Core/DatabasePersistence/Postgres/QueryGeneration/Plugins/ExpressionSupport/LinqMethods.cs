@@ -14,7 +14,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 	[Export(typeof(IExpressionMatcher))]
 	public class LinqMethods : IExpressionMatcher
 	{
-		private delegate void MethodCallDelegate(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression);
+		private delegate void MethodCallDelegate(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, IPostgresConverterFactory converter);
 
 		private static Dictionary<MethodInfo, MethodCallDelegate> SupportedMethods;
 		static LinqMethods()
@@ -25,7 +25,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMethods.Add(typeof(CollectionExtensions).GetMethod("ToSet"), ArrayAgg);
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
 		{
 			var mce = expression as MethodCallExpression;
 			if (mce == null || !mce.Method.IsGenericMethod)
@@ -34,13 +34,13 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			MethodCallDelegate mcd;
 			if (SupportedMethods.TryGetValue(mce.Method.GetGenericMethodDefinition(), out mcd))
 			{
-				mcd(mce, queryBuilder, visitExpression);
+				mcd(mce, queryBuilder, visitExpression, converter);
 				return true;
 			}
 			return false;
 		}
 
-		private static void ArrayAgg(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		private static void ArrayAgg(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, IPostgresConverterFactory converter)
 		{
 			queryBuilder.Append("(SELECT array_agg(");
 			var sqe = methodCall.Arguments[0] as SubQueryExpression;
@@ -49,7 +49,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			{
 				var me = sqe.QueryModel.SelectClause.Selector as MemberExpression;
 				if (me != null)
-					queryBuilder.Append("\"").Append(me.Member.Name).Append("\"");
+					queryBuilder.Append("\"").Append(converter.GetName(me.Member)).Append("\"");
 				else
 				{
 					visitExpression(sqe.QueryModel.SelectClause.Selector);

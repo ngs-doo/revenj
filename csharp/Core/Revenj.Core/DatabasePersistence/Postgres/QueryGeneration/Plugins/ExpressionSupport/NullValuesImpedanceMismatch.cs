@@ -25,7 +25,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			return false;
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
 		{
 			var be = expression as BinaryExpression;
 			if (be == null)

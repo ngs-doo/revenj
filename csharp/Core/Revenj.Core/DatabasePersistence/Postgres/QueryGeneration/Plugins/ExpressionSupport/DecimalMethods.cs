@@ -34,7 +34,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			return dict;
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
 		{
 			var mce = expression as MethodCallExpression;
 			if (mce == null)

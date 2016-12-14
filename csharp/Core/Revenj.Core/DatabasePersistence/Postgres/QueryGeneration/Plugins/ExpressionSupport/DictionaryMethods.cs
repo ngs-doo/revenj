@@ -24,7 +24,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMethods.Add(typeof(Dictionary<string, object>).GetMethod("get_Item", new Type[] { typeof(string) }), GetValue);
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
 		{
 			var mce = expression as MethodCallExpression;
 			if (mce == null)

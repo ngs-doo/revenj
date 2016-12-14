@@ -22,7 +22,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMethods.Add(typeof(TreePath).GetMethod("IsDescendant", new[] { typeof(TreePath) }), IsDescendant);
 		}
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
 		{
 			var mce = expression as MethodCallExpression;
 			if (mce == null)

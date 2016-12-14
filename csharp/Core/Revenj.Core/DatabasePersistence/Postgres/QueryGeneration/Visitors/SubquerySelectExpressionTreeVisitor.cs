@@ -58,11 +58,12 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				var memb = expression.Members[i];
 				VisitExpression(arg);
 				var last = Query.Selects[Query.Selects.Count - 1];
-				if (last.Name != memb.Name && !last.Sql.Contains(" AS "))
+				var membName = Query.ConverterFactory.GetName(memb);
+				if (last.Name != membName && !last.Sql.Contains(" AS "))
 				{
-					last.Name = memb.Name;
+					last.Name = membName;
 					if (!Query.CanQueryInMemory)
-						last.Sql += " AS \"{0}\"".With(memb.Name);
+						last.Sql += " AS \"{0}\"".With(membName);
 				}
 			}
 
@@ -94,7 +95,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			var cnt = Query.Selects.Count;
 			var expression = VisitExpression(memberAssigment.Expression);
 			if (cnt != Query.Selects.Count)
-				Query.Selects[cnt].Sql = "\"{0}\" AS \"{1}\"".With(Query.Selects[cnt].Name, memberAssigment.Member.Name);
+				Query.Selects[cnt].Sql = "\"{0}\" AS \"{1}\"".With(Query.Selects[cnt].Name, Query.ConverterFactory.GetName(memberAssigment.Member));
 
 			return Expression.Bind(memberAssigment.Member, expression);
 		}
@@ -143,15 +144,16 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				foreach (var mm in Query.MemberMatchers)
 					if (mm.TryMatch(expression, sb, exp => sb.Append(last.Sql), Query.Context))
 						break;
+				var name = Query.ConverterFactory.GetName(expression.Member);
 				if (sb.Length > 0)
 				{
-					sb.Append(" AS \"").Append(expression.Member.Name).Append("\"");
+					sb.Append(" AS \"").Append(name).Append("\"");
 					last.Sql = sb.ToString();
 				}
 				else
 				{
-					last.Sql = "({0}).\"{1}\"".With(last.Sql, expression.Member.Name);
-					last.Name = expression.Member.Name;
+					last.Sql = "({0}).\"{1}\"".With(last.Sql, name);
+					last.Name = name;
 				}
 				last.ItemType = expression.Type;
 				last.Expression = expression;

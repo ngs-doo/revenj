@@ -84,7 +84,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 			SqlExpression.Append(" ");
 
 			foreach (var candidate in QueryParts.ExpressionMatchers)
-				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
+				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context, QueryParts.ConverterFactory))
 					return expression;
 
 			var left = expression.Left;
@@ -258,7 +258,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				VisitExpression(expression.Expression);
 				if (!string.IsNullOrEmpty(Context.Name))
 					SqlExpression.Append(')');
-				SqlExpression.AppendFormat(".\"{0}\"", expression.Member.Name);
+				SqlExpression.AppendFormat(".\"{0}\"", QueryParts.ConverterFactory.GetName(expression.Member));
 			}
 			return expression;
 		}
@@ -286,7 +286,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				return Expression.Bind(memberAssigment.Member, memberAssigment.Expression);
 
 			var expression = VisitExpression(memberAssigment.Expression);
-			SqlExpression.AppendFormat(" AS {0}", memberAssigment.Member.Name);
+			SqlExpression.AppendFormat(" AS {0}", QueryParts.ConverterFactory.GetName(memberAssigment.Member));
 
 			return Expression.Bind(memberAssigment.Member, expression);
 		}
@@ -330,7 +330,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				var arg = expression.Arguments[i];
 				var memb = expression.Members[i];
 				VisitExpression(arg);
-				var name = "\"" + memb.Name + "\"";
+				var name = "\"" + QueryParts.ConverterFactory.GetName(memb) + "\"";
 				if (SqlExpression.Length < name.Length
 					|| SqlExpression.ToString(SqlExpression.Length - name.Length, name.Length) != name)
 					SqlExpression.Append(" AS ").Append(name);
@@ -343,7 +343,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 		protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
 		{
 			foreach (var candidate in QueryParts.ExpressionMatchers)
-				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
+				if (candidate.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context, QueryParts.ConverterFactory))
 					return expression;
 
 			var attr = expression.Method.GetCustomAttributes(typeof(DatabaseFunctionAttribute), false) as DatabaseFunctionAttribute[];
@@ -355,7 +355,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 					var em = Activator.CreateInstance(df.Call, new object[] { df.Function }) as IExpressionMatcher;
 					if (em == null)
 						throw new FrameworkException("DatabaseFunction attribute target is not an " + typeof(IExpressionMatcher).FullName);
-					if (!em.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context))
+					if (!em.TryMatch(expression, SqlExpression, exp => VisitExpression(exp), Context, QueryParts.ConverterFactory))
 						throw new FrameworkException("DatabaseFunction could not match provided expression.");
 					return expression;
 				}

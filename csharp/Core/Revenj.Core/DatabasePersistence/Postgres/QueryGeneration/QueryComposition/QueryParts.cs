@@ -345,7 +345,7 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			var list = new List<string>();
 			while (me != null)
 			{
-				list.Add(me.Member.Name);
+				list.Add(ConverterFactory.GetName(me.Member));
 				var qse = me.Expression as QuerySourceReferenceExpression;
 				var par = me.Expression as ParameterExpression;
 				if (qse != null || par != null)

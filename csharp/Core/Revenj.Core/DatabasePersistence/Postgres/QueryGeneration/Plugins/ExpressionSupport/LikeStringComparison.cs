@@ -21,7 +21,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 				typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) })
 			}.ToList();
 
-		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context)
+		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
 		{
 			var be = expression as BinaryExpression;
 			if (be == null)

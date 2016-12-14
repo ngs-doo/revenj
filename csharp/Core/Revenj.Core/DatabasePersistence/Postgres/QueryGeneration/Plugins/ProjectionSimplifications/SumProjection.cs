@@ -46,7 +46,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ProjectionSimplifications
 					"_subquery_" + cnt,
 					expression.QueryModel.MainFromClause.ItemName,
 					sql,
-					selector.Member.Name),
+					queryParts.ConverterFactory.GetName(selector.Member)),
 				"_sum_" + cnt,
 				expression.QueryModel.ResultTypeOverride,
 				(_, __, dr) => dr.IsDBNull(cnt) ? 0 : Convert.ChangeType(dr.GetValue(cnt), type));

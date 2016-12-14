@@ -36,12 +36,12 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.QuerySimplifications
 			{
 				return @"COALESCE(octet_length(({2}""{0}"").""{1}""), 0)".With(
 					qsre != null ? qsre.ReferencedQuerySource.ItemName : pe.Name,
-					me.Member.Name,
+					query.ConverterFactory.GetName(me.Member),
 					pe != null ? query.Context.Name : string.Empty);
 			}
 			return @"COALESCE(array_upper(({2}""{0}"").""{1}"", 1), 0)".With(
 				qsre != null ? qsre.ReferencedQuerySource.ItemName : pe.Name,
-				me.Member.Name,
+				query.ConverterFactory.GetName(me.Member),
 				pe != null ? query.Context.Name : string.Empty);
 		}
 	}
