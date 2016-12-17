@@ -460,7 +460,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public static void WriteInt32(Stream stream, Int32 value)
 		{
-			stream.Write(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(value)), 0, 4);
+			var number = IPAddress.HostToNetworkOrder(value);
+			stream.WriteByte((byte)number);
+			stream.WriteByte((byte)(number >> 8));
+			stream.WriteByte((byte)(number >> 16));
+			stream.WriteByte((byte)(number >> 24));
 		}
 
 		/// <summary>
@@ -469,7 +473,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public static int ReadInt32(Stream stream, byte[] buffer)
 		{
 			CheckedStreamReadShort(stream, buffer, 0, 4);
-			return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(buffer, 0));
+			var value = buffer[0] + (buffer[1] << 8) + (buffer[2] << 16) + (buffer[3] << 24);
+			return IPAddress.NetworkToHostOrder(value);
 		}
 
 		/// <summary>
@@ -477,7 +482,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		public static void WriteInt16(Stream stream, Int16 value)
 		{
-			stream.Write(BitConverter.GetBytes(IPAddress.HostToNetworkOrder(value)), 0, 2);
+			var number = IPAddress.HostToNetworkOrder(value);
+			stream.WriteByte((byte)number);
+			stream.WriteByte((byte)(number >> 8));
 		}
 
 		/// <summary>
@@ -486,7 +493,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public static short ReadInt16(Stream stream, byte[] buffer)
 		{
 			CheckedStreamReadShort(stream, buffer, 2, 2);
-			return IPAddress.NetworkToHostOrder(BitConverter.ToInt16(buffer, 2));
+			var value = buffer[2] + (buffer[3] << 8);
+			return IPAddress.NetworkToHostOrder((short)value);
 		}
 
 		public static int RotateShift(int val, int shift)
