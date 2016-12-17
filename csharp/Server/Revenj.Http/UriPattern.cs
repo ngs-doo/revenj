@@ -41,7 +41,7 @@ namespace Revenj.Http
 			Groups = TemplatePattern.GetGroupNumbers().Length;
 		}
 
-		public RouteMatch Match(string url, int offset)
+		public RouteMatch? Match(string url, int offset)
 		{
 			if (!TemplatePattern.IsMatch(url, offset))
 				return null;

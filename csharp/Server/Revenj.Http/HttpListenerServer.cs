@@ -108,10 +108,11 @@ namespace Revenj.Http
 			var response = context.Response;
 			try
 			{
-				RouteMatch match;
-				var route = Routes.Find(request.HttpMethod, request.RawUrl, request.Url.AbsolutePath, out match);
-				if (route != null)
+				RouteHandler route;
+				var routeMatch = Routes.Find(request.HttpMethod, request.RawUrl, request.Url.AbsolutePath, out route);
+				if (routeMatch != null)
 				{
+					var match = routeMatch.Value;
 					var auth = Authentication.TryAuthorize(context.Request.Headers["Authorization"], context.Request.RawUrl, route);
 					if (auth.Principal != null)
 					{

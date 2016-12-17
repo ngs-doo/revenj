@@ -37,7 +37,7 @@ namespace Revenj.Http
 		private static readonly byte CR = 13;
 		private static readonly byte LF = 10;
 
-		private static readonly char[] Lower = new char[255];
+		private static readonly char[] Lower = new char[256];
 
 		static HttpSocketContext()
 		{
@@ -142,11 +142,18 @@ namespace Revenj.Http
 					}
 				}
 				position = totalBytes;
-				var size = socket.Receive(InputTemp, totalBytes, InputTemp.Length - totalBytes, SocketFlags.None);
-				retries++;
-				if (size == 0) return -1;
-				totalBytes += size;
-			} while (retries < 100 && totalBytes < InputTemp.Length);
+				SocketError errorCode;
+				var size = socket.Receive(InputTemp, totalBytes, InputTemp.Length - totalBytes, SocketFlags.None, out errorCode);
+				if (errorCode == SocketError.Success && size > 0)
+					totalBytes += size;
+				else
+				{
+					if (retries == 0
+						|| errorCode == SocketError.ConnectionReset 
+						|| errorCode == SocketError.ConnectionAborted) return -1;
+					retries++;
+				}
+			} while (retries < 20 && totalBytes < InputTemp.Length);
 			return -1;
 		}
 
@@ -244,10 +251,10 @@ namespace Revenj.Http
 			totalBytes = 0;
 		}
 
-		private static readonly StringCache KeyCache = new StringCache(12);
-		private readonly StringCache ValueCache = new StringCache(14);
+		private static readonly StringCache KeyCache = new StringCache(10);
+		private readonly StringCache ValueCache = new StringCache(12);
 
-		public bool Parse(Socket socket, out RouteMatch match, out RouteHandler route)
+		public bool Parse(Socket socket, out RouteMatch? match, out RouteHandler route)
 		{
 			positionInTmp = 0;
 			Pipeline = false;
@@ -292,7 +299,7 @@ namespace Revenj.Http
 				ReturnError(socket, 505, "Only HTTP/1.1 and HTTP/1.0 supported (partially)", false);
 				return false;
 			}
-			route = ReadUrl(rowEnd, out match);
+			match = ReadUrl(rowEnd, out route);
 			if (route == null)
 			{
 				var unknownRoute = "Unknown route " + RawUrl + " on method " + HttpMethod;
@@ -351,6 +358,8 @@ namespace Revenj.Http
 				var size = totalBytes - rowEnd;
 				InputStream.Write(InputTemp, rowEnd, size);
 				len -= size;
+				var oldTimeout = socket.ReceiveTimeout;
+				socket.ReceiveTimeout = 10000;
 				while (len > 0)
 				{
 					size = socket.Receive(InputTemp, Math.Min(len, InputTemp.Length), SocketFlags.None);
@@ -358,6 +367,7 @@ namespace Revenj.Http
 					InputStream.Write(InputTemp, 0, size);
 					len -= size;
 				}
+				socket.ReceiveTimeout = oldTimeout;
 				InputStream.Position = 0;
 				rowEnd = totalBytes;
 				totalBytes = 0;
@@ -378,7 +388,7 @@ namespace Revenj.Http
 			return true;
 		}
 
-		private RouteHandler ReadUrl(int rowEnd, out RouteMatch match)
+		private RouteMatch? ReadUrl(int rowEnd, out RouteHandler handler)
 		{
 			var httpLen1 = HttpMethod.Length + 1;
 			var charBuf = TmpCharBuf;
@@ -391,16 +401,16 @@ namespace Revenj.Http
 					RawUrl = UTF8.GetString(InputTemp, httpLen1, end - httpLen1);
 					var askSign = RawUrl.IndexOf('?');
 					var absolutePath = askSign == -1 ? RawUrl : RawUrl.Substring(0, askSign);
-					return Routes.Find(HttpMethod, RawUrl, absolutePath, out match);
+					return Routes.Find(HttpMethod, RawUrl, absolutePath, out handler);
 				}
 				charBuf[x - httpLen1] = (char)tb;
 			}
-			var route = Routes.Find(HttpMethod, charBuf, end - httpLen1, out match);
-			if (route == null)
+			var match = Routes.Find(HttpMethod, charBuf, end - httpLen1, out handler);
+			if (handler == null)
 				RawUrl = new string(charBuf, 0, end - httpLen1);
 			else
-				RawUrl = route.Url;
-			return route;
+				RawUrl = handler.Url;
+			return match;
 		}
 
 		private RouteMatch Route;
@@ -481,10 +491,10 @@ namespace Revenj.Http
 			{
 				offset = AddContentLength(cms.Length, offset);
 				var len = offset + cms.Length;
-				if (len < 512)
+				if (len < 4096)
 				{
 					cms.CopyTo(OutputTemp, offset);
-					if (mustFlushResponse)
+					if (mustFlushResponse || len > 1024)
 					{
 						offsetInOutput = 0;
 						socket.Send(OutputTemp, (int)len, SocketFlags.None);

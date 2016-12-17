@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -11,6 +10,7 @@ using System.ServiceModel;
 using System.Threading;
 using Revenj.Api;
 using Revenj.DomainPatterns;
+using Revenj.Utility;
 
 namespace Revenj.Http
 {
@@ -35,7 +35,8 @@ namespace Revenj.Http
 		private readonly HttpAuth Authentication;
 
 		private readonly ThreadLocal<HttpSocketContext> Context;
-		private readonly BlockingCollection<RequestInfo> Requests;
+		private readonly RingBuffer<RequestInfo> Requests;
+		private readonly ManualResetEvent[] Resets;
 
 		public HttpSocketServer(IServiceProvider locator)
 		{
@@ -102,9 +103,19 @@ Please check settings: " + string.Join(", ", endpoints));
 			Context = new ThreadLocal<HttpSocketContext>(() => new HttpSocketContext("http://127.0.0.1/", MessageSizeLimit, routes));
 			var ca = ConfigurationManager.AppSettings["Revenj.HttpCapacity"];
 			if (!string.IsNullOrEmpty(ca))
-				Requests = new BlockingCollection<RequestInfo>(new ConcurrentQueue<RequestInfo>(), int.Parse(ca));
+				Requests = new RingBuffer<RequestInfo>((int)Math.Log(int.Parse(ca), 2));
 			else
-				Requests = new BlockingCollection<RequestInfo>(new ConcurrentQueue<RequestInfo>());
+				Requests = new RingBuffer<RequestInfo>(18);
+			var loops = Math.Max(1, Environment.ProcessorCount * 3 / 4);
+			Resets = new ManualResetEvent[loops];
+			for (int i = 0; i < loops; i++)
+			{
+				var re = new ManualResetEvent(false);
+				Resets[i] = re;
+				var thread = new Thread(SocketLoop);
+				thread.Name = "Socket loop: " + (i + 1);
+				thread.Start(re);
+			}
 		}
 
 		public void Run()
@@ -115,7 +126,7 @@ Please check settings: " + string.Join(", ", endpoints));
 				if (backlog != null)
 					Socket.Listen(int.Parse(backlog));
 				else
-					Socket.Listen(1000);
+					Socket.Listen(10000);
 				TraceSource.TraceEvent(TraceEventType.Start, 1002);
 				var minth = ConfigurationManager.AppSettings["Revenj.MinThreads"];
 				var maxth = ConfigurationManager.AppSettings["Revenj.MaxThreads"];
@@ -123,13 +134,6 @@ Please check settings: " + string.Join(", ", endpoints));
 				var maxThreads = !string.IsNullOrEmpty(maxth) ? int.Parse(maxth) : 128 + Environment.ProcessorCount * 3;
 				ThreadPool.SetMinThreads(minThreads, maxThreads);
 				var ctx = Context.Value;
-				var loops = Math.Max(1, Environment.ProcessorCount * 3 / 4);
-				for (int i = 0; i < loops; i++)
-				{
-					var thread = new Thread(SocketLoop);
-					thread.Name = "Main socket loop: " + (i + 1);
-					thread.Start();
-				}
 				while (true)
 				{
 					try
@@ -138,8 +142,11 @@ Please check settings: " + string.Join(", ", endpoints));
 						if (socket.Connected)
 						{
 							socket.Blocking = true;
-							if (!Requests.TryAdd(new RequestInfo(socket)))
-								ctx.ReturnError(socket, 503);
+							socket.ReceiveTimeout = 1;
+							Requests.Add(new RequestInfo(socket));
+							for (int i = 0; i < Resets.Length; i++)
+								Resets[i].Set();
+							Thread.Yield();
 						}
 					}
 					catch (SocketException ex)
@@ -161,58 +168,60 @@ Please check settings: " + string.Join(", ", endpoints));
 			}
 		}
 
-		struct RequestInfo
+		class RequestInfo
 		{
 			public readonly Socket Socket;
-			public readonly bool HasData;
-			public readonly int TimeoutAt;
+			public bool HasData;
+			public int TimeoutAt;
 
 			public RequestInfo(Socket socket)
 			{
 				this.Socket = socket;
-				HasData = true;
-				TimeoutAt = 0;
+				HasData = socket.Available > 0;
+				if (!HasData)
+					TimeoutAt = Environment.TickCount + KeepAliveTimeout;
 			}
-			public RequestInfo(Socket socket, bool hasData)
+			public RequestInfo Processed()
 			{
-				this.Socket = socket;
-				this.HasData = hasData;
+				this.HasData = Socket.Available > 0;
 				TimeoutAt = Environment.TickCount + KeepAliveTimeout;
+				return this;
 			}
-			public RequestInfo(Socket socket, int timeout)
+			public RequestInfo Skipped()
 			{
-				this.Socket = socket;
-				this.HasData = socket.Poll(0, SelectMode.SelectRead);
-				this.TimeoutAt = timeout;
+				this.HasData = Socket.Poll(0, SelectMode.SelectRead);
+				return this;
 			}
 		}
 
 		private void SocketLoop(object state)
 		{
+			var sync = (ManualResetEvent)state;
 			var ctx = Context.Value;
 			var principal = Thread.CurrentPrincipal;
 			ThreadContext.Request = ctx;
 			ThreadContext.Response = ctx;
-			var threadSync = new ManualResetEventSlim(false);
+			var resetEvent = new ManualResetEvent(false);
 			while (true)
 			{
-				var request = Requests.Take();
+				var request = Requests.Take(sync);
 				try
 				{
+					var socket = request.Socket;
 					if (request.HasData)
 					{
 						ctx.Reset();
-						ProcessAllMessages(request.Socket, ctx, principal, threadSync);
+						ProcessAllMessages(request, ctx, principal, resetEvent, true);
 					}
-					else if (!request.Socket.Connected) continue;
-					else if (request.Socket.Available > 0 || request.TimeoutAt < Environment.TickCount)
+					else if (socket.Available > 0 || request.TimeoutAt < Environment.TickCount)
 					{
 						ctx.Reset();
-						ProcessAllMessages(request.Socket, ctx, principal, threadSync);
+						ProcessAllMessages(request, ctx, principal, resetEvent, true);
 					}
-					else if (!Requests.TryAdd(new RequestInfo(request.Socket, request.TimeoutAt)))
+					else
 					{
-						request.Socket.Close();
+						Requests.Add(request.Skipped());
+						Thread.Yield();
 					}
 				}
 				catch (Exception ex)
@@ -224,15 +233,15 @@ Please check settings: " + string.Join(", ", endpoints));
 
 		struct ThreadArgs
 		{
-			public readonly Socket Socket;
+			public readonly RequestInfo Request;
 			public readonly HttpSocketContext Context;
-			public readonly ManualResetEventSlim ResetEvent;
+			public readonly ManualResetEvent ResetEvent;
 			public readonly HttpAuth.AuthorizeOrError Auth;
 			public readonly RouteHandler Route;
 			public readonly RouteMatch Match;
-			public ThreadArgs(Socket socket, HttpSocketContext context, ManualResetEventSlim resetEvent, HttpAuth.AuthorizeOrError auth, RouteHandler route, RouteMatch match)
+			public ThreadArgs(RequestInfo request, HttpSocketContext context, ManualResetEvent resetEvent, HttpAuth.AuthorizeOrError auth, RouteHandler route, RouteMatch match)
 			{
-				this.Socket = socket;
+				this.Request = request; ;
 				this.Context = context;
 				this.ResetEvent = resetEvent;
 				this.Auth = auth;
@@ -241,20 +250,23 @@ Please check settings: " + string.Join(", ", endpoints));
 			}
 		}
 
-		private void ProcessAllMessages(Socket socket, HttpSocketContext ctx, IPrincipal principal, ManualResetEventSlim threadSync)
+		private void ProcessAllMessages(RequestInfo request, HttpSocketContext ctx, IPrincipal principal, ManualResetEvent resetEvent, bool canReschedule)
 		{
-			RouteMatch match;
+			RouteMatch? routeMatch;
 			RouteHandler route;
-			while (ctx.Parse(socket, out match, out route))
+			var socket = request.Socket;
+			while (ctx.Parse(socket, out routeMatch, out route))
 			{
+				var match = routeMatch.Value;
 				var auth = Authentication.TryAuthorize(ctx.GetRequestHeader("authorization"), ctx.RawUrl, route);
 				if (auth.Principal != null)
 				{
-					if (route.IsAsync && threadSync != null)
+					if (canReschedule && route.IsAsync)
 					{
-						threadSync.Reset();
-						ThreadPool.QueueUserWorkItem(ProcessInThread, new ThreadArgs(socket, ctx, threadSync, auth, route, match));
-						threadSync.Wait();
+						resetEvent.Reset();
+						ThreadPool.QueueUserWorkItem(ProcessInThread, new ThreadArgs(request, ctx, resetEvent, auth, route, match));
+						Thread.Yield();
+						resetEvent.WaitOne();
 						return;
 					}
 					else
@@ -264,14 +276,19 @@ Please check settings: " + string.Join(", ", endpoints));
 							Thread.CurrentPrincipal = principal = auth.Principal;
 						using (var stream = route.Handle(match.OrderedArgs, ctx, ctx, ctx.InputStream, ctx.OutputStream))
 						{
-							var keepAlive = ctx.Return(stream, socket, threadSync == null);
+							var keepAlive = ctx.Return(stream, socket, !canReschedule);
 							if (keepAlive)
 							{
 								if (ctx.Pipeline) continue;
 								else if (socket.Connected)
 								{
-									if (Requests.TryAdd(new RequestInfo(socket, socket.Available > 0)))
-										return;
+									Requests.Add(request.Processed());
+									if (!canReschedule)
+									{
+										for (int i = 0; i < Resets.Length; i++)
+											Resets[i].Set();
+									}
+									return;
 								}
 							}
 							socket.Close();
@@ -334,8 +351,10 @@ Please check settings: " + string.Join(", ", endpoints));
 		private void ProcessInThread(object state)
 		{
 			var arg = (ThreadArgs)state;
-			var socket = arg.Socket;
+			var request = arg.Request;
+			var socket = request.Socket;
 			var ctx = Context.Value;
+			var semaphore = arg.ResetEvent;
 			try
 			{
 				ctx.CopyFrom(arg.Context);
@@ -355,12 +374,13 @@ Please check settings: " + string.Join(", ", endpoints));
 					}
 					else if (!ctx.Pipeline)
 					{
-						if (!Requests.TryAdd(new RequestInfo(socket, socket.Available > 0)))
-							socket.Close();
+						Requests.Add(request.Processed());
+						for (int i = 0; i < Resets.Length; i++)
+							Resets[i].Set();
 						return;
 					}
 				}
-				ProcessAllMessages(socket, ctx, principal, null);
+				ProcessAllMessages(request, ctx, principal, semaphore, false);
 			}
 			catch (Exception ex)
 			{

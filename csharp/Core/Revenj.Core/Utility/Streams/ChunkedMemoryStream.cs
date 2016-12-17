@@ -55,6 +55,9 @@ namespace Revenj.Utility
 		private readonly bool IsShared;
 
 		private int BoundToThread;
+		private bool UsedReader;
+		private bool UsedWriter;
+		private bool UsedBuffered;
 
 		/// <summary>
 		/// Create or get a new instance of memory stream
@@ -87,6 +90,7 @@ namespace Revenj.Utility
 			cms.GetReader();
 			cms.GetWriter();
 			cms.UseBufferedReader(string.Empty);
+			cms.UsedReader = cms.UsedWriter = cms.UsedBuffered = false;
 			return cms;
 		}
 
@@ -249,6 +253,9 @@ namespace Revenj.Utility
 		{
 			TotalSize = 0;
 			CurrentPosition = 0;
+			UsedReader = false;
+			UsedWriter = false;
+			UsedBuffered = false;
 		}
 		/// <summary>
 		/// Set new length of the stream.
@@ -489,6 +496,7 @@ namespace Revenj.Utility
 		{
 			if (Writer == null)
 				Writer = new CustomWriter(this);
+			UsedWriter = true;
 			return Writer;
 		}
 
@@ -500,6 +508,7 @@ namespace Revenj.Utility
 		{
 			if (Reader == null)
 				Reader = new StreamReader(this);
+			UsedReader = true;
 			return Reader;
 		}
 
@@ -514,6 +523,7 @@ namespace Revenj.Utility
 		{
 			if (BufferedReader == null)
 				return BufferedReader = new BufferedTextReader(reader, SmallBuffer, CharBuffer);
+			UsedBuffered = true;
 			return BufferedReader.Reuse(reader);
 		}
 
@@ -528,6 +538,7 @@ namespace Revenj.Utility
 		{
 			if (BufferedReader == null)
 				return BufferedReader = new BufferedTextReader(value, SmallBuffer, CharBuffer);
+			UsedBuffered = true;
 			return BufferedReader.Reuse(value);
 		}
 
@@ -542,15 +553,18 @@ namespace Revenj.Utility
 		{
 			if (IsShared)
 			{
-				Reader.DiscardBufferedData();
+				if (UsedReader)
+					Reader.DiscardBufferedData();
+				UsedBuffered = UsedReader = UsedWriter = false;
 			}
 			else if (!disposed && BoundToThread == Thread.CurrentThread.ManagedThreadId)
 			{
 				disposed = true;
-				if (Writer != null)
+				if (Writer != null && UsedWriter)
 					Writer.Flush();
-				if (Reader != null)
+				if (Reader != null && UsedReader)
 					Reader.DiscardBufferedData();
+				UsedBuffered = UsedReader = UsedWriter = false;
 				if (CurrentEstimate < SizeLimit || Blocks.Count > 10000)
 				{
 					MemoryPool.Push(this);

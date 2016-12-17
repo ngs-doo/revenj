@@ -113,9 +113,8 @@ namespace Revenj.Http
 				list.Add(handler);
 		}
 
-		internal RouteHandler Find(string httpMethod, char[] buffer, int len, out RouteMatch routeMatch)
+		internal RouteMatch? Find(string httpMethod, char[] buffer, int len, out RouteHandler handler)
 		{
-			RouteHandler handler;
 			var reqHash = StringCache.CalcHash(httpMethod, buffer, len);
 			int askSign = -1;
 			for (int i = 0; i < len; i++)
@@ -129,30 +128,25 @@ namespace Revenj.Http
 			if (askSign == -1 && Cache.TryGetValue(reqHash, out handler))
 			{
 				if (handler.Pattern.IsStatic)
-				{
-					routeMatch = handler.Pattern.ExtractMatch(handler.Url, 0);
-					return handler;
-				}
+					return handler.Pattern.ExtractMatch(handler.Url, 0);
 			}
 			var rawUrl = new string(buffer, 0, len);
-			return FindRoute(httpMethod, rawUrl, reqHash, out routeMatch);
+			return FindRoute(httpMethod, rawUrl, reqHash, out handler);
 		}
 
-		public RouteHandler Find(string httpMethod, string rawUrl, string absolutePath, out RouteMatch routeMatch)
+		public RouteMatch? Find(string httpMethod, string rawUrl, string absolutePath, out RouteHandler handler)
 		{
 			var reqHash = StringCache.CalcHash(httpMethod, absolutePath);
-			RouteHandler handler;
 			if (Cache.TryGetValue(reqHash, out handler))
 			{
-				routeMatch = handler.Pattern.ExtractMatch(rawUrl, handler.Service.Length);
-				return handler;
+				return handler.Pattern.ExtractMatch(rawUrl, handler.Service.Length);
 			}
-			return FindRoute(httpMethod, rawUrl, reqHash, out routeMatch);
+			return FindRoute(httpMethod, rawUrl, reqHash, out handler);
 		}
 
-		private RouteHandler FindRoute(string httpMethod, string rawUrl, int reqHash, out RouteMatch routeMatch)
+		private RouteMatch? FindRoute(string httpMethod, string rawUrl, int reqHash, out RouteHandler handler)
 		{
-			routeMatch = null;
+			handler = null;
 			Dictionary<string, List<RouteHandler>> handlers;
 			if (!MethodRoutes.TryGetValue(httpMethod, out handlers))
 				return null;
@@ -172,11 +166,11 @@ namespace Revenj.Http
 				var match = h.Pattern.Match(rawUrl, service.Length);
 				if (match != null)
 				{
-					routeMatch = match;
 					var newCache = new Dictionary<int, RouteHandler>(Cache);
 					newCache[reqHash] = h;
 					Cache = newCache;
-					return h;
+					handler = h;
+					return match;
 				}
 			}
 			return null;

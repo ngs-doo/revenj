@@ -4,7 +4,7 @@ using System.Web;
 
 namespace Revenj.Http
 {
-	internal class RouteMatch
+	internal struct RouteMatch
 	{
 		internal readonly string[] OrderedArgs;
 		internal readonly KeyValuePair<string, string>[] BoundVars;
@@ -15,6 +15,7 @@ namespace Revenj.Http
 		{
 			this.OrderedArgs = orderedArgs;
 			this.BoundVars = boundVars;
+			this.QueryParams = null;
 			this.RawUrl = rawUrl;
 		}
 
