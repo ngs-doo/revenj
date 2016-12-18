@@ -9,7 +9,7 @@
 	<description> DSL Platform compatible backend (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
-	<version>1.0.3</version>
+	<version>1.1.0</version>
 
 	<dependencies>
 		<dependency>
@@ -21,19 +21,19 @@
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>1.0.3</version>
+			<version>1.1.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-servlet</artifactId>
-			<version>1.0.3</version>
+			<version>1.1.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-storage</artifactId>
-			<version>1.0.3</version>
+			<version>1.1.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>com.dslplatform</groupId>
 			<artifactId>dsl-clc</artifactId>
-			<version>1.8.3</version>
+			<version>1.8.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -76,7 +76,7 @@
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>1.0.1</version>
+                <version>1.1.0</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>
@@ -93,8 +93,8 @@
 	                            <option>manual-json</option>
 	                            <option>uri-reference</option>
 	                            <option>lazy-load-warning</option>
-	                            <!--option>jaxb</option>
-	                            <option>something_custom</option-->
+	                            <option>jaxb</option>
+	                            <option>something_custom</option>
                             </options>
                         </configuration>
                     </execution>

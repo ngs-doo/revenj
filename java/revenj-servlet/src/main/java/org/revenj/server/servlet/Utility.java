@@ -79,9 +79,10 @@ abstract class Utility {
 	}
 
 	public static Principal toPrincipal(HttpServletRequest req) {
-		return req.getUserPrincipal() != null && !(req.getUserPrincipal() instanceof UserPrincipal)
-				? new UserPrincipal(req.getUserPrincipal().getName(), req::isUserInRole)
-				: req.getUserPrincipal();
+		Principal principal = req.getUserPrincipal();
+		return principal != null && !(principal instanceof UserPrincipal)
+				? new UserPrincipal(principal.getName(), req::isUserInRole)
+				: principal;
 	}
 
 	static Optional<String> findName(DomainModel model, String path, String prefix, HttpServletResponse res) throws IOException {

@@ -1,16 +1,19 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
 namespace Revenj.Utility
 {
 	public class RingBuffer<T> where T : class
 	{
+		private readonly ManualResetEvent[] Users;
 		private readonly int Mask;
 		private readonly T[] Pool;
 		private int WritePosition;
 		private int ReadPosition;
 
-		public RingBuffer(int log2)
+		public RingBuffer(int log2, ManualResetEvent[] users)
 		{
+			this.Users = users;
 			var size = 2;
 			for (int i = 0; i < log2; i++)
 				size *= 2;
@@ -27,6 +30,8 @@ namespace Revenj.Utility
 			while (Pool[index] != null)
 				Thread.Yield();
 			Pool[index] = work;
+			for (int i = 0; i < Users.Length; i++)
+				Users[i].Set();
 		}
 
 		public T Take(ManualResetEvent sync)
@@ -34,15 +39,23 @@ namespace Revenj.Utility
 			var next = Interlocked.Increment(ref ReadPosition);
 			var index = (next - 1) & Mask;
 			T work;
-			while ((work = Pool[index]) == null)
+			if ((work = Pool[index]) == null)
 			{
-				Thread.Yield();
-				Thread.MemoryBarrier();
-				if (next > WritePosition)
+				sync.Reset();
+				do
 				{
-					sync.Reset();
-					sync.WaitOne();
-				}
+					Thread.Yield();
+					if (next > WritePosition)
+					{
+						var maxWrite = Thread.VolatileRead(ref WritePosition);
+						if (next > maxWrite)
+						{
+							sync.WaitOne();
+							sync.Reset();
+						}
+					}
+				} while ((work = Pool[index]) == null);
+				sync.Set();
 			}
 			Pool[index] = null;
 			return work;

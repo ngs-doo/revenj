@@ -74,8 +74,8 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 			Optional<SearchableRepository<RolePermission>> rolesRepository) {
 		String permissions = properties.getProperty("revenj.permissions");
 		if (permissions != null && permissions.length() > 0) {
-			if (!permissions.equalsIgnoreCase("open") || !permissions.equalsIgnoreCase("closed")) {
-				throw new RuntimeException("Invalid revenj.permission settings found: " + permissions + ".\n"
+			if (!permissions.equalsIgnoreCase("open") && !permissions.equalsIgnoreCase("closed")) {
+				throw new RuntimeException("Invalid revenj.permission settings found: '" + permissions + "'.\n"
 						+ "Allowed values are open and closed");
 			}
 		}

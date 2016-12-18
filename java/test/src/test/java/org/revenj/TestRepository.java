@@ -378,7 +378,7 @@ public class TestRepository extends Setup {
 		PersistableRepository<PksV> repository = locator.resolve(PersistableRepository.class, PksV.class);
 		Random rnd = new Random();
 		Map map = new HashMap<>();
-		map.put("abc", 123L);
+		map.put("abc", "123");
 		PksV pks = new PksV()
 				.setE(E.B).setV(new v().setX(rnd.nextInt()))
 				.setVv(new v[]{new v(rnd.nextInt(), new Map[] { map }), new v().setX(55)})

@@ -79,17 +79,25 @@ public final class ProcessingEngine {
 		});
 
 		boolean withTransaction = false;
-		for (ServerCommandDescription<TInput> cd : commandDescriptions) {
-			if (!permissions.canAccess(cd.commandClass, principal)) {
-				return new ProcessingResult<>(
-						"You don't have permission to execute command: " + cd.commandClass,
-						403,
-						Collections.EMPTY_LIST,
-						startProcessing);
+		try {
+			for (ServerCommandDescription<TInput> cd : commandDescriptions) {
+				if (!permissions.canAccess(cd.commandClass, principal)) {
+					return new ProcessingResult<>(
+							"You don't have permission to execute command: " + cd.commandClass,
+							403,
+							Collections.EMPTY_LIST,
+							startProcessing);
+				}
+				if (!ReadOnlyServerCommand.class.isAssignableFrom(cd.commandClass)) {
+					withTransaction = true;
+				}
 			}
-			if (!ReadOnlyServerCommand.class.isAssignableFrom(cd.commandClass)) {
-				withTransaction = true;
-			}
+		} catch (SecurityException se) {
+			return new ProcessingResult<>(
+					se.getMessage(),
+					403,
+					Collections.EMPTY_LIST,
+					startProcessing);
 		}
 		ArrayList<CommandResultDescription<TOutput>> executedCommands = new ArrayList<>(commandDescriptions.length);
 		Connection connection;

@@ -207,7 +207,7 @@ module security {
 	    data;
 		maps;
 	}
-	sql LegacyWriteDocument from Document(ID) {
+	sql LegacyWriteDocument from security.Document(ID) {
 		int ID;
 		map data;
 		List<map?>? maps;

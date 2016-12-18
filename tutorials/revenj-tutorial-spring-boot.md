@@ -58,12 +58,12 @@ After we are done, `pom.xml` should look like:
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-spring</artifactId>
-            <version>1.0.1</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-servlet</artifactId>
-            <version>1.0.1</version>
+            <version>1.1.0</version>
         </dependency>
     </dependencies>
     <build>
@@ -71,7 +71,7 @@ After we are done, `pom.xml` should look like:
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>1.0.1</version>
+                <version>1.1.0</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -235,6 +235,6 @@ Alternatively we can use Revenj servlet API for such a purpose:
 
 ![List all instances through Revenj](pictures/fiddler-spring-domain-search.png)
 
-Revenj Servlets are configured in [Application](https://github.com/ngs-doo/revenj/blob/master/java/revenj-servlet/src/main/java/org/revenj/server/servlet/Application.java#L68)
+Revenj Servlets are configured in [Application](https://github.com/ngs-doo/revenj/blob/master/java/revenj-servlet/src/main/java/org/revenj/server/servlet/Application.java#L69)
 
 `DataContext` service autowired into our controller is main entry point to all repositories available in Revenj models.
