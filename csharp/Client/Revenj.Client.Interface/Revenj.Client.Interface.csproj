@@ -36,7 +36,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\Revenj.Client.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -61,8 +61,8 @@
     <Compile Include="Storage\IS3Repository.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Revenj.Client.snk">
-      <Link>Revenj.Client.snk</Link>
+    <None Include="..\..\Revenj.snk">
+      <Link>Revenj.snk</Link>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
