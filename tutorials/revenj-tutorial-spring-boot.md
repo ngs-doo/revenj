@@ -238,3 +238,7 @@ Alternatively we can use Revenj servlet API for such a purpose:
 Revenj Servlets are configured in [Application](https://github.com/ngs-doo/revenj/blob/master/java/revenj-servlet/src/main/java/org/revenj/server/servlet/Application.java#L69)
 
 `DataContext` service autowired into our controller is main entry point to all repositories available in Revenj models.
+
+Project example also includes simple security integration (both using Spring and Revenj security).
+
+This can be viewed through `/home` url.

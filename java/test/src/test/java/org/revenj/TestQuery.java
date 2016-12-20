@@ -580,4 +580,15 @@ public class TestQuery extends Setup {
 		reader.execute();
 		Assert.assertTrue(found.call().size() > 0);
 	}
+
+	@Test
+	public void canUseQueryDirectly() throws IOException, ReflectiveOperationException {
+		ServiceLocator locator = container;
+		DataContext db = locator.resolve(DataContext.class);
+		LocalDate ld = LocalDate.now().plusDays(15);
+		Clicked cl = new Clicked().setDate(ld);
+		db.submit(cl);
+		List<ClickedList> found = locator.resolve(Query.class, ClickedList.class).filter(new ClickedList.FindAt(ld)).list();
+		Assert.assertTrue(found.size() > 0);
+	}
 }

@@ -61,9 +61,10 @@ public class RevenjProcessor extends AbstractProcessor {
 						writer = fo.openWriter();
 					} else writer = new OutputStreamWriter(new FileOutputStream(file));
 					for (String impl : kv.getValue()) {
-						writer.write(impl);
 						writer.write('\n');
+						writer.write(impl);
 					}
+					writer.write('\n');
 					writer.close();
 				}
 			} catch (IOException e) {
@@ -90,12 +91,12 @@ public class RevenjProcessor extends AbstractProcessor {
 					List<String> content = Files.readAllLines(file.toPath());
 					if (!content.contains("revenj_container_Registrations")) {
 						writer = new OutputStreamWriter(new FileOutputStream(file, true));
-						writer.write("revenj_container_Registrations\n");
+						writer.write("\nrevenj_container_Registrations\n");
 						writer.close();
 					}
 				} else {
 					writer = new OutputStreamWriter(new FileOutputStream(file));
-					writer.write("revenj_container_Registrations\n");
+					writer.write("\nrevenj_container_Registrations\n");
 					writer.close();
 				}
 			} catch (IOException e) {

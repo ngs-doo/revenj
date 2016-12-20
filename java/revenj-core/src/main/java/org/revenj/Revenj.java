@@ -132,7 +132,7 @@ public abstract class Revenj {
 		void setNamespace(String namespaces) {
 			String[] parts = namespaces == null ? new String[0] : namespaces.split(",");
 			this.namespaces = new String[parts.length];
-			for(int i = 0; i < parts.length; i++) {
+			for (int i = 0; i < parts.length; i++) {
 				String ns = parts[i];
 				this.namespaces[i] = ns.length() > 0 ? ns + "." : "";
 			}
@@ -186,7 +186,7 @@ public abstract class Revenj {
 		container.registerInstance(DataSource.class, dataSource, false);
 		container.registerInstance(ClassLoader.class, loader, false);
 		container.register(GlobalEventStore.class, true);
-		container.register(JsonConverter.class, true);;
+		container.register(JsonConverter.class, true);
 		SimpleDomainModel domainModel = new SimpleDomainModel(loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
 		container.registerFactory(DataContext.class, LocatorDataContext::asDataContext, false);
@@ -203,6 +203,15 @@ public abstract class Revenj {
 		container.registerInstance(EagerNotification.class, databaseNotification, false);
 		container.registerInstance(DataChangeNotification.class, databaseNotification, true);
 		ChangeNotification.registerContainer(container, databaseNotification);
+		container.registerGenerics(
+				Query.class,
+				(c, arr) -> {
+					try {
+						return c.resolve(SearchableRepository.class, arr[0]).query();
+					} catch (ReflectiveOperationException e) {
+						throw new RuntimeException(e);
+					}
+				});
 		container.registerFactory(RepositoryBulkReader.class, PostgresBulkReader::create, false);
 		container.registerInstance(PermissionManager.class, new RevenjPermissionManager(container), false);
 		container.registerClass(new Generic<Serialization<String>>() {
