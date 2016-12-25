@@ -97,24 +97,27 @@ namespace Revenj.Security
 			CheckPermissions();
 			bool isAllowed;
 			var target = identifier ?? string.Empty;
-			var id = user.Identity.Name + ":" + target;
+			var id = user != null ? user.Identity.Name + ":" + target : target;
 			if (Cache.TryGetValue(id, out isAllowed))
 				return isAllowed;
 			var parts = target.Split('.');
 			isAllowed = CheckOpen(parts, parts.Length);
-			List<Pair> permissions;
-			for (int i = parts.Length; i > 0; i--)
+			if (user != null)
 			{
-				var subName = string.Join(".", parts.Take(i));
-				if (RolePermissions.TryGetValue(subName, out permissions))
+				List<Pair> permissions;
+				for (int i = parts.Length; i > 0; i--)
 				{
-					var found =
-						permissions.Find(it => user.Identity.Name == it.Name)
-						?? permissions.Find(it => user.IsInRole(it.Name));
-					if (found != null)
+					var subName = string.Join(".", parts.Take(i));
+					if (RolePermissions.TryGetValue(subName, out permissions))
 					{
-						isAllowed = found.IsAllowed;
-						break;
+						var found =
+							permissions.Find(it => user.Identity.Name == it.Name)
+							?? permissions.Find(it => user.IsInRole(it.Name));
+						if (found != null)
+						{
+							isAllowed = found.IsAllowed;
+							break;
+						}
 					}
 				}
 			}

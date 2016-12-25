@@ -25,7 +25,7 @@ public class DslJsonSerialization extends DslJson<ServiceLocator> implements Ser
 		if (manifest == null) {
 			manifest = value.getClass();
 		}
-		final JsonWriter jw = new JsonWriter();
+		final JsonWriter jw = newWriter();
 		if (!serialize(jw, manifest, value)) {
 			if (fallback != null) {
 				ByteArrayOutputStream os = new ByteArrayOutputStream();

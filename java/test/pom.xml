@@ -9,7 +9,7 @@
 	<description> DSL Platform compatible backend (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 
 	<dependencies>
 		<dependency>
@@ -21,19 +21,19 @@
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-servlet</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-storage</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

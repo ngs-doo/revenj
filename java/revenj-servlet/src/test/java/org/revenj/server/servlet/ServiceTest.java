@@ -11,7 +11,6 @@ import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.serialization.WireSerialization;
 import org.revenj.server.ProcessingEngine;
-import org.revenj.server.ServerCommand;
 import org.revenj.server.ServerService;
 import org.revenj.server.TestProcessingEngine;
 import org.revenj.server.commands.ExecuteService;
@@ -141,17 +140,17 @@ public class ServiceTest extends Mockito {
 		}
 
 		@Override
-		public <T extends org.revenj.patterns.DataSource, S extends T> Query<S> applyFilters(Class<T> manifest, Principal user, Query<S> data) {
+		public <T, S extends T> Query<S> applyFilters(Class<T> manifest, Principal user, Query<S> data) {
 			return data;
 		}
 
 		@Override
-		public <T extends org.revenj.patterns.DataSource, S extends T> List<S> applyFilters(Class<T> manifest, Principal user, List<S> data) {
+		public <T, S extends T> List<S> applyFilters(Class<T> manifest, Principal user, List<S> data) {
 			return data;
 		}
 
 		@Override
-		public <T extends org.revenj.patterns.DataSource> Closeable registerFilter(Class<T> manifest, Specification<T> filter, String role, boolean inverse) {
+		public <T> Closeable registerFilter(Class<T> manifest, Specification<T> filter, String role, boolean inverse) {
 			return null;
 		}
 	}

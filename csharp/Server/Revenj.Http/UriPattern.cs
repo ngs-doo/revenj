@@ -23,19 +23,18 @@ namespace Revenj.Http
 
 		public UriPattern(string template)
 		{
-			template = template.TrimEnd('*').ToUpperInvariant();
-			this.Template = template;
-			Tokens = GetTokens(template);
+			this.Template = template.TrimEnd('*').ToUpperInvariant();
+			Tokens = GetTokens(this.Template);
 			TokenMap = new Dictionary<string, int>();
 			for (int i = 0; i < Tokens.Length; i++)
 				TokenMap[Tokens[i]] = i;
 			TokensCount = Tokens.Length;
-			IsStatic = TokensCount == 0 && !template.Contains("?") && !template.Contains("{");
+			IsStatic = !template.EndsWith("*") && TokensCount == 0 && !template.Contains("?") && !template.Contains("{");
 			if (IsStatic)
 				ExtractMatcher = StaticExtractMatch;
 			else
 				ExtractMatcher = DynamicExtractMatch;
-			var segments = BuildRegex(template);
+			var segments = BuildRegex(this.Template);
 			var finalPattern = EscapePattern.Replace(segments, PathGroup);
 			TemplatePattern = new Regex(finalPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			Groups = TemplatePattern.GetGroupNumbers().Length;

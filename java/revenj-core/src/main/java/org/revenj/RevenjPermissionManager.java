@@ -132,25 +132,26 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 
 	@Override
 	public boolean canAccess(String identifier, Principal user) {
-		if (user == null) return defaultPermissions;
 		checkPermissions();
 		String target = identifier != null ? identifier : "";
-		String id = user.getName() + ":" + target;
+		String id = user != null ? user.getName() + ":" + target : target;
 		Boolean exists = cache.get(id);
 		if (exists != null) {
 			return exists;
 		}
 		String[] parts = target.split("\\.");
 		boolean isAllowed = checkOpen(parts, parts.length);
-		List<Pair> permissions;
-		for (int i = parts.length; i > 0; i--) {
-			String subName = String.join(".", Arrays.copyOf(parts, i));
-			permissions = rolePermissions.get(subName);
-			if (permissions != null) {
-				Optional<Pair> found = permissions.stream().filter(it -> implies(user, it.name)).findFirst();
-				if (found.isPresent()) {
-					isAllowed = found.get().isAllowed;
-					break;
+		if (user != null) {
+			List<Pair> permissions;
+			for (int i = parts.length; i > 0; i--) {
+				String subName = String.join(".", Arrays.copyOf(parts, i));
+				permissions = rolePermissions.get(subName);
+				if (permissions != null) {
+					Optional<Pair> found = permissions.stream().filter(it -> implies(user, it.name)).findFirst();
+					if (found.isPresent()) {
+						isAllowed = found.get().isAllowed;
+						break;
+					}
 				}
 			}
 		}
@@ -161,7 +162,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	}
 
 	@Override
-	public <T extends DataSource, S extends T> Query<S> applyFilters(Class<T> manifest, Principal user, Query<S> data) {
+	public <T, S extends T> Query<S> applyFilters(Class<T> manifest, Principal user, Query<S> data) {
 		if (user == null) return data.filter(it -> defaultPermissions);
 		List<Filter> registered = registeredFilters.get(manifest);
 		if (registered != null) {
@@ -177,7 +178,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	}
 
 	@Override
-	public <T extends DataSource, S extends T> List<S> applyFilters(Class<T> manifest, Principal user, List<S> data) {
+	public <T, S extends T> List<S> applyFilters(Class<T> manifest, Principal user, List<S> data) {
 		if (user == null) return defaultPermissions ? data : Collections.EMPTY_LIST;
 		List<Filter> registered = registeredFilters.get(manifest);
 		if (registered != null) {
@@ -195,7 +196,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	}
 
 	@Override
-	public <T extends DataSource> Closeable registerFilter(Class<T> manifest, Specification<T> filter, String role, boolean inverse) {
+	public <T> Closeable registerFilter(Class<T> manifest, Specification<T> filter, String role, boolean inverse) {
 		List<Filter> registered = registeredFilters.get(manifest);
 		if (registered == null) {
 			registered = new ArrayList<>();

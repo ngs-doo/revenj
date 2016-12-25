@@ -149,7 +149,7 @@ namespace Revenj.Http
 				else
 				{
 					if (retries == 0
-						|| errorCode == SocketError.ConnectionReset 
+						|| errorCode == SocketError.ConnectionReset
 						|| errorCode == SocketError.ConnectionAborted) return -1;
 					retries++;
 				}
@@ -406,10 +406,10 @@ namespace Revenj.Http
 				charBuf[x - httpLen1] = (char)tb;
 			}
 			var match = Routes.Find(HttpMethod, charBuf, end - httpLen1, out handler);
-			if (handler == null)
+			if (match == null)
 				RawUrl = new string(charBuf, 0, end - httpLen1);
 			else
-				RawUrl = handler.Url;
+				RawUrl = match.Value.RawUrl;
 			return match;
 		}
 

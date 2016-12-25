@@ -16,25 +16,25 @@ public interface PermissionManager {
 		return canAccess(manifest.getTypeName(), user);
 	}
 
-	<T extends DataSource, S extends T> Query<S> applyFilters(Class<T> manifest, Principal user, Query<S> data);
+	<T, S extends T> Query<S> applyFilters(Class<T> manifest, Principal user, Query<S> data);
 
-	default <T extends DataSource, S extends T> Query<S> applyFilters(Class<T> manifest, Query<S> data) {
+	default <T, S extends T> Query<S> applyFilters(Class<T> manifest, Query<S> data) {
 		return applyFilters(manifest, boundPrincipal.get(), data);
 	}
 
-	<T extends DataSource, S extends T> List<S> applyFilters(Class<T> manifest, Principal user, List<S> data);
+	<T, S extends T> List<S> applyFilters(Class<T> manifest, Principal user, List<S> data);
 
-	default <T extends DataSource, S extends T> List<S> applyFilters(Class<T> manifest, List<S> data) {
+	default <T, S extends T> List<S> applyFilters(Class<T> manifest, List<S> data) {
 		return applyFilters(manifest, boundPrincipal.get(), data);
 	}
 
-	<T extends DataSource> Closeable registerFilter(Class<T> manifest, Specification<T> filter, String role, boolean inverse);
+	<T> Closeable registerFilter(Class<T> manifest, Specification<T> filter, String role, boolean inverse);
 
-	default <T extends DataSource> Closeable registerForRole(Class<T> manifest, Specification<T> filter, String role) {
+	default <T> Closeable registerForRole(Class<T> manifest, Specification<T> filter, String role) {
 		return registerFilter(manifest, filter, role, false);
 	}
 
-	default <T extends DataSource> Closeable registerWhenNotInRole(Class<T> manifest, Specification<T> filter, String role) {
+	default <T> Closeable registerWhenNotInRole(Class<T> manifest, Specification<T> filter, String role) {
 		return registerFilter(manifest, filter, role, true);
 	}
 
