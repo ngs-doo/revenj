@@ -1,14 +1,17 @@
 package net.revenj.database.postgres
 
+import java.awt.Point
+import java.awt.geom.Point2D
 import java.io.IOException
 import java.sql.Connection
+import java.util.UUID
 import javax.sql.DataSource
 
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
 import monix.execution.Ack
 import net.revenj.database.postgres.DbCheck.MyService
-import net.revenj.extensibility.{SystemState, Container}
+import net.revenj.extensibility.{Container, SystemState}
 import net.revenj.patterns.DataChangeNotification.NotifyInfo
 import net.revenj.patterns.{DataChangeNotification, DataContext, DomainEventHandler, UnitOfWork}
 import org.specs2.ScalaCheck
@@ -18,11 +21,11 @@ import ru.yandex.qatools.embed.service.PostgresEmbeddedService
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-import scala.util.Try
+import scala.util.{Random, Try}
 import example.test.postgres._
 import example.test._
 import monix.eval.Task
-import monix.reactive.{Observer, Observable}
+import monix.reactive.{Observable, Observer}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.FutureMatchers
 import org.specs2.specification.mutable.ExecutionEnvironment
@@ -164,6 +167,24 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
           case _ =>
             1 === 1
         }
+      }
+      "complex pk" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ctx = container.resolve[DataContext]
+        val rnd = new Random()
+        val cpk = ComplexPk(
+          a = rnd.nextInt(),
+          b = UUID.randomUUID.toString,
+          p = Some(new Point(2, 4)),
+          l = Some(new Point2D.Double(2.2, 4.4)),
+          p2 = Seq(new Point(1, 5), new Point(5, 6)),
+          l2 = Set(Some(new Point2D.Double(-2.2, 5.4)), None, Some(new Point2D.Double(2.3, -5.4))))
+        val old = cpk.URI
+        Await.result(ctx.create(cpk), Duration.Inf)
+        val find = Await.result(ctx.find[ComplexPk](cpk.URI), Duration.Inf)
+        old !== cpk.URI
+        find.isDefined === true
+        find.get.URI == cpk.URI
       }
       "context from connection" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]

@@ -145,6 +145,10 @@ module test {
 		int a;
 		string b;
 		decimal?[] c;
+		point? p;
+		location? l;
+		List<point> p2;
+		Set<location?> l2;
 	}
 	root bpk(b) {
 		bool?[] b;
