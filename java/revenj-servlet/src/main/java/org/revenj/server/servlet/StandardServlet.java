@@ -74,8 +74,9 @@ public class StandardServlet extends HttpServlet {
 			final Optional<Class<?>> manifest = Utility.findType(model, path, "/persist/", res);
 			if (manifest.isPresent()) {
 				String name = path.substring("/persist/".length(), path.length());
-				ArrayList insert = serialization.deserialize(req.getInputStream(), "application/json", ArrayList.class, manifest.get());
-				PersistAggregateRoot.Argument<Object> arg = new PersistAggregateRoot.Argument<>(name, insert, null, null);
+				Optional<ArrayList> insert = Utility.deserializeOrBadRequest(serialization, req, res, ArrayList.class, manifest.get());
+				if (insert.isPresent()) return;
+				PersistAggregateRoot.Argument<Object> arg = new PersistAggregateRoot.Argument<>(name, insert.get(), null, null);
 				Utility.execute(engine, req, res, serialization, PersistAggregateRoot.class, arg);
 			}
 		} else if (path.startsWith("/execute/")) {
@@ -100,9 +101,10 @@ public class StandardServlet extends HttpServlet {
 			final Optional<Class<?>> manifest = Utility.findType(model, path, "/persist/", res);
 			if (manifest.isPresent()) {
 				String name = path.substring("/persist/".length(), path.length());
-				ArrayList input = serialization.deserialize(req.getInputStream(), "application/json", ArrayList.class, manifest.get());
-				ArrayList<PersistAggregateRoot.Pair> toUpdate = new ArrayList<>(input.size());
-				for (Object it : input) {
+				Optional<ArrayList> input = Utility.deserializeOrBadRequest(serialization, req, res, ArrayList.class, manifest.get());
+				if (input.isPresent()) return;
+				ArrayList<PersistAggregateRoot.Pair> toUpdate = new ArrayList<>(input.get().size());
+				for (Object it : input.get()) {
 					toUpdate.add(new PersistAggregateRoot.Pair<>(null, it));
 				}
 				PersistAggregateRoot.Argument<Object> arg = new PersistAggregateRoot.Argument<>(name, null, toUpdate, null);

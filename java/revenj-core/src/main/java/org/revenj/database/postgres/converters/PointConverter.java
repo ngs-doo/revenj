@@ -1,6 +1,7 @@
 package org.revenj.database.postgres.converters;
 
 import org.postgresql.geometric.PGpoint;
+import org.postgresql.util.PGobject;
 import org.revenj.database.postgres.PostgresBuffer;
 import org.revenj.database.postgres.PostgresReader;
 import org.revenj.database.postgres.PostgresWriter;
@@ -16,8 +17,14 @@ import java.util.List;
 public abstract class PointConverter {
 
 	public static void setParameter(PostgresBuffer sw, PreparedStatement ps, int index, Point2D value) throws SQLException {
-		PGpoint pg = new PGpoint(value.getX(), value.getY());
-		ps.setObject(index, pg);
+		if (value == null) {
+			PGobject pg = new PGobject();
+			pg.setType("point");
+			ps.setObject(index, pg);
+		} else {
+			PGpoint pg = new PGpoint(value.getX(), value.getY());
+			ps.setObject(index, pg);
+		}
 	}
 
 	public static void serializeURI(PostgresBuffer sw, Point2D value) {

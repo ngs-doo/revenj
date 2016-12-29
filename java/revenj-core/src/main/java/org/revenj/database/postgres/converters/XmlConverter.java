@@ -53,9 +53,13 @@ public abstract class XmlConverter {
 	}
 
 	public static void setParameter(PostgresBuffer sw, PreparedStatement ps, int index, Element value) throws SQLException {
-		SQLXML xml = ps.getConnection().createSQLXML();
-		xml.setString(xmlToString(value));
-		ps.setSQLXML(index, xml);
+		if (value != null) {
+			SQLXML xml = ps.getConnection().createSQLXML();
+			xml.setString(xmlToString(value));
+			ps.setSQLXML(index, xml);
+		} else {
+			ps.setSQLXML(index, null);
+		}
 	}
 
 	public static Element parse(PostgresReader reader, int context) throws IOException {

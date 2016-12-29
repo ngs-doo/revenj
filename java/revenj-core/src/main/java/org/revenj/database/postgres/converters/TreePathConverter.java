@@ -16,7 +16,7 @@ public abstract class TreePathConverter {
 	public static void setParameter(PostgresBuffer sw, PreparedStatement ps, int index, TreePath value) throws SQLException {
 		PGobject pg = new PGobject();
 		pg.setType("ltree");
-		pg.setValue(value.toString());
+		pg.setValue(value != null ? value.toString() : null);
 		ps.setObject(index, pg);
 	}
 
@@ -76,6 +76,6 @@ public abstract class TreePathConverter {
 	}
 
 	public static PostgresTuple toTuple(TreePath value) {
-		return value != null ? new ValueTuple(value.toString(), false, false) : null;
+		return value != null ? ValueTuple.from(value.toString()) : null;
 	}
 }

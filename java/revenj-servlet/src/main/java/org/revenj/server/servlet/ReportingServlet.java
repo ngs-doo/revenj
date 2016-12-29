@@ -60,8 +60,9 @@ public class ReportingServlet extends HttpServlet {
 			final Optional<Class<?>> manifest = Utility.findType(model, path, "/report/", res);
 			if (manifest.isPresent()) {
 				String name = path.substring("/report/".length(), path.length());
-				Object report = serialization.deserialize(req.getInputStream(), "application/json", manifest.get());
-				PopulateReport.Argument<Object> arg = new PopulateReport.Argument<>(report, name);
+				Optional<?> report = Utility.deserializeOrBadRequest(serialization, manifest.get(), req, res);
+				if (!report.isPresent()) return;
+				PopulateReport.Argument<Object> arg = new PopulateReport.Argument<>(report.get(), name);
 				Utility.execute(engine, req, res, serialization, PopulateReport.class, arg);
 			}
 		} else {

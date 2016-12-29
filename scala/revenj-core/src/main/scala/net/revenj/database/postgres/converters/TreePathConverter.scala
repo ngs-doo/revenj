@@ -18,6 +18,12 @@ object TreePathConverter extends Converter[TreePath] {
     ps.setObject(index, pg)
   }
 
+  def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: Option[TreePath]): Unit = {
+    val pg = new PGobject
+    pg.setType("ltree")
+    ps.setObject(index, pg)
+  }
+
   val dbName = "ltree"
 
   def default() = TreePath.Empty

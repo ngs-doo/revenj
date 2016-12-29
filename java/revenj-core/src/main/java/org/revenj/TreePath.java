@@ -37,7 +37,7 @@ public final class TreePath {
 		for (String p : parts) {
 			for (int j = 0; j < p.length(); j++) {
 				if (!Character.isLetterOrDigit(p.charAt(j))) {
-					throw new IllegalArgumentException("Invalid value for part: " + p + ". Only [A-Za-z0-9] allowed for labels");
+					throw new IllegalArgumentException("Invalid value for part: " + p + ". Only letters and digits allowed for labels");
 				}
 			}
 		}

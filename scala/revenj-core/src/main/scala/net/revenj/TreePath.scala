@@ -57,7 +57,7 @@ object TreePath {
       i += 1
       var j = 0
       while (j < p.length) {
-        if (!Character.isLetterOrDigit(p.charAt(j))) throw new IllegalArgumentException("Invalid value for part: " + p + ". Only [A-Za-z0-9] allowed for labels")
+        if (!Character.isLetterOrDigit(p.charAt(j))) throw new IllegalArgumentException("Invalid value for part: " + p + ". Only letters and digits allowed for labels")
         j += 1
       }
     }

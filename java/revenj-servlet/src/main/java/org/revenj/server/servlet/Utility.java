@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.security.Principal;
@@ -151,6 +152,33 @@ abstract class Utility {
 			}
 		}
 		return Utility.objectFromQuery(specManifest.get(), req, res);
+	}
+
+	static <T> Optional<T> deserializeOrBadRequest(
+			WireSerialization serialization,
+			Class<T> manifest,
+			HttpServletRequest req,
+			HttpServletResponse res) throws IOException {
+		try {
+			return Optional.of(serialization.deserialize(req.getInputStream(), req.getContentType(), manifest));
+		} catch (IOException e) {
+			res.sendError(400, "Error deserializing input: " + e.getMessage());
+			return Optional.empty();
+		}
+	}
+
+	static <T> Optional<T> deserializeOrBadRequest(
+			WireSerialization serialization,
+			HttpServletRequest req,
+			HttpServletResponse res,
+			Class<T> container,
+	        Type manifest) throws IOException {
+		try {
+			return Optional.of(serialization.deserialize(req.getInputStream(), req.getContentType(), container, manifest));
+		} catch (IOException e) {
+			res.sendError(400, "Error deserializing input: " + e.getMessage());
+			return Optional.empty();
+		}
 	}
 
 	static Optional<Object> specificationFromStream(

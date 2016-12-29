@@ -79,8 +79,9 @@ public class CrudServlet extends HttpServlet {
 			res.sendError(400, "Unknown domain object: " + name);
 			return;
 		}
-		Object instance = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
-		Utility.execute(engine, req, res, serialization, Create.class, new Create.Argument<>(name, instance, Utility.returnInstance(req)));
+		Optional<?> instance = Utility.deserializeOrBadRequest(serialization, manifest.get(), req, res);
+		if (!instance.isPresent()) return;
+		Utility.execute(engine, req, res, serialization, Create.class, new Create.Argument<>(name, instance.get(), Utility.returnInstance(req)));
 	}
 
 	@Override
@@ -101,8 +102,9 @@ public class CrudServlet extends HttpServlet {
 			res.sendError(400, "Uri parameter not set. Expecting /module.name?uri=value");
 			return;
 		}
-		Object instance = serialization.deserialize(manifest.get(), req.getInputStream(), req.getContentType());
-		Utility.execute(engine, req, res, serialization, Update.class, new Update.Argument<>(name, uri, instance, Utility.returnInstance(req)));
+		Optional<?> instance = Utility.deserializeOrBadRequest(serialization, manifest.get(), req, res);
+		if (!instance.isPresent()) return;
+		Utility.execute(engine, req, res, serialization, Update.class, new Update.Argument<>(name, uri, instance.get(), Utility.returnInstance(req)));
 	}
 
 	@Override
