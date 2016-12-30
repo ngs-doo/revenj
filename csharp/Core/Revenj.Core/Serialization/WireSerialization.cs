@@ -42,7 +42,7 @@ namespace Revenj.Serialization
 				Xml.Serialize(value, destination);
 				return "application/xml";
 			}
-			if (accept.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+			if (accept.StartsWith("application/json", StringComparison.Ordinal))
 			{
 				Json.Serialize(value, destination, false);
 				return "application/json";

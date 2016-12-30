@@ -11,7 +11,6 @@ using System.ServiceModel;
 using System.Threading;
 using Revenj.Api;
 using Revenj.DomainPatterns;
-using Revenj.Utility;
 
 namespace Revenj.Http
 {
@@ -36,8 +35,7 @@ namespace Revenj.Http
 		private readonly HttpAuth Authentication;
 
 		private readonly ThreadLocal<HttpSocketContext> Context;
-		private readonly Action<RequestInfo> AddRequest;
-		private readonly Func<ManualResetEvent, RequestInfo> TakeRequest;
+		private readonly BlockingCollection<RequestInfo> Requests;
 
 		public HttpSocketServer(IServiceProvider locator)
 		{
@@ -102,34 +100,10 @@ Please check settings: " + string.Join(", ", endpoints));
 			else Authentication = locator.Resolve<HttpAuth>();
 			var routes = locator.Resolve<Routes>();
 			Context = new ThreadLocal<HttpSocketContext>(() => new HttpSocketContext("http://127.0.0.1/", MessageSizeLimit, routes));
-			var loops = Math.Max(1, Environment.ProcessorCount * 3 / 4);
-			var resets = new ManualResetEvent[loops];
-			for (int i = 0; i < loops; i++)
-			{
-				var re = new ManualResetEvent(false);
-				resets[i] = re;
-				var thread = new Thread(SocketLoop);
-				thread.Name = "Socket loop: " + (i + 1);
-				thread.Start(re);
-			}
-			var httpProcessor = ConfigurationManager.AppSettings["Revenj.HttpProcessor"];
 			var ca = ConfigurationManager.AppSettings["Revenj.HttpCapacity"];
-			if (httpProcessor == "RingBuffer")
-			{
-				var requests = !string.IsNullOrEmpty(ca)
-					? new RingBuffer<RequestInfo>((int)Math.Log(int.Parse(ca), 2), resets)
-					: new RingBuffer<RequestInfo>(18, resets);
-				AddRequest = requests.Add;
-				TakeRequest = requests.Take;
-			}
-			else
-			{
-				var requests = !string.IsNullOrEmpty(ca)
-					? new BlockingCollection<RequestInfo>((int)Math.Log(int.Parse(ca), 2))
-					: new BlockingCollection<RequestInfo>();
-				AddRequest = requests.Add;
-				TakeRequest = _ => requests.Take();
-			}
+			Requests = !string.IsNullOrEmpty(ca)
+				? new BlockingCollection<RequestInfo>((int)Math.Log(int.Parse(ca), 2))
+				: new BlockingCollection<RequestInfo>();
 		}
 
 		public void Run()
@@ -147,6 +121,13 @@ Please check settings: " + string.Join(", ", endpoints));
 				var minThreads = !string.IsNullOrEmpty(minth) ? int.Parse(minth) : 128 + Environment.ProcessorCount * 3;
 				var maxThreads = !string.IsNullOrEmpty(maxth) ? int.Parse(maxth) : 128 + Environment.ProcessorCount * 3;
 				ThreadPool.SetMinThreads(minThreads, maxThreads);
+				var loops = Math.Max(1, Environment.ProcessorCount * 3 / 4);
+				for (int i = 0; i < loops; i++)
+				{
+					var thread = new Thread(SocketLoop);
+					thread.Name = "Socket loop: " + (i + 1);
+					thread.Start();
+				}
 				var ctx = Context.Value;
 				while (true)
 				{
@@ -157,8 +138,11 @@ Please check settings: " + string.Join(", ", endpoints));
 						{
 							socket.Blocking = true;
 							socket.ReceiveTimeout = 1;
-							AddRequest(new RequestInfo(socket));
-							Thread.Yield();
+							if (!Requests.TryAdd(new RequestInfo(socket)))
+							{
+								ctx.ReturnError(socket, 503);
+								Thread.Yield();
+							}
 						}
 					}
 					catch (SocketException ex)
@@ -208,7 +192,6 @@ Please check settings: " + string.Join(", ", endpoints));
 
 		private void SocketLoop(object state)
 		{
-			var sync = (ManualResetEvent)state;
 			var ctx = Context.Value;
 			var principal = Thread.CurrentPrincipal;
 			ThreadContext.Request = ctx;
@@ -216,7 +199,7 @@ Please check settings: " + string.Join(", ", endpoints));
 			var resetEvent = new ManualResetEvent(false);
 			while (true)
 			{
-				var request = TakeRequest(sync);
+				var request = Requests.Take();
 				try
 				{
 					var socket = request.Socket;
@@ -232,7 +215,8 @@ Please check settings: " + string.Join(", ", endpoints));
 					}
 					else
 					{
-						AddRequest(request.Skipped());
+						if (!Requests.TryAdd(request.Skipped()))
+							request.Socket.Close();
 						Thread.Yield();
 					}
 				}
@@ -292,11 +276,7 @@ Please check settings: " + string.Join(", ", endpoints));
 							if (keepAlive)
 							{
 								if (ctx.Pipeline) continue;
-								else if (socket.Connected)
-								{
-									AddRequest(request.Processed());
-									return;
-								}
+								else if (socket.Connected && Requests.TryAdd(request.Processed())) return;
 							}
 							socket.Close();
 							return;
@@ -381,7 +361,8 @@ Please check settings: " + string.Join(", ", endpoints));
 					}
 					else if (!ctx.Pipeline)
 					{
-						AddRequest(request.Processed());
+						if (!Requests.TryAdd(request.Processed()))
+							socket.Close();
 						return;
 					}
 				}
