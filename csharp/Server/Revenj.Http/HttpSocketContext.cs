@@ -836,6 +836,8 @@ namespace Revenj.Http
 			totalBytes = other.totalBytes;
 			Buffer.BlockCopy(other.InputTemp, 0, InputTemp, 0, positionInTmp);
 			other.InputStream.CopyTo(InputStream);
+			InputStream.Position = other.InputStream.Position;
+			InputStream.SetLength(other.InputStream.Length);
 			HttpMethod = other.HttpMethod;
 			HttpProtocolVersion = other.HttpProtocolVersion;
 			TemplateMatch = other.TemplateMatch;
