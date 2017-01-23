@@ -11,12 +11,12 @@ lazy val core = (project in file("revenj-core")
       "joda-time" % "joda-time" % "2.9.6",   // TODO: will be removed
       "org.joda" % "joda-convert" % "1.8.1", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix" % "2.1.1",
+      "io.monix" %% "monix" % "2.1.2",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.8.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.8.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.8.4",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.6",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.8.6",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.8.6",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.8.6",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
     )
   )
@@ -82,7 +82,7 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "com.dslplatform" % "dsl-clc" % "1.8.3" % Test,
+      "com.dslplatform" % "dsl-clc" % "1.8.6" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")

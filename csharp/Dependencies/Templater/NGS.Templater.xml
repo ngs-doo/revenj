@@ -108,6 +108,14 @@
             <param name="processor">processor plugin</param>
             <returns>itself</returns>
         </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.Object})">
+            <summary>
+            Register new low level replace plugin.
+            Replace plugins are called when low level Replace methods are invoked.
+            </summary>
+            <param name="replacer">replacer plugin</param>
+            <returns>itself</returns>
+        </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.Build">
             <summary>
             Build document factory instance using default 'templater.lic' license file.
