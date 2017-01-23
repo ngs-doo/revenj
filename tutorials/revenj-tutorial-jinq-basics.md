@@ -66,7 +66,7 @@ JINQ provider was built with extensibility in mind, so in case of a missing feat
 
 ####Support for complex queries
 
-Currenlty only simple queries are supported, meaning, no joins, grouping or other SQL like behavior can be simulated. Since Java version is work in progress, this will be improved in time.
+Currently only simple queries are supported, meaning, no joins, grouping or other SQL like behavior can be simulated. Since Java version is work in progress, this will be improved in time.
 Still, by defining snowflake which spans several tables, joins can be provided as a data source and JINQ can do simple filtering on it.
 
 JINQ also has issues with more complex queries; in a sense of combination of various ORs and ANDs which can produce strange and often incorrect SQL statements. Best workaround in those cases is to split single expression into multiple ones. Instead of writing:

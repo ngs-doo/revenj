@@ -109,7 +109,7 @@ and maven plugins for:
  * Spring boot
 
 Maven plugin for Revenj will be responsible for translating DSL code into Java code and upgrading the database.
-We have also passed in setting configuration for creating Jackson annotations on our persistance model.
+We have also passed in setting configuration for creating Jackson annotations on our persistence model.
 
 By adding new Run/debug configuration for Maven we can start our project from within the IDE through Command line argument `spring-boot:run`
 
@@ -127,7 +127,7 @@ An DSL example we can write is:
       }
     }
 
-which is slighly shorter version of a similar DSL:
+which is slightly shorter version of a similar DSL:
 
     module hello {
       aggregate World(ID) {

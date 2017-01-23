@@ -14,7 +14,7 @@ While it's perfectly fine to entirely bypass Revenj typesafe data layer and acce
 DSL Platform offers SQL concept as a convenient shortcut for dropping down to SQL layer, while maintaining most of the safeties and performance benefits offered through Revenj. SQL concept can be used in two primary ways:
 
  * as read only data source
- * as writable data source
+ * as writeable data source
 
 An example of read only data source is:
 
@@ -40,7 +40,7 @@ While these simplistic read only queries cover some features not supported out o
 ####Pre-existing tables
 
 Although most benefits of DSL Platform can be extracted on [Greenfield projects](https://en.wikipedia.org/wiki/Greenfield_project) where database schema can be managed by DSL Platform, Revenj can also be used on existing database.
-If SQL concept is defined with a table name and primary keys it will be considered writable; which means it can be used as standard aggregate root within Revenj.
+If SQL concept is defined with a table name and primary keys it will be considered writeable; which means it can be used as standard aggregate root within Revenj.
 An example of such definition is:
 
     SQL LegacyTable module.table(key1, key2) {
@@ -51,7 +51,7 @@ An example of such definition is:
       float ratio;
     }
 
-Writable SQL concept is a superset of read-only SQL data source, so besides being used for [bulk reading](revenj-tutorial-bulk-reading.md) or [basic data analysis](revenj-tutorial-olap-basics.md) in can be also used for bulk writing, or just as another ORM.
+Writeable SQL concept is a superset of read-only SQL data source, so besides being used for [bulk reading](revenj-tutorial-bulk-reading.md) or [basic data analysis](revenj-tutorial-olap-basics.md) in can be also used for bulk writing, or just as another ORM.
 
 Bulk writing is invoked every time multiple objects are changed at once, for example:
 
