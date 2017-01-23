@@ -116,7 +116,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 	}
 
 	private boolean checkOpen(String[] parts, int len) {
-		if (len < 1) {
+		if (len < 0) {
 			return defaultPermissions;
 		}
 		String name = String.join(".", Arrays.copyOf(parts, len));
@@ -143,7 +143,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 		boolean isAllowed = checkOpen(parts, parts.length);
 		if (user != null) {
 			List<Pair> permissions;
-			for (int i = parts.length; i > 0; i--) {
+			for (int i = parts.length; i >= 0; i--) {
 				String subName = String.join(".", Arrays.copyOf(parts, i));
 				permissions = rolePermissions.get(subName);
 				if (permissions != null) {

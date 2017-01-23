@@ -58,12 +58,12 @@ After we are done, `pom.xml` should look like:
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-spring</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.revenj</groupId>
             <artifactId>revenj-servlet</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.2</version>
         </dependency>
     </dependencies>
     <build>
@@ -71,7 +71,7 @@ After we are done, `pom.xml` should look like:
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>1.1.2</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -239,6 +239,6 @@ Revenj Servlets are configured in [Application](https://github.com/ngs-doo/reven
 
 `DataContext` service autowired into our controller is main entry point to all repositories available in Revenj models.
 
-Project example also includes simple security integration (both using Spring and Revenj security).
+Project example also includes simple security integration (using Spring security and overriding Revenj security).
 
 This can be viewed through `/home` url.

@@ -84,7 +84,7 @@ namespace Revenj.Security
 
 		private bool CheckOpen(string[] parts, int len)
 		{
-			if (len < 1)
+			if (len < 0)
 				return DefaultPermissions;
 			bool isOpen;
 			if (GlobalPermissions.TryGetValue(string.Join(".", parts.Take(len)), out isOpen))
@@ -105,7 +105,7 @@ namespace Revenj.Security
 			if (user != null)
 			{
 				List<Pair> permissions;
-				for (int i = parts.Length; i > 0; i--)
+				for (int i = parts.Length; i >= 0; i--)
 				{
 					var subName = string.Join(".", parts.Take(i));
 					if (RolePermissions.TryGetValue(subName, out permissions))
