@@ -20,7 +20,7 @@ trait PostgresTuple {
       sw.write('\'')
       insertRecord(sw, "", PostgresTuple.QUOTES)
       sw.write('\'')
-    } else insertRecord(sw, "", null)
+    } else insertRecord(sw, "", None)
   }
 
   def buildTuple(quote: Boolean): String = {

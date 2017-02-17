@@ -170,67 +170,67 @@ object HstoreConverter extends Converter[Map[String, String]] {
       lazy val quoteEscape = PostgresTuple.buildQuoteEscape(escaping + "0")
       lazy val slashEscape = PostgresTuple.buildSlashEscape(escaping.length + 1)
       var len = value.size
-      if (mappings.isDefined) {
-        val mapping = mappings.get
-        def loopOver(s: String): Unit = {
-          var x = 0
-          while (x < esc.length) {
-            mapping(sw, esc.charAt(x))
-            x += 1
+      mappings match {
+        case Some(mapping) =>
+          def loopOver(s: String): Unit = {
+            var x = 0
+            while (x < esc.length) {
+              mapping(sw, esc.charAt(x))
+              x += 1
+            }
+            var i = 0
+            while (i < s.length) {
+              val c = s.charAt(i)
+              if (c == '"') {
+                x = 0
+                while (x < quoteEscape.length) {
+                  mapping(sw, quoteEscape.charAt(x))
+                  x += 1
+                }
+              } else if (c == '\\') {
+                x = 0
+                while (x < slashEscape.length) {
+                  mapping(sw, slashEscape.charAt(x))
+                  x += 1
+                }
+              } else mapping(sw, c)
+              i += 1
+            }
+            x = 0
+            while (x < esc.length) {
+              mapping(sw, esc.charAt(x))
+              x += 1
+            }
           }
-          var i = 0
-          while (i < s.length) {
-            val c = s.charAt(i)
-            if (c == '"') {
-              x = 0
-              while (x < quoteEscape.length) {
-                mapping(sw, quoteEscape.charAt(x))
-                x += 1
-              }
-            } else if (c == '\\') {
-              x = 0
-              while (x < slashEscape.length) {
-                mapping(sw, slashEscape.charAt(x))
-                x += 1
-              }
-            } else mapping(sw, c)
-            i += 1
+          value foreach { case (k, v) =>
+            len -= 1
+            loopOver(k)
+            sw.write("=>")
+            if (v == null) sw.write("NULL")
+            else loopOver(v)
+            if (len > 0) sw.write(", ")
           }
-          x = 0
-          while (x < esc.length) {
-            mapping(sw, esc.charAt(x))
-            x += 1
+        case _ =>
+          def loopOver(s: String): Unit = {
+            sw.write(esc)
+            var x = 0
+            while (x < s.length) {
+              val c = s.charAt(x)
+              if (c == '"') sw.write(quoteEscape)
+              else if (c == '\\') sw.write(slashEscape)
+              else sw.write(c)
+              x += 1
+            }
+            sw.write(esc)
           }
-        }
-        value foreach { case (k, v) =>
-          len -= 1
-          loopOver(k)
-          sw.write("=>")
-          if (v == null) sw.write("NULL")
-          else loopOver(v)
-          if (len > 0) sw.write(", ")
-        }
-      } else {
-        def loopOver(s: String): Unit = {
-          sw.write(esc)
-          var x = 0
-          while (x < s.length) {
-            val c = s.charAt(x)
-            if (c == '"') sw.write(quoteEscape)
-            else if (c == '\\') sw.write(slashEscape)
-            else sw.write(c)
-            x += 1
+          value foreach { case (k, v) =>
+            len -= 1
+            loopOver(k)
+            sw.write("=>")
+            if (v == null) sw.write("NULL")
+            else loopOver(v)
+            if (len > 0) sw.write(", ")
           }
-          sw.write(esc)
-        }
-        value foreach { case (k, v) =>
-          len -= 1
-          loopOver(k)
-          sw.write("=>")
-          if (v == null) sw.write("NULL")
-          else loopOver(v)
-          if (len > 0) sw.write(", ")
-        }
       }
     }
   }
