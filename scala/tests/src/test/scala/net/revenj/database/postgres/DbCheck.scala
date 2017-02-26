@@ -86,8 +86,11 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.vvv = IndexedSeq(abc.v, abc.v)
         abc.ent2 = Array(Ent2())
         val uri = Await.result(repoAbc.insert(abc), Duration.Inf)
+        val find = Await.result(repoAbc.find(uri), Duration.Inf)
         container.close()
         uri === abc.URI
+        find.isDefined === true
+        find.get.en3 === List(En.B)
       }
       "data contex usage" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]

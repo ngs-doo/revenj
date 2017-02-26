@@ -17,6 +17,18 @@ namespace Revenj.DomainPatterns
 			DocumentFolder = path == null ? AppDomain.CurrentDomain.BaseDirectory : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
 		}
 
+		private readonly IDocumentFactory TemplaterFactory;
+
+		public DocumentReport()
+		{
+			TemplaterFactory = Factory;
+		}
+
+		public DocumentReport(IDocumentFactory factory)
+		{
+			TemplaterFactory = factory;
+		}
+
 		public abstract string TemplateFile { get; }
 		public abstract bool ToPdf { get; }
 
@@ -28,7 +40,7 @@ namespace Revenj.DomainPatterns
 			var ext = Path.GetExtension(TemplateFile);
 			var cms = ChunkedMemoryStream.Create();
 			using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
-			using (var document = Factory.Open(fs, cms, ext))
+			using (var document = TemplaterFactory.Open(fs, cms, ext))
 			{
 				if (data != null)
 					foreach (dynamic d in data)
