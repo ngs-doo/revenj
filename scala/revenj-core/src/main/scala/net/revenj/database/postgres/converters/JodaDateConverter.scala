@@ -57,27 +57,16 @@ object JodaDateConverter extends Converter[LocalDate] {
   }
 
   private def parseDateSlow(buf: Array[Char], reader: PostgresReader): LocalDate = {
-    var foundAt = 4
+    var foundAt = 5
     while (foundAt < buf.length && buf(foundAt) != '-') {
       foundAt += 1
     }
-    if (foundAt == buf.length) {
-      throw new RuntimeException("Invalid date value.")
+    if (foundAt == buf.length || foundAt > buf.length - 2 && buf(foundAt + 3) != '-') {
+      throw new RuntimeException("Invalid date value: " + new String(buf, 0, foundAt))
     }
-    val year = NumberConverter.parsePositive(buf, 0, foundAt)
-    val newBuf = reader.tmp
-    var i = foundAt + 1
-    while (i < buf.length) {
-      newBuf(i - foundAt - 1) = buf(i)
-      i += 1
-    }
-    i = buf.length - foundAt - 1
-    while (i < 5) {
-      newBuf(i) = reader.read().toChar
-      i += 1
-    }
+    reader.fillTotal(buf, 10, foundAt - 4)
     reader.read()
-    new LocalDate(year, NumberConverter.read2(newBuf, 0), NumberConverter.read2(newBuf, 3))
+    new LocalDate(NumberConverter.parsePositive(buf, 0, foundAt), NumberConverter.read2(buf, foundAt + 1), NumberConverter.read2(buf, foundAt + 4))
   }
 
   override def parseCollectionItem(reader: PostgresReader, context: Int): LocalDate = {

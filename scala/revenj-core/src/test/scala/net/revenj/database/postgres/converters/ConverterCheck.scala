@@ -109,12 +109,34 @@ class ConverterCheck extends Specification with ScalaCheck {
       values.head === None
     }
 
+    "large date" >> {
+      val reader = new PostgresReader
+      reader.process("{NULL,20215-09-28,1970-01-01}")
+      val values = DateConverter.parseNullableCollection(reader, 0)
+      values.size === 3
+      values.head === None
+      values.drop(1).head.get.getYear === 20215
+      values.drop(1).head.get.getMonthValue === 9
+      values.drop(1).head.get.getDayOfMonth === 28
+    }
+
     "timestamp local zone" >> {
       val reader = new PostgresReader
       reader.process("{NULL,\"2015-09-28 13:35:42.973+02:00\",\"1970-01-01 01:00:00+01:00\",\"0001-01-01 00:00:00Z\",\"2038-02-13 00:45:30.647+01:00\"}")
       val values = LocalTimestampConverter.parseNullableCollection(reader, 0)
       values.size === 5
       values.head === None
+    }
+
+    "large timestamp" >> {
+      val reader = new PostgresReader
+      reader.process("{NULL,\"20315-09-28 13:35:42.973+02:00\",\"1970-01-01 01:00:00+01:00\"}")
+      val values = LocalTimestampConverter.parseNullableCollection(reader, 0)
+      values.size === 3
+      values.head === None
+      values.drop(1).head.get.getYear === 20315
+      values.drop(1).head.get.getMonthValue === 9
+      values.drop(1).head.get.getDayOfMonth === 28
     }
 
     "timestamp with offset" >> {

@@ -159,8 +159,17 @@ object JodaTimestampConverter {
     buf(0) = cur.toChar
     val len = reader.fillUntil(buf, 1, '\\', '"') + 1
     reader.read(context + 1)
-    if (buf(10) != ' ') DateTime.parse(new String(buf, 0, len))
-    else {
+    if (buf(10) != ' ') {
+      var foundAt = 11
+      while (foundAt < buf.length && buf(foundAt) != ' ') {
+        foundAt += 1
+      }
+      if (foundAt == buf.length) {
+        throw new RuntimeException("Invalid timestamp value: " + new String(buf, 0, foundAt))
+      }
+      buf(foundAt) = 'T'
+      DateTime.parse(new String(buf, 0, len))
+    } else {
       val year = NumberConverter.read4(buf, 0)
       val month = NumberConverter.read2(buf, 5)
       val date = NumberConverter.read2(buf, 8)
