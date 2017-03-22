@@ -9,6 +9,7 @@ import javax.sql.DataSource
 
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
+import example.test.Client.Tick
 import monix.execution.Ack
 import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.{Container, SystemState}
@@ -84,13 +85,14 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.v = Val(x = Some(5), f = 2.2f, ff = Set(Some(4.5f), None, Some(6.6f)), aa = Some(Another()), en = En.C, bytes = bytes, bb = List(bytes, bytes))
         abc.vv = Some(abc.v)
         abc.vvv = IndexedSeq(abc.v, abc.v)
-        abc.ent2 = Array(Ent2())
+        abc.ent2 = Array(Ent2(f = 2.2f, ee = Array(Ent4(), Ent4())), Ent2(f = 3.3f))
         val uri = Await.result(repoAbc.insert(abc), Duration.Inf)
         val find = Await.result(repoAbc.find(uri), Duration.Inf)
         container.close()
         uri === abc.URI
         find.isDefined === true
         find.get.en3 === List(En.B)
+        find.get.ent2.length === abc.ent2.length
       }
       "data contex usage" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
@@ -419,6 +421,20 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         con.close()
         container.close()
         hasData === true
+      }
+    }
+    "events" >> {
+      "aggregate event" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ctx = container.resolve[UnitOfWork]
+        val rnd = new Random()
+        val cl = Client(id = rnd.nextLong(), points = 5)
+        Await.result(ctx.create(cl), Duration.Inf)
+        Await.result(ctx.submit(Seq(Tick(cl, 3), Tick(cl, 5))), Duration.Inf)
+        val found = Await.result(ctx.find[Client](cl.URI), Duration.Inf)
+        ctx.commit() must beEqualTo(()).await
+        container.close()
+        found.isDefined === true
       }
     }
   }

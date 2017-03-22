@@ -38,7 +38,7 @@ module test {
 		count en2;
 		sum i;
 	}
-	enum En { A; B; C; }
+	enum En { A; B; C { description 'something important'; } }
 	root Abc { 
 		string s; 
 		int[] ii;
@@ -152,5 +152,23 @@ module test {
 	}
 	root bpk(b) {
 		bool?[] b;
+	}	
+	sql Aliases from '"test"."Abc"' {
+		string ssX from s;
+	}
+	cube<Aliases> A2 {
+		dimension ssX;
+	}
+	aggregate Client(id) {
+		Long id;
+		int points;
+	}
+	aggregate CorporateClient(clientId) {
+		Long clientId;
+		Client(clientId) *baseClient;
+	}
+	event<Client> Tick {
+		int num;
+		async;
 	}
 }

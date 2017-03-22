@@ -19,7 +19,7 @@ DSL Platform will take care of various boilerplate and model evolution while Rev
 and various other simple and complex features captured in the model.
 With Revenj you will stop writing PO*O and instead focus on domain model/business value.
 
-##How it works
+## How it works
 
 Domain is described using various modeling building blocks in a DSL, for example:
 
@@ -62,7 +62,7 @@ SQL migration is created by the compiler analyzing differences between models, s
 
 DSL compiler acts as a developer in your team which does all the boring work you would need to do, while providing high quality and high performance parts of the system.
 
-##Why to use it?
+## Why to use it?
 
 There are mostly two reasons to use it:
 
@@ -86,7 +86,7 @@ Benchmarks:
 
 ![Framework bench](tutorials/pictures/techempower-single-13.png)
 
-##Getting started:
+## Getting started:
 
 Setup a Postgres or Oracle instance.
 
@@ -110,7 +110,7 @@ Go through the tutorials:
  * [Falling back to SQL](tutorials/revenj-tutorial-raw-sql.md)
 
 
-##Revenj features
+## Revenj features
 
 Revenj is basically only a thin access layer to the domain captured in the DSL.
 
@@ -134,7 +134,7 @@ Some of the features/approaches available in the framework or precompiled librar
  * integrate with S3 - store binary data outside of DB when required
  * and many others...
 
-###Usage examples:
+### Usage examples:
 
 DSL model:
 
@@ -177,9 +177,9 @@ DSL model:
 
 results in same objects which can be consumed through IDataContext:
 
-####LINQ/JINQ query:
+#### LINQ/JINQ query:
 
-#####C&#35;
+##### C&#35;
 
     IDataContext context = ...
     string matchingKey = ...
@@ -188,7 +188,7 @@ results in same objects which can be consumed through IDataContext:
     ...
     context.Update(matchingObjects);
 
-#####Java
+##### Java
 
     DataContext context = ...
     String matchingKey = ...
@@ -197,58 +197,58 @@ results in same objects which can be consumed through IDataContext:
     ...
     context.update(matchingObjects);
 
-####Lookup by identity:
+#### Lookup by identity:
 
 ComplexObject is an aggregate root which is one of the objects identified by unique identity: URI.
 URI is a string version of primary key; which mostly differs on composite primary keys.
 
-#####C&#35;
+##### C&#35;
 
     IDataContext context = ...
     string[] uris = ...
     var foundObjects = context.Find<ComplexObject>(uris);
 
-#####Java
+##### Java
 
     DataContext context = ...
     String[] uris = ...
     List<ComplexObject> foundObjects = context.find(ComplexObject.class, uris);
 
-####Listening for change:
+#### Listening for change:
 
 LISTEN/NOTIFY from Postgres and Advanced Queueing in Oracle are utilized to provide on commit information about data change.
 
-#####C&#35;
+##### C&#35;
 
     IDataContext context = ...
     context.Track<CapturedAction>().Select(ca => ...);
 
-#####Java
+##### Java
 
     DataContext context = ...
     context.track(CapturedAction.class).doOnNext(ca -> ...);
 
-####Populating report object:
+#### Populating report object:
 
 Report can be used to capture various data sources at once and provide it as a single object.
 
-#####C&#35;
+##### C&#35;
 
     var report = new Aggregation { inputs = new [] { 1, 2, 3}, maxActions = 100 };
     var result = report.Populate(locator); //provide access to various dependencies
 
-#####Java
+##### Java
 
     Aggregation report = new Aggregation().setInputs(new int[] { 1, 2, 3}).setMaxActions(100);
     Aggregation.Result result = report.populate(locator); //provide access to dependencies
 	
-####No abstractions, using ADO.NET:
+#### No abstractions, using ADO.NET:
 
     IDatabaseQuery query = ...
     string rawSql = ...
     query.Execute(rawSql, params);
 
-####Adding event handler:
+#### Adding event handler:
 
 Event handlers are picked up by their signatures during system initialization in appropriate aspect.
 This means it's enough to write an implementation class and place DLL alongside others.
@@ -261,7 +261,7 @@ This means it's enough to write an implementation class and place DLL alongside 
       }
     }
     
-####Exposing simple custom REST service:
+#### Exposing simple custom REST service:
 
 To add a custom REST service it's enough to implement specialized typesafe signature.
 
@@ -271,22 +271,22 @@ To add a custom REST service it's enough to implement specialized typesafe signa
       public List<ComplexObject> Execute(int[] arguments) { ... }      
     }
 
-####Registering custom access permissions:
+#### Registering custom access permissions:
 
 By default permissions are checked against the singleton IPermissionManager.
 Custom permissions can be registered by hand if they don't really belong to the DSL.
 
-#####C&#35;
+##### C&#35;
 
     IPermissionManager permissions = ...
     permissions.RegisterFilter<CapturedAction>(it => false, "Admin", false); //return empty results for everybody who are not in Admin role
 
-#####Java
+##### Java
 
     PermissionManager permissions = ...
     permissions.registerFilter(CapturedAction.class, it -> false, "Admin", false); //return empty results for everybody who are not in Admin role
 
-##External tools and libraries
+## External tools and libraries
 
 DSL can be written in Visual studio with the help of [DDD for DSL](http://visualstudiogallery.msdn.microsoft.com/5b8a140c-5c84-40fc-a551-b255ba7676f4) plugin.
 There is also syntax highlighting plugin for [IntelliJ IDEA](https://plugins.jetbrains.com/plugin/8227)
