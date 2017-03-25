@@ -121,7 +121,8 @@ Please check settings: " + string.Join(", ", endpoints));
 				var minThreads = !string.IsNullOrEmpty(minth) ? int.Parse(minth) : 128 + Environment.ProcessorCount * 3;
 				var maxThreads = !string.IsNullOrEmpty(maxth) ? int.Parse(maxth) : 128 + Environment.ProcessorCount * 3;
 				ThreadPool.SetMinThreads(minThreads, maxThreads);
-				var loops = Math.Max(1, Environment.ProcessorCount * 3 / 4);
+				var socketLoops = ConfigurationManager.AppSettings["Revenj.SocketLoops"];
+				var loops = !string.IsNullOrEmpty(socketLoops) ? int.Parse(socketLoops) : Environment.ProcessorCount;
 				for (int i = 0; i < loops; i++)
 				{
 					var thread = new Thread(SocketLoop);
