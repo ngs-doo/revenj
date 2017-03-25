@@ -27,6 +27,7 @@
 //                               System.Queue.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading;
@@ -48,12 +49,49 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			/// <summary>
 			/// Connections available to the end user
 			/// </summary>
-			public Queue<NpgsqlConnector> Available = new Queue<NpgsqlConnector>();
+			private readonly Queue<NpgsqlConnector> Available = new Queue<NpgsqlConnector>();
+			public void EnqueueAvailable(NpgsqlConnector connector)
+			{
+				lock (this)
+				{
+					Available.Enqueue(connector);
+				}
+			}
+			public NpgsqlConnector TakeAvailable()
+			{
+				lock (this)
+				{
+					return Available.Dequeue();
+				}
+			}
+			public int AvailableCount { get { return Available.Count; } }
 
 			/// <summary>
 			/// Connections currently in use
 			/// </summary>
-			public Dictionary<NpgsqlConnector, object> Busy = new Dictionary<NpgsqlConnector, object>();
+			private readonly HashSet<NpgsqlConnector> Busy = new HashSet<NpgsqlConnector>();
+			public void AddBusy(NpgsqlConnector connector)
+			{
+				lock (this)
+				{
+					Busy.Add(connector);
+				}
+			}
+			public bool RemoveBusy(NpgsqlConnector connector)
+			{
+				lock (this)
+				{
+					return Busy.Remove(connector);
+				}
+			}
+			public void ClearBusy()
+			{
+				lock (this)
+				{
+					Busy.Clear();
+				}
+			}
+			public int BusyCount { get { return Busy.Count; } }
 
 			public Int32 ConnectionLifeTime;
 			public Int32 InactiveTime = 0;
@@ -62,13 +100,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		/// <value>Unique static instance of the connector pool
 		/// mamager.</value>
-		internal static NpgsqlConnectorPool ConnectorPoolMgr = new NpgsqlConnectorPool();
-
-		private object locker = new object();
+		internal static readonly NpgsqlConnectorPool ConnectorPoolMgr = new NpgsqlConnectorPool();
 
 		public NpgsqlConnectorPool()
 		{
-			PooledConnectors = new Dictionary<string, ConnectorQueue>();
+			PooledConnectors = new ConcurrentDictionary<string, ConnectorQueue>();
 		}
 
 		private void StartTimer()
@@ -86,51 +122,48 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			try
 			{
-				lock (locker)
+				foreach (ConnectorQueue Queue in PooledConnectors.Values)
 				{
-					foreach (ConnectorQueue Queue in PooledConnectors.Values)
+					lock (Queue)
 					{
-						lock (Queue)
+						if (Queue.AvailableCount > 0)
 						{
-							if (Queue.Available.Count > 0)
+							if (Queue.AvailableCount + Queue.BusyCount > Queue.MinPoolSize)
 							{
-								if (Queue.Available.Count + Queue.Busy.Count > Queue.MinPoolSize)
+								if (Queue.InactiveTime >= Queue.ConnectionLifeTime)
 								{
-									if (Queue.InactiveTime >= Queue.ConnectionLifeTime)
+									Int32 diff = Queue.AvailableCount + Queue.BusyCount - Queue.MinPoolSize;
+									Int32 toBeClosed = (diff + 1) / 2;
+									toBeClosed = Math.Min(toBeClosed, Queue.AvailableCount);
+
+									if (diff < 2)
 									{
-										Int32 diff = Queue.Available.Count + Queue.Busy.Count - Queue.MinPoolSize;
-										Int32 toBeClosed = (diff + 1) / 2;
-										toBeClosed = Math.Min(toBeClosed, Queue.Available.Count);
-
-										if (diff < 2)
-										{
-											diff = 2;
-										}
-
-										Queue.InactiveTime -= Queue.ConnectionLifeTime / (int)(Math.Log(diff) / Math.Log(2));
-
-										for (Int32 i = 0; i < toBeClosed; ++i)
-										{
-											Connector = Queue.Available.Dequeue();
-											Connector.Close();
-										}
+										diff = 2;
 									}
-									else
+
+									Queue.InactiveTime -= Queue.ConnectionLifeTime / (int)(Math.Log(diff) / Math.Log(2));
+
+									for (Int32 i = 0; i < toBeClosed; ++i)
 									{
-										Queue.InactiveTime++;
+										Connector = Queue.TakeAvailable();
+										Connector.Close();
 									}
-									if (Queue.Available.Count > 0 || Queue.Busy.Count > 0)
-										activeConnectionsExist = true;
 								}
 								else
 								{
-									Queue.InactiveTime = 0;
+									Queue.InactiveTime++;
 								}
+								if (Queue.AvailableCount > 0 || Queue.BusyCount > 0)
+									activeConnectionsExist = true;
 							}
 							else
 							{
 								Queue.InactiveTime = 0;
 							}
+						}
+						else
+						{
+							Queue.InactiveTime = 0;
 						}
 					}
 				}
@@ -148,7 +181,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// next RequestConnector() call.</value>
 		/// <remarks>This hashmap will be indexed by connection string.
 		/// This key will hold a list of queues of pooled connectors available to be used.</remarks>
-		private readonly Dictionary<string, ConnectorQueue> PooledConnectors;
+		private readonly ConcurrentDictionary<string, ConnectorQueue> PooledConnectors;
 
 		/*/// <value>Map of shared connectors, avaliable to the
 		/// next RequestConnector() call.</value>
@@ -297,28 +330,24 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			ConnectorQueue Queue;
 			NpgsqlConnector Connector = null;
 
-			// We only need to lock all pools when trying to get one pool or create one.
-			lock (locker)
+			// Try to find a queue.
+			if (!PooledConnectors.TryGetValue(Connection.ConnectionString, out Queue))
 			{
-				// Try to find a queue.
-				if (!PooledConnectors.TryGetValue(Connection.ConnectionString, out Queue))
-				{
-					Queue = new ConnectorQueue();
-					Queue.ConnectionLifeTime = Connection.ConnectionLifeTime;
-					Queue.MinPoolSize = Connection.MinPoolSize;
-					PooledConnectors[Connection.ConnectionString] = Queue;
-				}
+				Queue = new ConnectorQueue();
+				Queue.ConnectionLifeTime = Connection.ConnectionLifeTime;
+				Queue.MinPoolSize = Connection.MinPoolSize;
+				PooledConnectors[Connection.ConnectionString] = Queue;
 			}
 
 			// Now we can simply lock on the pool itself.
 			lock (Queue)
 			{
-				if (Queue.Available.Count > 0)
+				if (Queue.AvailableCount > 0)
 				{
 					// Found a queue with connectors.  Grab the top one.
 					// Check if the connector is still valid.
-					Connector = Queue.Available.Dequeue();
-					Queue.Busy.Add(Connector, null);
+					Connector = Queue.TakeAvailable();
+					Queue.AddBusy(Connector);
 				}
 			}
 
@@ -326,10 +355,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				if (!Connector.IsValid())
 				{
-					lock (Queue)
-					{
-						Queue.Busy.Remove(Connector);
-					}
+					Queue.RemoveBusy(Connector);
 
 					Connector.Close();
 					return GetPooledConnector(Connection); //Try again
@@ -340,10 +366,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			lock (Queue)
 			{
-				if (Queue.Available.Count + Queue.Busy.Count < Connection.MaxPoolSize)
+				if (Queue.AvailableCount + Queue.BusyCount < Connection.MaxPoolSize)
 				{
 					Connector = new NpgsqlConnector(Connection);
-					Queue.Busy.Add(Connector, null);
+					Queue.AddBusy(Connector);
 				}
 			}
 
@@ -360,10 +386,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				}
 				catch
 				{
-					lock (Queue)
-					{
-						Queue.Busy.Remove(Connector);
-					}
+					Queue.RemoveBusy(Connector);
 
 					Connector.Close();
 
@@ -375,7 +398,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				{
 					lock (Queue)
 					{
-						while (Queue.Available.Count + Queue.Busy.Count < Connection.MinPoolSize)
+						while (Queue.AvailableCount + Queue.BusyCount < Connection.MinPoolSize)
 						{
 							NpgsqlConnector Spare = new NpgsqlConnector(Connection);
 
@@ -391,7 +414,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							Spare.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;
 							Spare.PrivateKeySelectionCallback -= Connection.PrivateKeySelectionCallbackDelegate;
 
-							Queue.Available.Enqueue(Spare);
+							Queue.EnqueueAvailable(Spare);
 						}
 					}
 				}
@@ -410,14 +433,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			ConnectorQueue Queue;
 
-			// Prevent multithread access to connection pool count.
-			lock (locker)
+			// Try to find a queue.
+			if (PooledConnectors.TryGetValue(Connection.ConnectionString, out Queue) && Queue != null)
 			{
-				// Try to find a queue.
-				if (PooledConnectors.TryGetValue(Connection.ConnectionString, out Queue) && Queue != null)
-				{
-					Queue.Busy.Remove(Connection.Connector);
-				}
+				Queue.RemoveBusy(Connection.Connector);
 			}
 		}
 
@@ -429,12 +448,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			ConnectorQueue queue;
 
-			// Find the queue.
-			// As we are handling all possible queues, we have to lock everything...
-			lock (locker)
-			{
-				PooledConnectors.TryGetValue(Connection.ConnectionString, out queue);
-			}
+			PooledConnectors.TryGetValue(Connection.ConnectionString, out queue);
 
 			if (queue == null)
 			{
@@ -447,13 +461,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			Connector.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;
 			Connector.PrivateKeySelectionCallback -= Connection.PrivateKeySelectionCallbackDelegate;
 
-			bool inQueue = false;
-
-			lock (queue)
-			{
-				inQueue = queue.Busy.ContainsKey(Connector);
-				queue.Busy.Remove(Connector);
-			}
+			bool inQueue = queue.RemoveBusy(Connector);
 
 			if (!Connector.IsInitialized)
 			{
@@ -497,10 +505,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					}
 
 					if (inQueue)
-						lock (queue)
-						{
-							queue.Available.Enqueue(Connector);
-						}
+						queue.EnqueueAvailable(Connector);
 					else
 						Connector.Close();
 				}
@@ -519,9 +524,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				return;
 			}
 
-			while (Queue.Available.Count > 0)
+			while (Queue.AvailableCount > 0)
 			{
-				NpgsqlConnector connector = Queue.Available.Dequeue();
+				NpgsqlConnector connector = Queue.TakeAvailable();
 
 				try
 				{
@@ -534,36 +539,27 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 
 			//Clear the busy list so that the current connections don't get re-added to the queue
-			Queue.Busy.Clear();
+			Queue.ClearBusy();
 		}
 
 
 		internal void ClearPool(NpgsqlConnection Connection)
 		{
-			// Prevent multithread access to connection pool count.
-			lock (locker)
+			ConnectorQueue queue;
+			// Try to find a queue.
+			if (PooledConnectors.TryRemove(Connection.ConnectionString, out queue))
 			{
-				ConnectorQueue queue;
-				// Try to find a queue.
-				if (PooledConnectors.TryGetValue(Connection.ConnectionString, out queue))
-				{
-					ClearQueue(queue);
-
-					PooledConnectors.Remove(Connection.ConnectionString);
-				}
+				ClearQueue(queue);
 			}
 		}
 
 		internal void ClearAllPools()
 		{
-			lock (locker)
+			foreach (ConnectorQueue Queue in PooledConnectors.Values)
 			{
-				foreach (ConnectorQueue Queue in PooledConnectors.Values)
-				{
-					ClearQueue(Queue);
-				}
-				PooledConnectors.Clear();
+				ClearQueue(Queue);
 			}
+			PooledConnectors.Clear();
 		}
 	}
 }
