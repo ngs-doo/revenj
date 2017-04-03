@@ -4,10 +4,10 @@ import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
-import net.revenj.patterns.DomainModel
+import net.revenj.patterns.{AggregateRoot, DomainModel}
 import net.revenj.server._
 import net.revenj.server.commands.reporting.PopulateReport
-import net.revenj.server.commands.{SubmitEvent, Utils}
+import net.revenj.server.commands.{SubmitAggregateEvent, SubmitEvent, Utils}
 import net.revenj.server.commands.search._
 
 import scala.collection.mutable
@@ -185,14 +185,41 @@ class DomainHandler(
       case HttpRequest(POST, uri, _, entity, _) if uri.path.startsWith(submitPath) =>
         Utils.findClass(uri, model, 5) match {
           case Left(info) =>
-            Utils.getInstance(serialization, info.manifest, entity).flatMap { inst =>
-              if (inst.isSuccess) {
-                Utils.executeJson(req, engine, serialization, classOf[SubmitEvent], SubmitEvent.Argument(info.name, inst.get, None))
-              } else {
-                Future.successful(Utils.badResponse(inst.failed.get.getMessage))
+            if (classOf[AggregateRoot].isAssignableFrom(info.manifest)) {
+              Utils.findName(uri, 7) match {
+                case Left(evName) =>
+                  getURI(uri) match {
+                    case Left(id) =>
+                      model.find(info.name + "$" + evName) match {
+                        case Some(evClass) =>
+                          Utils.getInstance(serialization, evClass, entity).flatMap { inst =>
+                            if (inst.isSuccess) {
+                              Utils.executeJson(req, engine, serialization, classOf[SubmitAggregateEvent], SubmitAggregateEvent.Argument(info.name + "+" + evName , inst.get, id, None))
+                            } else {
+                              Future.successful(Utils.badResponse(inst.failed.get.getMessage))
+                            }
+                          }.recover {
+                            case ex: Throwable => Utils.badResponse(ex.getMessage)
+                          }
+                        case _ =>
+                          Future.successful(Utils.badResponse(s"Unable to find aggregate domain event: $evName for aggregate root: ${info.name}"))
+                      }
+                    case Right(response) =>
+                      Future.successful(response)
+                  }
+                case Right(response) =>
+                  Future.successful(response)
               }
-            }.recover {
-              case ex: Throwable => Utils.badResponse(ex.getMessage)
+            } else {
+              Utils.getInstance(serialization, info.manifest, entity).flatMap { inst =>
+                if (inst.isSuccess) {
+                  Utils.executeJson(req, engine, serialization, classOf[SubmitEvent], SubmitEvent.Argument(info.name, inst.get, None))
+                } else {
+                  Future.successful(Utils.badResponse(inst.failed.get.getMessage))
+                }
+              }.recover {
+                case ex: Throwable => Utils.badResponse(ex.getMessage)
+              }
             }
           case Right(response) =>
             Future.successful(response)

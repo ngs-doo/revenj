@@ -19,17 +19,30 @@ private[revenj] object Utils {
 
   case class NameInfo(manifest: Class[_], name: String)
 
-  def findClass(uri: Uri, model: DomainModel, skip: Int): Either[NameInfo, HttpResponse] = {
+  def findName(uri: Uri, skip: Int): Either[String, HttpResponse] = {
     var i = 0
     var path = uri.path
-    while (i < skip) {
-      path = path.tail
-      i += 1
+    try {
+      while (i < skip) {
+        path = path.tail
+        i += 1
+      }
+      Left(path.head.toString)
+    } catch {
+      case _: Throwable =>
+        Right(badResponse(s"Invalid path provided. Unable to extract domain object name from: ${uri.path}"))
     }
-    val name = path.toString()
-    model.find(name) match {
-      case Some(manifest) => Left(NameInfo(manifest, name))
-      case _ => Right(badResponse(s"Unknown domain object: $name"))
+  }
+
+
+  def findClass(uri: Uri, model: DomainModel, skip: Int): Either[NameInfo, HttpResponse] = {
+    findName(uri, skip) match {
+      case Left(name) =>
+        model.find(name) match {
+          case Some(manifest) => Left(NameInfo(manifest, name))
+          case _ => Right(badResponse(s"Unknown domain object: $name"))
+        }
+      case Right(r) => Right(r)
     }
   }
 
