@@ -40,7 +40,10 @@ lazy val storage = (project in file("revenj-storage")
     version := "0.1.0-SNAPSHOT",
     libraryDependencies ++= Seq(
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
-    )
+    ),
+    publishLocal := {},
+    publish := {},
+    publishArtifact := false
   )
 )
 
@@ -82,13 +85,14 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "com.dslplatform" % "dsl-clc" % "1.8.6" % Test,
+      "com.dslplatform" % "dsl-clc" % "1.8.7" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
     ),
     publishLocal := {},
-    publish := {}
+    publish := {},
+    publishArtifact := false
   )
   dependsOn(core, storage)
 )
@@ -99,7 +103,8 @@ lazy val root = (project in file(".")
     name := "revenj",
     version := "0.0.0",
     publishLocal := {},
-    publish := {}
+    publish := {},
+    publishArtifact := false
   )
   aggregate(core, akka, storage, tests)
 )
