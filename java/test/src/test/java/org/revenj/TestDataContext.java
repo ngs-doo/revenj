@@ -23,11 +23,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.patterns.*;
 
+import javax.sql.*;
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.function.Function;
 
 public class TestDataContext extends Setup {
 
@@ -92,19 +97,24 @@ public class TestDataContext extends Setup {
 	@Test
 	public void unitOfWork() throws IOException {
 		ServiceLocator locator = container;
+		String uri;
 		try (UnitOfWork uow = locator.resolve(UnitOfWork.class)) {
 			Next next = new Next();
 			uow.create(next);
-			Optional<Next> find = uow.find(Next.class, next.getURI());
+			uri = next.getURI();
+			Optional<Next> find = uow.find(Next.class, uri);
 			Assert.assertEquals(next, find.get());
 		}
+		DataContext ctx = locator.resolve(DataContext.class);
+		Optional<Next> find = ctx.find(Next.class, uri);
+		Assert.assertFalse(find.isPresent());
 	}
 
 	@Test
 	public void transactionsWithUnitOfWork() throws IOException {
 		ServiceLocator locator = container;
 		try (UnitOfWork uow1 = locator.resolve(UnitOfWork.class);
-			UnitOfWork uow2 = locator.resolve(UnitOfWork.class)) {
+			 UnitOfWork uow2 = locator.resolve(UnitOfWork.class)) {
 			Next next = new Next();
 			uow1.create(next);
 			Optional<Next> find1 = uow1.find(Next.class, next.getURI());
@@ -112,6 +122,24 @@ public class TestDataContext extends Setup {
 			Assert.assertEquals(next, find1.get());
 			Assert.assertFalse(find2.isPresent());
 		}
+	}
+
+	@Test
+	public void dataContextWithConnection() throws Exception {
+		ServiceLocator locator = container;
+		javax.sql.DataSource ds = container.resolve(DataSource.class);
+		Connection conn = ds.getConnection();
+		conn.setAutoCommit(false);
+		Function<Connection, DataContext> ctxFactory = locator.resolve(Function.class, Connection.class, DataContext.class);
+		DataContext ctx = ctxFactory.apply(conn);
+		Next next = new Next();
+		ctx.create(next);
+		String uri = next.getURI();
+		Optional<Next> find1 = ctx.find(Next.class, uri);
+		Assert.assertEquals(next, find1.get());
+		conn.rollback();
+		Optional<Next> find2 = ctx.find(Next.class, uri);
+		Assert.assertFalse(find2.isPresent());
 	}
 
 	@Test
@@ -278,7 +306,7 @@ public class TestDataContext extends Setup {
 		log.setAlert(new Alert2().setPartnerID(2).setProp2("abc"));
 		db.queue(log);
 		long newCount = 0;
-		for(int i = 0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			newCount = db.count(AlertEventLog.class);
 			if (count != newCount) break;
 			Thread.sleep(100);

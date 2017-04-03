@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 final class LocatorDataContext implements UnitOfWork {
-	private final Container locator;
+	private final Container scope;
 	private ConcurrentHashMap<Class<?>, SearchableRepository> searchRepositories;
 	private ConcurrentHashMap<Class<?>, Repository> lookupRepositories;
 	private ConcurrentHashMap<Class<?>, PersistableRepository> persistableRepositories;
@@ -27,8 +27,8 @@ final class LocatorDataContext implements UnitOfWork {
 	private boolean hasChanges;
 	private boolean closed;
 
-	LocatorDataContext(Container locator, Connection connection) {
-		this.locator = locator;
+	LocatorDataContext(Container scope, Connection connection) {
+		this.scope = scope;
 		this.connection = connection;
 	}
 
@@ -36,9 +36,14 @@ final class LocatorDataContext implements UnitOfWork {
 		return new LocatorDataContext(container, null);
 	}
 
+	static DataContext asDataContext(Container container, Connection connection) {
+		Container scope = container.createScope();
+		scope.registerInstance(Connection.class, connection, false);
+		return new LocatorDataContext(scope, connection);
+	}
+
 	static UnitOfWork asUnitOfWork(Container container) {
 		javax.sql.DataSource dataSource = container.resolve(javax.sql.DataSource.class);
-		Container locator = container.createScope();
 		java.sql.Connection connection = null;
 		try {
 			connection = dataSource.getConnection();
@@ -55,8 +60,9 @@ final class LocatorDataContext implements UnitOfWork {
 				throw new RuntimeException(ex);
 			}
 		}
-		locator.registerInstance(Connection.class, connection, false);
-		return new LocatorDataContext(locator, connection);
+		Container scope = container.createScope();
+		scope.registerInstance(Connection.class, connection, false);
+		return new LocatorDataContext(scope, connection);
 	}
 
 	private <T extends DataSource> SearchableRepository<T> getSearchableRepository(Class<T> manifest) {
@@ -69,7 +75,7 @@ final class LocatorDataContext implements UnitOfWork {
 				if (repository != null) return repository;
 			}
 			try {
-				return (SearchableRepository) locator.resolve(Utils.makeGenericType(SearchableRepository.class, manifest));
+				return (SearchableRepository) scope.resolve(Utils.makeGenericType(SearchableRepository.class, manifest));
 			} catch (ReflectiveOperationException ex) {
 				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
 			}
@@ -86,7 +92,7 @@ final class LocatorDataContext implements UnitOfWork {
 				if (repository != null) return repository;
 			}
 			try {
-				return (Repository) locator.resolve(Utils.makeGenericType(Repository.class, manifest));
+				return (Repository) scope.resolve(Utils.makeGenericType(Repository.class, manifest));
 			} catch (ReflectiveOperationException ex) {
 				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
 			}
@@ -99,7 +105,7 @@ final class LocatorDataContext implements UnitOfWork {
 		return historyRepositories.computeIfAbsent(manifest, clazz ->
 		{
 			try {
-				return (Repository) locator.resolve(Utils.makeGenericType(Repository.class, Utils.makeGenericType(History.class, manifest)));
+				return (Repository) scope.resolve(Utils.makeGenericType(Repository.class, Utils.makeGenericType(History.class, manifest)));
 			} catch (ReflectiveOperationException ex) {
 				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
 			}
@@ -112,7 +118,7 @@ final class LocatorDataContext implements UnitOfWork {
 		return persistableRepositories.computeIfAbsent(manifest, clazz ->
 		{
 			try {
-				return (PersistableRepository) locator.resolve(Utils.makeGenericType(PersistableRepository.class, manifest));
+				return (PersistableRepository) scope.resolve(Utils.makeGenericType(PersistableRepository.class, manifest));
 			} catch (ReflectiveOperationException ex) {
 				throw new RuntimeException("Repository is not registered for: " + manifest, ex);
 			}
@@ -125,7 +131,7 @@ final class LocatorDataContext implements UnitOfWork {
 		return eventStores.computeIfAbsent(manifest, clazz ->
 		{
 			try {
-				return (DomainEventStore) locator.resolve(Utils.makeGenericType(SearchableRepository.class, manifest));
+				return (DomainEventStore) scope.resolve(Utils.makeGenericType(SearchableRepository.class, manifest));
 			} catch (ReflectiveOperationException ex) {
 				throw new RuntimeException("Domain event store is not registered for: " + manifest, ex);
 			}
@@ -205,7 +211,7 @@ final class LocatorDataContext implements UnitOfWork {
 	@Override
 	public <T extends DomainEvent> void queue(Collection<T> events) {
 		if (globalEventStore == null) {
-			globalEventStore = locator.resolve(GlobalEventStore.class);
+			globalEventStore = scope.resolve(GlobalEventStore.class);
 		}
 		for (T e : events) {
 			globalEventStore.queue(e);
@@ -214,7 +220,7 @@ final class LocatorDataContext implements UnitOfWork {
 
 	@Override
 	public <T> T populate(Report<T> report) {
-		return report.populate(locator);
+		return report.populate(scope);
 	}
 
 	@Override
@@ -224,7 +230,7 @@ final class LocatorDataContext implements UnitOfWork {
 
 	@Override
 	public <T extends Identifiable> Observable<DataChangeNotification.TrackInfo<T>> track(Class<T> manifest) {
-		if (changes == null) changes = locator.resolve(DataChangeNotification.class);
+		if (changes == null) changes = scope.resolve(DataChangeNotification.class);
 		return changes.track(manifest);
 	}
 
@@ -265,11 +271,11 @@ final class LocatorDataContext implements UnitOfWork {
 			} catch (SQLException e) {
 				throw new IOException(e);
 			}
-		}
-		try {
-			locator.close();
-		} catch (Exception e) {
-			throw new IOException(e);
+			try {
+				scope.close();
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
 		}
 		closed = true;
 	}

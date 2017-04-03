@@ -22,10 +22,12 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 public abstract class Revenj {
 	public static Container setup() throws IOException {
@@ -191,6 +193,10 @@ public abstract class Revenj {
 		container.registerInstance(DomainModel.class, domainModel, false);
 		container.registerFactory(DataContext.class, LocatorDataContext::asDataContext, false);
 		container.registerFactory(UnitOfWork.class, LocatorDataContext::asUnitOfWork, false);
+		container.registerFactory(
+				new Generic<Function<Connection, DataContext>>(){}.type,
+				c -> (Function<Connection, DataContext>) connection -> LocatorDataContext.asDataContext(c, connection),
+				false);
 		PluginLoader plugins = new ServicesPluginLoader(loader);
 		container.registerInstance(PluginLoader.class, plugins, false);
 		PostgresDatabaseNotification databaseNotification =

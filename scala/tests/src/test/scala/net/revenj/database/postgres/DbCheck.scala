@@ -437,6 +437,40 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         found.isDefined === true
       }
     }
+    "rollbacks" >> {
+      "uow rollback" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val uow = container.resolve[UnitOfWork]
+        val testMe = TestMe()
+        Await.result(uow.submit(testMe), Duration.Inf)
+        val uri = testMe.URI
+        val found1 = Await.result(uow.find[TestMe](uri), Duration.Inf)
+        found1.isDefined === true
+        found1.get.URI === uri
+        uow.rollback() must beEqualTo(()).await
+        val ctx = container.resolve[DataContext]
+        val found2 = Await.result(ctx.find[TestMe](uri), Duration.Inf)
+        container.close()
+        found2.isDefined === false
+      }
+      "ctx rollback" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ds = container.resolve[DataSource]
+        val con = ds.getConnection; con.setAutoCommit(false)
+        val ctxFactory = container.resolve[Connection => DataContext]
+        val ctx = ctxFactory(con)
+        val testMe = TestMe()
+        Await.result(ctx.submit(testMe), Duration.Inf)
+        val uri = testMe.URI
+        val found1 = Await.result(ctx.find[TestMe](uri), Duration.Inf)
+        found1.isDefined === true
+        found1.get.URI === uri
+        con.rollback()
+        val found2 = Await.result(ctx.find[TestMe](uri), Duration.Inf)
+        container.close()
+        found2.isDefined === false
+      }
+    }
   }
 }
 

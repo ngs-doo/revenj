@@ -12,7 +12,12 @@ import scala.concurrent.{Await, Future}
 import scala.reflect.runtime.universe._
 
 
-private[revenj] class LocatorDataContext(locator: Container, manageConnection: Boolean, connection: Option[Connection], mirror: Mirror) extends UnitOfWork {
+private[revenj] class LocatorDataContext(
+  scope: Container,
+  manageConnection: Boolean,
+  connection: Option[Connection],
+  mirror: Mirror) extends UnitOfWork {
+
   private implicit val ctx = scala.concurrent.ExecutionContext.Implicits.global
 
   private lazy val searchRepositories = new TrieMap[Class[_], SearchableRepository[_ <: DataSource]]()
@@ -28,7 +33,7 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     searchRepositories.getOrElseUpdate(manifest, {
       persistableRepositories.get(manifest) match {
         case Some(repo) => repo.asInstanceOf[SearchableRepository[T]]
-        case _ => locator.resolve[SearchableRepository[T]]
+        case _ => scope.resolve[SearchableRepository[T]]
       }
     }).asInstanceOf[SearchableRepository[T]]
   }
@@ -38,7 +43,7 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
     lookupRepositories.getOrElseUpdate(manifest, {
       persistableRepositories.get(manifest) match {
         case Some(repo) => repo.asInstanceOf[Repository[T]]
-        case _ => locator.resolve[Repository[T]]
+        case _ => scope.resolve[Repository[T]]
       }
     }).asInstanceOf[Repository[T]]
   }
@@ -46,14 +51,14 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
   private def getPersistableRepository[T <: AggregateRoot : TypeTag](manifest: Class[_]): PersistableRepository[T] = {
     if (closed) throw new RuntimeException("Unit of work has been closed")
     persistableRepositories.getOrElseUpdate(manifest, {
-      locator.resolve[PersistableRepository[T]]
+      scope.resolve[PersistableRepository[T]]
     }).asInstanceOf[PersistableRepository[T]]
   }
 
   private def getEventStore[T <: DomainEvent : TypeTag](manifest: Class[_]): DomainEventStore[T] = {
     if (closed) throw new RuntimeException("Unit of work has been closed")
     eventStores.getOrElseUpdate(manifest, {
-      locator.resolve[DomainEventStore[T]]
+      scope.resolve[DomainEventStore[T]]
     }).asInstanceOf[DomainEventStore[T]]
   }
 
@@ -135,7 +140,7 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
   }
 
   override def populate[T: TypeTag](report: Report[T]): Future[T] = {
-    report.populate(locator)
+    report.populate(scope)
   }
 
   override def commit(): Future[Unit] = {
@@ -168,10 +173,12 @@ private[revenj] class LocatorDataContext(locator: Container, manageConnection: B
         val rollbackAndClose = waitForChanges.map(_ => {
           conn.setAutoCommit(true)
           conn.close()
-          locator.close()
         })
         Await.result(rollbackAndClose, Duration.Inf)
       })
+    if (connection.isDefined) {
+      scope.close()
+    }
     closed = true
   }
 }
@@ -185,12 +192,13 @@ private[revenj] object LocatorDataContext {
   }
 
   def asDataContext(connection: Connection, container: Container, loader: ClassLoader): DataContext = {
-    new LocatorDataContext(container, false, Some(connection), runtimeMirror(loader))
+    val scope = container.createScope()
+    scope.registerInstance(connection, handleClose = false)
+    new LocatorDataContext(scope, false, Some(connection), runtimeMirror(loader))
   }
 
   def asUnitOfWork(container: Container, loader: ClassLoader): UnitOfWork = {
     val dataSource = container.resolve[javax.sql.DataSource]
-    val locator = container.createScope()
     var connection: Connection = null
     try {
       connection = dataSource.getConnection
@@ -205,7 +213,8 @@ private[revenj] object LocatorDataContext {
         connection = dataSource.getConnection
         connection.setAutoCommit(false)
     }
-    locator.registerInstance(connection, handleClose = false)
-    new LocatorDataContext(locator, true, Some(connection), runtimeMirror(loader))
+    val scope = container.createScope()
+    scope.registerInstance(connection, handleClose = false)
+    new LocatorDataContext(scope, true, Some(connection), runtimeMirror(loader))
   }
 }
