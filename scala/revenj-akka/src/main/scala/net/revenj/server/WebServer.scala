@@ -67,7 +67,7 @@ class WebServer(address: String, port: Int) {
     revenj.registerAs[ProcessingEngine, ProcessingEngine](singleton = true)
 
     val plugins = revenj.resolve[PluginLoader]
-    val bindings = plugins.resolve(revenj, classOf[RequestBinding])
+    val bindings = plugins.resolve[RequestBinding](revenj)
     val flow = Flow[HttpRequest]
     val cputCount = Runtime.getRuntime.availableProcessors
     val asyncBuilder = new mutable.HashMap[Path#Head, HttpRequest => Future[HttpResponse]]()

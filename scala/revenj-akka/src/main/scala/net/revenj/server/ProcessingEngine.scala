@@ -23,7 +23,7 @@ class ProcessingEngine private(
     this(container,
       dataSource,
       serialization,
-      extensibility.map(_.resolve(container, classOf[ServerCommand])).getOrElse(Array.empty[ServerCommand]))
+      extensibility.map(_.resolve[ServerCommand](container)).getOrElse(Array.empty[ServerCommand]))
   }
 
   def findCommand(name: String): Option[Class[_ <: ServerCommand]] = {

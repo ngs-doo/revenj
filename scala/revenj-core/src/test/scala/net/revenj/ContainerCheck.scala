@@ -1,10 +1,10 @@
 package net.revenj
 
-import net.revenj.patterns.DomainEventHandler
+import java.time.OffsetDateTime
+
+import net.revenj.patterns.{AggregateDomainEvent, AggregateDomainEventHandler, AggregateRoot, DomainEventHandler}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
-
-import scala.reflect.runtime.universe._
 
 class ContainerCheck extends Specification with ScalaCheck {
   sequential
@@ -156,6 +156,13 @@ class ContainerCheck extends Specification with ScalaCheck {
       val found = container.resolve[Seq[DomainEventHandler[Single]]]
       found.length === 2
     }
+    "complex sequence resolution" >> {
+      val container = new SimpleContainer(false, cl)
+      container.registerAs[AggregateDomainEventHandler[Agg, AggEvent], AggEventHandler1]()
+      container.registerAs[AggregateDomainEventHandler[Agg, AggEvent], AggEventHandler2.type]()
+      val found = container.resolve[Seq[AggregateDomainEventHandler[Agg, AggEvent]]]
+      found.length === 2
+    }
   }
 }
 
@@ -199,4 +206,21 @@ class Handler2 extends DomainEventHandler[Single] {
 }
 class Handler3 extends DomainEventHandler[Function0[Single]] {
   override def handle(domainEvent: Function0[Single]): Unit = ()
+}
+
+class Agg extends AggregateRoot {
+  def URI = ???
+}
+class AggEvent extends AggregateDomainEvent[Agg] {
+  def URI = ???
+  def queuedAt: OffsetDateTime = ???
+  def processedAt: Option[OffsetDateTime] = None
+
+  def apply(aggregate: Agg): Unit = ???
+}
+class AggEventHandler1 extends AggregateDomainEventHandler[Agg, AggEvent] {
+  def handle(domainEvent: AggEvent, aggregate: Agg): Unit = ???
+}
+object AggEventHandler2 extends AggregateDomainEventHandler[Agg, AggEvent] {
+  def handle(domainEvent: AggEvent, aggregate: Agg): Unit = ???
 }
