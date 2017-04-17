@@ -11,7 +11,7 @@ lazy val core = (project in file("revenj-core")
       "joda-time" % "joda-time" % "2.9.6",   // TODO: will be removed
       "org.joda" % "joda-convert" % "1.8.1", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix" % "2.1.2",
+      "io.monix" %% "monix-reactive" % "2.2.4",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.6",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.8.6",
@@ -52,40 +52,14 @@ lazy val tests = (project in file("tests")
   settings (
     dslNamespace := "example",
     dslDslPath := (resourceDirectory in Test).value,
-    dslSources := Map(
-      Targets.Option.REVENJ_SCALA -> (sourceManaged in Test).value / "revenj"
-    ),
-    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME),
-    resourceGenerators in Test += Def.task {
-      com.dslplatform.sbt.Actions.generateResources(
-        streams.value.log,
-        Targets.Option.REVENJ_SCALA,
-        (resourceManaged in Test).value / "META-INF" / "services",
-        Seq(target.value),
-        (dependencyClasspath in Test).value
-      )
-    }.taskValue,
-    sourceGenerators in Test += Def.task {
-      com.dslplatform.sbt.Actions.generateSource(
-        streams.value.log,
-        Targets.Option.REVENJ_SCALA,
-        (sourceManaged in Test).value / "revenj",
-        dslDslPath.value,
-        dslPlugins.value,
-        dslCompiler.value,
-        dslServerMode.value,
-        dslServerPort.value,
-        dslNamespace.value,
-        dslSettings.value,
-        dslLatest.value)
-    }.taskValue
+    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME)
   )
   settings (commonSettings)
   settings(
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "com.dslplatform" % "dsl-clc" % "1.8.7" % Test,
+      "com.dslplatform" % "dsl-clc" % "1.9.0" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")

@@ -71,7 +71,7 @@ After we are done, `pom.xml` should look like:
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>1.1.2</version>
+                <version>1.2.0</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>

@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>com.dslplatform</groupId>
 			<artifactId>dsl-clc</artifactId>
-			<version>1.8.7</version>
+			<version>1.9.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -76,7 +76,7 @@
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>1.1.2</version>
+                <version>1.2.0</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>
