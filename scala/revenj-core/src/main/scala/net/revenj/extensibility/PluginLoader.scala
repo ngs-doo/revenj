@@ -18,7 +18,7 @@ trait PluginLoader {
         val scope = container.createScope()
         try {
           find[T] foreach { sc =>
-            scope.registerType(tpe, sc, singleton = true)
+            scope.registerType(tpe, sc, InstanceScope.Context)
           }
           scope.resolve[Array[T]]
         } finally {

@@ -178,8 +178,8 @@ private[revenj] class LocatorDataContext(
       })
     if (connection.isDefined) {
       scope.close()
+      closed = true
     }
-    closed = true
   }
 }
 

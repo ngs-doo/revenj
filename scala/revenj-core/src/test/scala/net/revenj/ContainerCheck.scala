@@ -2,6 +2,7 @@ package net.revenj
 
 import java.time.OffsetDateTime
 
+import net.revenj.extensibility.InstanceScope
 import net.revenj.patterns.{AggregateDomainEvent, AggregateDomainEventHandler, AggregateRoot, DomainEventHandler}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -97,7 +98,7 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "pass exception" >> {
       val container = new SimpleContainer(false, cl)
-      container.registerFactory[ContainerCheck](c => throw new RuntimeException("test me now"))
+      container.registerFunc[ContainerCheck](_ => throw new RuntimeException("test me now"))
       val cc = container.tryResolve[ContainerCheck]
       cc.isFailure === true
       cc.failed.get.getMessage.contains("test me now") === true
@@ -118,14 +119,14 @@ class ContainerCheck extends Specification with ScalaCheck {
     }
     "self reference singleton" >> {
       val container = new SimpleContainer(false, cl)
-      container.register[SelfReference](singleton = true)
+      container.register[SelfReference](InstanceScope.Singleton)
       val sr = container.resolve[SelfReference]
       val sr2 = sr.getSelf()
       sr === sr2
     }
     "singleton in context" >> {
       val container = new SimpleContainer(false, cl)
-      container.register[Single](singleton = true)
+      container.register[Single](InstanceScope.Singleton)
       val nested = container.createScope()
       val s1 = nested.resolve[Single]
       val s2 = container.resolve[Single]
@@ -162,6 +163,39 @@ class ContainerCheck extends Specification with ScalaCheck {
       container.registerAs[AggregateDomainEventHandler[Agg, AggEvent], AggEventHandler2.type]()
       val found = container.resolve[Seq[AggregateDomainEventHandler[Agg, AggEvent]]]
       found.length === 2
+    }
+    "factory with singleton" >> {
+      val container = new SimpleContainer(false, cl)
+      container.registerFunc[Single](_ => new Single, InstanceScope.Singleton)
+      val s1 = container.resolve[Single]
+      val s2 = container.resolve[Single]
+      s1 === s2
+    }
+    "factory with singleton in scopes" >> {
+      val container = new SimpleContainer(false, cl)
+      container.registerFunc[Single](_ => new Single, InstanceScope.Singleton)
+      val c1 = container.createScope()
+      val s1 = c1.resolve[Single]
+      val s2 = c1.resolve[Single]
+      s1 === s2
+      val c2 = container.createScope()
+      val s3 = c2.resolve[Single]
+      val s4 = c2.resolve[Single]
+      s3 === s4
+      s1 === s3
+    }
+    "factory with context in scopes" >> {
+      val container = new SimpleContainer(false, cl)
+      container.registerFunc[Single](c => new Single, lifetime = InstanceScope.Context)
+      val c1 = container.createScope()
+      val s1 = c1.resolve[Single]
+      val s2 = c1.resolve[Single]
+      s1 === s2
+      val c2 = container.createScope()
+      val s3 = c2.resolve[Single]
+      val s4 = c2.resolve[Single]
+      s3 === s4
+      s1 !== s3
     }
   }
 }

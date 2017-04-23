@@ -10,7 +10,7 @@ import akka.http.scaladsl.model.Uri.Path
 import akka.stream.scaladsl.Flow
 import com.typesafe.config.ConfigFactory
 import net.revenj.Revenj
-import net.revenj.extensibility.PluginLoader
+import net.revenj.extensibility.{InstanceScope, PluginLoader}
 import net.revenj.server.handlers.RequestBinding
 
 import scala.collection.mutable
@@ -63,8 +63,8 @@ class WebServer(address: String, port: Int) {
     revenj.registerInstance(system)
     revenj.registerInstance(materializer)
     revenj.registerInstance[Materializer](materializer)
-    revenj.registerAs[WireSerialization, RevenjSerialization](singleton = true)
-    revenj.registerAs[ProcessingEngine, ProcessingEngine](singleton = true)
+    revenj.registerAs[WireSerialization, RevenjSerialization](InstanceScope.Singleton)
+    revenj.registerAs[ProcessingEngine, ProcessingEngine](InstanceScope.Singleton)
 
     val plugins = revenj.resolve[PluginLoader]
     val bindings = plugins.resolve[RequestBinding](revenj)

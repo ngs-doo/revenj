@@ -8,7 +8,7 @@ import java.util.{Properties, ServiceLoader}
 import javax.sql.DataSource
 
 import net.revenj.database.postgres.converters.JsonConverter
-import net.revenj.extensibility.{Container, PluginLoader, SystemAspect, SystemState}
+import net.revenj.extensibility._
 import net.revenj.patterns._
 import net.revenj.serialization.{JacksonSerialization, Serialization}
 import org.postgresql.ds.PGPoolingDataSource
@@ -159,7 +159,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.registerInstance[ServiceLocator](container, handleClose = false)
     container.registerInstance(dataSource, handleClose = false)
     container.registerInstance(loader, handleClose = false)
-    container.register[JsonConverter](singleton = true)
+    container.register[JsonConverter](InstanceScope.Singleton)
     val plugins = new ServicesPluginLoader(loader)
     container.registerInstance[PluginLoader](plugins)
     val domainModel = new SimpleDomainModel(loader)
@@ -168,11 +168,11 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.registerInstance[EagerNotification](databaseNotification, handleClose = false)
     container.registerInstance[DataChangeNotification](databaseNotification, handleClose = true)
     ChangeNotification.registerContainer(container, databaseNotification)
-    container.registerAs[JacksonSerialization, JacksonSerialization](singleton = true)
-    container.registerAs[Serialization[String], JacksonSerialization](singleton = true)
-    container.registerFactory[DataContext](c => LocatorDataContext.asDataContext(c, loader), singleton = false)
-    container.registerFactory[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), singleton = false)
-    container.registerFactory[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), singleton = false)
+    container.registerAs[JacksonSerialization, JacksonSerialization](InstanceScope.Singleton)
+    container.registerAs[Serialization[String], JacksonSerialization](InstanceScope.Singleton)
+    container.registerFunc[DataContext](c => LocatorDataContext.asDataContext(c, loader), InstanceScope.Context)
+    container.registerFunc[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), InstanceScope.Context)
+    container.registerFunc[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), InstanceScope.Context)
     aspects foreach { a => a.configure(container) }
     domainModel.setNamespace(properties.getProperty("revenj.namespace"))
     properties.setProperty("revenj.aspectsCount", Integer.toString(aspects.size))
@@ -191,8 +191,8 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     }
     def processHandlers[X: TypeTag](gt: ParameterizedType, eventHandlers: Seq[Class[DomainEventHandler[X]]]): Unit = {
       for (h <- eventHandlers) {
-        container.registerType(h, h, singleton = false)
-        container.registerType(gt, h, singleton = false)
+        container.registerType(h, h, InstanceScope.Context)
+        container.registerType(gt, h, InstanceScope.Context)
       }
     }
     val arrInst = java.lang.reflect.Array.newInstance(javaClass, 0)

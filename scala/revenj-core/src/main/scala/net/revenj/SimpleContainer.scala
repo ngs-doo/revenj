@@ -5,6 +5,9 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 import net.revenj.SimpleContainer.Registration
 import net.revenj.extensibility.Container
+import net.revenj.extensibility.InstanceScope
+import net.revenj.extensibility.InstanceScope._
+import net.revenj.patterns.ServiceLocator
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
@@ -19,12 +22,14 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     this(None, resolveUnknown, runtimeMirror(loader))
     registerGenerics[Option[_]]((locator, args) => locator.resolve(args(0)).toOption)
     registerGenerics[scala.Function0[_]]((locator, args) => () => locator.resolve(args(0)).getOrElse(throw new ReflectiveOperationException("Unable to resolve factory for: " + args(0))))
-    registerFactory[Container](c => c.createScope(), singleton = false)
   }
 
   private val classCache = new TrieMap[Class[_], Array[CtorInfo]]
   private val typeCache = new TrieMap[JavaType, TypeInfo]
   private val typeNameMappings = new TrieMap[String, JavaType]
+  private val container = new mutable.HashMap[JavaType, CopyOnWriteArrayList[Registration[AnyRef]]]
+  private val closeables = new CopyOnWriteArrayList[AutoCloseable]
+  private var closed = false
 
   private class TypeInfo(val paramType: ParameterizedType) {
     val rawType = paramType.getRawType
@@ -59,8 +64,8 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     val genTypes = ctor.getGenericParameterTypes
   }
 
-  private val container = new mutable.HashMap[JavaType, CopyOnWriteArrayList[Registration[AnyRef]]]
-  private val closeables = new CopyOnWriteArrayList[AutoCloseable]
+  registerInstance[Container](this, handleClose = false)
+  registerInstance[ServiceLocator](this, handleClose = false)
 
   private def tryResolveClass(manifest: Class[_], caller: SimpleContainer): Try[AnyRef] = {
     val constructors = classCache.getOrElseUpdate(manifest, {
@@ -164,7 +169,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   val nestedMappings = new mutable.HashMap[JavaType, JavaType]
                   nestedMappings ++= typeInfo.mappings
                   val iter = nestedInfo.mappings.iterator
-                  while(iter.hasNext) {
+                  while (iter.hasNext) {
                     val (key, value) = iter.next()
                     nestedMappings += key -> nestedMappings.getOrElse(value, value)
                   }
@@ -223,9 +228,18 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     }
   }
 
-  def resolve(tpe: JavaType): Try[AnyRef] = tryResolve(tpe, this)
+  override def resolve(tpe: JavaType): Try[AnyRef] = {
+    if (!closed) tryResolve(tpe, this)
+    else {
+      if (parent.isDefined) {
+        parent.get.resolve(tpe)
+      } else {
+        Failure(new ReflectiveOperationException("Container has been closed"))
+      }
+    }
+  }
 
-  def tryResolve[T: TypeTag]: Try[T] = {
+  override def tryResolve[T: TypeTag]: Try[T] = {
     Utils.findType(typeOf[T], mirror) match {
       case Some(tpe) => resolve(tpe).map(_.asInstanceOf[T])
       case _ => Failure(new ReflectiveOperationException("Invalid type tag argument"))
@@ -283,6 +297,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
                 Failure(new ReflectiveOperationException(s"$paramType is not an instance of Class<?> and cannot be resolved since it's not registered in the container."))
             }
           }
+
           def resolveArray(argumentType: JavaType) = {
             argumentType match {
               case pt: Class[_] =>
@@ -298,10 +313,11 @@ If you wish to resolve types not registered in the container, specify revenj.res
                 resolveClass()
             }
           }
+
           paramType match {
             case gat: GenericArrayType =>
               resolveArray(gat.getGenericComponentType)
-            case pt: ParameterizedType if pt.getRawType == seqSignature =>
+            case pt: ParameterizedType if pt.getRawType == SimpleContainer.seqSignature =>
               resolveArray(pt.getActualTypeArguments.head).map(_.asInstanceOf[Array[_]].toSeq)
             case pt: ParameterizedType =>
               tryResolveType(pt, caller)
@@ -311,8 +327,6 @@ If you wish to resolve types not registered in the container, specify revenj.res
         }
     }
   }
-
-  private val seqSignature = classOf[scala.collection.Seq[_]]
 
   private def tryResolveCollection(container: Class[_], element: JavaType, caller: SimpleContainer): Try[AnyRef] = {
     val registrations = new CopyOnWriteArrayList[Registration[AnyRef]]
@@ -351,18 +365,20 @@ If you wish to resolve types not registered in the container, specify revenj.res
       Success(registration.instance.get)
     } else if (registration.singleFactory.isDefined) {
       Try {
-        if (registration.singleton) {
-          this synchronized {
+        if (registration.lifetime != Transient) {
+          val self = if (registration.lifetime == Singleton) this else caller
+          self synchronized {
             if (registration.promoted) {
               registration.instance
             } else {
-              val instance = registration.singleFactory.get(this)
+              val instance = registration.singleFactory.get(self)
               instance match {
                 case closeable: AutoCloseable =>
-                  closeables.add(closeable)
+                  self.closeables.add(closeable)
                 case _ =>
               }
-              registration.promoteToSingleton(instance)
+              if (registration.lifetime == Singleton) registration.promoteToSingleton(instance)
+              else registration.promoteToSingletonOn(instance, caller)
               instance
             }
           }
@@ -371,8 +387,9 @@ If you wish to resolve types not registered in the container, specify revenj.res
         }
       }
     } else {
-      if (registration.singleton) {
-        this synchronized {
+      if (registration.lifetime != Transient) {
+        val self = if (registration.lifetime == Singleton) this else caller
+        self synchronized {
           if (registration.promoted) {
             Success(registration.instance)
           } else if (registration.manifest.isDefined) {
@@ -380,10 +397,11 @@ If you wish to resolve types not registered in the container, specify revenj.res
             if (tryInstance.isSuccess) {
               tryInstance.get match {
                 case closeable: AutoCloseable =>
-                  closeables.add(closeable)
+                  self.closeables.add(closeable)
                 case _ =>
               }
-              registration.promoteToSingleton(tryInstance.get)
+              if (registration.lifetime == Singleton) registration.promoteToSingleton(tryInstance.get)
+              else registration.promoteToSingletonOn(tryInstance.get, caller)
             }
             tryInstance
           } else {
@@ -398,33 +416,33 @@ If you wish to resolve types not registered in the container, specify revenj.res
     }
   }
 
-  private def addToRegistry[T](paramType: JavaType, registration: Registration[T]): this.type = {
-    val registrations = container.getOrElseUpdate(paramType, {
+  private def addToRegistry[T](registration: Registration[T]): this.type = {
+    val registrations = container.getOrElseUpdate(registration.signature, {
       new CopyOnWriteArrayList[Registration[AnyRef]]()
     })
-    typeNameMappings.put(paramType.toString, paramType)
+    typeNameMappings.put(registration.name, registration.signature)
     registrations.add(registration.asInstanceOf[Registration[AnyRef]])
     this
   }
 
-  override def registerType[T](manifest: JavaType, implementation: Class[T], singleton: Boolean = false): this.type = {
+  override def registerType[T](manifest: JavaType, implementation: Class[T], lifetime: InstanceScope = Transient): this.type = {
     val clSym = mirror.classSymbol(implementation)
-    if(clSym.isModuleClass) {
+    if (clSym.isModuleClass) {
       val instance = mirror.reflectModule(clSym.module.asModule).instance.asInstanceOf[T]
-      addToRegistry(manifest, new Registration[T](this, instance))
+      addToRegistry(new Registration[T](manifest, this, instance, true))
     } else {
-      addToRegistry(manifest, new Registration[T](this, implementation, singleton))
+      addToRegistry(new Registration[T](manifest, this, implementation, lifetime))
     }
   }
 
-  override def registerAs[T, S <: T](singleton: Boolean = false)(implicit manifest: TypeTag[T], implementation: ClassTag[S]): this.type = {
+  override def registerAs[T, S <: T](lifetime: InstanceScope = Transient)(implicit manifest: TypeTag[T], implementation: ClassTag[S]): this.type = {
     val signature = Utils.findType(manifest.tpe, mirror).getOrElse(throw new IllegalArgumentException(s"Unable to find Java type for $manifest"))
     val clSym = mirror.classSymbol(implementation.runtimeClass)
-    if(clSym.isModuleClass) {
+    if (clSym.isModuleClass) {
       val instance = mirror.reflectModule(clSym.module.asModule).instance.asInstanceOf[T]
-      addToRegistry(signature, new Registration[T](this, instance))
+      addToRegistry(new Registration[T](signature, this, instance, true))
     } else {
-      addToRegistry(signature, new Registration(this, implementation.runtimeClass, singleton))
+      addToRegistry(new Registration(signature, this, implementation.runtimeClass, lifetime))
     }
   }
 
@@ -433,16 +451,16 @@ If you wish to resolve types not registered in the container, specify revenj.res
       closeables.add(service.asInstanceOf[AutoCloseable])
     }
     val paramType = Utils.findType(typeOf[T], mirror).getOrElse(throw new IllegalArgumentException(s"Unable to register ${typeOf[T]} to container"))
-    addToRegistry(paramType, new Registration[T](this, service))
+    addToRegistry(new Registration[T](paramType, this, service, false))
   }
 
-  override def registerFactory[T: TypeTag](factory: Container => T, singleton: Boolean = false): this.type = {
+  override def registerFunc[T: TypeTag](factory: Container => T, lifetime: InstanceScope = Transient): this.type = {
     val paramType = Utils.findType(typeOf[T], mirror).getOrElse(throw new IllegalArgumentException(s"Unable to register ${typeOf[T]} to container"))
-    addToRegistry(paramType, new Registration[T](this, factory, singleton))
+    addToRegistry(new Registration[T](paramType, this, factory, lifetime))
   }
 
-  override def registerGenerics[T: TypeTag](factory: (Container, Array[JavaType]) => T): this.type = {
-    addToRegistry(mirror.runtimeClass(typeOf[T]), new Registration[T](this, factory, singleton = false))
+  override def registerGenerics[T: TypeTag](factory: (Container, Array[JavaType]) => T, lifetime: InstanceScope = Transient): this.type = {
+    addToRegistry(new Registration[T](mirror.runtimeClass(typeOf[T]), this, factory, lifetime))
   }
 
   override def createScope(): Container = {
@@ -450,6 +468,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
   }
 
   def close(): Unit = {
+    closed = true
     container.clear
     val it = closeables.iterator
     while (it.hasNext) {
@@ -461,29 +480,33 @@ If you wish to resolve types not registered in the container, specify revenj.res
 
 private object SimpleContainer {
 
-  private class Registration[T]
-  (
+  private val seqSignature = classOf[scala.collection.Seq[_]]
+
+  private class Registration[T](
+    val signature: JavaType,
     owner: SimpleContainer,
     val manifest: Option[Class[T]],
     var instance: Option[T],
     val singleFactory: Option[Container => T],
     val biFactory: Option[(Container, Array[JavaType]) => T],
-    val singleton: Boolean) {
+    val lifetime: InstanceScope) {
 
-    def this(owner: SimpleContainer, manifest: Class[T], singleton: Boolean) {
-      this(owner, Some(manifest), None, None, None, singleton)
+    val name = signature.getTypeName
+
+    def this(signature: JavaType, owner: SimpleContainer, manifest: Class[T], lifetime: InstanceScope) {
+      this(signature, owner, Some(manifest), None, None, None, lifetime)
     }
 
-    def this(owner: SimpleContainer, instance: T) {
-      this(owner, None, Some(instance), None, None, singleton = true)
+    def this(signature: JavaType, owner: SimpleContainer, instance: T, singleton: Boolean) {
+      this(signature, owner, None, Some(instance), None, None, if (singleton) Singleton else Context)
     }
 
-    def this(owner: SimpleContainer, factory: Container => T, singleton: Boolean) {
-      this(owner, None, None, Some(factory), None, singleton)
+    def this(signature: JavaType, owner: SimpleContainer, factory: Container => T, lifetime: InstanceScope) {
+      this(signature, owner, None, None, Some(factory), None, lifetime)
     }
 
-    def this(owner: SimpleContainer, factory: (Container, Array[JavaType]) => T, singleton: Boolean) {
-      this(owner, None, None, None, Some(factory), singleton)
+    def this(signature: JavaType, owner: SimpleContainer, factory: (Container, Array[JavaType]) => T, lifetime: InstanceScope) {
+      this(signature, owner, None, None, None, Some(factory), lifetime)
     }
 
     var promoted: Boolean = false
@@ -491,6 +514,12 @@ private object SimpleContainer {
     def promoteToSingleton(value: T): Unit = {
       promoted = true
       this.instance = Some(value)
+    }
+
+    def promoteToSingletonOn(value: T, caller: SimpleContainer): Unit = {
+      val registration = new Registration[T](signature, caller, manifest, Some(value), singleFactory, biFactory, Context)
+      registration.promoted = true
+      caller.addToRegistry(registration)
     }
   }
 
