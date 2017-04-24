@@ -59,6 +59,7 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
+      "net.revenj" %% "revenj-core" % "0.5.3-SNAPSHOT",
       "com.dslplatform" % "dsl-clc" % "1.9.0" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
@@ -68,7 +69,6 @@ lazy val tests = (project in file("tests")
     publish := {},
     publishArtifact := false
   )
-  dependsOn(core, storage)
 )
 
 lazy val root = (project in file(".")
@@ -141,6 +141,7 @@ val publishSettings = Seq(
 
   packageOptions := Seq(Package.ManifestAttributes(
     ("Implementation-Vendor", "New Generation Software Ltd."),
+    //TODO: causing problems for tests
     ("Sealed", "true")
   )),
 
