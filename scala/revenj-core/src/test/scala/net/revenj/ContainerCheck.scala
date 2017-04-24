@@ -7,6 +7,8 @@ import net.revenj.patterns.{AggregateDomainEvent, AggregateDomainEventHandler, A
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
+import scala.util.Try
+
 class ContainerCheck extends Specification with ScalaCheck {
   sequential
 
@@ -197,6 +199,14 @@ class ContainerCheck extends Specification with ScalaCheck {
       s3 === s4
       s1 !== s3
     }
+    "circular dependency" >> {
+      val container = new SimpleContainer(false, cl)
+      container.register[CircularTop](InstanceScope.Context)
+      container.register[CircularDep](InstanceScope.Context)
+      val tryResolve = Try { container.resolve[CircularTop] }
+      tryResolve.isFailure === true
+      tryResolve.failed.get.getMessage === "Unable to resolve: class net.revenj.CircularTop. Circular dependencies in signature detected"
+    }
   }
 }
 
@@ -258,3 +268,6 @@ class AggEventHandler1 extends AggregateDomainEventHandler[Agg, AggEvent] {
 object AggEventHandler2 extends AggregateDomainEventHandler[Agg, AggEvent] {
   def handle(domainEvent: AggEvent, aggregate: Agg): Unit = ???
 }
+
+class CircularTop(val dep: CircularDep)
+class CircularDep(val top: CircularTop)

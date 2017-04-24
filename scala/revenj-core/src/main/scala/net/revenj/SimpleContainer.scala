@@ -366,19 +366,23 @@ If you wish to resolve types not registered in the container, specify revenj.res
     } else if (registration.singleFactory.isDefined) {
       Try {
         if (registration.lifetime != Transient) {
-          val self = if (registration.lifetime == Singleton) this else caller
+          val (self, reg) =
+            if (registration.lifetime == Singleton || registration.owner == caller) (this, registration)
+            else (caller, registration.prepareSingleton(caller))
           self synchronized {
-            if (registration.promoted) {
-              registration.instance
+            if (reg.promoted) {
+              reg.instance
+            } else if (reg.promoting) {
+              Failure(new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected"))
             } else {
-              val instance = registration.singleFactory.get(self)
+              reg.promoting = true
+              val instance = reg.singleFactory.get(self)
               instance match {
                 case closeable: AutoCloseable =>
                   self.closeables.add(closeable)
                 case _ =>
               }
-              if (registration.lifetime == Singleton) registration.promoteToSingleton(instance)
-              else registration.promoteToSingletonOn(instance, caller)
+              reg.promoteToSingleton(instance)
               instance
             }
           }
@@ -388,24 +392,28 @@ If you wish to resolve types not registered in the container, specify revenj.res
       }
     } else {
       if (registration.lifetime != Transient) {
-        val self = if (registration.lifetime == Singleton) this else caller
+        val (self, reg) =
+          if (registration.lifetime == Singleton || registration.owner == caller) (this, registration)
+          else (caller, registration.prepareSingleton(caller))
         self synchronized {
-          if (registration.promoted) {
-            Success(registration.instance)
-          } else if (registration.manifest.isDefined) {
-            val tryInstance = tryResolveClass(registration.manifest.get, caller)
+          if (reg.promoted) {
+            Success(reg.instance)
+          } else if (reg.promoting) {
+            Failure(new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected"))
+          } else if (reg.manifest.isDefined) {
+            reg.promoting = true
+            val tryInstance = tryResolveClass(reg.manifest.get, caller)
             if (tryInstance.isSuccess) {
               tryInstance.get match {
                 case closeable: AutoCloseable =>
                   self.closeables.add(closeable)
                 case _ =>
               }
-              if (registration.lifetime == Singleton) registration.promoteToSingleton(tryInstance.get)
-              else registration.promoteToSingletonOn(tryInstance.get, caller)
+              reg.promoteToSingleton(tryInstance.get)
             }
             tryInstance
           } else {
-            Failure(new ReflectiveOperationException("Unable to resolve: " + registration))
+            Failure(new ReflectiveOperationException(s"Unable to resolve: $registration"))
           }
         }
       } else if (registration.manifest.isDefined) {
@@ -484,7 +492,7 @@ private object SimpleContainer {
 
   private class Registration[T](
     val signature: JavaType,
-    owner: SimpleContainer,
+    val owner: SimpleContainer,
     val manifest: Option[Class[T]],
     var instance: Option[T],
     val singleFactory: Option[Container => T],
@@ -510,16 +518,18 @@ private object SimpleContainer {
     }
 
     var promoted: Boolean = false
+    var promoting: Boolean = false
 
     def promoteToSingleton(value: T): Unit = {
       promoted = true
+      promoting = false
       this.instance = Some(value)
     }
 
-    def promoteToSingletonOn(value: T, caller: SimpleContainer): Unit = {
-      val registration = new Registration[T](signature, caller, manifest, Some(value), singleFactory, biFactory, Context)
-      registration.promoted = true
+    def prepareSingleton(caller: SimpleContainer) = {
+      val registration = new Registration[T](signature, caller, manifest, None, singleFactory, biFactory, Context)
       caller.addToRegistry(registration)
+      registration
     }
   }
 
