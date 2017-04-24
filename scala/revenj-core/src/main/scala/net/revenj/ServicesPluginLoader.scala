@@ -6,6 +6,7 @@ import java.nio.charset.Charset
 
 import net.revenj.extensibility.PluginLoader
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe._
 
@@ -23,14 +24,15 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
     val manifest = mirror.runtimeClass(typeOf[T].dealias).asInstanceOf[Class[T]]
     //TODO: release class loader to avoid locking up jars on Windows
     val configs = loader.getResources(fullName)
+    val foundServices = mutable.Set[String]()
     while (configs.hasMoreElements) {
       val url = configs.nextElement
-      lookupServices[T](manifest, url, plugins)
+      lookupServices[T](manifest, url, plugins, foundServices)
     }
     plugins
   }
 
-  private def lookupServices[T](manifest: Class[T], u: URL, plugins: ArrayBuffer[Class[T]]): Unit = {
+  private def lookupServices[T](manifest: Class[T], u: URL, plugins: ArrayBuffer[Class[T]], foundServices: mutable.Set[String]): Unit = {
     val stream = u.openStream
     val reader = new BufferedReader(new InputStreamReader(stream, UTF8))
     try {
@@ -51,7 +53,9 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
             i += Character.charCount(cp)
           }
           val service = loader.loadClass(line)
-          plugins += service.asInstanceOf[Class[T]]
+          if (foundServices.add(line)) {
+            plugins += service.asInstanceOf[Class[T]]
+          }
         }
       }
     } finally {
