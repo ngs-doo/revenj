@@ -99,7 +99,7 @@ private [revenj] object ConnectionFactory {
       if (currentSchema != null) {
         paramList.add(Array[String]("search_path", currentSchema))
       }
-      sendStartupPacket(newStream, paramList, logger)
+      sendStartupPacket(newStream, paramList)
       doAuthentication(newStream, hostSpec.getHost, user, password, info, logger)
       readStartupMessages(newStream, logger)
 
@@ -124,7 +124,7 @@ private [revenj] object ConnectionFactory {
       try {
         newStream.close()
       } catch {
-        case ignore: IOException =>
+        case _: IOException =>
       }
     }
   }
@@ -173,7 +173,7 @@ private [revenj] object ConnectionFactory {
     }
   }
 
-  private def sendStartupPacket(pgStream: PGStream, params: util.List[Array[String]], logger: Logger): Unit = {
+  private def sendStartupPacket(pgStream: PGStream, params: util.List[Array[String]]): Unit = {
     // Precalculate message length and encode params.
     var length = 4 + 4
     val encodedParams = new Array[Array[Byte]](params.size * 2)

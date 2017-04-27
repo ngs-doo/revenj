@@ -12,7 +12,7 @@ trait Container extends ServiceLocator with AutoCloseable {
 
   private[revenj] def registerType[T](manifest: Type, implementation: Class[T], lifetime: InstanceScope = Transient): this.type
 
-  @deprecated
+  @deprecated("use register with InstanceScope instead", "0.5.3")
   def register[T](singleton: Boolean)(implicit manifest: ClassTag[T]): this.type = {
     registerType(manifest.runtimeClass, manifest.runtimeClass, if (singleton) Singleton else Transient)
   }
@@ -21,7 +21,7 @@ trait Container extends ServiceLocator with AutoCloseable {
     registerType(manifest.runtimeClass, manifest.runtimeClass, lifetime)
   }
 
-  @deprecated
+  @deprecated("use registerAs with InstanceScope instead", "0.5.3")
   def registerAs[T, S <: T](singleton: Boolean)(implicit manifest: TypeTag[T], implementation: ClassTag[S]): this.type = {
     registerAs[T, S](if (singleton) Singleton else Transient)
   }
@@ -30,7 +30,7 @@ trait Container extends ServiceLocator with AutoCloseable {
 
   def registerInstance[T: TypeTag](service: T, handleClose: Boolean = false): this.type
 
-  @deprecated
+  @deprecated("use registerFunc with InstanceScope instead", "0.5.3")
   def registerFactory[T: TypeTag](factory: Container => T, singleton: Boolean): this.type = {
     registerFunc[T](factory, if (singleton) Singleton else Transient)
   }

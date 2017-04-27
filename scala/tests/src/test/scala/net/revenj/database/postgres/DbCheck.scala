@@ -10,9 +10,11 @@ import javax.sql.DataSource
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
 import example.test.Client.Tick
+import example.test.postgres._
+import example.test._
 import monix.execution.Ack
 import net.revenj.database.postgres.DbCheck.MyService
-import net.revenj.extensibility.{Container, SystemState}
+import net.revenj.extensibility.{Container, InstanceScope, SystemState}
 import net.revenj.patterns.DataChangeNotification.NotifyInfo
 import net.revenj.patterns.{DataChangeNotification, DataContext, DomainEventHandler, UnitOfWork}
 import org.specs2.ScalaCheck
@@ -23,8 +25,6 @@ import ru.yandex.qatools.embed.service.PostgresEmbeddedService
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 import scala.util.{Random, Try}
-import example.test.postgres._
-import example.test._
 import monix.eval.Task
 import monix.reactive.{Observable, Observer}
 import org.specs2.concurrent.ExecutionEnv
@@ -193,7 +193,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
       }
       "context from connection" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
-        container.register[MyService](singleton = false)
+        container.register[MyService](InstanceScope.Transient)
         val ds = container.resolve[DataSource]
         val conn = ds.getConnection
         val service = container.resolve[MyService]
@@ -247,7 +247,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val find = Await.result(ctx.search(AbcSql.Filter(s = "ctx")), Duration.Inf)
         ctx.commit() must beEqualTo(()).await
         container.close()
-        find.size >= 1
+        find.nonEmpty === true
       }
       "report test" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]

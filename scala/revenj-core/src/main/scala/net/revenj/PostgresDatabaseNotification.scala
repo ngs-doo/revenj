@@ -44,7 +44,7 @@ private [revenj] class PostgresDatabaseNotification(
       try {
         timeoutValue.toInt
       } catch {
-        case e: NumberFormatException => throw new RuntimeException("Error parsing notificationTimeout setting")
+        case _: NumberFormatException => throw new RuntimeException(s"Error parsing notificationTimeout setting: $timeoutValue")
       }
     } else 1000
   }

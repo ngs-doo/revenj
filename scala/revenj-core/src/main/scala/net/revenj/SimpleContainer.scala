@@ -1,7 +1,6 @@
 package net.revenj
 
 import java.lang.reflect.{Constructor, GenericArrayType, GenericDeclaration, ParameterizedType, TypeVariable, Type => JavaType}
-import java.util.Objects
 import java.util.concurrent.CopyOnWriteArrayList
 
 import net.revenj.SimpleContainer.Registration
@@ -549,11 +548,10 @@ private object SimpleContainer {
     }
 
     override def equals(obj: scala.Any): Boolean = {
-      val other = obj match {
-        case reg: Registration[T] => reg.parent.getOrElse(reg)
-        case _ => obj
+      obj match {
+        case reg: Registration[T] => parent.getOrElse(this) eq reg.parent.getOrElse(reg)
+        case _ => false
       }
-      Objects.equals(parent.getOrElse(this), other)
     }
   }
 

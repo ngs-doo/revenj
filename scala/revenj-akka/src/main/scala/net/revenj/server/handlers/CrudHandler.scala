@@ -10,10 +10,9 @@ import net.revenj.server.commands.Utils
 import net.revenj.server.commands.crud._
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class CrudHandler(
-  ec: ExecutionContext,
   model: DomainModel,
   engine: ProcessingEngine,
   serialization: WireSerialization,

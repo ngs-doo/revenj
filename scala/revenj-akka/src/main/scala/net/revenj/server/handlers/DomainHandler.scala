@@ -11,11 +11,10 @@ import net.revenj.server.commands.{SubmitAggregateEvent, SubmitEvent, Utils}
 import net.revenj.server.commands.search._
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Failure
 
 class DomainHandler(
-  ec: ExecutionContext,
   model: DomainModel,
   engine: ProcessingEngine,
   serialization: WireSerialization,

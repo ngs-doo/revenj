@@ -5,7 +5,7 @@ import com.dslplatform.compiler.client.parameters.{Settings, Targets}
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.5.3-SNAPSHOT",
+    version := "0.5.3",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "9.4.1212",
       "joda-time" % "joda-time" % "2.9.6",   // TODO: will be removed
@@ -25,7 +25,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.5.3-SNAPSHOT",
+  version := "0.5.3",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.1",
     "com.typesafe.akka" %% "akka-http-core" % "10.0.5"
@@ -52,14 +52,23 @@ lazy val tests = (project in file("tests")
   settings (
     dslNamespace := "example",
     dslDslPath := (resourceDirectory in Test).value,
-    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME)
+    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME),
+    resourceGenerators in Test += Def.task {
+     com.dslplatform.sbt.Actions.generateResources(
+        streams.value.log,
+        Targets.Option.REVENJ_SCALA,
+       (resourceManaged in Test).value / "META-INF" / "services",
+        Seq(target.value),
+        (dependencyClasspath in Test).value
+      )
+    }.taskValue
   )
   settings (commonSettings)
   settings(
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "net.revenj" %% "revenj-core" % "0.5.3-SNAPSHOT",
+      "net.revenj" %% "revenj-core" % "0.5.3" % Provided,
       "com.dslplatform" % "dsl-clc" % "1.9.0" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
@@ -90,7 +99,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   name := baseDirectory.value.getName,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  crossScalaVersions := Seq("2.11.8", "2.12.2"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",
@@ -140,9 +149,9 @@ val publishSettings = Seq(
   ),
 
   packageOptions := Seq(Package.ManifestAttributes(
-    ("Implementation-Vendor", "New Generation Software Ltd."),
-    //TODO: causing problems for tests
-    ("Sealed", "true")
+    ("Implementation-Vendor", "New Generation Software Ltd.")
+    //TODO: temporarly disabled due to problems with setup
+    //("Sealed", "true")
   )),
 
   publishTo := Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging),

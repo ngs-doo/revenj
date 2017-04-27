@@ -64,7 +64,7 @@ class ProcessingEngine private(
             connection.setAutoCommit(!withTransaction)
             runCommands(scope, withTransaction, connection, startProcessing, commandDescriptions, input, output, executed, 0)
           } catch {
-            case sql: SQLException =>
+            case _: SQLException =>
               Future.successful(ProcessingResult[TOutput]("Unable to create database connection", 503, null, startProcessing))
             case ex: Throwable =>
               Future.successful(ProcessingResult.error(ex, startProcessing))

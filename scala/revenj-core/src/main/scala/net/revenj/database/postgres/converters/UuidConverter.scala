@@ -162,7 +162,7 @@ object UuidConverter extends Converter[UUID] {
       new UUID(hi, lo)
     }
     catch {
-      case ex: ArrayIndexOutOfBoundsException => UUID.fromString(new String(buf, 0, 36))
+      case _: ArrayIndexOutOfBoundsException => UUID.fromString(new String(buf, 0, 36))
     }
   }
 

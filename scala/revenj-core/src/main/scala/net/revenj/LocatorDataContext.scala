@@ -64,7 +64,7 @@ private[revenj] class LocatorDataContext(
 
   private def findManifest[T: TypeTag]: Class[_] = {
     typeOf[T] match {
-      case TypeRef(_, sym, args) => mirror.runtimeClass(sym.asClass)
+      case TypeRef(_, sym, _) => mirror.runtimeClass(sym.asClass)
       case _ => throw new ReflectiveOperationException("Unable to find class type for " + typeOf[T])
     }
   }
@@ -156,7 +156,7 @@ private[revenj] class LocatorDataContext(
     Future.sequence(
       changes.map {
         _.recover {
-          case t: Throwable => ()
+          case _: Throwable => ()
         }
       }
     ) map { _ =>
@@ -204,7 +204,7 @@ private[revenj] object LocatorDataContext {
       connection = dataSource.getConnection
       connection.setAutoCommit(false)
     } catch {
-      case e: SQLException =>
+      case _: SQLException =>
         try {
           if (connection != null) connection.close()
         } catch {

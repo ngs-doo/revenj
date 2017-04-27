@@ -9,10 +9,9 @@ import net.revenj.server.{ProcessingEngine, ServerCommandDescription, WireSerial
 import net.revenj.server.commands.Utils
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class RpcHandler(
-  ec: ExecutionContext,
   engine: ProcessingEngine,
   serialization: WireSerialization,
   implicit private val materializer: Materializer) extends RequestBinding {
@@ -49,8 +48,8 @@ class RpcHandler(
   private def matchRequest(req: HttpRequest): Future[HttpResponse] = {
     req match {
       case HttpRequest(GET, uri, _, _, _) => executeRequest(req, uri, false)
-      case HttpRequest(POST, uri, _, entity, _) => executeRequest(req, uri, true)
-      case HttpRequest(PUT, uri, _, entity, _) => executeRequest(req, uri, true)
+      case HttpRequest(POST, uri, _, _, _) => executeRequest(req, uri, true)
+      case HttpRequest(PUT, uri, _, _, _) => executeRequest(req, uri, true)
       case _ =>
         Future.successful(Utils.badResponse("Invalid URL"))
     }

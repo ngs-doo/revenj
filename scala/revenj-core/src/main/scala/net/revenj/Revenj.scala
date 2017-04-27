@@ -187,7 +187,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
           case cl: Class[_] => cl
           case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${typeOf[T]}")
         }
-      case p => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
+      case _ => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
     }
     def processHandlers[X: TypeTag](gt: ParameterizedType, eventHandlers: Seq[Class[DomainEventHandler[X]]]): Unit = {
       eventHandlers foreach { h =>
