@@ -1,6 +1,7 @@
 package net.revenj
 
 import java.lang.reflect.{Constructor, GenericArrayType, GenericDeclaration, ParameterizedType, TypeVariable, Type => JavaType}
+import java.util.Objects
 import java.util.concurrent.CopyOnWriteArrayList
 
 import net.revenj.SimpleContainer.Registration
@@ -281,16 +282,19 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   tryResolveCollection(target.getComponentType, target.getComponentType, caller)
                 } else if (resolveUnknown) {
                   if (target.isInterface) {
-                    Failure(new ReflectiveOperationException(s"""$paramType is not an class and cannot be resolved since it's not registered in the container.
+                    Failure(new ReflectiveOperationException(
+                      s"""$paramType is not an class and cannot be resolved since it's not registered in the container.
 Try resolving implementation instead."""))
                   } else {
                     tryResolveClass(target, caller)
                   }
                 } else if (target.isInterface) {
-                  Failure(new ReflectiveOperationException(s"""$paramType is not registered in the container.
+                  Failure(new ReflectiveOperationException(
+                    s"""$paramType is not registered in the container.
 Since $paramType is an interface, it must be registered into the container."""))
                 } else {
-                  Failure(new ReflectiveOperationException(s"""$paramType is not registered in the container.
+                  Failure(new ReflectiveOperationException(
+                    s"""$paramType is not registered in the container.
 If you wish to resolve types not registered in the container, specify revenj.resolveUnknown=true in Properties configuration."""))
                 }
               case _ =>
@@ -329,11 +333,16 @@ If you wish to resolve types not registered in the container, specify revenj.res
   }
 
   private def tryResolveCollection(container: Class[_], element: JavaType, caller: SimpleContainer): Try[AnyRef] = {
-    val registrations = new CopyOnWriteArrayList[Registration[AnyRef]]
+    val registrations = new mutable.LinkedHashSet[Registration[AnyRef]]
     var current: Option[SimpleContainer] = Some(caller)
     do {
       current.get.container.get(element) match {
-        case Some(found) => registrations.addAll(0, found)
+        case Some(found) =>
+          var i = 0
+          while (i < found.size) {
+            registrations.add(found.get(i))
+            i += 1
+          }
         case _ =>
       }
       current = current.get.parent
@@ -343,8 +352,9 @@ If you wish to resolve types not registered in the container, specify revenj.res
     } else {
       val result = new mutable.ArrayBuffer[AnyRef](registrations.size)
       var i = 0
+      val iter = registrations.iterator
       while (i < registrations.size) {
-        val item = resolveRegistration(registrations.get(i), caller)
+        val item = resolveRegistration(iter.next(), caller)
         if (item.isSuccess) {
           result += item.get
         }
@@ -491,6 +501,7 @@ private object SimpleContainer {
   private val seqSignature = classOf[scala.collection.Seq[_]]
 
   private class Registration[T](
+    val parent: Option[Registration[T]],
     val signature: JavaType,
     val owner: SimpleContainer,
     val manifest: Option[Class[T]],
@@ -502,19 +513,19 @@ private object SimpleContainer {
     val name = signature.getTypeName
 
     def this(signature: JavaType, owner: SimpleContainer, manifest: Class[T], lifetime: InstanceScope) {
-      this(signature, owner, Some(manifest), None, None, None, lifetime)
+      this(None, signature, owner, Some(manifest), None, None, None, lifetime)
     }
 
     def this(signature: JavaType, owner: SimpleContainer, instance: T, singleton: Boolean) {
-      this(signature, owner, None, Some(instance), None, None, if (singleton) Singleton else Context)
+      this(None, signature, owner, None, Some(instance), None, None, if (singleton) Singleton else Context)
     }
 
     def this(signature: JavaType, owner: SimpleContainer, factory: Container => T, lifetime: InstanceScope) {
-      this(signature, owner, None, None, Some(factory), None, lifetime)
+      this(None, signature, owner, None, None, Some(factory), None, lifetime)
     }
 
     def this(signature: JavaType, owner: SimpleContainer, factory: (Container, Array[JavaType]) => T, lifetime: InstanceScope) {
-      this(signature, owner, None, None, None, Some(factory), lifetime)
+      this(None, signature, owner, None, None, None, Some(factory), lifetime)
     }
 
     var promoted: Boolean = false
@@ -527,9 +538,22 @@ private object SimpleContainer {
     }
 
     def prepareSingleton(caller: SimpleContainer) = {
-      val registration = new Registration[T](signature, caller, manifest, None, singleFactory, biFactory, Context)
+      val registration = new Registration[T](Some(this), signature, caller, manifest, None, singleFactory, biFactory, Context)
       caller.addToRegistry(registration)
       registration
+    }
+
+    override def hashCode(): Int = {
+      if (parent.isEmpty) super.hashCode()
+      else parent.get.hashCode()
+    }
+
+    override def equals(obj: scala.Any): Boolean = {
+      val other = obj match {
+        case reg: Registration[T] => reg.parent.getOrElse(reg)
+        case _ => obj
+      }
+      Objects.equals(parent.getOrElse(this), other)
     }
   }
 

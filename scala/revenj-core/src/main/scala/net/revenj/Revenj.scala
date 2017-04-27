@@ -190,7 +190,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
       case p => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
     }
     def processHandlers[X: TypeTag](gt: ParameterizedType, eventHandlers: Seq[Class[DomainEventHandler[X]]]): Unit = {
-      for (h <- eventHandlers) {
+      eventHandlers foreach { h =>
         container.registerType(h, h, InstanceScope.Context)
         container.registerType(gt, h, InstanceScope.Context)
       }

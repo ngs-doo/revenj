@@ -153,8 +153,8 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.ent2 = Array(Ent2())
         Await.result(ctx.create(abc), Duration.Inf)
         val find = Await.result(ctx.find[Abc](abc.URI), Duration.Inf).get
-        container.close()
         ctx.commit() must be_==(()).await
+        container.close()
         find.URI === abc.URI
       }
       "persistable sql" >> {
@@ -267,8 +267,8 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val root = bpk(b = Array(None, Some(true), Some(false)))
         Await.result(ctx.create(root), Duration.Inf)
         val find = Await.result(ctx.find[bpk](root.URI), Duration.Inf).get
-        container.close()
         ctx.rollback() must beEqualTo(()).await
+        container.close()
         find.URI === root.URI
         root.b === find.b
       }

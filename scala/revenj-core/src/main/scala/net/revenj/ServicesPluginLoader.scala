@@ -52,8 +52,8 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
             if (!Character.isJavaIdentifierPart(cp) && (cp != '.')) throw new IOException("Invalid configuration for " + manifest + " in " + u)
             i += Character.charCount(cp)
           }
-          val service = loader.loadClass(line)
           if (foundServices.add(line)) {
+            val service = loader.loadClass(line)
             plugins += service.asInstanceOf[Class[T]]
           }
         }
