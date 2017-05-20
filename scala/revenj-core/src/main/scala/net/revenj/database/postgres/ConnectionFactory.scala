@@ -25,11 +25,11 @@ private [revenj] object ConnectionFactory {
     */
   private class UnsupportedProtocolException extends IOException {}
 
-  private def createSSPI(pgStream: PGStream, spnServiceClass: String, enableNegotiate: Boolean, logger: Logger): ISSPIClient = {
+  private def createSSPI(pgStream: PGStream, spnServiceClass: String, enableNegotiate: Boolean): ISSPIClient = {
     try {
       val c = Class.forName("org.postgresql.sspi.SSPIClient")
-      val cArg = Array[Class[_]](classOf[PGStream], classOf[String], classOf[Boolean], classOf[Logger])
-      c.getDeclaredConstructor(cArg:_*).newInstance(Array[AnyRef](pgStream, spnServiceClass, enableNegotiate.asInstanceOf[AnyRef], logger):_*).asInstanceOf[ISSPIClient]
+      val cArg = Array[Class[_]](classOf[PGStream], classOf[String], classOf[Boolean])
+      c.getDeclaredConstructor(cArg:_*).newInstance(Array[AnyRef](pgStream, spnServiceClass, enableNegotiate.asInstanceOf[AnyRef]):_*).asInstanceOf[ISSPIClient]
     } catch {
       case e: ReflectiveOperationException =>
         throw new IllegalStateException("Unable to load org.postgresql.sspi.SSPIClient." + " Please check that SSPIClient is included in your pgjdbc distribution.", e)
@@ -39,7 +39,6 @@ private [revenj] object ConnectionFactory {
   def openConnection(hostSpec: HostSpec, user: String, password: String, database: String, info: Properties): PGStream = {
     // Extract interesting values from the info properties:
     // - the SSL setting
-    val logger = new Logger
     var requireSSL = false
     var trySSL = false
     val sslmode = PGProperty.SSL_MODE.get(info)
@@ -72,7 +71,7 @@ private [revenj] object ConnectionFactory {
       newStream = new PGStream(socketFactory, hostSpec, connectTimeout)
       // Construct and send an ssl startup packet if requested.
       if (trySSL) {
-        newStream = enableSSL(newStream, requireSSL, logger, info, connectTimeout)
+        newStream = enableSSL(newStream, requireSSL, info, connectTimeout)
       }
       // Set the socket timeout if the "socketTimeout" property has been set.
       val socketTimeout = PGProperty.SOCKET_TIMEOUT.getInt(info)
@@ -100,8 +99,8 @@ private [revenj] object ConnectionFactory {
         paramList.add(Array[String]("search_path", currentSchema))
       }
       sendStartupPacket(newStream, paramList)
-      doAuthentication(newStream, hostSpec.getHost, user, password, info, logger)
-      readStartupMessages(newStream, logger)
+      doAuthentication(newStream, hostSpec.getHost, user, password, info)
+      readStartupMessages(newStream)
 
       newStream
     } catch {
@@ -146,7 +145,7 @@ private [revenj] object ConnectionFactory {
     }
   }
 
-  private def enableSSL(pgStream: PGStream, requireSSL: Boolean, logger: Logger, info: Properties, connectTimeout: Int): PGStream = {
+  private def enableSSL(pgStream: PGStream, requireSSL: Boolean, info: Properties, connectTimeout: Int): PGStream = {
     // Send SSL request packet
     pgStream.sendInteger4(8)
     pgStream.sendInteger2(1234)
@@ -166,7 +165,7 @@ private [revenj] object ConnectionFactory {
         pgStream
       case 'S' =>
         // Server supports ssl
-        org.postgresql.ssl.MakeSSL.convert(pgStream, info, logger)
+        org.postgresql.ssl.MakeSSL.convert(pgStream, info)
         pgStream
       case _ =>
         throw new PSQLException(GT.tr("An error occurred while setting up the SSL connection."), PSQLState.PROTOCOL_VIOLATION)
@@ -197,7 +196,7 @@ private [revenj] object ConnectionFactory {
     pgStream.flush()
   }
 
-  private def doAuthentication(pgStream: PGStream, host: String, user: String, password: String, info: Properties, logger: Logger): Unit = {
+  private def doAuthentication(pgStream: PGStream, host: String, user: String, password: String, info: Properties): Unit = {
     // Now get the response from the backend, either an error message
     // or an authentication request
     /* SSPI negotiation state, if used */
@@ -216,7 +215,7 @@ private [revenj] object ConnectionFactory {
               // server, so trigger fallback.
               throw new ConnectionFactory.UnsupportedProtocolException
             }
-            val errorMsg = new ServerErrorMessage(pgStream.receiveString(l_elen - 4), logger.getLogLevel)
+            val errorMsg = new ServerErrorMessage(pgStream.receiveString(l_elen - 4))
             throw new PSQLException(errorMsg)
           case 'R' =>
             // Authentication request.
@@ -279,22 +278,20 @@ private [revenj] object ConnectionFactory {
                  * it's forced. Otherwise use gssapi. If the user has specified a Kerberos server
                  * name we'll always use JSSE GSSAPI.
                  */
-                if (gsslib == "gssapi") logger.debug("Using JSSE GSSAPI, param gsslib=gssapi")
-                else if (areq == AUTH_REQ_GSS && gsslib != "sspi") logger.debug("Using JSSE GSSAPI, gssapi requested by server and gsslib=sspi not forced")
+                if (gsslib == "gssapi") {}
+                else if (areq == AUTH_REQ_GSS && gsslib != "sspi") {}
                 else {
-                  /* Determine if SSPI is supported by the client */ sspiClient = createSSPI(pgStream, PGProperty.SSPI_SERVICE_CLASS.get(info), /* Use negotiation for SSPI, or if explicitly requested for GSS */ areq == AUTH_REQ_SSPI || (areq == AUTH_REQ_GSS && usespnego), logger)
+                  /* Determine if SSPI is supported by the client */ sspiClient = createSSPI(pgStream, PGProperty.SSPI_SERVICE_CLASS.get(info), /* Use negotiation for SSPI, or if explicitly requested for GSS */ areq == AUTH_REQ_SSPI || (areq == AUTH_REQ_GSS && usespnego))
                   useSSPI = sspiClient.isSSPISupported
-                  if (logger.logDebug) logger.debug("SSPI support detected: " + useSSPI)
                   if (!useSSPI) {
                     /* No need to dispose() if no SSPI used */ sspiClient = null
                     if (gsslib == "sspi") throw new PSQLException("SSPI forced with gsslib=sspi, but SSPI not available; set loglevel=2 for details", PSQLState.CONNECTION_UNABLE_TO_CONNECT)
                   }
-                  if (logger.logDebug) logger.debug(s"Using SSPI: $useSSPI, gsslib=$gsslib and SSPI support detected")
                 }
                 /* SSPI requested and detected as available */
                 if (useSSPI) sspiClient.startSSPI()
                 /* Use JGSS's GSSAPI for this request */
-                else org.postgresql.gss.MakeGSS.authenticate(pgStream, host, user, password, PGProperty.JAAS_APPLICATION_NAME.get(info), PGProperty.KERBEROS_SERVER_NAME.get(info), logger, usespnego)
+                else org.postgresql.gss.MakeGSS.authenticate(pgStream, host, user, password, PGProperty.JAAS_APPLICATION_NAME.get(info), PGProperty.KERBEROS_SERVER_NAME.get(info), usespnego)
               case AUTH_REQ_GSS_CONTINUE =>
                 /*
                  * Only called for SSPI, as GSS is handled by an inner loop in MakeGSS.
@@ -316,13 +313,12 @@ private [revenj] object ConnectionFactory {
           sspiClient.dispose()
         } catch {
           case ex: RuntimeException =>
-            logger.log("Unexpected error during SSPI context disposal", ex)
         }
       }
     }
   }
 
-  private def readStartupMessages(pgStream: PGStream, logger: Logger): Unit = {
+  private def readStartupMessages(pgStream: PGStream): Unit = {
     var isEnd = false
     while (!isEnd) {
       pgStream.receiveChar match {
@@ -338,7 +334,7 @@ private [revenj] object ConnectionFactory {
         case 'E' =>
           // Error
           val l_elen = pgStream.receiveInteger4
-          val l_errorMsg = new ServerErrorMessage(pgStream.receiveString(l_elen - 4), logger.getLogLevel)
+          val l_errorMsg = new ServerErrorMessage(pgStream.receiveString(l_elen - 4))
           throw new PSQLException(l_errorMsg)
         case 'N' =>
           // Warning

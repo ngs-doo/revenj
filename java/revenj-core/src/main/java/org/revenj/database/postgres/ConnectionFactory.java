@@ -44,13 +44,12 @@ public class ConnectionFactory {
 
 	private static ISSPIClient createSSPI(PGStream pgStream,
 								   String spnServiceClass,
-								   boolean enableNegotiate,
-								   Logger logger) {
+								   boolean enableNegotiate) {
 		try {
 			Class c = Class.forName("org.postgresql.sspi.SSPIClient");
-			Class[] cArg = new Class[]{PGStream.class, String.class, boolean.class, Logger.class};
+			Class[] cArg = new Class[]{PGStream.class, String.class, boolean.class};
 			return (ISSPIClient) c.getDeclaredConstructor(cArg)
-					.newInstance(pgStream, spnServiceClass, enableNegotiate, logger);
+					.newInstance(pgStream, spnServiceClass, enableNegotiate);
 		} catch (ReflectiveOperationException e) {
 			throw new IllegalStateException("Unable to load org.postgresql.sspi.SSPIClient."
 					+ " Please check that SSPIClient is included in your pgjdbc distribution.", e);
@@ -60,7 +59,6 @@ public class ConnectionFactory {
 	public static PGStream openConnection(HostSpec hostSpec, String user, String password, String database, Properties info) throws SQLException {
 		// Extract interesting values from the info properties:
 		// - the SSL setting
-		Logger logger = new Logger();
 		boolean requireSSL;
 		boolean trySSL;
 		String sslmode = PGProperty.SSL_MODE.get(info);
@@ -91,7 +89,7 @@ public class ConnectionFactory {
 
 			// Construct and send an ssl startup packet if requested.
 			if (trySSL) {
-				newStream = enableSSL(newStream, requireSSL, info, logger, connectTimeout);
+				newStream = enableSSL(newStream, requireSSL, info, connectTimeout);
 			}
 
 			// Set the socket timeout if the "socketTimeout" property has been set.
@@ -129,13 +127,13 @@ public class ConnectionFactory {
 				paramList.add(new String[]{"search_path", currentSchema});
 			}
 
-			sendStartupPacket(newStream, paramList, logger);
+			sendStartupPacket(newStream, paramList);
 
 			// Do authentication (until AuthenticationOk).
-			doAuthentication(newStream, hostSpec.getHost(), user, password, info, logger);
+			doAuthentication(newStream, hostSpec.getHost(), user, password, info);
 
 			// Do final startup.
-			readStartupMessages(newStream, logger);
+			readStartupMessages(newStream);
 
 			// And we're done.
 			return newStream;
@@ -190,7 +188,7 @@ public class ConnectionFactory {
 		return start + tz.substring(4);
 	}
 
-	private static PGStream enableSSL(PGStream pgStream, boolean requireSSL, Properties info, Logger logger,
+	private static PGStream enableSSL(PGStream pgStream, boolean requireSSL, Properties info,
 							   int connectTimeout) throws IOException, SQLException {
 		// Send SSL request packet
 		pgStream.sendInteger4(8);
@@ -223,7 +221,7 @@ public class ConnectionFactory {
 
 			case 'S':
 				// Server supports ssl
-				org.postgresql.ssl.MakeSSL.convert(pgStream, info, logger);
+				org.postgresql.ssl.MakeSSL.convert(pgStream, info);
 				return pgStream;
 
 			default:
@@ -232,7 +230,7 @@ public class ConnectionFactory {
 		}
 	}
 
-	private static void sendStartupPacket(PGStream pgStream, List<String[]> params, Logger logger)
+	private static void sendStartupPacket(PGStream pgStream, List<String[]> params)
 			throws IOException {
 		// Precalculate message length and encode params.
 		int length = 4 + 4;
@@ -258,8 +256,12 @@ public class ConnectionFactory {
 		pgStream.flush();
 	}
 
-	private static void doAuthentication(PGStream pgStream, String host, String user, String password, Properties info,
-								  Logger logger) throws IOException, SQLException {
+	private static void doAuthentication(
+			PGStream pgStream,
+			String host,
+			String user,
+			String password,
+			Properties info) throws IOException, SQLException {
 		// Now get the response from the backend, either an error message
 		// or an authentication request
 
@@ -286,8 +288,7 @@ public class ConnectionFactory {
 							throw new UnsupportedProtocolException();
 						}
 
-						ServerErrorMessage errorMsg =
-								new ServerErrorMessage(pgStream.receiveString(l_elen - 4), logger.getLogLevel());
+						ServerErrorMessage errorMsg = new ServerErrorMessage(pgStream.receiveString(l_elen - 4));
 						throw new PSQLException(errorMsg);
 
 					case 'R':
@@ -341,11 +342,6 @@ public class ConnectionFactory {
 							}
 
 							case AUTH_REQ_PASSWORD: {
-								if (logger.logDebug()) {
-									logger.debug(" <=BE AuthenticationReqPassword");
-									logger.debug(" FE=> Password(password=<not shown>)");
-								}
-
 								if (password == null) {
 									throw new PSQLException(
 											GT.tr("The server requested password-based authentication, but no password was provided."),
@@ -393,15 +389,12 @@ public class ConnectionFactory {
 								 * name we'll always use JSSE GSSAPI.
 								 */
 								if (gsslib.equals("gssapi")) {
-									logger.debug("Using JSSE GSSAPI, param gsslib=gssapi");
 								} else if (areq == AUTH_REQ_GSS && !gsslib.equals("sspi")) {
-									logger.debug(
-											"Using JSSE GSSAPI, gssapi requested by server and gsslib=sspi not forced");
 								} else {
 									/* Determine if SSPI is supported by the client */
 									sspiClient = createSSPI(pgStream, PGProperty.SSPI_SERVICE_CLASS.get(info),
 											/* Use negotiation for SSPI, or if explicitly requested for GSS */
-											areq == AUTH_REQ_SSPI || (areq == AUTH_REQ_GSS && usespnego), logger);
+											areq == AUTH_REQ_SSPI || (areq == AUTH_REQ_GSS && usespnego));
 
 									useSSPI = sspiClient.isSSPISupported();
 
@@ -424,7 +417,7 @@ public class ConnectionFactory {
 									/* Use JGSS's GSSAPI for this request */
 									org.postgresql.gss.MakeGSS.authenticate(pgStream, host, user, password,
 											PGProperty.JAAS_APPLICATION_NAME.get(info),
-											PGProperty.KERBEROS_SERVER_NAME.get(info), logger, usespnego);
+											PGProperty.KERBEROS_SERVER_NAME.get(info), usespnego);
 								}
 
 								break;
@@ -459,7 +452,6 @@ public class ConnectionFactory {
 				try {
 					sspiClient.dispose();
 				} catch (RuntimeException ex) {
-					logger.log("Unexpected error during SSPI context disposal", ex);
 				}
 
 			}
@@ -467,7 +459,7 @@ public class ConnectionFactory {
 
 	}
 
-	private static void readStartupMessages(PGStream pgStream, Logger logger) throws IOException, SQLException {
+	private static void readStartupMessages(PGStream pgStream) throws IOException, SQLException {
 		while (true) {
 			int beresp = pgStream.receiveChar();
 			switch (beresp) {
@@ -497,7 +489,7 @@ public class ConnectionFactory {
 					// Error
 					int l_elen = pgStream.receiveInteger4();
 					ServerErrorMessage l_errorMsg =
-							new ServerErrorMessage(pgStream.receiveString(l_elen - 4), logger.getLogLevel());
+							new ServerErrorMessage(pgStream.receiveString(l_elen - 4));
 
 					throw new PSQLException(l_errorMsg);
 
@@ -512,10 +504,6 @@ public class ConnectionFactory {
 					pgStream.receiveInteger4();
 					String name = pgStream.receiveString();
 					String value = pgStream.receiveString();
-
-					if (logger.logDebug()) {
-						logger.debug(" <=BE ParameterStatus(" + name + " = " + value + ")");
-					}
 
 					if (name.equals("client_encoding")) {
 						if (!value.equals("UTF8")) {

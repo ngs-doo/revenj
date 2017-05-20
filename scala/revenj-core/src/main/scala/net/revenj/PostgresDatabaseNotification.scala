@@ -52,17 +52,13 @@ private [revenj] class PostgresDatabaseNotification(
     isClosed = true
   } else if ("pooling" == properties.getProperty("revenj.notifications.type")) {
     setupPooling()
-    Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
-      override def run(): Unit = isClosed = true
-    }))
+    Runtime.getRuntime.addShutdownHook(new Thread(() => isClosed = true))
   } else {
     setupListening()
-    Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
-      override def run(): Unit = isClosed = true
-    }))
+    Runtime.getRuntime.addShutdownHook(new Thread(() => isClosed = true))
   }
 
-  private def setupPooling(): Unit = {
+  private def setupPooling(): Boolean = {
     retryCount += 1
     if (retryCount > 60) retryCount = 30
     try {
@@ -103,9 +99,13 @@ private [revenj] class PostgresDatabaseNotification(
         val thread = new Thread(pooling)
         thread.setDaemon(true)
         thread.start()
-      } else cleanupConnection(connection)
+        true
+      } else {
+        cleanupConnection(connection)
+        false
+      }
     } catch {
-      case ex: Exception =>
+      case ex: Throwable =>
         try {
           systemState.notify(SystemState.SystemEvent("notification", s"issue: ${ex.getMessage}"))
           Thread.sleep(1000L * retryCount)
@@ -113,6 +113,7 @@ private [revenj] class PostgresDatabaseNotification(
           case e: InterruptedException =>
             e.printStackTrace()
         }
+        false
     }
   }
 
@@ -146,13 +147,13 @@ private [revenj] class PostgresDatabaseNotification(
             threadAlive = false
             try {
               systemState.notify(SystemState.SystemEvent("notification", s"error: ${ex.getMessage}"))
-              Thread.sleep(1000)
+              Thread.sleep(1000L)
             } catch {
               case e: InterruptedException => e.printStackTrace()
             }
             cleanupConnection(connection)
-            if (!isClosed) {
-              setupPooling()
+            while (!isClosed && !setupPooling()) {
+              Thread.sleep(1000L)
             }
         }
       }
@@ -188,7 +189,7 @@ private [revenj] class PostgresDatabaseNotification(
     }
   }
 
-  private def setupListening(): Unit = {
+  private def setupListening(): Boolean = {
     retryCount += 1
     if (retryCount > 60) retryCount = 30
     val jdbcUrl = properties.getProperty("revenj.jdbcUrl")
@@ -196,16 +197,21 @@ private [revenj] class PostgresDatabaseNotification(
       throw new RuntimeException("""Unable to read revenj.jdbcUrl from properties. Listening notification is not supported without it.
 Either disable notifications (revenj.notifications.status=disabled), change it to pooling (revenj.notifications.type=pooling) or provide revenj.jdbcUrl to properties.""")
     }
-    val pgUrl =
+    val pgUrl = {
       if (!jdbcUrl.startsWith("jdbc:postgresql:") && jdbcUrl.contains("://")) "jdbc:postgresql" + jdbcUrl.substring(jdbcUrl.indexOf("://"))
       else jdbcUrl
+    }
     val parsed = org.postgresql.Driver.parseURL(pgUrl, properties)
     if (parsed == null) throw new RuntimeException("Unable to parse revenj.jdbcUrl")
     try {
-      val user = if (properties.containsKey("revenj.user")) properties.getProperty("revenj.user")
-      else parsed.getProperty("user", "")
-      val password = if (properties.containsKey("revenj.password")) properties.getProperty("revenj.password")
-      else parsed.getProperty("password", "")
+      val user = {
+        if (properties.containsKey("revenj.user")) properties.getProperty("revenj.user")
+        else parsed.getProperty("user", "")
+      }
+      val password = {
+        if (properties.containsKey("revenj.password")) properties.getProperty("revenj.password")
+        else parsed.getProperty("password", "")
+      }
       val db = parsed.getProperty("PGDBNAME")
       val host = new HostSpec(parsed.getProperty("PGHOST").split(",")(0), parsed.getProperty("PGPORT").split(",")(0).toInt)
       val pgStream = ConnectionFactory.openConnection(host, user, password, db, properties)
@@ -215,8 +221,9 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
       val thread = new Thread(listening)
       thread.setDaemon(true)
       thread.start()
+      true
     } catch {
-      case ex: Exception =>
+      case ex: Throwable =>
         try {
           systemState.notify(SystemState.SystemEvent("notification", s"issue: ${ex.getMessage}"))
           Thread.sleep(1000L * retryCount)
@@ -224,6 +231,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
           case e: InterruptedException =>
             e.printStackTrace()
         }
+        false
     }
   }
 
@@ -283,12 +291,12 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
               currentStream = None
               systemState.notify(SystemState.SystemEvent("notification", s"error: ${ex.getMessage}"))
               pgStream.close()
-              Thread.sleep(1000)
+              Thread.sleep(1000L)
             } catch {
               case e: Exception => e.printStackTrace()
             }
-            if (!isClosed) {
-              setupListening()
+            while (!isClosed && !setupListening()) {
+              Thread.sleep(1000L)
             }
         }
       }
@@ -301,7 +309,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
   private def getRepository[T <: Identifiable](manifest: Class[T]): Repository[T] = {
     repositories.getOrElseUpdate(manifest, {
       val clazz = Utils.makeGenericType(classOf[Repository[_]], manifest)
-      locator.resolve(clazz).getOrElse(throw new RuntimeException("Unable to resolve Repository[" + manifest + "]"))
+      locator.resolve(clazz).getOrElse(throw new RuntimeException(s"Unable to resolve Repository[$manifest]"))
     }).asInstanceOf[Repository[T]]
   }
 

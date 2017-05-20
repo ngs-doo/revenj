@@ -76,8 +76,8 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		}
 	}
 
-	private void setupPooling() {
-		if (dataSource == null) return;
+	private boolean setupPooling() {
+		if (dataSource == null) return false;
 		retryCount++;
 		if (retryCount > 60) {
 			retryCount = 30;
@@ -118,7 +118,11 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 				Thread thread = new Thread(pooling);
 				thread.setDaemon(true);
 				thread.start();
-			} else cleanupConnection(connection);
+				return true;
+			} else {
+				cleanupConnection(connection);
+				return false;
+			}
 		} catch (Exception ex) {
 			try {
 				systemState.notify(new SystemState.SystemEvent("notification", "issue: " + ex.getMessage()));
@@ -126,6 +130,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			return false;
 		}
 	}
 
@@ -171,8 +176,11 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 						e.printStackTrace();
 					}
 					cleanupConnection(connection);
-					if (!isClosed) {
-						setupPooling();
+					while (!isClosed && !setupPooling()) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException ignore) {
+						}
 					}
 					return;
 				}
@@ -181,7 +189,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		}
 	}
 
-	private void setupListening() {
+	private boolean setupListening() {
 		retryCount++;
 		if (retryCount > 60) {
 			retryCount = 30;
@@ -206,6 +214,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			Thread thread = new Thread(listening);
 			thread.setDaemon(true);
 			thread.start();
+			return true;
 		} catch (Exception ex) {
 			try {
 				systemState.notify(new SystemState.SystemEvent("notification", "issue: " + ex.getMessage()));
@@ -213,6 +222,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			return false;
 		}
 	}
 
@@ -278,8 +288,11 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					if (!isClosed) {
-						setupListening();
+					while (!isClosed && !setupListening()) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException ignore) {
+						}
 					}
 					return;
 				}

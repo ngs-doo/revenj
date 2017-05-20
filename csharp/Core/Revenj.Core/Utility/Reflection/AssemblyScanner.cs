@@ -15,6 +15,7 @@ namespace Revenj.Utility
 		/// Cache for <see cref="GetAssemblies"/>
 		/// </summary>
 		private static readonly List<Assembly> AllAssemblies = new List<Assembly>();
+		private static readonly HashSet<string> AssemblyNames = new HashSet<string>();
 
 		/// <summary>
 		/// Cache for <see cref="GetAllTypes"/>
@@ -30,20 +31,24 @@ namespace Revenj.Utility
 		{
 			if (AllAssemblies.Count == 0)
 			{
-				AllAssemblies.AddRange(
-					(from refAsm in AppDomain.CurrentDomain.GetAssemblies()
-					 from asm in GetAssemblyAndAllReferencedAssemblies(refAsm)
-					 where !asm.IsDynamic
-						 && !asm.FullName.StartsWith("Microsoft.")
-						 && !asm.FullName.StartsWith("Microsoft,")
-						 && !asm.FullName.StartsWith("Mono.")
-						 && !asm.FullName.StartsWith("Mono,")
-						 && !asm.FullName.StartsWith("System,")
-						 && !asm.FullName.StartsWith("System.")
-						 && !asm.FullName.StartsWith("mscorlib")
-						 && !asm.FullName.StartsWith("Oracle.DataAccess")
-						 && !asm.FullName.StartsWith("Revenj.DatabasePersistence.Oracle")
-					 select asm).Distinct());
+				foreach (var refAsm in AppDomain.CurrentDomain.GetAssemblies())
+				{
+					foreach (var asm in GetAssemblyAndAllReferencedAssemblies(refAsm))
+					{
+						if (asm.IsDynamic
+							|| asm.FullName.StartsWith("Microsoft.")
+							|| asm.FullName.StartsWith("Microsoft,")
+							|| asm.FullName.StartsWith("Mono.")
+							|| asm.FullName.StartsWith("Mono,")
+							|| asm.FullName.StartsWith("System,")
+							|| asm.FullName.StartsWith("System.")
+							|| asm.FullName.StartsWith("mscorlib")
+							|| asm.FullName.StartsWith("Oracle.DataAccess")
+							|| asm.FullName.StartsWith("Revenj.DatabasePersistence.Oracle")) continue;
+						if (AssemblyNames.Add(asm.FullName))
+							AllAssemblies.Add(asm);
+					}
+				}
 			}
 			return AllAssemblies;
 		}
