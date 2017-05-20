@@ -3,9 +3,11 @@ package org.revenj;
 import org.junit.Assert;
 import org.junit.Test;
 import org.revenj.extensibility.Container;
+import org.revenj.extensibility.InstanceScope;
 import org.revenj.patterns.Generic;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -201,6 +203,7 @@ public class TestContainer {
 		public Later(Callable<A> aCallable) {
 			this.aCallable = aCallable;
 		}
+
 		public A getA() throws Exception {
 			return aCallable.call();
 		}
@@ -221,6 +224,7 @@ public class TestContainer {
 		public SelfReference(Callable<SelfReference> self) {
 			this.self = self;
 		}
+
 		public SelfReference getSelf() throws Exception {
 			return self.call();
 		}
@@ -229,21 +233,107 @@ public class TestContainer {
 	@Test
 	public void selfReferenceSingleton() throws Exception {
 		Container container = new SimpleContainer(false);
-		container.register(SelfReference.class, true);
+		container.register(SelfReference.class, InstanceScope.SINGLETON);
 		SelfReference sr = container.resolve(SelfReference.class);
 		SelfReference sr2 = sr.getSelf();
 		Assert.assertEquals(sr, sr2);
 	}
 
-	static class Single {}
+	static class Single {
+	}
 
 	@Test
 	public void singletonInContext() throws Exception {
 		Container container = new SimpleContainer(false);
-		container.register(Single.class, true);
+		container.register(Single.class, InstanceScope.SINGLETON);
 		Container nested = container.createScope();
 		Single s1 = nested.resolve(Single.class);
 		Single s2 = container.resolve(Single.class);
 		Assert.assertEquals(s1, s2);
+	}
+
+	@Test
+	public void singletonFactory() throws Exception {
+		Container container = new SimpleContainer(false);
+		container.registerFactory(Single.class, c -> new Single(), InstanceScope.SINGLETON);
+		Single s1 = container.resolve(Single.class);
+		Single s2 = container.resolve(Single.class);
+		Assert.assertEquals(s1, s2);
+	}
+
+	@Test
+	public void singletonFactoryInScope() throws Exception {
+		Container container = new SimpleContainer(false);
+		container.registerFactory(Single.class, c -> new Single(), InstanceScope.SINGLETON);
+		Container c1 = container.createScope();
+		Single s1 = c1.resolve(Single.class);
+		Single s2 = c1.resolve(Single.class);
+		Assert.assertEquals(s1, s2);
+		Container c2 = container.createScope();
+		Single s3 = c2.resolve(Single.class);
+		Single s4 = c2.resolve(Single.class);
+		Assert.assertEquals(s3, s4);
+		Assert.assertEquals(s1, s3);
+	}
+
+	@Test
+	public void contextFactoryInScope() throws Exception {
+		Container container = new SimpleContainer(false);
+		container.registerFactory(Single.class, c -> new Single(), InstanceScope.CONTEXT);
+		Container c1 = container.createScope();
+		Single s1 = c1.resolve(Single.class);
+		Single s2 = c1.resolve(Single.class);
+		Assert.assertEquals(s1, s2);
+		Container c2 = container.createScope();
+		Single s3 = c2.resolve(Single.class);
+		Single s4 = c2.resolve(Single.class);
+		Assert.assertEquals(s3, s4);
+		Assert.assertNotEquals(s1, s3);
+	}
+
+	@Test
+	public void circularDependency() throws Exception {
+		Container container = new SimpleContainer(false);
+		container.register(CircularTop.class, InstanceScope.CONTEXT);
+		container.register(CircularDep.class, InstanceScope.CONTEXT);
+		try {
+			container.resolve((Type)CircularTop.class);
+			Assert.fail("Expecting exception");
+		} catch (ReflectiveOperationException ex) {
+			Assert.assertEquals("Unable to resolve: class org.revenj.TestContainer$CircularTop. Circular dependencies in signature detected", ex.getMessage());
+		}
+	}
+
+	@Test
+	public void singletonContainer() throws Exception {
+		Container container = new SimpleContainer(false);
+		container.register(UsesContainer.class, InstanceScope.SINGLETON);
+		Container scope = container.createScope();
+		UsesContainer uc = scope.resolve(UsesContainer.class);
+		Assert.assertEquals(container, uc.container);
+		Assert.assertNotEquals(scope, uc.container);
+	}
+
+	public static class UsesContainer {
+		public final Container container;
+		public UsesContainer(Container container) {
+			this.container = container;
+		}
+	}
+
+	public static class CircularTop {
+		public final CircularDep dep;
+
+		public CircularTop(CircularDep dep) {
+			this.dep = dep;
+		}
+	}
+
+	public static class CircularDep {
+		public final CircularTop top;
+
+		public CircularDep(CircularTop top) {
+			this.top = top;
+		}
 	}
 }

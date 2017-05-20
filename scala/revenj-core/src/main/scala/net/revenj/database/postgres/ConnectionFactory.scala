@@ -312,7 +312,7 @@ private [revenj] object ConnectionFactory {
         try {
           sspiClient.dispose()
         } catch {
-          case ex: RuntimeException =>
+          case _: RuntimeException =>
         }
       }
     }

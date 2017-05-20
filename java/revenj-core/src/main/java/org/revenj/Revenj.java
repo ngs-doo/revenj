@@ -2,14 +2,11 @@ package org.revenj;
 
 import org.postgresql.ds.PGPoolingDataSource;
 import org.revenj.database.postgres.converters.JsonConverter;
-import org.revenj.extensibility.Container;
-import org.revenj.extensibility.SystemState;
+import org.revenj.extensibility.*;
 import org.revenj.serialization.json.DslJsonSerialization;
 import org.revenj.patterns.*;
 import org.revenj.database.postgres.jinq.JinqMetaModel;
 import org.revenj.security.PermissionManager;
-import org.revenj.extensibility.PluginLoader;
-import org.revenj.extensibility.SystemAspect;
 import org.revenj.serialization.Serialization;
 import org.revenj.serialization.xml.XmlJaxbSerialization;
 import org.w3c.dom.Element;
@@ -101,12 +98,14 @@ public abstract class Revenj {
 		ClassLoader loader;
 		if (pluginsPath.isPresent()) {
 			File[] jars = pluginsPath.get().listFiles(f -> f.getPath().toLowerCase().endsWith(".jar"));
-			List<URL> urls = new ArrayList<>(jars.length);
-			for (File j : jars) {
-				try {
-					urls.add(j.toURI().toURL());
-				} catch (MalformedURLException ex) {
-					throw new IOException(ex);
+			List<URL> urls = new ArrayList<>(jars != null ? jars.length : 0);
+			if (jars != null) {
+				for (File j : jars) {
+					try {
+						urls.add(j.toURI().toURL());
+					} catch (MalformedURLException ex) {
+						throw new IOException(ex);
+					}
 				}
 			}
 			loader = classLoader.isPresent()
@@ -187,16 +186,16 @@ public abstract class Revenj {
 		container.registerInstance(ServiceLocator.class, container, false);
 		container.registerInstance(DataSource.class, dataSource, false);
 		container.registerInstance(ClassLoader.class, loader, false);
-		container.register(GlobalEventStore.class, true);
-		container.register(JsonConverter.class, true);
+		container.register(GlobalEventStore.class, InstanceScope.SINGLETON);
+		container.register(JsonConverter.class, InstanceScope.SINGLETON);
 		SimpleDomainModel domainModel = new SimpleDomainModel(loader);
 		container.registerInstance(DomainModel.class, domainModel, false);
-		container.registerFactory(DataContext.class, LocatorDataContext::asDataContext, false);
-		container.registerFactory(UnitOfWork.class, LocatorDataContext::asUnitOfWork, false);
+		container.registerFactory(DataContext.class, LocatorDataContext::asDataContext, InstanceScope.CONTEXT);
+		container.registerFactory(UnitOfWork.class, LocatorDataContext::asUnitOfWork, InstanceScope.TRANSIENT);
 		container.registerFactory(
 				new Generic<Function<Connection, DataContext>>(){}.type,
 				c -> (Function<Connection, DataContext>) connection -> LocatorDataContext.asDataContext(c, connection),
-				false);
+				InstanceScope.CONTEXT);
 		PluginLoader plugins = new ServicesPluginLoader(loader);
 		container.registerInstance(PluginLoader.class, plugins, false);
 		PostgresDatabaseNotification databaseNotification =
@@ -217,11 +216,13 @@ public abstract class Revenj {
 					} catch (ReflectiveOperationException e) {
 						throw new RuntimeException(e);
 					}
-				});
-		container.registerFactory(RepositoryBulkReader.class, PostgresBulkReader::create, false);
+				},
+				InstanceScope.CONTEXT);
+		container.registerFactory(RepositoryBulkReader.class, PostgresBulkReader::create, InstanceScope.CONTEXT);
 		container.registerInstance(PermissionManager.class, new RevenjPermissionManager(container), false);
-		container.registerClass(new Generic<Serialization<String>>() {
-		}.type, DslJsonSerialization.class, false);
+		container.registerType(DslJsonSerialization.class, DslJsonSerialization.class, InstanceScope.SINGLETON);
+		container.registerType(new Generic<Serialization<String>>() {
+		}.type, DslJsonSerialization.class, InstanceScope.SINGLETON);
 		XmlJaxbSerialization xml = new XmlJaxbSerialization(container, Optional.of(plugins));
 		container.registerInstance(new Generic<Serialization<Element>>() {
 		}.type, xml, false);
@@ -244,28 +245,28 @@ public abstract class Revenj {
 		Type gt = Utils.makeGenericType(DomainEventHandler.class, manifest);
 		List<Class<DomainEventHandler>> eventHandlers = plugins.find(DomainEventHandler.class, manifest);
 		for (Class<DomainEventHandler> h : eventHandlers) {
-			container.registerClass(h, h, false);
-			container.registerClass(gt, h, false);
+			container.registerType(h, h, InstanceScope.CONTEXT);
+			container.registerType(gt, h, InstanceScope.CONTEXT);
 		}
 		gt = Utils.makeGenericType(DomainEventHandler.class, arrayManifest);
 		eventHandlers = plugins.find(DomainEventHandler.class, arrayManifest);
 		for (Class<DomainEventHandler> h : eventHandlers) {
-			container.registerClass(h, h, false);
-			container.registerClass(gt, h, false);
+			container.registerType(h, h, InstanceScope.CONTEXT);
+			container.registerType(gt, h, InstanceScope.CONTEXT);
 		}
 		Type ct = Utils.makeGenericType(Callable.class, manifest);
 		gt = Utils.makeGenericType(DomainEventHandler.class, ct);
 		eventHandlers = plugins.find(DomainEventHandler.class, ct);
 		for (Class<DomainEventHandler> h : eventHandlers) {
-			container.registerClass(h, h, false);
-			container.registerClass(gt, h, false);
+			container.registerType(h, h, InstanceScope.CONTEXT);
+			container.registerType(gt, h, InstanceScope.CONTEXT);
 		}
 		ct = Utils.makeGenericType(Callable.class, arrayManifest);
 		gt = Utils.makeGenericType(DomainEventHandler.class, ct);
 		eventHandlers = plugins.find(DomainEventHandler.class, ct);
 		for (Class<DomainEventHandler> h : eventHandlers) {
-			container.registerClass(h, h, false);
-			container.registerClass(gt, h, false);
+			container.registerType(h, h, InstanceScope.CONTEXT);
+			container.registerType(gt, h, InstanceScope.CONTEXT);
 		}
 	}
 }

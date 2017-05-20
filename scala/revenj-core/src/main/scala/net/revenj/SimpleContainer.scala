@@ -21,7 +21,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
   def this(resolveUnknown: Boolean, loader: ClassLoader) {
     this(None, resolveUnknown, runtimeMirror(loader))
     registerGenerics[Option[_]]((locator, args) => locator.resolve(args(0)).toOption)
-    registerGenerics[scala.Function0[_]]((locator, args) => () => locator.resolve(args(0)).getOrElse(throw new ReflectiveOperationException("Unable to resolve factory for: " + args(0))))
+    registerGenerics[scala.Function0[_]]((locator, args) => () => locator.resolve(args(0)).getOrElse(throw new ReflectiveOperationException(s"Unable to resolve factory for: ${args(0)}")))
   }
 
   private val classCache = new TrieMap[Class[_], Array[CtorInfo]]
@@ -90,7 +90,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
       var i = 0
       while (success && i < genTypes.length) {
         val p = genTypes(i)
-        val arg = tryResolve(p, caller)
+        val arg = caller.resolve(p)
         if (arg.isFailure) {
           success = false
           errors += arg
@@ -132,7 +132,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
           }
         case _ =>
           if (typeInfo.constructors.isDefined && typeInfo.constructors.isEmpty && typeInfo.mappedType.isDefined) {
-            tryResolve(typeInfo.mappedType.get, caller)
+            caller.resolve(typeInfo.mappedType.get)
           } else {
             val mappings = typeInfo.mappings
             tryResolveTypeFrom(typeInfo, mappings, caller)
@@ -164,7 +164,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   success = false
                   errors += Failure(new ReflectiveOperationException(s"Nested parametrized type: $nestedType is not an instance of Class<?>. Error while resolving constructor: ${info.ctor}"))
                 } else if (nestedInfo.rawClass.get eq classOf[Option[_]]) {
-                  args(i) = tryResolve(nestedInfo.genericArguments.get(0), caller).toOption
+                  args(i) = caller.resolve(nestedInfo.genericArguments.get(0)).toOption
                 } else {
                   val nestedMappings = new mutable.HashMap[JavaType, JavaType]
                   nestedMappings ++= typeInfo.mappings
@@ -191,7 +191,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   }
                 }
                 if (success) {
-                  val arg = tryResolve(c.get, caller)
+                  val arg = caller.resolve(c.get)
                   if (arg.isFailure) {
                     success = false
                     errors += arg
@@ -370,14 +370,17 @@ If you wish to resolve types not registered in the container, specify revenj.res
   }
 
   private def resolveRegistration(registration: Registration[AnyRef], caller: SimpleContainer): Try[AnyRef] = {
+    def prepareRegistration = {
+      if (registration.lifetime == Singleton) (registration.owner, registration)
+      else if (registration.owner eq caller) (this, registration)
+      else (caller, registration.prepareSingleton(caller))
+    }
     if (registration.instance.isDefined) {
       Success(registration.instance.get)
     } else if (registration.singleFactory.isDefined) {
       Try {
         if (registration.lifetime != Transient) {
-          val (self, reg) =
-            if (registration.lifetime == Singleton || registration.owner == caller) (this, registration)
-            else (caller, registration.prepareSingleton(caller))
+          val (self, reg) = prepareRegistration
           self synchronized {
             if (reg.promoted) {
               reg.instance
@@ -401,9 +404,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
       }
     } else {
       if (registration.lifetime != Transient) {
-        val (self, reg) =
-          if (registration.lifetime == Singleton || registration.owner == caller) (this, registration)
-          else (caller, registration.prepareSingleton(caller))
+        val (self, reg) = prepareRegistration
         self synchronized {
           if (reg.promoted) {
             Success(reg.instance)
@@ -411,7 +412,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
             Failure(new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected"))
           } else if (reg.manifest.isDefined) {
             reg.promoting = true
-            val tryInstance = tryResolveClass(reg.manifest.get, caller)
+            val tryInstance = self.tryResolveClass(reg.manifest.get, self)
             if (tryInstance.isSuccess) {
               tryInstance.get match {
                 case closeable: AutoCloseable =>
@@ -422,7 +423,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
             }
             tryInstance
           } else {
-            Failure(new ReflectiveOperationException(s"Unable to resolve: $registration"))
+            Failure(new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}"))
           }
         }
       } else if (registration.manifest.isDefined) {
@@ -487,9 +488,10 @@ If you wish to resolve types not registered in the container, specify revenj.res
   def close(): Unit = {
     closed = true
     container.clear
-    val it = closeables.iterator
-    while (it.hasNext) {
-      it.next().close()
+    var i = 0
+    while (i < closeables.size()) {
+      closeables.get(i).close()
+      i += 1
     }
     closeables.clear()
   }

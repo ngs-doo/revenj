@@ -2,6 +2,7 @@ package net.revenj.server.commands.crud
 
 import net.revenj.patterns._
 import net.revenj.serialization.Serialization
+import net.revenj.server.commands.Utils
 import net.revenj.server.commands.crud.Delete.Argument
 import net.revenj.server.{CommandResult, ServerCommand}
 
@@ -26,7 +27,7 @@ class Delete(domainModel: DomainModel) extends ServerCommand {
     } else if (!classOf[AggregateRoot].isAssignableFrom(manifest.get)) {
       CommandResult.badRequest(s"Specified type is not an aggregate root: ${arg.get.Name}")
     } else {
-      val tryRepository = locator.resolve(classOf[PersistableRepository[AggregateRoot]], manifest.get)
+      val tryRepository = Utils.resolve(locator, classOf[PersistableRepository[AggregateRoot]], manifest.get)
       if (!tryRepository.isSuccess) {
         CommandResult.badRequest(s"Error resolving repository for: ${arg.get.Name}. Reason: ${tryRepository.failed.get.getMessage}")
       } else {

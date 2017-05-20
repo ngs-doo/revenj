@@ -12,7 +12,7 @@ public interface PluginLoader {
 		try (Container scope = container.createScope()) {
 			List<Class<T>> manifests = find(manifest);
 			for (Class<T> sc : manifests) {
-				scope.registerClass(manifest, sc, false);
+				scope.registerType(manifest, sc, InstanceScope.CONTEXT);
 			}
 			return (T[]) scope.resolve((GenericArrayType) () -> manifest);
 		}

@@ -1,6 +1,8 @@
 package org.revenj;
 
 import org.revenj.extensibility.Container;
+import org.revenj.extensibility.InstanceScope;
+import org.revenj.patterns.ServiceLocator;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -14,49 +16,83 @@ import java.util.function.Function;
 final class SimpleContainer implements Container {
 
 	private static class Registration<T> {
+		public final Registration<T> parent;
+		public final Type signature;
 		public final SimpleContainer owner;
 		public final Class<T> manifest;
 		public T instance;
 		public final Function<Container, T> singleFactory;
 		public final BiFunction<Container, Type[], T> biFactory;
-		public final boolean singleton;
+		public final InstanceScope lifetime;
+
+		public final String name;
 
 		private Registration(
+				Registration<T> parent,
+				Type signature,
 				SimpleContainer owner,
 				Class<T> manifest,
 				T instance,
 				Function<Container, T> singleFactory,
 				BiFunction<Container, Type[], T> biFactory,
-				boolean singleton) {
+				InstanceScope lifetime) {
+			this.parent = parent;
+			this.signature = signature;
 			this.owner = owner;
 			this.manifest = manifest;
 			this.instance = instance;
 			this.singleFactory = singleFactory;
 			this.biFactory = biFactory;
-			this.singleton = singleton;
+			this.lifetime = lifetime;
+
+			this.name = signature.getTypeName();
 		}
 
-		static <T> Registration<T> register(SimpleContainer owner, Class<T> manifest, boolean singleton) {
-			return new Registration<>(owner, manifest, null, null, null, singleton);
+		static <T> Registration<T> register(Type signature, SimpleContainer owner, Class<T> manifest, InstanceScope lifetime) {
+			return new Registration<>(null, signature, owner, manifest, null, null, null, lifetime);
 		}
 
-		static <T> Registration<T> register(SimpleContainer owner, T instance) {
-			return new Registration<>(owner, null, instance, null, null, true);
+		static <T> Registration<T> register(Type signature, SimpleContainer owner, T instance, boolean singleton) {
+			return new Registration<>(null, signature, owner, null, instance, null, null, singleton ? InstanceScope.SINGLETON : InstanceScope.CONTEXT);
 		}
 
-		static <T> Registration<T> register(SimpleContainer owner, Function<Container, T> factory, boolean singleton) {
-			return new Registration<>(owner, null, null, factory, null, singleton);
+		static <T> Registration<T> register(Type signature, SimpleContainer owner, Function<Container, T> factory, InstanceScope lifetime) {
+			return new Registration<>(null, signature, owner, null, null, factory, null, lifetime);
 		}
 
-		static <T> Registration<T> register(SimpleContainer owner, BiFunction<Container, Type[], T> factory, boolean singleton) {
-			return new Registration<>(owner, null, null, null, factory, singleton);
+		static <T> Registration<T> register(Type signature, SimpleContainer owner, BiFunction<Container, Type[], T> factory, InstanceScope lifetime) {
+			return new Registration<>(null, signature, owner, null, null, null, factory, lifetime);
 		}
 
 		boolean promoted;
+		boolean promoting;
 
 		void promoteToSingleton(Object instance) {
 			promoted = true;
+			promoting = false;
 			this.instance = (T) instance;
+		}
+
+		Registration<T> prepareSingleton(SimpleContainer caller) {
+			Registration<T> registration = new Registration<>(this, signature, caller, manifest, null, singleFactory, biFactory, InstanceScope.CONTEXT);
+			caller.addToRegistry(registration);
+			return registration;
+		}
+
+		@Override
+		public int hashCode() {
+			return parent == null ? super.hashCode() : parent.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof Registration) {
+				Registration reg = (Registration)obj;
+				Registration thisParent = parent != null ? parent : this;
+				Registration regParent = reg.parent != null ? reg.parent : reg;
+				return thisParent == regParent;
+			}
+			return false;
 		}
 	}
 
@@ -142,6 +178,7 @@ final class SimpleContainer implements Container {
 	private final Map<Type, List<Registration<?>>> container = new HashMap<>();
 	private final SimpleContainer parent;
 	private final boolean resolveUnknown;
+	private boolean closed = false;
 
 	private final CopyOnWriteArrayList<AutoCloseable> closeables = new CopyOnWriteArrayList<>();
 
@@ -156,15 +193,19 @@ final class SimpleContainer implements Container {
 					} catch (ReflectiveOperationException ignore) {
 						return Optional.empty();
 					}
-				}
+				},
+				InstanceScope.TRANSIENT
 		);
-		registerGenerics(Callable.class, (locator, args) -> () -> locator.resolve(args[0]));
-		registerFactory(Container.class, Container::createScope, false);
+		registerGenerics(Callable.class, (locator, args) -> () -> locator.resolve(args[0]), InstanceScope.TRANSIENT);
+		registerInstance(Container.class, this, false);
+		registerInstance(ServiceLocator.class, this, false);
 	}
 
 	private SimpleContainer(SimpleContainer parent) {
 		this.parent = parent;
 		this.resolveUnknown = parent.resolveUnknown;
+		registerInstance(Container.class, this, false);
+		registerInstance(ServiceLocator.class, this, false);
 	}
 
 	private Either<Object> tryResolveClass(Class<?> manifest, SimpleContainer caller) {
@@ -184,6 +225,7 @@ final class SimpleContainer implements Container {
 			boolean success = true;
 			for (int i = 0; i < genTypes.length; i++) {
 				Type p = genTypes[i];
+				//TODO: use try so it can be redirected
 				Either<Object> arg = tryResolve(p, caller);
 				if (arg.hasError()) {
 					success = false;
@@ -340,6 +382,12 @@ final class SimpleContainer implements Container {
 
 	@Override
 	public Object resolve(Type type) throws ReflectiveOperationException {
+		if (closed) {
+			if (parent != null) {
+				return parent.resolve(type);
+			}
+			throw new ReflectiveOperationException("Container has been closed");
+		}
 		Either<Object> found = tryResolve(type, this);
 		if (found.hasError()) {
 			if (found.error instanceof ReflectiveOperationException) {
@@ -446,16 +494,27 @@ final class SimpleContainer implements Container {
 			try {
 				//TODO match registration owner and caller
 				Object instance;
-				if (registration.singleton) {
-					synchronized (this) {
-						if (registration.promoted) {
-							return Either.success(registration.instance);
+				if (registration.lifetime != InstanceScope.TRANSIENT) {
+					final SimpleContainer self = registration.lifetime == InstanceScope.SINGLETON
+							? registration.owner
+							: registration.owner == caller
+							? this
+							: caller;
+					final Registration<?> reg = registration.lifetime == InstanceScope.SINGLETON || registration.owner == caller
+							? registration
+							: registration.prepareSingleton(caller);
+					synchronized (self) {
+						if (reg.promoted) {
+							return Either.success(reg.instance);
+						} else if (reg.promoting) {
+							return Either.fail("Unable to resolve: " + registration.signature + ". Circular dependencies in signature detected");
 						}
-						instance = registration.singleFactory.apply(this);
+						reg.promoting = true;
+						instance = reg.singleFactory.apply(self);
 						if (instance instanceof AutoCloseable) {
-							closeables.add((AutoCloseable) instance);
+							self.closeables.add((AutoCloseable) instance);
 						}
-						registration.promoteToSingleton(instance);
+						reg.promoteToSingleton(instance);
 					}
 				} else {
 					instance = registration.singleFactory.apply(this);
@@ -465,17 +524,30 @@ final class SimpleContainer implements Container {
 				return Either.fail(ex);
 			}
 		}
-		if (registration.singleton) {
-			synchronized (this) {
-				if (registration.promoted) {
-					return Either.success(registration.instance);
+		if (registration.lifetime != InstanceScope.TRANSIENT) {
+			final SimpleContainer self = registration.lifetime == InstanceScope.SINGLETON
+					? registration.owner
+					: registration.owner == caller
+					? this
+					: caller;
+			final Registration<?> reg = registration.lifetime == InstanceScope.SINGLETON || registration.owner == caller
+					? registration
+					: registration.prepareSingleton(caller);
+			synchronized (self) {
+				if (reg.promoted) {
+					return Either.success(reg.instance);
+				} else if (reg.promoting) {
+					return Either.fail("Unable to resolve: " + registration.signature + ". Circular dependencies in signature detected");
+				} else if (reg.manifest == null) {
+					return Either.fail("Unable to resolve: " + registration.signature);
 				}
-				Either<Object> tryInstance = tryResolveClass(registration.manifest, caller);
+				reg.promoting = true;
+				Either<Object> tryInstance = self.tryResolveClass(reg.manifest, self);
 				if (tryInstance.isPresent()) {
 					if (tryInstance.value instanceof AutoCloseable) {
-						closeables.add((AutoCloseable) tryInstance.value);
+						self.closeables.add((AutoCloseable) tryInstance.value);
 					}
-					registration.promoteToSingleton(tryInstance.value);
+					reg.promoteToSingleton(tryInstance.value);
 				}
 				return tryInstance;
 			}
@@ -483,21 +555,21 @@ final class SimpleContainer implements Container {
 		return tryResolveClass(registration.manifest, caller);
 	}
 
-	private synchronized void addToRegistry(Type type, Registration registration) {
-		List<Registration<?>> registrations = container.get(type);
-		typeNameMappings.put(type.toString(), type);
+	private synchronized void addToRegistry(Registration registration) {
+		List<Registration<?>> registrations = container.get(registration.signature);
+		typeNameMappings.put(registration.name, registration.signature);
 		if (registrations == null) {
 			registrations = new CopyOnWriteArrayList<>();
 			registrations.add(registration);
-			container.put(type, registrations);
+			container.put(registration.signature, registrations);
 		} else {
 			registrations.add(registration);
 		}
 	}
 
 	@Override
-	public void registerClass(Type type, Class<?> manifest, boolean singleton) {
-		addToRegistry(type, Registration.register(this, manifest, singleton));
+	public void registerType(Type type, Class<?> manifest, InstanceScope lifetime) {
+		addToRegistry(Registration.register(type, this, manifest, lifetime));
 	}
 
 	@Override
@@ -505,17 +577,17 @@ final class SimpleContainer implements Container {
 		if (handleClose && service instanceof AutoCloseable) {
 			closeables.add((AutoCloseable) service);
 		}
-		addToRegistry(type, Registration.register(this, service));
+		addToRegistry(Registration.register(type, this, service, false));
 	}
 
 	@Override
-	public void registerFactory(Type type, Function<Container, ?> factory, boolean singleton) {
-		addToRegistry(type, Registration.register(this, factory, singleton));
+	public void registerFactory(Type type, Function<Container, ?> factory, InstanceScope lifetime) {
+		addToRegistry(Registration.register(type, this, factory, lifetime));
 	}
 
 	@Override
-	public <T> void registerGenerics(Class<T> container, BiFunction<Container, Type[], T> factory) {
-		addToRegistry(container, Registration.register(this, factory, false));
+	public <T> void registerGenerics(Class<T> container, BiFunction<Container, Type[], T> factory, InstanceScope lifetime) {
+		addToRegistry(Registration.register(container, this, factory, lifetime));
 	}
 
 	@Override
@@ -525,6 +597,7 @@ final class SimpleContainer implements Container {
 
 	@Override
 	public void close() throws Exception {
+		closed = true;
 		container.clear();
 		for (AutoCloseable closable : closeables) {
 			closable.close();

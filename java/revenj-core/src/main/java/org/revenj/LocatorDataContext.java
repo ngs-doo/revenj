@@ -23,23 +23,25 @@ final class LocatorDataContext implements UnitOfWork {
 	private ConcurrentHashMap<Class<?>, DomainEventStore> eventStores;
 	private GlobalEventStore globalEventStore;
 	private DataChangeNotification changes;
+	private final boolean manageConnection;
 	private final Connection connection;
 	private boolean hasChanges;
 	private boolean closed;
 
-	LocatorDataContext(Container scope, Connection connection) {
+	LocatorDataContext(Container scope, boolean manageConnection, Connection connection) {
 		this.scope = scope;
+		this.manageConnection = manageConnection;
 		this.connection = connection;
 	}
 
 	static DataContext asDataContext(Container container) {
-		return new LocatorDataContext(container, null);
+		return new LocatorDataContext(container, false, null);
 	}
 
 	static DataContext asDataContext(Container container, Connection connection) {
 		Container scope = container.createScope();
 		scope.registerInstance(Connection.class, connection, false);
-		return new LocatorDataContext(scope, connection);
+		return new LocatorDataContext(scope, false, connection);
 	}
 
 	static UnitOfWork asUnitOfWork(Container container) {
@@ -62,7 +64,7 @@ final class LocatorDataContext implements UnitOfWork {
 		}
 		Container scope = container.createScope();
 		scope.registerInstance(Connection.class, connection, false);
-		return new LocatorDataContext(scope, connection);
+		return new LocatorDataContext(scope, true, connection);
 	}
 
 	private <T extends DataSource> SearchableRepository<T> getSearchableRepository(Class<T> manifest) {
@@ -261,7 +263,7 @@ final class LocatorDataContext implements UnitOfWork {
 		if (closed) {
 			return;
 		}
-		if (connection != null) {
+		if (connection != null && manageConnection) {
 			if (hasChanges) {
 				rollback();
 			}
@@ -271,12 +273,14 @@ final class LocatorDataContext implements UnitOfWork {
 			} catch (SQLException e) {
 				throw new IOException(e);
 			}
+		}
+		if (connection != null) {
+			closed = true;
 			try {
 				scope.close();
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
 		}
-		closed = true;
 	}
 }

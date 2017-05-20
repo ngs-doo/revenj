@@ -2,7 +2,7 @@ package net.revenj
 
 import java.time.OffsetDateTime
 
-import net.revenj.extensibility.InstanceScope
+import net.revenj.extensibility.{Container, InstanceScope}
 import net.revenj.patterns.{AggregateDomainEvent, AggregateDomainEventHandler, AggregateRoot, DomainEventHandler}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -207,6 +207,14 @@ class ContainerCheck extends Specification with ScalaCheck {
       tryResolve.isFailure === true
       tryResolve.failed.get.getMessage === "Unable to resolve: class net.revenj.CircularTop. Circular dependencies in signature detected"
     }
+    "singleton container" >> {
+      val container = new SimpleContainer(false, cl)
+      container.register[UsesContainer](InstanceScope.Singleton)
+      val scope = container.createScope()
+      val uc = scope.resolve[UsesContainer]
+      container === uc.container
+      scope !== uc.container
+    }
   }
 }
 
@@ -271,3 +279,5 @@ object AggEventHandler2 extends AggregateDomainEventHandler[Agg, AggEvent] {
 
 class CircularTop(val dep: CircularDep)
 class CircularDep(val top: CircularTop)
+
+class UsesContainer(val container: Container)

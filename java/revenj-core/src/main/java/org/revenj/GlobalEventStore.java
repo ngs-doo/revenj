@@ -99,9 +99,5 @@ class GlobalEventStore implements Closeable {
 	@Override
 	public void close() throws IOException {
 		isClosed = true;
-		try {
-			container.close();
-		} catch (Exception ignore) {
-		}
 	}
 }

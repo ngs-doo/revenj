@@ -30,7 +30,7 @@ class SubmitEvent(domainModel: DomainModel) extends ServerCommand {
       if (!instance.isSuccess) {
         CommandResult.badRequest(s"Error deserializing provided input for: ${arg.get.Name}. Reason: ${instance.failed.get.getMessage}")
       } else {
-        val tryStore = locator.resolve(classOf[DomainEventStore[DomainEvent]], manifest.get)
+        val tryStore = Utils.resolve(locator, classOf[DomainEventStore[DomainEvent]], manifest.get)
         if (!tryStore.isSuccess) {
           CommandResult.badRequest(s"Error resolving event store for: ${arg.get.Name}. Reason: ${tryStore.failed.get.getMessage}")
         } else {

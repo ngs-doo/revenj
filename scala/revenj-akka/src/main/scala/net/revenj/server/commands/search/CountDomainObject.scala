@@ -2,6 +2,7 @@ package net.revenj.server.commands.search
 
 import net.revenj.patterns._
 import net.revenj.serialization.Serialization
+import net.revenj.server.commands.Utils
 import net.revenj.server.commands.search.CountDomainObject.Argument
 import net.revenj.server.{CommandResult, ReadOnlyServerCommand}
 
@@ -25,7 +26,7 @@ class CountDomainObject(domainModel: DomainModel) extends ReadOnlyServerCommand 
     } else if (!classOf[DataSource].isAssignableFrom(manifest.get)) {
       CommandResult.badRequest(s"Specified type is not a data source: ${arg.get.Name}")
     } else {
-      val tryRepository = locator.resolve(classOf[SearchableRepository[DataSource]], manifest.get)
+      val tryRepository = Utils.resolve(locator, classOf[SearchableRepository[DataSource]], manifest.get)
       if (!tryRepository.isSuccess) {
         CommandResult.badRequest(s"Error resolving repository for: ${arg.get.Name}. Reason: ${tryRepository.failed.get.getMessage}")
       } else {

@@ -40,7 +40,7 @@ class PersistAggregateRoot(domainModel: DomainModel) extends ServerCommand {
       } else if (insertData.get.isEmpty && updateData.get.isEmpty && deleteData.get.isEmpty) {
         CommandResult.badRequest("Data not sent or deserialized unsuccessfully.")
       } else {
-        val tryRepository = locator.resolve(classOf[PersistableRepository[AggregateRoot]], manifest.get)
+        val tryRepository = Utils.resolve(locator, classOf[PersistableRepository[AggregateRoot]], manifest.get)
         if (!tryRepository.isSuccess) {
           CommandResult.badRequest(s"Error resolving repository for: ${arg.get.RootName}. Reason: ${tryRepository.failed.get.getMessage}")
         } else {

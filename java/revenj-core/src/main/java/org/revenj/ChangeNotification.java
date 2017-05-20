@@ -1,6 +1,7 @@
 package org.revenj;
 
 import org.revenj.extensibility.Container;
+import org.revenj.extensibility.InstanceScope;
 import org.revenj.patterns.DataChangeNotification;
 import rx.Observable;
 import rx.Subscription;
@@ -82,7 +83,8 @@ final class ChangeNotification<T> implements Closeable {
 						}
 					}
 					throw new RuntimeException("Invalid arguments for Observable<T>. Supported arguments: Observable<Callable<List<T>>>, Observable<T> and Observable<Callable<T>>");
-				}
+				},
+				InstanceScope.TRANSIENT
 		);
 	}
 

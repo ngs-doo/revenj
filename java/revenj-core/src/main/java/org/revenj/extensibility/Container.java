@@ -8,30 +8,62 @@ import java.util.function.Function;
 
 public interface Container extends ServiceLocator, AutoCloseable {
 
-	void registerClass(Type type, Class<?> manifest, boolean singleton);
+	@Deprecated
+	default void registerClass(Type type, Class<?> manifest, boolean singleton) {
+		registerType(type, manifest, singleton ? InstanceScope.SINGLETON : InstanceScope.TRANSIENT);
+	}
+
+	void registerType(Type type, Class<?> manifest, InstanceScope scope);
 
 	void registerInstance(Type type, Object service, boolean handleClose);
 
-	void registerFactory(Type type, Function<Container, ?> factory, boolean singleton);
+	@Deprecated
+	default void registerFactory(Type type, Function<Container, ?> factory, boolean singleton) {
+		registerFactory(type, factory, singleton ? InstanceScope.SINGLETON : InstanceScope.CONTEXT);
+	}
 
-	<T> void registerGenerics(Class<T> manifest, BiFunction<Container, Type[], T> factory);
+	@Deprecated
+	default void registerFactory(Type type, Function<Container, ?> factory) {
+		registerFactory(type, factory, InstanceScope.TRANSIENT);
+	}
 
+	void registerFactory(Type type, Function<Container, ?> factory, InstanceScope scope);
+
+	default	<T> void registerFactory(Class<T> manifest, Function<Container, T> factory, InstanceScope scope) {
+		registerFactory((Type)manifest, factory, scope);
+	}
+
+	<T> void registerGenerics(Class<T> manifest, BiFunction<Container, Type[], T> factory, InstanceScope scope);
+
+	@Deprecated
 	default <T> void register(Class<T> manifest, boolean singleton) {
-		registerClass(manifest, manifest, singleton);
+		registerType(manifest, manifest, singleton ? InstanceScope.SINGLETON : InstanceScope.TRANSIENT);
+	}
+
+	default <T> void register(Class<T> manifest, InstanceScope scope) {
+		registerType(manifest, manifest, scope);
 	}
 
 	default <T> void register(Class<T> manifest, Class<?>... manifests) {
-		registerClass(manifest, manifest, false);
+		registerType(manifest, manifest, InstanceScope.TRANSIENT);
 		for (Class<?> it : manifests) {
-			registerClass(it, it, false);
+			registerType(it, it, InstanceScope.TRANSIENT);
 		}
+	}
+
+	@Deprecated
+	default <TInterface, TService extends TInterface> void registerAs(
+			Class<TService> manifest,
+			Class<TInterface> as,
+			boolean singleton) {
+		registerAs(manifest, as, singleton ? InstanceScope.SINGLETON : InstanceScope.TRANSIENT);
 	}
 
 	default <TInterface, TService extends TInterface> void registerAs(
 			Class<TService> manifest,
 			Class<TInterface> as,
-			boolean singleton) {
-		registerClass(as, manifest, singleton);
+			InstanceScope scope) {
+		registerType(as, manifest, scope);
 	}
 
 	default <T> void registerInstance(T service) {
@@ -43,7 +75,7 @@ public interface Container extends ServiceLocator, AutoCloseable {
 	}
 
 	default <T> void register(Class<T> manifest, Function<Container, T> service) {
-		registerFactory(manifest, service, false);
+		registerFactory(manifest, service, InstanceScope.TRANSIENT);
 	}
 
 	Container createScope();

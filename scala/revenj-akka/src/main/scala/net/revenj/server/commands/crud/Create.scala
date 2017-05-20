@@ -2,6 +2,7 @@ package net.revenj.server.commands.crud
 
 import net.revenj.patterns.{AggregateRoot, DomainModel, PersistableRepository, ServiceLocator}
 import net.revenj.serialization.Serialization
+import net.revenj.server.commands.Utils
 import net.revenj.server.commands.crud.Create.Argument
 import net.revenj.server.{CommandResult, ServerCommand}
 
@@ -30,7 +31,7 @@ class Create(domainModel: DomainModel) extends ServerCommand {
       if (!instance.isSuccess) {
         CommandResult.badRequest(s"Error deserializing provided input for: ${arg.get.Name}. Reason: ${instance.failed.get.getMessage}")
       } else {
-        val tryRepository = locator.resolve(classOf[PersistableRepository[AggregateRoot]], manifest.get)
+        val tryRepository = Utils.resolve(locator, classOf[PersistableRepository[AggregateRoot]], manifest.get)
         if (!tryRepository.isSuccess) {
           CommandResult.badRequest(s"Error resolving repository for: ${arg.get.Name}. Reason: ${tryRepository.failed.get.getMessage}")
         } else {

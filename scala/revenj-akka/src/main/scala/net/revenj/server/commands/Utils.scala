@@ -1,10 +1,12 @@
 package net.revenj.server.commands
 
+import java.lang.reflect.Type
+
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.CustomHeader
 import akka.stream.Materializer
 import akka.util.ByteString
-import net.revenj.patterns.DomainModel
+import net.revenj.patterns.{DomainModel, ServiceLocator}
 import net.revenj.server._
 
 import scala.collection.immutable
@@ -130,5 +132,9 @@ private[revenj] object Utils {
             ContentTypes.`text/plain(UTF-8)`,
             if (ex.getMessage == null) ex.toString else ex.getMessage))
     }
+  }
+
+  def resolve[T](locator: ServiceLocator, container: Class[T], argument: Type, arguments: Type*): Try[T] = {
+    locator.resolve(net.revenj.Utils.makeGenericType(container, argument, arguments: _*)).map(_.asInstanceOf[T])
   }
 }

@@ -2,6 +2,7 @@ package net.revenj.server.commands.crud
 
 import net.revenj.patterns._
 import net.revenj.serialization.Serialization
+import net.revenj.server.commands.Utils
 import net.revenj.server.commands.crud.Read.Argument
 import net.revenj.server.{CommandResult, ReadOnlyServerCommand}
 
@@ -26,7 +27,7 @@ class Read(domainModel: DomainModel) extends ReadOnlyServerCommand {
     } else if (!classOf[Identifiable].isAssignableFrom(manifest.get)) {
       CommandResult.badRequest(s"Specified type is not an identifiable: ${arg.get.Name}")
     } else {
-      val tryRepository = locator.resolve(classOf[Repository[Identifiable]], manifest.get)
+      val tryRepository = Utils.resolve(locator, classOf[Repository[Identifiable]], manifest.get)
       if (!tryRepository.isSuccess) {
         CommandResult.badRequest(s"Error resolving repository for: ${arg.get.Name}. Reason: ${tryRepository.failed.get.getMessage}")
       } else {

@@ -34,11 +34,11 @@ class SubmitAggregateEvent(domainModel: DomainModel) extends ServerCommand {
         if (!classOf[AggregateRoot].isAssignableFrom(aggType)) {
           CommandResult.badRequest(s"Specified type is not an aggregate domain event: ${arg.get.Name}")
         } else {
-          val tryRepo = locator.resolve(classOf[Repository[AggregateRoot]], aggType)
+          val tryRepo = Utils.resolve(locator, classOf[Repository[AggregateRoot]], aggType)
           if (!tryRepo.isSuccess) {
             CommandResult.badRequest(s"Error resolving repository for: ${aggType.getSimpleName}. Reason: ${tryRepo.failed.get.getMessage}")
           } else {
-            val tryStore = locator.resolve(classOf[DomainEventStore[DomainEvent]], manifest.get)
+            val tryStore = Utils.resolve(locator, classOf[DomainEventStore[DomainEvent]], manifest.get)
             if (!tryStore.isSuccess) {
               CommandResult.badRequest(s"Error resolving event store for: ${arg.get.Name}. Reason: ${tryStore.failed.get.getMessage}")
             } else {

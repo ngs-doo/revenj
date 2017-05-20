@@ -10,7 +10,8 @@ import scala.reflect.runtime.universe.TypeTag
 
 trait Container extends ServiceLocator with AutoCloseable {
 
-  private[revenj] def registerType[T](manifest: Type, implementation: Class[T], lifetime: InstanceScope = Transient): this.type
+  @deprecated("avoid using this unbounded method. Prefer bounded ones instead", "0.6.0")
+  def registerType[T](manifest: Type, implementation: Class[T], lifetime: InstanceScope = Transient): this.type
 
   @deprecated("use register with InstanceScope instead", "0.5.3")
   def register[T](singleton: Boolean)(implicit manifest: ClassTag[T]): this.type = {

@@ -177,8 +177,8 @@ private[revenj] class LocatorDataContext(
         Await.result(rollbackAndClose, Duration.Inf)
       })
     if (connection.isDefined) {
-      scope.close()
       closed = true
+      scope.close()
     }
   }
 }

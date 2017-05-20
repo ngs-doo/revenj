@@ -86,7 +86,7 @@ public class ExecuteService implements ServerCommand {
 		} catch (ReflectiveOperationException e) {
 			for (Constructor ctor : manifest.getConstructors()) {
 				try {
-					service = (ServerService) locator.create(ctor);
+					service = (ServerService) create(locator, ctor);
 				} catch (ReflectiveOperationException ignore) {
 				}
 			}
@@ -100,5 +100,14 @@ public class ExecuteService implements ServerCommand {
 		} catch (IOException e) {
 			return new CommandResult<>(null, "Error serializing result.", 500);
 		}
+	}
+
+	private static <T> T create(ServiceLocator locator, Constructor<T> ctor) throws ReflectiveOperationException {
+		Type[] types = ctor.getGenericParameterTypes();
+		Object[] dependencies = new Object[types.length];
+		for (int i = 0; i < types.length; i++) {
+			dependencies[i] = locator.resolve(types[i]);
+		}
+		return ctor.newInstance(dependencies);
 	}
 }
