@@ -289,7 +289,9 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
             try {
               threadAlive = false
               currentStream = None
-              systemState.notify(SystemState.SystemEvent("notification", s"error: ${ex.getMessage}"))
+              if (!isClosed) {
+                systemState.notify(SystemState.SystemEvent("notification", s"error: ${ex.getMessage}"))
+              }
               pgStream.close()
               Thread.sleep(1000L)
             } catch {
