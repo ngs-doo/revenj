@@ -51,13 +51,14 @@ lazy val tests = (project in file("tests")
   enablePlugins(SbtDslPlatformPlugin)
   settings (
     dslNamespace := "example",
-    dslDslPath := (resourceDirectory in Test).value,
+    dslDslPath := Seq((resourceDirectory in Test).value),
     dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME),
     resourceGenerators in Test += Def.task {
-     com.dslplatform.sbt.Actions.generateResources(
+      streams.value.log.info("creating resource")
+      com.dslplatform.sbt.Actions.generateResources(
         streams.value.log,
         Targets.Option.REVENJ_SCALA,
-       (resourceManaged in Test).value / "META-INF" / "services",
+        (resourceManaged in Test).value / "META-INF" / "services",
         Seq(target.value),
         (dependencyClasspath in Test).value
       )

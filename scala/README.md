@@ -9,5 +9,5 @@ Revenj.Scala
 **revenj.scala** is available on OSSRH / Maven Central:
 
 ```scala
-libraryDependencies += "net.revenj" %% "revenj-core" % "0.5.2"
+libraryDependencies += "net.revenj" %% "revenj-core" % "0.6.0"
 ```

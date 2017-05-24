@@ -268,7 +268,7 @@ To add a custom REST service it's enough to implement specialized typesafe signa
     public class MyCustomService : IServerService<int[], List<ComplexObject>> {
       ...
       public MyCustomService(...) { ... }
-      public List<ComplexObject> Execute(int[] arguments) { ... }      
+      public List<ComplexObject> Execute(int[] arguments) { ... }
     }
 
 #### Registering custom access permissions:
