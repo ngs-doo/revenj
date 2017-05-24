@@ -336,4 +336,22 @@ public class TestContainer {
 			this.top = top;
 		}
 	}
+
+	@Test
+	public void collectionErrorIsPropagated() throws Exception {
+		Container container = new SimpleContainer(false);
+		container.register(ErrorInCollection.class);
+		try {
+			container.resolve((Type)ErrorInCollection[].class);
+			Assert.fail("Expecting exception");
+		} catch (ReflectiveOperationException ex) {
+			Assert.assertEquals("Unable to resolve class org.revenj.TestContainer$ErrorInCollection. Error: naah", ex.getMessage());
+		}
+	}
+
+	public static class ErrorInCollection {
+		public ErrorInCollection() {
+			throw new RuntimeException("naah");
+		}
+	}
 }

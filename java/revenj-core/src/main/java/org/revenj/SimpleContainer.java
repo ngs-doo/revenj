@@ -461,30 +461,35 @@ final class SimpleContainer implements Container {
 	}
 
 	private Either<Object> tryResolveCollection(Class<?> container, Type element, SimpleContainer caller) {
-		List<Registration<?>> registrations = new ArrayList<>();
+		LinkedHashSet<Registration<?>> registrations = new LinkedHashSet<>();
 		SimpleContainer current = caller;
 		do {
 			List<Registration<?>> found = current.container.get(element);
 			if (found != null) {
-				registrations.addAll(0, found);
+				registrations.addAll(found);
 			}
 			current = current.parent;
 		} while (current != null);
 		if (registrations.isEmpty()) {
 			return Either.success(Array.newInstance(container, 0));
 		}
-		List<Object> result = new ArrayList<>(registrations.size());
-		for (int i = 0; i < registrations.size(); i++) {
-			Either<Object> item = resolveRegistration(registrations.get(i), caller);
+		Object[] result = (Object[]) Array.newInstance(container, registrations.size());
+		Iterator<Registration<?>> iter = registrations.iterator();
+		int i = 0;
+		while (iter.hasNext()) {
+			Registration<?> it = iter.next();
+			Either<Object> item = resolveRegistration(it, caller);
 			if (item.isPresent()) {
-				result.add(item.value);
+				result[i++] = item.value;
+			} else {
+				String message = item.error.getMessage();
+				if (message == null && item.error.getCause() != null) {
+					message = item.error.getCause().getMessage();
+				}
+				return Either.fail(new ReflectiveOperationException("Unable to resolve " + it.signature + ". Error: " + message, item.error));
 			}
 		}
-		Object[] instance = (Object[]) Array.newInstance(container, result.size());
-		for (int i = 0; i < instance.length; i++) {
-			instance[i] = result.get(i);
-		}
-		return Either.success(instance);
+		return Either.success(result);
 	}
 
 	private Either<Object> resolveRegistration(Registration<?> registration, SimpleContainer caller) {

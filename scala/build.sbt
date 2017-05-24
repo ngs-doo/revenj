@@ -5,7 +5,7 @@ import com.dslplatform.compiler.client.parameters.{Settings, Targets}
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.6.0",
+    version := "0.6.1",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.1.1",
       "joda-time" % "joda-time" % "2.9.6",   // TODO: will be removed
@@ -25,7 +25,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.6.0",
+  version := "0.6.1",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.1",
     "com.typesafe.akka" %% "akka-http-core" % "10.0.6"

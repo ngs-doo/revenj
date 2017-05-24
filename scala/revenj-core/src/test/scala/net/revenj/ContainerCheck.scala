@@ -215,6 +215,13 @@ class ContainerCheck extends Specification with ScalaCheck {
       container === uc.container
       scope !== uc.container
     }
+    "collection error is propagated" >> {
+      val container = new SimpleContainer(false, cl)
+      container.register[ErrorInCollection]()
+      val tryCol = Try { container.resolve[Array[ErrorInCollection]] }
+      tryCol.isFailure === true
+      tryCol.failed.get.asInstanceOf[ReflectiveOperationException].getMessage == "Unable to resolve class net.revenj.ErrorInCollection. Error: naah"
+    }
   }
 }
 
@@ -281,3 +288,7 @@ class CircularTop(val dep: CircularDep)
 class CircularDep(val top: CircularTop)
 
 class UsesContainer(val container: Container)
+
+class ErrorInCollection {
+  throw new RuntimeException("naah")
+}

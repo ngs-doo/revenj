@@ -349,23 +349,27 @@ If you wish to resolve types not registered in the container, specify revenj.res
     if (registrations.isEmpty) {
       Success(java.lang.reflect.Array.newInstance(container, 0))
     } else {
-      val result = new mutable.ArrayBuffer[AnyRef](registrations.size)
+      val result = java.lang.reflect.Array.newInstance(container, registrations.size).asInstanceOf[Array[AnyRef]]
       var i = 0
       val iter = registrations.iterator
-      while (i < registrations.size) {
-        val item = resolveRegistration(iter.next(), caller)
+      var fail = Option.empty[Throwable]
+      while (fail.isEmpty && i < registrations.size) {
+        val it = iter.next()
+        val item = resolveRegistration(it, caller)
         if (item.isSuccess) {
-          result += item.get
+          result(i) = item.get
+        } else {
+          val error = item.failed.get
+          val message = {
+            val msg = error.getMessage
+            if (msg == null && error.getCause != null) error.getCause.getMessage
+            else msg
+          }
+          fail = Some(new ReflectiveOperationException(s"Unable to resolve ${it.signature}. Error: $message", item.failed.get))
         }
         i += 1
       }
-      val instance = java.lang.reflect.Array.newInstance(container, result.size).asInstanceOf[Array[AnyRef]]
-      i = 0
-      while (i < instance.length) {
-        instance(i) = result(i)
-        i += 1
-      }
-      Success(instance)
+      fail.map(Failure.apply).getOrElse(Success(result))
     }
   }
 

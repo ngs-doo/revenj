@@ -9,13 +9,13 @@
 	<description>DSL Platform compatible backend - servlet (https://dsl-platform.com)</description>
 	<url>https://github.com/ngs-doo/revenj</url>
 	<packaging>jar</packaging>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.revenj</groupId>
 			<artifactId>revenj-core</artifactId>
-			<version>1.2.0</version>
+			<version>1.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
