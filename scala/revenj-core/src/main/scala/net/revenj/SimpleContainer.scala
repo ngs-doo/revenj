@@ -90,7 +90,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
       var i = 0
       while (success && i < genTypes.length) {
         val p = genTypes(i)
-        val arg = caller.resolve(p)
+        val arg = tryResolve(p, caller)
         if (arg.isFailure) {
           success = false
           errors += arg
@@ -132,7 +132,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
           }
         case _ =>
           if (typeInfo.constructors.isDefined && typeInfo.constructors.isEmpty && typeInfo.mappedType.isDefined) {
-            caller.resolve(typeInfo.mappedType.get)
+            tryResolve(typeInfo.mappedType.get, caller)
           } else {
             val mappings = typeInfo.mappings
             tryResolveTypeFrom(typeInfo, mappings, caller)
@@ -164,7 +164,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   success = false
                   errors += Failure(new ReflectiveOperationException(s"Nested parametrized type: $nestedType is not an instance of Class<?>. Error while resolving constructor: ${info.ctor}"))
                 } else if (nestedInfo.rawClass.get eq classOf[Option[_]]) {
-                  args(i) = caller.resolve(nestedInfo.genericArguments.get(0)).toOption
+                  args(i) = tryResolve(nestedInfo.genericArguments.get(0), caller).toOption
                 } else {
                   val nestedMappings = new mutable.HashMap[JavaType, JavaType]
                   nestedMappings ++= typeInfo.mappings
@@ -191,7 +191,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   }
                 }
                 if (success) {
-                  val arg = caller.resolve(c.get)
+                  val arg = tryResolve(c.get, caller)
                   if (arg.isFailure) {
                     success = false
                     errors += arg

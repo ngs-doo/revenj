@@ -210,9 +210,9 @@ public class RevenjProcessor extends AbstractProcessor {
 					registrations.setLength(registrations.length() - 1);
 				}
 				if (singletons.contains(parent)) {
-					registrations.append("), true);\n");
+					registrations.append("), org.revenj.extensibility.InstanceScope.SINGLETON);\n");
 				} else {
-					registrations.append("), false);\n");
+					registrations.append("), org.revenj.extensibility.InstanceScope.TRANSIENT);\n");
 				}
 				registered.add(parent);
 			}
@@ -259,8 +259,8 @@ public class RevenjProcessor extends AbstractProcessor {
 			} else if (!injections.contains(element)) {
 				registrations.append("    container.register(");
 				registrations.append(element.asType());
-				registrations.append(".class, ");
-				registrations.append(singleton ? "true);" : "false);\n");
+				registrations.append(".class, org.revenj.extensibility.InstanceScope.");
+				registrations.append(singleton ? "SINGLETON);" : "TRANSIENT);\n");
 			}
 		}
 	}

@@ -225,7 +225,6 @@ final class SimpleContainer implements Container {
 			boolean success = true;
 			for (int i = 0; i < genTypes.length; i++) {
 				Type p = genTypes[i];
-				//TODO: use try so it can be redirected
 				Either<Object> arg = tryResolve(p, caller);
 				if (arg.hasError()) {
 					success = false;
