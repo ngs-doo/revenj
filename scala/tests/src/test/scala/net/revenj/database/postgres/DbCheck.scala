@@ -489,6 +489,15 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         hist.get.snapshots.head.value.s == "history"
       }
     }
+    "shallow references" >> {
+      "simple reference" >> {
+        implicit val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val abc = Abc()
+        abc.abc1 = "123"
+        abc.abc1ID === Some(123)
+        container.close()
+      }
+    }
   }
 }
 
