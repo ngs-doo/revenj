@@ -69,6 +69,7 @@ module test {
 		timestamp t;
 		List<timestamp?>? tt;
 		specification Filter 'it => it.t > at' { timestamp at; }
+		persistence { history; }
 	}
 	entity Ent1 { int i; }
 	entity Ent2 { float f; Ent4[] ee; }
@@ -149,6 +150,7 @@ module test {
 		location? l;
 		List<point> p2;
 		Set<location?> l2;
+		timestamp ts { versioning; }
 	}
 	root bpk(b) {
 		bool?[] b;
@@ -162,6 +164,11 @@ module test {
 	aggregate Client(id) {
 		Long id;
 		int points;
+		detail<CorporateClient.baseClient> clients1;
+		detail<Cli2.client> clients2;
+	}
+	entity Cli2 {
+		Client *client;
 	}
 	aggregate CorporateClient(clientId) {
 		Long clientId;
@@ -170,5 +177,9 @@ module test {
 	event<Client> Tick {
 		int num;
 		async;
+	}
+	aggregate Dec(d) {
+		decimal(9) d;
+		persistence { history; }
 	}
 }

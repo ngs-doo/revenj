@@ -16,7 +16,7 @@ import monix.execution.Ack
 import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.{Container, InstanceScope, SystemState}
 import net.revenj.patterns.DataChangeNotification.NotifyInfo
-import net.revenj.patterns.{DataChangeNotification, DataContext, DomainEventHandler, UnitOfWork}
+import net.revenj.patterns._
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeAfterAll
@@ -469,6 +469,24 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val found2 = Await.result(ctx.find[TestMe](uri), Duration.Inf)
         container.close()
         found2.isDefined === false
+      }
+    }
+    "history" >> {
+      "can read" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val repoAbc = container.resolve[AbcRepository]
+        val historyRepo = container.resolve[Repository[History[Abc]]]
+        val abc = Abc(s = "history")
+        abc.ii = Array(1, 2, 3)
+        val uri = Await.result(repoAbc.insert(abc), Duration.Inf)
+        val hist = Await.result(historyRepo.find(uri), Duration.Inf)
+        container.close()
+        uri === abc.URI
+        hist.isDefined === true
+        hist.get.URI === uri
+        hist.get.snapshots.size === 1
+        hist.get.snapshots.head.action == "Insert"
+        hist.get.snapshots.head.value.s == "history"
       }
     }
   }
