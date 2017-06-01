@@ -1,6 +1,6 @@
 ## Setting up basic security
 
-####Enabling security layers for REST projects (WCF and HTTP)
+#### Enabling security layers for REST projects (WCF and HTTP)
 
 For convenience security is disabled by default. This is done by overriding default authentication provider and permission manager. In http-server project this is done with two lines in App.config/Web.config
 
@@ -18,11 +18,11 @@ After security is enabled, HTTP project will support basic security (username:pa
 
 They are supported with `Authorization` http header with `Basic` and `Hash` prefixes.
 
-####Security is enabled by default for Revenj.Core
+#### Security is enabled by default for Revenj.Core
 
 If Revenj is used as a library from some other framework such as ASP.NET, then security is not disabled by default. Since other framework will be used for authentication, http-server or WCF authentication provider is not even referenced. There is no need to override authorization provider (permission manager) since it will be used only for filtering access to repositories (and not checking if server command is allowed to be executed).
 
-####Authorization service
+#### Authorization service
 
 [Permission manager](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core.Interface/Security/IPermissionManager.cs) is a singleton service which should be used to configure access to data available through repositories. It can be configured from DSL or by code. Depending on the DSL configuration, security checks will be injected directly into repository and executed as a part of SQL query. This means permission manager can be used to implement features such as multi-tenancy on a single database. To globally disable application of security checks during DB queries, default needs to be changed in DSL as:
 
@@ -56,13 +56,13 @@ SQL query will be executed which would look something like:
 
     SELECT t FROM "Todo"."Task_entity" WHERE t."UserID" == 'iUser' LIMIT 10
 
-if we are authenticated with a username `iUser`.  
+if we are authenticated with a username `iUser`.
 
 If multiple filters are applied, they will be executed as && operations when they satisfy the role condition.
 
 Currently `IPermissionManager` lacks few methods to be able to replicate all authorization which can be defined in DSL, such as create/update/delete operations on an aggregate. *This is expected to be added soon.*
 
-####Default security configuration
+#### Default security configuration
 
 If Revenj is used as a REST framework `CanAccess` method will be used to check access to various objects and services. By configuring default permission manager configurations, complex scenarios can be supported out of the box. Default permission manager implementation is based on two tables for setting up security:
 

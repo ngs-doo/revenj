@@ -1,6 +1,6 @@
 ## Using SQL directly from Revenj
 
-####ORM and SQL abstraction
+#### ORM and SQL abstraction
 
 While Revenj data layer supports wide range of use cases, it's neither a complete replacement for SQL, nor does it try to be.
 Main purpose of SQL abstraction is to provide convenient and fast object/SQL conversion, most notably for converting complex object graphs into database structures and vice versa. 
@@ -9,7 +9,7 @@ Unlike most ORMs which are focused on object/relational conversion, due to focus
 While Revenj data layer could behave as just another ORM, that is not its primary purpose, nor it's optimized for such modeling.
 While it's perfectly fine to entirely bypass Revenj typesafe data layer and access data directly through JDBC/ADO.NET the most important thing to keep in mind is that model evolution is being compromised by writing manual SQL, since changes to the model will not be automatically verified or refactorable.
 
-####SQL concept
+#### SQL concept
 
 DSL Platform offers SQL concept as a convenient shortcut for dropping down to SQL layer, while maintaining most of the safeties and performance benefits offered through Revenj. SQL concept can be used in two primary ways:
 
@@ -37,7 +37,7 @@ When SQL is defined in such a way in DSL model this will allow for several benef
 
 While these simplistic read only queries cover some features not supported out of the box by Revenj, they still fall short for some other custom use cases when the best solution is to fall back to raw JDBC/ADO.NET.
 
-####Pre-existing tables
+#### Pre-existing tables
 
 Although most benefits of DSL Platform can be extracted on [Greenfield projects](https://en.wikipedia.org/wiki/Greenfield_project) where database schema can be managed by DSL Platform, Revenj can also be used on existing database.
 If SQL concept is defined with a table name and primary keys it will be considered writeable; which means it can be used as standard aggregate root within Revenj.

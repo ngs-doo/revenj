@@ -4,7 +4,7 @@ In previous event sourcing [tutorial](revenj-tutorial-event-sourcing.md), we've 
 There is also a special kind of domain event, which is tied to an aggregate. 
 Due to still ongoing research, its DSL representation will probably change and those two separate concepts will probably end up with a same grammar. 
 
-###Aggregate events in DSL
+### Aggregate events in DSL
 
 But let's explore the current usage to understand the features they offer and how to implement it. 
 We'll write DSL similar to the previous one.
@@ -33,7 +33,7 @@ While we could use actual primary key and referenced the aggregate, basic premis
 Even if we delete the referencing aggregate from the system we still want events "referencing" that aggregate to remain. 
 Thus, referential integrity is somewhat relaxed which could be improved slightly in the future, but for now it's like this.
 
-###Handling aggregate events in code
+### Handling aggregate events in code
 
 .NET classes are nested inside aggregate and code for previous tutorial will still work, after we rename *Upvote* and *Downvote* to *VoteStats.Upvote* and *VoteStats.Downvote*. 
 But those event handlers are stateful, in a sense they can reference services and change the state of the database (as the current implementation does). 
@@ -45,7 +45,7 @@ While there is no way to enforce such a constraint in C#, in practice this means
 To get this working we need to initialize it during application startup. 
 An interesting effect will happen now that we have one async and one synchronous event.
 
-###How everything works together
+### How everything works together
 
 Since upvote is asynchronous, aggregate root will not be updated in the database, but new events will be created in it. 
 Also, database view *unprocessed event* for that aggregate will now look like:
@@ -69,7 +69,7 @@ In the end, developers can choose how they want to model the domain; repository 
 As stated before, DSL Platform is all about providing best-patterns implementation. 
 With better understanding of events, aggregate events, requirements for the repositories, we expect somewhere down the line to have a merger of events with aggregate events, at least on the DSL level.
 
-###Trying it out
+### Trying it out
 
 So let's write some code to see how this behaves in practice. 
 Instead of consuming it as REST service, let's add some test and work directly on the server:

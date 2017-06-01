@@ -4,7 +4,7 @@ Revenj can utilize advanced Postgres and Oracle features to provide advanced mod
 Such features are not new, but they are rarely utilized since they are too cumbersome to manage and much harder to evolve. 
 But sometimes they can offer vast improvements over standard ways.
 
-###The rise of NoSQL
+### The rise of NoSQL
 
 DDD advocates modeling the domain as closely as possible. 
 With only tables and columns, this is often impossible. 
@@ -17,7 +17,7 @@ By leveraging DDD terminology of an aggregate root as a container for entities a
 Relational in a sense, that entities will be mapped to tables and value objects will be mapped to types. 
 Sometimes relationship between entities will create a helper table so that relational integrity is maintained.
 
-###Object-oriented relational database
+### Object-oriented relational database
 
 Let's explore various examples to get a feel of the modeling capabilities. 
 Wikipedia [Document-oriented-database page](http://en.wikipedia.org/wiki/Document-oriented_database) shows of an example of a document as:
@@ -157,7 +157,7 @@ If we define Child as an entity inside an Person aggregate, there will be severa
 Unpacking can happen in the database for simple use-cases (when objects are not big), or optimized away in the repository objects. 
 As already stated, DSL Platform provides best-practices implementation (at least currently implemented ones) so in the case of bulk insert/update, appropriate Postgres features will be utilized, such as [copy](http://www.postgresql.org/docs/9.2/static/sql-copy.html).
 
-###Rich modeling support
+### Rich modeling support
 
 There are also several other modeling constructs which can be used to implement such (or similar) document:
 

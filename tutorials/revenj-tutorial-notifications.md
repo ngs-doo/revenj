@@ -1,10 +1,10 @@
 ## Notifications, cache invalidation and server push
 
-####How it works
+#### How it works
 
 Revenj leverages database notifications, such as [LISTEN/NOTIFY](http://www.postgresql.org/docs/9.1/static/sql-notify.html) in Postgres or [Advanced Queueing](http://docs.oracle.com/cd/B10501_01/appdev.920/a96587/qintro.htm) in Oracle, to provide notifications on data change in distributed environment. It also supports in process notifications without the database to provide always up-to-date data within the process which modified it.
 
-####How to use it
+#### How to use it
 
 This allows it to provide several complex features through some simple services such as [`IDataChangeNotification`](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core.Interface/DomainPatterns/Notification.cs) or through `IDataContext`. Change notification is a singleton which is getting invoked asynchronously from database on commit. Thus events will be raised with a small delay. An example of registering for changes on an aggregate root Post will look like:
 
@@ -15,7 +15,7 @@ On each Post insert/update or delete changes will be notified (if transaction su
 
 Alternative way to use it is to request `IObservable` signature for that object, such as `IObservable<Post>`. An example of such usage can be found in default security permission manager. Reasoning for using `IObservable` is that our code is sticking to only [BCL](http://en.wikipedia.org/wiki/Standard_Libraries_%28CLI%29) types (with a meaning). This is in line with the rest of DI supported vocabulary (such as `IEnumerable`, `Lazy`, `Func` and others) and removes dependencies in code from the used framework.
 
-####Advanced configuration
+#### Advanced configuration
 
 In case of Postgres, DSL Platform will write notification code directly into DB function, which means even if you call it outside of Revenj notification it will still be invoked. 
 
@@ -32,7 +32,7 @@ Notification is enabled by default in DSL, but it can be turned off and manually
 
 Alternatively global notifications can be left enabled, but specific aggregates can be excluded with `notifications disabled` DSL inside `persistence` part. 
 
-####Server side pushes
+#### Server side pushes
 
 Revenj includes simple [SignalR](http://signalr.net/) integration (both for [v1](https://github.com/ngs-doo/revenj/tree/master/csharp/Server/Revenj.SignalRWeb) and [v2](https://github.com/ngs-doo/revenj/tree/master/csharp/Server/Revenj.SignalR2SelfHost)). They are based on notification infrastructure and offer several ways for interfacing:
 
@@ -67,7 +67,7 @@ These APIs can be used from Javascript, Android or any other SignalR client to t
 
 Most of the heavy work is done in SignalR, so its [tutorials](https://github.com/SignalR/SignalR/wiki/SignalR-JS-Client) should be inspected for more details on how to work with SignalR. 
 
-####Processing streams on the server
+#### Processing streams on the server
 
 [Reactive extensions](http://msdn.microsoft.com/en-us/data/gg577609.aspx) can be utilized to consume notifications in a really convenient way. An example of this can be found in [Revenj mailer](https://github.com/ngs-doo/revenj/blob/master/csharp/Features/Revenj.Features.Mailer/QueueProcessor.cs). Rx subscription is registered on `IMailMessage` interface with a buffer after which processing of all existing mails is executed. Relevant part of the code looks like:
 

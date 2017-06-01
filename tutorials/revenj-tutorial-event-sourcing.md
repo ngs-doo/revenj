@@ -4,7 +4,7 @@
 State can be always reconstructed by replaying captured events. 
 Revenj has [support for event sourcing](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core.Interface/DomainPatterns/DomainEvent.cs) with few signatures and services.
 
-###Events in DSL
+### Events in DSL
 
 Let's write a few events and explore how they can be used in the system.
 
@@ -30,7 +30,7 @@ We will also get three .NET classes, one with `IAggregateRoot` signature and two
 One obvious difference from other event sourcing solutions is that instead of having a single Events table with serialized version of the object, we get a table per [Domain Event](http://martinfowler.com/eaaDev/DomainEvent.html). 
 In this way there is no need for specialized projections, since tables themselves can be used for querying.
 
-###Event sourcing basics
+### Event sourcing basics
 
 Let's reuse previous project to continue Revenj exploration. 
 Instead of previous model let's apply this new one. 
@@ -65,7 +65,7 @@ They are located in domain patterns project and look something like:
 
 ![Domain Event signatures](pictures/event-store-signature.png)
 
-###Handling Domain Events in code
+### Handling Domain Events in code
 
 Domain Events can be submitted in bulk, which is essential in highly concurrent environments. 
 Event handler is just a type-safe signature with void `Handle(T event)` method.
@@ -90,7 +90,7 @@ Our implementation can look something like this:
 
 Since Revenj has registered our class to the container, we can resolve various services in the constructor (actually for this to work, we didn't need to register it to the container, but for simplicity sake, let's skip that discussion for now).
 
-###Events and transactions
+### Events and transactions
 
 As discussed previously, events are processed inside a transaction (using default pipeline), which means that services which are transaction-aware will have correct transaction reference. 
 In the above example, requested `IDataContext` will come with `IDatabaseQuery` bound to the current transaction.
@@ -125,7 +125,7 @@ A more [DDD](http://dddcommunity.org/learning-ddd/what_is_ddd/) aproach would be
 Another issue is that we are running this service outside of transactions, which means that while all upvotes will be changed in a single transaction and all events will be marked as processed in a single transaction, those will be two separate transactions. 
 We will explain later on how to create units of work and share a database transaction among services.
 
-###Processing Domain Events
+### Processing Domain Events
 
 We also didn't touch the notion of event replay-ability, but will do that in the next [tutorial](revenj-tutorial-aggregate-events.md). 
 For now, let's finish up with sending some events to the server with Fiddler. 
@@ -151,7 +151,7 @@ Event store will invoke processors (for synchronous events) and persist it to th
 REST service also accepts an argument of the expected result, which can be identity of the event (URI) or the whole instance. 
 While events are immutable after they hit the database (in a sense that we can't modify it), they are mutable before, which allows for some nice features.
 
-###Getting the most of Domain Events
+### Getting the most of Domain Events
 
 For example let's model an aggregate root with a [surrogate key](http://en.wikipedia.org/wiki/Surrogate_key) which is applied just before insert to the database and an event for creating such aggregates.
 

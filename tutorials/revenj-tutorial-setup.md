@@ -14,7 +14,7 @@ In this tutorial we will use it as a REST service to show off why Revenj/DSL Pla
 To get started, we'll need a Postgres (9.1 or newer) and .NET (4.0 or newer). 
 DSL Platform is a DSL compiler which converts provided DSL model to target code/SQL.
 
-###DSL introduction
+### DSL introduction
 
 Let's start with a minimal DSL and a simple [CRUD](http://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operation to get a feeling what's happening.
 
@@ -39,7 +39,7 @@ To CRUD it we can use [REST-like API](https://github.com/ngs-doo/revenj/blob/mas
 
 Rest plugin is using WCF signature for defining endpoint and is available (by default) via `/Crud.svc/Tutorial.Example` url.
 
-###Configuring DSL Platform plugin
+### Configuring DSL Platform plugin
 
 Let's start the server by running Revenj.Http.exe (since this is supported by Mono too).
 
@@ -97,7 +97,7 @@ At the beginning it will contain comments of database changes, following by a ch
 After that migration script will perform migration from the previous state to the current state. 
 Since this was our initial migration, a helper -NGS- schema will be created, which is used for storing the previous version of applied DSL and some system functions.
 
-###Starting the http server
+### Starting the http server
 
 To start the Revenj Http server let's add start external program to out project and point it to the Revenj.Http.exe downloaded to dependencies/Server folder:
 
@@ -121,7 +121,7 @@ If everything is working, we should get a response from the server:
 
 Since we didn't specify Accept header, server answered in the default format (in this case with XML).
 
-###First tour through Revenj
+### First tour through Revenj
 
 **So how was this processed by Revenj?**
 
@@ -145,7 +145,7 @@ Its implementation `CrudCommands.cs` is just passing it through the Revenj pipel
 This is the basic architecture of processing requests in Revenj. 
 While few interesting things happened in the pipeline, we will not discuss them in this tutorial.
 
-###Modeling NoSQL documents
+### Modeling NoSQL documents
 
 Now that we have a working setup and understand the basic processing of the request, let's write more interesting model, not just standard [ER](http://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model) one.
 
@@ -200,7 +200,7 @@ If necessary, optimized single insert/update function can be created in the data
 Data access doesn't actually go through the tables, but through the views, so, if required, [DBA](http://en.wikipedia.org/wiki/Database_administrator) can alter objects created by the Platform and report an issue which will then result in a better database object or an additional modeling concept. 
 Of course, dropping down to SQL when everything else fails can be done through the DSL.
 
-###Conclusion
+### Conclusion
 
 So while some [ORMs](http://en.wikipedia.org/wiki/Object-relational_mapping) can support simple NoSQL models, neither is close to supporting advanced NoSQL-like modeling in the database DSL Platform provides and Revenj utilizes. 
 Of course, nobody is forcing developer to use object oriented features, collections and various other non-relational constructs, but since those can provide various optimizations they are often useful.

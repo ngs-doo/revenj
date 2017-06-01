@@ -1,6 +1,6 @@
 ## Basics of LINQ provider
 
-####ORDBMS LINQ provider
+#### ORDBMS LINQ provider
 
 Revenj supports Postgres and Oracle in an OO way. To understand what that means, let's look at simple SELECT statement. Selecting all columns from a table is usually done with something like:
 
@@ -18,7 +18,7 @@ This becomes handy when we have non-trivial queries:
 
 It basically allows us to map SQL queries to almost LINQ like expressions, instead of writing it in a way ORM tools usually write SQL queries. In Oracle to get the same behavior Revenj will work with Object tables/views and `VALUE(t)` instead of just `t`.
 
-####Data sources
+#### Data sources
 
 Revenj uses a convention based naming for data types, but this can be overridden with a custom name attribute. Convention states that entities are read from `_entity` view (Oracles uses uppercase naming convention), while snowflakes are read from view with same name. So if we have a simple DSL:
 
@@ -61,7 +61,7 @@ since count result operator was used. To define read-only data source, SQL conce
 
 SQL `MySqlMapping` query will be validated during system startup, with a `SELECT * LIMIT 0` query. Custom attribute needs to be used on `Legacy.MySqlMapping` object for defining the actual query. 
 
-####Reducing the amount of data returned
+#### Reducing the amount of data returned
 
 Since Revenj always works with the whole object from the database (DB and code map 1:1) it's transparent how it will behave. If one is interested in returning a subset of data from an aggregate, there are two ways to do it:
 
@@ -69,11 +69,11 @@ Since Revenj always works with the whole object from the database (DB and code m
 
  * by forcing selection into a subquery. LINQ provider will allow non-SQL operations on the top-most SELECT since it will not try to convert the topmost projection to SQL. So to get around this when we want to reduce the amount of columns returned from a query we have to force selection into subquery. 
 
-####Provider extensibility
+#### Provider extensibility
 
 LINQ provider was built with extensibility in mind, so in case of a missing feature/conversion or a bad SQL, it's rather easy to add specialized code for dealing with such scenario. Both Oracle and Postgres driver have a big chunk of .NET -> SQL conversion defined in their [plugins](https://github.com/ngs-doo/revenj/tree/master/csharp/Core/Revenj.Core/DatabasePersistence/Postgres/QueryGeneration/Plugins). For example DateTime.Date method, which converts timestamptz to date, is implemented in DateTimeMembers as [GetDate method](https://github.com/ngs-doo/revenj/blob/master/csharp/Core/Revenj.Core/DatabasePersistence/Postgres/QueryGeneration/Plugins/MemberSupport/DateTimeMembers.cs#L47). It's enough to add a DLL which exports supported signatures via [MEF](http://msdn.microsoft.com/en-us/library/dd460648%28v=vs.110%29.aspx) to import new behavior into Revenj.
 
-####Support for complex queries
+#### Support for complex queries
 
 Since we are utilizing DB in an OO way, we can write some non-trivial queries which will be executed as a single query in the DB. Let's use simple master detail as an obvious example:
 
@@ -102,11 +102,11 @@ This will be executed as a single database query, without data duplication, usin
       array_agg(SELECT c 
                 FROM "MasterDetail"."Child_entity" c 
                 WHERE c."parentID" = p."ID") as c
-    FROM "MasterDetail"."Parent_entity" p  
+    FROM "MasterDetail"."Parent_entity" p
 
 If you are defining complex aggregates (consisting from several entities), DSL Platform will prepare such a view so you don't need to combine multiple data sources in LINQ, but can just select from a single data source which has already prepared complex query in the DB (this will also improve performance, since LINQ provider will have less work to do).
 
-####Lazy loading / expression evaluation
+#### Lazy loading / expression evaluation
 
 It's important to know that LINQ provider doesn't convert topmost projection to SQL. Thus lazy load should be avoided in topmost selection since it will be performed after SQL query and therefore will probably invoke multiple SQL queries again. 
 

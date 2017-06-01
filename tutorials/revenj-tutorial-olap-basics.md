@@ -33,7 +33,7 @@ While OLTP systems are usually normalized and use snowflake schema for rich quer
 While DSL Platform has snowflake concept for defining projections of the data, Revenj supports any data source as input for OLAP cubes/queries.
 Therefore specialized SQL can be created as data sources and Revenj will happily use them to run OLAP queries.
 
-####OLAP cubes
+#### OLAP cubes
 
 Cubes defined in DSL can be used from Revenj as data sources for OLAP queries.
 This is done through [OLAP cube query interface](https://github.com/ngs-doo/revenj/blob/master/java/revenj-core/src/main/java/org/revenj/patterns/OlapCubeQuery.java)
@@ -80,7 +80,7 @@ Complete example in Revenj would look like:
 
 which would return the list of appropriate objects (project name, total tasks in project, opened task in project) which were created in year 2016).
 
-####Generic OLAP API
+#### Generic OLAP API
 
 Servlet API has a support for [OLAP conversion](https://github.com/ngs-doo/revenj/blob/master/java/revenj-servlet/src/main/java/org/revenj/server/servlet/StandardServlet.java).
 This means that HTTP can be used to ask ad hoc queries such as

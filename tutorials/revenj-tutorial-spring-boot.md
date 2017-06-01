@@ -21,7 +21,7 @@ On Windows .NET should be available by default.
 On Linux it can be installed through `sudo apt-get install mono-complete`.
 For Mac [installer is available](http://www.mono-project.com/download/#download-mac) on project website.
 
-###Setting up environment
+### Setting up environment
 
 Before starting up IDE, let's setup PostgreSQL database. Tutorial will assume:
 
@@ -115,7 +115,7 @@ By adding new Run/debug configuration for Maven we can start our project from wi
 
 ![Run Maven from IDEA](pictures/spring-boot-run.png)
 
-###DSL introduction
+### DSL introduction
 
 Let's start with a minimal DSL and a simple [CRUD](http://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operation to get a feeling what's happening. To write DSL, let's add a `dsl` folder and write a `model.dsl` file inside. IDEA should pick up that signature and offer to download [DSL Platform plugin](https://plugins.jetbrains.com/plugin/8227) (which will be used to syntax highlight our DSL).
 
@@ -154,7 +154,7 @@ Migrated database should look like:
 
 To CRUD it we can either use builtin [REST-like API](https://github.com/ngs-doo/revenj/blob/master/java/revenj-servlet/src/main/java/org/revenj/server/servlet/CrudServlet.java) available in a Servlet jar provided with Revenj or write manual mappings in Spring controllers.
 
-###Integrating with Spring
+### Integrating with Spring
 
 Rest plugin will open up endpoint which is available (by default) via `/Crud.svc/hello.World` url,
 while in Spring we will define exact mapping.
@@ -162,7 +162,7 @@ while in Spring we will define exact mapping.
 Spring boot application should be configured with a class such as:
 
     @SpringBootApplication @Configuration
-    public class Application implements ServletContextInitializer, WebApplicationInitializer {    
+    public class Application implements ServletContextInitializer, WebApplicationInitializer {
     
         public static void main(String[] args) throws Exception {
             SpringApplication.run(Application.class, args);

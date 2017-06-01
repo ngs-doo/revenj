@@ -8,7 +8,7 @@ Revenj models come with a Boot setup which wires all the dependencies together.
 While this could be done without the container, it's much simplified with the use of container; and allows customization after the setup. Boot mostly consists from registering various services and their signatures into the container.
 Most of the times, model setup is transparent to the developers, since if `Revenj.setup` API is used, configuration is done implicitly through `ServiceLoader` instead of directly by calling `Boot.configure`.
 
-###Vocabulary
+### Vocabulary
 
 Revenj.JVM DI is influenced by DI in .NET world and as such has features similar to [Autofac relationships](http://nblumhardt.com/2010/01/the-relationship-zoo/).
 Built in relationships are:
@@ -39,7 +39,7 @@ where scoping rules are followed; which can be translated into intentions such a
  * resolve all registrations for Plugin type
  * resolve other service using its scoping rules (singleton/transient/...)
 
-###Scoping and contexts
+### Scoping and contexts
 
 Revenj supports and encourages usage of scoping and nesting - which allows for convenient implementations of various features, such as unit of work.
 
@@ -58,7 +58,7 @@ Basic scoping rules are supported:
 
 Along with contexts this allows various scenarios which are not really supported or encouraged in standard Java DI libraries.
 
-###Best practices/FAQ
+### Best practices/FAQ
 
 `Revenj.setup` will return an instance of the container. Multiple Revenj instances can be simultaneously started that way (for example to different databases).
 When using Revenj as a library from other frameworks, such as Spring, most of the time it's enough to wire into the DI of such framework relevant services, such as `DataContex` and maybe `ServiceLocator`.

@@ -14,7 +14,7 @@ For setup we will need:
  * Java servlet - for running packed WAR. [Jetty](http://download.eclipse.org/jetty/) can be used, but any other servlet should do
  * DSL model - we will write DSL model example which will be converted into jar/SQL
 
-###DSL model
+### DSL model
 
 Before we can use our REST endpoint we need to write some model which will be exposed through HTTP. While Revenj can be used in purely relational style, in practice most models are object-relational combination. [Wikipedia](https://en.wikipedia.org/wiki/Document-oriented_database) page about document databases contains a person/address example which we will replicate here.
 
@@ -70,7 +70,7 @@ while this is not an ideal model neither a exact replicate it shows off several 
  * Enum concept can be used to enumerate types
  * Value concept can be used to group several properties under an object which will be translated to an embedded type in database. This means it will not have its own table, but rather will live under some other table as a column or a property in some other column.
 
-###Converting DSL model to SQL/jar
+### Converting DSL model to SQL/jar
 
 Now that we have our DSL model we can convert it into database schema and Java jar using DSL command line client. This can be done through a command which looks like:
 
