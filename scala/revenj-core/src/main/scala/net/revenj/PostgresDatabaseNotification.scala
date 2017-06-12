@@ -216,12 +216,10 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
         if (properties.containsKey("revenj.password")) properties.getProperty("revenj.password")
         else parsed.getProperty("password", "")
       }
-      val listenApplicationName = Option(
-        properties.getProperty("revenj.listenApplicationName")
-      )
+      val applicationName = Option(properties.getProperty("revenj.notifications.applicationName"))
       val db = parsed.getProperty("PGDBNAME")
       val host = new HostSpec(parsed.getProperty("PGHOST").split(",")(0), parsed.getProperty("PGPORT").split(",")(0).toInt)
-      val pgStream = ConnectionFactory.openConnection(host, user, password, db, listenApplicationName, properties)
+      val pgStream = ConnectionFactory.openConnection(host, user, password, db, applicationName, properties)
       currentStream = Some(pgStream)
       retryCount = 0
       val listening = new Listening(pgStream)
