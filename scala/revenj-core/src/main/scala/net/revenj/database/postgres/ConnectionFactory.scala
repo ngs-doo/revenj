@@ -36,7 +36,7 @@ private [revenj] object ConnectionFactory {
     }
   }
 
-  def openConnection(hostSpec: HostSpec, user: String, password: String, database: String, info: Properties): PGStream = {
+  def openConnection(hostSpec: HostSpec, user: String, password: String, database: String, applicationName: Option[String], info: Properties): PGStream = {
     // Extract interesting values from the info properties:
     // - the SSL setting
     var requireSSL = false
@@ -91,9 +91,9 @@ private [revenj] object ConnectionFactory {
       paramList.add(Array[String]("DateStyle", "ISO"))
       paramList.add(Array[String]("TimeZone", createPostgresTimeZone))
       paramList.add(Array[String]("extra_float_digits", "3"))
-      val appName = PGProperty.APPLICATION_NAME.get(info)
-      if (appName != null) paramList.add(Array[String]("application_name", appName))
-      else paramList.add(Array[String]("application_name", "Revenj"))
+      if (applicationName.isDefined) {
+        paramList.add(Array[String]("application_name", applicationName.get))
+      }
       val currentSchema = PGProperty.CURRENT_SCHEMA.get(info)
       if (currentSchema != null) {
         paramList.add(Array[String]("search_path", currentSchema))

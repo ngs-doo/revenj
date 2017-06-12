@@ -50,15 +50,19 @@ private [revenj] class PostgresDatabaseNotification(
   }
   if ("disabled" == properties.getProperty("revenj.notifications.status")) {
     isClosed = true
-  } else if ("pooling" == properties.getProperty("revenj.notifications.type")) {
-    setupPooling()
-    Runtime.getRuntime.addShutdownHook(new Thread(() => isClosed = true))
+  } else if ("polling" == properties.getProperty("revenj.notifications.type")) {
+    setupPolling()
+    Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
+      override def run(): Unit = isClosed = true
+    }))
   } else {
     setupListening()
-    Runtime.getRuntime.addShutdownHook(new Thread(() => isClosed = true))
+    Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
+      override def run(): Unit = isClosed = true
+    }))
   }
 
-  private def setupPooling(): Boolean = {
+  private def setupPolling(): Boolean = {
     retryCount += 1
     if (retryCount > 60) retryCount = 30
     try {
@@ -95,8 +99,8 @@ private [revenj] class PostgresDatabaseNotification(
         val stmt = bc.get.createStatement
         stmt.execute("LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj")
         retryCount = 0
-        val pooling = new Pooling(bc.get, stmt)
-        val thread = new Thread(pooling)
+        val polling = new Polling(bc.get, stmt)
+        val thread = new Thread(polling)
         thread.setDaemon(true)
         thread.start()
         true
@@ -117,7 +121,7 @@ private [revenj] class PostgresDatabaseNotification(
     }
   }
 
-  private class Pooling private[revenj](connection: BaseConnection, ping: Statement) extends Runnable {
+  private class Polling private[revenj](connection: BaseConnection, ping: Statement) extends Runnable {
     def run(): Unit = {
       val reader = new PostgresReader
       var timeout = maxTimeout
@@ -152,7 +156,7 @@ private [revenj] class PostgresDatabaseNotification(
               case e: InterruptedException => e.printStackTrace()
             }
             cleanupConnection(connection)
-            while (!isClosed && !setupPooling()) {
+            while (!isClosed && !setupPolling()) {
               Thread.sleep(1000L)
             }
         }
@@ -195,7 +199,7 @@ private [revenj] class PostgresDatabaseNotification(
     val jdbcUrl = properties.getProperty("revenj.jdbcUrl")
     if (jdbcUrl == null || jdbcUrl.isEmpty) {
       throw new RuntimeException("""Unable to read revenj.jdbcUrl from properties. Listening notification is not supported without it.
-Either disable notifications (revenj.notifications.status=disabled), change it to pooling (revenj.notifications.type=pooling) or provide revenj.jdbcUrl to properties.""")
+Either disable notifications (revenj.notifications.status=disabled), change it to polling (revenj.notifications.type=polling) or provide revenj.jdbcUrl to properties.""")
     }
     val pgUrl = {
       if (!jdbcUrl.startsWith("jdbc:postgresql:") && jdbcUrl.contains("://")) "jdbc:postgresql" + jdbcUrl.substring(jdbcUrl.indexOf("://"))
@@ -212,9 +216,12 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
         if (properties.containsKey("revenj.password")) properties.getProperty("revenj.password")
         else parsed.getProperty("password", "")
       }
+      val listenApplicationName = Option(
+        properties.getProperty("revenj.listenApplicationName")
+      )
       val db = parsed.getProperty("PGDBNAME")
       val host = new HostSpec(parsed.getProperty("PGHOST").split(",")(0), parsed.getProperty("PGPORT").split(",")(0).toInt)
-      val pgStream = ConnectionFactory.openConnection(host, user, password, db, properties)
+      val pgStream = ConnectionFactory.openConnection(host, user, password, db, listenApplicationName, properties)
       currentStream = Some(pgStream)
       retryCount = 0
       val listening = new Listening(pgStream)
