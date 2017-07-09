@@ -32,7 +32,6 @@ using System.Linq;
 using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Core.Registration;
-using Revenj.Utility;
 
 namespace Revenj.Extensibility.Autofac.Integration.Mef
 {
@@ -63,7 +62,7 @@ namespace Revenj.Extensibility.Autofac.Integration.Mef
 				.Select(r => System.Windows.Application.GetResourceStream(new Uri(r.Source, UriKind.Relative)))
 				.Select(s => new System.Windows.AssemblyPart().Load(s.Stream));
 #else
-			var assemblies = AssemblyScanner.GetAssemblies();
+			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 #endif
 			try
 			{

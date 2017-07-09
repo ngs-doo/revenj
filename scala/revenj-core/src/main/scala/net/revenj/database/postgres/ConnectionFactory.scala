@@ -91,9 +91,7 @@ private [revenj] object ConnectionFactory {
       paramList.add(Array[String]("DateStyle", "ISO"))
       paramList.add(Array[String]("TimeZone", createPostgresTimeZone))
       paramList.add(Array[String]("extra_float_digits", "3"))
-      if (applicationName.isDefined) {
-        paramList.add(Array[String]("application_name", applicationName.get))
-      }
+      paramList.add(Array[String]("application_name", applicationName.getOrElse("Revenj")))
       val currentSchema = PGProperty.CURRENT_SCHEMA.get(info)
       if (currentSchema != null) {
         paramList.add(Array[String]("search_path", currentSchema))
