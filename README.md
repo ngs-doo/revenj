@@ -82,9 +82,9 @@ Benchmarks:
 
 ![JSON bench](tutorials/pictures/json-bench.png)
 
- * [Techempower benchmark](https://www.techempower.com/benchmarks/#section=data-r13)
+ * [Techempower benchmark](https://www.techempower.com/benchmarks/#section=data-r14&hw=ph&test=update)
 
-![Framework bench](tutorials/pictures/techempower-single-13.png)
+![Framework bench](tutorials/pictures/techempower-update-15.png)
 
 ## Getting started:
 
