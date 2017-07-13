@@ -494,8 +494,8 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         implicit val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val abc = Abc()
         abc.abc1 = "123"
-        abc.abc1ID === Some(123)
         container.close()
+        abc.abc1ID === Some(123)
       }
     }
   }

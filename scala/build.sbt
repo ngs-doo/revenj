@@ -52,7 +52,7 @@ lazy val tests = (project in file("tests")
   settings (
     dslNamespace := "example",
     dslDslPath := Seq((resourceDirectory in Test).value),
-    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME),
+    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME, Settings.Option.URI_REFERENCE),
     resourceGenerators in Test += Def.task {
       streams.value.log.info("creating resource")
       com.dslplatform.sbt.Actions.generateResources(
