@@ -166,6 +166,8 @@ module test {
 		int points;
 		detail<CorporateClient.baseClient> clients1;
 		detail<Cli2.client> clients2;
+		Client? *parent { snapshot; }
+		List<Client> *parents { snapshot; }
 	}
 	entity Cli2 {
 		Client *client;

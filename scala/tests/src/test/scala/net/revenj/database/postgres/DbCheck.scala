@@ -498,6 +498,32 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.abc1ID === Some(123)
       }
     }
+    "snapshot" >> {
+      "will read the old value" >> {
+        val rnd = new Random()
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val c1 = Client(id = rnd.nextInt(), points = 42)
+        val ctx = container.resolve[DataContext]
+        Await.result(ctx.create(c1), Duration.Inf)
+        val c2 = Client(id = rnd.nextInt(), points = 22, parent = Some(c1), parents = Seq(c1))
+        Await.result(ctx.create(c2), Duration.Inf)
+        val found = Await.result(ctx.find[Client](c2.URI), Duration.Inf).get
+        c2.parentURI === found.parentURI
+        c2.parentsURI === found.parentsURI
+        c2.parent.map(_.id) === found.parent.map(_.id)
+        c2.parent.map(_.points) === Some(42)
+        found.parent.map(_.points) === Some(42)
+        found.parents.head.points === 42
+        c1.points = 55
+        Await.result(ctx.update(c1), Duration.Inf)
+        val found2 = Await.result(ctx.find[Client](c2.URI), Duration.Inf).get
+        container.close()
+        c2.parentURI === found2.parentURI
+        c2.parentsURI === found2.parentsURI
+        found2.parent.map(_.points) === Some(42)
+        found2.parents.head.points === 42
+      }
+    }
   }
 }
 
