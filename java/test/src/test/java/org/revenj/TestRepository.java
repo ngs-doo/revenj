@@ -191,7 +191,7 @@ public class TestRepository extends Setup {
 		Clicked cl = new Clicked().setBigint(rndLong).setDate(LocalDate.now()).setNumber(rndDecimal).setEn(En.B);
 		String[] uris = store.submit(Collections.singletonList(cl));
 		Assert.assertEquals(1, uris.length);
-		List<Clicked> found = store.search(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal), En.B));
+		List<Clicked> found = store.search(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal), En.B, null));
 		Assert.assertEquals(1, found.size());
 	}
 
@@ -205,7 +205,7 @@ public class TestRepository extends Setup {
 		Clicked cl = new Clicked().setBigint(rndLong).setDate(LocalDate.now()).setNumber(rndDecimal).setEn(En.B);
 		String[] uris = store.submit(Collections.singletonList(cl));
 		Assert.assertEquals(1, uris.length);
-		boolean found = store.exists(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal), En.B));
+		boolean found = store.exists(new Clicked.BetweenNumbers(rndDecimal, Collections.singleton(rndDecimal), En.B, null));
 		Assert.assertTrue(found);
 	}
 
@@ -645,5 +645,18 @@ public class TestRepository extends Setup {
 		Assert.assertTrue(found.isPresent());
 		Assert.assertTrue(found.get().deepEquals(value));
 		Assert.assertEquals(123L, found.get().getData().get("abc"));
+	}
+
+	@Test
+	public void sqlWithOptionalDateSearch() throws IOException {
+		ServiceLocator locator = container;
+		DataContext context = locator.resolve(DataContext.class);
+		Random rnd = new Random();
+		String name = "bulk " + rnd.nextInt();
+		Document document = new Document().setName(name);
+		context.create(document);
+		context.create(new Composite());
+		List<WritableDocument> found = context.search(WritableDocument.class, new WritableDocument.FindDate(document.getID(), LocalDate.now()));
+		Assert.assertEquals(1, found.size());
 	}
 }

@@ -2,16 +2,14 @@ package net.revenj.database.postgres
 
 import java.awt.Point
 import java.awt.geom.Point2D
-import java.io.IOException
+import java.io.{File, IOException}
 import java.sql.Connection
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
 
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
-import example.test.Client.Tick
-import example.test.postgres._
-import example.test._
 import monix.execution.Ack
 import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.{Container, InstanceScope, SystemState}
@@ -21,6 +19,10 @@ import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeAfterAll
 import ru.yandex.qatools.embed.service.PostgresEmbeddedService
+
+import example.test.Client.Tick
+import example.test.postgres._
+import example.test._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
@@ -123,6 +125,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         abc.ent2 = Array(Ent2())
         val uri = abc.URI
         Await.result(ctx.create(abc), Duration.Inf)
+        Await.result(ctx.delete(abc), Duration.Inf)
         container.close()
         abc.URI !== uri
       }
@@ -248,6 +251,17 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         ctx.commit() must beEqualTo(()).await
         container.close()
         find.nonEmpty === true
+      }
+      "search with nullable timestamp" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ctx = container.resolve[UnitOfWork]
+        val x = (new java.util.Date().getTime / 10000).asInstanceOf[Int]
+        val abc = Abc(s = "xzy")
+        Await.result(ctx.create(abc), Duration.Inf)
+        val find = Await.result(ctx.search(Abc.Filter()), Duration.Inf)
+        ctx.commit() must beEqualTo(()).await
+        container.close()
+        find.size must beGreaterThanOrEqualTo(1)
       }
       "report test" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
@@ -489,13 +503,29 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         hist.get.snapshots.head.value.s == "history"
       }
     }
-    "shallow references" >> {
-      "simple reference" >> {
+    "references" >> {
+      "simple shallow reference" >> {
         implicit val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val abc = Abc()
         abc.abc1 = "123"
         container.close()
         abc.abc1ID === Some(123)
+      }
+      "property will read reference off aggregate" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val repoAbc = container.resolve[AbcRepository]
+        val historyRepo = container.resolve[Repository[History[Abc]]]
+        val abc = Abc(s = "history")
+        abc.ii = Array(1, 2, 3)
+        val abcWrite = AbcWrite()
+        abcWrite.refId === None
+        abcWrite.ref = Some(abc)
+        val oldId = abc.ID
+        abcWrite.refId === Some(oldId)
+        val uri = Await.result(repoAbc.insert(abc), Duration.Inf)
+        container.close()
+        oldId !== abc.ID
+        abcWrite.refId === Some(abc.ID)
       }
     }
     "snapshot" >> {
@@ -536,6 +566,7 @@ object DbCheck {
       }
     }
   }
+
   class ExampleArrayEventHandler extends DomainEventHandler[Array[TestMe]] {
     override def handle(events: Array[TestMe]): Unit = {
       if (!events.exists(_.URI.nonEmpty)) {
@@ -543,6 +574,7 @@ object DbCheck {
       }
     }
   }
+
   class ExampleFuncEventHandler extends DomainEventHandler[Function0[TestMe]] {
     override def handle(event: Function0[TestMe]): Unit = {
       if (event().URI.nonEmpty) {
@@ -550,6 +582,7 @@ object DbCheck {
       }
     }
   }
+
   class ExampleFuncArrayEventHandler extends DomainEventHandler[Function0[Array[TestMe]]] {
     override def handle(events: Function0[Array[TestMe]]): Unit = {
       if (!events().exists(_.URI.isEmpty)) {
@@ -557,11 +590,13 @@ object DbCheck {
       }
     }
   }
+
   object EventHandlerCounters {
     var simpleCounter = 0
     var arrayCounter = 0
     var funcCounter = 0
     var arrayFuncCounter = 0
+
     def resetCounters(): Unit = {
       simpleCounter = 0
       arrayCounter = 0

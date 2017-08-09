@@ -93,10 +93,11 @@ module test {
 		Set<bool> bool;
 		En? en;
 
-		specification BetweenNumbers 'it => it.number >= min && inSet.Contains(it.number) && it.en == en' {
+		specification BetweenNumbers 'it => it.number >= min && inSet.Contains(it.number) && it.en == en && (onDate == null || onDate == it.date)' {
 			decimal min;
 			Set<decimal> inSet;
 			En? en;
+			date? onDate;
 		}
 	}
 	sql ClickedList from 'SELECT date, number FROM test."Clicked" GROUP BY date, number' {
@@ -178,12 +179,18 @@ module binaries {
 		string(20) name;
 		binary content;
 		Array<Boolean>? bools;
+		date date;
 		calculated Array<Boolean>? boolsCalc from 'it => it.bools';
 	}
 	sql WritableDocument binaries.Document(id)
 	{
 		guid id from ID;
 		string name;
+		date date;
+		specification FindDate 'it => id == it.id && (date == null || it.date == date.Value)' {
+			guid id;
+			date? date;
+		}	
 	}
 	sql ReadOnlyDocument 'SELECT "ID", name from binaries."Document"'
 	{

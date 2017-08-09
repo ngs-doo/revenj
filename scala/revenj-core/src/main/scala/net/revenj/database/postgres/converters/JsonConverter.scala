@@ -22,8 +22,8 @@ class JsonConverter(serialization: Serialization[String]) extends Converter[Map[
     toMap(StringConverter.parseRaw(reader, start, context))
   }
 
-  private def toMap(value: String) = {
-    serialization.deserialize[Map[String, Any]](value).getOrElse(throw new RuntimeException("Unable to deserialize JsonB into map"))
+  private def toMap(value: String): Map[String, Any] = {
+    serialization.deserialize[Map[String, AnyRef]](value).getOrElse(throw new RuntimeException("Unable to deserialize JsonB into map"))
   }
 
   override def parseCollectionItem(reader: PostgresReader, context: Int): Map[String, Any] = {

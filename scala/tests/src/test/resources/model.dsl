@@ -68,7 +68,7 @@ module test {
 		Queue<Abc> *abc2;
 		timestamp t;
 		List<timestamp?>? tt;
-		specification Filter 'it => it.t > at' { timestamp at; }
+		specification Filter 'it => it.t > at && (exactly == null || exactly.Value == it.t)' { timestamp at; timestamp? exactly; }
 		persistence { history; }
 	}
 	entity Ent1 { int i; }
@@ -124,7 +124,9 @@ module test {
 		Vector<Val> vvv;
 		Set<Another?> a;
 		List<string> sss; 
-		List<string?>? ssss; 
+		List<string?>? ssss;
+		int? refId from abc1ID;
+		Abc(refId)? *ref; 
 	}
 	struct Struct {
 		int i;

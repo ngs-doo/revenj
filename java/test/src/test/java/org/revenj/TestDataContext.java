@@ -191,6 +191,9 @@ public class TestDataContext extends Setup {
 		Optional<Document> changed = context.find(Document.class, document.getURI());
 		Assert.assertTrue(changed.isPresent());
 		Assert.assertEquals("test me later", changed.get().getName());
+		context.delete(wd);
+		Optional<Document> deleted = context.find(Document.class, document.getURI());
+		Assert.assertFalse(deleted.isPresent());
 	}
 
 	@Test
