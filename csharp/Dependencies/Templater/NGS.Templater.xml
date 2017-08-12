@@ -116,6 +116,14 @@
             <param name="replacer">replacer plugin</param>
             <returns>itself</returns>
         </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.WithMatcher(System.String)">
+            <summary>
+            Customize tag matcher. Default tag regex is [-+@\w\s.,!?]+
+            Full matcher consists from more elements, this is just the base tag element.
+            </summary>
+            <param name="regex">custom tag matcher</param>
+            <returns>itself</returns>
+        </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.Build">
             <summary>
             Build document factory instance using default 'templater.lic' license file.

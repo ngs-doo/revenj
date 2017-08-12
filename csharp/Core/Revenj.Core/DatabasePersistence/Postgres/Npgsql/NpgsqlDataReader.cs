@@ -53,20 +53,20 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		//the differences between the two is hidden from the user. Because CachingDataReader is a less efficient
 		//class supplied only to resolve some backwards-compatibility issues that are possible with some code, all
 		//internal use uses ForwardsOnlyDataReader directly.
-		internal NpgsqlConnector _connector;
-		internal NpgsqlConnection _connection;
 		internal DataTable _currentResultsetSchema;
 		internal CommandBehavior _behavior;
-		internal NpgsqlCommand _command;
+		internal readonly NpgsqlCommand _command;
 
 		internal static Version Npgsql205 = new Version("2.0.5");
 
 		internal NpgsqlDataReader(NpgsqlCommand command, CommandBehavior behavior)
 		{
 			_behavior = behavior;
-			_connection = (_command = command).Connection;
-			_connector = command.Connector;
+			_command = command;
 		}
+
+		internal NpgsqlConnector Connector { get { return _command.Connector; } }
+		internal NpgsqlConnection Connection { get { return _command.Connection; } }
 
 		internal bool _isClosed = false;
 
@@ -125,7 +125,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get
 			{
-				if (_connector.CompatVersion <= Npgsql205)
+				if (Connector.CompatVersion <= Npgsql205)
 					return CurrentDescription == null ? -1 : CurrentDescription.NumFields;
 				else
 					// We read msdn documentation and bug report #1010649 that the common return value is 0.
@@ -663,7 +663,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			String getPKColumns =
 				"select a.attname from pg_catalog.pg_class ct, pg_catalog.pg_class ci, pg_catalog.pg_attribute a, pg_catalog.pg_index i  WHERE ct.oid=i.indrelid AND ci.oid=i.indexrelid  AND a.attrelid=ci.oid AND i.indisprimary AND ct.relname = :tablename";
 
-			using (NpgsqlConnection metadataConn = _connection.Clone())
+			using (NpgsqlConnection metadataConn = Connection.Clone())
 			{
 				using (NpgsqlCommand c = new NpgsqlCommand(getPKColumns, metadataConn))
 				{
@@ -712,7 +712,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			KeyLookup lookup = new KeyLookup();
 
-			using (NpgsqlConnection metadataConn = _connection.Clone())
+			using (NpgsqlConnection metadataConn = Connection.Clone())
 			{
 				NpgsqlCommand c = new NpgsqlCommand(getKeys, metadataConn);
 				c.Parameters.Add(new NpgsqlParameter("tableOid", NpgsqlDbType.Integer)).Value = tableOid;
@@ -867,7 +867,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 			sb.Append(')');
 
-			using (NpgsqlConnection connection = _connection.Clone())
+			using (NpgsqlConnection connection = Connection.Clone())
 			{
 				using (NpgsqlCommand command = new NpgsqlCommand(sb.ToString(), connection))
 				{
@@ -942,7 +942,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				return null;
 			}
 
-			using (NpgsqlConnection connection = _connection.Clone())
+			using (NpgsqlConnection connection = Connection.Clone())
 			{
 				using (NpgsqlCommand command = new NpgsqlCommand(sb.ToString(), connection))
 				{
@@ -976,7 +976,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// </summary>
 	internal class ForwardsOnlyDataReader : NpgsqlDataReader, IStreamOwner
 	{
-		private readonly IEnumerator<IServerResponseObject> _dataEnumerator;
+		private IEnumerator<IServerResponseObject> _dataEnumerator;
 		private NpgsqlRowDescription _currentDescription;
 		private NpgsqlRow _currentRow = null;
 		private int? _recordsAffected = null;
@@ -984,8 +984,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private long? _lastInsertOID = null;
 		private long? _nextInsertOID = null;
 		internal bool _cleanedUp = false;
-		private readonly NpgsqlConnector.NotificationThreadBlock _threadBlock;
-		private readonly bool _synchOnReadError; //maybe this should always be done?
+		private NpgsqlConnector.NotificationThreadBlock _threadBlock;
+		private bool _synchOnReadError; //maybe this should always be done?
 
 		//Unfortunately we sometimes don't know we're going to be dealing with
 		//a description until it comes when we look for a row or a message, and
@@ -997,21 +997,33 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		// Logging related values
 		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
 
-		internal ForwardsOnlyDataReader(
+		internal ForwardsOnlyDataReader(NpgsqlCommand command, CommandBehavior readerBehavior)
+			: base(command, readerBehavior) { }
+
+		internal ForwardsOnlyDataReader Process(
 			IEnumerable<IServerResponseObject> dataEnumeration,
 			CommandBehavior behavior,
-			NpgsqlCommand command,
 			NpgsqlConnector.NotificationThreadBlock threadBlock,
 			bool synchOnReadError)
-			: base(command, behavior)
 		{
+			_currentDescription = null;
+			_currentRow = null;
+			_recordsAffected = null;
+			_nextRecordsAffected = null;
+			_lastInsertOID = null;
+			_nextInsertOID = null;
+			_pendingDescription = null;
+			_pendingRow = null;
+			_cleanedUp = false;
+			_behavior = behavior;
 			_dataEnumerator = dataEnumeration.GetEnumerator();
-			_connector.CurrentReader = this;
+			_command.Connector.CurrentReader = this;
 			_threadBlock = threadBlock;
 			_synchOnReadError = synchOnReadError;
 			//DataReaders always start prepared to read from the first Resultset (if any).
 			NextResult();
 			UpdateOutputParameters();
+			return this;
 		}
 
 		internal override NpgsqlRowDescription CurrentDescription
@@ -1141,7 +1153,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					// Sync is reached, then issues ReadyForQuery and returns to normal message processing.[...]"
 					// So, send a sync command if we get any problems.
 
-					_connector.Sync();
+					Connector.Sync();
 				}
 				throw;
 			}
@@ -1311,13 +1323,13 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				{
 					if ((Thread.CurrentThread.ThreadState & (ThreadState.Aborted | ThreadState.AbortRequested)) != 0)
 					{
-						_connection.EmergencyClose();
+						Connection.EmergencyClose();
 						return;
 					}
 				}
 				while (GetNextResponseObject() != null);
 			}
-			_connector.CurrentReader = null;
+			Connector.CurrentReader = null;
 			_threadBlock.Dispose();
 		}
 
@@ -1329,7 +1341,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			CleanUp(false);
 			if ((_behavior & CommandBehavior.CloseConnection) == CommandBehavior.CloseConnection)
 			{
-				_connection.Close();
+				Connection.Close();
 			}
 			_isClosed = true;
 			SendClosedEvent();
@@ -1381,7 +1393,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				return ExpectedTypeConverter.ChangeType(providerValue, _command.ExpectedTypes[Index]);
 			}
-			else if ((_connection == null || !_connection.UseExtendedTypes) && TryGetTypeInfo(Index, out backendTypeInfo))
+			else if ((Connection == null || !Connection.UseExtendedTypes) && TryGetTypeInfo(Index, out backendTypeInfo))
 				return backendTypeInfo.ConvertToFrameworkType(providerValue);
 			return providerValue;
 		}
@@ -1592,7 +1604,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			if ((_behavior & CommandBehavior.CloseConnection) == CommandBehavior.CloseConnection)
 			{
-				_connection.Close();
+				Connection.Close();
 			}
 			_isClosed = true;
 			SendClosedEvent();

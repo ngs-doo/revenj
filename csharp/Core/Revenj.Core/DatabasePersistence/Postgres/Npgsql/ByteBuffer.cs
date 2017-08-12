@@ -12,6 +12,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public readonly byte[] Large = new byte[65536];
 
+		private readonly char[] Chars = new char[256];
+
 		public void Add(byte value)
 		{
 			if (Position == Buffer.Length)
@@ -27,14 +29,26 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public int GetPosition() { return Position; }
 		public bool AreSame(byte[] compare)
 		{
+			if (compare.Length != Position) return false;
 			for (int i = 0; i < compare.Length && i < Buffer.Length; i++)
 				if (compare[i] != Buffer[i])
 					return false;
-			return compare.Length == Position;
+			return true;
 		}
 
 		public string GetUtf8String()
 		{
+			if (Position == 0) return string.Empty;
+			else if (Position < 256)
+			{
+				for (var i = 0; i < Position; i++)
+				{
+					var ch = Buffer[i];
+					if (ch > 126) return UTF8.GetString(Buffer, 0, Position);
+					Chars[i] = (char)ch;
+				}
+				return new string(Chars, 0, Position);
+			}
 			return UTF8.GetString(Buffer, 0, Position);
 		}
 

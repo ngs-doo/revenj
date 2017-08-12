@@ -83,6 +83,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private Boolean commandTimeoutSet = false;
 
 		private UpdateRowSource updateRowSource = UpdateRowSource.Both;
+		internal readonly ForwardsOnlyDataReader forwardReader;
 
 
 		// Constructors
@@ -107,6 +108,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			CommandType = System.Data.CommandType.Text;
 			timeout = 20;
 			ReaderBehavior = CommandBehavior.SequentialAccess;
+			forwardReader = new ForwardsOnlyDataReader(this, ReaderBehavior);
 		}
 
 		internal NpgsqlCommand(Stream stream, string template, string preparedQuery, string preparedParams)
@@ -118,6 +120,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			ReaderBehavior = CommandBehavior.SequentialAccess;
 			this.PreparedQuery = preparedQuery;
 			this.PreparedParams = preparedParams;
+			forwardReader = new ForwardsOnlyDataReader(this, ReaderBehavior);
 		}
 
 		/// <summary>
@@ -159,6 +162,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			type = CommandType.Text;
 			this.Transaction = transaction;
+			forwardReader = new ForwardsOnlyDataReader(this, ReaderBehavior);
 
 			SetCommandTimeout();
 		}
@@ -173,6 +177,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			text = cmdText;
 			this.m_Connector = connector;
 			type = CommandType.Text;
+			forwardReader = new ForwardsOnlyDataReader(this, ReaderBehavior);
 
 			// Removed this setting. It was causing too much problem.
 			// Do internal commands really need different timeout setting?
@@ -585,8 +590,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					ForwardsOnlyDataReader reader;
 					if (parse == null)
 					{
-						reader = new ForwardsOnlyDataReader(connector.QueryEnum(this), cb, this,
-															connector.BlockNotificationThread(), false);
+						reader = forwardReader.Process(connector.QueryEnum(this), cb, connector.BlockNotificationThread(), false);
 						if (type == CommandType.StoredProcedure
 							&& reader.FieldCount == 1
 							&& reader.GetDataTypeName(0) == "refcursor")
@@ -616,8 +620,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					else
 					{
 						BindParameters();
-						reader = new ForwardsOnlyDataReader(connector.ExecuteEnum(new NpgsqlExecute(bind.PortalName, 0)), cb, this,
-															connector.BlockNotificationThread(), true);
+						reader = forwardReader.Process(connector.ExecuteEnum(new NpgsqlExecute(bind.PortalName, 0)), cb, connector.BlockNotificationThread(), true);
 					}
 					return reader;
 				}
