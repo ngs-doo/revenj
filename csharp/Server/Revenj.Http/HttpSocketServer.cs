@@ -269,7 +269,7 @@ Please check settings: " + string.Join(", ", endpoints));
 					else
 					{
 						ctx.ForRouteWithAuth(match, auth.Principal);
-						if (principal != auth.Principal)
+						if (!IsSamePrincipal(principal, auth.Principal))
 							Thread.CurrentPrincipal = principal = auth.Principal;
 						using (var stream = route.Handle(match.OrderedArgs, ctx, ctx, ctx.InputStream, ctx.OutputStream))
 						{
@@ -334,6 +334,16 @@ Please check settings: " + string.Join(", ", endpoints));
 			{
 				ctx.ReturnError(socket, (int)auth.ResponseCode, auth.Error, true);
 			}
+		}
+
+		private static bool IsSamePrincipal(IPrincipal left, IPrincipal right)
+		{
+			if (left == right) return true;
+			else if (left == null || right == null) return false;
+			if (left.Identity != null && right.Identity != null
+				&& left.Identity.Name == string.Empty
+				&& right.Identity.Name == string.Empty) return true;//guest principal
+			return false;
 		}
 
 		private void ProcessInThread(object state)

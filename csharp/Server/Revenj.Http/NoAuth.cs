@@ -8,7 +8,7 @@ namespace Revenj.Http
 {
 	public class NoAuth : HttpAuth, IPermissionManager
 	{
-		private static readonly GenericPrincipal Guest = new GenericPrincipal(new GenericIdentity("guest"), new string[0]);
+		private static readonly GenericPrincipal Guest = new GenericPrincipal(new GenericIdentity(string.Empty, string.Empty), new string[0]);
 
 		public NoAuth() : base(null, null, null) { }
 
