@@ -9,10 +9,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private byte[] Buffer = new byte[32];
 		private int Position;
+		private readonly char[] Chars = new char[256];
 
 		public readonly byte[] Large = new byte[65536];
-
-		private readonly char[] Chars = new char[256];
 
 		public void Add(byte value)
 		{

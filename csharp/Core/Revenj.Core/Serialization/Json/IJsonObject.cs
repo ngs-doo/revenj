@@ -8,8 +8,10 @@ namespace Revenj.Serialization
 {
 	public interface IJsonObject
 	{
-		void Serialize(TextWriter sw, bool minimal, Action<TextWriter, object> serializer);
-		object Deserialize(BufferedTextReader sr, StreamingContext context, Func<TextReader, Type, object> serializer);
+		[Obsolete("will be removed")]
+		void Serialize(TextWriter sw, bool minimal, Action<TextWriter, object> fallback);
+		void Serialize(TextWriter sw, char[] buffer, bool minimal, Action<TextWriter, object> fallback);
+		object Deserialize(BufferedTextReader sr, StreamingContext context, Func<TextReader, Type, object> fallback);
 	}
 
 	public static class JsonObjectHelper
@@ -18,7 +20,7 @@ namespace Revenj.Serialization
 		{
 			stream.Reset();
 			var sw = stream.GetWriter();
-			instance.Serialize(sw, false, null);
+			instance.Serialize(sw, stream.SmallBuffer, false, null);
 			sw.Flush();
 			stream.Position = 0;
 		}
@@ -29,11 +31,11 @@ namespace Revenj.Serialization
 			sw.Write('[');
 			if (array.Length > 0)
 			{
-				array[0].Serialize(sw, false, null);
+				array[0].Serialize(sw, stream.SmallBuffer, false, null);
 				for (int i = 1; i < array.Length; i++)
 				{
 					sw.Write(',');
-					array[i].Serialize(sw, false, null);
+					array[i].Serialize(sw, stream.SmallBuffer, false, null);
 				}
 			}
 			sw.Write(']');
@@ -47,11 +49,11 @@ namespace Revenj.Serialization
 			sw.Write('[');
 			if (len > 0)
 			{
-				array[0].Serialize(sw, false, null);
+				array[0].Serialize(sw, stream.SmallBuffer, false, null);
 				for (int i = 1; i < len; i++)
 				{
 					sw.Write(',');
-					array[i].Serialize(sw, false, null);
+					array[i].Serialize(sw, stream.SmallBuffer, false, null);
 				}
 			}
 			sw.Write(']');
@@ -68,11 +70,11 @@ namespace Revenj.Serialization
 			{
 				var array = segment.Array;
 				var off = segment.Offset;
-				array[off].Serialize(sw, false, null);
+				array[off].Serialize(sw, stream.SmallBuffer, false, null);
 				for (int i = 1; i < segment.Count; i++)
 				{
 					sw.Write(',');
-					array[off + i].Serialize(sw, false, null);
+					array[off + i].Serialize(sw, stream.SmallBuffer, false, null);
 				}
 			}
 			sw.Write(']');
@@ -86,11 +88,11 @@ namespace Revenj.Serialization
 			sw.Write('[');
 			if (values.Count > 0)
 			{
-				values[0].Serialize(sw, false, null);
+				values[0].Serialize(sw, stream.SmallBuffer, false, null);
 				for (int i = 1; i < values.Count; i++)
 				{
 					sw.Write(',');
-					values[i].Serialize(sw, false, null);
+					values[i].Serialize(sw, stream.SmallBuffer, false, null);
 				}
 			}
 			sw.Write(']');

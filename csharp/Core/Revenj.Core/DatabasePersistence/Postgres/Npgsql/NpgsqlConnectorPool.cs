@@ -211,9 +211,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			Connector = RequestPooledConnectorInternal(Connection);
 
+			//TODO: rewrite using something better like blocking queue with timeout
 			while (Connector == null && timeoutMilliseconds > 0)
 			{
-				Int32 ST = timeoutMilliseconds > 1000 ? 1000 : timeoutMilliseconds;
+				Int32 ST = timeoutMilliseconds > 100 ? 100 : timeoutMilliseconds;
 
 				Thread.Sleep(ST);
 				timeoutMilliseconds -= ST;

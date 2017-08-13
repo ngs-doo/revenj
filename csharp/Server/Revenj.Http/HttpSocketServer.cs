@@ -228,7 +228,7 @@ Please check settings: " + string.Join(", ", endpoints));
 			}
 		}
 
-		struct ThreadArgs
+		class ThreadArgs
 		{
 			public readonly RequestInfo Request;
 			public readonly HttpSocketContext Context;
@@ -360,7 +360,8 @@ Please check settings: " + string.Join(", ", endpoints));
 				var principal = arg.Auth.Principal;
 				ThreadContext.Request = ctx;
 				ThreadContext.Response = ctx;
-				Thread.CurrentPrincipal = principal;
+				if (!IsSamePrincipal(Thread.CurrentPrincipal, principal))
+					Thread.CurrentPrincipal = principal;
 				ctx.ForRouteWithAuth(arg.Match, principal);
 				using (var stream = arg.Route.Handle(arg.Match.OrderedArgs, ctx, ctx, ctx.InputStream, ctx.OutputStream))
 				{

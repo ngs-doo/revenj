@@ -37,7 +37,9 @@ using System.Reflection;
 using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -85,6 +87,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private UpdateRowSource updateRowSource = UpdateRowSource.Both;
 		internal readonly ForwardsOnlyDataReader forwardReader;
 
+		private static readonly ThreadLocal<ChunkedMemoryStream> LocalStream = new ThreadLocal<ChunkedMemoryStream>(() => ChunkedMemoryStream.Static());
 
 		// Constructors
 
@@ -847,7 +850,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			return result;
 		}
 
-		private static void PassEscapedArray(StreamWriter query, string array)
+		private static void PassEscapedArray(TextWriter query, string array)
 		{
 			bool inTextLiteral = false;
 			int endAt = array.Length - 1;//leave last char for separate append as we don't have to continually check we're safe to add the next char too.
@@ -877,7 +880,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			query.Write(array[endAt]);
 		}
 
-		private void PassParam(StreamWriter query, NpgsqlParameter p)
+		private void PassParam(TextWriter query, NpgsqlParameter p)
 		{
 			string serialised = p.TypeInfo.ConvertToBackend(p.Value, false);
 
@@ -926,14 +929,23 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private Stream GetClearCommandStream()
 		{
+			var ms = LocalStream.Value;
+			ms.Reset();
+			var sw = ms.GetWriter();
 			if (type == CommandType.TableDirect)
-				return new MemoryStream(Encoding.UTF8.GetBytes("select * from " + text)); // There is no parameter support on table direct.
-			else if (type == CommandType.Text && parameters.Count == 0)
-				return new MemoryStream(Encoding.UTF8.GetBytes(text));
-
-			var ms = new MemoryStream();
-			var sw = new StreamWriter(ms);
-			if (type == CommandType.StoredProcedure)
+			{
+				sw.Write("select * from ");
+				sw.Write(text);
+				sw.Flush();
+				return ms; // There is no parameter support on table direct.
+			}
+			if (type == CommandType.Text && parameters.Count == 0)
+			{
+				sw.Write(text);
+				sw.Flush();
+				return ms;
+			}
+			else if (type == CommandType.StoredProcedure)
 			{
 				if (Connector.SupportsPrepare)
 					sw.Write("SELECT * FROM ");
@@ -991,8 +1003,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				foreach (NpgsqlParameter parameter in parameters)
 					parameterIndex[parameter.CleanName] = parameter;
 
-				ms = new MemoryStream();
-				sw = new StreamWriter(ms);
+				sw.Flush();
+				ms.Reset();
+				sw = ms.GetWriter();
 
 				foreach (string s in parameterReplace.Split(text))
 					//foreach (String s in parameterReplace.Split(result.ToString()))
@@ -1162,7 +1175,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			return ret;
 		}
 
-		private void AddFunctionColumnListSupport(StreamWriter sw)
+		private void AddFunctionColumnListSupport(TextWriter sw)
 		{
 			sw.Write(" as (");
 			for (int i = 0; i < Parameters.Count; i++)
@@ -1185,12 +1198,18 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private Stream GetPreparedCommandStream()
 		{
-			if (parameters.Count == 0)
-				return new MemoryStream(Encoding.UTF8.GetBytes("execute " + planName));
+			var ms = LocalStream.Value;
+			ms.Reset();
+			var sw = ms.GetWriter();
+			sw.Write("execute ");
+			sw.Write(planName);
 
-			var ms = new MemoryStream();
-			var sw = new StreamWriter(ms);
-			sw.Write("execute " + planName);
+			if (parameters.Count == 0)
+			{
+				sw.Flush();
+				return ms;
+			}
+
 			sw.Write('(');
 
 			for (int i = 0; i < parameters.Count; i++)
