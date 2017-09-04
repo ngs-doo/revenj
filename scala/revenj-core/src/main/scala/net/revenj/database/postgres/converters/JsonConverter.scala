@@ -47,7 +47,7 @@ class JsonConverter(serialization: Serialization[String]) extends Converter[Map[
     if (value.isEmpty) {
       EmptyTuple
     } else {
-      ValueTuple.from(serialization.serialize(value).getOrElse(throw new IOException(s"Unable to serialize provided map: $value")))
+      ValueTuple.from(serialization.serialize(value.asInstanceOf[Map[String, AnyRef]]).getOrElse(throw new IOException(s"Unable to serialize provided map: $value")))
     }
   }
 }
