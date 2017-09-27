@@ -54,8 +54,8 @@ namespace Revenj.Extensibility
 			{
 				if (directory != null)
 				{
-				    var exclusions = ConfigurationManager.AppSettings["PluginsExclusions"];
-                    var files = Directory.EnumerateFiles(directory, "*.dll").Where(f => !Util.FilenameMatch(f, exclusions)).ToList();
+					var exclusions = ConfigurationManager.AppSettings["PluginsExclusions"];
+					var files = Directory.EnumerateFiles(directory, "*.dll").Where(f => !Util.FilenameMatch(f, exclusions)).ToList();
 					foreach (var f in files)
 					{
 						var name = Path.GetFileNameWithoutExtension(f);
