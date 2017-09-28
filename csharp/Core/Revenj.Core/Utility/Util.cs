@@ -12,7 +12,7 @@ namespace Revenj.Core.Utility
 			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
 
-			var filename = Path.GetFileName(filePath).ToLower();
+			var filename = Path.GetFileNameWithoutExtension(filePath).ToLower();
 			return commaSeparatedWildcards != null && commaSeparatedWildcards.ToLower().Split(',')
 						.Any(wildcard => Regex.IsMatch(filename, WildcardToRegExPattern(wildcard)));
 		}

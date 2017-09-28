@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Revenj.Core.Utility;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -15,7 +18,7 @@ namespace Revenj.Utility
 		/// Cache for <see cref="GetAssemblies"/>
 		/// </summary>
 		private static readonly List<Assembly> AllAssemblies = new List<Assembly>();
-		private static readonly HashSet<string> AssemblyNames = new HashSet<string>();
+		private static readonly Dictionary<string, string> AssemblyNames = new Dictionary<string, string>();
 
 		/// <summary>
 		/// Cache for <see cref="GetAllTypes"/>
@@ -31,38 +34,35 @@ namespace Revenj.Utility
 		{
 			if (AllAssemblies.Count == 0)
 			{
-				foreach (var refAsm in AppDomain.CurrentDomain.GetAssemblies())
+				var exclusions = ConfigurationManager.AppSettings["PluginsExclusions"];
+				exclusions = (!string.IsNullOrWhiteSpace(exclusions) ? exclusions + "," : "") + 
+					"Microsoft,Microsoft.*,Mono,Mono.*,System,System.*,mscorlib,Oracle.DataAccess*,Revenj.DatabasePersistence.Oracle*";
+
+				foreach (var refAsm in AppDomain.CurrentDomain.GetAssemblies().Where(it => !it.IsDynamic))
 				{
-					foreach (var asm in GetAssemblyAndAllReferencedAssemblies(refAsm))
+					AssemblyNames[refAsm.FullName] = Path.GetFileNameWithoutExtension(refAsm.Location);
+					foreach (var asm in refAsm.GetReferencedAssemblies())
 					{
-						if (asm.IsDynamic
-							|| asm.FullName.StartsWith("Microsoft.")
-							|| asm.FullName.StartsWith("Microsoft,")
-							|| asm.FullName.StartsWith("Mono.")
-							|| asm.FullName.StartsWith("Mono,")
-							|| asm.FullName.StartsWith("System,")
-							|| asm.FullName.StartsWith("System.")
-							|| asm.FullName.StartsWith("mscorlib")
-							|| asm.FullName.StartsWith("Oracle.DataAccess")
-							|| asm.FullName.StartsWith("Revenj.DatabasePersistence.Oracle")) continue;
-						if (AssemblyNames.Add(asm.FullName))
+						AssemblyNames[asm.FullName] = asm.Name;
+					}
+				}
+
+				var assemblyNames = AssemblyNames.Where(it => !Util.FilenameMatch(it.Value, exclusions)).ToList();
+				foreach (var assemblyName in assemblyNames)
+				{
+					try
+					{
+						var asm = Assembly.Load(assemblyName.Key);
+						if (!asm.IsDynamic)
 							AllAssemblies.Add(asm);
+					}
+					catch (Exception ex)
+					{
+						System.Diagnostics.Debug.WriteLine(ex.Message);
 					}
 				}
 			}
 			return AllAssemblies;
-		}
-
-		private static IEnumerable<Assembly> GetAssemblyAndAllReferencedAssemblies(Assembly asm)
-		{
-			var found = new List<Assembly>();
-			found.Add(asm);
-			foreach (var refAsm in asm.GetReferencedAssemblies())
-			{
-				try { found.Add(Assembly.Load(refAsm)); }
-				catch { }
-			}
-			return found;
 		}
 
 		/// <summary>
