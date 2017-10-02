@@ -503,6 +503,7 @@
     <Compile Include="Utility\TemporaryResources.cs" />
     <Compile Include="Utility\TopologicalSort.cs" />
     <Compile Include="Utility\TreePath.cs" />
+    <Compile Include="Utility\Util.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">

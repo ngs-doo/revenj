@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
+using System.Configuration;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Revenj.Common;
+using Revenj.Core.Utility;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Utility;
 
@@ -48,22 +50,24 @@ namespace Revenj.Extensibility
 					}
 				}
 			}
+
+			var exclusions = ConfigurationManager.AppSettings["PluginsExclusions"];
+			exclusions = (!string.IsNullOrWhiteSpace(exclusions) ? exclusions + "," : "") + 
+						 //TODO: temporary hack, will clean up later
+						 "Oracle.DataAccess*,Revenj.DatabasePersistence.Oracle*";
+			//TODO: Or? "Microsoft,Microsoft.*,Mono,Mono.*,System,System.*,mscorlib,Oracle.DataAccess*,Revenj.DatabasePersistence.Oracle*";
+
 			foreach (var directory in configuration.Directories)
 			{
 				if (directory != null)
 				{
-					foreach (var f in Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly))
+					foreach (var f in Directory.EnumerateFiles(directory, "*.dll").Where(f => !Util.FilenameMatch(f, exclusions)))
 					{
-						var name = Path.GetFileNameWithoutExtension(f);
-						//TODO: temporary hack, will clean up later
-						if (name != "Oracle.DataAccess" && name != "Revenj.DatabasePersistence.Oracle")
+						try { assemblies.Add(Assembly.LoadFrom(f)); }
+						catch (Exception aex)
 						{
-							try { assemblies.Add(Assembly.LoadFrom(f)); }
-							catch (Exception aex)
-							{
-								System.Diagnostics.Debug.WriteLine(aex.ToString());
-								throw new FrameworkException("Error loading plugin: " + f, aex);
-							}
+							System.Diagnostics.Debug.WriteLine(aex.ToString());
+							throw new FrameworkException("Error loading plugin: " + f, aex);
 						}
 					}
 				}
