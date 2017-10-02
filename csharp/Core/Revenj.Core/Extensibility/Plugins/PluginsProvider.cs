@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
-using System.Configuration;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Revenj.Common;
-using Revenj.Core.Utility;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Utility;
 
@@ -51,19 +49,21 @@ namespace Revenj.Extensibility
 				}
 			}
 
-			var exclusions = ConfigurationManager.AppSettings["PluginsExclusions"];
-			exclusions = (!string.IsNullOrWhiteSpace(exclusions) ? exclusions + "," : "") + 
-						 //TODO: temporary hack, will clean up later
-						 "Oracle.DataAccess*,Revenj.DatabasePersistence.Oracle*";
-			//TODO: Or? "Microsoft,Microsoft.*,Mono,Mono.*,System,System.*,mscorlib,Oracle.DataAccess*,Revenj.DatabasePersistence.Oracle*";
-
 			foreach (var directory in configuration.Directories)
 			{
 				if (directory != null)
 				{
-					foreach (var f in Directory.EnumerateFiles(directory, "*.dll").Where(f => !Util.FilenameMatch(f, exclusions)))
+					foreach (var f in Directory.EnumerateFiles(directory, "*.dll"))
 					{
-						try { assemblies.Add(Assembly.LoadFrom(f)); }
+						try
+						{
+							if (!Plugins.ExcludeFile(f))
+							{
+								var asm = Assembly.LoadFrom(f);
+								if (!Plugins.ExcludeAssembly(asm))
+									assemblies.Add(asm);
+							}
+						}
 						catch (Exception aex)
 						{
 							System.Diagnostics.Debug.WriteLine(aex.ToString());

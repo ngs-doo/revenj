@@ -1,7 +1,5 @@
-﻿using Revenj.Core.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -34,9 +32,6 @@ namespace Revenj.Utility
 		{
 			if (AllAssemblies.Count == 0)
 			{
-				var exclusions = ConfigurationManager.AppSettings["PluginsExclusions"];
-				exclusions = (!string.IsNullOrWhiteSpace(exclusions) ? exclusions + "," : "") + 
-					"Microsoft,Microsoft.*,Mono,Mono.*,System,System.*,mscorlib,Oracle.DataAccess*,Revenj.DatabasePersistence.Oracle*";
 
 				foreach (var refAsm in AppDomain.CurrentDomain.GetAssemblies().Where(it => !it.IsDynamic))
 				{
@@ -47,13 +42,13 @@ namespace Revenj.Utility
 					}
 				}
 
-				var assemblyNames = AssemblyNames.Where(it => !Util.FilenameMatch(it.Value, exclusions)).ToList();
+				var assemblyNames = AssemblyNames.Where(it => !Plugins.ExcludeFile(it.Value)).ToList();
 				foreach (var assemblyName in assemblyNames)
 				{
 					try
 					{
 						var asm = Assembly.Load(assemblyName.Key);
-						if (!asm.IsDynamic)
+						if (!Plugins.ExcludeAssembly(asm))
 							AllAssemblies.Add(asm);
 					}
 					catch (Exception ex)
