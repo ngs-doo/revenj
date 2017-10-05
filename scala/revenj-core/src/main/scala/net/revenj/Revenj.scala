@@ -4,7 +4,7 @@ import java.io._
 import java.lang.reflect.ParameterizedType
 import java.net.{URL, URLClassLoader}
 import java.sql.Connection
-import java.util.{Properties, ServiceLoader}
+import java.util.{Properties, ServiceLoader, UUID}
 import javax.sql.DataSource
 
 import net.revenj.database.postgres.converters.JsonConverter
@@ -77,6 +77,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     } else if (password != null && password.length > 0) {
       dataSource.setPassword(password)
     }
+    dataSource.setDataSourceName(UUID.randomUUID.toString)
     dataSource
   }
 
