@@ -15,12 +15,12 @@ namespace Revenj.Utility
 		{
 			var fileExclusions = ConfigurationManager.AppSettings["Plugins.FileExclusions"];
 			fileExclusions = (!string.IsNullOrWhiteSpace(fileExclusions) ? fileExclusions + "," : "")
-				+ "Oracle.DataAccess*,Revenj.DatabasePersistence.Oracle*";
-			FileExclusions = fileExclusions.Split(',').Select(it => new Regex("^" + Regex.Escape(it).Replace("\\?", ".").Replace("\\*", ".*") + "$")).ToArray();
+				+ "Microsoft.*;Mono.*;Oracle.DataAccess*;Revenj.DatabasePersistence.Oracle*";
+			FileExclusions = fileExclusions.Split(new[] { ':', ';' }).Select(it => new Regex("^" + Regex.Escape(it).Replace("\\?", ".").Replace("\\*", ".*"))).ToArray();
 			var assemblyExclusions = ConfigurationManager.AppSettings["Plugins.AssemblyExclusions"];
 			assemblyExclusions = (!string.IsNullOrWhiteSpace(assemblyExclusions) ? assemblyExclusions + "," : "") +
-				"Microsoft,Microsoft.*,Mono,Mono.*,System,System.*,mscorlib,Oracle.DataAccess*,Revenj.DatabasePersistence.Oracle*";
-			AssemblyExclusions = assemblyExclusions.Split(',').Select(it => new Regex("^" + Regex.Escape(it).Replace("\\?", ".").Replace("\\*", ".*") + "$")).ToArray();
+				"Microsoft,;Microsoft.*;Mono,;Mono.*;System,;System.*;mscorlib,;Oracle.DataAccess*;Revenj.DatabasePersistence.Oracle*";
+			AssemblyExclusions = assemblyExclusions.Split(new[] { ':', ';' }).Select(it => new Regex("^" + Regex.Escape(it).Replace("\\?", ".").Replace("\\*", ".*"))).ToArray();
 		}
 
 		public static bool ExcludeFile(string filePath)
@@ -35,6 +35,11 @@ namespace Revenj.Utility
 		{
 			if (assembly == null || assembly.IsDynamic) return true;
 
+			return AssemblyExclusions.Any(match => match.IsMatch(assembly.FullName));
+		}
+
+		public static bool ExcludeAssembly(AssemblyName assembly)
+		{
 			return AssemblyExclusions.Any(match => match.IsMatch(assembly.FullName));
 		}
 	}
