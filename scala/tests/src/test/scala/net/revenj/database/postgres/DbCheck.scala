@@ -436,6 +436,29 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         container.close()
         hasData === true
       }
+      "cube with report" >> {
+        val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+        val ds = container.resolve[DataSource]
+        val ctx = container.resolve[UnitOfWork]
+        val x = (new java.util.Date().getTime / 10000).asInstanceOf[Int]
+        val me1 = Me(x = x, s = Some(s"first$x"), a = Seq(1L, 2L), x1 = X(i = 1), x2 = Seq(X(i = 2), X(i = 3)))
+        val me2 = Me(x = x + 1, s = Some(s"first$x"), a = Seq(11L, -2L), x1 = X(i = 5), x2 = Seq(X(i = -3)))
+        val me3 = Me(x = x + 2, s = Some(s"second$x"), a = Seq(21L, 22L), x1 = X(i = 8), x2 = Seq(X(i = -32), X(i = 13)))
+        Await.result(ctx.create(Seq(me1, me2, me3)), Duration.Inf)
+        val rep = R(s = s"first$x")
+        val result = Await.result(ctx.populate(rep), Duration.Inf)
+        ctx.rollback() must beEqualTo(()).await
+        container.close()
+        result.all.size === 2
+        val sorted = result.all.sortBy(_.s.get)
+        sorted.head.s === Option(s"first$x")
+        sorted.head.x2.size === 3
+        sorted.last.s === Option(s"second$x")
+        sorted.last.x2.size === 2
+        result.x1.size === 1
+        result.x2.size === 1
+        result.x2.head.x2.size === 5
+      }
     }
     "events" >> {
       "aggregate event" >> {

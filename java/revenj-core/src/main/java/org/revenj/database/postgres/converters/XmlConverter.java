@@ -24,7 +24,7 @@ import java.util.List;
 
 public abstract class XmlConverter {
 
-	private static DocumentBuilder documentBuilder;
+	private static final DocumentBuilder documentBuilder;
 
 	static {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -72,7 +72,9 @@ public abstract class XmlConverter {
 		if (value.length() == 0) return null;
 		try {
 			InputSource source = new InputSource(new StringReader(value));
-			return documentBuilder.parse(source).getDocumentElement();
+			synchronized (documentBuilder) {
+				return documentBuilder.parse(source).getDocumentElement();
+			}
 		} catch (SAXException ex) {
 			throw new IOException(ex);
 		}

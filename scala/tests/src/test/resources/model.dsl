@@ -185,5 +185,71 @@ module test {
 	aggregate Dec(d) {
 		decimal(9) d;
 		persistence { history; }
+		path tree;
+		specification Filter 'it => true' {
+			path tree;
+		}
+	}
+
+	value ChequeClearingSearch {
+		Date? depositDate;
+
+		ChequeClientAccount? chequeAccountClient;
+
+		List<String> banks;
+		List<ChequeStatus> statuses;
+		List<ChequeType> chequeTypes;
+	}
+
+	enum ChequeStatus { A; B; }
+	enum ChequeType { C; D; }
+	value ChequeClientAccount {
+		string account;
+	}
+
+	aggregate Cheque(chequeNumber, bank) {
+		String chequeNumber;
+		String bank;
+		specification Filter 'it => true' {
+			ChequeClearingSearch filter;
+		}
+	}
+	
+	root Me {
+		int x;
+		string? s;
+		List<long> a;
+		X x1;
+		List<X> x2;
+	}
+	value X { int i; }
+	cube<Me> MEE {
+		dimension s;
+		accumulate x;
+		accumulate a;
+		accumulate x1;
+		accumulate x2;
+	}
+	report R {
+	    string s;
+		MEE(s, x, a, x1, x2) all 'it => true';
+		MEE(x1) x1 'it => it.s == s';
+		MEE(x2) x2 'it => true';
+	}
+	command CreateMe {
+		int x;
+		string b;
+		string? s;
+		has mapping same from Me;
+		has mapping same into Me;
+	}
+	struct MeVM {
+		int x;
+		List<long> a;
+		has mapping same from Me;
+		has mapping same into Me;
+	}
+	mapping same {
+		identical;
 	}
 }
