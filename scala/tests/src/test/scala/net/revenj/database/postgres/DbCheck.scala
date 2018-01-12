@@ -258,7 +258,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val x = (new java.util.Date().getTime / 10000).asInstanceOf[Int]
         val abc = Abc(s = "xzy")
         Await.result(ctx.create(abc), Duration.Inf)
-        val find = Await.result(ctx.search(Abc.Filter()), Duration.Inf)
+        val find = Await.result(ctx.search(Abc.Filter(at = abc.t.minusMillis(1))), Duration.Inf)
         ctx.commit() must beEqualTo(()).await
         container.close()
         find.size must beGreaterThanOrEqualTo(1)

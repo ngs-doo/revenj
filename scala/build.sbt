@@ -5,18 +5,18 @@ import com.dslplatform.compiler.client.parameters.{Settings, Targets}
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.6.4",
+    version := "0.6.5",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.1.4",
-      "joda-time" % "joda-time" % "2.9.6",   // TODO: will be removed
-      "org.joda" % "joda-convert" % "1.8.1", // TODO: will be removed
+      "joda-time" % "joda-time" % "2.9.9",   // TODO: will be removed
+      "org.joda" % "joda-convert" % "1.9.2", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix-reactive" % "2.3.0",
+      "io.monix" %% "monix-reactive" % "2.3.2",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.8.8",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.8.8",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.8.8",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.2",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.2",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.2",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.2",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
     )
   )
@@ -25,10 +25,10 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.6.4",
+  version := "0.6.5",
   libraryDependencies ++= Seq(
-    "com.typesafe" % "config" % "1.3.1",
-    "com.typesafe.akka" %% "akka-http-core" % "10.0.6"
+    "com.typesafe" % "config" % "1.3.2",
+    "com.typesafe.akka" %% "akka-http-core" % "10.0.11"
     )
   )
   dependsOn(core)
@@ -69,8 +69,8 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "net.revenj" %% "revenj-core" % "0.6.4" % Provided,
-      "com.dslplatform" % "dsl-clc" % "1.9.1" % Test,
+      "net.revenj" %% "revenj-core" % "0.6.5" % Provided,
+      "com.dslplatform" % "dsl-clc" % "1.9.2" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
@@ -100,7 +100,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   name := baseDirectory.value.getName,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.11.11", "2.12.3"),
+  crossScalaVersions := Seq("2.11.12", "2.12.4"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",

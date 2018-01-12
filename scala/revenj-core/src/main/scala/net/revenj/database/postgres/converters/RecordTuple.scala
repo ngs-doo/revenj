@@ -4,9 +4,9 @@ import net.revenj.database.postgres.PostgresWriter
 
 class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
 
-  val mustEscapeRecord = true
+  override val mustEscapeRecord = true
 
-  val mustEscapeArray = true
+  override val mustEscapeArray = true
 
   override def buildTuple(quote: Boolean): String = {
     val sw = PostgresTuple.threadWriter.get

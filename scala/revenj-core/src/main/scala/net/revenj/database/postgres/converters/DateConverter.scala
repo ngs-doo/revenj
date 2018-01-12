@@ -32,9 +32,9 @@ object DateConverter extends Converter[LocalDate] {
     ps.setObject(index, pg)
   }
 
-  val dbName = "date"
+  override val dbName = "date"
 
-  def default() = Utils.MinLocalDate
+  override def default(): LocalDate = Utils.MinLocalDate
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): LocalDate = parseDate(reader, start)
 

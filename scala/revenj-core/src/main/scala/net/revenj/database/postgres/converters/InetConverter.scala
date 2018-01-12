@@ -9,7 +9,7 @@ object InetConverter extends Converter[InetAddress] {
 
   override val dbName = "inet"
 
-  override def default() = Utils.Loopback
+  override def default(): InetAddress = Utils.Loopback
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): InetAddress = {
     InetAddress.getByName(StringConverter.parseRaw(reader, start, context))

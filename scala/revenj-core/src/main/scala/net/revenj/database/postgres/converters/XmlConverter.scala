@@ -1,24 +1,34 @@
 package net.revenj.database.postgres.converters
 
-import net.revenj.database.postgres.PostgresReader
+import java.io.ByteArrayInputStream
+import java.nio.charset.Charset
 
-import scala.xml.{Elem, XML}
+import net.revenj.Utils
+import net.revenj.database.postgres.PostgresReader
+import org.xml.sax.InputSource
+
+import scala.xml.Elem
 
 object XmlConverter extends Converter[Elem] {
+
+  private val utf8 = Charset.forName("UTF-8")
+
   override val dbName = "xml"
 
-  override def default() = null
+  override def default(): Elem = null
+
+  private def toElem(xml: String) = Utils.parse[Elem](new InputSource(new ByteArrayInputStream(xml.getBytes(utf8))))
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Elem = {
-    XML.loadString(StringConverter.parseRaw(reader, start, context))
+    toElem(StringConverter.parseRaw(reader, start, context))
   }
 
   override def parseCollectionItem(reader: PostgresReader, context: Int): Elem = {
-    XML.loadString(StringConverter.parseCollectionItem(reader, context))
+    toElem(StringConverter.parseCollectionItem(reader, context))
   }
 
   override def parseNullableCollectionItem(reader: PostgresReader, context: Int): Option[Elem] = {
-    StringConverter.parseNullableCollectionItem(reader, context).map(XML.loadString)
+    StringConverter.parseNullableCollectionItem(reader, context).map(toElem)
   }
 
   override def toTuple(value: Elem): PostgresTuple = ValueTuple.from(value.toString)

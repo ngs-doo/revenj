@@ -1,5 +1,6 @@
 package org.revenj.database.postgres.converters;
 
+import org.revenj.Utils;
 import org.revenj.database.postgres.PostgresBuffer;
 import org.revenj.database.postgres.PostgresReader;
 import org.w3c.dom.Document;
@@ -8,11 +9,7 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -23,17 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class XmlConverter {
-
-	private static final DocumentBuilder documentBuilder;
-
-	static {
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		try {
-			documentBuilder = dbFactory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	public static String xmlToString(Element value) {
 		Document document = value.getOwnerDocument();
@@ -70,14 +56,7 @@ public abstract class XmlConverter {
 
 	public static Element stringToXml(String value) throws IOException {
 		if (value.length() == 0) return null;
-		try {
-			InputSource source = new InputSource(new StringReader(value));
-			synchronized (documentBuilder) {
-				return documentBuilder.parse(source).getDocumentElement();
-			}
-		} catch (SAXException ex) {
-			throw new IOException(ex);
-		}
+		return Utils.parse(new InputSource(new StringReader(value))).getDocumentElement();
 	}
 
 	public static List<Element> parseCollection(PostgresReader reader, int context) throws IOException {

@@ -89,7 +89,7 @@ object ValueTuple {
     override def buildTuple(quote: Boolean): String = if (quote) "'\"\"'" else "\"\""
   }
 
-  def apply(value: String) = {
+  def apply(value: String): ValueTuple = {
     if (value != null) {
       var hasMarkers = false
       var escapeRecord = value.length == 0

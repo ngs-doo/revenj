@@ -32,9 +32,9 @@ object ByteaConverter extends Converter[Array[Byte]] {
     }
   }
 
-  val dbName = "bytea"
+  override val dbName = "bytea"
 
-  def default() = EMPTY_BYTES
+  override def default(): Array[Byte] = EMPTY_BYTES
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Array[Byte] = {
     val len = if (context == 0) 1 else context + (context << 1)

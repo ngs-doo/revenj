@@ -8,9 +8,9 @@ object FloatConverter extends Converter[Float] {
     sw.addToBuffer(value.toString)
   }
 
-  val dbName = "real4"
+  override val dbName = "real4"
 
-  def default() = 0f
+  override def default() = 0f
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Float = parseFloat(reader, start, ')')
 

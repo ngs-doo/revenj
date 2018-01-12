@@ -12,9 +12,9 @@ object IntConverter extends Converter[Int] {
     }
   }
 
-  val dbName = "int4"
+  override val dbName = "int4"
 
-  def default() = 0
+  override def default() = 0
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Int = parseInt(reader, start, ')')
 

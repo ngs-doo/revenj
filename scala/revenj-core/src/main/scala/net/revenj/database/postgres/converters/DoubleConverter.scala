@@ -8,9 +8,9 @@ object DoubleConverter extends Converter[Double] {
     sw.addToBuffer(value.toString)
   }
 
-  val dbName = "real8"
+  override val dbName = "real8"
 
-  def default() = 0d
+  override def default() = 0d
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Double = parseDouble(reader, start, ')')
 

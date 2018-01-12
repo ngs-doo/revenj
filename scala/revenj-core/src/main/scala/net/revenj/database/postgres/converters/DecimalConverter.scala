@@ -8,9 +8,9 @@ object DecimalConverter extends Converter[BigDecimal] {
     sw.addToBuffer(value.bigDecimal.toPlainString)
   }
 
-  val dbName = "numeric"
+  override val dbName = "numeric"
 
-  def default() = Utils.Zero0
+  override def default(): BigDecimal = Utils.Zero0
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): BigDecimal = parseDecimal(reader, start, ')')
 

@@ -14,9 +14,9 @@ class JodaTimestampConverter(asUtc: Boolean) extends Converter[DateTime] {
 
   import JodaTimestampConverter._
 
-  val dbName = "timestamptz"
+  override val dbName = "timestamptz"
 
-  def default() = MIN_DATE_TIME_UTC
+  override def default(): DateTime = MIN_DATE_TIME_UTC
 
   override def serializeURI(sw: PostgresBuffer, value: DateTime): Unit = {
     val len = serialize(sw.tempBuffer, 0, value)

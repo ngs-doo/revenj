@@ -9,7 +9,7 @@ import org.postgresql.util.PGobject
 //TODO: this will be removed eventually
 object JodaDateConverter extends Converter[LocalDate] {
 
-  val MIN_DATE = new LocalDate(1, 1, 1)
+  val MIN_DATE: LocalDate = new LocalDate(1, 1, 1)
 
   override def serializeURI(sw: PostgresBuffer, value: LocalDate): Unit = {
     serialize(sw.tempBuffer, 0, value)
@@ -35,9 +35,9 @@ object JodaDateConverter extends Converter[LocalDate] {
     ps.setObject(index, pg)
   }
 
-  val dbName = "date"
+  override val dbName = "date"
 
-  def default() = MIN_DATE
+  override def default(): LocalDate = MIN_DATE
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): LocalDate = parseDate(reader, start)
 

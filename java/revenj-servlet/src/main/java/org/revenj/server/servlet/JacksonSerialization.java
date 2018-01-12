@@ -9,15 +9,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.revenj.TreePath;
+import org.revenj.Utils;
 import org.revenj.serialization.Serialization;
 import org.revenj.patterns.ServiceLocator;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 
 import javax.imageio.ImageIO;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -41,18 +39,6 @@ final class JacksonSerialization implements Serialization<String> {
 				.registerModule(withCustomSerializers())
 				.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 	}
-
-	private static final ThreadLocal<DocumentBuilder> documentBuilder = new ThreadLocal<DocumentBuilder>() {
-		@Override
-		public DocumentBuilder initialValue() {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			try {
-				return dbFactory.newDocumentBuilder();
-			} catch (ParserConfigurationException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	};
 
 	private static SimpleModule withCustomSerializers() {
 		SimpleModule module = new SimpleModule();
@@ -124,12 +110,8 @@ final class JacksonSerialization implements Serialization<String> {
 			@Override
 			public Element deserialize(JsonParser parser, DeserializationContext unused) throws IOException {
 				if (parser.getCurrentToken() == JsonToken.VALUE_STRING) {
-					try {
-						byte[] content = parser.getValueAsString().getBytes("UTF-8");
-						return documentBuilder.get().parse(new ByteArrayInputStream(content)).getDocumentElement();
-					} catch (SAXException ex) {
-						throw new IOException(ex);
-					}
+					byte[] content = parser.getValueAsString().getBytes("UTF-8");
+					return Utils.parse(new InputSource(new ByteArrayInputStream(content))).getDocumentElement();
 				}
 				@SuppressWarnings("unchecked")
 				final HashMap<String, Object> map = parser.readValueAs(HashMap.class);

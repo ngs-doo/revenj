@@ -12,9 +12,9 @@ object LongConverter extends Converter[Long] {
     }
   }
 
-  val dbName = "int8"
+  override val dbName = "int8"
 
-  def default() = 0L
+  override def default() = 0L
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Long = parseLong(reader, start, ')')
 

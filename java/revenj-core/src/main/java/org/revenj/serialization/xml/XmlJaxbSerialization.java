@@ -149,18 +149,6 @@ public class XmlJaxbSerialization implements Serialization<Element> {
 		unpackers.put(type, unpacker);
 	}
 
-	private static final ThreadLocal<DocumentBuilder> documentBuilder = new ThreadLocal<DocumentBuilder>() {
-		@Override
-		public DocumentBuilder initialValue() {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			try {
-				return dbFactory.newDocumentBuilder();
-			} catch (ParserConfigurationException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	};
-
 	private static final byte[] NULL = "<object nil=\"true\"/>".getBytes();
 	private static final byte[] EMPTY = "<ArrayOfobject/>".getBytes();
 
@@ -217,7 +205,7 @@ public class XmlJaxbSerialization implements Serialization<Element> {
 			manifest = findBestManifest(value);
 		}
 		if (manifest == null && value == null) {
-			Document doc = documentBuilder.get().newDocument();
+			Document doc = Utils.newDocument();
 			Element object = doc.createElement("object");
 			object.setAttribute("nil", "true");
 			doc.appendChild(object);

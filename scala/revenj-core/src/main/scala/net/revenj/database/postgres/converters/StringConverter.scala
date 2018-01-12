@@ -23,8 +23,8 @@ object StringConverter extends Converter[String] {
     }
   }
 
-  val dbName = "varchar"
-  def default() = ""
+  override val dbName = "varchar"
+  override def default() = ""
 
   def skip(reader: PostgresReader, context: Int): Unit = {
     var cur = reader.read()

@@ -117,9 +117,9 @@ object UuidConverter extends Converter[UUID] {
     pos + 36
   }
 
-  val dbName = "uuid"
+  override val dbName = "uuid"
 
-  def default() = Utils.MinUuid
+  override def default(): UUID = Utils.MinUuid
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): UUID = parseUuid(reader, start, 36)
 

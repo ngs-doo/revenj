@@ -7,9 +7,9 @@ import scala.collection.mutable.ArrayBuffer
 class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTuple {
   private val escapeRecord = elements.length > 1 || elements(0) != null && elements(0).mustEscapeRecord
 
-  val mustEscapeRecord = escapeRecord
+  override val mustEscapeRecord: Boolean = escapeRecord
 
-  val mustEscapeArray = true
+  override val mustEscapeArray: Boolean = true
 
   override def buildTuple(sw: PostgresWriter, quote: Boolean): Unit = {
     val mappings = {

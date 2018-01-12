@@ -2,7 +2,7 @@ package net.revenj.database.postgres
 
 class PostgresWriter extends PostgresBuffer with AutoCloseable {
   private var buffer = new Array[Char](64)
-  val tmp = new Array[Char](64)
+  val tmp: Array[Char] = new Array[Char](64)
   private var position = 0
 
   def close(): Unit = {

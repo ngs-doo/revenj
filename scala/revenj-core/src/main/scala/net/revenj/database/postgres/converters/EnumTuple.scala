@@ -3,8 +3,8 @@ package net.revenj.database.postgres.converters
 import net.revenj.database.postgres.PostgresWriter
 
 class EnumTuple(val value: String) extends PostgresTuple {
-  val mustEscapeRecord = false
-  val mustEscapeArray = "NULL" == value
+  override val mustEscapeRecord = false
+  override val mustEscapeArray: Boolean = "NULL" == value
 
   def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     sw.write(value)

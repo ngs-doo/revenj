@@ -33,9 +33,9 @@ object HstoreConverter extends Converter[Map[String, String]] {
     StringConverter.serializeCompositeURI(sw, str)
   }
 
-  val dbName = "hstore"
+  override val dbName = "hstore"
 
-  def default() = Map.empty
+  override def default(): Map[String, String] = Map.empty
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Map[String, String] = {
     parseMap(reader, context, if (context > 0) context << 1 else 1, ')')

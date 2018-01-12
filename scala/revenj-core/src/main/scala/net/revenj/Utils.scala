@@ -4,22 +4,77 @@ import java.lang.reflect.{GenericArrayType, ParameterizedType, Type => JavaType}
 import java.net.InetAddress
 import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
+import java.util.concurrent.ArrayBlockingQueue
+import javax.xml.parsers.{DocumentBuilderFactory, SAXParser, SAXParserFactory}
+
+import org.w3c.dom.Document
+import org.xml.sax.InputSource
 
 import scala.collection.concurrent.TrieMap
 import scala.reflect.runtime.universe._
+import scala.xml.TopScope
+import scala.xml.parsing.NoBindingFactoryAdapter
 
 object Utils {
-  val MinLocalDate = LocalDate.of(1, 1, 1)
-  val MinLocalDateTime = LocalDateTime.of(1, 1, 1, 0, 0, 0, 0)
-  val MinDateTime = OffsetDateTime.of(MinLocalDateTime, ZoneOffset.UTC)
-  val MinUuid = new UUID(0L, 0L)
-  val Zero0 = BigDecimal(0).setScale(0)
-  val Zero1 = BigDecimal(0).setScale(1)
-  val Zero2 = BigDecimal(0).setScale(2)
-  val Zero3 = BigDecimal(0).setScale(3)
-  val Zero4 = BigDecimal(0).setScale(4)
-  val Loopback = InetAddress.getLoopbackAddress
+  val MinLocalDate: LocalDate = LocalDate.of(1, 1, 1)
+  val MinLocalDateTime: LocalDateTime = LocalDateTime.of(1, 1, 1, 0, 0, 0, 0)
+  val MinDateTime: OffsetDateTime = OffsetDateTime.of(MinLocalDateTime, ZoneOffset.UTC)
+  val MinUuid: UUID = new UUID(0L, 0L)
+  val Zero0: BigDecimal = BigDecimal(0).setScale(0)
+  val Zero1: BigDecimal = BigDecimal(0).setScale(1)
+  val Zero2: BigDecimal = BigDecimal(0).setScale(2)
+  val Zero3: BigDecimal = BigDecimal(0).setScale(3)
+  val Zero4: BigDecimal = BigDecimal(0).setScale(4)
+  val Loopback: InetAddress = InetAddress.getLoopbackAddress
   private val typeCache = new TrieMap[String, GenericType]
+
+  private val documentBuilder = {
+    val dbf = DocumentBuilderFactory.newInstance
+    dbf.setValidating(false)
+    dbf.setFeature("http://xml.org/sax/features/namespaces", false)
+    dbf.setFeature("http://xml.org/sax/features/validation", false)
+    dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
+    dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+    dbf.setNamespaceAware(false)
+    dbf.newDocumentBuilder
+  }
+  private val documentParsers = {
+    val cpu = Runtime.getRuntime.availableProcessors
+    val res = new ArrayBlockingQueue[SAXParser](cpu)
+    0 until cpu foreach { _ => res.offer(initializeParser()) }
+    res
+  }
+
+  private def initializeParser() = {
+    val f = SAXParserFactory.newInstance()
+    f.setValidating(false)
+    f.setFeature("http://xml.org/sax/features/namespaces", false)
+    f.setFeature("http://xml.org/sax/features/validation", false)
+    f.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
+    f.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+    f.setNamespaceAware(false)
+    f.newSAXParser()
+  }
+
+  def newDocument: Document = documentBuilder.newDocument
+
+  def parse[T](source: InputSource): T = {
+    val adapter = new NoBindingFactoryAdapter()
+    val parser = Option(documentParsers.poll()) match {
+      case Some(p) => p
+      case _ => initializeParser()
+    }
+
+    try {
+      adapter.scopeStack push TopScope
+      parser.parse(source, adapter)
+      adapter.scopeStack.pop()
+    } finally {
+      documentParsers.offer(parser)
+    }
+
+    adapter.rootElem.asInstanceOf[T]
+  }
 
   private class GenericType(val name: String, val raw: JavaType, val arguments: Array[JavaType]) extends ParameterizedType {
     private val argObjects = arguments.map(_.asInstanceOf[AnyRef])

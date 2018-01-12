@@ -24,9 +24,9 @@ object TreePathConverter extends Converter[TreePath] {
     ps.setObject(index, pg)
   }
 
-  val dbName = "ltree"
+  override val dbName = "ltree"
 
-  def default() = TreePath.Empty
+  override def default(): TreePath = TreePath.Empty
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): TreePath = {
     reader.initBuffer(start.toChar)

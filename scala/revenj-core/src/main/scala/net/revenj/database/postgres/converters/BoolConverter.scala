@@ -8,9 +8,9 @@ object BoolConverter extends Converter[Boolean] {
     sw.addToBuffer(if (value) "true" else "false")
   }
 
-  val dbName = "bool"
+  override val dbName = "bool"
 
-  def default() = false
+  override def default() = false
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Boolean = {
     reader.read()

@@ -14,9 +14,9 @@ class JsonConverter(serialization: Serialization[String]) extends Converter[Map[
     }
   }
 
-  val dbName = "jsonb"
+  override val dbName = "jsonb"
 
-  def default() = Map.empty
+  override def default(): Map[String, Any] = Map.empty
 
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Map[String, Any] = {
     toMap(StringConverter.parseRaw(reader, start, context))

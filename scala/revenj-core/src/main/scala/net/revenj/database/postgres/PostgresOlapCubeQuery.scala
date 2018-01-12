@@ -1,6 +1,7 @@
 package net.revenj.database.postgres
 
 import java.sql.{Connection, PreparedStatement, ResultSet}
+import javax.sql
 
 import net.revenj.patterns.{DataSource, OlapCubeQuery, ServiceLocator, Specification}
 
@@ -11,12 +12,12 @@ import scala.concurrent.{ExecutionContext, Future}
 abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) extends OlapCubeQuery[T] {
 
   protected val reader = new PostgresReader(Some(locator))
-  protected lazy val transactionConnection = locator.tryResolve[Connection].toOption
-  protected lazy val dataSource = transactionConnection match {
+  protected lazy val transactionConnection: Option[Connection] = locator.tryResolve[Connection].toOption
+  protected lazy val dataSource: Option[sql.DataSource] = transactionConnection match {
     case Some(_) => None
     case _ => Some(locator.resolve[javax.sql.DataSource])
   }
-  protected lazy val loader = locator.resolve[ClassLoader]
+  protected lazy val loader: ClassLoader = locator.resolve[ClassLoader]
   private lazy val executionContext = locator.resolve[ExecutionContext]
 
   val source: String
