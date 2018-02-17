@@ -26,16 +26,12 @@ public class CheckDomainObject implements ReadOnlyServerCommand {
 
 	@CompiledJson
 	public static final class Argument {
-		public String Name;
-		public String Uri;
+		public final String Name;
+		public final String Uri;
 
 		public Argument(String name, String uri) {
 			this.Name = name;
 			this.Uri = uri;
-		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
 		}
 	}
 

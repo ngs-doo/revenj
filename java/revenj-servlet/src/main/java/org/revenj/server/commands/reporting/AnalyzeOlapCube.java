@@ -27,14 +27,14 @@ public class AnalyzeOlapCube implements ReadOnlyServerCommand {
 	}
 
 	public static final class Argument<TFormat> {
-		public String CubeName;
-		public String SpecificationName;
-		public TFormat Specification;
-		public String[] Dimensions;
-		public String[] Facts;
-		public List<Map.Entry<String, Boolean>> Order;
-		public Integer Limit;
-		public Integer Offset;
+		public final String CubeName;
+		public final String SpecificationName;
+		public final TFormat Specification;
+		public final String[] Dimensions;
+		public final String[] Facts;
+		public final List<Map.Entry<String, Boolean>> Order;
+		public final Integer Limit;
+		public final Integer Offset;
 
 		public Argument(
 				String cubeName,
@@ -53,10 +53,6 @@ public class AnalyzeOlapCube implements ReadOnlyServerCommand {
 			this.Order = order;
 			this.Limit = limit;
 			this.Offset = offset;
-		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
 		}
 	}
 

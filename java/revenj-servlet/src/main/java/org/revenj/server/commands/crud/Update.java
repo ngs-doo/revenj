@@ -23,20 +23,16 @@ public final class Update implements ServerCommand {
 	}
 
 	public static final class Argument<TFormat> {
-		public String Name;
-		public String Uri;
-		public TFormat Data;
-		public Boolean ReturnInstance;
+		public final String Name;
+		public final String Uri;
+		public final TFormat Data;
+		public final Boolean ReturnInstance;
 
 		public Argument(String name, String uri, TFormat data, Boolean returnInstance) {
 			this.Name = name;
 			this.Uri = uri;
 			this.Data = data;
 			this.ReturnInstance = returnInstance;
-		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
 		}
 	}
 

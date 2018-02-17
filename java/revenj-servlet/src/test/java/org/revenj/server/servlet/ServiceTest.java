@@ -10,6 +10,7 @@ import org.revenj.patterns.Specification;
 import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
 import org.revenj.serialization.WireSerialization;
+import org.revenj.serialization.json.DslJsonSerialization;
 import org.revenj.server.ProcessingEngine;
 import org.revenj.server.ServerService;
 import org.revenj.server.TestProcessingEngine;
@@ -94,22 +95,22 @@ public class ServiceTest extends Mockito {
 	}
 
 	static class SerializationMock implements WireSerialization {
-		private final JacksonSerialization jackson = new JacksonSerialization(null, Optional.empty());
+		private final DslJsonSerialization json = new DslJsonSerialization(null, Optional.empty());
 
 		@Override
 		public String serialize(Object value, OutputStream stream, String accept) throws IOException {
-			jackson.serialize(value, stream);
+			json.serialize(value, stream);
 			return "application/json";
 		}
 
 		@Override
 		public Object deserialize(Type type, byte[] content, int length, String contentType) throws IOException {
-			return jackson.deserialize(type, content, length);
+			return json.deserialize(type, content, length);
 		}
 
 		@Override
 		public Object deserialize(Type type, InputStream stream, String contentType) throws IOException {
-			return jackson.deserialize(type, stream);
+			return json.deserialize(type, stream);
 		}
 
 		static class PassThroughSerialization implements Serialization<Object> {
@@ -128,7 +129,7 @@ public class ServiceTest extends Mockito {
 		@Override
 		public <TFormat> Optional<Serialization<TFormat>> find(Class<TFormat> format) {
 			if (format == Object.class) return Optional.of((Serialization) new PassThroughSerialization());
-			return Optional.of((Serialization) jackson);
+			return Optional.of((Serialization) json);
 		}
 	}
 

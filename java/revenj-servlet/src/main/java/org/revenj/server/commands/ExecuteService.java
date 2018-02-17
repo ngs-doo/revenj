@@ -28,16 +28,12 @@ public class ExecuteService implements ServerCommand {
 	}
 
 	public static final class Argument<TFormat> {
-		public String Name;
-		public TFormat Data;
+		public final String Name;
+		public final TFormat Data;
 
 		public Argument(String name, TFormat data) {
 			this.Name = name;
 			this.Data = data;
-		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
 		}
 	}
 

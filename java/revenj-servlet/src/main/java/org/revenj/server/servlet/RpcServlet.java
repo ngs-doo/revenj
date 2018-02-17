@@ -17,8 +17,6 @@ import java.util.Optional;
 
 public class RpcServlet extends HttpServlet {
 
-	private static final Charset UTF8 = Charset.forName("UTF-8");
-
 	private final ProcessingEngine engine;
 	private final WireSerialization serialization;
 

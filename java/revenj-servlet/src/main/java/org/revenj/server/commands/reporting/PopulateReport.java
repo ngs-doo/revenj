@@ -23,16 +23,12 @@ public class PopulateReport implements ReadOnlyServerCommand {
 	}
 
 	public static final class Argument<TFormat> {
-		public TFormat Data;
-		public String ReportName;
+		public final TFormat Data;
+		public final String ReportName;
 
 		public Argument(TFormat data, String reportName) {
 			this.Data = data;
 			this.ReportName = reportName;
-		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
 		}
 	}
 

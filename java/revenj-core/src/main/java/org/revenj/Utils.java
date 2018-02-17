@@ -3,7 +3,6 @@ package org.revenj;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import rx.internal.util.unsafe.ConcurrentCircularArrayQueue;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,7 +16,6 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
 public abstract class Utils {
@@ -86,7 +84,7 @@ public abstract class Utils {
 		private final Type raw;
 		private final Type[] arguments;
 
-		public GenericType(String name, Type raw, Type[] arguments) {
+		GenericType(String name, Type raw, Type[] arguments) {
 			this.name = name;
 			this.raw = raw;
 			this.arguments = arguments;

@@ -25,18 +25,14 @@ public class GetDomainObject implements ReadOnlyServerCommand {
 
 	@CompiledJson
 	public static final class Argument {
-		public String Name;
-		public String[] Uri;
-		public boolean MatchOrder;
+		public final String Name;
+		public final String[] Uri;
+		public final boolean MatchOrder;
 
 		public Argument(String name, String[] uri, boolean matchOrder) {
 			this.Name = name;
 			this.Uri = uri;
 			this.MatchOrder = matchOrder;
-		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
 		}
 	}
 

@@ -9,12 +9,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Optional;
-import java.util.ServiceLoader;
 
 public class DslJsonSerialization extends DslJson<ServiceLocator> implements Serialization<String> {
 
+	private static DslJson.Settings<ServiceLocator> buildSettings(ServiceLocator locator, Fallback<ServiceLocator> fallback) {
+		return com.dslplatform.json.runtime.Settings.<ServiceLocator>withRuntime()
+				.withContext(locator)
+				.fallbackTo(fallback)
+				.withJavaConverters(true)
+				.skipDefaultValues(false)
+				.includeServiceLoader();
+	}
+
 	public DslJsonSerialization(final ServiceLocator locator, Optional<Fallback<ServiceLocator>> fallback) {
-		super(locator, true, fallback.orElse(null), false, null, ServiceLoader.load(Configuration.class));
+		super(buildSettings(locator, fallback.orElse(null)));
 		registerReader(TreePath.class, TreePathConverter.Reader);
 		registerWriter(TreePath.class, TreePathConverter.Writer);
 	}

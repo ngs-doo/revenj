@@ -24,10 +24,10 @@ public class PersistAggregateRoot implements ServerCommand {
 	}
 
 	public static final class Argument<TFormat> {
-		public String RootName;
-		public TFormat ToInsert;
-		public TFormat ToUpdate;
-		public TFormat ToDelete;
+		public final String RootName;
+		public final TFormat ToInsert;
+		public final TFormat ToUpdate;
+		public final TFormat ToDelete;
 
 		public Argument(String rootName, TFormat toInsert, TFormat toUpdate, TFormat toDelete) {
 			this.RootName = rootName;
@@ -35,23 +35,15 @@ public class PersistAggregateRoot implements ServerCommand {
 			this.ToUpdate = toUpdate;
 			this.ToDelete = toDelete;
 		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
-		}
 	}
 
 	public static class Pair<T> {
-		public T Key;
-		public T Value;
+		public final T Key;
+		public final T Value;
 
 		public Pair(T key, T value) {
 			this.Key = key;
 			this.Value = value;
-		}
-
-		@SuppressWarnings("unused")
-		private Pair() {
 		}
 	}
 

@@ -31,12 +31,12 @@ public class SearchDomainObject implements ReadOnlyServerCommand {
 	}
 
 	public static final class Argument<TFormat> {
-		public String Name;
-		public String SpecificationName;
-		public TFormat Specification;
-		public Integer Offset;
-		public Integer Limit;
-		public List<Map.Entry<String, Boolean>> Order;
+		public final String Name;
+		public final String SpecificationName;
+		public final TFormat Specification;
+		public final Integer Offset;
+		public final Integer Limit;
+		public final List<Map.Entry<String, Boolean>> Order;
 
 		public Argument(String name, String specificationName, TFormat specification, Integer offset, Integer limit, List<Map.Entry<String, Boolean>> order) {
 			this.Name = name;
@@ -45,10 +45,6 @@ public class SearchDomainObject implements ReadOnlyServerCommand {
 			this.Offset = offset;
 			this.Limit = limit;
 			this.Order = order;
-		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
 		}
 	}
 

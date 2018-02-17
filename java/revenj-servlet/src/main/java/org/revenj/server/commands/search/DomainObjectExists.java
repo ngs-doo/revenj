@@ -24,18 +24,14 @@ public class DomainObjectExists implements ReadOnlyServerCommand {
 	}
 
 	public static final class Argument<TFormat> {
-		public String Name;
-		public String SpecificationName;
-		public TFormat Specification;
+		public final String Name;
+		public final String SpecificationName;
+		public final TFormat Specification;
 
 		public Argument(String name, String specificationName, TFormat specification) {
 			this.Name = name;
 			this.SpecificationName = specificationName;
 			this.Specification = specification;
-		}
-
-		@SuppressWarnings("unused")
-		private Argument() {
 		}
 	}
 
