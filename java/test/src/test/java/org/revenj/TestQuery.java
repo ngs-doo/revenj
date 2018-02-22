@@ -417,6 +417,16 @@ public class TestQuery extends Setup {
 
 		Assert.assertEquals(1, list.size());
 		Assert.assertEquals(article.getID(), list.get(0).getID());
+
+		Optional<ArticleGrid> og = gridRepository.find(list.get(0).getURI());
+
+		Assert.assertTrue(og.isPresent());
+		Assert.assertEquals(list.get(0), og.get());
+
+		List<ArticleGrid> lst2 = gridRepository.find(new String[] { list.get(0).getURI() });
+
+		Assert.assertEquals(1, lst2.size());
+		Assert.assertEquals(list.get(0), lst2.get(0));
 	}
 
 	@Test
