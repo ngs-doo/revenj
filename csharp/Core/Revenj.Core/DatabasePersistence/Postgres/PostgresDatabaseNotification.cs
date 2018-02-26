@@ -47,7 +47,9 @@ namespace Revenj.DatabasePersistence.Postgres
 			this.Locator = locator;
 			this.SystemState = systemState;
 			Notifications = Subject.AsObservable();
+#if !NETSTANDARD2_0
 			if (ConfigurationManager.AppSettings["Revenj.Notifications"] != "disabled")
+#endif
 				SetUpConnection(connectionInfo.ConnectionString + ";SyncNotification=true");
 			AppDomain.CurrentDomain.ProcessExit += (s, ea) => IsDisposed = true;
 			AppDomain.CurrentDomain.DomainUnload += (s, ea) => IsDisposed = true;

@@ -13,11 +13,19 @@ namespace Revenj.Utility
 
 		static Plugins()
 		{
+#if NETSTANDARD2_0
+			string fileExclusions = null;
+#else
 			var fileExclusions = ConfigurationManager.AppSettings["Plugins.FileExclusions"];
+#endif
 			fileExclusions = (!string.IsNullOrWhiteSpace(fileExclusions) ? fileExclusions + "," : "")
 				+ "Microsoft.*;Mono.*;Oracle.DataAccess*;Revenj.DatabasePersistence.Oracle*";
 			FileExclusions = fileExclusions.Split(new[] { ':', ';' }).Select(it => new Regex("^" + Regex.Escape(it).Replace("\\?", ".").Replace("\\*", ".*"))).ToArray();
+#if NETSTANDARD2_0
+			string assemblyExclusions = null;
+#else
 			var assemblyExclusions = ConfigurationManager.AppSettings["Plugins.AssemblyExclusions"];
+#endif
 			assemblyExclusions = (!string.IsNullOrWhiteSpace(assemblyExclusions) ? assemblyExclusions + "," : "") +
 				"Microsoft,;Microsoft.*;Mono,;Mono.*;System,;System.*;mscorlib,;Oracle.DataAccess*;Revenj.DatabasePersistence.Oracle*";
 			AssemblyExclusions = assemblyExclusions.Split(new[] { ':', ';' }).Select(it => new Regex("^" + Regex.Escape(it).Replace("\\?", ".").Replace("\\*", ".*"))).ToArray();

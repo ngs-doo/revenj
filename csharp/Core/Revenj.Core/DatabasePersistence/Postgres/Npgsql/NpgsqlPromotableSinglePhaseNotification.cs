@@ -180,13 +180,17 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		#endregion
 
 		private static INpgsqlResourceManager _resourceManager;
+#if !NETSTANDARD2_0
 		private static System.Runtime.Remoting.Lifetime.ClientSponsor _sponser;
-
+#endif
 		private static INpgsqlResourceManager CreateResourceManager()
 		{
 			// TODO: create network proxy for resource manager
 			if (_resourceManager == null)
 			{
+#if NETSTANDARD2_0
+				throw new NotSupportedException("Not supported on .NET core");
+#else
 				_sponser = new System.Runtime.Remoting.Lifetime.ClientSponsor();
 				AppDomain rmDomain = AppDomain.CreateDomain("NpgsqlResourceManager", AppDomain.CurrentDomain.Evidence, AppDomain.CurrentDomain.SetupInformation);
 				_resourceManager =
@@ -194,6 +198,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					rmDomain.CreateInstanceAndUnwrap(typeof(NpgsqlResourceManager).Assembly.FullName,
 													 typeof(NpgsqlResourceManager).FullName);
 				_sponser.Register((MarshalByRefObject)_resourceManager);
+#endif
 			}
 			return _resourceManager;
 		}

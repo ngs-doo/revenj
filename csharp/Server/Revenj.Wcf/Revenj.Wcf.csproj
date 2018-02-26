@@ -53,9 +53,6 @@
     <Reference Include="Castle.Core">
       <HintPath>..\..\Dependencies\Castle\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Remotion.Linq">
-      <HintPath>..\..\Dependencies\Remotion\Remotion.Linq.dll</HintPath>
-    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.ServiceModel.Activation" />

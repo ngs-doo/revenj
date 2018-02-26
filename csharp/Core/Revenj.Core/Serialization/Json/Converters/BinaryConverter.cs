@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+#if !NETSTANDARD2_0
 using System.Drawing;
 using System.Drawing.Imaging;
+#endif
 using System.IO;
 using System.Runtime.Serialization;
 using Revenj.Utility;
@@ -18,8 +20,10 @@ namespace Revenj.Serialization.Json.Converters
 
 		static BinaryConverter()
 		{
+#if !NETSTANDARD2_0
 			foreach (var enc in ImageCodecInfo.GetImageEncoders())
 				Codecs.Add(enc.FormatID);
+#endif
 			for (int i = 0; i < Environment.ProcessorCount / 2 + 1; i++)
 				Buffers.Add(new char[65536]);//TODO: use 65536/2 instead!?
 		}
@@ -55,6 +59,7 @@ namespace Revenj.Serialization.Json.Converters
 			}
 		}
 
+#if !NETSTANDARD2_0
 		public static void Serialize(Image value, TextWriter sw)
 		{
 			if (value == null)
@@ -76,7 +81,7 @@ namespace Revenj.Serialization.Json.Converters
 				sw.Write('"');
 			}
 		}
-
+#endif
 		public static void Serialize(Stream value, TextWriter sw)
 		{
 			if (value == null)
@@ -208,7 +213,7 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeStream(sr, next), res);
 		}
-
+#if !NETSTANDARD2_0
 		public static Image DeserializeImage(BufferedTextReader sr, int nextToken)
 		{
 			return Image.FromStream(DeserializeStream(sr, nextToken));
@@ -233,5 +238,6 @@ namespace Revenj.Serialization.Json.Converters
 		{
 			JsonSerialization.DeserializeNullableCollection(sr, nextToken, next => DeserializeImage(sr, next), res);
 		}
+#endif
 	}
 }

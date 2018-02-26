@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD2_0
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -74,3 +75,4 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		}
 	}
 }
+#endif

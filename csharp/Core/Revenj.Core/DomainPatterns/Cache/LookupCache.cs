@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD2_0
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics.Contracts;
@@ -129,3 +130,4 @@ namespace Revenj.DomainPatterns
 		}
 	}
 }
+#endif

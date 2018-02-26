@@ -16,16 +16,17 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		static SecretConverter()
 		{
-			var secretKeyFile = ConfigurationManager.AppSettings["EncryptionConfiguration"];
-			if (string.IsNullOrEmpty(secretKeyFile))
-				throw new ConfigurationErrorsException(@"EncryptionConfiguration file not specified. 
-To use secret data type EncryptionConfiguration file must be specified");
+#if NETSTANDARD2_0
+			string secretKeyFile = "encryption.config";
+#else
+			var secretKeyFile = ConfigurationManager.AppSettings["EncryptionConfiguration"] ?? "encryption.config";
+#endif
 			if (!File.Exists(secretKeyFile))
 			{
 				secretKeyFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, secretKeyFile);
 				if (!File.Exists(secretKeyFile))
-					throw new ConfigurationErrorsException(@"EncryptionConfiguration file not found. 
-To use secret data type valid EncryptionConfiguration file must be specified");
+					throw new ConfigurationErrorsException(@"EncryptionConfiguration file not found: " + secretKeyFile + @". 
+To use secret data type valid EncryptionConfiguration file must be specified and found in appropriate location");
 			}
 			RsaProvider = new RSACryptoServiceProvider();
 			try

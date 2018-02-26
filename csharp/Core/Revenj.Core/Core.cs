@@ -19,6 +19,7 @@ namespace DSL
 {
 	public static class Core
 	{
+#if !NETSTANDARD2_0
 		public static IServiceProvider Setup(
 			bool withAspects = false,
 			bool externalConfiguration = false,
@@ -32,6 +33,15 @@ namespace DSL
 				 let chosenPath = Directory.Exists(pathRelative) ? pathRelative : path
 				 select chosenPath)
 				.ToArray();
+			return Setup(withAspects, externalConfiguration, setupDatabase, dllPlugins);
+		}
+#endif
+		public static IServiceProvider Setup(
+			bool withAspects = false,
+			bool externalConfiguration = false,
+			Action<IObjectFactoryBuilder> setupDatabase = null,
+			string[] dllPlugins = null)
+		{
 			var assemblies =
 				from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
 				where asm.FullName.StartsWith("Revenj.")
@@ -99,11 +109,15 @@ namespace DSL
 		public static void ConfigureSerialization(this IObjectFactoryBuilder builder)
 		{
 			builder.RegisterType<GenericDataContractResolver>(InstanceScope.Singleton);
+#if !NETSTANDARD2_0
 			builder.RegisterType(typeof(XmlSerialization), InstanceScope.Singleton, false, typeof(ISerialization<XElement>));
+#endif
 			builder.RegisterType<GenericDeserializationBinder, GenericDeserializationBinder, SerializationBinder>(InstanceScope.Singleton);
 			builder.RegisterType(typeof(BinarySerialization), InstanceScope.Singleton, false, typeof(ISerialization<byte[]>));
 			builder.RegisterType(typeof(JsonSerialization), InstanceScope.Singleton, false, typeof(ISerialization<string>), typeof(ISerialization<TextReader>));
+#if !NETSTANDARD2_0
 			builder.RegisterType(typeof(ProtobufSerialization), InstanceScope.Singleton, false, typeof(ISerialization<MemoryStream>), typeof(ISerialization<Stream>));
+#endif
 			builder.RegisterType(typeof(PassThroughSerialization), InstanceScope.Singleton, false, typeof(ISerialization<object>));
 			builder.RegisterType<WireSerialization, IWireSerialization>(InstanceScope.Singleton);
 		}

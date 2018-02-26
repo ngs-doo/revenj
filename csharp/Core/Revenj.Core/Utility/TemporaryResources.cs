@@ -22,7 +22,11 @@ namespace Revenj.Utility
 
 		static TemporaryResources()
 		{
+#if NETSTANDARD2_0
+			string tp = null;
+#else
 			var tp = ConfigurationManager.AppSettings["TemporaryPath"];
+#endif
 			TempPath = !string.IsNullOrEmpty(tp) && Directory.Exists(tp) ? tp : Path.Combine(Path.GetTempPath(), "Revenj", "Temp");
 		}
 		/// <summary>

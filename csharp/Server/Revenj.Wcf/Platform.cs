@@ -10,12 +10,6 @@ namespace DSL
 {
 	public static class Platform
 	{
-		internal enum Container
-		{
-			Autofac,
-			DryIoc
-		}
-
 		public static IServiceProvider Start()
 		{
 			return Start<IServiceProvider>();
@@ -33,13 +27,8 @@ namespace DSL
 				 let chosenPath = Directory.Exists(pathRelative) ? pathRelative : path
 				 select chosenPath)
 				.ToList();
-			var container = Container.Autofac;
-			var builder = container == Container.Autofac
-				? Revenj.Extensibility.Setup.UseAutofac(null, dllPlugins, true, false, withAspects)
-				: Revenj.Extensibility.Setup.UseDryIoc(null, dllPlugins);
+			var builder = Revenj.Extensibility.Setup.UseAutofac(null, dllPlugins, true, false, withAspects);
 			builder.RegisterSingleton<ISystemState>(state);
-			if (container == Container.DryIoc)
-				StandardModule.Configure(builder, StandardModule.SetupPostgres);
 			foreach (var t in types)
 				builder.RegisterType(t, InstanceScope.Transient, false, new[] { t }.Union(t.GetInterfaces()).ToArray());
 			if (types.Length == 0 && typeof(TService).IsClass)

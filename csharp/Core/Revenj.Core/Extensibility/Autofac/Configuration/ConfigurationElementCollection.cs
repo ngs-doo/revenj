@@ -1,3 +1,4 @@
+#if !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,3 +56,4 @@ namespace Revenj.Extensibility.Autofac.Configuration
         }
     }
 }
+#endif

@@ -24,7 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System.Configuration;
-
+#if !NETSTANDARD2_0
 namespace Revenj.Extensibility.Autofac.Configuration
 {
     /// <summary>
@@ -104,3 +104,4 @@ namespace Revenj.Extensibility.Autofac.Configuration
 	}
 
 }
+#endif

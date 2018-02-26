@@ -13,7 +13,11 @@ namespace Revenj.DomainPatterns
 
 		static DocumentReport()
 		{
+#if NETSTANDARD2_0
+			string path = null;
+#else
 			var path = ConfigurationManager.AppSettings["DocumentsPath"];
+#endif
 			DocumentFolder = path == null ? AppDomain.CurrentDomain.BaseDirectory : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
 		}
 

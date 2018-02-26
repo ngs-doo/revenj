@@ -19,7 +19,9 @@ namespace Revenj.Utility
 
 		static Exceptions()
 		{
+#if !NETSTANDARD2_0
 			DebugMode = "Debug".Equals(ConfigurationManager.AppSettings["ApplicationMode"], StringComparison.InvariantCultureIgnoreCase);
+#endif
 		}
 		/// <summary>
 		/// Get messages for this exception.

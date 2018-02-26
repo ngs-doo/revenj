@@ -181,7 +181,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		public static IPostgresTuple ToTuple(decimal value, int scale)
 		{
 			//TODO: optimize
-			return new ValueTuple(value.ToString("F" + scale, Invariant), false, false);
+			return new Converters.ValueTuple(value.ToString("F" + scale, Invariant), false, false);
 		}
 
 		class DecimalTuple : IPostgresTuple

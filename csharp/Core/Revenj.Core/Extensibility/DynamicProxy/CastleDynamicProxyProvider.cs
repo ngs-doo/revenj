@@ -8,7 +8,11 @@ namespace Revenj.Extensibility
 {
 	public class CastleDynamicProxyProvider : IMixinProvider, IDynamicProxyProvider
 	{
+#if NETSTANDARD2_0
+		private static readonly ProxyGenerator Generator = new ProxyGenerator();
+#else
 		private static readonly ProxyGenerator Generator = new ProxyGenerator(new PersistentProxyBuilder());
+#endif
 
 		public object Create(Type mixinType, object[] args, IEnumerable<object> implementations)
 		{

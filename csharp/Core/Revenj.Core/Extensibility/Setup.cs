@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+#if !NETSTANDARD2_0
 using System.ServiceModel;
-using DryIoc;
+#endif
 using Revenj.Extensibility.Autofac;
 using Revenj.Extensibility.Autofac.Configuration;
 using Revenj.Extensibility.Autofac.Core;
@@ -89,64 +90,11 @@ namespace Revenj.Extensibility
 			bool dslAspects = false)
 		{
 			var builder = new AutofacContainerBuilder(pluginAssemblies, pluginPaths, loadModules, withAspects, dslAspects);
+#if !NETSTANDARD2_0
 			if (withExternalConfiguration)
 				builder.Builder.RegisterModule(new ConfigurationSettingsReader("autofacConfiguration"));
+#endif
 			return builder;
-		}
-
-		class DryIocContainerBuilder : IContainerBuilder
-		{
-			public readonly IObjectFactory Factory;
-			private readonly bool DslAspects;
-			private readonly PluginsConfiguration Plugins;
-			private readonly CastleDynamicProxyProvider Proxy;
-
-			public DryIocContainerBuilder(
-				IEnumerable<Assembly> pluginAssemblies,
-				IEnumerable<string> pluginPaths,
-				bool dslAspects = false)
-			{
-				this.DslAspects = dslAspects;
-				var container = new DryIoc.Container(rules => rules.With(FactoryMethod.ConstructorWithResolvableArguments)).OpenScopeWithoutContext();
-				Proxy = new CastleDynamicProxyProvider();
-				this.RegisterSingleton<IMixinProvider>(Proxy);
-				this.RegisterSingleton<IDynamicProxyProvider>(Proxy);
-				var aopRepository = new AspectRepository(Proxy);
-				this.RegisterSingleton<IAspectRegistrator>(aopRepository);
-				this.RegisterSingleton<IAspectComposer>(aopRepository);
-				this.RegisterSingleton<IInterceptorRegistrator>(aopRepository);
-				Factory = new DryIocObjectFactory(container, aopRepository);
-				this.RegisterSingleton<IObjectFactory>(Factory);
-				this.RegisterSingleton<IServiceProvider>(Factory);
-				Plugins = new PluginsConfiguration
-				{
-					Directories = (pluginPaths ?? new string[0]).ToList(),
-					Assemblies = (pluginAssemblies ?? new Assembly[0]).ToList()
-				};
-				this.RegisterSingleton(Plugins);
-				this.RegisterType<SystemInitialization>();
-				this.RegisterType(typeof(PluginRepository<>), InstanceScope.Singleton, true, typeof(IPluginRepository<>));
-				this.RegisterSingleton<IExtensibilityProvider>(new DryIocMefProvider(Plugins, Proxy, container));
-				DryIocObjectFactory.RegisterToContainer(container, this);
-			}
-
-			private List<IFactoryBuilderInstance> instances = new List<IFactoryBuilderInstance>();
-			private List<IFactoryBuilderType> types = new List<IFactoryBuilderType>();
-			private List<IFactoryBuilderFunc> funcs = new List<IFactoryBuilderFunc>();
-
-			public IEnumerable<IFactoryBuilderInstance> Instances { get { return instances; } }
-			public IEnumerable<IFactoryBuilderType> Types { get { return types; } }
-			public IEnumerable<IFactoryBuilderFunc> Funcs { get { return funcs; } }
-			public void Add(IFactoryBuilderInstance item) { instances.Add(item); }
-			public void Add(IFactoryBuilderType item) { types.Add(item); }
-			public void Add(IFactoryBuilderFunc item) { funcs.Add(item); }
-
-			public IObjectFactory Build()
-			{
-				var init = Factory.Resolve<SystemInitialization>();
-				init.Initialize(DslAspects);
-				return Factory;
-			}
 		}
 
 		class GenericContainerBuilder<TObjectFactory, TExtensibilityProvider> : GenericContainerBuilder
@@ -205,15 +153,7 @@ namespace Revenj.Extensibility
 				return factory;
 			}
 		}
-
-		public static IContainerBuilder UseDryIoc(
-			IEnumerable<Assembly> pluginAssemblies,
-			IEnumerable<string> pluginPaths,
-			bool dslAspects = false)
-		{
-			return new DryIocContainerBuilder(pluginAssemblies, pluginPaths, dslAspects);
-		}
-
+		
 		public static IContainerBuilder UseContainer<TObjectFactory, TExtensibilityProvider>(
 			IContainerBuilder builder,
 			IEnumerable<Assembly> pluginAssemblies,
@@ -240,7 +180,9 @@ namespace Revenj.Extensibility
 			{
 				this.Repository = repository;
 				//FIX for Castle interception issue
+#if !NETSTANDARD2_0
 				Castle.DynamicProxy.Generators.AttributesToAvoidReplicating.Add(typeof(ServiceContractAttribute));
+#endif
 			}
 
 			protected override void AttachToComponentRegistration(

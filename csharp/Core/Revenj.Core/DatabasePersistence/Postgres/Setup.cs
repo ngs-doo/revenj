@@ -16,11 +16,19 @@ namespace Revenj.DatabasePersistence.Postgres
 		{
 			MinBatchSize = 1000;
 			MaxObjectSize = 1024 * 1024;
+#if NETSTANDARD2_0
+			string mbs = null;
+#else
 			var mbs = ConfigurationManager.AppSettings["Database.MinBatchSize"];
+#endif
 			int n;
 			if (!string.IsNullOrEmpty(mbs) && int.TryParse(mbs, out n))
 				MinBatchSize = n;
+#if NETSTANDARD2_0
+			mbs = null;
+#else
 			mbs = ConfigurationManager.AppSettings["Database.MaxObjectSize"];
+#endif
 			long m;
 			if (!string.IsNullOrEmpty(mbs) && long.TryParse(mbs, out m))
 				MaxObjectSize = m;
@@ -44,7 +52,7 @@ namespace Revenj.DatabasePersistence.Postgres
 		}
 	}
 }
-
+#if !NETSTANDARD2_0
 namespace Revenj
 {
 	public class PostgresModule : Revenj.Extensibility.Autofac.Module
@@ -61,3 +69,4 @@ Example: <add key=""ConnectionString"" value=""server=postgres.localhost;port=54
 		}
 	}
 }
+#endif

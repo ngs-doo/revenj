@@ -23,7 +23,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
+#if !NETSTANDARD2_0
 namespace Revenj.Extensibility.Autofac.Configuration
 {
 	
@@ -42,3 +42,4 @@ namespace Revenj.Extensibility.Autofac.Configuration
     }
 	
 }
+#endif

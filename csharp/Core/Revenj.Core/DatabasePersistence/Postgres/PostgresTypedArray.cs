@@ -15,7 +15,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				return "NULL";
 			using (var cms = ChunkedMemoryStream.Create())
 			{
-				Func<T, IPostgresTuple> toTuple = v => new ValueTuple(converter(v), false, true);
+				Func<T, IPostgresTuple> toTuple = v => new Converters.ValueTuple(converter(v), false, true);
 				var writer = cms.GetWriter();
 				ToArray(writer, cms.SmallBuffer, data, toTuple);
 				writer.Flush();

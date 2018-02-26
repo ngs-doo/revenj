@@ -219,6 +219,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				if ((_integrated_security) && (String.IsNullOrEmpty(_username)))
 				{
+					
 					System.Security.Principal.WindowsIdentity identity = System.Security.Principal.WindowsIdentity.GetCurrent();
 					_username = identity.Name.Split('\\')[1];
 				}
