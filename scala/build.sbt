@@ -13,10 +13,10 @@ lazy val core = (project in file("revenj-core")
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "io.monix" %% "monix-reactive" % "2.3.2",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.2",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.2",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.2",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.2",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.4",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.4",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
     )
   )
@@ -100,7 +100,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   name := baseDirectory.value.getName,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.11.12", "2.12.4"),
+  crossScalaVersions := Seq("2.11.12", "2.12.5"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",
@@ -151,8 +151,6 @@ val publishSettings = Seq(
 
   packageOptions := Seq(Package.ManifestAttributes(
     ("Implementation-Vendor", "New Generation Software Ltd.")
-    //TODO: temporarly disabled due to problems with setup
-    //("Sealed", "true")
   )),
 
   publishTo := Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging),
