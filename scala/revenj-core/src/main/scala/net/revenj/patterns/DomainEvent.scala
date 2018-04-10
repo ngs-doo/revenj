@@ -2,6 +2,8 @@ package net.revenj.patterns
 
 import java.time.OffsetDateTime
 
+import scala.concurrent.Future
+
 /** Domain event represents an meaningful business event that occurred in the system.
   * It is a message that back-end system knows how to process and that will
   * change the state of the system.
@@ -31,4 +33,27 @@ trait DomainEvent extends Identifiable {
 
   def queuedAt: OffsetDateTime
   def processedAt: Option[OffsetDateTime]
+}
+
+trait DomainEventHandler[T] {
+  def handle(domainEvent: T): Unit
+}
+
+trait DomainEventStore[T <: DomainEvent] extends Repository[T] with SearchableRepository[T] {
+
+  def submit(events: Seq[T]): Future[IndexedSeq[String]]
+
+  def submit(event: T): Future[String] = {
+    implicit val global = scala.concurrent.ExecutionContext.Implicits.global
+    require(event ne null, "null value provided for event")
+    submit(Seq(event)).map(_.head)
+  }
+
+  def mark(uris: Seq[String]): Future[Unit]
+
+  def mark(uri: String): Future[Unit] = {
+    require(uri ne null, "null value provided for URI")
+    require(uri.length != 0, "empty value provided for URI")
+    mark(Seq(uri))
+  }
 }

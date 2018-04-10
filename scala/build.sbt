@@ -1,7 +1,19 @@
 import com.dslplatform.compiler.client.parameters.{Settings, Targets}
+import sbt.Keys.resourceGenerators
 
 // ### PROJECT SETTINGS ###
-
+/*
+private def dslResourceTestTask = Def.task {
+  streams.value.log.info("creating test resources")
+  com.dslplatform.sbt.Actions.generateResources(
+    streams.value.log,
+    Targets.Option.REVENJ_SCALA,
+    (resourceManaged in Test).value / "META-INF" / "services",
+    Seq(target.value),
+    (dependencyClasspath in Test).value
+  )
+}
+*/
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
@@ -11,14 +23,16 @@ lazy val core = (project in file("revenj-core")
       "joda-time" % "joda-time" % "2.9.9",   // TODO: will be removed
       "org.joda" % "joda-convert" % "1.9.2", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix-reactive" % "2.3.2",
+      "io.monix" %% "monix-reactive" % "2.3.3",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+      "com.dslplatform" %% "dsl-json-scala" % "1.7.1",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.4",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.4",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.4",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.4",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
-    )
+    )/*,
+    resourceGenerators in Test += dslResourceTestTask.taskValue*/
   )
 )
 
@@ -28,7 +42,7 @@ lazy val akka = (project in file("revenj-akka")
   version := "0.6.5",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.2",
-    "com.typesafe.akka" %% "akka-http-core" % "10.0.11"
+    "com.typesafe.akka" %% "akka-http-core" % "10.0.13"
     )
   )
   dependsOn(core)
@@ -52,17 +66,8 @@ lazy val tests = (project in file("tests")
   settings (
     dslNamespace := "example",
     dslDslPath := Seq((resourceDirectory in Test).value),
-    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME, Settings.Option.URI_REFERENCE),
-    resourceGenerators in Test += Def.task {
-      streams.value.log.info("creating resource")
-      com.dslplatform.sbt.Actions.generateResources(
-        streams.value.log,
-        Targets.Option.REVENJ_SCALA,
-        (resourceManaged in Test).value / "META-INF" / "services",
-        Seq(target.value),
-        (dependencyClasspath in Test).value
-      )
-    }.taskValue
+    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME, Settings.Option.URI_REFERENCE)/*,
+    resourceGenerators in Test += dslResourceTestTask.taskValue*/
   )
   settings (commonSettings)
   settings(
@@ -70,7 +75,7 @@ lazy val tests = (project in file("tests")
     version := "0.0.0",
     libraryDependencies ++= Seq(
       "net.revenj" %% "revenj-core" % "0.6.5" % Provided,
-      "com.dslplatform" % "dsl-clc" % "1.9.2" % Test,
+      "com.dslplatform" % "dsl-clc" % "1.9.4" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")

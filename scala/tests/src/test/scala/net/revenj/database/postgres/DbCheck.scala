@@ -324,12 +324,17 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         changed === false
         Await.result(ctx.submit(ev), Duration.Inf)
         var i = 0
-        while (i < 50) {
+        while (i < 20) {
           if (changed) i = 50
           Thread.sleep(100)
           i += 1
         }
         container.close()
+        while (i < 50) {
+          if (changed) i = 50
+          Thread.sleep(100)
+          i += 1
+        }
         changed === true
       }
       "can track multiple" >> {

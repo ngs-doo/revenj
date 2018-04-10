@@ -26,7 +26,9 @@ object Utils {
   val Zero3: BigDecimal = BigDecimal(0).setScale(3)
   val Zero4: BigDecimal = BigDecimal(0).setScale(4)
   val Loopback: InetAddress = InetAddress.getLoopbackAddress
-  private val typeCache = new TrieMap[String, GenericType]
+
+  private val typeCache = new TrieMap[Type, JavaType]
+  private val genericsCache = new TrieMap[String, GenericType]
 
   private val documentBuilder = {
     val dbf = DocumentBuilderFactory.newInstance
@@ -101,6 +103,36 @@ object Utils {
     override def toString: String = name
   }
 
+  private class GenArrType(genType: JavaType) extends GenericArrayType {
+    lazy private val typeName = genType.getTypeName + "[]"
+    override def getGenericComponentType: JavaType = genType
+    override def getTypeName: String = typeName
+    override def toString: String = typeName
+  }
+
+  private[revenj] def findType(tpe: Type, mirror: Mirror): Option[JavaType] = {
+    typeCache.get(tpe) match {
+      case found@Some(_) => found
+      case _ =>
+        tpe.dealias match {
+          case TypeRef(_, sym, args) if args.isEmpty =>
+            Some(mirror.runtimeClass(sym.asClass))
+          case TypeRef(_, sym, args) if sym.fullName == "scala.Array" && args.size == 1 =>
+            findType(args.head, mirror) match {
+              case Some(typeArg) => Some(new GenArrType(typeArg))
+              case _ => None
+            }
+          case TypeRef(_, sym, args) =>
+            val symClass = mirror.runtimeClass(sym.asClass)
+            val typeArgs = args.flatMap(it => findType(it, mirror))
+            if (typeArgs.size == args.size) Some(Utils.makeGenericType(symClass, typeArgs))
+            else None
+          case _ =>
+            None
+        }
+    }
+  }
+
   private[revenj] def makeGenericType(container: Class[_], arguments: List[JavaType]): ParameterizedType = {
     val sb = new StringBuilder
     sb.append(container.getTypeName)
@@ -112,35 +144,9 @@ object Utils {
     }
     sb.append(">")
     val name = sb.toString
-    typeCache.getOrElseUpdate(name, {
+    genericsCache.getOrElseUpdate(name, {
       new GenericType(name, container, arguments.toArray)
     })
-  }
-
-  private class GenArrType(genType: JavaType) extends GenericArrayType {
-    lazy private val typeName = genType.getTypeName + "[]"
-    override def getGenericComponentType = genType
-    override def getTypeName: String = typeName
-    override def toString: String = typeName
-  }
-
-  private[revenj] def findType(tpe: Type, mirror: Mirror): Option[JavaType] = {
-    tpe.dealias match {
-      case TypeRef(_, sym, args) if args.isEmpty =>
-        Some(mirror.runtimeClass(sym.asClass))
-      case TypeRef(_, sym, args) if sym.fullName == "scala.Array" && args.size == 1 =>
-        findType(args.head, mirror) match {
-          case Some(typeArg) => Some(new GenArrType(typeArg))
-          case _ => None
-        }
-      case TypeRef(_, sym, args) =>
-        val symClass = mirror.runtimeClass(sym.asClass)
-        val typeArgs = args.flatMap(it => findType(it, mirror))
-        if (typeArgs.size == args.size) Some(Utils.makeGenericType(symClass, typeArgs))
-        else None
-      case _ =>
-        None
-    }
   }
 
   def makeGenericType(container: Class[_], argument: JavaType, arguments: JavaType*): ParameterizedType = {
@@ -154,7 +160,7 @@ object Utils {
     }
     sb.append(">")
     val name = sb.toString
-    typeCache.getOrElseUpdate(name, {
+    genericsCache.getOrElseUpdate(name, {
       val genericArgs = new Array[JavaType](arguments.length + 1)
       genericArgs(0) = argument
       var i = 0

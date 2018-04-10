@@ -18,7 +18,7 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
   def find[T: TypeTag]: Seq[Class[T]] = {
     val plugins = new ArrayBuffer[Class[T]]()
     val scalaType = typeOf[T].dealias
-    val javaTypeName = Utils.findType(scalaType, mirror).map(_.getTypeName).getOrElse(scalaType.toString)
+    val javaTypeName = Utils.findType(scalaType, mirror).map(_.getTypeName).getOrElse(scalaType.toString).replace(" ", "")
 
     val fullName = PREFIX + URLEncoder.encode(javaTypeName, "UTF-8")
     val manifest = mirror.runtimeClass(typeOf[T].dealias).asInstanceOf[Class[T]]

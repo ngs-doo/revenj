@@ -86,7 +86,7 @@ object OlapCubeQuery {
       this
     }
 
-    def take(count: Int) = limit(count)
+    def take(count: Int): this.type = limit(count)
 
     def limit(count: Int): this.type = {
       require(count > 0, "Invalid limit value. Limit must be positive")
@@ -94,7 +94,7 @@ object OlapCubeQuery {
       this
     }
 
-    def drop(count: Int) = offset(count)
+    def drop(count: Int): this.type = offset(count)
 
     def offset(count: Int): this.type = {
       require(count > 0, "Invalid offset value. Offset must be positive")

@@ -13,6 +13,7 @@ class WeakDataCache[T <: Identifiable](lazyRepository: Callable[Repository[T]]) 
 
   private lazy val repository = lazyRepository.call()
   private lazy val cache = WeakReference(new TrieMap[String, T]())
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   override def invalidate(uris: Seq[String]): Unit = {
     cache.get match {

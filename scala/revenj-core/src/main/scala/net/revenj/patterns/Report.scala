@@ -27,3 +27,8 @@ import scala.concurrent.Future
 trait Report[T] {
   def populate(locator: ServiceLocator): Future[T]
 }
+
+trait ReportHandler[R, T <: Report[R]] {
+  def before(report: T): Unit = {}
+  def after(result: R): R = result
+}
