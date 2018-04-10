@@ -17,7 +17,7 @@ private def dslResourceTestTask = Def.task {
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.6.5",
+    version := "0.6.6",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.1.4",
       "joda-time" % "joda-time" % "2.9.9",   // TODO: will be removed
@@ -39,7 +39,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.6.5",
+  version := "0.6.6",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.2",
     "com.typesafe.akka" %% "akka-http-core" % "10.0.13"
@@ -74,7 +74,7 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "net.revenj" %% "revenj-core" % "0.6.5" % Provided,
+      "net.revenj" %% "revenj-core" % "0.6.6" % Provided,
       "com.dslplatform" % "dsl-clc" % "1.9.4" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test

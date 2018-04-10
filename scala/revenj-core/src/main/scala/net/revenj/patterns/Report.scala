@@ -29,6 +29,6 @@ trait Report[T] {
 }
 
 trait ReportHandler[R, T <: Report[R]] {
-  def before(report: T): Unit = {}
+  def before(report: T): T = report
   def after(result: R): R = result
 }
