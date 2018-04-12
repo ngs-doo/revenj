@@ -79,7 +79,7 @@ final class RevenjPermissionManager implements PermissionManager, Closeable {
 						+ "Allowed values are open and closed");
 			}
 		}
-		defaultPermissions = permissions == null || "open".equals(permissions);
+		defaultPermissions = "open".equals(permissions);
 		globalSubscription = globalChanges.subscribe(c -> permissionsChanged = true);
 		roleSubscription = roleChanges.subscribe(c -> permissionsChanged = true);
 		this.globalRepository = globalRepository;

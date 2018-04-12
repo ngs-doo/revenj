@@ -5,11 +5,12 @@ import java.lang.reflect.ParameterizedType
 import java.net.{URL, URLClassLoader}
 import java.sql.Connection
 import java.util.{Properties, ServiceLoader, UUID}
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import net.revenj.database.postgres.converters.JsonConverter
 import net.revenj.extensibility._
 import net.revenj.patterns._
+import net.revenj.security.PermissionManager
 import net.revenj.serialization.{JacksonSerialization, Serialization}
 import org.postgresql.ds.PGPoolingDataSource
 
@@ -174,6 +175,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.registerFunc[DataContext](c => LocatorDataContext.asDataContext(c, loader), InstanceScope.Context)
     container.registerFunc[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), InstanceScope.Transient)
     container.registerFunc[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), InstanceScope.Context)
+    container.registerInstance[PermissionManager](new RevenjPermissionManager(properties, container))
     aspects foreach { _.configure(container) }
     domainModel.setNamespace(properties.getProperty("revenj.namespace"))
     properties.setProperty("revenj.aspectsCount", Integer.toString(aspects.size))

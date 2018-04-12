@@ -17,13 +17,13 @@ private def dslResourceTestTask = Def.task {
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.6.6",
+    version := "0.7.0",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.1.4",
       "joda-time" % "joda-time" % "2.9.9",   // TODO: will be removed
       "org.joda" % "joda-convert" % "1.9.2", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix-reactive" % "2.3.3",
+      "io.monix" %% "monix-reactive" % "2.3.2",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
       "com.dslplatform" %% "dsl-json-scala" % "1.7.1",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.4",
@@ -39,7 +39,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.6.6",
+  version := "0.7.0",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.2",
     "com.typesafe.akka" %% "akka-http-core" % "10.0.13"
@@ -74,7 +74,7 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "net.revenj" %% "revenj-core" % "0.6.6" % Provided,
+      "net.revenj" %% "revenj-core" % "0.7.0" % Provided,
       "com.dslplatform" % "dsl-clc" % "1.9.4" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
@@ -83,7 +83,7 @@ lazy val tests = (project in file("tests")
     publishLocal := {},
     publish := {},
     publishArtifact := false
-  )
+  )// dependsOn(core)
 )
 
 lazy val root = (project in file(".")
