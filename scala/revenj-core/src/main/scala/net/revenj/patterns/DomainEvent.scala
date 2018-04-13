@@ -57,3 +57,8 @@ trait DomainEventStore[T <: DomainEvent] extends Repository[T] with SearchableRe
     mark(Seq(uri))
   }
 }
+
+trait EventStoreAspect[T <: DomainEvent] {
+  def before(events: Seq[T]): Seq[T] = events
+  def after(events: Seq[T]): Unit = {}
+}

@@ -104,3 +104,8 @@ trait PersistableRepository[T <: AggregateRoot]
     persist(Seq.empty, Seq.empty, Seq(delete)).map(_ => ())
   }
 }
+
+trait PersistableRepositoryAspect[T <: AggregateRoot] {
+  def before(inserts: Seq[T], updates: Seq[(T, T)], deletes: Seq[T]): Unit = {}
+  def after(inserts: Seq[T], updates: Seq[(T, T)], deletes: Seq[T]): Unit = {}
+}

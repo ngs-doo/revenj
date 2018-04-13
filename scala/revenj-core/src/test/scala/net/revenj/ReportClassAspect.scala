@@ -1,8 +1,8 @@
 package net.revenj
 
-import net.revenj.patterns.ReportHandler
+import net.revenj.patterns.ReportAspect
 
-class ReportClassHandler extends ReportHandler[ReportMe.Result, ReportMe] {
+class ReportClassAspect extends ReportAspect[ReportMe.Result, ReportMe] {
   override def before(report: ReportMe): ReportMe = {
     ReportClassHandler.calledBefore += 1
     report

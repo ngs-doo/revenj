@@ -83,7 +83,7 @@ lazy val tests = (project in file("tests")
     publishLocal := {},
     publish := {},
     publishArtifact := false
-  )// dependsOn(core)
+  )
 )
 
 lazy val root = (project in file(".")

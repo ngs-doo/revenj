@@ -28,7 +28,7 @@ trait Report[T] {
   def populate(locator: ServiceLocator): Future[T]
 }
 
-trait ReportHandler[R, T <: Report[R]] {
+trait ReportAspect[R, T <: Report[R]] {
   def before(report: T): T = report
   def after(result: R): R = result
 }

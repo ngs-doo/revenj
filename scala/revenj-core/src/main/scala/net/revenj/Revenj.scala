@@ -213,6 +213,11 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     processHandlers(fgt, funcHandlers)
     val arrayFuncHandlers = plugins.find[DomainEventHandler[Function0[Array[T]]]]
     processHandlers(afgt, arrayFuncHandlers)
+    val aspects = plugins.find[EventStoreAspect[T]]
+    aspects foreach { a =>
+      container.registerType(a, a, InstanceScope.Context)
+      container.registerType(gt, a, InstanceScope.Context)
+    }
   }
 
   def registerReports[R : TypeTag, T <: Report[R] : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
@@ -232,11 +237,28 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
         }
       case _ => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
     }
-    val gt = Utils.makeGenericType(classOf[ReportHandler[_, _]], resultClass, reportClass)
-    val handlers = plugins.find[ReportHandler[R, T]]
-    handlers foreach { h =>
-      container.registerType(h, h, InstanceScope.Context)
-      container.registerType(gt, h, InstanceScope.Context)
+    val gt = Utils.makeGenericType(classOf[ReportAspect[_, _]], resultClass, reportClass)
+    val aspects = plugins.find[ReportAspect[R, T]]
+    aspects foreach { a =>
+      container.registerType(a, a, InstanceScope.Context)
+      container.registerType(gt, a, InstanceScope.Context)
+    }
+  }
+
+  def registerAggregates[T <: AggregateRoot : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
+    val javaClass = Utils.findType(typeOf[T], runtimeMirror(loader)) match {
+      case Some(p) =>
+        p match {
+          case cl: Class[_] => cl
+          case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${typeOf[T]}")
+        }
+      case _ => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
+    }
+    val gt = Utils.makeGenericType(classOf[PersistableRepositoryAspect[_]], javaClass)
+    val aspects = plugins.find[PersistableRepositoryAspect[T]]
+    aspects foreach { a =>
+      container.registerType(a, a, InstanceScope.Context)
+      container.registerType(gt, a, InstanceScope.Context)
     }
   }
 }
