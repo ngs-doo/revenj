@@ -1,21 +1,8 @@
 import com.dslplatform.compiler.client.parameters.{Settings, Targets}
-import sbt.Keys.resourceGenerators
 
-// ### PROJECT SETTINGS ###
-/*
-private def dslResourceTestTask = Def.task {
-  streams.value.log.info("creating test resources")
-  com.dslplatform.sbt.Actions.generateResources(
-    streams.value.log,
-    Targets.Option.REVENJ_SCALA,
-    (resourceManaged in Test).value / "META-INF" / "services",
-    Seq(target.value),
-    (dependencyClasspath in Test).value
-  )
-}
-*/
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
+  enablePlugins(SbtDslPlatformPlugin)
   settings(
     version := "0.7.0",
     libraryDependencies ++= Seq(
@@ -31,8 +18,9 @@ lazy val core = (project in file("revenj-core")
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.4",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.4",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
-    )/*,
-    resourceGenerators in Test += dslResourceTestTask.taskValue*/
+    ),
+    Test / dsl / dslSources      += (Targets.Option.REVENJ_SCALA -> sourceManaged.value),
+    Test / dsl / dslResourcePath := Some((resourceDirectory in Test).value / "META-INF" / "services")
   )
 )
 
@@ -63,23 +51,22 @@ lazy val storage = (project in file("revenj-storage")
 
 lazy val tests = (project in file("tests")
   enablePlugins(SbtDslPlatformPlugin)
-  settings (
-    dslNamespace := "example",
-    dslDslPath := Seq((resourceDirectory in Test).value),
-    dslSettings := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME, Settings.Option.URI_REFERENCE)/*,
-    resourceGenerators in Test += dslResourceTestTask.taskValue*/
-  )
   settings (commonSettings)
+  dependsOn(core)
   settings(
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "net.revenj" %% "revenj-core" % "0.7.0" % Provided,
       "com.dslplatform" % "dsl-clc" % "1.9.4" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
     ),
+    Test / dsl / dslNamespace    := "example",
+    Test / dsl / dslDslPath      := Seq((resourceDirectory in Test).value),
+    Test / dsl / dslSettings     := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME, Settings.Option.URI_REFERENCE),
+    Test / dsl / dslSources      += (Targets.Option.REVENJ_SCALA -> sourceManaged.value),
+    Test / dsl / dslResourcePath := Some((resourceDirectory in Test).value / "META-INF" / "services"),
     publishLocal := {},
     publish := {},
     publishArtifact := false
