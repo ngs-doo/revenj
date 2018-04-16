@@ -353,7 +353,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
           i += 1
         }
         val ev2 = TestMe(x = 105)
-        changed === 1
+        changed === 2
         Await.result(ctx.submit(ev2), Duration.Inf)
         i = 0
         while (i < 50) {
@@ -362,7 +362,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
           i += 1
         }
         container.close()
-        changed === 2
+        changed === 4
       }
       "observables" >> {
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
