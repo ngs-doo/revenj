@@ -1,3 +1,4 @@
 logLevel := Level.Warn
-addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8.3")
-addSbtPlugin("com.dslplatform" % "sbt-dsl-platform" % "0.6.5")
+
+addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.1")
+addSbtPlugin("com.dslplatform" % "sbt-dsl-platform" % "0.7.0")
