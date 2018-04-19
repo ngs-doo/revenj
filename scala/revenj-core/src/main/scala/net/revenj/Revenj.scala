@@ -162,8 +162,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.registerInstance(dataSource, handleClose = false)
     container.registerInstance(loader, handleClose = false)
     container.register[JsonConverter](InstanceScope.Singleton)
-    val plugins = new ServicesPluginLoader(loader)
-    container.registerInstance[PluginLoader](plugins)
+    container.registerInstance[PluginLoader](new ServicesPluginLoader(loader))
     val domainModel = new SimpleDomainModel(loader)
     container.registerInstance[DomainModel](domainModel, handleClose = false)
     val databaseNotification = new PostgresDatabaseNotification(dataSource, Some(domainModel), properties, state, container)
@@ -175,10 +174,10 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.registerFunc[DataContext](c => LocatorDataContext.asDataContext(c, loader), InstanceScope.Context)
     container.registerFunc[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), InstanceScope.Transient)
     container.registerFunc[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), InstanceScope.Context)
-    container.registerInstance[PermissionManager](new RevenjPermissionManager(properties, container))
     aspects foreach { _.configure(container) }
     domainModel.setNamespace(properties.getProperty("revenj.namespace"))
     properties.setProperty("revenj.aspectsCount", Integer.toString(aspects.size))
+    container.registerFunc[PermissionManager](c => new RevenjPermissionManager(properties, c), InstanceScope.Singleton)
     state.started(container)
     container
   }

@@ -252,4 +252,8 @@ module test {
 	mapping same {
 		identical;
 	}
+	permissions {
+	    allow CreateMe for User;
+	}
 }
+role User;

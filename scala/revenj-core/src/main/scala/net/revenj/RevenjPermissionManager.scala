@@ -96,7 +96,7 @@ private[revenj] class RevenjPermissionManager(
             val subName = parts.take(i).mkString(".")
             rolePermissions.get(subName) match {
               case Some(permissions) =>
-                permissions.find(it => implies(user, it.name)) match {
+                permissions.find(it => implies(user, it.roleID)) match {
                   case Some(found) =>
                     isAllowed = found.isAllowed
                     i = 0
