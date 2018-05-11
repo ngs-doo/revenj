@@ -183,13 +183,14 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
   }
 
   def registerEvents[T <: DomainEvent : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
-    val javaClass = Utils.findType(typeOf[T], runtimeMirror(loader)) match {
+    val mirror = runtimeMirror(loader)
+    val javaClass = Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(p) =>
         p match {
           case cl: Class[_] => cl
-          case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${typeOf[T]}")
+          case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${mirror.typeOf[T]}")
         }
-      case _ => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
+      case _ => throw new IllegalArgumentException(s"Unable to detect type: ${mirror.typeOf[T]}")
     }
     def processHandlers[X: TypeTag](gt: ParameterizedType, eventHandlers: Seq[Class[DomainEventHandler[X]]]): Unit = {
       eventHandlers foreach { h =>
@@ -220,7 +221,8 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
   }
 
   def registerReports[R : TypeTag, T <: Report[R] : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
-    val resultClass = Utils.findType(typeOf[R], runtimeMirror(loader)) match {
+    val mirror = runtimeMirror(loader)
+    val resultClass = Utils.findType(mirror.typeOf[R], mirror) match {
       case Some(p) =>
         p match {
           case cl: Class[_] => cl
@@ -228,13 +230,13 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
         }
       case _ => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[R]}")
     }
-    val reportClass = Utils.findType(typeOf[T], runtimeMirror(loader)) match {
+    val reportClass = Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(p) =>
         p match {
           case cl: Class[_] => cl
-          case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${typeOf[T]}")
+          case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${mirror.typeOf[T]}")
         }
-      case _ => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
+      case _ => throw new IllegalArgumentException(s"Unable to detect type: ${mirror.typeOf[T]}")
     }
     val gt = Utils.makeGenericType(classOf[ReportAspect[_, _]], resultClass, reportClass)
     val aspects = plugins.find[ReportAspect[R, T]]
@@ -245,13 +247,14 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
   }
 
   def registerAggregates[T <: AggregateRoot : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
-    val javaClass = Utils.findType(typeOf[T], runtimeMirror(loader)) match {
+    val mirror = runtimeMirror(loader)
+    val javaClass = Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(p) =>
         p match {
           case cl: Class[_] => cl
-          case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${typeOf[T]}")
+          case _ => throw new IllegalArgumentException(s"Only non-generic types supported. Found: ${mirror.typeOf[T]}")
         }
-      case _ => throw new IllegalArgumentException(s"Unable to detect type: ${typeOf[T]}")
+      case _ => throw new IllegalArgumentException(s"Unable to detect type: ${mirror.typeOf[T]}")
     }
     val gt = Utils.makeGenericType(classOf[PersistableRepositoryAspect[_]], javaClass)
     val aspects = plugins.find[PersistableRepositoryAspect[T]]

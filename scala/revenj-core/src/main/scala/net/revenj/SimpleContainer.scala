@@ -240,7 +240,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
   }
 
   override def tryResolve[T: TypeTag]: Try[T] = {
-    Utils.findType(typeOf[T], mirror) match {
+    Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(tpe) => resolve(tpe).map(_.asInstanceOf[T])
       case _ => Failure(new ReflectiveOperationException("Invalid type tag argument"))
     }
@@ -472,17 +472,17 @@ If you wish to resolve types not registered in the container, specify revenj.res
     if (handleClose && service.isInstanceOf[AutoCloseable]) {
       closeables.add(service.asInstanceOf[AutoCloseable])
     }
-    val paramType = Utils.findType(typeOf[T], mirror).getOrElse(throw new IllegalArgumentException(s"Unable to register ${typeOf[T]} to container"))
+    val paramType = Utils.findType(mirror.typeOf[T], mirror).getOrElse(throw new IllegalArgumentException(s"Unable to register ${mirror.typeOf[T]} to container"))
     addToRegistry(new Registration[T](paramType, this, service, false))
   }
 
   override def registerFunc[T: TypeTag](factory: Container => T, lifetime: InstanceScope = Transient): this.type = {
-    val paramType = Utils.findType(typeOf[T], mirror).getOrElse(throw new IllegalArgumentException(s"Unable to register ${typeOf[T]} to container"))
+    val paramType = Utils.findType(mirror.typeOf[T], mirror).getOrElse(throw new IllegalArgumentException(s"Unable to register ${mirror.typeOf[T]} to container"))
     addToRegistry(new Registration[T](paramType, this, factory, lifetime))
   }
 
   override def registerGenerics[T: TypeTag](factory: (Container, Array[JavaType]) => T, lifetime: InstanceScope = Transient): this.type = {
-    addToRegistry(new Registration[T](mirror.runtimeClass(typeOf[T]), this, factory, lifetime))
+    addToRegistry(new Registration[T](mirror.runtimeClass(mirror.typeOf[T]), this, factory, lifetime))
   }
 
   override def createScope(): Container = {

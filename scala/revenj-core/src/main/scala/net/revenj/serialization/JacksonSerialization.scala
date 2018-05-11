@@ -45,9 +45,9 @@ class JacksonSerialization(
   }
 
   def serialize[T: TypeTag](value: T): Try[String] = {
-    Utils.findType(typeOf[T], mirror) match {
+    Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(tpe) => serializeRuntime(value, tpe)
-      case _ => Failure(new IllegalArgumentException("Unable to find Java type for: " + typeOf[T]))
+      case _ => Failure(new IllegalArgumentException(s"Unable to find Java type for: ${mirror.typeOf[T]}"))
     }
   }
 
@@ -87,9 +87,9 @@ class JacksonSerialization(
   }
 
   override def deserialize[T: TypeTag](input: String): Try[T] = {
-    Utils.findType(typeOf[T], mirror) match {
+    Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(tpe) => deserializeRuntime[T](input, tpe)
-      case _ => Failure(new IllegalArgumentException("Unable to find Java type for: " + typeOf[T]))
+      case _ => Failure(new IllegalArgumentException(s"Unable to find Java type for: ${mirror.typeOf[T]}"))
     }
   }
 }

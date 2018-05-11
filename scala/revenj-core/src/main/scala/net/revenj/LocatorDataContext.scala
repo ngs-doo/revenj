@@ -63,9 +63,9 @@ private[revenj] class LocatorDataContext(
   }
 
   private def findManifest[T: TypeTag]: Class[_] = {
-    typeOf[T] match {
+    mirror.typeOf[T] match {
       case TypeRef(_, sym, _) => mirror.runtimeClass(sym.asClass)
-      case _ => throw new ReflectiveOperationException("Unable to find class type for " + typeOf[T])
+      case _ => throw new ReflectiveOperationException(s"Unable to find class type for ${mirror.typeOf[T]}")
     }
   }
 

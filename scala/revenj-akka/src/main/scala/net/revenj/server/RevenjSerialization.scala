@@ -26,16 +26,16 @@ private[revenj] class RevenjSerialization(jackson: JacksonSerialization, loader:
   }
 
   override def deserialize[T: TypeTag](content: Array[Byte], length: Int, contentType: String): Try[T] = {
-    Utils.findType(typeOf[T], mirror) match {
+    Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(tpe) => deserialize(tpe, content, length, contentType).map(_.asInstanceOf[T])
-      case _ => Failure(new IllegalArgumentException("Unable to find Java type for: " + typeOf[T]))
+      case _ => Failure(new IllegalArgumentException(s"Unable to find Java type for: ${mirror.typeOf[T]}"))
     }
   }
 
   override def deserialize[T: TypeTag](stream: InputStream, contentType: String): Try[T] = {
-    Utils.findType(typeOf[T], mirror) match {
+    Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(tpe) => deserialize(tpe, stream, contentType).map(_.asInstanceOf[T])
-      case _ => Failure(new IllegalArgumentException("Unable to find Java type for: " + typeOf[T]))
+      case _ => Failure(new IllegalArgumentException(s"Unable to find Java type for: ${mirror.typeOf[T]}"))
     }
   }
 
