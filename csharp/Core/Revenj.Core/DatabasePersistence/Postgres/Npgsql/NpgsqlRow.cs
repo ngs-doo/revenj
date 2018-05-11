@@ -27,7 +27,6 @@
 // TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Resources;
@@ -52,12 +51,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 	internal sealed class CachingRow : NpgsqlRow
 	{
-		private readonly List<object> _data = new List<object>();
-		private readonly ForwardsOnlyRow _inner;
+		private readonly object[] _data;
+		private readonly int _numFields;
 
 		public CachingRow(ForwardsOnlyRow fo)
 		{
-			_inner = fo;
+			_numFields = fo.NumFields;
+			_data = new object[_numFields];
+			for (int i = 0; i < _data.Length; i++)
+				_data[i] = fo[i];
+			fo.Dispose();
 		}
 
 		public override object this[Int32 index]
@@ -68,18 +71,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				{
 					throw new IndexOutOfRangeException("this[] index value");
 				}
-				while (_data.Count <= index)
-				{
-					_data.Add(_inner[_data.Count]);
-				}
 				return _data[index];
 			}
 		}
 
-		public override int NumFields
-		{
-			get { return _inner.NumFields; }
-		}
+		public override int NumFields { get { return _numFields; } }
 
 		public override bool IsDBNull(int index)
 		{
@@ -112,7 +108,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public override void Dispose()
 		{
-			_inner.Dispose();
 		}
 	}
 
@@ -192,6 +187,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				SetIndex(index - 1, true);
 			}
 			return _reader.IsNextDBNull;
+		}
+
+		public void Reset()
+		{
+			_lastIndex = -1;
 		}
 
 		public override void Dispose()
@@ -314,8 +314,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 		protected static readonly Encoding UTF8Encoding = Encoding.UTF8;
-		private readonly NpgsqlRowDescription _rowDesc;
-		private readonly Stream _stream;
+		protected readonly NpgsqlRowDescription _rowDesc;
+		protected Stream _stream;
 		private Streamer _streamer;
 		private int _currentField = -1;
 		protected readonly byte[] buffer;
@@ -479,10 +479,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			CurrentCharStreamer.SkipTo(position);
 		}
 
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			CurrentStreamer = null;
 			Skip(_rowDesc.NumFields - _currentField - 1);
+			_currentField = -1;
 		}
 	}
 }

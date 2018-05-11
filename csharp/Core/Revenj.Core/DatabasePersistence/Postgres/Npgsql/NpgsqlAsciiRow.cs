@@ -39,17 +39,22 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// </summary>
 	internal sealed class StringRowReader : RowReader
 	{
-		private readonly int _messageSize;
+		private int _messageSize;
 		private int? _nextFieldSize = null;
+		private bool disposed = true;
 
 		public StringRowReader(NpgsqlRowDescription rowDesc, Stream inputStream, byte[] buffer, ByteBuffer bytes)
-			: base(rowDesc, inputStream, buffer, bytes)
+			: base(rowDesc, inputStream, buffer, bytes) { }
+
+		public int NextMessage(Stream inputStream)
 		{
-			_messageSize = PGUtil.ReadInt32(inputStream, buffer);
-			if (PGUtil.ReadInt16(inputStream, buffer) != rowDesc.NumFields)
-			{
+			disposed = false;
+			_stream = inputStream;
+			_messageSize = PGUtil.ReadInt32(_stream, buffer);
+			if (PGUtil.ReadInt16(_stream, buffer) != _rowDesc.NumFields)
 				throw new DataException();
-			}
+			_nextFieldSize = null;
+			return _messageSize;
 		}
 
 		protected override object ReadNext()
@@ -185,6 +190,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			int ret = GetThisFieldCount();
 			_nextFieldSize = null;
 			return ret;
+		}
+
+		//not an actual dispose ;(
+		public override void Dispose()
+		{
+			if (disposed) return;
+			disposed = true;
+			base.Dispose();
+			_messageSize = 0;
+			_nextFieldSize = null;
 		}
 	}
 }

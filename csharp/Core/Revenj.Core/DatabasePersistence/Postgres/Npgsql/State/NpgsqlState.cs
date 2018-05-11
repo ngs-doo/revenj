@@ -325,21 +325,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 		}
 
-		private class ContextResetter : IDisposable
-		{
-			private readonly NpgsqlConnector _connector;
-
-			public ContextResetter(NpgsqlConnector connector)
-			{
-				_connector = connector;
-			}
-
-			public void Dispose()
-			{
-				_connector.RequireReadyForQuery = true;
-			}
-		}
-
 		///<summary>
 		/// This method is responsible to handle all protocol messages sent from the backend.
 		/// It holds all the logic to do it.
@@ -356,7 +341,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				// Process commandTimeout behavior.
 
 				if ((context.Mediator.CommandTimeout > 0) &&
-					(!CheckForContextSocketAvailability(context, SelectMode.SelectRead)))
+					(!CheckForContextSocketAvailability(context)))
 				{
 					// If timeout occurs when establishing the session with server then
 					// throw an exception instead of trying to cancel query. This helps to prevent loop as CancelRequest will also try to stablish a connection and sends commands.
@@ -430,7 +415,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// <returns><c>true</c>, if for context socket availability was checked, <c>false</c> otherwise.</returns>
 		/// <param name="context">Context.</param>
 		/// <param name="selectMode">Select mode.</param>
-		internal bool CheckForContextSocketAvailability(NpgsqlConnector context, SelectMode selectMode)
+		internal bool CheckForContextSocketAvailability(NpgsqlConnector context)
 		{
 			/* Socket.Poll supports integer as microseconds parameter.
 			 * This limits the usable command timeout value
@@ -438,7 +423,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			 */
 			const int limitOfSeconds = 2147;
 
-			bool socketPoolResponse = false;
+			bool socketPoolResponse = context.Socket.Available > 0;
 			int secondsToWait = context.Mediator.CommandTimeout;
 
 			/* In order to bypass this limit, the availability of
@@ -446,11 +431,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			 */
 			while ((secondsToWait > limitOfSeconds) && (!socketPoolResponse))
 			{    //
-				socketPoolResponse = context.Socket.Poll(1000000 * limitOfSeconds, selectMode);
+				socketPoolResponse = context.Socket.Poll(1000000 * limitOfSeconds, SelectMode.SelectRead);
 				secondsToWait -= limitOfSeconds;
 			}
 
-			return socketPoolResponse || context.Socket.Poll(1000000 * secondsToWait, selectMode);
+			return socketPoolResponse || context.Socket.Poll(1000000 * secondsToWait, SelectMode.SelectRead);
 		}
 
 		private enum BackEndMessageCode
@@ -509,12 +494,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		protected IEnumerable<IServerResponseObject> ProcessBackendResponses_Ver_3(NpgsqlConnector context)
 		{
-			using (new ContextResetter(context))
+			try
 			{
 				Stream stream = context.Stream;
 				NpgsqlMediator mediator = context.Mediator;
-
-				NpgsqlRowDescription lastRowDescription = null;
 
 				var buffer = context.TmpBuffer;
 				var queue = context.ArrayBuffer;
@@ -660,7 +643,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							}
 							break;
 						case BackEndMessageCode.RowDescription:
-							yield return lastRowDescription = new NpgsqlRowDescription(stream, context.OidToNameMapping, context.CompatVersion, buffer, queue);
+							yield return context.RowDescription();
 							break;
 						case BackEndMessageCode.ParameterDescription:
 
@@ -676,7 +659,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							break;
 
 						case BackEndMessageCode.DataRow:
-							yield return new ForwardsOnlyRow(new StringRowReader(lastRowDescription, stream, buffer, queue));
+							yield return context.NextRow();
 							break;
 
 						case BackEndMessageCode.ReadyForQuery:
@@ -809,6 +792,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							throw new NotSupportedException(String.Format("Backend sent unrecognized response type: {0}", (Char)message));
 					}
 				}
+			}
+			finally
+			{
+				context.RequireReadyForQuery = true;
 			}
 		}
 

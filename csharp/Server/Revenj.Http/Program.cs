@@ -30,37 +30,16 @@ namespace Revenj.Http
 They can't be changed in runtime via command line arguments.
 Specify arguments in config file using <add key=... value=... />", ex);
 			}
-			/*Platform.Container container;
-			if (!Enum.TryParse<Platform.Container>(ConfigurationManager.AppSettings["Revenj.Container"], out container))
-				container = Platform.Container.Autofac;*/
 			Console.WriteLine("Starting server");
 			if (httpServer == "Socket" || httpServer == "Revenj")
 			{
-				var server = Platform.Start<HttpSocketServer>();//container);
+				var server = Platform.Start<HttpSocketServer>();
 				server.Run();
 			}
 			else
 			{
-				try
-				{
-					var server = Platform.Start<HttpListenerServer>();//container);
-					server.Run();
-				}
-				catch (Exception ex)
-				{
-					var tle = ex.InnerException as TypeLoadException;
-					if (tle != null && tle.TypeName == "System.Net.HttpListener")
-					{
-						throw new TypeLoadException(@"Unable to load HttpListener. 
-Newer Mono versions (4.2+) have incompatible Mono.Security.
-Either delete Mono.Security.dll from the Revenj folder so it can use Mono default one,
-use an older Mono version (pre 4.2) or use Revenj builtin web server.
-To run Revenj builtin web server add Revenj.HttpServer=Revenj to command line or add
-	<add key=""Revenj.HttpServer"" value=""Socket""/>
-to <appSettings>", ex.InnerException);
-					}
-					throw;
-				}
+				var server = Platform.Start<HttpListenerServer>();
+				server.Run();
 			}
 		}
 	}

@@ -98,7 +98,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 		}
 
-		private readonly FieldData[] fields_data;
+		private FieldData[] fields_data;
+		private int fields_data_len;
 		private Dictionary<string, int> _field_name_index_table;
 		private Dictionary<string, int> _caseInsensitiveNameIndexTable;
 		private readonly Version _compatVersion;
@@ -106,14 +107,23 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private readonly static Version KANA_FIX_VERSION = new Version(2, 0, 2, 1);
 		private readonly static Version GET_ORDINAL_THROW_EXCEPTION = KANA_FIX_VERSION;
 
-		public NpgsqlRowDescription(Stream stream, NpgsqlBackendTypeMapping type_mapping, Version compatVersion, byte[] buffer, ByteBuffer queue)
+		public NpgsqlRowDescription(Version compatVersion)
 		{
 			_compatVersion = compatVersion;
+			fields_data = new FieldData[16];
+		}
+
+		public NpgsqlRowDescription Process(Stream stream, NpgsqlBackendTypeMapping type_mapping, byte[] buffer, ByteBuffer queue)
+		{
 			PGUtil.EatStreamBytes(stream, 4);
 			var num = PGUtil.ReadInt16(stream, buffer);
-			fields_data = new FieldData[num];
-			for (int i = 0; i < fields_data.Length; i++)
+			fields_data_len = num;
+			if (num > fields_data.Length) fields_data = new FieldData[num];
+			for (int i = 0; i < fields_data_len; i++)
 				fields_data[i] = new FieldData(stream, type_mapping, buffer, queue);
+			_field_name_index_table = null;
+			_caseInsensitiveNameIndexTable = null;
+			return this;
 		}
 
 		public FieldData this[int index]
@@ -123,11 +133,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		public int NumFields
 		{
-			get { return (Int16)fields_data.Length; }
+			get { return fields_data_len; }
 		}
 
 		private void InitDictionary()
 		{
+			//TODO: rebuild the dict
 			if (_field_name_index_table != null)
 				return;
 			if (_compatVersion < KANA_FIX_VERSION)
@@ -140,7 +151,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				_field_name_index_table = new Dictionary<string, int>(fields_data.Length, KanaWidthInsensitiveComparer.INSTANCE);
 				_caseInsensitiveNameIndexTable = new Dictionary<string, int>(fields_data.Length, KanaWidthCaseInsensitiveComparator.INSTANCE);
 			}
-			for (int i = 0; i < fields_data.Length; i++)
+			for (int i = 0; i < fields_data_len; i++)
 			{
 				var fd = fields_data[i];
 				_field_name_index_table[fd.Name] = i;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Revenj.Utility;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -10,6 +11,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private byte[] Buffer = new byte[32];
 		private int Position;
 		private readonly char[] Chars = new char[256];
+		private readonly StringCache Cache = new StringCache(10);
 
 		public readonly byte[] Large = new byte[65536];
 
@@ -46,7 +48,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					if (ch > 126) return UTF8.GetString(Buffer, 0, Position);
 					Chars[i] = (char)ch;
 				}
-				return new string(Chars, 0, Position);
+				return Cache.Get(Chars, Position);
 			}
 			return UTF8.GetString(Buffer, 0, Position);
 		}

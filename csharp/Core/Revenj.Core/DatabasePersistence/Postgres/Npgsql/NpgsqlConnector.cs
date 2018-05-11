@@ -180,6 +180,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			_portalIndex = 0;
 			_notificationThreadStopCount = 1;
 			_notificationAutoResetEvent = new AutoResetEvent(true);
+			rowDescription = new NpgsqlRowDescription(CompatVersion);
+			rowReader = new StringRowReader(rowDescription, Stream, TmpBuffer, ArrayBuffer);
+			forwardReader = new ForwardsOnlyRow(rowReader);
 		}
 
 		public NpgsqlConnector(NpgsqlConnection Connection)
@@ -556,6 +559,25 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get { return _stream; }
 			set { _stream = value; }
+		}
+
+		private bool newDescription;
+
+		private readonly NpgsqlRowDescription rowDescription;
+		internal NpgsqlRowDescription RowDescription()
+		{
+			newDescription = true;
+			return rowDescription.Process(_stream, OidToNameMapping, TmpBuffer, ArrayBuffer);
+		}
+
+		private readonly StringRowReader rowReader;
+		private readonly ForwardsOnlyRow forwardReader;
+		internal ForwardsOnlyRow NextRow()
+		{
+			newDescription = false;
+			forwardReader.Reset();
+			rowReader.NextMessage(_stream);
+			return forwardReader;
 		}
 
 		/// <summary>
