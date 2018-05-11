@@ -13,7 +13,8 @@ trait PluginLoader {
   }
   def resolve[T : TypeTag](container: Container): Array[T] = {
     val loader = container.resolve[ClassLoader]
-    Utils.findType(typeOf[T], runtimeMirror(loader)) match {
+    val mirror = runtimeMirror(loader)
+    Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(tpe) =>
         val scope = container.createScope()
         try {
@@ -24,7 +25,7 @@ trait PluginLoader {
         } finally {
           scope.close()
         }
-      case _ => throw new IllegalArgumentException(s"Unable to resolve plugins for provided type: ${typeOf[T]}")
+      case _ => throw new IllegalArgumentException(s"Unable to resolve plugins for provided type: ${mirror.typeOf[T]}")
     }
   }
 }
