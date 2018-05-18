@@ -481,6 +481,11 @@ If you wish to resolve types not registered in the container, specify revenj.res
     addToRegistry(new Registration[T](paramType, this, factory, lifetime))
   }
 
+  override def registerInstance[T](manifest: JavaType, factory: () => T): this.type = {
+    val resolution: Container => T = _ => factory.apply()
+    addToRegistry(new Registration[T](manifest, this, resolution, InstanceScope.Singleton))
+  }
+
   override def registerGenerics[T: TypeTag](factory: (Container, Array[JavaType]) => T, lifetime: InstanceScope = Transient): this.type = {
     addToRegistry(new Registration[T](mirror.runtimeClass(mirror.typeOf[T]), this, factory, lifetime))
   }
@@ -515,7 +520,7 @@ private object SimpleContainer {
     val biFactory: Option[(Container, Array[JavaType]) => T],
     val lifetime: InstanceScope) {
 
-    val name = signature.getTypeName
+    val name: String = signature.getTypeName
 
     def this(signature: JavaType, owner: SimpleContainer, manifest: Class[T], lifetime: InstanceScope) {
       this(None, signature, owner, Some(manifest), None, None, None, lifetime)

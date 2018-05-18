@@ -222,6 +222,13 @@ class ContainerCheck extends Specification with ScalaCheck {
       tryCol.isFailure === true
       tryCol.failed.get.asInstanceOf[ReflectiveOperationException].getMessage == "Unable to resolve class net.revenj.ErrorInCollection. Error: naah"
     }
+    "unbound func" >> {
+      val container = new SimpleContainer(false, cl)
+      val top = new CircularTop(new CircularDep(null))
+      container.registerInstance(classOf[CircularTop], () => top)
+      val resolved = container.resolve[CircularTop]
+      top === resolved
+    }
   }
 }
 
