@@ -1,5 +1,7 @@
 import com.dslplatform.compiler.client.parameters.{Settings, Targets}
 
+lazy val DSL = SbtDslPlatformPlugin.autoImport.dsl
+
 lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
@@ -19,7 +21,7 @@ lazy val core = (project in file("revenj-core")
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.4",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
     ),
-    Test / dsl / dslResourcePath := Some((resourceDirectory in Test).value / "META-INF" / "services")
+    dslResourcePath in (Test, DSL) := Some((resourceDirectory in Test).value / "META-INF" / "services")
   )
 )
 
@@ -61,11 +63,11 @@ lazy val tests = (project in file("tests")
       "ru.yandex.qatools.embed" % "embedded-services" % "1.21" % Test
         exclude ("org.xbib.elasticsearch.plugin", "elasticsearch-river-jdbc")
     ),
-    Test / dsl / dslNamespace    := "example",
-    Test / dsl / dslDslPath      := Seq((resourceDirectory in Test).value),
-    Test / dsl / dslSettings     := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME, Settings.Option.URI_REFERENCE),
-    Test / dsl / dslSources      += (Targets.Option.REVENJ_SCALA -> sourceManaged.value),
-    Test / dsl / dslResourcePath := Some((resourceDirectory in Test).value / "META-INF" / "services"),
+    dslNamespace in (Test, DSL) := "example",
+    dslDslPath in (Test, DSL) := Seq((resourceDirectory in Test).value),
+    dslSettings in (Test, DSL) := Seq(Settings.Option.JACKSON, Settings.Option.JODA_TIME, Settings.Option.URI_REFERENCE),
+    dslSources in (Test, DSL) += (Targets.Option.REVENJ_SCALA -> sourceManaged.value),
+    dslResourcePath in (Test, DSL) := Some((resourceDirectory in Test).value / "META-INF" / "services"),
     publishLocal := {},
     publish := {},
     publishArtifact := false
