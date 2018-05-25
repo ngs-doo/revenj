@@ -3,7 +3,6 @@ package net.revenj
 import java.lang.reflect.{Constructor, GenericArrayType, GenericDeclaration, ParameterizedType, TypeVariable, Type => JavaType}
 import java.util.concurrent.CopyOnWriteArrayList
 
-import net.revenj.SimpleContainer.Registration
 import net.revenj.extensibility.Container
 import net.revenj.extensibility.InstanceScope
 import net.revenj.extensibility.InstanceScope._
@@ -18,51 +17,17 @@ import scala.util.{Failure, Success, Try}
 
 private[revenj] class SimpleContainer private(private val parent: Option[SimpleContainer], resolveUnknown: Boolean, mirror: Mirror) extends Container {
 
+  import SimpleContainer._
+
   def this(resolveUnknown: Boolean, loader: ClassLoader) {
     this(None, resolveUnknown, runtimeMirror(loader))
     registerGenerics[Option[_]]((locator, args) => locator.resolve(args(0)).toOption)
     registerGenerics[scala.Function0[_]]((locator, args) => () => locator.resolve(args(0)).getOrElse(throw new ReflectiveOperationException(s"Unable to resolve factory for: ${args(0)}")))
   }
 
-  private val classCache = new TrieMap[Class[_], Array[CtorInfo]]
-  private val typeCache = new TrieMap[JavaType, TypeInfo]
-  private val typeNameMappings = new TrieMap[String, JavaType]
   private val container = new mutable.HashMap[JavaType, CopyOnWriteArrayList[Registration[AnyRef]]]
   private val closeables = new CopyOnWriteArrayList[AutoCloseable]
   private var closed = false
-
-  private class TypeInfo(val paramType: ParameterizedType) {
-    val rawType = paramType.getRawType
-    val mappings = new mutable.HashMap[JavaType, JavaType]
-    val (constructors, rawClass, genericArguments) = {
-      rawType match {
-        case rawClass: Class[_] =>
-          val genericArguments = paramType.getActualTypeArguments
-          val variables = rawClass.getTypeParameters
-          var i = 0
-          while (i < genericArguments.length) {
-            mappings += variables(i) -> genericArguments(i)
-            i += 1
-          }
-          val ctors = rawClass.getConstructors
-          val constructors = new Array[CtorInfo](ctors.length)
-          i = 0
-          while (i < ctors.length) {
-            constructors(i) = new CtorInfo(ctors(i))
-            i += 1
-          }
-          (Some(constructors), Some(rawClass), Some(genericArguments))
-        case _ => (None, None, None)
-      }
-    }
-    val name = paramType.toString
-    val mappedType = typeNameMappings.get(name)
-  }
-
-  private class CtorInfo(val ctor: Constructor[_]) {
-    val rawTypes = ctor.getParameterTypes
-    val genTypes = ctor.getGenericParameterTypes
-  }
 
   registerInstance[Container](this, handleClose = false)
   registerInstance[ServiceLocator](this, handleClose = false)
@@ -308,7 +273,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
               case pt: ParameterizedType =>
                 pt.getRawType match {
                   case rawClass: Class[_] =>
-                    tryResolveCollection(rawClass, pt, caller)
+                    tryResolveCollection(rawClass, argumentType, caller)
                   case _ =>
                     resolveClass()
                 }
@@ -365,7 +330,8 @@ If you wish to resolve types not registered in the container, specify revenj.res
             if (msg == null && error.getCause != null) error.getCause.getMessage
             else msg
           }
-          fail = Some(new ReflectiveOperationException(s"Unable to resolve ${it.signature}. Error: $message", item.failed.get))
+          val description = if (it.manifest.isDefined && it.manifest.get != it.signature) s" (${it.manifest.get})" else ""
+          fail = Some(new ReflectiveOperationException(s"Unable to resolve ${it.signature}$description. Error: $message", error))
         }
         i += 1
       }
@@ -373,23 +339,24 @@ If you wish to resolve types not registered in the container, specify revenj.res
     }
   }
 
+  private def prepareRegistration(registration: Registration[AnyRef], caller: SimpleContainer) = {
+    if (registration.lifetime == Singleton) (registration.owner, registration)
+    else if (registration.owner eq caller) (this, registration)
+    else (caller, registration.prepareSingleton(caller))
+  }
+
   private def resolveRegistration(registration: Registration[AnyRef], caller: SimpleContainer): Try[AnyRef] = {
-    def prepareRegistration = {
-      if (registration.lifetime == Singleton) (registration.owner, registration)
-      else if (registration.owner eq caller) (this, registration)
-      else (caller, registration.prepareSingleton(caller))
-    }
     if (registration.instance.isDefined) {
       Success(registration.instance.get)
     } else if (registration.singleFactory.isDefined) {
       Try {
         if (registration.lifetime != Transient) {
-          val (self, reg) = prepareRegistration
+          val (self, reg) = prepareRegistration(registration, caller)
           self synchronized {
             if (reg.promoted) {
-              reg.instance
+              reg.instance.get
             } else if (reg.promoting) {
-              Failure(new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected"))
+              throw new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected")
             } else {
               reg.promoting = true
               val instance = reg.singleFactory.get(self)
@@ -408,10 +375,10 @@ If you wish to resolve types not registered in the container, specify revenj.res
       }
     } else {
       if (registration.lifetime != Transient) {
-        val (self, reg) = prepareRegistration
+        val (self, reg) = prepareRegistration(registration, caller)
         self synchronized {
           if (reg.promoted) {
-            Success(reg.instance)
+            Success(reg.instance.get)
           } else if (reg.promoting) {
             Failure(new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected"))
           } else if (reg.manifest.isDefined) {
@@ -508,7 +475,43 @@ If you wish to resolve types not registered in the container, specify revenj.res
 
 private object SimpleContainer {
 
+  private val classCache = new TrieMap[Class[_], Array[CtorInfo]]
+  private val typeCache = new TrieMap[JavaType, TypeInfo]
+  private val typeNameMappings = new TrieMap[String, JavaType]
   private val seqSignature = classOf[scala.collection.Seq[_]]
+
+  private class CtorInfo(val ctor: Constructor[_]) {
+    val rawTypes: Array[Class[_]] = ctor.getParameterTypes
+    val genTypes: Array[JavaType] = ctor.getGenericParameterTypes
+  }
+
+  private class TypeInfo(val paramType: ParameterizedType) {
+    val rawType: JavaType = paramType.getRawType
+    val mappings = new mutable.HashMap[JavaType, JavaType]
+    val (constructors, rawClass, genericArguments) = {
+      rawType match {
+        case rawClass: Class[_] =>
+          val genericArguments = paramType.getActualTypeArguments
+          val variables = rawClass.getTypeParameters
+          var i = 0
+          while (i < genericArguments.length) {
+            mappings += variables(i) -> genericArguments(i)
+            i += 1
+          }
+          val ctors = rawClass.getConstructors
+          val constructors = new Array[CtorInfo](ctors.length)
+          i = 0
+          while (i < ctors.length) {
+            constructors(i) = new CtorInfo(ctors(i))
+            i += 1
+          }
+          (Some(constructors), Some(rawClass), Some(genericArguments))
+        case _ => (None, None, None)
+      }
+    }
+    val name: String = paramType.toString
+    val mappedType: Option[JavaType] = typeNameMappings.get(name)
+  }
 
   private class Registration[T](
     val parent: Option[Registration[T]],
@@ -547,7 +550,7 @@ private object SimpleContainer {
       this.instance = Some(value)
     }
 
-    def prepareSingleton(caller: SimpleContainer) = {
+    def prepareSingleton(caller: SimpleContainer): Registration[T] = {
       val registration = new Registration[T](Some(this), signature, caller, manifest, None, singleFactory, biFactory, Context)
       caller.addToRegistry(registration)
       registration
