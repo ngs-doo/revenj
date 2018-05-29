@@ -451,6 +451,9 @@ module events {
 	event AlertEventLog {
 		AlertScenario alert;
 	}
+	event CustomKeyName(KeyID) {
+	    Text text;
+	}
 }
 module sql {
 	SQL GuardCheck <# SELECT 1.0 as a #> {

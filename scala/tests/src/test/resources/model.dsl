@@ -255,5 +255,8 @@ module test {
 	permissions {
 	    allow CreateMe for User;
 	}
+	event CustomKeyName(eventID) {
+	    Text text;
+	}
 }
 role User;
