@@ -1,6 +1,7 @@
 package org.revenj.server.commands.crud;
 
 import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import org.revenj.patterns.*;
 import org.revenj.Utils;
 import org.revenj.security.PermissionManager;
@@ -27,12 +28,14 @@ public final class Delete implements ServerCommand {
 
 	@CompiledJson
 	public static final class Argument {
-		public final String Name;
-		public final String Uri;
+		@JsonAttribute(name = "Name", alternativeNames = {"name"})
+		public final String name;
+		@JsonAttribute(name = "Uri", alternativeNames = {"uri"})
+		public final String uri;
 
 		public Argument(String name, String uri) {
-			this.Name = name;
-			this.Uri = uri;
+			this.name = name;
+			this.uri = uri;
 		}
 	}
 
@@ -50,26 +53,26 @@ public final class Delete implements ServerCommand {
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
-		Optional<Class<?>> manifest = domainModel.find(arg.Name);
+		Optional<Class<?>> manifest = domainModel.find(arg.name);
 		if (!manifest.isPresent()) {
-			return CommandResult.badRequest("Unable to find specified domain object: " + arg.Name);
+			return CommandResult.badRequest("Unable to find specified domain object: " + arg.name);
 		}
 		if (!AggregateRoot.class.isAssignableFrom(manifest.get())) {
-			return CommandResult.badRequest("Specified type is not an aggregate root: " + arg.Name);
+			return CommandResult.badRequest("Specified type is not an aggregate root: " + arg.name);
 		}
 		if (!permissions.canAccess(manifest.get(), principal)) {
-			return CommandResult.forbidden(arg.Name);
+			return CommandResult.forbidden(arg.name);
 		}
 		PersistableRepository repository;
 		try {
 			repository = locator.resolve(PersistableRepository.class, manifest.get());
 		} catch (ReflectiveOperationException e) {
-			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
+			return CommandResult.badRequest("Error resolving repository for: " + arg.name + ". Reason: " + e.getMessage());
 		}
 		try {
-			Optional<AggregateRoot> found = repository.find(arg.Uri);
+			Optional<AggregateRoot> found = repository.find(arg.uri);
 			if (!found.isPresent()) {
-				return CommandResult.badRequest("Can't find " + arg.Name + " with uri: " + arg.Uri);
+				return CommandResult.badRequest("Can't find " + arg.name + " with uri: " + arg.uri);
 			}
 			repository.delete(found.get());
 			return CommandResult.success("Object deleted", output.serialize(found.get()));

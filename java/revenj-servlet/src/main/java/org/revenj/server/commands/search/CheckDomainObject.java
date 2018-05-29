@@ -1,6 +1,7 @@
 package org.revenj.server.commands.search;
 
 import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import org.revenj.patterns.*;
 import org.revenj.security.PermissionManager;
 import org.revenj.serialization.Serialization;
@@ -26,12 +27,14 @@ public class CheckDomainObject implements ReadOnlyServerCommand {
 
 	@CompiledJson
 	public static final class Argument {
-		public final String Name;
-		public final String Uri;
+		@JsonAttribute(name = "Name", alternativeNames = {"name"})
+		public final String name;
+		@JsonAttribute(name = "Uri", alternativeNames = {"uri"})
+		public final String uri;
 
 		public Argument(String name, String uri) {
-			this.Name = name;
-			this.Uri = uri;
+			this.name = name;
+			this.uri = uri;
 		}
 	}
 
@@ -48,26 +51,26 @@ public class CheckDomainObject implements ReadOnlyServerCommand {
 		} catch (IOException e) {
 			return CommandResult.badRequest(e.getMessage());
 		}
-		Optional<Class<?>> manifest = domainModel.find(arg.Name);
+		Optional<Class<?>> manifest = domainModel.find(arg.name);
 		if (!manifest.isPresent()) {
-			return CommandResult.badRequest("Unable to find specified domain object: " + arg.Name);
+			return CommandResult.badRequest("Unable to find specified domain object: " + arg.name);
 		}
-		if (arg.Uri == null) {
+		if (arg.uri == null) {
 			return CommandResult.badRequest("Uri not specified.");
 		}
 		if (!Identifiable.class.isAssignableFrom(manifest.get())) {
-			return CommandResult.badRequest("Specified type is not an identifiable: " + arg.Name);
+			return CommandResult.badRequest("Specified type is not an identifiable: " + arg.name);
 		}
 		if (!permissions.canAccess(manifest.get(), principal)) {
-			return CommandResult.forbidden(arg.Name);
+			return CommandResult.forbidden(arg.name);
 		}
 		Repository repository;
 		try {
 			repository = locator.resolve(Repository.class, manifest.get());
 		} catch (ReflectiveOperationException e) {
-			return CommandResult.badRequest("Error resolving repository for: " + arg.Name + ". Reason: " + e.getMessage());
+			return CommandResult.badRequest("Error resolving repository for: " + arg.name + ". Reason: " + e.getMessage());
 		}
-		Optional<AggregateRoot> found = repository.find(arg.Uri);
+		Optional<AggregateRoot> found = repository.find(arg.uri);
 		try {
 			return new CommandResult<>(output.serialize(found.isPresent()), found.isPresent() ? "Found" : "Not found", 200);
 		} catch (IOException e) {

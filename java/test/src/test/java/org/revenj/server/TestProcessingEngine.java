@@ -43,6 +43,7 @@ public class TestProcessingEngine {
 		Properties properties = new Properties();
 		properties.setProperty("revenj.namespace", "gen.model");
 		properties.setProperty("revenj.notifications.status", "disabled");
+		properties.setProperty("revenj.permissions", "open");
 		File revProps = new File("test.properties");
 		if (revProps.exists() && revProps.isFile()) {
 			properties.load(new FileReader(revProps));
