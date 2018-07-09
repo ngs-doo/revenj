@@ -6,19 +6,19 @@ lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
   settings(
-    version := "0.7.3",
+    version := "0.8.0",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.1.4",
       "joda-time" % "joda-time" % "2.9.9",   // TODO: will be removed
       "org.joda" % "joda-convert" % "1.9.2", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix-reactive" % "2.3.2",
+      "io.monix" %% "monix-reactive" % "2.3.3",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "com.dslplatform" %% "dsl-json-scala" % "1.7.4",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.4",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.4",
+      "com.dslplatform" %% "dsl-json-scala" % "1.7.5",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.6",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.6",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.6",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.6",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
     ),
     dslResourcePath in (Test, DSL) := Some((resourceDirectory in Test).value / "META-INF" / "services")
@@ -28,7 +28,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.7.3",
+  version := "0.8.0",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.2",
     "com.typesafe.akka" %% "akka-http-core" % "10.0.13"

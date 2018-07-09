@@ -1,7 +1,5 @@
 package net.revenj.cache
 
-import java.util.concurrent.Callable
-
 import net.revenj.patterns.{DataCache, Identifiable, Repository}
 
 import scala.collection.concurrent.TrieMap
@@ -9,17 +7,18 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
 import scala.ref.WeakReference
 
-class WeakDataCache[T <: Identifiable](lazyRepository: Callable[Repository[T]]) extends DataCache[T] {
+class WeakDataCache[T <: Identifiable](repository: Repository[T]) extends DataCache[T] {
 
-  private lazy val repository = lazyRepository.call()
   private lazy val cache = WeakReference(new TrieMap[String, T]())
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  override def invalidate(uris: Seq[String]): Unit = {
-    cache.get match {
-      case Some(wr) if uris != null && uris.nonEmpty =>
-        uris.foreach(wr.remove)
-      case _ =>
+  override def invalidate(uris: Seq[String]): Future[Unit] = {
+    Future.successful {
+      cache.get match {
+        case Some(wr) if uris != null && uris.nonEmpty =>
+          uris.foreach(wr.remove)
+        case _ =>
+      }
     }
   }
 
