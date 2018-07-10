@@ -27,43 +27,73 @@ class EagerDataCache[T <: Identifiable](
   private val subscription = dataChanges.notifications
     .filter(_.name == name)
     .map { n =>
+      val version = currentVersion
       n.operation match {
-          //TODO: change to URI should result in old values being removed
-        case Operation.Insert | Operation.Change | Operation.Update =>
+        case Operation.Insert | Operation.Update =>
           n match {
             case nw: NotifyWith[Seq[T]@unchecked] =>
-              set(nw.info)
+              if (nw.info != null && nw.info.nonEmpty) {
+                set(nw.info, version, forceSet = true)
+              }
             case _ =>
               implicit val global = scala.concurrent.ExecutionContext.Implicits.global
-              repository.find(n.uris).foreach(set)
+              repository.find(n.uris).foreach { items => set(items, version, forceSet = false) }
           }
-        case Operation.Delete =>
-          remove(n.uris)
+        case Operation.Delete | Operation.Change =>
+          remove(n.uris, version, n.isInstanceOf[NotifyWith[_]])
       }
     }.subscribe()(monix.execution.Scheduler.Implicits.global)
 
-  def set(instances: Seq[T]): Unit = {
+  def set(instances: Seq[T]): Unit = set(instances, currentVersion, forceSet = true)
+  private def set(instances: Seq[T], oldVersion: Int, forceSet: Boolean): Int = {
     if (instances != null && instances.nonEmpty) {
-      synchronized {
-        lastChange = OffsetDateTime.now()
-        currentVersion += 1
-        instances.foreach(f => cache.put(f.URI, f))
+      val (shouldInvalidateAll, newVersion) = if (forceSet || oldVersion == currentVersion) {
+        synchronized {
+          val isInvalid = currentVersion != oldVersion
+          lastChange = OffsetDateTime.now()
+          currentVersion += 1
+          instances.foreach(f => cache.put(f.URI, f))
+          isInvalid -> currentVersion
+        }
+      } else {
+        true -> currentVersion
       }
-      versionChangeSubject.onNext(currentVersion)
-    }
+      if (shouldInvalidateAll) {
+        invalidateAll()
+        oldVersion
+      } else {
+        versionChangeSubject.onNext(currentVersion)
+        newVersion
+      }
+    } else oldVersion
   }
+
+  def remove(uris: Seq[String]): Unit = remove(uris, currentVersion, forceRemove = true)
+  private def remove(uris: Seq[String], oldVersion: Int, forceRemove: Boolean): Int = {
+    if (uris != null && uris.nonEmpty) {
+      val (shouldInvalidateAll, newVersion) = if (forceRemove || oldVersion == currentVersion) {
+        synchronized {
+          val isInvalid = currentVersion != oldVersion
+          lastChange = OffsetDateTime.now()
+          currentVersion += 1
+          uris.foreach(cache.remove)
+          isInvalid -> currentVersion
+        }
+      } else {
+        true -> currentVersion
+      }
+      if (shouldInvalidateAll) {
+        invalidateAll()
+        oldVersion
+      } else {
+        versionChangeSubject.onNext(currentVersion)
+        newVersion
+      }
+    } else oldVersion
+  }
+
   def get(uri: String): Option[T] = if (uri != null) cache.get(uri) else None
   def items: Seq[T] = cache.values.toIndexedSeq
-  def remove(uris: Seq[String]): Unit = {
-    if (uris != null && uris.nonEmpty) {
-      synchronized {
-        lastChange = OffsetDateTime.now()
-        currentVersion += 1
-        uris.foreach(cache.remove)
-      }
-      versionChangeSubject.onNext(currentVersion)
-    }
-  }
 
   def version: Int = currentVersion
   def changedOn: OffsetDateTime = lastChange
@@ -71,18 +101,24 @@ class EagerDataCache[T <: Identifiable](
   override def invalidate(uris: Seq[String]): Future[Unit] = {
     if (uris != null && uris.nonEmpty) {
       implicit val global = scala.concurrent.ExecutionContext.Implicits.global
+      val version = currentVersion
       repository.find(uris).map { found =>
-        set(found)
-        remove(uris.diff(found.map(_.URI)))
+        val newVersion = set(found, version, forceSet = false)
+        if (newVersion != version) {
+          remove(uris.diff(found.map(_.URI)), newVersion, forceRemove = false)
+        }
       }
     } else Future.failed(new RuntimeException("invalid uris provided"))
   }
 
   override def invalidateAll(): Future[Unit] = {
     implicit val global = scala.concurrent.ExecutionContext.Implicits.global
+    val version = currentVersion
     repository.search().map { found =>
-      set(found)
-      remove(cache.keys.toSeq.diff(found.map(_.URI)))
+      val newVersion = set(found, version, forceSet = false)
+      if (newVersion != version) {
+        remove(cache.keys.toSeq.diff(found.map(_.URI)), newVersion, forceRemove = false)
+      }
     }
   }
 
