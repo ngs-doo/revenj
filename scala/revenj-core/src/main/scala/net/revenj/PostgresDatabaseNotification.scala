@@ -193,7 +193,19 @@ private [revenj] class PostgresDatabaseNotification(
     }
   }
 
-  private def setupListening(): Boolean = {
+  private def hostSpecs(props: Properties) = {
+    val hosts = props.getProperty("PGHOST").split(",")
+    val ports = props.getProperty("PGPORT").split(",")
+    val hostSpecs = new Array[HostSpec](hosts.length)
+    var i = 0
+    while (i < hostSpecs.length) {
+      hostSpecs(i) = new HostSpec(hosts(i), ports(i).toInt)
+      i += 1
+    }
+    hostSpecs
+  }
+
+  private def setupListening() = {
     retryCount += 1
     if (retryCount > 60) retryCount = 30
     val jdbcUrl = properties.getProperty("revenj.jdbcUrl")
@@ -218,8 +230,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
       }
       val applicationName = Option(properties.getProperty("revenj.notifications.applicationName"))
       val db = parsed.getProperty("PGDBNAME")
-      val host = new HostSpec(parsed.getProperty("PGHOST").split(",")(0), parsed.getProperty("PGPORT").split(",")(0).toInt)
-      val pgStream = ConnectionFactory.openConnection(host, user, password, db, applicationName, properties)
+      val pgStream = ConnectionFactory.openConnection(hostSpecs(parsed), user, password, db, applicationName, properties)
       currentStream = Some(pgStream)
       retryCount = 0
       val listening = new Listening(pgStream)
