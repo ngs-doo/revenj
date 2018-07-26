@@ -4,6 +4,7 @@ import java.time.OffsetDateTime
 
 import monix.reactive.Observable
 import monix.reactive.subjects.PublishSubject
+import net.revenj.extensibility.SystemState
 import net.revenj.patterns.DataChangeNotification.{NotifyWith, Operation}
 import net.revenj.patterns._
 
@@ -13,7 +14,9 @@ import scala.concurrent.Future
 class EagerDataCache[T <: Identifiable](
   val name: String,
   repository: Repository[T] with SearchableRepository[T],
-  dataChanges: DataChangeNotification
+  dataChanges: DataChangeNotification,
+  systemState: SystemState,
+  initialValues: Seq[T] = Nil
 ) extends DataSourceCache[T] with AutoCloseable {
 
   protected val cache = new TrieMap[String, T]()
@@ -22,7 +25,16 @@ class EagerDataCache[T <: Identifiable](
   private var lastChange = OffsetDateTime.now()
   def changes: Observable[Int] = versionChangeSubject.map(identity)
 
-  invalidateAll()
+  systemState.change
+    .filter(it => it.id == "notification" && it.detail == "started")
+    .doOnNext(_ => invalidateAll())
+    .subscribe()(monix.execution.Scheduler.Implicits.global)
+
+  if (initialValues.nonEmpty) {
+    set(initialValues)
+  } else {
+    invalidateAll()
+  }
 
   private val subscription = dataChanges.notifications
     .filter(_.name == name)

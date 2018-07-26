@@ -154,6 +154,9 @@ module test {
 		Set<location?> l2;
 		timestamp ts { versioning; }
 	}
+	caching {
+	    eager for ComplexPk;
+	}
 	root bpk(b) {
 		bool?[] b;
 	}	
