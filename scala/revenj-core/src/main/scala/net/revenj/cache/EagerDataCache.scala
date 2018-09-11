@@ -58,7 +58,7 @@ class EagerDataCache[T <: Identifiable](
 
   def set(instances: Seq[T]): Unit = set(instances, currentVersion, forceSet = true)
   private def set(instances: Seq[T], oldVersion: Int, forceSet: Boolean): Int = {
-    if (instances != null && instances.nonEmpty) {
+    if (instances != null) {
       val (shouldInvalidateAll, newVersion) = if (forceSet || oldVersion == currentVersion) {
         synchronized {
           val isInvalid = currentVersion != oldVersion
