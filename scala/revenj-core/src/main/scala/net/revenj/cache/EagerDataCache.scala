@@ -45,63 +45,41 @@ class EagerDataCache[T <: Identifiable](
           n match {
             case nw: NotifyWith[Seq[T]@unchecked] =>
               if (nw.info != null && nw.info.nonEmpty) {
-                set(nw.info, version, forceSet = true)
+                change(nw.info, Nil, version, force = true)
               }
             case _ =>
               implicit val global = scala.concurrent.ExecutionContext.Implicits.global
-              repository.find(n.uris).foreach { items => set(items, version, forceSet = false) }
+              repository.find(n.uris).foreach { items => change(items, Nil, version, force = false) }
           }
-        case Operation.Delete | Operation.Change =>
-          remove(n.uris, version, n.isInstanceOf[NotifyWith[_]])
+        case Operation.Change | Operation.Delete =>
+          change(Nil, n.uris, version, n.isInstanceOf[NotifyWith[_]])
       }
     }.subscribe()(monix.execution.Scheduler.Implicits.global)
 
-  def set(instances: Seq[T]): Unit = set(instances, currentVersion, forceSet = true)
-  private def set(instances: Seq[T], oldVersion: Int, forceSet: Boolean): Int = {
-    if (instances != null) {
-      val (shouldInvalidateAll, newVersion) = if (forceSet || oldVersion == currentVersion) {
-        synchronized {
-          val isInvalid = currentVersion != oldVersion
-          lastChange = OffsetDateTime.now()
-          currentVersion += 1
-          instances.foreach(f => cache.put(f.URI, f))
-          isInvalid -> currentVersion
-        }
-      } else {
-        true -> currentVersion
-      }
-      if (shouldInvalidateAll) {
-        invalidateAll()
-        oldVersion
-      } else {
-        versionChangeSubject.onNext(currentVersion)
-        newVersion
-      }
-    } else oldVersion
-  }
+  def set(instances: Seq[T]): Unit = change(instances, Nil, currentVersion, force = true)
+  def remove(uris: Seq[String]): Unit = change(Nil, uris, currentVersion, force = true)
 
-  def remove(uris: Seq[String]): Unit = remove(uris, currentVersion, forceRemove = true)
-  private def remove(uris: Seq[String], oldVersion: Int, forceRemove: Boolean): Int = {
-    if (uris != null && uris.nonEmpty) {
-      val (shouldInvalidateAll, newVersion) = if (forceRemove || oldVersion == currentVersion) {
+  private def change(newInstances: Seq[T], oldUris: Seq[String], oldVersion: Int, force: Boolean): Unit = {
+    if (newInstances != null && oldUris != null && (newInstances.nonEmpty || oldUris.nonEmpty)) {
+      val shouldInvalidateAll = if (force || oldVersion == currentVersion) {
+        val diff = oldUris.diff(newInstances.map(_.URI))
         synchronized {
           val isInvalid = currentVersion != oldVersion
           lastChange = OffsetDateTime.now()
           currentVersion += 1
-          uris.foreach(cache.remove)
-          isInvalid -> currentVersion
+          newInstances.foreach(f => cache.put(f.URI, f))
+          diff.foreach(cache.remove)
+          isInvalid
         }
       } else {
-        true -> currentVersion
+        true
       }
       if (shouldInvalidateAll) {
         invalidateAll()
-        oldVersion
       } else {
         versionChangeSubject.onNext(currentVersion)
-        newVersion
       }
-    } else oldVersion
+    }
   }
 
   def get(uri: String): Option[T] = if (uri != null) cache.get(uri) else None
@@ -115,10 +93,7 @@ class EagerDataCache[T <: Identifiable](
       implicit val global = scala.concurrent.ExecutionContext.Implicits.global
       val version = currentVersion
       repository.find(uris).map { found =>
-        val newVersion = set(found, version, forceSet = false)
-        if (newVersion != version) {
-          remove(uris.diff(found.map(_.URI)), newVersion, forceRemove = false)
-        }
+        change(found, uris, version, force = false)
       }
     } else Future.failed(new RuntimeException("invalid uris provided"))
   }
@@ -127,10 +102,7 @@ class EagerDataCache[T <: Identifiable](
     implicit val global = scala.concurrent.ExecutionContext.Implicits.global
     val version = currentVersion
     repository.search().map { found =>
-      val newVersion = set(found, version, forceSet = false)
-      if (newVersion != version) {
-        remove(cache.keys.toSeq.diff(found.map(_.URI)), newVersion, forceRemove = false)
-      }
+      change(found, cache.keys.toIndexedSeq, version, force = false)
     }
   }
 
