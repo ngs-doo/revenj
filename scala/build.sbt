@@ -6,7 +6,7 @@ lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
   settings(
-    version := "0.8.2",
+    version := "0.8.3",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.4",
       "joda-time" % "joda-time" % "2.9.9",   // TODO: will be removed
@@ -14,7 +14,7 @@ lazy val core = (project in file("revenj-core")
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "io.monix" %% "monix-reactive" % "2.3.3",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "com.dslplatform" %% "dsl-json-scala" % "1.7.5",
+      "com.dslplatform" %% "dsl-json-scala" % "1.8.0",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.6",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.6",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.6",
@@ -28,7 +28,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.8.2",
+  version := "0.8.3",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.2",
     "com.typesafe.akka" %% "akka-http-core" % "10.0.13"
