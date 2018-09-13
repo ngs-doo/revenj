@@ -252,6 +252,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
   }
 
   private class Listening (stream: PGStream) extends Runnable {
+    private val reader = new PostgresReader
     private val command = "LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj".getBytes("UTF-8")
     stream.sendChar('Q')
     stream.sendInteger4(command.length + 5)
@@ -262,9 +263,23 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     receiveCommand(stream)
     receiveCommand(stream)
     receiveCommand(stream)
-    if (stream.receiveChar != 'Z') throw new IOException("Unable to setup Postgres listener")
+    private var lastChar = stream.receiveChar()
+    while (lastChar != 'Z') {
+      if (lastChar == 'N') {
+        val n_len = stream.receiveInteger4
+        val notice = stream.receiveString(n_len - 4)
+        systemState.notify(SystemState.SystemEvent("notice", notice))
+        lastChar = stream.receiveChar()
+      } else {
+        systemState.notify(SystemState.SystemEvent("error", "Unable to setup Postgres listener"))
+        throw new IOException("Unable to setup Postgres listener")
+      }
+    }
     private val num = stream.receiveInteger4
-    if (num != 5) throw new IOException("unexpected length of ReadyForQuery packet")
+    if (num != 5) {
+      systemState.notify(SystemState.SystemEvent("error", "unexpected length of ReadyForQuery packet"))
+      throw new IOException("unexpected length of ReadyForQuery packet")
+    }
     stream.receiveChar()
 
     private def receiveCommand(pgStream: PGStream): Unit = {
@@ -274,7 +289,6 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     }
 
     def run(): Unit = {
-      val reader = new PostgresReader
       val pgStream = stream
       systemState.notify(SystemState.SystemEvent("notification", "started"))
       var threadAlive = true
