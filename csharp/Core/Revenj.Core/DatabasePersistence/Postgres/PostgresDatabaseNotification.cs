@@ -85,7 +85,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				Connection.Notification += Connection_Notification;
 				Connection.Open();
 				var com = Connection.CreateCommand();
-				com.CommandText = "listen events; listen aggregate_roots; listen migration;";
+				com.CommandText = "LISTEN events; LISTEN aggregate_roots; LISTEN migration; LISTEN revenj";
 				com.ExecuteNonQuery();
 				RetryCount = 0;
 			}

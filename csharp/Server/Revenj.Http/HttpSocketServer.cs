@@ -198,6 +198,7 @@ Please check settings: " + string.Join(", ", endpoints));
 			ThreadContext.Request = ctx;
 			ThreadContext.Response = ctx;
 			var resetEvent = new ManualResetEvent(false);
+			var counter = 0;
 			while (true)
 			{
 				var request = Requests.Take();
@@ -206,18 +207,26 @@ Please check settings: " + string.Join(", ", endpoints));
 					var socket = request.Socket;
 					if (request.HasData)
 					{
+						counter = 0;
 						ctx.Reset();
 						ProcessAllMessages(request, ctx, principal, resetEvent, true);
 					}
 					else if (socket.Available > 0 || request.TimeoutAt < Environment.TickCount)
 					{
+						counter = 0;
 						ctx.Reset();
 						ProcessAllMessages(request, ctx, principal, resetEvent, true);
 					}
 					else
 					{
+						counter++;
 						if (!Requests.TryAdd(request.Skipped()))
 							request.Socket.Close();
+						if (counter == 512)
+						{
+							counter = 0;
+							Thread.Sleep(1);
+						}
 						Thread.Yield();
 					}
 				}
