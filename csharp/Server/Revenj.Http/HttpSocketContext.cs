@@ -153,7 +153,7 @@ namespace Revenj.Http
 						|| errorCode == SocketError.ConnectionAborted) return -1;
 					retries++;
 				}
-			} while (retries < 20 && totalBytes < InputTemp.Length);
+			} while (retries < 20 && totalBytes <= InputTemp.Length);
 			return -1;
 		}
 

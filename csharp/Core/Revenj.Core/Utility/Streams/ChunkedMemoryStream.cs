@@ -448,9 +448,9 @@ namespace Revenj.Utility
 			other.CurrentPosition = CurrentPosition;
 			var total = TotalSize >> BlockShift;
 			var remaining = TotalSize & BlockAnd;
-			if (other.TotalSize < total)
+			if (other.TotalSize < TotalSize)
 			{
-				for (int i = other.Blocks.Count; i < total; i++)
+				for (int i = other.Blocks.Count; i <= total; i++)
 					other.Blocks.Add(new byte[BlockSize]);
 			}
 			for (int i = 0; i < total; i++)
