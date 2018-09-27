@@ -22,6 +22,30 @@ namespace Revenj.DatabasePersistence.Postgres
 		protected readonly Dictionary<string, Func<string, string>> CubeFacts = new Dictionary<string, Func<string, string>>();
 		protected readonly Dictionary<string, Func<BufferedTextReader, int, object>> CubeConverters = new Dictionary<string, Func<BufferedTextReader, int, object>>();
 		protected readonly Dictionary<string, Type> CubeTypes = new Dictionary<string, Type>();
+		protected readonly Dictionary<string, JoinInfo[]> CubeDependencies = new Dictionary<string, JoinInfo[]>();
+
+		public struct JoinInfo
+		{
+			public readonly string Path;
+			public readonly string Target;
+			public readonly JoinColumn[] JoinColumns;
+			public JoinInfo(string path, string target, params JoinColumn[] joinColumns)
+			{
+				this.Path = path;
+				this.Target = target;
+				this.JoinColumns = joinColumns;
+			}
+		}
+		public struct JoinColumn
+		{
+			public readonly string Source;
+			public readonly string Target;
+			public JoinColumn(string source, string target)
+			{
+				this.Source = source;
+				this.Target = target;
+			}
+		}
 
 		protected PostgresOlapCubeQuery(IServiceProvider locator)
 		{
@@ -106,6 +130,33 @@ namespace Revenj.DatabasePersistence.Postgres
 			return converters;
 		}
 
+		struct JoinOrder
+		{
+			public readonly int Index;
+			public readonly string FromAlias;
+			public readonly string ToAlias;
+			public readonly JoinInfo Join;
+			public JoinOrder(int index, string fromAlias, JoinInfo join)
+			{
+				this.Index = index;
+				this.FromAlias = fromAlias;
+				this.ToAlias = "_lf" + index;
+				this.Join = join;
+			}
+
+			internal void BuildJoin(StringBuilder sb)
+			{
+				sb.AppendFormat("\nLEFT JOIN {0} {1} ON ", Join.Target, ToAlias);
+				var first = Join.JoinColumns[0];
+				sb.AppendFormat("{0}.\"{1}\" = {2}.\"{3}\"", FromAlias, first.Source, ToAlias, first.Target);
+				for (int i = 1; i < Join.JoinColumns.Length; i++)
+				{
+					var cur = Join.JoinColumns[i];
+					sb.AppendFormat(" AND {0}.\"{1}\" = {2}.\"{3}\"", FromAlias, cur.Source, ToAlias, cur.Target);
+				}
+			}
+		}
+
 		internal string PrepareSql(
 			List<string> usedDimensions,
 			List<string> usedFacts,
@@ -117,48 +168,59 @@ namespace Revenj.DatabasePersistence.Postgres
 			var customOrder = new List<KeyValuePair<string, bool>>();
 
 			if (order != null)
+			{
 				foreach (var o in order)
 					if (o.Key != null)
 						customOrder.Add(new KeyValuePair<string, bool>(o.Key, o.Value));
+			}
 
 			ValidateInput(usedDimensions, usedFacts, customOrder.Select(it => it.Key));
 
+			var joinGraph = new Dictionary<string, JoinOrder>();
 			var sb = new StringBuilder();
-			var alias = filter != null ? filter.IsSatisfied.Parameters.First().Name : "it";
+			var alias = filter != null ? filter.IsSatisfied.Parameters.First().Name : "_it";
 			sb.Append("SELECT ROW(");
 			foreach (var d in usedDimensions)
 			{
-				sb.Append(CubeDimensions[d](alias));
+				var name = PrepareJoins(joinGraph, alias, d);
+				sb.Append(CubeDimensions[d](name));
 				sb.Append(',');
 			}
 			foreach (var f in usedFacts)
 			{
-				sb.Append(CubeFacts[f](alias));
+				var name = PrepareJoins(joinGraph, alias, f);
+				sb.Append(CubeFacts[f](name));
 				sb.Append(',');
 			}
 			sb.Length--;
-			sb.AppendFormat(") FROM {0} \"{1}\" ", Source, alias);
+			sb.AppendFormat(")\nFROM {0} \"{1}\" ", Source, alias);
+			foreach (var jo in joinGraph.Values.OrderBy(it => it.Index))
+			{
+				jo.BuildJoin(sb);
+			}
 			if (filter != null)
 				MainQueryParts.AddFilter(Locator, DatabaseQuery, filter, sb);
 			if (usedDimensions.Count > 0)
 			{
-				sb.Append(" GROUP BY ");
+				sb.Append("\nGROUP BY ");
 				foreach (var d in usedDimensions)
 				{
-					sb.Append(CubeDimensions[d](alias));
+					var name = GetAliasName(joinGraph, alias, d);
+					sb.Append(CubeDimensions[d](name));
 					sb.Append(',');
 				}
 				sb.Length--;
 			}
 			if (customOrder.Count > 0)
 			{
-				sb.Append(" ORDER BY ");
+				sb.Append("\nORDER BY ");
 				foreach (var kv in customOrder)
 				{
+					var name = GetAliasName(joinGraph, alias, kv.Key);
 					if (CubeDimensions.ContainsKey(kv.Key))
-						sb.Append(CubeDimensions[kv.Key](alias));
+						sb.Append(CubeDimensions[kv.Key](name));
 					else if (CubeFacts.ContainsKey(kv.Key))
-						sb.Append(CubeFacts[kv.Key](alias));
+						sb.Append(CubeFacts[kv.Key](name));
 					else
 						sb.AppendFormat("\"{0}\"", kv.Key);
 					if (kv.Value == false)
@@ -168,10 +230,35 @@ namespace Revenj.DatabasePersistence.Postgres
 				sb.Length -= 2;
 			}
 			if (limit != null)
-				sb.Append(" LIMIT ").Append(limit.Value);
+				sb.Append("\nLIMIT ").Append(limit.Value);
 			if (offset != null)
-				sb.Append(" OFFSET ").Append(offset.Value);
+				sb.Append("\nOFFSET ").Append(offset.Value);
 			return sb.ToString();
+		}
+
+		private string GetAliasName(Dictionary<string, JoinOrder> joinGraph, string alias, string d)
+		{
+			JoinInfo[] deps;
+			if (!CubeDependencies.TryGetValue(d, out deps))
+				return alias;
+			return joinGraph[deps[deps.Length - 1].Path].ToAlias;
+		}
+
+		private string PrepareJoins(Dictionary<string, JoinOrder> joinGraph, string alias, string d)
+		{
+			var name = alias;
+			JoinInfo[] deps;
+			if (CubeDependencies.TryGetValue(d, out deps))
+			{
+				foreach (var p in deps)
+				{
+					JoinOrder jo;
+					if (!joinGraph.TryGetValue(p.Path, out jo))
+						joinGraph[p.Path] = jo = new JoinOrder(joinGraph.Count, name, p);
+					name = jo.ToAlias;
+				}
+			}
+			return name;
 		}
 	}
 }
