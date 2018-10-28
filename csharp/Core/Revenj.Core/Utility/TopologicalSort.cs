@@ -18,34 +18,39 @@ namespace Revenj.Utility
 		/// <returns>Sorted nodes</returns>
 		public static IEnumerable<T> TopologicalSort<T>(IEnumerable<T> nodes, IEnumerable<KeyValuePair<T, T>> dependencies)
 		{
-			var dictionary = nodes.ToDictionary(it => it, _ => new HashSet<T>());
+			var graph = nodes.ToDictionary(it => it, _ => new HashSet<T>());
+			var inverse = nodes.ToDictionary(it => it, _ => new HashSet<T>());
 			foreach (var dep in dependencies)
-				dictionary[dep.Key].Add(dep.Value);
+			{
+				graph[dep.Key].Add(dep.Value);
+				inverse[dep.Value].Add(dep.Key);
+			}
 
-			return TopologicalSort(dictionary);
+			return TopologicalSort(graph, inverse);
 		}
 
-		private static List<T> TopologicalSort<T>(IDictionary<T, HashSet<T>> graph)
+		private static List<T> TopologicalSort<T>(Dictionary<T, HashSet<T>> graph, Dictionary<T, HashSet<T>> inverse)
 		{
-			var result = new List<T>();
+			var result = new List<T>(graph.Count);
+			int position = 0;
 
 			while (graph.Count > 0)
 			{
-				var emptyNodes =
-					(from it in graph
-					 where it.Value.Count == 0
-					 select it.Key).ToList();
+				foreach (var kv in graph)
+					if (kv.Value.Count == 0)
+						result.Add(kv.Key);
 
-				foreach (var node in emptyNodes)
+				for (int i = position; i < result.Count; i++)
 				{
+					var node = result[i];
 					graph.Remove(node);
-					foreach (var list in graph.Values)
-						list.Remove(node);
+					foreach (var dep in inverse[node])
+						graph[dep].Remove(node);
 				}
 
-				result.AddRange(emptyNodes);
-				if (emptyNodes.Count == 0)
+				if (result.Count == position)
 					throw new ArgumentException("Provided graph has circular dependency. Topological sort can't be performed on graph with circular dependency.");
+				position = result.Count;
 			}
 
 			return result;
