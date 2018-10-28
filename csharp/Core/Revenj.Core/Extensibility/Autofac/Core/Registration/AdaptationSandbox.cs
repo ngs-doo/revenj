@@ -30,9 +30,9 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 {
 	class AdaptationSandbox
 	{
-		readonly IEnumerable<IRegistrationSource> _adapters;
+		readonly List<IRegistrationSource> _adapters;
 		readonly IComponentRegistration _registration;
-		readonly IEnumerable<Service> _adapterServices;
+		readonly List<Service> _adapterServices;
 
 		readonly Dictionary<Service, List<IRegistrationSource>> _adaptersToQuery = new Dictionary<Service, List<IRegistrationSource>>();
 		readonly List<IComponentRegistration> _registrations = new List<IComponentRegistration>();
@@ -40,9 +40,9 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 		public AdaptationSandbox(
 			IEnumerable<IRegistrationSource> adapters,
 			IComponentRegistration registration,
-			IEnumerable<Service> adapterServices)
+			List<Service> adapterServices)
 		{
-			_adapters = adapters;
+			_adapters = adapters.ToList();
 			_registration = registration;
 			_adapterServices = adapterServices;
 			_registrations.Add(_registration);
@@ -53,7 +53,7 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 			foreach (var adapterService in _adapterServices)
 				GetAndInitialiseRegistrationsFor(adapterService);
 
-			return _registrations.Where(r => r != _registration);
+			return _registrations.FindAll(r => r != _registration);
 		}
 
 		IEnumerable<IComponentRegistration> GetAndInitialiseRegistrationsFor(Service service)
@@ -68,11 +68,11 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 			foreach (var adapter in _adapters)
 			{
 				remaining.Remove(adapter);
-				var newRegistrations = adapter.RegistrationsFor(service, GetAndInitialiseRegistrationsFor).ToArray();
+				var newRegistrations = adapter.RegistrationsFor(service, GetAndInitialiseRegistrationsFor);
 				_registrations.AddRange(newRegistrations);
 			}
 
-			return _registrations.Where(r => r.Services.Contains(service));
+			return _registrations.FindAll(r => r.Services.Contains(service));
 		}
 	}
 }
