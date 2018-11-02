@@ -39,13 +39,15 @@
         </member>
         <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">
             <summary>
-            Replace tag at index in the sequence of same tag names with provided value.
+            Replace tag at the index in the sequence of same tag names with provided value.
             Some document formats and value converters support complex values (DateTime, Image, ...)
+            Will return the index of the next same tag which is shared across context and should be replaced next.
+            If none is found it will return -1
             </summary>
             <param name="tag">Tag to be replaced</param>
             <param name="index">Tag index in sequence of same tag names</param>
             <param name="value">Replacement value (which can be formatted)</param>
-            <returns>Successful replacement</returns>
+            <returns>Index of the next shared tag</returns>
         </member>
         <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">
             <summary>
@@ -118,10 +120,18 @@
         </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.WithMatcher(System.String)">
             <summary>
-            Customize tag matcher. Default tag regex is [-+@\w\s.,!?]+
+            Customize tag matcher. Default tag regex is [-+@\w\s.,!?/]+
             Full matcher consists from more elements, this is just the base tag element.
             </summary>
             <param name="regex">custom tag matcher</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.ResizeLimit(System.Int32)">
+            <summary>
+            Maximum number of times same tag can be resized. Default is 8.
+            To protect against badly designed documents where Templater resizes the wrong context, set this limit to the maximum expected nesting.
+            </summary>
+            <param name="limit">maximum nesting level</param>
             <returns>itself</returns>
         </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.Build">
