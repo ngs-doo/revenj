@@ -24,6 +24,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
@@ -55,21 +56,23 @@ namespace Revenj.Extensibility.Autofac.Integration.Mef
 			return new KeyedService(ed.ContractName, et);
 		}
 
+		private static readonly ConcurrentDictionary<string, Type> TypeLookup = new ConcurrentDictionary<string, Type>();
+
 		static Type FindType(string exportTypeIdentity)
 		{
-#if SL4
-			var assemblies = System.Windows.Deployment.Current.Parts
-				.Select(r => System.Windows.Application.GetResourceStream(new Uri(r.Source, UriKind.Relative)))
-				.Select(s => new System.Windows.AssemblyPart().Load(s.Stream));
-#else
+			Type found;
+			if (TypeLookup.TryGetValue(exportTypeIdentity, out found))
+				return found;
 			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-#endif
 			try
 			{
-				return assemblies
+				found = assemblies
 					.Select(a => a.GetType(exportTypeIdentity, false))
 					.Where(t => t != null)
 					.SingleOrDefault();
+				if (found != null)
+					TypeLookup[exportTypeIdentity] = found;
+				return found;
 			}
 			catch (InvalidOperationException)
 			{

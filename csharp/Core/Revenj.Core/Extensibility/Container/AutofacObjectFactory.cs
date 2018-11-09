@@ -213,8 +213,9 @@ Check if type should be registered in the container or if correct arguments are 
 
 		internal static void RegisterToContainer(ContainerBuilder cb, IObjectFactoryBuilder rb, ConcurrentDictionary<Type, bool> cache)
 		{
-			foreach (var item in rb.Types.Where(i => i.IsGeneric == false))
+			foreach (var item in rb.Types)
 			{
+				if (item.IsGeneric) continue;
 				if (cache != null)
 				{
 					if (item.AsType != null)
@@ -245,8 +246,9 @@ Check if type should be registered in the container or if correct arguments are 
 						break;
 				}
 			}
-			foreach (var item in rb.Types.Where(i => i.IsGeneric))
+			foreach (var item in rb.Types)
 			{
+				if (!item.IsGeneric) continue;
 				if (cache != null)
 				{
 					if (item.AsType != null)
