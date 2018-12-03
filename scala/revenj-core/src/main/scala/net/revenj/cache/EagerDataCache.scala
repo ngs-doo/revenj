@@ -11,19 +11,22 @@ import net.revenj.patterns._
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.Future
 
-class EagerDataCache[T <: Identifiable](
+class EagerDataCache[T <: Identifiable, PK](
   val name: String,
   repository: Repository[T] with SearchableRepository[T],
   dataChanges: DataChangeNotification,
   systemState: SystemState,
+  extractKey: T => PK,
   initialValues: Seq[T] = Nil
 ) extends DataSourceCache[T] with AutoCloseable {
 
   protected val cache = new TrieMap[String, T]()
+  private var lookup: Map[PK, T] = Map.empty
   private var currentVersion = 0
   private val versionChangeSubject = PublishSubject[Int]()
   private var lastChange = OffsetDateTime.now()
   def changes: Observable[Int] = versionChangeSubject.map(identity)
+  def currentLookup: Map[PK, T] = lookup
 
   systemState.change
     .filter(it => it.id == "notification" && it.detail == "started")
@@ -69,6 +72,7 @@ class EagerDataCache[T <: Identifiable](
           currentVersion += 1
           newInstances.foreach(f => cache.put(f.URI, f))
           diff.foreach(cache.remove)
+          lookup = cache.values.map{ it => extractKey(it) -> it }.toMap
           isInvalid
         }
       } else {
