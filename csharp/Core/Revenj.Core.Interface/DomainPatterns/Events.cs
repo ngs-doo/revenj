@@ -4,16 +4,27 @@ using System.Diagnostics.Contracts;
 
 namespace Revenj.DomainPatterns
 {
+	public interface IEvent { }
+	/// <summary>
+	/// Server command signature.
+	/// Command is an external event which was received by the system.
+	/// </summary>
+	public interface ICommand : IEvent, IValidationErrors
+	{
+	}
 	/// <summary>
 	/// Server domain event signature.
 	/// Domain event is meaningful business event which has happened and was logged.
 	/// </summary>
-	public interface IDomainEvent : IIdentifiable
+	public interface IDomainEvent : IIdentifiable, IEvent
 	{
 		/// <summary>
 		/// Queue time
 		/// </summary>
 		DateTime QueuedAt { get; }
+	}
+	public interface IAsyncEvent : IDomainEvent
+	{
 		/// <summary>
 		/// When domain event was processed
 		/// </summary>
@@ -34,29 +45,39 @@ namespace Revenj.DomainPatterns
 		void Apply(TAggregate aggregate);
 	}
 	/// <summary>
-	/// Domain event-sourcing. 
-	/// Processed domain events will be raised and available through the observable Events property.
+	/// Event-sourcing. 
+	/// Processed events will be raised and available through the observable Events property.
 	/// </summary>
-	/// <typeparam name="TEvent">domain event type</typeparam>
-	public interface IDomainEventSource<TEvent>
+	/// <typeparam name="TEvent">event type</typeparam>
+	public interface IEventSource<TEvent> where TEvent : IEvent
 	{
 		/// <summary>
-		/// Processed domain events
+		/// Processed events
 		/// </summary>
 		IObservable<TEvent> Events { get; }
 	}
 	/// <summary>
-	/// Domain event-sourcing.
-	/// Processed domain events will be raised and available for registered event types.
+	/// Event-sourcing.
+	/// Processed events will be raised and available for registered event types.
 	/// </summary>
-	public interface IDomainEventSource
+	public interface IEventSource
 	{
 		/// <summary>
-		/// Register for specific domain events.
+		/// Register for specific events.
 		/// </summary>
-		/// <typeparam name="TEvent">domain event type</typeparam>
-		/// <returns>observable to processed domain events</returns>
-		IObservable<TEvent> Track<TEvent>();
+		/// <typeparam name="TEvent">event type</typeparam>
+		/// <returns>observable to processed events</returns>
+		IObservable<TEvent> Track<TEvent>() where TEvent : IEvent;
+	}
+	public interface IEventStore<TEvent> where TEvent : IEvent
+	{
+		/// <summary>
+		/// Submit events (commands or domain events) to the store.
+		/// Submission will return unique identifier.
+		/// </summary>
+		/// <param name="events">events</param>
+		/// <returns>submission identifiers</returns>
+		string[] Submit(IEnumerable<TEvent> events);
 	}
 	//TODO: IDomainEvent signature?!
 	/// <summary>
@@ -65,21 +86,19 @@ namespace Revenj.DomainPatterns
 	/// Async events can be marked as processed at a later time.
 	/// </summary>
 	/// <typeparam name="TEvent">domain event type</typeparam>
-	public interface IDomainEventStore<TEvent> : IQueryableRepository<TEvent>, IRepository<TEvent>
+	public interface IDomainEventStore<TEvent> : IEventStore<TEvent>, IQueryableRepository<TEvent>, IRepository<TEvent>
 		where TEvent : IDomainEvent
 	{
-		/// <summary>
-		/// Submit domain events to the store.
-		/// After submission event will get an unique identifier.
-		/// </summary>
-		/// <param name="events">domain events</param>
-		/// <returns>event identifiers</returns>
-		string[] Submit(IEnumerable<TEvent> events);
+	}
+	public interface IAsyncDomainEventStore<TEvent> : IDomainEventStore<TEvent>
+		where TEvent : IAsyncEvent
+	{
 		/// <summary>
 		/// Mark unprocessed events as processed.
+		/// Use instance based mark
 		/// </summary>
-		/// <param name="uris">event identifiers</param>
-		void Mark(IEnumerable<string> uris);
+		/// <param name="events">events</param>
+		void Mark(IEnumerable<TEvent> events);
 		/// <summary>
 		/// Get unprocessed events.
 		/// </summary>
@@ -87,21 +106,26 @@ namespace Revenj.DomainPatterns
 		IEnumerable<TEvent> GetQueue();
 	}
 	/// <summary>
+	/// Event store (command or domain event)
+	/// </summary>
+	public interface IEventStore
+	{
+		/// <summary>
+		/// Submit event to the store.
+		/// </summary>
+		/// <typeparam name="TEvent">event type</typeparam>
+		/// <param name="instance">event</param>
+		/// <returns>submission identifier</returns>
+		string Submit<TEvent>(TEvent instance)
+			where TEvent : IEvent;
+	}
+	/// <summary>
 	/// Domain event store.
 	/// Events can only be submitted. Submitted events can't be changed.
 	/// Async events can be marked as processed at a latter time.
 	/// </summary>
-	public interface IDomainEventStore
+	public interface IDomainEventStore : IEventStore
 	{
-		/// <summary>
-		/// Submit domain event to the store.
-		/// After submission event will get an unique identifier
-		/// </summary>
-		/// <typeparam name="TEvent">domain event type</typeparam>
-		/// <param name="domainEvent">domain event</param>
-		/// <returns>event identifier</returns>
-		string Submit<TEvent>(TEvent domainEvent)
-			where TEvent : IDomainEvent;
 		/// <summary>
 		/// Queue domain event for out-of-transaction submission to the store
 		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
@@ -117,37 +141,35 @@ namespace Revenj.DomainPatterns
 	/// When domain event is processed by the server, all domain event handlers are invoked to
 	/// process it. If one domain event handler throws an exception, entire submission is canceled.
 	/// If Event[] is used, collection of events can be processed at once.
+	/// 
+	/// Exists for legacy purpose. Use IHandler instead
 	/// </summary>
 	/// <typeparam name="TEvent">domain event type</typeparam>
-	public interface IDomainEventHandler<TEvent>
+	[Obsolete("Use IHandler instead")]
+	public interface IDomainEventHandler<TEvent> : IHandler<TEvent>
 	{
-		/// <summary>
-		/// Handle domain event submission.
-		/// </summary>
-		/// <param name="input">processing domain event(s)</param>
-		void Handle(TEvent input);
 	}
 
 	/// <summary>
-	/// Utility for domain events
+	/// Utility for events
 	/// </summary>
-	public static class DomainEventHelper
+	public static class EventHelper
 	{
 		/// <summary>
-		/// Submit single domain event to the store.
+		/// Submit single event to the store.
 		/// Redirects call to the collection API.
 		/// </summary>
-		/// <typeparam name="TEvent">domain event type</typeparam>
-		/// <param name="store">domain event store</param>
-		/// <param name="domainEvent">raise domain event</param>
+		/// <typeparam name="TEvent">event type</typeparam>
+		/// <param name="store">event store</param>
+		/// <param name="instance">raise event</param>
 		/// <returns>event identifier</returns>
-		public static string Submit<TEvent>(this IDomainEventStore<TEvent> store, TEvent domainEvent)
-			where TEvent : IDomainEvent
+		public static string Submit<TEvent>(this IEventStore<TEvent> store, TEvent instance)
+			where TEvent : IEvent
 		{
 			Contract.Requires(store != null);
-			Contract.Requires(domainEvent != null);
+			Contract.Requires(instance != null);
 
-			var uris = store.Submit(new[] { domainEvent });
+			var uris = store.Submit(new[] { instance });
 			if (uris != null && uris.Length == 1)
 				return uris[0];
 			return null;
@@ -159,14 +181,14 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="TEvent">domain event type</typeparam>
 		/// <param name="store">domain event store</param>
 		/// <param name="domainEvent">mark domain event as processed</param>
-		public static void Mark<TEvent>(this IDomainEventStore<TEvent> store, TEvent domainEvent)
-			where TEvent : IDomainEvent
+		public static void Mark<TEvent>(this IAsyncDomainEventStore<TEvent> store, TEvent domainEvent)
+			where TEvent : IAsyncEvent
 		{
 			Contract.Requires(store != null);
 			Contract.Requires(domainEvent != null);
 			Contract.Requires(domainEvent.ProcessedAt == null);
 
-			store.Mark(new[] { domainEvent.URI });
+			store.Mark(new[] { domainEvent });
 		}
 	}
 }

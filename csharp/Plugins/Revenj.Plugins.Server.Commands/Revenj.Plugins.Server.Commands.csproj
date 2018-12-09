@@ -67,6 +67,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CommandResult.cs" />
+    <Compile Include="Reporting\EvaluateQuery.cs" />
     <Compile Include="Search\CheckDomainObject.cs" />
     <Compile Include="QueueAggregateEvent.cs" />
     <Compile Include="QueueEvent.cs" />

@@ -134,7 +134,7 @@ Example argument:
 				{
 					throw new ArgumentException("Error deserializing domain event.", ex);
 				}
-				var domainStore = locator.Resolve<IDomainEventStore>();
+				var domainStore = locator.Resolve<IEventStore>();
 				string uri;
 				try
 				{

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.ServiceModel;
+using System.Text;
 using Revenj.Api;
 using Revenj.DomainPatterns;
 using Revenj.Plugins.Server.Commands;
@@ -365,6 +366,43 @@ namespace Revenj.Plugins.Rest.Commands
 			var type = Utility.CheckDomainObject(DomainModel, domainObject);
 			var spec = Utility.ParseExpressionSpecification(Serialization, type, body);
 			return SearchTemplater(file, domainObject, spec);
+		}
+
+		public Stream EvaluateQuery(string domainObject)
+		{
+			var type = Utility.CheckDomainObject(DomainModel, domainObject);
+			if (type.IsFailure) return type.Error;
+			return
+				Converter.PassThrough<EvaluateQuery, EvaluateQuery.Argument<object>>(
+					new EvaluateQuery.Argument<object> { QueryName = type.Result.FullName });
+		}
+
+		private Stream Evaluate<TFormat>(Type query, TFormat data)
+		{
+			return Converter.ConvertStream<EvaluateQuery, EvaluateQuery.Argument<TFormat>>(
+				new EvaluateQuery.Argument<TFormat>
+				{
+					QueryName = query.FullName,
+					Data = data
+				});
+		}
+
+		public Stream EvaluateQuery(string domainObject, Stream body)
+		{
+			var type = Utility.CheckDomainObject(DomainModel, domainObject);
+			if (type.IsFailure) return type.Error;
+			switch (Utility.GetIncomingFormat())
+			{
+				//TODO: maybe it's ok to use stream reader now!?
+				case MessageFormat.Json:
+					return Evaluate(type.Result, new StreamReader(body, Encoding.UTF8).ReadToEnd());
+				case MessageFormat.ProtoBuf:
+					return Evaluate<Stream>(type.Result, body);
+				default:
+					var xml = Utility.ParseXml(body);
+					if (xml.IsFailure) return xml.Error;
+					return Evaluate(type.Result, xml.Result);
+			}
 		}
 	}
 }

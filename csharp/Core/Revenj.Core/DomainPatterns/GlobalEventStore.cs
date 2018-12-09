@@ -23,11 +23,13 @@ namespace Revenj.DomainPatterns
 		{
 			public readonly Type Type;
 			public readonly IDomainEvent Event;
+			public readonly Guid ID;
 
 			public EventInfo(Type type, IDomainEvent domainEvent)
 			{
 				this.Type = type;
 				this.Event = domainEvent;
+				this.ID = Guid.NewGuid();
 			}
 		}
 
@@ -42,9 +44,11 @@ namespace Revenj.DomainPatterns
 			Loop.Start();
 		}
 
-		public void Queue<TEvent>(TEvent domainEvent) where TEvent : IDomainEvent
+		public string Queue<T>(T domainEvent) where T : IDomainEvent
 		{
-			EventQueue.Add(new EventInfo(typeof(TEvent), domainEvent));
+			var info = new EventInfo(typeof(T), domainEvent);
+			EventQueue.Add(info);
+			return info.ID.ToString();
 		}
 
 		private static Func<IServiceProvider, Action<List<IDomainEvent>>> ResolveMethod = ResolveAndSetupStore<IDomainEvent>;
@@ -85,7 +89,7 @@ namespace Revenj.DomainPatterns
 		{
 			var bulk = new List<IDomainEvent>(1000);
 			Type lastType = null;
-			EventInfo info = default(EventInfo);
+			var info = default(EventInfo);
 			while (!IsDisposed)
 			{
 				try

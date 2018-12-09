@@ -151,8 +151,8 @@ Example argument:
 				{
 					throw new ArgumentException(ex.Message, ex);
 				}
-				var domainStore = locator.Resolve<IDomainEventStore>();
-				try { domainStore.Queue(domainEvent); }
+				var eventStore = locator.Resolve<IDomainEventStore>();
+				try { eventStore.Queue(domainEvent); }
 				catch (SecurityException) { throw; }
 				catch (Exception ex)
 				{

@@ -153,7 +153,7 @@ Example argument:
 				{
 					throw new ArgumentException(ex.Message, ex);
 				}
-				var domainStore = locator.Resolve<IDomainEventStore>();
+				var domainStore = locator.Resolve<IEventStore>();
 				try { domainStore.Submit(domainEvent); }
 				catch (SecurityException) { throw; }
 				catch (Exception ex)

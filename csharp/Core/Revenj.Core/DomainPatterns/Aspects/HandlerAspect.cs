@@ -6,7 +6,7 @@ using Revenj.Utility;
 namespace Revenj.DomainPatterns
 {
 	[Export(typeof(ISystemAspect))]
-	public class EventProcessorAspect : ISystemAspect
+	public class HandlerAspect : ISystemAspect
 	{
 		public void Initialize(IObjectFactory factory)
 		{
@@ -17,7 +17,7 @@ namespace Revenj.DomainPatterns
 				var interfaces =
 					(from i in type.GetInterfaces()
 					 where i.IsGenericType
-						 && i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)
+						&& (i.GetGenericTypeDefinition() == typeof(IHandler<>) || i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>))
 					 select i).ToList();
 				if (interfaces.Count > 0)
 				{

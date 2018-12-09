@@ -5,7 +5,7 @@ using System.Reactive.Subjects;
 
 namespace Revenj.DomainPatterns
 {
-	internal class SingleDomainEventSource<TEvent> : IDomainEventSource<TEvent>, IDisposable
+	internal class SingleDomainEventSource<TEvent> : IEventSource<TEvent>, IDisposable
 		where TEvent : IDomainEvent
 	{
 		private readonly IDisposable Subscription;

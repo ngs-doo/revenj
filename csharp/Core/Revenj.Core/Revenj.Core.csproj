@@ -420,7 +420,7 @@
     <Compile Include="DatabasePersistence\Relinq\Transformations\SubQueryFromClauseFlattener.cs" />
     <Compile Include="DatabasePersistence\Relinq\UniqueIdentifierGenerator.cs" />
     <Compile Include="DatabasePersistence\Relinq\Utilities\ReflectionUtility.cs" />
-    <Compile Include="DomainPatterns\Aspects\EventProcessorAspect.cs" />
+    <Compile Include="DomainPatterns\Aspects\HandlerAspect.cs" />
     <Compile Include="DomainPatterns\Aspects\SystemStartupAspect.cs" />
     <Compile Include="DomainPatterns\Cache\EagerCache.cs" />
     <Compile Include="DomainPatterns\Cache\LazyCache.cs" />
@@ -429,8 +429,8 @@
     <Compile Include="DomainPatterns\ChangeNotifications.cs" />
     <Compile Include="DomainPatterns\DataContext.cs" />
     <Compile Include="DomainPatterns\DocumentReport.cs" />
-    <Compile Include="DomainPatterns\DomainEventSource.cs" />
-    <Compile Include="DomainPatterns\DomainEventStore.cs" />
+    <Compile Include="DomainPatterns\EventSource.cs" />
+    <Compile Include="DomainPatterns\EventStore.cs" />
     <Compile Include="DomainPatterns\DomainModel.cs" />
     <Compile Include="DomainPatterns\DomainTypeResolver.cs" />
     <Compile Include="DomainPatterns\GlobalEventStore.cs" />

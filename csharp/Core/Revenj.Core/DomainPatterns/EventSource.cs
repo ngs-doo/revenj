@@ -4,27 +4,27 @@ using System.Diagnostics.Contracts;
 
 namespace Revenj.DomainPatterns
 {
-	internal class DomainEventSource : IDomainEventSource
+	internal class EventSource : IEventSource
 	{
 		private readonly IServiceProvider Locator;
 		private readonly ConcurrentDictionary<Type, object> EventSources = new ConcurrentDictionary<Type, object>(1, 17);
 
-		public DomainEventSource(IServiceProvider locator)
+		public EventSource(IServiceProvider locator)
 		{
 			Contract.Requires(locator != null);
 
 			this.Locator = locator;
 		}
 
-		public IObservable<TEvent> Track<TEvent>()
+		public IObservable<TEvent> Track<TEvent>() where TEvent : IEvent
 		{
 			object observable;
 			if (!EventSources.TryGetValue(typeof(TEvent), out observable))
 			{
-				IDomainEventSource<TEvent> domainEventSource;
+				IEventSource<TEvent> domainEventSource;
 				try
 				{
-					domainEventSource = Locator.Resolve<IDomainEventSource<TEvent>>();
+					domainEventSource = Locator.Resolve<IEventSource<TEvent>>();
 				}
 				catch (Exception ex)
 				{

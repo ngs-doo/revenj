@@ -66,10 +66,11 @@
     <Compile Include="Database\IDatabaseQuery.cs" />
     <Compile Include="Database\IDatabaseQueryManager.cs" />
     <Compile Include="DomainPatterns\Cache.cs" />
+    <Compile Include="DomainPatterns\Handler.cs" />
     <Compile Include="DomainPatterns\DataContext.cs" />
     <Compile Include="DomainPatterns\Notification.cs" />
     <Compile Include="DomainPatterns\Reporting.cs" />
-    <Compile Include="DomainPatterns\DomainEvent.cs" />
+    <Compile Include="DomainPatterns\Events.cs" />
     <Compile Include="DomainPatterns\DomainModel.cs" />
     <Compile Include="DomainPatterns\History.cs" />
     <Compile Include="DomainPatterns\ServiceLocator.cs" />

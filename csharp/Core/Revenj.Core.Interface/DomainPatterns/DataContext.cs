@@ -83,12 +83,12 @@ namespace Revenj.DomainPatterns
 		/// <param name="aggregates">remove provided aggregate roots</param>
 		void Delete<T>(IEnumerable<T> aggregates) where T : IAggregateRoot;
 		/// <summary>
-		/// Raise domain events (within current transaction)
+		/// Raise events (within current transaction)
 		/// If currently inside transaction and transaction is rolled back, event will not be saved
 		/// </summary>
 		/// <typeparam name="T">event type</typeparam>
-		/// <param name="events">domain events</param>
-		void Submit<T>(IEnumerable<T> events) where T : IDomainEvent;
+		/// <param name="events">events</param>
+		void Submit<T>(IEnumerable<T> events) where T : IEvent;
 		/// <summary>
 		/// Queue domain event for out-of-transaction submission to the store
 		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
@@ -315,16 +315,16 @@ namespace Revenj.DomainPatterns
 			return context.InvalidItems<TValidation, TResult>(null);
 		}
 		/// <summary>
-		/// Submit single Domain Event
+		/// Submit single event (domain event or command)
 		/// If currently inside transaction and transaction is rolled back, event will not be saved
 		/// </summary>
 		/// <typeparam name="TEvent">domain event type</typeparam>
 		/// <param name="context">data context</param>
-		/// <param name="domainEvent">domain event</param>
-		public static void Submit<TEvent>(this IDataContext context, TEvent domainEvent)
-			where TEvent : IDomainEvent
+		/// <param name="event">domain event or command</param>
+		public static void Submit<TEvent>(this IDataContext context, TEvent @event)
+			where TEvent : IEvent
 		{
-			context.Submit(new[] { domainEvent });
+			context.Submit(new[] { @event });
 		}
 		/// <summary>
 		/// Queue domain event for out-of-transaction submission to the store

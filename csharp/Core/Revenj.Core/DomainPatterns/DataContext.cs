@@ -134,19 +134,19 @@ namespace Revenj.DomainPatterns
 			repository.Persist(null, null, aggregates);
 		}
 
-		private IDomainEventStore<T> GetStore<T>() where T : IDomainEvent
+		private IEventStore<T> GetStore<T>() where T : IEvent
 		{
 			object store;
 			if (EventStores == null) EventStores = new ConcurrentDictionary<Type, object>(1, 7);
 			if (!EventStores.TryGetValue(typeof(T), out store))
 			{
-				store = Locator.Resolve<IDomainEventStore<T>>();
+				store = Locator.Resolve<IEventStore<T>>();
 				EventStores.TryAdd(typeof(T), store);
 			}
-			return (IDomainEventStore<T>)store;
+			return (IEventStore<T>)store;
 		}
 
-		public void Submit<T>(IEnumerable<T> events) where T : IDomainEvent
+		public void Submit<T>(IEnumerable<T> events) where T : IEvent
 		{
 			var store = GetStore<T>();
 			store.Submit(events);

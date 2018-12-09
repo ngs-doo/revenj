@@ -33,6 +33,11 @@ namespace Revenj.DomainPatterns
 		/// <returns>why is object invalid</returns>
 		string GetErrorDescription(TEntity item);
 	}
+	public interface IValidationErrors
+	{
+		void LogError(string path, string message);
+		Dictionary<string, List<string>> GetValidationErrors();
+	}
 
 	/// <summary>
 	/// Validation result signature.

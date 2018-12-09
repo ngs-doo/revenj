@@ -97,5 +97,15 @@ namespace Revenj.Plugins.Rest.Commands
 		[WebInvoke(Method = "PUT", UriTemplate = "/templater-expression/{file}/{domainObject}")]
 		[Description("Run Templater with specified file for domain object using provided expression")]
 		Stream SearchTemplaterWithExpression(string file, string domainObject, Stream body);
+
+		[OperationContract]
+		[WebGet(UriTemplate = "/query/{query}")]
+		[Description("Evaluate query")]
+		Stream EvaluateQuery(string query);
+
+		[OperationContract]
+		[WebInvoke(Method = "PUT", UriTemplate = "/query/{query}")]
+		[Description("Evaluate query")]
+		Stream EvaluateQuery(string query, Stream body);
 	}
 }
