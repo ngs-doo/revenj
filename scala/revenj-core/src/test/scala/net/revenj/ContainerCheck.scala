@@ -229,6 +229,14 @@ class ContainerCheck extends Specification with ScalaCheck {
       val resolved = container.resolve[CircularTop]
       top === resolved
     }
+    "register as" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      container.registerAs[Service, ServiceImpl](InstanceScope.Context)
+      val result1 = container.tryResolve[Service]
+      result1.isSuccess === true
+      val result2 = container.tryResolve[Service]
+      result2 === result1
+    }
   }
 }
 
@@ -299,3 +307,6 @@ class UsesContainer(val container: Container)
 class ErrorInCollection {
   throw new RuntimeException("naah")
 }
+
+trait Service
+class ServiceImpl extends Service

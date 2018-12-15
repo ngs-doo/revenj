@@ -28,7 +28,8 @@ private [revenj] class PostgresDatabaseNotification(
   domainModel: Option[DomainModel],
   properties: Properties,
   systemState: SystemState,
-  locator: ServiceLocator) extends EagerNotification with Closeable {
+  locator: ServiceLocator
+) extends EagerNotification with Closeable {
 
   private val subject = PublishSubject[DataChangeNotification.NotifyInfo]()
   private val notificationStream = subject.map(identity)
