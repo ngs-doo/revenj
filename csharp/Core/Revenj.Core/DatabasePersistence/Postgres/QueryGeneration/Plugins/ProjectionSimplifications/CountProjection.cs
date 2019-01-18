@@ -16,8 +16,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ProjectionSimplifications
 			var sq = expression as SubQueryExpression;
 			return sq != null
 				&& sq.QueryModel.ResultOperators.Count == 1
-				&& (sq.QueryModel.ResultOperators[0] is CountResultOperator
-				|| sq.QueryModel.ResultOperators[0] is LongCountResultOperator)
+				&& (sq.QueryModel.ResultOperators[0] is CountResultOperator || sq.QueryModel.ResultOperators[0] is LongCountResultOperator)
 				&& CheckShortCircuitCount(sq, queryParts, visitExpression);
 		}
 

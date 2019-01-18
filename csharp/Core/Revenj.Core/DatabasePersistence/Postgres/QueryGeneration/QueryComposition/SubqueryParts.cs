@@ -110,7 +110,8 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition
 			sb.Append(GetWherePart());
 			sb.Append(GetOrderPart());
 
-			ProcessResultOperators(sb);
+			if (canUseOperators)
+				ProcessResultOperators(sb);
 
 			return sb.ToString();
 		}
