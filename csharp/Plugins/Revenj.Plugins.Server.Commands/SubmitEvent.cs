@@ -73,9 +73,9 @@ namespace Revenj.Plugins.Server.Commands
 						@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 			}
-			if (!typeof(IDomainEvent).IsAssignableFrom(eventType))
+			if (!typeof(IEvent).IsAssignableFrom(eventType))
 			{
-				return CommandResult<TOutput>.Fail(@"Specified type ({0}) is not a domain event. 
+				return CommandResult<TOutput>.Fail(@"Specified type ({0}) is not an event. 
 Please check your arguments.".With(argument.Name), null);
 			}
 			if (!Permissions.CanAccess(eventType.FullName, principal))
@@ -116,7 +116,7 @@ Example argument:
 		}
 
 		private class SubmitEventCommand<TEvent> : ISubmitCommand
-			where TEvent : IDomainEvent
+			where TEvent : IEvent
 		{
 			public TOutput Submit<TInput, TOutput>(
 				ISerialization<TInput> input,

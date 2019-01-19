@@ -66,7 +66,6 @@
     <Compile Include="Database\IDatabaseQuery.cs" />
     <Compile Include="Database\IDatabaseQueryManager.cs" />
     <Compile Include="DomainPatterns\Cache.cs" />
-    <Compile Include="DomainPatterns\Handler.cs" />
     <Compile Include="DomainPatterns\DataContext.cs" />
     <Compile Include="DomainPatterns\Notification.cs" />
     <Compile Include="DomainPatterns\Reporting.cs" />

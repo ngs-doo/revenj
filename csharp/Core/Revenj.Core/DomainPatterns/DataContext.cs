@@ -146,10 +146,10 @@ namespace Revenj.DomainPatterns
 			return (IEventStore<T>)store;
 		}
 
-		public void Submit<T>(IEnumerable<T> events) where T : IEvent
+		public string[] Submit<T>(IEnumerable<T> events) where T : IEvent
 		{
 			var store = GetStore<T>();
-			store.Submit(events);
+			return store.Submit(events);
 		}
 
 		public void Queue<T>(IEnumerable<T> events) where T : IDomainEvent

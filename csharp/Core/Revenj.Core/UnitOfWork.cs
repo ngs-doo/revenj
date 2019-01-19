@@ -129,11 +129,11 @@ namespace Revenj
 			Context.Delete(aggregates);
 		}
 
-		public void Submit<T>(IEnumerable<T> events) where T : IEvent
+		public string[] Submit<T>(IEnumerable<T> events) where T : IEvent
 		{
 			if (Finished)
 				throw new InvalidOperationException("Transaction was already closed");
-			Context.Submit(events);
+			return Context.Submit(events);
 		}
 
 		public T Populate<T>(IReport<T> report)

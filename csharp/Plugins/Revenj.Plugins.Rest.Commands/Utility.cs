@@ -71,6 +71,14 @@ namespace Revenj.Plugins.Rest.Commands
 			return type;
 		}
 
+		public static Either<Type> CheckEvent(IDomainModel domainModel, string name)
+		{
+			var type = CheckDomainObject(domainModel, name);
+			if (type.IsSuccess && !typeof(IEvent).IsAssignableFrom(type.Result))
+				return name + " is not an event (domain event or a command)";
+			return type;
+		}
+
 		public static Either<XElement> ParseXml(Stream data)
 		{
 			if (data == null)

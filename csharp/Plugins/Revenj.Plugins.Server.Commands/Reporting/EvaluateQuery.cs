@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
+using System.Security;
 using System.Security.Principal;
+using Revenj.Common;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
 using Revenj.Processing;
@@ -68,16 +71,26 @@ namespace Revenj.Plugins.Server.Commands
 						@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 
-				var ri1 = queryType.GetInterfaces().FirstOrDefault(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IQuery<,>));
-				var ri2 = queryType.GetInterfaces().FirstOrDefault(it => it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IQuery<>));
-				if (ri1 == null && ri2 == null)
-					return CommandResult<TOutput>.Fail(@"Specified type ({0}) is not an query. 
-Please check your arguments.".With(argument.QueryName), null);
-
-				var commandType = ri1 != null
-					? typeof(EvaluateCommand<,>).MakeGenericType(queryType, ri1.GetGenericArguments()[0])
-					: typeof(EvaluateCommand<,,>).MakeGenericType(queryType, ri2.GetGenericArguments()[0], ri2.GetGenericArguments()[1]);
-				command = Activator.CreateInstance(commandType) as IEvaluateCommand;
+				var returnMethods =
+					(from m in queryType.GetMethods(BindingFlags.Static | BindingFlags.Public)
+					 where m.Name == "Return"
+					 let p = m.GetParameters()
+					 where p != null && p.Length == 1 && typeof(ICommand).IsAssignableFrom(p[0].ParameterType)
+					 select new { command = p[0].ParameterType, output = m.ReturnType, method = m }).ToList();
+				if (returnMethods.Count != 1)
+					return CommandResult<TOutput>.Fail("Invalid query type {0}.".With(argument.QueryName), null);
+				var acceptMethods =
+					(from m in queryType.GetMethods(BindingFlags.Static | BindingFlags.Public)
+					 where m.Name == "Accept"
+					 let p = m.GetParameters()
+					 where p != null && p.Length < 2 && typeof(ICommand).IsAssignableFrom(m.ReturnType)
+					 select new { method = m, accept = p.Length == 1 ? p[0].ParameterType : null }).ToList();
+				if (acceptMethods.Count != 1)
+					return CommandResult<TOutput>.Fail("Invalid query type {0}.".With(argument.QueryName), null);
+				var commandType = acceptMethods[0].accept == null
+					? typeof(EvaluateCommand<,>).MakeGenericType(returnMethods[0].command, returnMethods[0].output)
+					: typeof(EvaluateCommand<,,>).MakeGenericType(returnMethods[0].command, acceptMethods[0].accept, returnMethods[0].output);
+				command = Activator.CreateInstance(commandType, new object[] { acceptMethods[0].method, returnMethods[0].method }) as IEvaluateCommand;
 				var newCache = new Dictionary<string, IEvaluateCommand>(Cache);
 				newCache[argument.QueryName] = command;
 				Cache = newCache;
@@ -109,34 +122,63 @@ Example argument:
 				TInput data);
 		}
 
-		private class EvaluateCommand<TSignature, TResult> : IEvaluateCommand
-			where TSignature : IQuery<TResult>, new()
+		private class EvaluateCommand<TCommand, TResult> : IEvaluateCommand
+			where TCommand : ICommand
 		{
-			public TOutput Evaluate<TInput, TOutput>(
+			protected readonly MethodInfo InMethod;
+			protected readonly MethodInfo OutMethod;
+
+			public EvaluateCommand(MethodInfo inMethod, MethodInfo outMethod)
+			{
+				this.InMethod = inMethod;
+				this.OutMethod = outMethod;
+				//TODO: lambda instead of reflection
+			}
+
+			public virtual TOutput Evaluate<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
 				TInput data)
 			{
-				IHandler<TSignature> queryEvaluator;
+				var command = (TCommand)InMethod.Invoke(null, new object[0]);
+				return ExecuteCommand<TOutput>(output, locator, command);
+			}
+
+			protected TOutput ExecuteCommand<TOutput>(ISerialization<TOutput> output, IServiceProvider locator, TCommand command)
+			{
+				var domainStore = locator.Resolve<IEventStore>();
 				try
 				{
-					queryEvaluator = locator.Resolve<IHandler<TSignature>>();
+					domainStore.Submit(command);
+				}
+				catch (SecurityException) { throw; }
+				catch (Exception ex)
+				{
+					throw new ArgumentException(
+						ex.Message,
+						new FrameworkException("Error while submitting query: {0}".With(ex.Message), ex));
+				}
+				try
+				{
+					return output.Serialize(OutMethod.Invoke(null, new object[] { command }));
 				}
 				catch (Exception ex)
 				{
-					throw new ArgumentException("Can't resolve query handler for {0}".With(typeof(TSignature).FullName), ex);
+					throw new ArgumentException(
+						ex.Message,
+						new FrameworkException(@"Error serializing result: " + ex.Message, ex));
 				}
-				var signature = new TSignature();
-				queryEvaluator.Handle(signature);
-				return output.Serialize(signature.Out);
 			}
 		}
 
-		private class EvaluateCommand<TSignature, TArgument, TResult> : IEvaluateCommand
-			where TSignature : IQuery<TArgument, TResult>, new()
+		private class EvaluateCommand<TCommand, TArgument, TResult> : EvaluateCommand<TCommand, TResult>
+			where TCommand : ICommand
 		{
-			public TOutput Evaluate<TInput, TOutput>(
+			public EvaluateCommand(MethodInfo inMethod, MethodInfo outMethod)
+				: base(inMethod, outMethod) { }
+
+			public override TOutput Evaluate<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
@@ -151,19 +193,8 @@ Example argument:
 				{
 					throw new ArgumentException("Error deserializing input arguments", ex);
 				}
-				IHandler<TSignature> queryEvaluator;
-				try
-				{
-					queryEvaluator = locator.Resolve<IHandler<TSignature>>();
-				}
-				catch (Exception ex)
-				{
-					throw new ArgumentException("Can't resolve query handler for {0}".With(typeof(TSignature).FullName), ex);
-				}
-				var signature = new TSignature();
-				signature.In = argument;
-				queryEvaluator.Handle(signature);
-				return output.Serialize(signature.Out);
+				var command = (TCommand)InMethod.Invoke(null, new object[] { argument });
+				return ExecuteCommand<TOutput>(output, locator, command);
 			}
 		}
 	}

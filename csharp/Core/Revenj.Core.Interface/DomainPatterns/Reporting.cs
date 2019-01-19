@@ -20,13 +20,10 @@ namespace Revenj.DomainPatterns
 		/// <returns>populated result</returns>
 		TData Populate(IServiceProvider locator);
 	}
-	public interface IQuery<TOut>
+	public interface IReportAspect<TReport, TData> where TReport : IReport<TData>
 	{
-		TOut Out { get; set; }
-	}
-	public interface IQuery<TIn, TOut> : IQuery<TOut>
-	{
-		TIn In { get; set; }
+		TReport Before(TReport report);
+		TData After(TData result);
 	}
 
 	/// <summary>

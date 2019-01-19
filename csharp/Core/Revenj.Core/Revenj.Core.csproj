@@ -427,6 +427,7 @@
     <Compile Include="DomainPatterns\Cache\LookupCache.cs" />
     <Compile Include="DomainPatterns\Cache\WeakCache.cs" />
     <Compile Include="DomainPatterns\ChangeNotifications.cs" />
+    <Compile Include="DomainPatterns\Commands.cs" />
     <Compile Include="DomainPatterns\DataContext.cs" />
     <Compile Include="DomainPatterns\DocumentReport.cs" />
     <Compile Include="DomainPatterns\EventSource.cs" />

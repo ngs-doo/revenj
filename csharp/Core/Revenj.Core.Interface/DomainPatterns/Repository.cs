@@ -92,6 +92,11 @@ namespace Revenj.DomainPatterns
 		/// <returns>created identifiers</returns>
 		string[] Persist(IEnumerable<TRoot> insert, IEnumerable<KeyValuePair<TRoot, TRoot>> update, IEnumerable<TRoot> delete);
 	}
+	public interface IRepositoryAspect<TRoot> where TRoot : IAggregateRoot
+	{
+		void Before(IEnumerable<TRoot> insert, IEnumerable<KeyValuePair<TRoot, TRoot>> update, IEnumerable<TRoot> delete);
+		void After(IEnumerable<TRoot> insert, IEnumerable<KeyValuePair<TRoot, TRoot>> update, IEnumerable<TRoot> delete);
+	}
 	/// <summary>
 	/// Provides bulk access to DB operations (if supported by implementation)
 	/// </summary>

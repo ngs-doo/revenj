@@ -105,6 +105,19 @@ namespace Revenj.DomainPatterns
 		/// <returns>unprocessed events</returns>
 		IEnumerable<TEvent> GetQueue();
 	}
+
+	public interface ICommandLog<out T> : IIdentifiable, INestedValue<T>
+		where T : ICommand
+	{
+		DateTime At { get; }
+		T Value { get; }
+	}
+
+	public interface ICommandStore<TCommand> : IEventStore<TCommand>, IRepository<ICommandLog<TCommand>>//, IQueryableRepository<ICommandLog<TCommand>> TODO later
+		where TCommand : ICommand
+	{
+	}
+
 	/// <summary>
 	/// Event store (command or domain event)
 	/// </summary>
@@ -141,13 +154,17 @@ namespace Revenj.DomainPatterns
 	/// When domain event is processed by the server, all domain event handlers are invoked to
 	/// process it. If one domain event handler throws an exception, entire submission is canceled.
 	/// If Event[] is used, collection of events can be processed at once.
-	/// 
-	/// Exists for legacy purpose. Use IHandler instead
 	/// </summary>
 	/// <typeparam name="TEvent">domain event type</typeparam>
-	[Obsolete("Use IHandler instead")]
-	public interface IDomainEventHandler<TEvent> : IHandler<TEvent>
+	public interface IDomainEventHandler<TEvent>
 	{
+		void Handle(TEvent instance);
+	}
+
+	public interface IEventHandler<TEvent> where TEvent : IEvent
+	{
+		void Before(IEnumerable<TEvent> events);
+		void After(IEnumerable<TEvent> events);
 	}
 
 	/// <summary>

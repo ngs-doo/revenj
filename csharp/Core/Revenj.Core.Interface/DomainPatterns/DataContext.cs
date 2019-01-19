@@ -88,7 +88,7 @@ namespace Revenj.DomainPatterns
 		/// </summary>
 		/// <typeparam name="T">event type</typeparam>
 		/// <param name="events">events</param>
-		void Submit<T>(IEnumerable<T> events) where T : IEvent;
+		string[] Submit<T>(IEnumerable<T> events) where T : IEvent;
 		/// <summary>
 		/// Queue domain event for out-of-transaction submission to the store
 		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
@@ -321,10 +321,10 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="TEvent">domain event type</typeparam>
 		/// <param name="context">data context</param>
 		/// <param name="event">domain event or command</param>
-		public static void Submit<TEvent>(this IDataContext context, TEvent @event)
+		public static string Submit<TEvent>(this IDataContext context, TEvent @event)
 			where TEvent : IEvent
 		{
-			context.Submit(new[] { @event });
+			return context.Submit(new[] { @event })[0];
 		}
 		/// <summary>
 		/// Queue domain event for out-of-transaction submission to the store

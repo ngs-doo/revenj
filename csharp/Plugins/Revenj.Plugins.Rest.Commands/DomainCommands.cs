@@ -358,7 +358,7 @@ namespace Revenj.Plugins.Rest.Commands
 
 		public Stream SubmitEvent(string domainEvent, string result, Stream body)
 		{
-			var domainType = Utility.CheckDomainEvent(DomainModel, domainEvent);
+			var domainType = Utility.CheckEvent(DomainModel, domainEvent);
 			var validatedObject = Utility.ParseObject(Serialization, domainType, body, true, Locator);
 			if (validatedObject.IsFailure) return validatedObject.Error;
 			return
@@ -373,7 +373,7 @@ namespace Revenj.Plugins.Rest.Commands
 
 		public Stream QueueEvent(string domainEvent, Stream body)
 		{
-			var domainType = Utility.CheckDomainEvent(DomainModel, domainEvent);
+			var domainType = Utility.CheckEvent(DomainModel, domainEvent);
 			var validatedObject = Utility.ParseObject(Serialization, domainType, body, true, Locator);
 			if (validatedObject.IsFailure) return validatedObject.Error;
 			return
