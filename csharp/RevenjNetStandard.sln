@@ -7,6 +7,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Core.NetStandard", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Core.Interface.NetStandard", "Core\Revenj.Core.Interface\Revenj.Core.Interface.NetStandard.csproj", "{DE956CBD-DC6F-436D-A84F-307836E83F66}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{FEA3A5CE-E3DF-4373-BB7B-16F8B8AB9E9A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{514A8694-B351-4298-BD95-C174B675C5C3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Processing.Interface.NetStandard", "Server\Revenj.Processing.Interface\Revenj.Processing.Interface.NetStandard.csproj", "{8E1BF0A5-E3D1-4272-BFF6-6F7690C7C2CE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Processing.NetStandard", "Server\Revenj.Processing\Revenj.Processing.NetStandard.csproj", "{609C2F2A-1B15-47A5-8A9A-1E911746BFDD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{3232D4CC-4F5B-4151-BF51-FACF36A73D62}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Plugins.Server.Commands.NetStandard", "Plugins\Revenj.Plugins.Server.Commands\Revenj.Plugins.Server.Commands.NetStandard.csproj", "{203D6F2E-8828-4998-AD5D-766C42F3FC22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +33,30 @@ Global
 		{DE956CBD-DC6F-436D-A84F-307836E83F66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE956CBD-DC6F-436D-A84F-307836E83F66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE956CBD-DC6F-436D-A84F-307836E83F66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E1BF0A5-E3D1-4272-BFF6-6F7690C7C2CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E1BF0A5-E3D1-4272-BFF6-6F7690C7C2CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E1BF0A5-E3D1-4272-BFF6-6F7690C7C2CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E1BF0A5-E3D1-4272-BFF6-6F7690C7C2CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{609C2F2A-1B15-47A5-8A9A-1E911746BFDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{609C2F2A-1B15-47A5-8A9A-1E911746BFDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{609C2F2A-1B15-47A5-8A9A-1E911746BFDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{609C2F2A-1B15-47A5-8A9A-1E911746BFDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{203D6F2E-8828-4998-AD5D-766C42F3FC22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{203D6F2E-8828-4998-AD5D-766C42F3FC22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{203D6F2E-8828-4998-AD5D-766C42F3FC22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{203D6F2E-8828-4998-AD5D-766C42F3FC22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3E472630-22AF-47A0-9E44-3449EB990B43} = {FEA3A5CE-E3DF-4373-BB7B-16F8B8AB9E9A}
+		{DE956CBD-DC6F-436D-A84F-307836E83F66} = {FEA3A5CE-E3DF-4373-BB7B-16F8B8AB9E9A}
+		{8E1BF0A5-E3D1-4272-BFF6-6F7690C7C2CE} = {514A8694-B351-4298-BD95-C174B675C5C3}
+		{609C2F2A-1B15-47A5-8A9A-1E911746BFDD} = {514A8694-B351-4298-BD95-C174B675C5C3}
+		{203D6F2E-8828-4998-AD5D-766C42F3FC22} = {3232D4CC-4F5B-4151-BF51-FACF36A73D62}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2A2C8BE8-F8DE-45BB-B436-C6FFBCD1DEB9}
 	EndGlobalSection
 EndGlobal

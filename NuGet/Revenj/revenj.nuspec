@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Revenj</id>
+    <title>Revenj core libraries</title>
+    <version>1.5.0</version>
+    <authors>NGS</authors>
+    <owners>NGS</owners>
+    <licenseUrl>https://github.com/ngs-doo/revenj/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/ngs-doo/revenj</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>.NET and Mono framework with support for Postgres and Oracle</description>
+    <releaseNotes>
+1.5.0 - Support for .NET standard 2.0. Minor LINQ fixes
+1.4.2 - Performance improvements
+1.4.0 - Initial release to Nuget
+	</releaseNotes>
+    <copyright>Copyright 2019 N.G.S.</copyright>
+    <tags>LINQ Postgres Oracle DDD DSL framework NOSQL</tags>
+    <summary>Revenj is a DDD-like framework for .NET and Mono with support for Postgres and Oracle databases. 
+It leverages ORDBMS features of the database, to provide typesafe NoSQL documents inside relational database.
+This package contains common components shared across Revenj versions.</summary>
+    <dependencies>
+      <group targetFramework=".NETFramework4.0">
+        <dependency id="Castle.Core" version="4.3.1" />
+        <dependency id="Templater" version="2.9.6" />
+        <dependency id="Newtonsoft.Json" version="11.0.2" />
+        <dependency id="System.Reactive.Linq" version="3.1.1" />
+        <dependency id="protobuf-net" version="2.0.0.668" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Castle.Core" version="4.3.1" />
+        <dependency id="Templater" version="2.9.6" />
+        <dependency id="Newtonsoft.Json" version="11.0.2" />
+        <dependency id="protobuf-net" version="2.4.0" />
+        <dependency id="System.Reactive.Linq" version="3.1.1" />
+        <dependency id="Microsoft.CSharp" version="4.5.0" />
+        <dependency id="System.ComponentModel.Composition" version="4.5.0" />
+        <dependency id="System.Drawing.Common" version="4.5.0" />
+        <dependency id="System.Security.Principal.Windows" version="4.5.1" />
+        <dependency id="System.Configuration.ConfigurationManager" version="4.5.0" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

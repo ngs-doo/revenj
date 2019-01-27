@@ -1,5 +1,4 @@
-﻿#if !NETSTANDARD2_0
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -19,10 +18,16 @@ namespace Revenj.Serialization
 		private readonly DataContractResolver GenericResolver;
 		private readonly ITypeResolver TypeResolver;
 		private readonly GenericDeserializationBinder GenericBinder;
+#if NETSTANDARD2_0
+		private readonly JsonSerialization Json;
+#endif
 
 		public XmlSerialization(
 			ITypeResolver typeResolver,
 			GenericDataContractResolver genericResolver,
+#if NETSTANDARD2_0
+			JsonSerialization json,
+#endif
 			GenericDeserializationBinder genericBinder)
 		{
 			Contract.Requires(typeResolver != null);
@@ -31,6 +36,9 @@ namespace Revenj.Serialization
 
 			this.TypeResolver = typeResolver;
 			this.GenericResolver = genericResolver;
+#if NETSTANDARD2_0
+			this.Json = json;
+#endif
 			this.GenericBinder = genericBinder;
 		}
 
@@ -103,6 +111,13 @@ Type detected for Xml is {1}. Can't deserialize Xml to instance of {1}.".With(de
 				//implement recursive descent and provide context to all objects
 				using (var cms = ChunkedMemoryStream.Create())
 				{
+#if NETSTANDARD2_0
+					try
+					{
+						Json.Serialize(result, cms, true);
+						cms.Position = 0;
+						return Json.Deserialize(cms, type, context);
+#else
 					var ns = new NetDataContractSerializer(context);
 					try
 					{
@@ -110,6 +125,7 @@ Type detected for Xml is {1}. Can't deserialize Xml to instance of {1}.".With(de
 						cms.Position = 0;
 						ns.Binder = GenericBinder;
 						return ns.Deserialize(cms);
+#endif
 					}
 					catch (Exception ex)
 					{
@@ -118,7 +134,7 @@ Type detected for Xml is {1}. Can't deserialize Xml to instance of {1}.".With(de
 						throw;
 					}
 				}
-			}
+					}
 		}
 
 		public void Serialize(object value, Stream s)
@@ -136,13 +152,18 @@ Type detected for Xml is {1}. Can't deserialize Xml to instance of {1}.".With(de
 			//TODO fix double serialization because of context
 			using (var cms = ChunkedMemoryStream.Create())
 			{
+#if NETSTANDARD2_0
+				Json.Serialize(result, cms, true);
+				cms.Position = 0;
+				return Json.Deserialize(cms, target, context);
+#else
 				var ns = new NetDataContractSerializer(context);
 				ns.Serialize(cms, result);
 				ns.Binder = GenericBinder;
 				cms.Position = 0;
 				return ns.Deserialize(cms);
+#endif
 			}
 		}
 	}
 }
-#endif

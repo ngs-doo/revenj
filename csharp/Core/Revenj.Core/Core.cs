@@ -108,15 +108,11 @@ namespace DSL
 		public static void ConfigureSerialization(this IObjectFactoryBuilder builder)
 		{
 			builder.RegisterType<GenericDataContractResolver>(InstanceScope.Singleton);
-#if !NETSTANDARD2_0
 			builder.RegisterType(typeof(XmlSerialization), InstanceScope.Singleton, false, typeof(ISerialization<XElement>));
-#endif
 			builder.RegisterType<GenericDeserializationBinder, GenericDeserializationBinder, SerializationBinder>(InstanceScope.Singleton);
 			builder.RegisterType(typeof(BinarySerialization), InstanceScope.Singleton, false, typeof(ISerialization<byte[]>));
 			builder.RegisterType(typeof(JsonSerialization), InstanceScope.Singleton, false, typeof(ISerialization<string>), typeof(ISerialization<TextReader>));
-#if !NETSTANDARD2_0
 			builder.RegisterType(typeof(ProtobufSerialization), InstanceScope.Singleton, false, typeof(ISerialization<MemoryStream>), typeof(ISerialization<Stream>));
-#endif
 			builder.RegisterType(typeof(PassThroughSerialization), InstanceScope.Singleton, false, typeof(ISerialization<object>));
 			builder.RegisterType<WireSerialization, IWireSerialization>(InstanceScope.Singleton);
 		}

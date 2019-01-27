@@ -13,10 +13,8 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		static ImageConverter()
 		{
-#if !NETSTANDARD2_0
 			foreach (var enc in ImageCodecInfo.GetImageEncoders())
 				Codecs.Add(enc.FormatID);
-#endif
 		}
 
 		private static void SaveImage(Image image, Stream stream)

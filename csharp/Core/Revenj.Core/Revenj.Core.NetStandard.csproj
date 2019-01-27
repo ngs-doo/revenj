@@ -21,12 +21,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Serialization\Protobuf\**" />
-    <EmbeddedResource Remove="Serialization\Protobuf\**" />
-    <None Remove="Serialization\Protobuf\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\..\Revenj.snk" Link="Revenj.snk" />
   </ItemGroup>
 
@@ -34,8 +28,9 @@
     <PackageReference Include="Castle.Core" Version="4.3.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="protobuf-net" Version="2.4.0" />
     <PackageReference Include="System.ComponentModel.Composition" Version="4.5.0" />
-    <PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
     <PackageReference Include="System.Reactive.Core" Version="3.1.1" />
     <PackageReference Include="System.Reactive.Linq" Version="3.1.1" />
     <PackageReference Include="System.Security.Principal.Windows" Version="4.5.1" />

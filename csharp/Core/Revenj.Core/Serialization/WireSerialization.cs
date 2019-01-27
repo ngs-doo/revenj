@@ -7,19 +7,19 @@ namespace Revenj.Serialization
 	internal class WireSerialization : IWireSerialization
 	{
 		private readonly JsonSerialization Json;
-#if !NETSTANDARD2_0
 		private readonly XmlSerialization Xml;
 		private readonly ProtobufSerialization Protobuf;
-#endif
 		private readonly PassThroughSerialization Pass;
 
 		public WireSerialization(GenericDeserializationBinder binder)
 		{
 			Json = new JsonSerialization(binder);
-#if !NETSTANDARD2_0
+#if NETSTANDARD2_0
+			Xml = new XmlSerialization(null, null, Json, binder);
+#else
 			Xml = new XmlSerialization(null, null, binder);
-			Protobuf = new ProtobufSerialization();
 #endif
+			Protobuf = new ProtobufSerialization();
 			Pass = new PassThroughSerialization();
 		}
 
@@ -36,7 +36,6 @@ namespace Revenj.Serialization
 				Json.Serialize(value, destination, true);
 				return "application/json";
 			}
-#if !NETSTANDARD2_0
 			if (accept == "application/x-protobuf")
 			{
 				Protobuf.Serialize(value, destination);
@@ -47,7 +46,6 @@ namespace Revenj.Serialization
 				Xml.Serialize(value, destination);
 				return "application/xml";
 			}
-#endif
 			if (accept.StartsWith("application/json", StringComparison.Ordinal))
 			{
 				Json.Serialize(value, destination, false);
@@ -60,7 +58,6 @@ namespace Revenj.Serialization
 				Json.Serialize(value, destination, false);
 				return "application/json";
 			}
-#if !NETSTANDARD2_0
 			if (accept.Contains("application/xml"))
 			{
 				Xml.Serialize(value, destination);
@@ -71,7 +68,6 @@ namespace Revenj.Serialization
 				Protobuf.Serialize(value, destination);
 				return "application/x-protobuf";
 			}
-#endif
 			Json.Serialize(value, destination, false);
 			return "application/json";
 		}
@@ -85,7 +81,6 @@ namespace Revenj.Serialization
 				return Json.Deserialize(source, target, context);
 			if (contentType == "application/json;minimal")
 				return Json.Deserialize(source, target, context);
-#if !NETSTANDARD2_0
 			if (contentType == "application/x-protobuf")
 				return Protobuf.Deserialize(source, target, context);
 			if (contentType == "application/xml")
@@ -96,17 +91,14 @@ namespace Revenj.Serialization
 				return Xml.Deserialize(source, target, context);
 			if (contentType.Contains("application/x-protobuf"))
 				return Protobuf.Deserialize(source, target, context);
-#endif
 			return Json.Deserialize(source, target, context);
 		}
 
 		public ISerialization<TFormat> GetSerializer<TFormat>()
 		{
 			return Json as ISerialization<TFormat>
-#if !NETSTANDARD2_0
 				?? Xml as ISerialization<TFormat>
 				?? Protobuf as ISerialization<TFormat>
-#endif
 				?? Pass as ISerialization<TFormat>;
 		}
 	}

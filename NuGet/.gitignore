@@ -1,0 +1,5 @@
+*.exe
+*.dll
+*.xml
+*.nupkg
+*.txt

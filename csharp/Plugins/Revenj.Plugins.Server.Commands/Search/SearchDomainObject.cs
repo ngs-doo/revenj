@@ -21,14 +21,14 @@ namespace Revenj.Plugins.Server.Commands
 	public class SearchDomainObject : IReadOnlyServerCommand
 	{
 		private static readonly int? MaxSearchLimit;
-
+#if !NETSTANDARD2_0
 		static SearchDomainObject()
 		{
 			int msl;
 			if (int.TryParse(ConfigurationManager.AppSettings["MaxSearchLimit"], out msl))
 				MaxSearchLimit = msl;
 		}
-
+#endif
 		private readonly IDomainModel DomainModel;
 		private readonly IPermissionManager Permissions;
 

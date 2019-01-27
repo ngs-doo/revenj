@@ -49,12 +49,6 @@ namespace Revenj.Plugins.Rest.Commands
 			ThreadContext.Response.ContentType = "text/plain; charset=\"utf-8\"";
 			return new Either<T>(default(T), new MemoryStream(Encoding.UTF8.GetBytes(message)));
 		}
-		public static Either<T> Fail(string message, HttpStatusCode code)
-		{
-			ThreadContext.Response.StatusCode = code;
-			ThreadContext.Response.ContentType = "text/plain; charset=\"utf-8\"";
-			return new Either<T>(default(T), new MemoryStream(Encoding.UTF8.GetBytes(message)));
-		}
 	}
 
 	internal static class Either

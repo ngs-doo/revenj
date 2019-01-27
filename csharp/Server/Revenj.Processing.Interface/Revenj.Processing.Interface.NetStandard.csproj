@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>Revenj.Processing.Interface</AssemblyName>
+    <RootNamespace>Revenj.Processing.Interface</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Revenj.Core.Interface\Revenj.Core.Interface.NetStandard.csproj" />
+    <None Include="..\..\Revenj.snk" Link="Revenj.snk" />
+  </ItemGroup>
+
+</Project>
