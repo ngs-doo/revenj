@@ -175,10 +175,15 @@ namespace Revenj.DatabasePersistence.Oracle.Converters
 
 		public DbParameter ToParameter(object value)
 		{
-			//TODO: DateTime.MinValue results in ORA-1841: (full) year must be between -4713 and +9999, and not be 0
-			//TODO: check latest drivers
-			if (value is DateTime?)
-				return new OracleParameter { OracleDbType = OracleDbType.TimeStampTZ, Value = ToOracleTimestamp((DateTime?)value) };
+			if (value == null)
+				return new OracleParameter { OracleDbType = OracleDbType.TimeStampTZ, Value = OracleTimeStampTZ.Null };
+			if (value is DateTime)
+			{
+				var dt = (DateTime)value;
+				if (dt.Date == dt)
+					return new OracleParameter { OracleDbType = OracleDbType.Date, Value = dt };
+				return new OracleParameter { OracleDbType = OracleDbType.TimeStampTZ, Value = ToOracleTimestamp(dt) };
+			}
 			return new OracleParameter { OracleDbType = OracleDbType.TimeStampTZ, Value = value };
 		}
 
