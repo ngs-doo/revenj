@@ -286,12 +286,22 @@ namespace Revenj.DatabasePersistence.Oracle.QueryGeneration.Visitors
 		protected override Expression VisitConstantExpression(ConstantExpression expression)
 		{
 			var value = expression.Value;
-			var type = value != null ? value.GetType() : expression.Type;
-			SqlExpression.Append(QueryParts.AddParameter(type, value, Context.CanUseParams));
+			if (value is bool)
+			{
+				SqlExpression.Append(" 1 = ");
+				if ((bool)value)
+					SqlExpression.Append("1 ");
+				else
+					SqlExpression.Append("0 ");
+			}
+			else
+			{
+				var type = value != null ? value.GetType() : expression.Type;
+				SqlExpression.Append(QueryParts.AddParameter(type, value, Context.CanUseParams));
 
-			if ((type == typeof(bool) || type == typeof(bool?)) && (BinaryLevel == 0 && Level == 1 || BinaryLevel + 1 < Level))
-				SqlExpression.Append(" = 'Y'");
-
+				if ((type == typeof(bool) || type == typeof(bool?)) && (BinaryLevel == 0 && Level == 1 || BinaryLevel + 1 < Level))
+					SqlExpression.Append(" = 'Y'");
+			}
 			return expression;
 		}
 
