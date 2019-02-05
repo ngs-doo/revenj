@@ -114,6 +114,9 @@
     <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\TimestampArrayConverter.cs">
       <Link>Converters\TimestampArrayConverter.cs</Link>
     </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\TreePathArrayConverter.cs">
+      <Link>Converters\TreePathArrayConverter.cs</Link>
+    </Compile>
     <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\UriArrayConverter.cs">
       <Link>Converters\UriArrayConverter.cs</Link>
     </Compile>
