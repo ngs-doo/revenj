@@ -17,7 +17,7 @@ namespace Revenj.DomainPatterns
 				var interfaces =
 					(from i in type.GetInterfaces()
 					 where i.IsGenericType
-						&& (i.GetGenericTypeDefinition() == typeof(IEventHandler<>)
+						&& (i.GetGenericTypeDefinition() == typeof(IEventStoreAspect<>)
 							|| i.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)
 							|| i.GetGenericTypeDefinition() == typeof(IReportAspect<,>)
 							|| i.GetGenericTypeDefinition() == typeof(IRepositoryAspect<>))

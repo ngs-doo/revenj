@@ -150,21 +150,24 @@ namespace Revenj.DomainPatterns
 			where TEvent : IDomainEvent;
 	}
 	/// <summary>
-	/// Handle domain event.
-	/// When domain event is processed by the server, all domain event handlers are invoked to
-	/// process it. If one domain event handler throws an exception, entire submission is canceled.
+	/// Handle event within the domain (command, aggregate event or an domain event).
+	/// When event is processed by the server, all event handlers are invoked to
+	/// process it. If one event handler throws an exception, entire submission is canceled.
 	/// If Event[] is used, collection of events can be processed at once.
+	/// 
+	/// Ideally this signature should be called IEventHandler, 
+	/// but for historical reasons it's currently named IDomainEventHandler
 	/// </summary>
-	/// <typeparam name="TEvent">domain event type</typeparam>
+	/// <typeparam name="TEvent">event type</typeparam>
 	public interface IDomainEventHandler<TEvent>
 	{
 		void Handle(TEvent instance);
 	}
 
-	public interface IEventHandler<TEvent> where TEvent : IEvent
+	public interface IEventStoreAspect<TEvent> where TEvent : IEvent
 	{
-		void Before(IEnumerable<TEvent> events);
-		void After(IEnumerable<TEvent> events);
+		TEvent[] Before(TEvent[] events);
+		void After(TEvent[] events);
 	}
 
 	/// <summary>
