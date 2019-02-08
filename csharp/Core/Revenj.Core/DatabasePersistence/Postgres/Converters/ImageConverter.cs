@@ -1,5 +1,4 @@
-﻿#if !NETSTANDARD2_0
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -14,8 +13,10 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		static ImageConverter()
 		{
+#if !NETSTANDARD2_0
 			foreach (var enc in ImageCodecInfo.GetImageEncoders())
 				Codecs.Add(enc.FormatID);
+#endif
 		}
 
 		private static void SaveImage(Image image, Stream stream)
@@ -75,4 +76,3 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 		}
 	}
 }
-#endif

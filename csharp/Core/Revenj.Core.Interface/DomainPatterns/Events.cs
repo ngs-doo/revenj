@@ -110,7 +110,6 @@ namespace Revenj.DomainPatterns
 		where T : ICommand
 	{
 		DateTime At { get; }
-		T Value { get; }
 	}
 
 	public interface ICommandStore<TCommand> : IEventStore<TCommand>, IRepository<ICommandLog<TCommand>>//, IQueryableRepository<ICommandLog<TCommand>> TODO later

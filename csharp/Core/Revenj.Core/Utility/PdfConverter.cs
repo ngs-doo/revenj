@@ -20,23 +20,20 @@ namespace Revenj.Utility
 
 		static PdfConverter()
 		{
-#if NETSTANDARD2_0
-			PdfConverterTimeout = 20;
-			ConverterPath = AppDomain.CurrentDomain.BaseDirectory;
-#else
 			var ct = ConfigurationManager.AppSettings["PdfConverterTimeout"];
 			if (!int.TryParse(ct, out PdfConverterTimeout))
 				PdfConverterTimeout = 20;
 			ConverterPath = ConfigurationManager.AppSettings["PdfConverter"];
 			if (string.IsNullOrEmpty(ConverterPath))
 				throw new ConfigurationErrorsException("Missing configuration for PdfConverter");
+#if !NETSTANDARD2_0
 			if (!File.Exists(ConverterPath))
 				ConverterPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ConverterPath);
+#endif
 			if (!File.Exists(ConverterPath))
 				throw new ConfigurationErrorsException("Can't find PdfConverter application");
 			if (ConverterPath.Any(c => char.IsWhiteSpace(c)))
 				throw new ConfigurationErrorsException("PdfConverter must be on path without whitespace characters");
-#endif
 			var platform = System.Environment.OSVersion.Platform;
 			IsWindows = platform != PlatformID.MacOSX && platform != PlatformID.Unix;
 		}

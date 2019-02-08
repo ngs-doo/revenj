@@ -19,7 +19,6 @@ namespace DSL
 {
 	public static class Core
 	{
-#if !NETSTANDARD2_0
 		public static IServiceProvider Setup(
 			bool withAspects = false,
 			bool externalConfiguration = false,
@@ -35,7 +34,7 @@ namespace DSL
 				.ToArray();
 			return Setup(withAspects, externalConfiguration, setupDatabase, dllPlugins);
 		}
-#endif
+
 		public static IServiceProvider Setup(
 			bool withAspects = false,
 			bool externalConfiguration = false,

@@ -16,11 +16,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 
 		static SecretConverter()
 		{
-#if NETSTANDARD2_0
-			string secretKeyFile = "encryption.config";
-#else
 			var secretKeyFile = ConfigurationManager.AppSettings["EncryptionConfiguration"] ?? "encryption.config";
-#endif
 			if (!File.Exists(secretKeyFile))
 			{
 				secretKeyFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, secretKeyFile);

@@ -34,15 +34,9 @@ namespace Revenj.DatabasePersistence.Postgres
 		public PostgresConnectionPool(ConnectionInfo info)
 		{
 			this.Info = info;
-#if !NETSTANDARD2_0
 			if (!int.TryParse(ConfigurationManager.AppSettings["Database.PoolSize"], out Size))
-#endif
 				Size = Math.Min(Environment.ProcessorCount, 20);
-#if NETSTANDARD2_0
-			if (true)
-#else
 			if (!Enum.TryParse<PoolMode>(ConfigurationManager.AppSettings["Database.PoolMode"], out Mode))
-#endif
 			{
 				//TODO: Mono has issues with BlockingCollection. use None as default
 				int p = (int)Environment.OSVersion.Platform;

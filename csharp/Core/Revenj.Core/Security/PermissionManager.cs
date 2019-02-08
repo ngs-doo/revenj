@@ -17,11 +17,7 @@ namespace Revenj.Security
 
 		static PermissionManager()
 		{
-#if NETSTANDARD2_0
-			string dp = null;
-#else
 			var dp = ConfigurationManager.AppSettings["Permissions.OpenByDefault"];
-#endif
 			DefaultPermissions = string.IsNullOrEmpty(dp) ? true : bool.Parse(dp);
 		}
 
