@@ -9,6 +9,7 @@ using System.Text;
 using Revenj.Common;
 using Revenj.DatabasePersistence.Postgres.Converters;
 using Revenj.DatabasePersistence.Postgres.Npgsql;
+using Revenj.DatabasePersistence.Postgres.QueryGeneration;
 using Revenj.DomainPatterns;
 
 namespace Revenj.DatabasePersistence.Postgres
@@ -44,6 +45,14 @@ namespace Revenj.DatabasePersistence.Postgres
 				CommandTimeout = ConnectionInfo.LastCommandTimeout,
 				ReaderBehavior = sequential ? CommandBehavior.SequentialAccess : CommandBehavior.Default
 			};
+		}
+	}
+
+	public static class QueryHelper
+	{
+		public static IQueryable<T> QueryRaw<T>(this IDatabaseQuery query, IServiceProvider locator) where T : IEntity
+		{
+			return new Queryable<T>(new QueryExecutor(query, locator));
 		}
 	}
 

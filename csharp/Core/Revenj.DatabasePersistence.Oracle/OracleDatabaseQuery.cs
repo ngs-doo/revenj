@@ -5,16 +5,27 @@ using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Oracle.DataAccess.Client;
 using Revenj.Common;
 using Revenj.DatabasePersistence.Oracle.Converters;
+using Revenj.DatabasePersistence.Oracle.QueryGeneration;
+using Revenj.DomainPatterns;
 
 namespace Revenj.DatabasePersistence.Oracle
 {
 	public interface IOracleDatabaseQuery : IDatabaseQuery
 	{
 		void Notify(OracleNotifyInfoConverter[] notifiers, string target);
+	}
+
+	public static class QueryHelper
+	{
+		public static IQueryable<T> QueryRaw<T>(this IDatabaseQuery query, IServiceProvider locator) where T : IEntity
+		{
+			return new Queryable<T>(new QueryExecutor(query, locator));
+		}
 	}
 
 	internal class OracleDatabaseQuery : IOracleDatabaseQuery, IDisposable
