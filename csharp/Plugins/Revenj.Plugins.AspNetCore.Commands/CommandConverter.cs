@@ -30,14 +30,17 @@ namespace Revenj.Plugins.AspNetCore.Commands
 			this.Serialization = serialization;
 		}
 
+		public static string Accept(IHeaderDictionary headers)
+		{
+			StringValues header;
+			if (headers.TryGetValue("accept", out header))
+				return header[0];
+			return "application/json";
+		}
+
 		public void PassThrough<TCommand, TArgument>(HttpContext context, TArgument argument)
 		{
-			string accept;
-			StringValues header;
-			if (context.Request.Headers.TryGetValue("accept", out header))
-				accept = header[0];
-			else
-				accept = "application/json";
+			var accept = Accept(context.Request.Headers);
 			PassThrough<TCommand, TArgument>(argument, accept, context, NoCommands);
 		}
 
@@ -47,7 +50,7 @@ namespace Revenj.Plugins.AspNetCore.Commands
 			TArgument argument, 
 			string accept,
 			HttpContext contex,
-			params AdditionalCommand[] additionalCommands)
+			AdditionalCommand[] additionalCommands)
 		{
 			var request = contex.Request;
 			var response = contex.Response;

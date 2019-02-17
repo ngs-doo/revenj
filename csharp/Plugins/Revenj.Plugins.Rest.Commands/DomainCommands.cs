@@ -346,7 +346,8 @@ namespace Revenj.Plugins.Rest.Commands
 
 		public Stream Check(string domainObject, string uri)
 		{
-			Utility.CheckIdentifiable(DomainModel, domainObject);
+			var type = Utility.CheckIdentifiable(DomainModel, domainObject);
+			if (type.IsFailure) return type.Error;
 			return
 				Converter.PassThrough<CheckDomainObject, CheckDomainObject.Argument>(
 					new CheckDomainObject.Argument

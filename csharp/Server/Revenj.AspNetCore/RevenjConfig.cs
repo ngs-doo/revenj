@@ -25,6 +25,7 @@ namespace Revenj.AspNetCore
 		private readonly List<Assembly> AssemblyPlugins = new List<Assembly>();
 		private readonly List<ISystemAspect> Aspects = new List<ISystemAspect>();
 		private Extensibility.Setup.IContainerBuilder Container;
+		private IPermissionManager Permissions = new SkipPermissionChecks();
 
 		public RevenjConfig(IWebHostBuilder builder)
 		{
@@ -56,15 +57,19 @@ namespace Revenj.AspNetCore
 			Container = container;
 			return this;
 		}
-
-		public IRevenjConfig With(ISystemAspect aspect)
+		public IRevenjConfig OnInitialize(ISystemAspect aspect)
 		{
 			if (aspect == null) throw new ArgumentNullException("aspect");
 			if (!Aspects.Contains(aspect))
 				Aspects.Add(aspect);
 			return this;
 		}
-
+		public IRevenjConfig SecurityCheck(IPermissionManager permissions)
+		{
+			if (permissions == null) throw new ArgumentNullException("permissions");
+			this.Permissions = permissions;
+			return this;
+		}
 		public IWebHostBuilder Configure(string connectionString)
 		{
 			return Builder.ConfigureServices(services => SetupRevenjWith(connectionString, services));
@@ -77,14 +82,6 @@ namespace Revenj.AspNetCore
 			if (oldFactory != null)
 				services.Remove(oldFactory);
 			services.AddSingleton<IServiceProviderFactory<IServiceCollection>>(factory);
-		}
-
-		private class SkipPermissionChecks : IPermissionManager
-		{
-			public IQueryable<T> ApplyFilters<T>(IPrincipal user, IQueryable<T> data) { return data; }
-			public T[] ApplyFilters<T>(IPrincipal user, T[] data) { return data; }
-			public bool CanAccess(string identifier, IPrincipal user) { return true; }
-			public IDisposable RegisterFilter<T>(Expression<Func<T, bool>> filter, string role, bool inverse) { return null; }
 		}
 
 		private class RevenjConfigFactory : IServiceProviderFactory<IServiceCollection>
@@ -126,7 +123,7 @@ namespace Revenj.AspNetCore
 				builder.ConfigurePatterns(_ => serverModels);
 				builder.ConfigureSerialization();
 				//builder.ConfigureSecurity(false);
-				builder.RegisterType<SkipPermissionChecks, IPermissionManager>(InstanceScope.Singleton);
+				builder.RegisterSingleton<IPermissionManager>(Config.Permissions);
 				builder.RegisterFunc<IPrincipal>(c => c.Resolve<IHttpContextAccessor>().HttpContext.User, InstanceScope.Context);
 
 				builder.ConfigureProcessing();
@@ -149,6 +146,14 @@ namespace Revenj.AspNetCore
 				state.Started(factory);
 				return factory;
 			}
+		}
+
+		private class SkipPermissionChecks : IPermissionManager
+		{
+			public IQueryable<T> ApplyFilters<T>(IPrincipal user, IQueryable<T> data) { return data; }
+			public T[] ApplyFilters<T>(IPrincipal user, T[] data) { return data; }
+			public bool CanAccess(string identifier, IPrincipal user) { return true; }
+			public IDisposable RegisterFilter<T>(Expression<Func<T, bool>> filter, string role, bool inverse) { return null; }
 		}
 
 		private class ServerState : ISystemState

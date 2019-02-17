@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Hosting
 		public static IRevenjConfig WithCommands(this IRevenjConfig builder)
 		{
 			return builder
-				.With(new CommandSetup())
+				.OnInitialize(new CommandSetup())
 				.ImportPlugins(typeof(RevenjWebHostCommandExtension).Assembly);
 		}
 	}

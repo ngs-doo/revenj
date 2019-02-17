@@ -5,6 +5,7 @@ using Revenj.Extensibility;
 using System.IO;
 using System.Reflection;
 using Revenj.AspNetCore;
+using Revenj.Security;
 
 namespace Microsoft.AspNetCore.Hosting
 {
@@ -14,7 +15,8 @@ namespace Microsoft.AspNetCore.Hosting
 		IRevenjConfig ImportPlugins(string path);
 		IRevenjConfig ImportPlugins(Assembly assembly);
 		IRevenjConfig UsingContainer(Setup.IContainerBuilder container);
-		IRevenjConfig With(ISystemAspect aspect);
+		IRevenjConfig OnInitialize(ISystemAspect aspect);
+		IRevenjConfig SecurityCheck(IPermissionManager permissions);
 		IWebHostBuilder Configure(string connectionString);
 	}
 
@@ -31,6 +33,7 @@ namespace Microsoft.AspNetCore.Hosting
 			bool withAspects = false,
 			bool externalConfiguration = false,
 			Setup.IContainerBuilder customContainer = null,
+			IPermissionManager permissionCheck = null,
 			IEnumerable<ISystemAspect> customAspects = null)
 		{
 			var config = new RevenjConfig(builder);
@@ -47,10 +50,11 @@ namespace Microsoft.AspNetCore.Hosting
 				}
 			}
 			if (customContainer != null) config.UsingContainer(customContainer);
+			if (permissionCheck != null) config.SecurityCheck(permissionCheck);
 			if (customAspects != null)
 			{
 				foreach (var ca in customAspects)
-					config.With(ca);
+					config.OnInitialize(ca);
 			}
 			return config.Configure(connectionString);
 		}

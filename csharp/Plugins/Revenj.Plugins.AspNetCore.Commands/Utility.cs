@@ -244,24 +244,7 @@ Error: " + ex.Message, response);
 				 let word = o.Trim(new[] { '-', '+' })
 				 select new KeyValuePair<string, bool>(word, !o.StartsWith("-")))
 				 .ToList();
-		}
-
-		public static void ParseLimitOffset(
-			string limitQuery,
-			string offsetQuery,
-			out int? limit,
-			out int? offset)
-		{
-			int x;
-			if (int.TryParse(limitQuery, out x))
-				limit = x;
-			else
-				limit = null;
-			if (int.TryParse(offsetQuery, out x))
-				offset = x;
-			else
-				offset = null;
-		}
+		}		
 
 		public static Try<object> ParseGenericSpecification(this IWireSerialization serialization, Try<Type> target, Stream data, HttpRequest request, HttpResponse response)
 		{
