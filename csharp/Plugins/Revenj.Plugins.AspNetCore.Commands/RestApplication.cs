@@ -71,19 +71,24 @@ namespace Revenj.Plugins.AspNetCore.Commands
 			return new ExecuteResult { Result = first.Result.Data };
 		}
 
-		public void Execute(Type command, Stream message, HttpContext context)
+		public void Execute(string command, Stream message, HttpContext context)
 		{
 			if (command == null)
 			{
 				context.Response.WriteError("Command not specified", HttpStatusCode.BadRequest);
 				return;
 			}
-			var commandType = CommandsRepository.Find(command.FullName);
+			var commandType = CommandsRepository.Find(command);
 			if (commandType == null)
 			{
 				context.Response.WriteError("Unknown command: " + command, HttpStatusCode.NotFound);
 				return;
 			}
+			Execute(commandType, message, context);
+		}
+
+		public void Execute(Type commandType, Stream message, HttpContext context)
+		{
 			var request = context.Request;
 			var response = context.Response;
 			StringValues headers;
