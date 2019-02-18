@@ -246,17 +246,18 @@ Error: " + ex.Message, response);
 				 .ToList();
 		}		
 
-		public static Try<object> ParseGenericSpecification(this IWireSerialization serialization, Try<Type> target, Stream data, HttpRequest request, HttpResponse response)
+		public static Try<object> ParseGenericSpecification(this IWireSerialization serialization, Try<Type> target, HttpContext context)
 		{
 			if (target.IsFailure) return Try<object>.Error;
+			var request = context.Request;
 			switch (GetIncomingFormat(request))
 			{
 				case MessageFormat.Json:
-					return ParseGenericSpecification<string>(serialization, target, data, request, response);
+					return ParseGenericSpecification<string>(serialization, target, request.Body, request, context.Response);
 				case MessageFormat.ProtoBuf:
-					return ParseGenericSpecification<MemoryStream>(serialization, target, data, request, response);
+					return ParseGenericSpecification<MemoryStream>(serialization, target, request.Body, request, context.Response);
 				default:
-					return ParseGenericSpecification<XElement>(serialization, target, data, request, response);
+					return ParseGenericSpecification<XElement>(serialization, target, request.Body, request, context.Response);
 			}
 		}
 

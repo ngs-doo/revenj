@@ -81,9 +81,9 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 			else
 			{
 				if (Any)
-					Debug.WriteLine(String.Format(
+					Debug.WriteLine(
 						"[Autofac] Overriding default for: '{0}' with: '{1}' (was '{2}')",
-						_service, registration, _implementations.First.Value));
+						_service, registration, _implementations.First.Value);
 
 				_implementations.AddFirst(registration);
 			}

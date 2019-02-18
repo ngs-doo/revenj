@@ -146,9 +146,9 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 			if (adapterServices.Count == 0)
 				return;
 
-			Debug.WriteLine(String.Format(
+			Debug.WriteLine(
 				"[Autofac] Component '{0}' provides services that have already been adapted. Consider refactoring to ContainerBuilder.Build() rather than Update().",
-				registration));
+				registration);
 
 			var drs = _dynamicRegistrationSourcesArray;
 			if (drs == null)

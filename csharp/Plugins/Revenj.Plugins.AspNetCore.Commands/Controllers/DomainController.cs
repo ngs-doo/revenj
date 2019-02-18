@@ -109,7 +109,7 @@ namespace Revenj.Plugins.AspNetCore.Commands
 			var request = HttpContext.Request;
 			var response = HttpContext.Response;
 			var doType = Utility.CheckDomainObject(DomainModel, domainObject, response);
-			var spec = Utility.ParseGenericSpecification(Serialization, doType, request.Body, request, response);
+			var spec = Utility.ParseGenericSpecification(Serialization, doType, HttpContext);
 			var ordDict = Utility.ParseOrder(order);
 			if (spec.IsFailure) return;
 
@@ -171,10 +171,8 @@ namespace Revenj.Plugins.AspNetCore.Commands
 		[HttpPut("/count-generic/{domainObject}")]
 		public void CountGeneric(string domainObject)
 		{
-			var request = HttpContext.Request;
-			var response = HttpContext.Response;
-			var doType = Utility.CheckDomainObject(DomainModel, domainObject, response);
-			var spec = Utility.ParseGenericSpecification(Serialization, doType, request.Body, request, response);
+			var doType = Utility.CheckDomainObject(DomainModel, domainObject, HttpContext.Response);
+			var spec = Utility.ParseGenericSpecification(Serialization, doType, HttpContext);
 			if (spec.IsFailure) return;
 
 			Converter.PassThrough<CountDomainObject, CountDomainObject.Argument<object>>(
@@ -212,10 +210,8 @@ namespace Revenj.Plugins.AspNetCore.Commands
 		[HttpPut("/exists-generic/{domainObject}")]
 		public void ExistsGeneric(string domainObject)
 		{
-			var request = HttpContext.Request;
-			var response = HttpContext.Response;
-			var doType = Utility.CheckDomainObject(DomainModel, domainObject, response);
-			var spec = Utility.ParseGenericSpecification(Serialization, doType, request.Body, request, response);
+			var doType = Utility.CheckDomainObject(DomainModel, domainObject, HttpContext.Response);
+			var spec = Serialization.ParseGenericSpecification(doType, HttpContext);
 			if (spec.IsFailure) return;
 
 			Converter.PassThrough<DomainObjectExists, DomainObjectExists.Argument<object>>(

@@ -85,10 +85,13 @@ namespace Revenj.Plugins.AspNetCore.Commands
 				stream.CopyTo(response.Body);
 		}
 
-		public void ConvertStream<TCommand, TArgument>(TArgument argument, HttpContext contex)
+		public void ConvertStream<TCommand, TArgument>(HttpContext contex, TArgument argument)
 		{
 			if (argument == null)
+			{
 				Application.Execute(typeof(TCommand), null, contex);
+				return;
+			}
 			using (var ms = ChunkedMemoryStream.Create())
 			{
 				Serialization.Serialize(argument, contex.Request.ContentType, ms);
