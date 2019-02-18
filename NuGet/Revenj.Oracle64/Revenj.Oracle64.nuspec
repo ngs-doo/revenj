@@ -3,19 +3,22 @@
   <metadata>
     <id>Revenj.Oracle64</id>
     <title>Revenj Core (+ Oracle 64bit)</title>
-    <version>1.4.2</version>
+    <version>1.5.0</version>
     <authors>NGS</authors>
     <owners>NGS</owners>
     <licenseUrl>https://github.com/ngs-doo/revenj/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/ngs-doo/revenj</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>.NET and Mono framework with support for Postgres and Oracle</description>
-    <releaseNotes>Performance improvements.</releaseNotes>
-    <copyright>Copyright 2017 N.G.S.</copyright>
+    <releaseNotes>
+1.5.0 - Minor LINQ fixes. Support for TreePath
+1.4.2 - Performance improvements
+    </releaseNotes>
+    <copyright>Copyright 2019 N.G.S.</copyright>
     <tags>LINQ Postgres Oracle DDD DSL framework NOSQL</tags>
     <summary>Revenj core provides API for usage of Revenj as a library from other frameworks such as ASP.NET.</summary>
     <dependencies>
-		<dependency id="revenj.core" version="[1.4.2]" />
+		<dependency id="Revenj" version="[1.5.0]" />
     </dependencies>
   </metadata>
 </package>

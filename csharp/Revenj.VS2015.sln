@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CFF9545-4CA9-462A-AB53-42C85A3A808F}"
 	ProjectSection(SolutionItems) = preProject
@@ -367,8 +367,7 @@ Global
 		{D0582F75-2EDA-4381-AA64-BF9B2B6F6B0D} = {511632A3-D73B-46A7-8509-2A7B59AB01FD}
 		{7B2138AF-31A4-42F5-884D-3F4E74F59C35} = {9337DE07-CEB3-456E-8FF3-C6BA4DB6496D}
 	EndGlobalSection
-	GlobalSection(DslPlatformSolutionProperties) = preSolution
-		Php.Name = Php
-		Php.Target = Php
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {690E8111-2014-4319-8867-1C79B66A50C6}
 	EndGlobalSection
 EndGlobal
