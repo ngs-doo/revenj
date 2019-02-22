@@ -93,59 +93,6 @@ namespace Revenj.Plugins.Rest.Commands
 		[Description("Get simple olap report with optional specification from query parameters")]
 		Stream OlapCubeQuery(string cube, string specification, string dimensions, string facts, string order, string limit, string offset);
 		/// <summary>
-		/// Analyze olap cube using generic specification with defined dimensions and facts.
-		/// Result can be ordered and limited. If required offset can be used.
-		/// Specification will be dynamically reconstructed from body as Content-type and used for filtering.
-		/// Returns data analysis collection with specified facts + dimensions.
-		/// </summary>
-		/// <param name="cube">olap cube name</param>
-		/// <param name="dimensions">group result by dimensions</param>
-		/// <param name="facts">aggregate result by facts</param>
-		/// <param name="order">order result</param>
-		/// <param name="limit">limit total number of items</param>
-		/// <param name="offset">skip initial number of items</param>
-		/// <param name="body">serialized specification</param>
-		/// <returns>analysis result as collection of dimensions + facts</returns>
-		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/olap-generic/{cube}?dimensions={dimensions}&facts={facts}&order={order}&limit={limit}&offset={offset}")]
-		[Description("Get simple olap report with generic specification")]
-		Stream OlapCubeWithGenericSpecification(string cube, string dimensions, string facts, string order, string limit, string offset, Stream body);
-		/// <summary>
-		/// Analyze olap cube using generic specification with defined dimensions and facts.
-		/// Result can be ordered and limited. If required offset can be used.
-		/// Specification will be dynamically reconstructed from query parameters and used for filtering.
-		/// Returns data analysis collection with specified facts + dimensions.
-		/// </summary>
-		/// <param name="cube">olap cube name</param>
-		/// <param name="dimensions">group result by dimensions</param>
-		/// <param name="facts">aggregate result by facts</param>
-		/// <param name="order">order result</param>
-		/// <param name="limit">limit total number of items</param>
-		/// <param name="offset">skip initial number of items</param>
-		/// <returns>analysis result as collection of dimensions + facts</returns>
-		[OperationContract]
-		[WebGet(UriTemplate = "/olap-generic/{cube}?dimensions={dimensions}&facts={facts}&order={order}&limit={limit}&offset={offset}")]
-		[Description("Get simple olap report with generic specification. Search arguments are in query string")]
-		Stream OlapCubeWithGenericSpecificationQuery(string cube, string dimensions, string facts, string order, string limit, string offset);
-		/// <summary>
-		/// Analyze olap cube using provided lambda expresion specification with defined dimensions and facts.
-		/// Result can be ordered and limited. If required offset can be used.
-		/// Specification will be dynamically reconstructed from body as Content-type and used for filtering.
-		/// Returns data analysis collection with specified facts + dimensions.
-		/// </summary>
-		/// <param name="cube">olap cube name</param>
-		/// <param name="dimensions">group result by dimensions</param>
-		/// <param name="facts">aggregate result by facts</param>
-		/// <param name="order">order result</param>
-		/// <param name="limit">limit total number of items</param>
-		/// <param name="offset">skip initial number of items</param>
-		/// <param name="body">serialized specification</param>
-		/// <returns>analysis result as collection of dimensions + facts</returns>
-		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/olap-expression/{cube}?dimensions={dimensions}&facts={facts}&order={order}&limit={limit}&offset={offset}")]
-		[Description("Get simple olap report with using expression")]
-		Stream OlapCubeWithExpression(string cube, string dimensions, string facts, string order, string limit, string offset, Stream body);
-		/// <summary>
 		/// Execute remote service. Service must implement IServerService&lt;TInput, TOutput&gt;.
 		/// Input argument is deserialized using defined Content-type header.
 		/// Result is serialized using defined Accept header.

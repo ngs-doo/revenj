@@ -190,55 +190,6 @@ namespace Revenj.Plugins.Rest.Commands
 			return OlapCube(cubeType, templater, dimensions, facts, order, spec, limit, offset);
 		}
 
-		public Stream OlapCubeWithGenericSpecification(
-			string cube,
-			string templater,
-			string dimensions,
-			string facts,
-			string order,
-			string limit,
-			string offset,
-			Stream body)
-		{
-			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.IsFailure) return ci.Error;
-			var spec = Serialization.ParseGenericSpecification(ci.Result.Value, body);
-			return OlapCube(ci.Result.Key, templater, dimensions, facts, order, spec, limit, offset);
-		}
-
-		public Stream OlapCubeWithGenericSpecificationQuery(
-			string cube,
-			string templater,
-			string dimensions,
-			string facts,
-			string order,
-			string limit,
-			string offset)
-		{
-			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.IsFailure) return ci.Error;
-			var spec = Utility.GenericSpecificationFromQuery(ci.Result.Value);
-			return OlapCube(ci.Result.Key, templater, dimensions, facts, order, spec, limit, offset);
-		}
-
-		public Stream OlapCubeWithExpression(
-			string cube,
-			string templater,
-			string dimensions,
-			string facts,
-			string order,
-			string limit,
-			string offset,
-			Stream body)
-		{
-			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.IsFailure) return ci.Error;
-			var type = Utility.CheckDomainObject(DomainModel, ci.Result.Key, templater);
-			if (type.IsFailure) return type.Error;
-			var spec = Utility.ParseExpressionSpecification(Serialization, ci.Result.Value, body);
-			return OlapCube(ci.Result.Key, templater, dimensions, facts, order, spec, limit, offset);
-		}
-
 		public Stream GetHistory(string root, string uris)
 		{
 			var type = Utility.CheckAggregateRoot(DomainModel, root);

@@ -90,13 +90,13 @@ namespace Revenj.DomainPatterns
 		/// <param name="events">events</param>
 		string[] Submit<T>(IEnumerable<T> events) where T : IEvent;
 		/// <summary>
-		/// Queue domain event for out-of-transaction submission to the store
+		/// Queue event for out-of-transaction submission to the store
 		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
-		/// If current transaction is rolled back, event will still be persisted
+		/// If current transaction is rolled back, event will still be processed/persisted
 		/// </summary>
 		/// <typeparam name="T">event type</typeparam>
-		/// <param name="events">domain events</param>
-		void Queue<T>(IEnumerable<T> events) where T : IDomainEvent;
+		/// <param name="events">domain events or commands</param>
+		void Queue<T>(IEnumerable<T> events) where T : IEvent;
 		/// <summary>
 		/// Populate report
 		/// </summary>
@@ -327,7 +327,7 @@ namespace Revenj.DomainPatterns
 			return context.Submit(new[] { @event })[0];
 		}
 		/// <summary>
-		/// Queue domain event for out-of-transaction submission to the store
+		/// Queue event for out-of-transaction submission to the store
 		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
 		/// If current transaction is rolled back, event will still be persisted
 		/// </summary>
@@ -335,7 +335,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="context">data context</param>
 		/// <param name="domainEvent">domain event</param>
 		public static void Queue<TEvent>(this IDataContext context, TEvent domainEvent)
-			where TEvent : IDomainEvent
+			where TEvent : IEvent
 		{
 			context.Queue(new[] { domainEvent });
 		}

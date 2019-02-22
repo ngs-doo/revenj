@@ -8,8 +8,9 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;
+using System.Threading.Tasks;
 
-namespace Revenj.Plugins.AspNetCore.Commands
+namespace Revenj.AspNetCore
 {
 	public class CommandConverter
 	{
@@ -38,19 +39,20 @@ namespace Revenj.Plugins.AspNetCore.Commands
 			return "application/json";
 		}
 
-		public void PassThrough<TCommand, TArgument>(HttpContext context, TArgument argument)
+		public Task PassThrough<TCommand, TArgument>(HttpContext context, TArgument argument)
 		{
 			var accept = Accept(context.Request.Headers);
-			PassThrough<TCommand, TArgument>(argument, accept, context, NoCommands);
+			return PassThrough<TCommand, TArgument>(argument, accept, context, NoCommands, null);
 		}
 
 		private static readonly AdditionalCommand[] NoCommands = new AdditionalCommand[0];
 
-		public void PassThrough<TCommand, TArgument>(
+		public Task PassThrough<TCommand, TArgument>(
 			TArgument argument, 
 			string accept,
 			HttpContext contex,
-			AdditionalCommand[] additionalCommands)
+			AdditionalCommand[] additionalCommands,
+			string customContentType = null)
 		{
 			var request = contex.Request;
 			var response = contex.Response;
@@ -62,10 +64,7 @@ namespace Revenj.Plugins.AspNetCore.Commands
 				var sessionID = headers[0];
 				var scope = ObjectFactory.FindScope(sessionID);
 				if (scope == null)
-				{
-					response.WriteError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
-					return;
-				}
+					return response.WriteError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
 				engine = scope.Resolve<IProcessingEngine>();
 			}
 			var commands = new ObjectCommandDescription[1 + (additionalCommands != null ? additionalCommands.Length : 0)];
@@ -75,30 +74,44 @@ namespace Revenj.Plugins.AspNetCore.Commands
 				var ac = additionalCommands[i - 1];
 				commands[i] = new ObjectCommandDescription { RequestID = ac.ToHeader, CommandType = ac.CommandType, Data = ac.Argument };
 			}
-			var stream = RestApplication.ExecuteCommands<object>(engine, Serialization, commands, contex, accept);
-			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
-			response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
-			var cms = stream as ChunkedMemoryStream;
-			if (cms != null)
-				cms.CopyTo(response.Body);
-			else if (stream != null)
-				stream.CopyTo(response.Body);
+			var task = RestApplication.ExecuteCommands<object>(engine, Serialization, commands, contex, accept);
+			return task.ContinueWith(t =>
+			{
+				if (t.IsCompletedSuccessfully)
+				{
+					var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+					if (customContentType != null)
+						response.ContentType = customContentType;
+					response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
+					var stream = t.Result;
+					var cms = stream as ChunkedMemoryStream;
+					if (cms != null)
+					{
+						cms.CopyTo(response.Body);
+						cms.Dispose();
+					}
+					else if (stream != null)
+					{
+						stream.CopyTo(response.Body);
+						stream.Dispose();
+					}
+				}
+			});
 		}
 
-		public void ConvertStream<TCommand, TArgument>(HttpContext contex, TArgument argument)
+		public Task ConvertStream<TCommand, TArgument>(HttpContext contex, TArgument argument)
 		{
 			if (argument == null)
+				return Application.Execute(typeof(TCommand), null, contex);
+			var ms = ChunkedMemoryStream.Create();
+			Serialization.Serialize(argument, contex.Request.ContentType, ms);
+			ms.Position = 0;
+			var task = Application.Execute(typeof(TCommand), ms, contex);
+			return task.ContinueWith(t =>
 			{
-				Application.Execute(typeof(TCommand), null, contex);
-				return;
-			}
-			using (var ms = ChunkedMemoryStream.Create())
-			{
-				Serialization.Serialize(argument, contex.Request.ContentType, ms);
-				ms.Position = 0;
-				Application.Execute(typeof(TCommand), ms, contex);
-			}
+				ms.Dispose();
+				return t;
+			});
 		}
 	}
-
 }

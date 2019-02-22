@@ -1,7 +1,7 @@
 ﻿using Revenj.Processing;
 using System;
 
-namespace Revenj.Plugins.AspNetCore.Commands
+namespace Revenj.AspNetCore
 {
 	public class ObjectCommandDescription : IServerCommandDescription<object>
 	{

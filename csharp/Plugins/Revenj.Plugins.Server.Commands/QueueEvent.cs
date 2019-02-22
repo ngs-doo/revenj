@@ -70,11 +70,6 @@ namespace Revenj.Plugins.Server.Commands
 						@"Example argument: 
 " + CommandResult<TOutput>.ConvertToString(CreateExampleArgument(output)));
 			}
-			if (!typeof(IDomainEvent).IsAssignableFrom(eventType))
-			{
-				return CommandResult<TOutput>.Fail(@"Specified type ({0}) is not a domain event. 
-Please check your arguments.".With(argument.Name), null);
-			}
 			if (!Permissions.CanAccess(eventType.FullName, principal))
 				return CommandResult<TOutput>.Forbidden(argument.Name);
 			try
@@ -112,7 +107,7 @@ Example argument:
 		}
 
 		private class QueueEventCommand<TEvent> : IQueueCommand
-			where TEvent : IDomainEvent
+			where TEvent : IEvent
 		{
 			public void Queue<TInput>(
 				ISerialization<TInput> input,

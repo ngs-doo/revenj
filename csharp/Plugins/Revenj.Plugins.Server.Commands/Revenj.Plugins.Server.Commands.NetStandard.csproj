@@ -14,6 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Templater" Version="2.9.6" />
   </ItemGroup>
 

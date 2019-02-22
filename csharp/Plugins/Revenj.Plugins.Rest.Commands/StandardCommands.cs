@@ -187,50 +187,6 @@ namespace Revenj.Plugins.Rest.Commands
 			return OlapCube(cubeType, dimensions, facts, order, spec, limit, offset);
 		}
 
-		public Stream OlapCubeWithGenericSpecification(
-			string cube,
-			string dimensions,
-			string facts,
-			string order,
-			string limit,
-			string offset,
-			Stream body)
-		{
-			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.IsFailure) return ci.Error;
-			var spec = Serialization.ParseGenericSpecification(ci.Result.Value, body);
-			return OlapCube(ci.Result.Key, dimensions, facts, order, spec, limit, offset);
-		}
-
-		public Stream OlapCubeWithGenericSpecificationQuery(
-			string cube,
-			string dimensions,
-			string facts,
-			string order,
-			string limit,
-			string offset)
-		{
-			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.IsFailure) return ci.Error;
-			var spec = Utility.GenericSpecificationFromQuery(ci.Result.Value);
-			return OlapCube(ci.Result.Key, dimensions, facts, order, spec, limit, offset);
-		}
-
-		public Stream OlapCubeWithExpression(
-			string cube,
-			string dimensions,
-			string facts,
-			string order,
-			string limit,
-			string offset,
-			Stream body)
-		{
-			var ci = Utility.CheckCube(DomainModel, cube);
-			if (ci.IsFailure) return ci.Error;
-			var spec = Utility.ParseExpressionSpecification(Serialization, ci.Result.Value, body);
-			return OlapCube(ci.Result.Key, dimensions, facts, order, spec, limit, offset);
-		}
-
 		private Stream Execute<TFormat>(string service, TFormat data)
 		{
 			return Converter.ConvertStream<ExecuteService, ExecuteService.Argument<TFormat>>(

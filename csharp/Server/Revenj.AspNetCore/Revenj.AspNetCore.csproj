@@ -2,10 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Revenj.snk</AssemblyOriginatorKeyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>Revenj.AspNetCore</AssemblyName>
+    <RootNamespace>Revenj.AspNetCore</RootNamespace>	
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="RevenjAspNetContainer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

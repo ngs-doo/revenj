@@ -6,20 +6,20 @@ using Revenj.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Text;
 using System.Xml.Linq;
 using System.Runtime.Serialization;
 using System.Reflection;
 using Microsoft.Extensions.Primitives;
 using Revenj.Plugins.Server.Commands;
+using Revenj.AspNetCore;
+using System.Threading.Tasks;
+using System.Net;
+using System.Text;
 
 namespace Revenj.Plugins.AspNetCore.Commands
 {
 	internal static class Utility
 	{
-		internal static readonly ISerialization<object> PassThrough = new PassThroughSerialization();
-
 		public static Try<Type> CheckDomainObject(IDomainModel domainModel, string name, HttpResponse response)
 		{
 			var type = domainModel.Find(name);
@@ -97,11 +97,11 @@ Error: " + ex.Message, response);
 			}
 		}
 
-		private static string EmptyInstanceString(this IWireSerialization serializer, Type target, HttpRequest request, HttpResponse response)
+		private static string EmptyInstanceString(this IWireSerialization serializer, Type target, HttpContext context)
 		{
 			try
 			{
-				return SerializeToString(serializer, TemporaryResources.CreateRandomObject(target), request, response);
+				return SerializeToString(serializer, TemporaryResources.CreateRandomObject(target), context);
 			}
 			catch (Exception ex)
 			{
@@ -111,16 +111,16 @@ Error: " + ex.Message, response);
 			}
 		}
 
-		private static string SerializeToString(this IWireSerialization serializer, object instance, HttpRequest request, HttpResponse response)
+		private static string SerializeToString(this IWireSerialization serializer, object instance, HttpContext context)
 		{
 			StringValues headers;
 			string accept = null;
-			if (request.Headers.TryGetValue("accept", out headers) && headers.Count > 0)
+			if (context.Request.Headers.TryGetValue("accept", out headers) && headers.Count > 0)
 				accept = headers[0];
 			using (var cms = ChunkedMemoryStream.Create())
 			{
 				var ct = serializer.Serialize(instance, accept, cms);
-				response.ContentType = ct;
+				context.Response.ContentType = ct;
 				return cms.GetReader().ReadToEnd();
 			}
 		}
@@ -131,8 +131,7 @@ Error: " + ex.Message, response);
 			Stream data,
 			bool canCreate,
 			IServiceProvider locator,
-			HttpRequest request,
-			HttpResponse response)
+			HttpContext context)
 		{
 			if (maybeType.IsFailure) return Try<object>.Error;
 			var type = maybeType.Result;
@@ -141,7 +140,7 @@ Error: " + ex.Message, response);
 			{
 				if (canCreate == false)
 					return Try.Fail<object>(@"{0} must be provided. Example: 
-{1}".With(type.FullName, serializer.EmptyInstanceString(type, request, response)), response);
+{1}".With(type.FullName, serializer.EmptyInstanceString(type, context)), context.Response);
 				try
 				{
 					return Activator.CreateInstance(type);
@@ -149,36 +148,37 @@ Error: " + ex.Message, response);
 				catch (Exception ex)
 				{
 					return Try.Fail<object>(@"Can't create instance of {0}. Data must be provided. Error: {1}. Example: 
-{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type, request, response)), response);
+{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type, context)), context.Response);
 				}
 			}
 			try
 			{
+				//TODO: deserialize async
 				var sc = new StreamingContext(StreamingContextStates.All, locator);
 				//TODO: objects deserialized here will have global scope access. Do OnDeserialized again later in scope
-				return serializer.Deserialize(data, type, request.ContentType, sc);
+				return serializer.Deserialize(data, type, context.Request.ContentType, sc);
 			}
 			catch (TargetInvocationException tie)
 			{
 				var ex = tie.InnerException ?? tie;
 				return Try.Fail<object>(@"Can't deserialize {0}. Error: {1}. Example: 
-{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type, request, response)), response);
+{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type, context)), context.Response);
 			}
 			catch (Exception ex)
 			{
 				return Try.Fail<object>(@"Can't deserialize {0}. Error: {1}. Example: 
-{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type, request, response)), response);
+{2}".With(type.FullName, ex.Message, serializer.EmptyInstanceString(type, context)), context.Response);
 			}
 		}
 
-		public static Try<object> ObjectFromQuery(Try<Type> specType, HttpRequest request, HttpResponse response)
+		public static Try<object> ObjectFromQuery(Try<Type> specType, HttpContext context)
 		{
 			if (specType.IsFailure) return Try<object>.Error;
 			var type = specType.Result;
 			if (type == null) return Try<object>.Empty;
 			try
 			{
-				var queryParams = request.Query;
+				var queryParams = context.Request.Query;
 				var ctor = type.GetConstructors().FirstOrDefault();
 				var instance = ctor.Invoke(ctor.GetParameters().Select(_ => (object)null).ToArray());
 				foreach (var kv in queryParams)
@@ -191,36 +191,7 @@ Error: " + ex.Message, response);
 			}
 			catch (Exception ex)
 			{
-				return Try.Fail<object>("Error creating object from query string. " + ex.Message, response);
-			}
-		}
-
-		public static Try<object> GenericSpecificationFromQuery(Try<Type> domainType, HttpRequest request, HttpResponse response)
-		{
-			if (domainType.IsFailure) return Try<object>.Error;
-			var type = domainType.Result;
-			try
-			{
-				var arg = new Dictionary<string, List<KeyValuePair<int, object>>>();
-				var specType = typeof(GenericSpecification<,>).MakeGenericType(type, typeof(object));
-				//TODO better match parameters. allow > != ~ etc...
-				var queryParams = request.Query;
-				foreach (var kv in queryParams)
-				{
-					var prop = type.GetProperty(kv.Key);
-					if (prop != null)
-					{
-						List<KeyValuePair<int, object>> list;
-						if (!arg.TryGetValue(kv.Key, out list))
-							arg[kv.Key] = list = new List<KeyValuePair<int, object>>();
-						list.Add(new KeyValuePair<int, object>(0, Convert.ChangeType(kv.Value[0], prop.PropertyType)));
-					}
-				}
-				return Activator.CreateInstance(specType, PassThrough, arg);
-			}
-			catch (Exception ex)
-			{
-				return Try.Fail<object>("Error creating object from query string. " + ex.Message, response);
+				return Try.Fail<object>("Error creating object from query string. " + ex.Message, context.Response);
 			}
 		}
 
@@ -244,7 +215,23 @@ Error: " + ex.Message, response);
 				 let word = o.Trim(new[] { '-', '+' })
 				 select new KeyValuePair<string, bool>(word, !o.StartsWith("-")))
 				 .ToList();
-		}		
+		}
+
+		public static void ParseLimitOffset(
+			IQueryCollection query,
+			out int? limit,
+			out int? offset)
+		{
+			int x;
+			if (query.ContainsKey("limit") && int.TryParse(query["limit"][0], out x))
+				limit = x;
+			else
+				limit = null;
+			if (query.ContainsKey("offset") && int.TryParse(query["offset"][0], out x))
+				offset = x;
+			else
+				offset = null;
+		}
 
 		public static Try<object> ParseGenericSpecification(this IWireSerialization serialization, Try<Type> target, HttpContext context)
 		{
@@ -253,22 +240,30 @@ Error: " + ex.Message, response);
 			switch (GetIncomingFormat(request))
 			{
 				case MessageFormat.Json:
-					return ParseGenericSpecification<string>(serialization, target, request.Body, request, context.Response);
+					return ParseGenericSpecification<string>(serialization, target, request.Body, context);
 				case MessageFormat.ProtoBuf:
-					return ParseGenericSpecification<MemoryStream>(serialization, target, request.Body, request, context.Response);
+					return ParseGenericSpecification<MemoryStream>(serialization, target, request.Body, context);
 				default:
-					return ParseGenericSpecification<XElement>(serialization, target, request.Body, request, context.Response);
+					return ParseGenericSpecification<XElement>(serialization, target, request.Body, context);
 			}
 		}
 
-		public static Try<object> ParseGenericSpecification<TFormat>(this IWireSerialization serializer, Try<Type> domainType, Stream data, HttpRequest request, HttpResponse response)
+		public static Try<object> ParseGenericSpecification<TFormat>(this IWireSerialization serializer, Try<Type> domainType, Stream data, HttpContext context)
 		{
 			if (domainType.IsFailure) return Try<object>.Error;
 			var genSer = serializer.GetSerializer<TFormat>();
-			var specType = typeof(GenericSpecification<,>).MakeGenericType(domainType.Result, typeof(TFormat));
+			Type specType;
 			try
 			{
-				var arg = ParseObject(serializer, typeof(Dictionary<string, List<KeyValuePair<int, TFormat>>>), data, true, null, request, response);
+				specType = typeof(GenericSpecification<,>).MakeGenericType(domainType.Result, typeof(TFormat));
+			}
+			catch
+			{
+				return Try.Fail<object>(@"Unable to use generic specification on " + domainType.Result, context.Response);
+			}
+			try
+			{
+				var arg = ParseObject(serializer, typeof(Dictionary<string, List<KeyValuePair<int, TFormat>>>), data, true, null, context);
 				if (arg.IsFailure) return Try<object>.Error;
 				return Activator.CreateInstance(specType, genSer, arg.Result);
 			}
@@ -280,26 +275,10 @@ Error: " + ex.Message, response);
 				specArg["URI"] = new List<KeyValuePair<int, TFormat>>(new[] { new KeyValuePair<int, TFormat>(1, genSer.Serialize("1001")) });
 				return Try.Fail<object>(@"Error deserializing specification. " + ex.Message + @"
 Example: 
-" + serializer.SerializeToString(specArg, request, response), response);
+" + serializer.SerializeToString(specArg, context), context.Response);
 			}
 		}
-		/*
-		public static Try<object> ParseExpressionSpecification(IWireSerialization serializer, Try<Type> domainType, Stream data)
-		{
-			if (domainType.IsFailure) return Try<object>.Error;
-			try
-			{
-				var expressionNode = serializer.Deserialize<LambdaExpressionNode>(data, ThreadContext.Request.ContentType);
-				return Activator.CreateInstance(typeof(SpecificationFromNode<>).MakeGenericType(domainType.Result), expressionNode);
-			}
-			catch (Exception ex)
-			{
-				if (ex.InnerException != null)
-					ex = ex.InnerException;
-				return @"Error deserializing expression. " + ex.Message;
-			}
-		}
-		*/
+
 		public static bool? ReturnInstance(string argument, HttpRequest request)
 		{
 			var result = argument;
@@ -324,11 +303,13 @@ Example:
 			return result == "yes";
 		}
 
-		public static void WriteError(this HttpResponse response, string message, HttpStatusCode code)
+		public static Task WriteError(this HttpResponse response, string message, HttpStatusCode code)
 		{
 			response.StatusCode = (int)code;
 			response.ContentType = "text/plain; charset=UTF-8";
-			response.Body.Write(Encoding.UTF8.GetBytes(message));
+			var bytes = Encoding.UTF8.GetBytes(message);
+			response.Body.Write(bytes, 0, bytes.Length);
+			return Task.CompletedTask;
 		}
 	}
 }

@@ -175,7 +175,7 @@ namespace Revenj
 			return Context.InvalidItems<TValidation, TResult>(specification);
 		}
 
-		public void Queue<T>(IEnumerable<T> events) where T : IDomainEvent
+		public void Queue<T>(IEnumerable<T> events) where T : IEvent
 		{
 			Context.Queue(events);
 		}

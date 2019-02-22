@@ -12,7 +12,7 @@ namespace Revenj.Plugins.Server.Commands
 {
 	[DataContract]
 	public class GenericSpecification<T, TFormat> : ISpecification<T>
-		where T : class, IIdentifiable
+		where T : class, IDataSource
 	{
 		[DataMember]
 		private readonly Dictionary<string, List<KeyValuePair<int, TFormat>>> Filters;

@@ -152,7 +152,7 @@ namespace Revenj.DomainPatterns
 			return store.Submit(events);
 		}
 
-		public void Queue<T>(IEnumerable<T> events) where T : IDomainEvent
+		public void Queue<T>(IEnumerable<T> events) where T : IEvent
 		{
 			if (GlobalEventStore == null)
 				GlobalEventStore = Locator.Resolve<GlobalEventStore>();

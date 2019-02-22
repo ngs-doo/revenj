@@ -23,6 +23,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Plugins.Server.Comma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Plugins.AspNetCore.Commands", "Plugins\Revenj.Plugins.AspNetCore.Commands\Revenj.Plugins.AspNetCore.Commands.csproj", "{B8F0E839-F41C-4FB2-9F32-BD538A983E07}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E0040072-51C7-45AB-A838-059733ABEFFA}"
+	ProjectSection(SolutionItems) = preProject
+		SharedAssemblyInfo.cs = SharedAssemblyInfo.cs
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

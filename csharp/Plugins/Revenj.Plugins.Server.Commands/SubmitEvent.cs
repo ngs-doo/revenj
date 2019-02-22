@@ -91,9 +91,7 @@ Please check your arguments.".With(argument.Name), null);
 					newCache[eventType] = command;
 					Cache = newCache;
 				}
-				var result = command.Submit(input, output, locator, argument.ReturnInstance ?? false, argument.Data);
-
-				return CommandResult<TOutput>.Return(HttpStatusCode.Created, result, "Event stored");
+				return command.Submit(input, output, locator, argument.ReturnInstance ?? false, argument.Data);
 			}
 			catch (ArgumentException ex)
 			{
@@ -107,7 +105,7 @@ Example argument:
 
 		private interface ISubmitCommand
 		{
-			TOutput Submit<TInput, TOutput>(
+			CommandResult<TOutput> Submit<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
@@ -118,7 +116,7 @@ Example argument:
 		private class SubmitEventCommand<TEvent> : ISubmitCommand
 			where TEvent : IEvent
 		{
-			public TOutput Submit<TInput, TOutput>(
+			public CommandResult<TOutput> Submit<TInput, TOutput>(
 				ISerialization<TInput> input,
 				ISerialization<TOutput> output,
 				IServiceProvider locator,
@@ -152,10 +150,25 @@ Example argument:
 				}
 				try
 				{
-					if (returnInstance)
-						return output.Serialize(domainEvent);
-					else
-						return output.Serialize(uri);
+					var command = domainEvent as ICommand;
+					Dictionary<string, List<string>> errors;
+					if (command != null)
+					{
+						errors = command.GetValidationErrors();
+						if (errors.Count != 0)
+							return CommandResult<TOutput>.Return(
+								HttpStatusCode.BadRequest,
+								output.Serialize(errors),
+								"Validation errors");
+						return CommandResult<TOutput>.Return(
+							HttpStatusCode.OK,
+							returnInstance ? output.Serialize(domainEvent) : output.Serialize(uri),
+							"Command processed");
+					}
+					return CommandResult<TOutput>.Return(
+						HttpStatusCode.Created,
+						returnInstance ? output.Serialize(domainEvent) : output.Serialize(uri),
+						"Event stored");
 				}
 				catch (Exception ex)
 				{

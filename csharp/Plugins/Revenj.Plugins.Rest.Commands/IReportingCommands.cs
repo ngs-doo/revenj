@@ -39,21 +39,6 @@ namespace Revenj.Plugins.Rest.Commands
 		Stream OlapCubeQuery(string cube, string templater, string specification, string dimensions, string facts, string order, string limit, string offset);
 
 		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/olap-generic/{cube}/{templater}?dimensions={dimensions}&facts={facts}&order={order}&limit={limit}&offset={offset}")]
-		[Description("Create simple olap report with generic specification")]
-		Stream OlapCubeWithGenericSpecification(string cube, string templater, string dimensions, string facts, string order, string limit, string offset, Stream body);
-
-		[OperationContract]
-		[WebGet(UriTemplate = "/olap-generic/{cube}/{templater}?dimensions={dimensions}&facts={facts}&order={order}&limit={limit}&offset={offset}")]
-		[Description("Create simple olap report with generic specification. Search arguments are in query string")]
-		Stream OlapCubeWithGenericSpecificationQuery(string cube, string templater, string dimensions, string facts, string order, string limit, string offset);
-
-		[OperationContract]
-		[WebInvoke(Method = "PUT", UriTemplate = "/olap-expression/{cube}/{templater}?dimensions={dimensions}&facts={facts}&order={order}&limit={limit}&offset={offset}")]
-		[Description("Create simple olap report with using expression")]
-		Stream OlapCubeWithExpression(string cube, string templater, string dimensions, string facts, string order, string limit, string offset, Stream body);
-
-		[OperationContract]
 		[WebGet(UriTemplate = "/history/{root}/{*uris}")]
 		[Description("Get aggregate root's history")]
 		Stream GetHistory(string root, string uris);

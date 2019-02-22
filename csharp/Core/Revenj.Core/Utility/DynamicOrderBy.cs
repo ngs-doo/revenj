@@ -33,12 +33,13 @@ namespace Revenj.Utility
 			return collection;
 		}
 
+		//TODO: caching
 		private static IQueryable<T> ApplyOrderBy<T>(IQueryable<T> collection, string path, bool ascending, bool first)
 		{
 			var props = path.Split('.');
 			var type = typeof(T);
 
-			var arg = Expression.Parameter(type, "x");
+			var arg = Expression.Parameter(type, "_it");
 			Expression expr = arg;
 			foreach (var prop in props)
 			{

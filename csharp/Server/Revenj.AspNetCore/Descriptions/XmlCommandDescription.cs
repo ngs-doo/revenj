@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.Http;
 using Revenj.Processing;
 
-namespace Revenj.Plugins.AspNetCore.Commands
+namespace Revenj.AspNetCore
 {
 	public class XmlCommandDescription : IServerCommandDescription<XElement>
 	{

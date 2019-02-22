@@ -3,7 +3,7 @@ using Revenj.Processing;
 using System;
 using System.IO;
 
-namespace Revenj.Plugins.AspNetCore.Commands
+namespace Revenj.AspNetCore
 {
 	public class ProtobufCommandDescription : IServerCommandDescription<Stream>
 	{

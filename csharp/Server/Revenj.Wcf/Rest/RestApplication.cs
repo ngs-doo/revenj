@@ -65,13 +65,13 @@ namespace Revenj.Wcf
 			if (result.Status == HttpStatusCode.ServiceUnavailable)
 				HttpRuntime.UnloadAppDomain();
 
-			if ((int)result.Status >= 300)
-				return new ExecuteResult { Error = response.ReturnError(result.Message, result.Status) };
+			var noResult = first == null || first.Result == null || first.Result.Data == null;
 
+			if ((int)result.Status >= 300 && noResult)
+				return new ExecuteResult { Error = response.ReturnError(result.Message, result.Status) };
 			if (first == null)
 				return new ExecuteResult { Error = response.ReturnError("Missing result", HttpStatusCode.InternalServerError) };
-
-			if ((int)first.Result.Status >= 300)
+			if ((int)first.Result.Status >= 300 && noResult)
 				return new ExecuteResult { Error = response.ReturnError(first.Result.Message, first.Result.Status) };
 
 			foreach (var ar in result.ExecutedCommandResults.Skip(1))

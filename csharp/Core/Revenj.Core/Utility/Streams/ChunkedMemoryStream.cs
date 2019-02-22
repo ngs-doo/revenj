@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Revenj.Common;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -54,7 +55,8 @@ namespace Revenj.Utility
 		private BufferedTextReader BufferedReader;
 		private readonly bool IsShared;
 
-		private int BoundToThread;
+		private bool disposed;
+
 		private bool UsedReader;
 		private bool UsedWriter;
 		private bool UsedBuffered;
@@ -71,7 +73,6 @@ namespace Revenj.Utility
 			{
 				CurrentEstimate--;
 				stream.Reset();
-				stream.BoundToThread = Thread.CurrentThread.ManagedThreadId;
 				stream.disposed = false;
 				return stream;
 			}
@@ -100,7 +101,6 @@ namespace Revenj.Utility
 		/// </summary>
 		public ChunkedMemoryStream()
 		{
-			BoundToThread = Thread.CurrentThread.ManagedThreadId;
 			IsShared = false;
 			Blocks.Add(new byte[BlockSize]);
 		}
@@ -542,8 +542,6 @@ namespace Revenj.Utility
 			return BufferedReader.Reuse(value);
 		}
 
-		bool disposed;
-
 		/// <summary>
 		/// Close current stream.
 		/// Stream will be added to pool if required.
@@ -557,8 +555,9 @@ namespace Revenj.Utility
 					Reader.DiscardBufferedData();
 				UsedBuffered = UsedReader = UsedWriter = false;
 			}
-			else if (!disposed && BoundToThread == Thread.CurrentThread.ManagedThreadId)
+			else
 			{
+				if (disposed) throw new FrameworkException("Close called multiple times on reusable stream");
 				disposed = true;
 				if (Writer != null && UsedWriter)
 					Writer.Flush();

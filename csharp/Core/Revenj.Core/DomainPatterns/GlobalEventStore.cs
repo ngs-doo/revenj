@@ -13,8 +13,8 @@ namespace Revenj.DomainPatterns
 		private static readonly TraceSource TraceSource = new TraceSource("Revenj.Server");
 
 		private readonly IServiceProvider Locator;
-		private readonly ConcurrentDictionary<Type, Action<List<IDomainEvent>>> EventStores =
-			new ConcurrentDictionary<Type, Action<List<IDomainEvent>>>(1, 17);
+		private readonly ConcurrentDictionary<Type, Action<List<IEvent>>> EventStores =
+			new ConcurrentDictionary<Type, Action<List<IEvent>>>(1, 17);
 		private readonly BlockingCollection<EventInfo> EventQueue = new BlockingCollection<EventInfo>(new ConcurrentQueue<EventInfo>());
 		private bool IsDisposed;
 		private readonly Thread Loop;
@@ -22,14 +22,12 @@ namespace Revenj.DomainPatterns
 		struct EventInfo
 		{
 			public readonly Type Type;
-			public readonly IDomainEvent Event;
-			public readonly Guid ID;
+			public readonly IEvent Event;
 
-			public EventInfo(Type type, IDomainEvent domainEvent)
+			public EventInfo(Type type, IEvent domainEvent)
 			{
 				this.Type = type;
 				this.Event = domainEvent;
-				this.ID = Guid.NewGuid();
 			}
 		}
 
@@ -44,21 +42,20 @@ namespace Revenj.DomainPatterns
 			Loop.Start();
 		}
 
-		public string Queue<T>(T domainEvent) where T : IDomainEvent
+		public void Queue<T>(T domainEvent) where T : IEvent
 		{
 			var info = new EventInfo(typeof(T), domainEvent);
 			EventQueue.Add(info);
-			return info.ID.ToString();
 		}
 
-		private static Func<IServiceProvider, Action<List<IDomainEvent>>> ResolveMethod = ResolveAndSetupStore<IDomainEvent>;
+		private static Func<IServiceProvider, Action<List<IEvent>>> ResolveMethod = ResolveAndSetupStore<IEvent>;
 
-		private static Action<List<IDomainEvent>> ResolveAndSetupStore<TEvent>(IServiceProvider locator)
-			where TEvent : IDomainEvent
+		private static Action<List<IEvent>> ResolveAndSetupStore<TEvent>(IServiceProvider locator)
+			where TEvent : IEvent
 		{
 			try
 			{
-				var store = locator.Resolve<IDomainEventStore<TEvent>>();
+				var store = locator.Resolve<IEventStore<TEvent>>();
 				return events => store.Submit(events.Cast<TEvent>());
 			}
 			catch (Exception ex)
@@ -73,13 +70,13 @@ namespace Revenj.DomainPatterns
 			}
 		}
 
-		private Action<List<IDomainEvent>> ResolveStore(Type type)
+		private Action<List<IEvent>> ResolveStore(Type type)
 		{
-			Action<List<IDomainEvent>> store;
+			Action<List<IEvent>> store;
 			if (!EventStores.TryGetValue(type, out store))
 			{
 				var eventMethod = ResolveMethod.Method.GetGenericMethodDefinition().MakeGenericMethod(type);
-				store = (Action<List<IDomainEvent>>)eventMethod.Invoke(null, new object[] { Locator });
+				store = (Action<List<IEvent>>)eventMethod.Invoke(null, new object[] { Locator });
 				EventStores.TryAdd(type, store);
 			}
 			return store;
@@ -87,7 +84,7 @@ namespace Revenj.DomainPatterns
 
 		private void WaitForEvents(object o)
 		{
-			var bulk = new List<IDomainEvent>(1000);
+			var bulk = new List<IEvent>(1000);
 			Type lastType = null;
 			var info = default(EventInfo);
 			while (!IsDisposed)

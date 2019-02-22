@@ -21,6 +21,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\..\Revenj.snk" Link="Revenj.snk" />
   </ItemGroup>
 

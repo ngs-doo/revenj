@@ -17,10 +17,23 @@ using System.Linq.Expressions;
 
 namespace Revenj.AspNetCore
 {
+	public interface IRevenjConfig
+	{
+		IRevenjConfig WithAOP();
+		IRevenjConfig UseRevenjServiceProvider();
+		IRevenjConfig ImportPlugins(string path);
+		IRevenjConfig ImportPlugins(Assembly assembly);
+		IRevenjConfig UsingContainer(Extensibility.Setup.IContainerBuilder container);
+		IRevenjConfig OnInitialize(ISystemAspect aspect);
+		IRevenjConfig SecurityCheck(IPermissionManager permissions);
+		IWebHostBuilder Configure(string connectionString);
+	}
+
 	internal class RevenjConfig : IRevenjConfig
 	{
 		private readonly IWebHostBuilder Builder;
 		private bool WithAspects;
+		private bool ReplaceProvider;
 		private readonly List<string> DllPlugins = new List<string>();
 		private readonly List<Assembly> AssemblyPlugins = new List<Assembly>();
 		private readonly List<ISystemAspect> Aspects = new List<ISystemAspect>();
@@ -35,6 +48,11 @@ namespace Revenj.AspNetCore
 		public IRevenjConfig WithAOP()
 		{
 			WithAspects = true;
+			return this;
+		}
+		public IRevenjConfig UseRevenjServiceProvider()
+		{
+			ReplaceProvider = true;
 			return this;
 		}
 		public IRevenjConfig ImportPlugins(string path)
@@ -77,11 +95,15 @@ namespace Revenj.AspNetCore
 
 		private void SetupRevenjWith(string connectionString, IServiceCollection services)
 		{
-			var factory = new RevenjConfigFactory(connectionString, this);
-			var oldFactory = services.FirstOrDefault(it => it.ServiceType == typeof(IServiceProviderFactory<IServiceCollection>));
-			if (oldFactory != null)
-				services.Remove(oldFactory);
-			services.AddSingleton<IServiceProviderFactory<IServiceCollection>>(factory);
+			var provider = new RevenjConfigFactory(connectionString, this);
+			if (ReplaceProvider)
+			{
+				var oldFactory = services.FirstOrDefault(it => it.ServiceType == typeof(IServiceProviderFactory<IServiceCollection>));
+				if (oldFactory != null)
+					services.Remove(oldFactory);
+				services.AddSingleton<IServiceProviderFactory<IServiceCollection>>(provider);
+			}
+			else services.AddSingleton(provider.CreateFactory(services));
 		}
 
 		private class RevenjConfigFactory : IServiceProviderFactory<IServiceCollection>
@@ -100,10 +122,10 @@ namespace Revenj.AspNetCore
 				return services;
 			}
 
-			public IServiceProvider CreateServiceProvider(IServiceCollection services)
+			public IObjectFactory CreateFactory(IServiceCollection services)
 			{
 				var assemblies =
-					(from asm in Revenj.Utility.AssemblyScanner.GetAssemblies()
+					(from asm in AssemblyScanner.GetAssemblies()
 					 where asm.FullName.StartsWith("Revenj.")
 					 select asm)
 					 .Union(Config.AssemblyPlugins)
@@ -113,9 +135,9 @@ namespace Revenj.AspNetCore
 					? Extensibility.Setup.UseAutofac(assemblies, Config.DllPlugins, withAspects: Config.WithAspects)
 					: Extensibility.Setup.UseContainer(Config.Container, assemblies, Config.DllPlugins);
 				builder.RegisterSingleton<ISystemState>(state);
-				Revenj.DatabasePersistence.Postgres.Setup.ConfigurePostgres(builder, ConnectionString);
+				DatabasePersistence.Postgres.Setup.ConfigurePostgres(builder, ConnectionString);
 				var serverModels =
-					(from asm in Revenj.Utility.AssemblyScanner.GetAssemblies().Union(Config.AssemblyPlugins)
+					(from asm in AssemblyScanner.GetAssemblies().Union(Config.AssemblyPlugins)
 					 let type = asm.GetType("SystemBoot.Configuration")
 					 where type != null && type.GetMethod("Initialize") != null
 					 select asm)
@@ -125,6 +147,8 @@ namespace Revenj.AspNetCore
 				//builder.ConfigureSecurity(false);
 				builder.RegisterSingleton<IPermissionManager>(Config.Permissions);
 				builder.RegisterFunc<IPrincipal>(c => c.Resolve<IHttpContextAccessor>().HttpContext.User, InstanceScope.Context);
+				builder.RegisterType<RestApplication, RestApplication>(InstanceScope.Singleton);
+				builder.RegisterType<CommandConverter, CommandConverter>(InstanceScope.Singleton);
 
 				builder.ConfigureProcessing();
 				builder.RegisterFunc<IEnumerable<Assembly>>(f => AssemblyScanner.GetAssemblies());
@@ -145,6 +169,11 @@ namespace Revenj.AspNetCore
 					ca.Initialize(factory);
 				state.Started(factory);
 				return factory;
+			}
+
+			public IServiceProvider CreateServiceProvider(IServiceCollection services)
+			{
+				return CreateFactory(services);
 			}
 		}
 

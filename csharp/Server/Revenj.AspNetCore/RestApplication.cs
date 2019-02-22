@@ -15,26 +15,24 @@ using System.Text;
 using System.Xml.Linq;
 using Microsoft.Extensions.Primitives;
 using System.Security.Principal;
+using System.Threading.Tasks;
 
-namespace Revenj.Plugins.AspNetCore.Commands
+namespace Revenj.AspNetCore
 {
 	public class RestApplication
 	{
 		private readonly IProcessingEngine ProcessingEngine;
 		private readonly IObjectFactory ObjectFactory;
 		private readonly IWireSerialization Serialization;
-		private readonly IPluginRepository<IServerCommand> CommandsRepository;
 
 		public RestApplication(
 			IProcessingEngine processingEngine,
 			IObjectFactory objectFactory,
-			IWireSerialization serialization,
-			IPluginRepository<IServerCommand> commandsRepository)
+			IWireSerialization serialization)
 		{
 			this.ProcessingEngine = processingEngine;
 			this.ObjectFactory = objectFactory;
 			this.Serialization = serialization;
-			this.CommandsRepository = commandsRepository;
 		}
 
 		class ExecuteResult
@@ -43,26 +41,26 @@ namespace Revenj.Plugins.AspNetCore.Commands
 			public object Result;
 		}
 
-		private static ExecuteResult Execute<TInput>(
+		private static async Task<ExecuteResult> Execute<TInput>(
 			IProcessingEngine engine,
 			IServerCommandDescription<TInput>[] commands,
 			IPrincipal principal,
 			HttpResponse response)
 		{
-			var result = engine.Execute<TInput, object>(commands, principal);
+			//TODO: make it truly async. as a temporary workaroung just call engine in a thread
+			var result = await Task.Run(() => engine.Execute<TInput, object>(commands, principal));
 			var first = result.ExecutedCommandResults != null ? result.ExecutedCommandResults.FirstOrDefault() : null;
 			response.StatusCode = (int)(first != null && first.Result != null
 				? first.Result.Status
 				: result.Status);
 
-			//if (result.Status == HttpStatusCode.ServiceUnavailable)
-				//HttpRuntime.UnloadAppDomain();
+			var noResult = first == null || first.Result == null || first.Result.Data == null;
 
-			if ((int)result.Status >= 300)
+			if ((int)result.Status >= 300 && noResult)
 				return new ExecuteResult { Error = result.Message };
-			else  if (first == null)
+			if (first == null)
 				return new ExecuteResult { Error = "Missing result" };
-			else if ((int)first.Result.Status >= 300)
+			if ((int)first.Result.Status >= 300 && noResult)
 				return new ExecuteResult { Error = first.Result.Message };
 
 			foreach (var ar in result.ExecutedCommandResults.Skip(1))
@@ -71,23 +69,7 @@ namespace Revenj.Plugins.AspNetCore.Commands
 			return new ExecuteResult { Result = first.Result.Data };
 		}
 
-		public void Execute(string command, Stream message, HttpContext context)
-		{
-			if (command == null)
-			{
-				context.Response.WriteError("Command not specified", HttpStatusCode.BadRequest);
-				return;
-			}
-			var commandType = CommandsRepository.Find(command);
-			if (commandType == null)
-			{
-				context.Response.WriteError("Unknown command: " + command, HttpStatusCode.NotFound);
-				return;
-			}
-			Execute(commandType, message, context);
-		}
-
-		public void Execute(Type commandType, Stream message, HttpContext context)
+		public Task Execute(Type commandType, Stream message, HttpContext context)
 		{
 			var request = context.Request;
 			var response = context.Response;
@@ -105,18 +87,15 @@ namespace Revenj.Plugins.AspNetCore.Commands
 				var sessionID = headers[0];
 				var scope = ObjectFactory.FindScope(sessionID);
 				if (scope == null)
-				{
-					context.Response.WriteError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
-					return;
-				}
+					return context.Response.WriteError("Unknown session: " + sessionID, HttpStatusCode.BadRequest);
 				engine = scope.Resolve<IProcessingEngine>();
 			}
 
-			Stream stream;
+			Task<Stream> task;
 			switch (request.ContentType)
 			{
 				case "application/json":
-					stream =
+					task =
 						ExecuteCommands(
 							engine,
 							Serialization,
@@ -125,7 +104,7 @@ namespace Revenj.Plugins.AspNetCore.Commands
 							accept);
 					break;
 				case "application/x-protobuf":
-					stream =
+					task =
 						ExecuteCommands(
 							engine,
 							Serialization,
@@ -140,12 +119,11 @@ namespace Revenj.Plugins.AspNetCore.Commands
 						try { el = XElement.Load(message); }
 						catch (Exception ex)
 						{
-							response.WriteError(
+							return response.WriteError(
 								"Error parsing request body as XML. " + ex.Message,
 								request.ContentType == null ? HttpStatusCode.UnsupportedMediaType : HttpStatusCode.BadRequest);
-							return;
 						}
-						stream =
+						task =
 							ExecuteCommands(
 								engine,
 								Serialization,
@@ -155,7 +133,7 @@ namespace Revenj.Plugins.AspNetCore.Commands
 					}
 					else
 					{
-						stream =
+						task =
 							ExecuteCommands(
 								engine,
 								Serialization,
@@ -165,16 +143,29 @@ namespace Revenj.Plugins.AspNetCore.Commands
 					}
 					break;
 			}
-			var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
-			response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
-			var cms = stream as ChunkedMemoryStream;
-			if (cms != null)
-				cms.CopyTo(response.Body);
-			else if (stream != null)
-				stream.CopyTo(response.Body);
+			return task.ContinueWith(s =>
+			{
+				if (s.IsCompletedSuccessfully)
+				{
+					var elapsed = (decimal)(Stopwatch.GetTimestamp() - start) / TimeSpan.TicksPerMillisecond;
+					response.Headers.Add("X-Duration", elapsed.ToString(CultureInfo.InvariantCulture));
+					var stream = s.Result;
+					var cms = stream as ChunkedMemoryStream;
+					if (cms != null)
+					{
+						cms.CopyTo(response.Body);
+						cms.Dispose();
+					}
+					else if (task != null)
+					{
+						stream.CopyTo(response.Body);
+						stream.Dispose();
+					}
+				}
+			});
 		}
 
-		internal static Stream ExecuteCommands<TFormat>(
+		internal static async Task<Stream> ExecuteCommands<TFormat>(
 			IProcessingEngine engine,
 			IWireSerialization serialization,
 			IServerCommandDescription<TFormat>[] commands,
@@ -182,13 +173,16 @@ namespace Revenj.Plugins.AspNetCore.Commands
 			string accept)
 		{
 			var response = context.Response;
-			var result = Execute(engine, commands, context.User, response);
+			var result = await Execute(engine, commands, context.User, response);
 			if (result.Error != null)
+			{
+				context.Response.ContentType = "text/plain; charset=UTF-8";
 				return new MemoryStream(Encoding.UTF8.GetBytes(result.Error));
+			}
 			if (result.Result == null)
 			{
 				response.ContentType = accept;
-				return null;
+				return default(Stream);
 			}
 			if (accept == "application/octet-stream")
 			{

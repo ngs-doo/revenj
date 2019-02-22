@@ -3,23 +3,11 @@ using System.Collections.Generic;
 using System.Configuration;
 using Revenj.Extensibility;
 using System.IO;
-using System.Reflection;
 using Revenj.AspNetCore;
 using Revenj.Security;
 
 namespace Microsoft.AspNetCore.Hosting
 {
-	public interface IRevenjConfig
-	{
-		IRevenjConfig WithAOP();
-		IRevenjConfig ImportPlugins(string path);
-		IRevenjConfig ImportPlugins(Assembly assembly);
-		IRevenjConfig UsingContainer(Setup.IContainerBuilder container);
-		IRevenjConfig OnInitialize(ISystemAspect aspect);
-		IRevenjConfig SecurityCheck(IPermissionManager permissions);
-		IWebHostBuilder Configure(string connectionString);
-	}
-
 	public static class RevenjWebHostBuilderExtension
 	{
 		public static IRevenjConfig UseRevenj(this IWebHostBuilder builder)

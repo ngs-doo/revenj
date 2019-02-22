@@ -1,7 +1,7 @@
 ﻿using Revenj.Serialization;
 using System.Runtime.Serialization;
 
-namespace Revenj.Plugins.AspNetCore.Commands
+namespace Revenj.AspNetCore
 {
 	internal class PassThroughSerialization : ISerialization<object>
 	{

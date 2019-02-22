@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Revenj.Processing;
 using Revenj.Utility;
 
-namespace Revenj.Plugins.AspNetCore.Commands
+namespace Revenj.AspNetCore
 {
 	public class JsonCommandDescription : IServerCommandDescription<TextReader>
 	{

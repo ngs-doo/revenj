@@ -273,7 +273,15 @@ Error: " + ex.Message;
 		{
 			if (domainType.IsFailure) return domainType.Error;
 			var genSer = serializer.GetSerializer<TFormat>();
-			var specType = typeof(GenericSpecification<,>).MakeGenericType(domainType.Result, typeof(TFormat));
+			Type specType;
+			try
+			{
+				specType = typeof(GenericSpecification<,>).MakeGenericType(domainType.Result, typeof(TFormat));
+			}
+			catch
+			{
+				return @"Unable to use generic specification on " + domainType.Result;
+			}
 			try
 			{
 				var arg = ParseObject(serializer, typeof(Dictionary<string, List<KeyValuePair<int, TFormat>>>), data, true, null);
