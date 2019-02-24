@@ -65,13 +65,13 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 
 		public int LogFillTable(
 			IDbCommand command,
-			DataTable table,
-			Func<IDbCommand, DataTable, int> query)
+			DataSet results,
+			Func<IDbCommand, DataSet, int> query)
 		{
 			var start = Stopwatch.GetTimestamp();
 			try
 			{
-				return query(command, table);
+				return query(command, results);
 			}
 			finally
 			{

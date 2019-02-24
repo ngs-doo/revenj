@@ -1,12 +1,10 @@
-﻿using Revenj.Common;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 
 namespace Revenj.Utility
 {
@@ -55,7 +53,8 @@ namespace Revenj.Utility
 		private BufferedTextReader BufferedReader;
 		private readonly bool IsShared;
 
-		private bool disposed;
+		private int PoolID;
+		private int DisposeID;
 
 		private bool UsedReader;
 		private bool UsedWriter;
@@ -73,7 +72,7 @@ namespace Revenj.Utility
 			{
 				CurrentEstimate--;
 				stream.Reset();
-				stream.disposed = false;
+				stream.PoolID++;
 				return stream;
 			}
 			CurrentEstimate = MemoryPool.Count;
@@ -119,6 +118,11 @@ namespace Revenj.Utility
 				: base(cms) { }
 
 			public override IFormatProvider FormatProvider { get { return Invariant; } }
+
+			public override void Close()
+			{
+				Flush();
+			}
 		}
 
 		/// <summary>
@@ -555,10 +559,11 @@ namespace Revenj.Utility
 					Reader.DiscardBufferedData();
 				UsedBuffered = UsedReader = UsedWriter = false;
 			}
-			else
+			else if (PoolID == DisposeID)
 			{
-				if (disposed) throw new FrameworkException("Close called multiple times on reusable stream");
-				disposed = true;
+				//due to bad stream API, keep do the dispose only the first time
+				//while this is not fully correct, it should be correct for sane use cases
+				DisposeID++;
 				if (Writer != null && UsedWriter)
 					Writer.Flush();
 				if (Reader != null && UsedReader)

@@ -31,7 +31,7 @@ namespace Revenj.Plugins.Aspects.DatabaseTrace
 			aspectRegistrator.Around<IDatabaseQuery, IDbCommand, Action<IDataReader>>(
 				q => q.Execute(null, null),
 				interceptor.LogExecuteDataReader);
-			aspectRegistrator.Around<IDatabaseQuery, IDbCommand, DataTable, int>(
+			aspectRegistrator.Around<IDatabaseQuery, IDbCommand, DataSet, int>(
 				q => q.Fill(null, null),
 				interceptor.LogFillTable);
 		}
