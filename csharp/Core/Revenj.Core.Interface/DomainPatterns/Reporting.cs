@@ -4,6 +4,8 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Revenj.DomainPatterns
 {
@@ -19,6 +21,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="locator">service locator</param>
 		/// <returns>populated result</returns>
 		TData Populate(IServiceProvider locator);
+		Task<TData> PopulateAsync(IServiceProvider locator, CancellationToken cancellationToken);
 	}
 	public interface IReportAspect<TReport, TData> where TReport : IReport<TData>
 	{
@@ -75,6 +78,14 @@ namespace Revenj.DomainPatterns
 			ISpecification<TSource> filter,
 			int? limit,
 			int? offset);
+		Task<DataTable> AnalyzeAsync(
+			IEnumerable<string> dimensions,
+			IEnumerable<string> facts,
+			IEnumerable<KeyValuePair<string, bool>> order,
+			ISpecification<TSource> filter,
+			int? limit,
+			int? offset,
+			CancellationToken cancellationToken);
 	}
 	/// <summary>
 	/// Utility for easier use of OLAP cube
@@ -217,7 +228,11 @@ namespace Revenj.DomainPatterns
 		/// Load query data by running analysis on all data.
 		/// </summary>
 		/// <returns>aggregated information</returns>
-		public DataTable Analyze() { return Query.Analyze(Dimensions, Facts, Order, ResultLimit, ResultOffset); }
+		public DataTable Analyze() { return Query.Analyze(Dimensions, Facts, Order, null, ResultLimit, ResultOffset); }
+		public Task<DataTable> AnalyzeAsync(CancellationToken cancellationToken)
+		{
+			return Query.AnalyzeAsync(Dimensions, Facts, Order, null, ResultLimit, ResultOffset, cancellationToken);
+		}
 		/// <summary>
 		/// Load query data by running analysis on subset of data.
 		/// Specification predicate is used to filter data.
@@ -227,6 +242,10 @@ namespace Revenj.DomainPatterns
 		public DataTable Analyze(ISpecification<T> specification)
 		{
 			return Query.Analyze(Dimensions, Facts, Order, specification, ResultLimit, ResultOffset);
+		}
+		public Task<DataTable> AnalyzeAsync(ISpecification<T> specification, CancellationToken cancellationToken)
+		{
+			return Query.AnalyzeAsync(Dimensions, Facts, Order, specification, ResultLimit, ResultOffset, cancellationToken);
 		}
 	}
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Revenj.DomainPatterns
 {
@@ -20,6 +22,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="uri">identity</param>
 		/// <returns>found value</returns>
 		T Find<T>(string uri) where T : IIdentifiable;
+		Task<T> FindAsync<T>(string uri, CancellationToken cancellationToken) where T : IIdentifiable;
 		/// <summary>
 		/// Find identifiable data from provided URIs
 		/// </summary>
@@ -27,6 +30,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="uris">identification</param>
 		/// <returns>found values</returns>
 		T[] Find<T>(IEnumerable<string> uris) where T : IIdentifiable;
+		Task<IEnumerable<T>> FindAsync<T>(IEnumerable<string> uris, CancellationToken cancellationToken) where T : IIdentifiable;
 		/// <summary>
 		/// LINQ queries to data
 		/// </summary>
@@ -43,6 +47,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="offset">skip initial results</param>
 		/// <returns>found items</returns>
 		T[] Search<T>(ISpecification<T> filter, int? limit, int? offset) where T : IDataSource;
+		Task<IEnumerable<T>> SearchAsync<T>(ISpecification<T> filter, int? limit, int? offset, CancellationToken cancellationToken) where T : IDataSource;
 		/// <summary>
 		/// Count data using provided specification.
 		/// Specification is optional.
@@ -51,6 +56,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="filter">filter predicate</param>
 		/// <returns>total found items</returns>
 		long Count<T>(ISpecification<T> filter) where T : IDataSource;
+		Task<long> CountAsync<T>(ISpecification<T> filter, CancellationToken cancellationToken) where T : IDataSource;
 		/// <summary>
 		/// Check if data exists using provided specification.
 		/// Specification is optional.
@@ -59,6 +65,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="filter">filter predicate</param>
 		/// <returns>items exists</returns>
 		bool Exists<T>(ISpecification<T> filter) where T : IDataSource;
+		Task<bool> ExistsAsync<T>(ISpecification<T> filter, CancellationToken cancellationToken) where T : IDataSource;
 		/// <summary>
 		/// Create new aggregate roots. 
 		/// Data will be sent immediately to the backing store.
@@ -66,6 +73,7 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="aggregates">new aggregates</param>
 		void Create<T>(IEnumerable<T> aggregates) where T : IAggregateRoot;
+		Task CreateAsync<T>(IEnumerable<T> aggregates, CancellationToken cancellationToken) where T : IAggregateRoot;
 		/// <summary>
 		/// Update existing aggregate roots. Provide pair of old and new.
 		/// Old value is optional. Change track value will be used on null values.
@@ -75,6 +83,7 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="pairs">aggregate pairs</param>
 		void Update<T>(IEnumerable<KeyValuePair<T, T>> pairs) where T : IAggregateRoot;
+		Task UpdateAsync<T>(IEnumerable<KeyValuePair<T, T>> pairs, CancellationToken cancellationToken) where T : IAggregateRoot;
 		/// <summary>
 		/// Delete existing aggregate roots.
 		/// Data will be sent immediately to the backing store.
@@ -82,6 +91,7 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="T">aggregate type</typeparam>
 		/// <param name="aggregates">remove provided aggregate roots</param>
 		void Delete<T>(IEnumerable<T> aggregates) where T : IAggregateRoot;
+		Task DeleteAsync<T>(IEnumerable<T> aggregates, CancellationToken cancellationToken) where T : IAggregateRoot;
 		/// <summary>
 		/// Raise events (within current transaction)
 		/// If currently inside transaction and transaction is rolled back, event will not be saved
@@ -89,6 +99,7 @@ namespace Revenj.DomainPatterns
 		/// <typeparam name="T">event type</typeparam>
 		/// <param name="events">events</param>
 		string[] Submit<T>(IEnumerable<T> events) where T : IEvent;
+		Task<string[]> SubmitAsync<T>(IEnumerable<T> events, CancellationToken cancellationToken) where T : IEvent;
 		/// <summary>
 		/// Queue event for out-of-transaction submission to the store
 		/// If error happens during submission (loss of power, DB connection problems, event will be lost)
@@ -104,6 +115,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="report">arguments for report</param>
 		/// <returns>populated report</returns>
 		T Populate<T>(IReport<T> report);
+		Task<T> PopulateAsync<T>(IReport<T> report, CancellationToken cancellationToken);
 		/// <summary>
 		/// Change tracking.
 		/// </summary>
@@ -117,6 +129,7 @@ namespace Revenj.DomainPatterns
 		/// <param name="uris">identifiers</param>
 		/// <returns>found history</returns>
 		IHistory<T>[] History<T>(IEnumerable<string> uris) where T : IObjectHistory;
+		Task<IEnumerable<IHistory<T>>> HistoryAsync<T>(IEnumerable<string> uris, CancellationToken cancellationToken) where T : IObjectHistory;
 		/// <summary>
 		/// OLAP cube builder. Data analysis using dimensions and facts
 		/// </summary>

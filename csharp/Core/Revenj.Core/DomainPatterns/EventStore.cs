@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Revenj.DomainPatterns
 {
-	internal class EventStore : IDomainEventStore
+	internal class EventStore : IEventStore
 	{
 		private readonly IServiceProvider Locator;
 		private readonly GlobalEventStore GlobalStore;
-		private readonly ConcurrentDictionary<Type, Func<object, string>> EventStores = new ConcurrentDictionary<Type, Func<object, string>>(1, 17);
+		private readonly ConcurrentDictionary<Type, object> EventStores = new ConcurrentDictionary<Type, object>(1, 17);
 
 		public EventStore(IServiceProvider locator, GlobalEventStore globalStore)
 		{
@@ -19,30 +21,39 @@ namespace Revenj.DomainPatterns
 			this.GlobalStore = globalStore;
 		}
 
-		public string Submit<TEvent>(TEvent domainEvent) where TEvent : IEvent
+		private IEventStore<TEvent> FindStore<TEvent>() where TEvent : IEvent
 		{
-			Func<object, string> store;
-			if (!EventStores.TryGetValue(typeof(TEvent), out store))
+			object store;
+			if (EventStores.TryGetValue(typeof(TEvent), out store))
+				return (IEventStore<TEvent>)store;
+			IEventStore<TEvent> domainEventStore;
+			try
 			{
-				IEventStore<TEvent> domainEventStore;
-				try
-				{
-					domainEventStore = Locator.Resolve<IEventStore<TEvent>>();
-				}
-				catch (Exception ex)
-				{
-					throw new ArgumentException(string.Format(@"Can't find domain event store for {0}.
-Is {0} a domain event and does it have registered store", typeof(TEvent).FullName), ex);
-				}
-				store = it => domainEventStore.Submit((TEvent)it);
-				EventStores.TryAdd(typeof(TEvent), store);
+				domainEventStore = Locator.Resolve<IEventStore<TEvent>>();
 			}
-			return store(domainEvent);
+			catch (Exception ex)
+			{
+				throw new ArgumentException(string.Format(@"Can't find event store for {0}.
+Is {0} an event and does it have registered store", typeof(TEvent).FullName), ex);
+			}
+			EventStores.TryAdd(typeof(TEvent), domainEventStore);
+			return domainEventStore;
 		}
 
-		public void Queue<TEvent>(TEvent domainEvent) where TEvent : IDomainEvent
+		public string Submit<TEvent>(TEvent instance) where TEvent : IEvent
 		{
-			GlobalStore.Queue(domainEvent);
+			return FindStore<TEvent>().Submit(instance);
+		}
+
+		public Task<string> SubmitAsync<TEvent>(TEvent instance, CancellationToken cancellationToken) where TEvent : IEvent
+		{
+			return FindStore<TEvent>().SubmitAsync(new[] { instance }, cancellationToken)
+				.ContinueWith(res => res.Result[0], TaskContinuationOptions.OnlyOnRanToCompletion);
+		}
+
+		public void Queue<TEvent>(TEvent instance) where TEvent : IEvent
+		{
+			GlobalStore.Queue(instance);
 		}
 	}
 }

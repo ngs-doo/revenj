@@ -31,3 +31,5 @@ logs/
 _ReSharper*/
 Dotfuscated/
 [Tt]est[Rr]esult*
+
+.vs/

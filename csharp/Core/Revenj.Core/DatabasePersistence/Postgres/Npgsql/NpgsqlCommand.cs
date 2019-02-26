@@ -38,6 +38,7 @@ using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 using Revenj.Utility;
 
@@ -47,7 +48,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// Represents a SQL statement or function (stored procedure) to execute
 	/// against a PostgreSQL database. This class cannot be inherited.
 	/// </summary>
-	public sealed class NpgsqlCommand : DbCommand, ICloneable
+	public sealed class NpgsqlCommand : DbCommand, IRevenjDbCommand, ICloneable
 	{
 		// Logging related values
 		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
@@ -484,6 +485,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			GetReader(CommandBehavior.SequentialAccess).Dispose();
 		}
 
+		internal Task ExecuteBlindAsync(CancellationToken cancellationToken)
+		{
+			return GetReaderAsync(CommandBehavior.SequentialAccess, cancellationToken)
+				.ContinueWith(rdr => rdr.Dispose(), TaskContinuationOptions.OnlyOnRanToCompletion);
+		}
+
 		/// <summary>
 		/// Executes a SQL statement against the connection and returns the number of rows affected.
 		/// </summary>
@@ -509,6 +516,29 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			return ret ?? -1;
 		}
 
+		public Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
+		{
+			int? ret = null;
+			var reader = GetReaderAsync(CommandBehavior.SequentialAccess, cancellationToken);
+			return reader.ContinueWith(r =>
+			{
+				using (NpgsqlDataReader rdr = r.Result)
+				{
+					do
+					{
+						int thisRecord = rdr.RecordsAffected;
+						if (thisRecord != -1)
+						{
+							ret = (ret ?? 0) + thisRecord;
+						}
+						lastInsertedOID = rdr.LastInsertedOID ?? lastInsertedOID;
+					}
+					while (rdr.NextResult());
+				}
+				return ret ?? -1;
+			}, TaskContinuationOptions.OnlyOnRanToCompletion);
+		}
+
 		/// <summary>
 		/// Sends the <see cref="Npgsql.NpgsqlCommand.CommandText">CommandText</see> to
 		/// the <see cref="Npgsql.NpgsqlConnection">Connection</see> and builds a
@@ -531,6 +561,32 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public new NpgsqlDataReader ExecuteReader()
 		{
 			return ExecuteReader(CommandBehavior.Default);
+		}
+
+		public Task<IDataReader> ExecuteReaderAsync(CommandBehavior cb, CancellationToken cancellationToken)
+		{
+			try
+			{
+				if (connection != null)
+				{
+					if (connection.PreloadReader)
+					{
+						//Adjust behaviour so source reader is sequential access - for speed - and doesn't close the connection - or it'll do so at the wrong time.
+						CommandBehavior adjusted = (cb | CommandBehavior.SequentialAccess) & ~CommandBehavior.CloseConnection;
+						return GetReaderAsync(adjusted, cancellationToken)
+							.ContinueWith<IDataReader>(r => new CachingDataReader(r.Result, cb), TaskContinuationOptions.OnlyOnRanToCompletion);
+					}
+				}
+				return GetReaderAsync(cb, cancellationToken).ContinueWith<IDataReader>(r => r.Result, TaskContinuationOptions.OnlyOnRanToCompletion);
+			}
+			catch (Exception)
+			{
+				if ((cb & CommandBehavior.CloseConnection) == CommandBehavior.CloseConnection)
+				{
+					connection.Close();
+				}
+				throw;
+			}
 		}
 
 		/// <summary>
@@ -567,7 +623,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				}
 				throw;
 			}
-
 		}
 
 		internal ForwardsOnlyDataReader GetReader(CommandBehavior cb)
@@ -626,6 +681,102 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						reader = forwardReader.Process(connector.ExecuteEnum(new NpgsqlExecute(bind.PortalName, 0)), cb, connector.BlockNotificationThread(), true);
 					}
 					return reader;
+				}
+			}
+			catch (IOException ex)
+			{
+				throw ClearPoolAndCreateException(ex);
+			}
+		}
+
+		internal Task<ForwardsOnlyDataReader> GetReaderAsync(CommandBehavior cb, CancellationToken cancellationToken)
+		{
+			try
+			{
+				CheckConnectionState();
+
+				var connector = Connector;
+
+				if (PreparedQuery != null)
+					connector.PrepareOrAdd(PreparedQuery, PreparedParams, text);
+
+				// reset any responses just before getting new ones
+				connector.Mediator.ResetResponses();
+
+				// Set command timeout.
+				connector.Mediator.CommandTimeout = CommandTimeout;
+
+				var nt = connector.BlockNotificationThread();
+				ForwardsOnlyDataReader reader;
+				if (parse == null)
+				{
+					var task = connector.QueryEnumAsync(this, cancellationToken);
+					return task.ContinueWith(res =>
+					{
+						if (res.IsCompleted)
+						{
+							try
+							{
+								reader = forwardReader.Process(res.Result, cb, connector.BlockNotificationThread(), false);
+								if (type == CommandType.StoredProcedure
+									&& reader.FieldCount == 1
+									&& reader.GetDataTypeName(0) == "refcursor")
+								{
+									StringBuilder sb = new StringBuilder();
+									while (reader.Read())
+									{
+										sb.Append("fetch all from \"").Append(reader.GetString(0)).Append("\";");
+									}
+									sb.Append(";");
+									NpgsqlCommand c = new NpgsqlCommand(sb.ToString(), Connection);
+									c.CommandTimeout = this.CommandTimeout;
+									return c.GetReader(reader._behavior);
+								}
+								return reader;
+							}
+							catch (IOException ex)
+							{
+								throw ClearPoolAndCreateException(ex);
+							}
+							finally
+							{
+								nt.Dispose();
+							}
+						}
+						else
+						{
+							nt.Dispose();
+							throw ClearPoolAndCreateException(res.Exception);
+						}
+					});
+				}
+				else
+				{
+					BindParameters();
+					var task = connector.ExecuteEnumAsync(new NpgsqlExecute(bind.PortalName, 0), cancellationToken);
+					return task.ContinueWith(res =>
+					{
+						if (res.IsCompleted)
+						{
+							try
+							{
+								return forwardReader.Process(res.Result, cb, connector.BlockNotificationThread(), true);
+							}
+							catch (IOException ex)
+							{
+								throw ClearPoolAndCreateException(ex);
+							}
+							finally
+							{
+								nt.Dispose();
+							}
+						}
+						else
+						{
+							nt.Dispose();
+							throw ClearPoolAndCreateException(res.Exception);
+						}
+					});
 				}
 			}
 			catch (IOException ex)

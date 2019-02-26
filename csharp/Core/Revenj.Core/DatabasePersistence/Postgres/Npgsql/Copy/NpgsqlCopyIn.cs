@@ -28,6 +28,8 @@
 
 
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -148,6 +150,27 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				{
 					throw new NpgsqlException("Not a COPY IN query: " + _cmd.CommandText);
 				}
+			}
+			else
+			{
+				throw new NpgsqlException("Copy can only start in Ready state, not in " + _context.CurrentState);
+			}
+		}
+
+		public Task StartAsync(CancellationToken cancellationToken)
+		{
+			if (_context.CurrentState is NpgsqlReadyState)
+			{
+				_context.Mediator.CopyStream = _copyStream;
+				return _cmd.ExecuteBlindAsync(cancellationToken).ContinueWith(t =>
+				{
+					_disposeCopyStream = _copyStream == null;
+					_copyStream = _context.Mediator.CopyStream;
+					if (_copyStream == null && !(_context.CurrentState is NpgsqlReadyState))
+					{
+						throw new NpgsqlException("Not a COPY IN query: " + _cmd.CommandText);
+					}
+				}, TaskContinuationOptions.OnlyOnRanToCompletion);
 			}
 			else
 			{

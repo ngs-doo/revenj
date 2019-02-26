@@ -4,6 +4,8 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Revenj.DomainPatterns;
 using Revenj.Utility;
 
@@ -125,7 +127,7 @@ namespace Revenj.DatabasePersistence.Postgres
 				});
 			}
 
-			public void Execute()
+			private IDbCommand PrepareQuery()
 			{
 				Writer.Flush();
 				Stream.Position = 0;
@@ -163,6 +165,12 @@ namespace Revenj.DatabasePersistence.Postgres
 					com = PostgresCommandFactory.PreparedCommand(Stream, preparedCommand.Name, preparedCommand.Query, preparedCommand.Types);
 				}
 				else com = PostgresCommandFactory.NewCommand(Stream);
+				return com;
+			}
+
+			public void Execute()
+			{
+				IDbCommand com = PrepareQuery();
 				Results = new object[ResultActions.Count];
 				Query.Execute(
 					com,
@@ -171,6 +179,20 @@ namespace Revenj.DatabasePersistence.Postgres
 						for (int i = 0; i < ResultActions.Count; i++)
 							Results[i] = ResultActions[i](dr, i);
 					});
+			}
+
+			public Task ExecuteAsync(CancellationToken cancellationToken)
+			{
+				IDbCommand com = PrepareQuery();
+				Results = new object[ResultActions.Count];
+				return Query.ExecuteAsync(
+					com,
+					dr =>
+					{
+						for (int i = 0; i < ResultActions.Count; i++)
+							Results[i] = ResultActions[i](dr, i);
+					},
+					cancellationToken);
 			}
 
 			private IBulkRepository<T> GetRepository<T>()

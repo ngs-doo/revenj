@@ -8,6 +8,8 @@ using System.Text;
 using Revenj.DatabasePersistence.Postgres.QueryGeneration.QueryComposition;
 using Revenj.DomainPatterns;
 using Revenj.Utility;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Revenj.DatabasePersistence.Postgres
 {
@@ -109,6 +111,42 @@ namespace Revenj.DatabasePersistence.Postgres
 				});
 			}
 			return table;
+		}
+
+		public Task<DataTable> AnalyzeAsync(
+			IEnumerable<string> dimensions,
+			IEnumerable<string> facts,
+			IEnumerable<KeyValuePair<string, bool>> order,
+			ISpecification<TSource> filter,
+			int? limit,
+			int? offset,
+			CancellationToken cancellationToken)
+		{
+			var usedDimensions = new List<string>();
+			var usedFacts = new List<string>();
+			if (dimensions != null)
+				usedDimensions.AddRange(dimensions);
+			if (facts != null)
+				usedFacts.AddRange(facts);
+			var sql = PrepareSql(usedDimensions, usedFacts, order, filter, limit, offset);
+			var table = new DataTable { CaseSensitive = true };
+			var converters = PrepareConverters(usedDimensions, usedFacts, table);
+			var cms = ChunkedMemoryStream.Create();
+			var com = DatabaseQuery.CreateCommand(sql);
+			return DatabaseQuery.ExecuteAsync(com, dr =>
+			{
+				var obj = dr.GetValue(0);
+				var tr = obj as TextReader;
+				var btr = tr != null ? cms.UseBufferedReader(tr) : cms.UseBufferedReader(obj.ToString());
+				btr.Read();
+				var args = new object[converters.Length];
+				for (int i = 0; i < converters.Length; i++)
+					args[i] = converters[i](btr, 1);
+				table.Rows.Add(args);
+				if (tr != null) tr.Dispose();
+			}, cancellationToken)
+				.ContinueWith(t => { cms.Dispose(); })
+				.ContinueWith(t => table, TaskContinuationOptions.OnlyOnRanToCompletion);
 		}
 
 		public Func<BufferedTextReader, int, object>[] PrepareConverters(

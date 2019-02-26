@@ -2,9 +2,16 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.Contracts;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Revenj.DatabasePersistence
 {
+	public interface IRevenjDbCommand : IDbCommand
+	{
+		Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken);
+		Task<IDataReader> ExecuteReaderAsync(CommandBehavior commandBehavior, CancellationToken cancellationToken);
+	}
 	/// <summary>
 	/// ADO.NET database abstraction.
 	/// Execute SQL queries on database.
@@ -15,7 +22,7 @@ namespace Revenj.DatabasePersistence
 		/// Create new database command for specific ADO.NET driver.
 		/// </summary>
 		/// <returns>new command</returns>
-		IDbCommand NewCommand();
+		IRevenjDbCommand NewCommand();
 		/// <summary>
 		/// Is current query inside a transaction.
 		/// </summary>
@@ -28,6 +35,7 @@ namespace Revenj.DatabasePersistence
 		/// <param name="command">database command</param>
 		/// <returns>base ExecuteNonQuery result</returns>
 		int Execute(IDbCommand command);
+		int ExecuteAsync(IRevenjDbCommand command, CancellationToken cancellationToken);
 		/// <summary>
 		/// Execute query on the database and loop through the reader.
 		/// Connection and transaction information will be appended to the provided command.
@@ -36,6 +44,7 @@ namespace Revenj.DatabasePersistence
 		/// <param name="command">database command</param>
 		/// <param name="action">handle result returned from the database</param>
 		void Execute(IDbCommand command, Action<IDataReader> action);
+		Task ExecuteAsync(IRevenjDbCommand command, Action<IDataReader> action, CancellationToken cancellationToken);
 		/// <summary>
 		/// Execute query on the database and fill DataSet with the result.
 		/// Connection and transaction information will be appended to the provided command.
@@ -92,7 +101,7 @@ namespace Revenj.DatabasePersistence
 		/// <param name="sql">SQL to execute</param>
 		/// <param name="parameters">parameters to bind</param>
 		/// <returns></returns>
-		public static IDbCommand CreateCommand(
+		public static IRevenjDbCommand CreateCommand(
 			this IDatabaseQuery query,
 			string sql,
 			params object[] parameters)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Revenj.DatabasePersistence;
 using Revenj.DomainPatterns;
 using Revenj.Extensibility;
@@ -73,11 +75,25 @@ namespace Revenj
 			return Context.Find<T>(uri);
 		}
 
+		public Task<T> FindAsync<T>(string uri, CancellationToken cancellationToken) where T : IIdentifiable
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.FindAsync<T>(uri, cancellationToken);
+		}
+
 		public T[] Find<T>(IEnumerable<string> uris) where T : IIdentifiable
 		{
 			if (Finished)
 				throw new InvalidOperationException("Transaction was already closed");
 			return Context.Find<T>(uris);
+		}
+
+		public Task<IEnumerable<T>> FindAsync<T>(IEnumerable<string> uris, CancellationToken cancellationToken) where T : IIdentifiable
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.FindAsync<T>(uris, cancellationToken);
 		}
 
 		public IQueryable<T> Query<T>() where T : IDataSource
@@ -94,11 +110,25 @@ namespace Revenj
 			return Context.Search<T>(filter, limit, offset);
 		}
 
+		public Task<IEnumerable<T>> SearchAsync<T>(ISpecification<T> filter, int? limit, int? offset, CancellationToken cancellationToken) where T : IDataSource
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.SearchAsync<T>(filter, limit, offset, cancellationToken);
+		}
+
 		public long Count<T>(ISpecification<T> filter) where T : IDataSource
 		{
 			if (Finished)
 				throw new InvalidOperationException("Transaction was already closed");
 			return Context.Count<T>(filter);
+		}
+
+		public Task<long> CountAsync<T>(ISpecification<T> filter, CancellationToken cancellationToken) where T : IDataSource
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.CountAsync<T>(filter, cancellationToken);
 		}
 
 		public bool Exists<T>(ISpecification<T> filter) where T : IDataSource
@@ -108,11 +138,25 @@ namespace Revenj
 			return Context.Exists<T>(filter);
 		}
 
+		public Task<bool> ExistsAsync<T>(ISpecification<T> filter, CancellationToken cancellationToken) where T : IDataSource
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.ExistsAsync<T>(filter, cancellationToken);
+		}
+
 		public void Create<T>(IEnumerable<T> aggregates) where T : IAggregateRoot
 		{
 			if (Finished)
 				throw new InvalidOperationException("Transaction was already closed");
 			Context.Create(aggregates);
+		}
+
+		public Task CreateAsync<T>(IEnumerable<T> aggregates, CancellationToken cancellationToken) where T : IAggregateRoot
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.CreateAsync(aggregates, cancellationToken);
 		}
 
 		public void Update<T>(IEnumerable<KeyValuePair<T, T>> pairs) where T : IAggregateRoot
@@ -122,11 +166,25 @@ namespace Revenj
 			Context.Update(pairs);
 		}
 
+		public Task UpdateAsync<T>(IEnumerable<KeyValuePair<T, T>> pairs, CancellationToken cancellationToken) where T : IAggregateRoot
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.UpdateAsync(pairs, cancellationToken);
+		}
+
 		public void Delete<T>(IEnumerable<T> aggregates) where T : IAggregateRoot
 		{
 			if (Finished)
 				throw new InvalidOperationException("Transaction was already closed");
 			Context.Delete(aggregates);
+		}
+
+		public Task DeleteAsync<T>(IEnumerable<T> aggregates, CancellationToken cancellationToken) where T : IAggregateRoot
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.DeleteAsync(aggregates, cancellationToken);
 		}
 
 		public string[] Submit<T>(IEnumerable<T> events) where T : IEvent
@@ -136,11 +194,25 @@ namespace Revenj
 			return Context.Submit(events);
 		}
 
+		public Task<string[]> SubmitAsync<T>(IEnumerable<T> events, CancellationToken cancellationToken) where T : IEvent
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.SubmitAsync(events, cancellationToken);
+		}
+
 		public T Populate<T>(IReport<T> report)
 		{
 			if (Finished)
 				throw new InvalidOperationException("Transaction was already closed");
 			return Context.Populate(report);
+		}
+
+		public Task<T> PopulateAsync<T>(IReport<T> report, CancellationToken cancellationToken)
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.PopulateAsync(report, cancellationToken);
 		}
 
 		public IObservable<NotifyInfo> Track<T>() where T : IIdentifiable
@@ -155,6 +227,13 @@ namespace Revenj
 			if (Finished)
 				throw new InvalidOperationException("Transaction was already closed");
 			return Context.History<T>(uris);
+		}
+
+		public Task<IEnumerable<IHistory<T>>> HistoryAsync<T>(IEnumerable<string> uris, CancellationToken cancellationToken) where T : IObjectHistory
+		{
+			if (Finished)
+				throw new InvalidOperationException("Transaction was already closed");
+			return Context.HistoryAsync<T>(uris, cancellationToken);
 		}
 
 		public OlapCubeQueryBuilder<TSource> CubeBuilder<TCube, TSource>()

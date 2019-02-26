@@ -35,6 +35,7 @@ using System.Reflection;
 using System.Resources;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -67,6 +68,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 		public virtual IEnumerable<IServerResponseObject> QueryEnum(NpgsqlConnector context, NpgsqlCommand command)
+		{
+			throw new InvalidOperationException("Internal Error! " + this);
+		}
+
+		public virtual Task<IEnumerable<IServerResponseObject>> QueryEnumAsync(NpgsqlConnector context, NpgsqlCommand command, CancellationToken cancellationToken)
 		{
 			throw new InvalidOperationException("Internal Error! " + this);
 		}
@@ -226,6 +232,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 		public virtual IEnumerable<IServerResponseObject> ExecuteEnum(NpgsqlConnector context, NpgsqlExecute execute)
+		{
+			throw new InvalidOperationException("Internal Error! " + this);
+		}
+
+		public virtual Task<IEnumerable<IServerResponseObject>> ExecuteEnumAsync(NpgsqlConnector context, NpgsqlExecute execute, CancellationToken cancellationToken)
 		{
 			throw new InvalidOperationException("Internal Error! " + this);
 		}

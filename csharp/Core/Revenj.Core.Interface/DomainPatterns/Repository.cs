@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Revenj.DomainPatterns
 {
@@ -27,6 +29,13 @@ namespace Revenj.DomainPatterns
 		/// <returns>found objects</returns>
 		TValue[] Find(IEnumerable<string> uris);
 	}
+	public interface IRepositoryAsync<TValue> : IRepository<TValue>
+		where TValue : IIdentifiable
+	{
+		Task<TValue> FindAsync(string uri, CancellationToken cancellationToken);
+		Task<IEnumerable<TValue>> FindAsync(IEnumerable<string> uris, CancellationToken cancellationToken);
+	}
+
 	//TODO: TValue should implement IQueryable-like interface (doesn't exists yet)
 	/// <summary>
 	/// Data access abstraction.
@@ -72,6 +81,14 @@ namespace Revenj.DomainPatterns
 		/// <returns>data has been found</returns>
 		bool Exists<TCondition>(ISpecification<TCondition> specification);
 	}
+	public interface IQueryableRepositoryAsync<TValue> : IQueryableRepository<TValue>
+		where TValue : IDataSource
+	{
+		IQueryable<TValue> Query<TCondition>(ISpecification<TCondition> specification);
+		Task<IEnumerable<TValue>> SearchAsync<TCondition>(ISpecification<TCondition> specification, int? limit, int? offset, CancellationToken cancellationToken);
+		Task<long> CountAsync<TCondition>(ISpecification<TCondition> specification, CancellationToken cancellationToken);
+		Task<bool> ExistsAsync<TCondition>(ISpecification<TCondition> specification, CancellationToken cancellationToken);
+	}
 	/// <summary>
 	/// Aggregate root persistable repository.
 	/// Besides querying capabilities, repository has set based API for persistence.
@@ -91,6 +108,11 @@ namespace Revenj.DomainPatterns
 		/// <param name="delete">remove aggregates</param>
 		/// <returns>created identifiers</returns>
 		string[] Persist(IEnumerable<TRoot> insert, IEnumerable<KeyValuePair<TRoot, TRoot>> update, IEnumerable<TRoot> delete);
+	}
+	public interface IPersistableRepositoryAsync<TRoot> : IQueryableRepositoryAsync<TRoot>, IRepositoryAsync<TRoot>, IPersistableRepository<TRoot>
+		where TRoot : IAggregateRoot
+	{
+		Task<string[]> PersistAsync(IEnumerable<TRoot> insert, IEnumerable<KeyValuePair<TRoot, TRoot>> update, IEnumerable<TRoot> delete, CancellationToken cancellationToken);
 	}
 	public interface IRepositoryAspect<TRoot> where TRoot : IAggregateRoot
 	{
@@ -164,9 +186,13 @@ namespace Revenj.DomainPatterns
 			where TCube : IOlapCubeQuery<TSource>
 			where TSource : IDataSource;
 		/// <summary>
-		/// Execute queries
+		/// Execute queries synchronously
 		/// </summary>
 		void Execute();
+		/// <summary>
+		/// Execute queries
+		/// </summary>
+		Task ExecuteAsync(CancellationToken cancellationToken);
 	}
 	/// <summary>
 	/// Utility for easier usage of repositories.

@@ -36,6 +36,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Mono.Security.Protocol.Tls;
 using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
@@ -315,6 +316,20 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			return CurrentState.QueryEnum(this, queryCommand);
 		}
 
+		internal Task<IEnumerable<IServerResponseObject>> QueryEnumAsync(NpgsqlCommand queryCommand, CancellationToken cancellationToken)
+		{
+			if (CurrentReader != null)
+			{
+				if (!CurrentReader._cleanedUp)
+				{
+					throw new InvalidOperationException(
+						"There is already an open DataReader associated with this Command which must be closed first.");
+				}
+				CurrentReader.Close();
+			}
+			return CurrentState.QueryEnumAsync(this, queryCommand, cancellationToken);
+		}
+
 		internal void Authenticate(byte[] password)
 		{
 			CurrentState.Authenticate(this, password);
@@ -358,6 +373,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		internal IEnumerable<IServerResponseObject> ExecuteEnum(NpgsqlExecute execute)
 		{
 			return CurrentState.ExecuteEnum(this, execute);
+		}
+
+		internal Task<IEnumerable<IServerResponseObject>> ExecuteEnumAsync(NpgsqlExecute execute, CancellationToken cancellationToken)
+		{
+			return CurrentState.ExecuteEnumAsync(this, execute, cancellationToken);
 		}
 
 		private static int ValidCounter;

@@ -6,6 +6,8 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Revenj.Common;
 using Revenj.DatabasePersistence.Postgres.Converters;
 using Revenj.DatabasePersistence.Postgres.Npgsql;
@@ -17,8 +19,13 @@ namespace Revenj.DatabasePersistence.Postgres
 	public interface IPostgresDatabaseQuery : IDatabaseQuery
 	{
 		void BulkInsert(string table, IEnumerable<IPostgresTuple[]> data);
+		Task BulkInsertAsync(string table, IEnumerable<IPostgresTuple[]> data, CancellationToken cancellationToken);
 		T[] Search<T>(ISpecification<T> filter, int? limit, int? offset, IEnumerable<KeyValuePair<string, bool>> order, Func<IDataReader, T> converter);
+		IEnumerable<T> SearchAsync<T>(ISpecification<T> filter, int? limit, int? offset, IEnumerable<KeyValuePair<string, bool>> order, Func<IDataReader, T> converter, CancellationToken cancellationToken);
 		long Count<T>(ISpecification<T> filter);
+		Task<long> CountAsync<T>(ISpecification<T> filter, IEnumerable<IPostgresTuple[]> data);
+		bool Exists<T>(ISpecification<T> filter);
+		Task<bool> ExistsAsync<T>(ISpecification<T> filter, IEnumerable<IPostgresTuple[]> data);
 	}
 
 	public static class PostgresCommandFactory
@@ -224,6 +231,64 @@ Near: " + ex.Where, ex);
 			ExecuteDataReader(command, action, Transaction == null);
 		}
 
+		public Task ExecuteAsync(IRevenjDbCommand command, Action<IDataReader> action, CancellationToken cancellationToken)
+		{
+			try
+			{
+				var npg = command as NpgsqlCommand;
+				var behavior = npg != null ? npg.ReaderBehavior : CommandBehavior.Default;
+				var obj = Transaction ?? sync;
+				Monitor.Enter(obj);
+				try
+				{
+					PrepareCommand(command);
+				}
+				catch
+				{
+					Monitor.Exit(obj);
+					throw;
+				}
+				return command.ExecuteReaderAsync(behavior, cancellationToken)
+					.ContinueWith(r =>
+					{
+						using (var dr = r.Result)
+						{
+							while (dr.Read())
+								action(dr);
+						}
+					}, TaskContinuationOptions.OnlyOnRanToCompletion)
+					.ContinueWith(r =>
+					{
+						Monitor.Exit(obj);
+						return r;
+					});
+			}
+			catch (NpgsqlException ex)
+			{
+				LogError(command, 5115, ex);
+				if (Transaction == null)
+					ResetConnection();
+				throw FormatException(ex);
+			}
+			catch (PostgresException ex)
+			{
+				TraceSource.TraceEvent(TraceEventType.Error, 5116, "{0}", ex);
+				throw;
+			}
+			catch (Exception ex)
+			{
+				TraceSource.TraceEvent(TraceEventType.Critical, 5117, "{0}", ex);
+				if (Transaction == null)
+					ResetConnection();
+				throw;
+			}
+			finally
+			{
+				command.Transaction = null;
+				command.Connection = null;
+			}
+		}
+
 		private void ExecuteDataReader(IDbCommand command, Action<IDataReader> action, bool tryRecover)
 		{
 			bool hasRead = false;
@@ -289,6 +354,14 @@ Near: " + ex.Where, ex);
 		}
 
 		public int Fill(IDbCommand command, DataSet ds)
+		{
+			if (command is NpgsqlCommand)
+				return FillDataSet(command as NpgsqlCommand, ds, Transaction == null);
+
+			return FillDataSet(CopyCommand(command), ds, Transaction == null);
+		}
+
+		public Task<int> FillAsync(IDbCommand command, DataSet ds, CancellationToken cancellationToken)
 		{
 			if (command is NpgsqlCommand)
 				return FillDataSet(command as NpgsqlCommand, ds, Transaction == null);
@@ -399,6 +472,41 @@ Near: " + ex.Where, ex);
 				cms.CopyTo(copy.CopyStream);
 				copy.End();
 			}
+		}
+
+		public Task BulkInsertAsync(string table, IEnumerable<IPostgresTuple[]> data, CancellationToken cancellationToken)
+		{
+			if (!InTransaction) throw new FrameworkException("BulkInsert can only be used within transaction");
+			var cms = Revenj.Utility.ChunkedMemoryStream.Create();
+			var sw = cms.GetWriter();
+			var buf = cms.SmallBuffer;
+			foreach (var it in data)
+			{
+				var p = it[0];
+				if (p != null)
+					p.InsertRecord(sw, buf, string.Empty, PostgresTuple.EscapeBulkCopy);
+				else
+					sw.Write("\\N");
+				for (int i = 1; i < it.Length; i++)
+				{
+					sw.Write('\t');
+					p = it[i];
+					if (p != null)
+						p.InsertRecord(sw, buf, string.Empty, PostgresTuple.EscapeBulkCopy);
+					else
+						sw.Write("\\N");
+				}
+				sw.Write('\n');
+			}
+			sw.Flush();
+			cms.Position = 0;
+			var copy = new NpgsqlCopyIn("COPY " + table + " FROM STDIN DELIMITER '\t'", Connection);
+			copy.StartAsync(cancellationToken).ContinueWith(t =>
+			{
+				cms.CopyTo(copy.CopyStream);
+				//TODO: async fix
+				copy.End();
+			}, TaskContinuationOptions.OnlyOnRanToCompletion);
 		}
 
 		private NpgsqlCommand AddSource<T>(string select, ISpecification<T> filter)
