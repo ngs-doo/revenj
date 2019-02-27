@@ -583,7 +583,10 @@ Now it can be called though the built-in API:
 
 and get back just the list of customers
 
-    [{"id":"8e3f228c50444be","name":"customer 1","mobile":{"regionCode":"HR","number":"+123456"},"URI":"8e3f228c50444be"},{"id":"c131d91f9e714b1","name":"customer 2","mobile":{"regionCode":"HR","number":"+234567"},"URI":"c131d91f9e714b1"}]
+    [
+      {"id":"8e3f228c50444be","name":"customer 1","mobile":{"regionCode":"HR","number":"+123456"},"URI":"8e3f228c50444be"},
+      {"id":"c131d91f9e714b1","name":"customer 2","mobile":{"regionCode":"HR","number":"+234567"},"URI":"c131d91f9e714b1"}
+    ]
  
 ### Leaving a trail of logs
 
@@ -603,9 +606,9 @@ Modeling of such events can look like:
       Document? newPassport;
     }
  
-where we capture both the new and the old value with a reference to the actual aggregate. Unlike the *CustomerCreated* where we captured the entire customer aggregate, only the relevant information is capture here. There is one important distinction between the events, how the *customer* is referenced. The first one represents a relationship + a lazy load property on the event. Its preferable to model it in a second way unless the cache is defined for the aggregate. This way lazy load problems are avoided. 
+where we capture both the new and the old value with a reference to the actual aggregate. Unlike the *CustomerCreated* where we captured the entire customer aggregate, only the relevant information is capture here. There is one important distinction between the events, how the *customer* is referenced. The first one represents a relationship + a lazy load property on the event. Its preferable to model it in the second way unless the cache is defined for the aggregate. This way lazy load problems are avoided. 
 
-### Conclusions
+### Conclusion
 
 Revenj supports different kinds of modeling and teams should choose the one which fits their use case the best. Systems often have different architecture styles in different parts of the application - which is often desired instead of trying to do entire application in a single style.
 
