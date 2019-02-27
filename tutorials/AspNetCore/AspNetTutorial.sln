@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetTutorial", "AspNetTutorial.csproj", "{AB65D119-222D-4C9A-85DF-47E99E397F19}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB65D119-222D-4C9A-85DF-47E99E397F19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB65D119-222D-4C9A-85DF-47E99E397F19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB65D119-222D-4C9A-85DF-47E99E397F19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB65D119-222D-4C9A-85DF-47E99E397F19}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {28345340-2DF8-42E6-86E9-D01F657CB104}
+	EndGlobalSection
+	GlobalSection(DslPlatformSolutionProperties) = preSolution
+		Postgres.ConnectionString = server=localhost;database=tutorial;user=revenj;password=revenj
+		Postgres.ApplyMigration = True
+		Postgres.CompileMigration = True
+		Postgres.Compile = True
+		Postgres.BuildType = DotNetStandard
+		Postgres.Name = Model
+		Postgres.Dependencies = 
+		Postgres.Nugets = revenj:1.5.1
+	EndGlobalSection
+EndGlobal
