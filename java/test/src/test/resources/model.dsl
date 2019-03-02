@@ -5,6 +5,7 @@ module test {
 		En? en;
 		En en2;
 		bool? nb;
+		short? ss;
 		timestamp ts;
 	}
 	enum En { A; B; }
@@ -27,6 +28,8 @@ module test {
 		calculated int entitiesCount from 'it => it.entities.Count';
 		calculated bool[] entityHasMoney from 'it => it.entities.Select(e => e.money > 0).ToArray()';
 		long[]? indexes;
+		short s1;
+		short[] s2;
 		calculated hasEntities from 'it => it.entities.Count > 0';
 		CompositeList? *selfReference;
 		List<CompositeList> *selfReferences;
@@ -47,6 +50,8 @@ module test {
 		hasEntities;
 		entityHasMoney;
 		indexes;
+		s1;
+		s2;
 		calculated guid id2 from 'it => it.id';
 		specification ForSimple 'it => simples.Contains(it.simple)' {
 			List<Simple> simples;
@@ -422,11 +427,11 @@ module xc {
 	}
 	
 	sql CoverageVersions1 <# 
-		SELECT  _event_id "eventID", "supplierID", _processed_at "processedAt" 
+		SELECT  _event_id "eventID", "supplierID", _queued_at "queuedAt" 
 		from xc."CoverageUpdate" 
 	#> {
 		String supplierID;
-		Timestamp processedAt;
+		Timestamp queuedAt;
 	}
 }
 module events {

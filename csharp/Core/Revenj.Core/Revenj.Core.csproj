@@ -88,6 +88,7 @@
     <Compile Include="DatabasePersistence\Postgres\Converters\ArrayTuple.cs" />
     <Compile Include="DatabasePersistence\Postgres\Converters\BoolConverter.cs" />
     <Compile Include="DatabasePersistence\Postgres\Converters\ByteaConverter.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Converters\ShortConverter.cs" />
     <Compile Include="DatabasePersistence\Postgres\Converters\DateConverter.cs" />
     <Compile Include="DatabasePersistence\Postgres\Converters\DecimalConverter.cs" />
     <Compile Include="DatabasePersistence\Postgres\Converters\DoubleConverter.cs" />

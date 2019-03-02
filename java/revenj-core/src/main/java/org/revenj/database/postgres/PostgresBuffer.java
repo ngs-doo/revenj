@@ -14,7 +14,7 @@ public interface PostgresBuffer {
 
 	void addToBuffer(char[] c, int len);
 
-	void addToBuffer(char[] c, int start, int emd);
+	void addToBuffer(char[] c, int start, int end);
 
 	void addToBuffer(String input);
 

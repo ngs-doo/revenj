@@ -320,6 +320,126 @@ namespace Revenj.Serialization.Json.Converters
 			}
 		}
 
+		public static short DeserializeShort(BufferedTextReader sr, ref int nextToken)
+		{
+			if (nextToken == '"')
+			{
+				sr.InitBuffer();
+				sr.FillUntil('"');
+				nextToken = sr.Read(2);
+				try
+				{
+					return sr.BufferToValue(ConvertToShort);
+				}
+				catch (Exception ex)
+				{
+					throw new SerializationException("Error parsing short at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+				}
+			}
+			var buf = sr.SmallBuffer;
+			buf[0] = (char)nextToken;
+			var size = sr.ReadNumber(buf, 1) + 1;
+			nextToken = sr.Read();
+			try
+			{
+				return ConvertToShort(buf, size);
+			}
+			catch (Exception ex)
+			{
+				throw new SerializationException("Error parsing short at " + JsonSerialization.PositionInStream(sr) + ". " + ex.Message, ex);
+			}
+		}
+		private static short ConvertToShort(char[] buf, int len)
+		{
+			var ch = buf[0];
+			int i = 0;
+			int value = 0;
+			switch (ch)
+			{
+				case '+':
+					i = 1;
+					break;
+				case '-':
+					for (i = 1; i < len; i++)
+					{
+						ch = buf[i];
+						int ind = buf[i] - 48;
+						value = (value << 3) + (value << 1) - ind;
+						if (ind < 0 || ind > 9)
+							return ConvertToShortGeneric(buf, len);
+					}
+					return (short)value;
+			}
+			for (; i < len; i++)
+			{
+				ch = buf[i];
+				int ind = buf[i] - 48;
+				value = (value << 3) + (value << 1) + ind;
+				if (ind < 0 || ind > 9)
+					return ConvertToShortGeneric(buf, len);
+			}
+			return (short)value;
+		}
+		private static short ConvertToShortGeneric(char[] buf, int len)
+		{
+			return short.Parse(new string(buf, 0, len), NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent | NumberStyles.AllowLeadingSign, Invariant);
+		}
+
+		public static List<short> DeserializeShortCollection(BufferedTextReader sr, int nextToken)
+		{
+			var res = new List<short>();
+			DeserializeShortCollection(sr, nextToken, res);
+			return res;
+		}
+		public static void DeserializeShortCollection(BufferedTextReader sr, int nextToken, ICollection<short> res)
+		{
+			res.Add(DeserializeShort(sr, ref nextToken));
+			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
+			{
+				nextToken = JsonSerialization.GetNextToken(sr);
+				res.Add(DeserializeShort(sr, ref nextToken));
+			}
+			if (nextToken != ']')
+			{
+				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+		}
+		public static List<short?> DeserializeShortNullableCollection(BufferedTextReader sr, int nextToken)
+		{
+			var res = new List<short?>();
+			DeserializeShortNullableCollection(sr, nextToken, res);
+			return res;
+		}
+		public static void DeserializeShortNullableCollection(BufferedTextReader sr, int nextToken, ICollection<short?> res)
+		{
+			if (nextToken == 'n')
+			{
+				if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+					res.Add(null);
+				else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for short value. Expecting number or null");
+				nextToken = sr.Read();
+			}
+			else res.Add(DeserializeShort(sr, ref nextToken));
+			while ((nextToken = JsonSerialization.MoveToNextToken(sr, nextToken)) == ',')
+			{
+				nextToken = JsonSerialization.GetNextToken(sr);
+				if (nextToken == 'n')
+				{
+					if (sr.Read() == 'u' && sr.Read() == 'l' && sr.Read() == 'l')
+						res.Add(null);
+					else throw new SerializationException("Invalid value found at position " + JsonSerialization.PositionInStream(sr) + " for short value. Expecting number or null");
+					nextToken = sr.Read();
+				}
+				else res.Add(DeserializeShort(sr, ref nextToken));
+			}
+			if (nextToken != ']')
+			{
+				if (nextToken == -1) throw new SerializationException("Unexpected end of json in collection.");
+				else throw new SerializationException("Expecting ']' at position " + JsonSerialization.PositionInStream(sr) + ". Found " + (char)nextToken);
+			}
+		}
+
 		public static int DeserializeInt(BufferedTextReader sr, ref int nextToken)
 		{
 			if (nextToken == '"')

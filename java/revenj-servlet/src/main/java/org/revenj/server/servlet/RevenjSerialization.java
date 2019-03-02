@@ -1,7 +1,6 @@
 package org.revenj.server.servlet;
 
 import com.dslplatform.json.DslJson;
-import com.dslplatform.json.JsonWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.revenj.serialization.json.DslJsonSerialization;
 import org.revenj.serialization.Serialization;
@@ -44,29 +43,13 @@ final class RevenjSerialization implements WireSerialization {
 		this.xml = xml;
 	}
 
-	private static final ThreadLocal<JsonWriter> threadWriter = new ThreadLocal<JsonWriter>() {
-		@Override
-		protected JsonWriter initialValue() {
-			return new JsonWriter();
-		}
-	};
-	private static final ThreadLocal<byte[]> threadBuffer = new ThreadLocal<byte[]>() {
-		@Override
-		protected byte[] initialValue() {
-			return new byte[65536];
-		}
-	};
-
 	@Override
 	public String serialize(Object value, OutputStream stream, String accept) throws IOException {
 		if (accept != null && accept.startsWith("application/xml")) {
 			xml.serializeTo(value, stream);
 			return "application/xml; charset=UTF-8";
 		}
-		JsonWriter writer = threadWriter.get();
-		writer.reset();
-		json.serialize(writer, value);
-		writer.toStream(stream);
+		json.serialize(value, stream);
 		return "application/json";
 	}
 
@@ -84,7 +67,7 @@ final class RevenjSerialization implements WireSerialization {
 		if (contentType != null && contentType.startsWith("application/xml")) {
 			return xml.deserialize(type, stream);
 		}
-		return json.deserialize(type, stream, threadBuffer.get());
+		return json.deserialize(type, stream);
 	}
 
 	@Override

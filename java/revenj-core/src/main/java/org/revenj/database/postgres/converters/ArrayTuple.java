@@ -112,6 +112,19 @@ public class ArrayTuple extends PostgresTuple {
 		return new ArrayTuple(tuples);
 	}
 
+	public static PostgresTuple create(short[] elements, Function<Short, PostgresTuple> converter) {
+		if (elements == null) {
+			return null;
+		} else if (elements.length == 0) {
+			return EMPTY;
+		}
+		PostgresTuple[] tuples = new PostgresTuple[elements.length];
+		for (int i = 0; i < elements.length; i++) {
+			tuples[i] = converter.apply(elements[i]);
+		}
+		return new ArrayTuple(tuples);
+	}
+
 	public static PostgresTuple create(long[] elements, Function<Long, PostgresTuple> converter) {
 		if (elements == null) {
 			return null;

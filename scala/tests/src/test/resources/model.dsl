@@ -187,6 +187,8 @@ module test {
 	}
 	aggregate Dec(d) {
 		decimal(9) d;
+		Short s;
+		List<Short?>? ss;
 		persistence { history; }
 		path tree;
 		specification Filter 'it => true' {

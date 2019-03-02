@@ -236,8 +236,8 @@ public class TestQuery extends Setup {
 		db.submit(cl);
 		Query<Clicked> query = db.query(Clicked.class);
 		OffsetDateTime dt = cl.getQueuedAt();
-		boolean found = query.anyMatch(it -> it.getURI().equals(cl.getURI()) && it.getProcessedAt().compareTo(dt) == 0);
-		boolean notFound = query.anyMatch(it -> it.getURI().equals(cl.getURI()) && it.getProcessedAt().compareTo(dt) != 0);
+		boolean found = query.anyMatch(it -> it.getURI().equals(cl.getURI()) && it.getQueuedAt().compareTo(dt) == 0);
+		boolean notFound = query.anyMatch(it -> it.getURI().equals(cl.getURI()) && it.getQueuedAt().compareTo(dt) != 0);
 		Assert.assertTrue(found);
 		Assert.assertFalse(notFound);
 	}
@@ -553,7 +553,7 @@ public class TestQuery extends Setup {
 
 		List<CoverageVersions1> items = covVersionsRepo.query(it -> it.getSupplierID().equals(suppID)).list();
 		Assert.assertEquals(items.size(), 2);
-		Assert.assertNotEquals(items.get(0).getProcessedAt().isEqual(items.get(1).getProcessedAt()), true);
+		Assert.assertNotEquals(items.get(0).getQueuedAt().isEqual(items.get(1).getQueuedAt()), true);
 	}
 
 	@Test

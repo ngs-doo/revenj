@@ -108,6 +108,9 @@
     <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\OracleNotifyInfoConverter.cs">
       <Link>Converters\OracleNotifyInfoConverter.cs</Link>
     </Compile>
+    <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\ShortArrayConverter.cs">
+      <Link>Converters\ShortArrayConverter.cs</Link>
+    </Compile>
     <Compile Include="..\Revenj.DatabasePersistence.Oracle\Converters\StringArrayConverter.cs">
       <Link>Converters\StringArrayConverter.cs</Link>
     </Compile>

@@ -1,6 +1,5 @@
 package org.revenj.spring;
 
-import com.dslplatform.json.JsonWriter;
 import org.revenj.serialization.json.DslJsonSerialization;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -20,19 +19,6 @@ public class DslJsonMessageConverter extends AbstractGenericHttpMessageConverter
 		super(MediaType.APPLICATION_JSON);
 		this.serializer = serializer;
 	}
-
-	private static final ThreadLocal<JsonWriter> threadWriter = new ThreadLocal<JsonWriter>() {
-		@Override
-		protected JsonWriter initialValue() {
-			return new JsonWriter();
-		}
-	};
-	private static final ThreadLocal<byte[]> threadBuffer = new ThreadLocal<byte[]>() {
-		@Override
-		protected byte[] initialValue() {
-			return new byte[65536];
-		}
-	};
 
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return serializer.canDeserialize(clazz) && canRead(mediaType);
@@ -55,18 +41,15 @@ public class DslJsonMessageConverter extends AbstractGenericHttpMessageConverter
 	}
 
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-		return serializer.deserialize(clazz, inputMessage.getBody(), threadBuffer.get());
+		return serializer.deserialize(clazz, inputMessage.getBody());
 	}
 
 	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-		return serializer.deserialize(type, inputMessage.getBody(), threadBuffer.get());
+		return serializer.deserialize(type, inputMessage.getBody());
 	}
 
 	protected void writeInternal(Object instance, Type type, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-		JsonWriter writer = threadWriter.get();
-		writer.reset();
-		serializer.serialize(writer, type, instance);
-		writer.toStream(outputMessage.getBody());
+		serializer.serialize(instance, outputMessage.getBody());
 	}
 
 	protected MediaType getDefaultContentType(Object object) throws IOException {

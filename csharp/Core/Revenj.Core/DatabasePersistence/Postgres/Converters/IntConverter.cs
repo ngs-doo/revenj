@@ -23,7 +23,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 			return ParseInt(reader, ref cur, ')');
 		}
 
-		private static int ParseInt(BufferedTextReader reader, ref int cur, char matchEnd)
+		internal static int ParseInt(BufferedTextReader reader, ref int cur, char matchEnd)
 		{
 			int res = 0;
 			if (cur == '-')

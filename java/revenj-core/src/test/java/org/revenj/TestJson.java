@@ -1,5 +1,6 @@
 package org.revenj;
 
+import com.dslplatform.json.DslJson;
 import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.JsonWriter;
 import org.junit.Assert;
@@ -15,12 +16,14 @@ import java.util.*;
 
 public class TestJson {
 
+	private final DslJson<Object> dslJson = new DslJson<>();
+
 	@Test
 	public void dateTimeOffsetConversion() throws IOException {
 		OffsetDateTime now = OffsetDateTime.now();
-		JsonWriter jw = new JsonWriter();
+		JsonWriter jw = dslJson.newWriter();
 		JavaTimeConverter.serialize(now, jw);
-		JsonReader jr = new JsonReader<>(jw.toString().getBytes("UTF-8"), null);
+		JsonReader jr = dslJson.newReader(jw.toString().getBytes("UTF-8"));
 		jr.read();
 		OffsetDateTime value = JavaTimeConverter.deserializeDateTime(jr);
 		Assert.assertEquals(now, value);
@@ -29,9 +32,9 @@ public class TestJson {
 	@Test
 	public void dateTimeOffsetUtcConversion() throws IOException {
 		OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-		JsonWriter jw = new JsonWriter();
+		JsonWriter jw = dslJson.newWriter();
 		JavaTimeConverter.serialize(now, jw);
-		JsonReader jr = new JsonReader<>(jw.toString().getBytes("UTF-8"), null);
+		JsonReader jr = dslJson.newReader(jw.toString().getBytes("UTF-8"));
 		jr.read();
 		OffsetDateTime value = JavaTimeConverter.deserializeDateTime(jr);
 		Assert.assertEquals(now, value);
@@ -40,9 +43,9 @@ public class TestJson {
 	@Test
 	public void localDateTimeConversion() throws IOException {
 		LocalDateTime now = LocalDateTime.now();
-		JsonWriter jw = new JsonWriter();
+		JsonWriter jw = dslJson.newWriter();
 		JavaTimeConverter.serialize(now, jw);
-		JsonReader jr = new JsonReader<>(jw.toString().getBytes("UTF-8"), null);
+		JsonReader jr = dslJson.newReader(jw.toString().getBytes("UTF-8"));
 		jr.read();
 		LocalDateTime value = JavaTimeConverter.deserializeLocalDateTime(jr);
 		Assert.assertEquals(now, value);

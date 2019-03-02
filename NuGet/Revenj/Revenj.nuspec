@@ -3,7 +3,7 @@
   <metadata>
     <id>Revenj</id>
     <title>Revenj core libraries</title>
-    <version>1.5.1</version>
+    <version>1.6.0</version>
     <authors>NGS</authors>
     <owners>NGS</owners>
     <licenseUrl>https://github.com/ngs-doo/revenj/blob/master/LICENSE</licenseUrl>
@@ -11,6 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>.NET and Mono framework with support for Postgres and Oracle</description>
     <releaseNotes>
+1.6.0 - Support for short data type
 1.5.1 - Provide correct version on .NET standard 2.0. Queue API change
 1.5.0 - Support for .NET standard 2.0. Minor LINQ fixes
 1.4.2 - Performance improvements
