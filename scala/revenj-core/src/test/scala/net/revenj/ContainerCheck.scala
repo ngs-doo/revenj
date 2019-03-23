@@ -98,6 +98,38 @@ class ContainerCheck extends Specification with ScalaCheck {
       cg.generics.instance2.isInstanceOf[B] === true
       classOf[B] === cg.generics.instance2.getClass
     }
+    "ctor generics and primitives" >> {
+      val container = new SimpleContainer(false, cl)
+      container.register[B]()
+      container.registerInstance(new ComplexGenerics[Int, B](new B(), 6), false)
+      container.register[CtorPartialGenerics[_]]()
+      val cg = container.resolve[ComplexGenerics[Int, B]]
+      cg.instance1 === 6
+      val p = container.resolve[CtorPartialGenerics[Int]]
+      p.generics.instance1 === 6
+      p.generics === cg
+    }
+    "generics and bad primitive" >> {
+      val container = new SimpleContainer(false, cl)
+      container.register[B]()
+      container.registerInstance(new ComplexGenerics[Int, B](new B(), 6), false)
+      container.register[CtorPartialGenerics[_]]()
+      val cg = container.resolve[ComplexGenerics[Int, B]]
+      cg.instance1 === 6
+      val p = container.tryResolve[CtorPartialGenerics[Long]]
+      p.isFailure === true
+      p.failed.get.getMessage.contains("long is not registered in the container") === true
+    }
+    "generics and option" >> {
+      val container = new SimpleContainer(false, cl)
+      container.register[B]()
+      container.registerInstance(new ComplexGenerics[Int, B](new B(), 6), false)
+      container.register[CtorPartialGenerics[_]]()
+      val cg = container.resolve[ComplexGenerics[Int, B]]
+      cg.instance1 === 6
+      val p = container.resolve[Option[CtorPartialGenerics[Long]]]
+      p === None
+    }
     "pass exception" >> {
       val container = new SimpleContainer(false, cl)
       container.registerFunc[ContainerCheck](_ => throw new RuntimeException("test me now"))
@@ -205,7 +237,7 @@ class ContainerCheck extends Specification with ScalaCheck {
       container.register[CircularDep](InstanceScope.Context)
       val tryResolve = Try { container.resolve[CircularTop] }
       tryResolve.isFailure === true
-      tryResolve.failed.get.getMessage === "Unable to resolve: class net.revenj.CircularTop. Circular dependencies in signature detected"
+      tryResolve.failed.get.getMessage === "Unable to resolve: class net.revenj.CircularTop. Circular dependencies in signature detected\nResolution chain: class net.revenj.CircularTop -> class net.revenj.CircularDep -> class net.revenj.CircularTop"
     }
     "singleton container" >> {
       val container = new SimpleContainer(false, cl)

@@ -27,8 +27,22 @@ object Utils {
   val Zero4: BigDecimal = BigDecimal(0).setScale(4)
   val Loopback: InetAddress = InetAddress.getLoopbackAddress
 
-  private val typeCache = new TrieMap[Type, JavaType]
+  case class TypeCache(actual: JavaType, erased: JavaType)
+  private val typeCache = new TrieMap[Type, TypeCache]
   private val genericsCache = new TrieMap[String, GenericType]
+
+
+  Seq(
+    (typeOf[Byte], classOf[Byte]),
+    (typeOf[Boolean], classOf[Boolean]),
+    (typeOf[Int], classOf[Int]),
+    (typeOf[Long], classOf[Long]),
+    (typeOf[Short], classOf[Short]),
+    (typeOf[Float], classOf[Float]),
+    (typeOf[Double], classOf[Double]),
+    (typeOf[Char], classOf[Char])).foreach { case (t, c) =>
+    typeCache.put(t, TypeCache(c, classOf[AnyRef]))
+  }
 
   private val documentBuilder = {
     val dbf = DocumentBuilderFactory.newInstance
@@ -111,27 +125,54 @@ object Utils {
   }
 
   private[revenj] def findType(tpe: Type, mirror: Mirror): Option[JavaType] = {
-    typeCache.get(tpe) match {
-      case found@Some(_) => found
-      case _ =>
-        tpe.dealias match {
-          case TypeRef(_, sym, args) if args.isEmpty =>
-            Some(mirror.runtimeClass(sym.asClass))
-          case TypeRef(_, sym, args) if sym.fullName == "scala.Array" && args.size == 1 =>
-            findType(args.head, mirror) match {
-              case Some(typeArg) => Some(new GenArrType(typeArg))
-              case _ => None
-            }
-          case TypeRef(_, sym, args) =>
-            val symClass = mirror.runtimeClass(sym.asClass)
-            val typeArgs = args.flatMap(it => findType(it, mirror))
-            if (typeArgs.size == args.size) Some(Utils.makeGenericType(symClass, typeArgs))
-            else None
-          case _ =>
-            None
-        }
+    val ft = typeCache.get(tpe)
+    if (ft.isDefined) Some(ft.get.actual)
+    else {
+      val actual = buildType(tpe, mirror, false, false)
+      val erased = buildType(tpe, mirror, false, true)
+      if (actual.isDefined && erased.isDefined) {
+        val tc = TypeCache(actual.get, erased.get)
+        typeCache.put(tpe, tc)
+        Some(tc.actual)
+      } else actual
     }
   }
+
+  private[revenj] def findTypeInfo(tpe: Type, mirror: Mirror): TypeCache = {
+    val ft = typeCache.get(tpe)
+    if (ft.isDefined) ft.get
+    else {
+      val actual = buildType(tpe, mirror, false, false)
+      val erased = buildType(tpe, mirror, false, true)
+      if (actual.isEmpty || erased.isEmpty) throw new IllegalArgumentException(s"Unable to analyze $tpe")
+      val tc = TypeCache(actual.get, erased.get)
+      typeCache.put(tpe, tc)
+      tc
+    }
+  }
+
+  private[revenj] def buildType(tpe: Type, mirror: Mirror, inContainer: Boolean, erasedVersion: Boolean): Option[JavaType] = {
+    val ft = typeCache.get(tpe)
+    if (ft.isDefined) {
+      Some(if (inContainer && erasedVersion) ft.get.erased else ft.get.actual)
+    } else tpe.dealias match {
+      case TypeRef(_, sym, args) if args.isEmpty =>
+        Some(mirror.runtimeClass(sym.asClass))
+      case TypeRef(_, sym, args) if sym.fullName == "scala.Array" && args.size == 1 =>
+        buildType(args.head, mirror, inContainer, erasedVersion) match {
+          case Some(typeArg) => Some(new GenArrType(typeArg))
+          case _ => None
+        }
+      case TypeRef(_, sym, args) =>
+        val symClass = mirror.runtimeClass(sym.asClass)
+        val typeArgs = args.flatMap(it => buildType(it, mirror, true, erasedVersion))
+        if (typeArgs.size == args.size) Some(Utils.makeGenericType(symClass, typeArgs))
+        else None
+      case _ =>
+        None
+    }
+  }
+
 
   private[revenj] def makeGenericType(container: Class[_], arguments: List[JavaType]): ParameterizedType = {
     val sb = new StringBuilder

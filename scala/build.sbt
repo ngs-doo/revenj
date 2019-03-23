@@ -6,7 +6,7 @@ lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
   settings(
-    version := "0.8.6",
+    version := "0.9.0",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.4",
       "joda-time" % "joda-time" % "2.9.9",   // TODO: will be removed
@@ -28,7 +28,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.8.6",
+  version := "0.9.0",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.2",
     "com.typesafe.akka" %% "akka-http-core" % "10.0.13"

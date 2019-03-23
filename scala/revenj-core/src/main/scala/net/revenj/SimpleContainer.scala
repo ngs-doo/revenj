@@ -1,6 +1,6 @@
 package net.revenj
 
-import java.lang.reflect.{Constructor, GenericArrayType, GenericDeclaration, ParameterizedType, TypeVariable, Type => JavaType}
+import java.lang.reflect.{Constructor, GenericArrayType, GenericDeclaration, InvocationTargetException, ParameterizedType, TypeVariable, Type => JavaType}
 import java.util.concurrent.CopyOnWriteArrayList
 
 import net.revenj.extensibility.Container
@@ -22,7 +22,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
   def this(resolveUnknown: Boolean, loader: ClassLoader) {
     this(None, resolveUnknown, runtimeMirror(loader))
     registerGenerics[Option[_]]((locator, args) => locator.resolve(args(0)).toOption)
-    registerGenerics[scala.Function0[_]]((locator, args) => () => locator.resolve(args(0)).getOrElse(throw new ReflectiveOperationException(s"Unable to resolve factory for: ${args(0)}")))
+    registerGenerics[scala.Function0[_]]((locator, args) => () => locator.resolve(args(0)).getOrElse(throw new ResolutionException(s"Unable to resolve factory for: ${args(0)}", args(0))))
   }
 
   private val container = new mutable.HashMap[JavaType, CopyOnWriteArrayList[Registration[AnyRef]]]
@@ -68,10 +68,13 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
         val tryInstance = Try {
           info.ctor.newInstance(args: _*).asInstanceOf[AnyRef]
         }
-        if (tryInstance.isFailure) {
-          errors += tryInstance
-        } else {
+        if (tryInstance.isSuccess) {
           result = Some(tryInstance)
+        } else tryInstance.failed.get match {
+          case tie: InvocationTargetException if tie.getTargetException != null =>
+            errors += Failure(tie.getTargetException)
+          case _ =>
+            errors += tryInstance
         }
       }
     }
@@ -80,7 +83,17 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
         manifest.newInstance().asInstanceOf[AnyRef]
       })
     }
-    result.getOrElse(errors.headOption.getOrElse(Failure(new ReflectiveOperationException(s"Unable to find constructors for: $manifest"))))
+    result match {
+      case Some(tryResult) =>
+        addChainToError(tryResult, manifest)
+      case _ =>
+        errors.headOption match {
+          case Some(tryResult) =>
+            addChainToError(tryResult, manifest)
+          case _ =>
+            Failure(new ResolutionException(s"Unable to find constructors for: $manifest", manifest))
+        }
+    }
   }
 
   private def tryResolveType(paramType: ParameterizedType, caller: SimpleContainer): Try[AnyRef] = {
@@ -88,7 +101,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
       new TypeInfo(paramType)
     })
     if (typeInfo.rawClass.isEmpty) {
-      Failure(new ReflectiveOperationException(s"$paramType is not an instance of Class<?> and cannot be resolved"))
+      Failure(new ResolutionException(s"$paramType is not an instance of Class<?> and cannot be resolved", paramType))
     } else {
       getRegistration(typeInfo.rawClass.get) match {
         case Some(registration) if registration.biFactory.isDefined && typeInfo.genericArguments.isDefined =>
@@ -127,9 +140,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                 })
                 if (nestedInfo.rawClass.isEmpty) {
                   success = false
-                  errors += Failure(new ReflectiveOperationException(s"Nested parametrized type: $nestedType is not an instance of Class<?>. Error while resolving constructor: ${info.ctor}"))
-                } else if (nestedInfo.rawClass.get eq classOf[Option[_]]) {
-                  args(i) = tryResolve(nestedInfo.genericArguments.get(0), caller).toOption
+                  errors += Failure(new ResolutionException(s"Nested parametrized type: $nestedType is not an instance of Class<?>. Error while resolving constructor: ${info.ctor}", info.ctor.getDeclaringClass))
                 } else {
                   val nestedMappings = new mutable.HashMap[JavaType, JavaType]
                   nestedMappings ++= typeInfo.mappings
@@ -138,12 +149,20 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                     val (key, value) = iter.next()
                     nestedMappings += key -> nestedMappings.getOrElse(value, value)
                   }
-                  val arg = tryResolveTypeFrom(nestedInfo, nestedMappings, caller)
-                  if (arg.isFailure) {
+                  val concreteTypeArgs = nestedType.getActualTypeArguments.flatMap {
+                    case tv: TypeVariable[_] => nestedMappings.get(tv)
+                    case o => Some(o)
+                  }
+                  val arg = if (concreteTypeArgs.length == nestedType.getActualTypeArguments.length) {
+                    tryResolve(Utils.makeGenericType(nestedInfo.rawClass.get, concreteTypeArgs.toList), caller)
+                  } else {
+                    tryResolveTypeFrom(nestedInfo, nestedMappings, caller)
+                  }
+                  if (arg.isSuccess) {
+                    args(i) = arg.get
+                  } else {
                     success = false
                     errors += arg
-                  } else {
-                    args(i) = arg.get
                   }
                 }
               case p@_ =>
@@ -152,7 +171,7 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   c = mappings.get(c.get)
                   if (c.isEmpty) {
                     success = false
-                    errors += Failure(new ReflectiveOperationException(s"Unable to find mapping for $p"))
+                    errors += Failure(new ResolutionException(s"Unable to find mapping for $p", typeInfo.rawType))
                   }
                 }
                 if (success) {
@@ -178,9 +197,19 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
             }
           }
         }
-        result.getOrElse(errors.headOption.getOrElse(Failure(new ReflectiveOperationException(s"Unable to find constructors for: ${typeInfo.rawType}"))))
+        result match {
+          case Some(tryResult) =>
+            addChainToError(tryResult, typeInfo.paramType)
+          case _ =>
+            errors.headOption match {
+              case Some(tryResult) =>
+                addChainToError(tryResult, typeInfo.paramType)
+              case _ =>
+                Failure(new ResolutionException(s"Unable to find constructors for: ${typeInfo.rawType}", typeInfo.paramType))
+            }
+        }
       case _ =>
-        Failure(new ReflectiveOperationException(s"Unable to find constructors for: ${typeInfo.rawType}"))
+        Failure(new ResolutionException(s"Unable to find constructors for: ${typeInfo.rawType}", typeInfo.rawType))
     }
   }
 
@@ -205,10 +234,8 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
   }
 
   override def tryResolve[T: TypeTag]: Try[T] = {
-    Utils.findType(mirror.typeOf[T], mirror) match {
-      case Some(tpe) => resolve(tpe).map(_.asInstanceOf[T])
-      case _ => Failure(new ReflectiveOperationException("Invalid type tag argument"))
-    }
+    val ti = Utils.findTypeInfo(mirror.typeOf[T], mirror)
+    resolve(ti.actual).map(_.asInstanceOf[T])
   }
 
   private def tryResolve(paramType: JavaType, caller: SimpleContainer): Try[AnyRef] = {
@@ -246,23 +273,20 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
                   tryResolveCollection(target.getComponentType, target.getComponentType, caller)
                 } else if (resolveUnknown) {
                   if (target.isInterface) {
-                    Failure(new ReflectiveOperationException(
-                      s"""$paramType is not an class and cannot be resolved since it's not registered in the container.
-Try resolving implementation instead."""))
+                    Failure(new ResolutionException(s"""$paramType is not an class and cannot be resolved since it's not registered in the container.
+Try resolving implementation instead.""", paramType))
                   } else {
                     tryResolveClass(target, caller)
                   }
                 } else if (target.isInterface) {
-                  Failure(new ReflectiveOperationException(
-                    s"""$paramType is not registered in the container.
-Since $paramType is an interface, it must be registered into the container."""))
+                  Failure(new ResolutionException(s"""$paramType is not registered in the container.
+Since $paramType is an interface, it must be registered into the container.""", paramType))
                 } else {
-                  Failure(new ReflectiveOperationException(
-                    s"""$paramType is not registered in the container.
-If you wish to resolve types not registered in the container, specify revenj.resolveUnknown=true in Properties configuration."""))
+                  Failure(new ResolutionException(s"""$paramType is not registered in the container.
+If you wish to resolve types not registered in the container, specify revenj.resolveUnknown=true in Properties configuration.""", paramType))
                 }
               case _ =>
-                Failure(new ReflectiveOperationException(s"$paramType is not an instance of Class<?> and cannot be resolved since it's not registered in the container."))
+                Failure(new ResolutionException(s"$paramType is not an instance of Class<?> and cannot be resolved since it's not registered in the container.", paramType))
             }
           }
 
@@ -331,7 +355,13 @@ If you wish to resolve types not registered in the container, specify revenj.res
             else msg
           }
           val description = if (it.manifest.isDefined && it.manifest.get != it.signature) s" (${it.manifest.get})" else ""
-          fail = Some(new ReflectiveOperationException(s"Unable to resolve ${it.signature}$description. Error: $message", error))
+          val underlyingError = error match {
+            case re: ResolutionException if re.chain.size == 1 && re.originalError.isDefined =>
+              re.originalError.get
+            case _ =>
+              error
+          }
+          fail = Some(new ReflectiveOperationException(s"Unable to resolve ${it.signature}$description. Error: $message", underlyingError))
         }
         i += 1
       }
@@ -356,7 +386,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
             if (reg.promoted) {
               reg.instance.get
             } else if (reg.promoting) {
-              throw new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected")
+              throw new ResolutionException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected", registration.signature)
             } else {
               reg.promoting = true
               val instance = reg.singleFactory.get(self)
@@ -380,7 +410,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
           if (reg.promoted) {
             Success(reg.instance.get)
           } else if (reg.promoting) {
-            Failure(new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected"))
+            Failure(new ResolutionException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected", registration.signature))
           } else if (reg.manifest.isDefined) {
             reg.promoting = true
             val tryInstance = self.tryResolveClass(reg.manifest.get, self)
@@ -394,13 +424,13 @@ If you wish to resolve types not registered in the container, specify revenj.res
             }
             tryInstance
           } else {
-            Failure(new ReflectiveOperationException(s"Unable to resolve: ${registration.signature}"))
+            Failure(new ResolutionException(s"Unable to resolve: ${registration.signature}", registration.signature))
           }
         }
       } else if (registration.manifest.isDefined) {
         tryResolveClass(registration.manifest.get, caller)
       } else {
-        Failure(new ReflectiveOperationException(s"Unable to resolve: $registration"))
+        Failure(new ResolutionException(s"Unable to resolve: ${registration.signature}", registration.signature))
       }
     }
   }
@@ -425,27 +455,42 @@ If you wish to resolve types not registered in the container, specify revenj.res
   }
 
   override def registerAs[T, S <: T](lifetime: InstanceScope = Transient)(implicit manifest: TypeTag[T], implementation: ClassTag[S]): this.type = {
-    val signature = Utils.findType(manifest.tpe, mirror).getOrElse(throw new IllegalArgumentException(s"Unable to find Java type for $manifest"))
+    val ti = Utils.findTypeInfo(manifest.tpe, mirror)
     val clSym = mirror.classSymbol(implementation.runtimeClass)
     if (clSym.isModuleClass) {
       val instance = mirror.reflectModule(clSym.module.asModule).instance.asInstanceOf[T]
-      addToRegistry(new Registration[T](signature, this, instance, true))
+      addToRegistry(new Registration[T](ti.actual, this, instance, true))
+      if (ti.actual != ti.erased) {
+        addToRegistry(new Registration[T](ti.erased, this, instance, true))
+      }
     } else {
-      addToRegistry(new Registration(signature, this, implementation.runtimeClass, lifetime))
+      addToRegistry(new Registration(ti.actual, this, implementation.runtimeClass, lifetime))
+      if (ti.actual != ti.erased) {
+        addToRegistry(new Registration(ti.erased, this, implementation.runtimeClass, lifetime))
+      }
     }
+    this
   }
 
   override def registerInstance[T: TypeTag](service: T, handleClose: Boolean = false): this.type = {
     if (handleClose && service.isInstanceOf[AutoCloseable]) {
       closeables.add(service.asInstanceOf[AutoCloseable])
     }
-    val paramType = Utils.findType(mirror.typeOf[T], mirror).getOrElse(throw new IllegalArgumentException(s"Unable to register ${mirror.typeOf[T]} to container"))
-    addToRegistry(new Registration[T](paramType, this, service, false))
+    val ti = Utils.findTypeInfo(mirror.typeOf[T], mirror)
+    addToRegistry(new Registration[T](ti.actual, this, service, false))
+    if (ti.actual != ti.erased) {
+      addToRegistry(new Registration[T](ti.erased, this, service, false))
+    }
+    this
   }
 
   override def registerFunc[T: TypeTag](factory: Container => T, lifetime: InstanceScope = Transient): this.type = {
-    val paramType = Utils.findType(mirror.typeOf[T], mirror).getOrElse(throw new IllegalArgumentException(s"Unable to register ${mirror.typeOf[T]} to container"))
-    addToRegistry(new Registration[T](paramType, this, factory, lifetime))
+    val ti = Utils.findTypeInfo(mirror.typeOf[T], mirror)
+    addToRegistry(new Registration[T](ti.actual, this, factory, lifetime))
+    if (ti.actual != ti.erased) {
+      addToRegistry(new Registration[T](ti.erased, this, factory, lifetime))
+    }
+    this
   }
 
   override def registerInstance[T](manifest: JavaType, factory: () => T): this.type = {
@@ -479,6 +524,35 @@ private object SimpleContainer {
   private val typeCache = new TrieMap[JavaType, TypeInfo]
   private val typeNameMappings = new TrieMap[String, JavaType]
   private val seqSignature = classOf[scala.collection.Seq[_]]
+
+  private class ResolutionException(msg: String, location: JavaType, val originalError: Option[Throwable] = None) extends ReflectiveOperationException(msg) {
+    val chain = new mutable.ArrayBuffer[JavaType]()
+    chain += location
+
+    override def getMessage: String = {
+      if (chain.size > 1) {
+        val sb = new java.lang.StringBuilder()
+        sb.append(super.getMessage).append("\nResolution chain: ")
+        chain.reverse.foreach(c => sb.append(c).append(" -> "))
+        sb.setLength(sb.length() - 4)
+        sb.toString
+      } else super.getMessage
+    }
+  }
+
+  private def addChainToError(tryResult: Try[AnyRef], manifest: JavaType): Try[AnyRef] = {
+    if (tryResult.isFailure) {
+      tryResult.failed.get match {
+        case re: ResolutionException =>
+          re.chain += manifest
+          tryResult
+        case ex: Throwable =>
+          Failure(new ResolutionException(ex.getMessage, manifest, Some(ex)))
+      }
+    } else {
+      tryResult
+    }
+  }
 
   private class CtorInfo(val ctor: Constructor[_]) {
     val rawTypes: Array[Class[_]] = ctor.getParameterTypes
