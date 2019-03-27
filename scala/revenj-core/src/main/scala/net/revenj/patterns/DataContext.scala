@@ -52,9 +52,9 @@ trait DataContext {
     delete(Seq(aggregate))
   }
 
-  def submit[T <: DomainEvent : TypeTag](events: Seq[T]): Future[Unit]
+  def submit[T <: Event : TypeTag](events: Seq[T]): Future[Unit]
 
-  def submit[T <: DomainEvent : TypeTag](event: T): Future[Unit] = {
+  def submit[T <: Event : TypeTag](event: T): Future[Unit] = {
     submit(Seq(event))
   }
 

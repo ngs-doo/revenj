@@ -23,7 +23,7 @@ private[revenj] class LocatorDataContext(
   private lazy val searchRepositories = new TrieMap[Class[_], SearchableRepository[_ <: DataSource]]()
   private lazy val lookupRepositories = new TrieMap[Class[_], Repository[_ <: Identifiable]]()
   private lazy val persistableRepositories = new TrieMap[Class[_], PersistableRepository[_ <: AggregateRoot]]()
-  private lazy val eventStores = new TrieMap[Class[_], DomainEventStore[_ <: DomainEvent]]()
+  private lazy val eventStores = new TrieMap[Class[_], EventStore[_ <: Event]]()
   private var hasChanges: Boolean = false
   private var closed: Boolean = false
   private val changes = new mutable.HashSet[Future[Any]]
@@ -55,11 +55,11 @@ private[revenj] class LocatorDataContext(
     }).asInstanceOf[PersistableRepository[T]]
   }
 
-  private def getEventStore[T <: DomainEvent : TypeTag](manifest: Class[_]): DomainEventStore[T] = {
+  private def getEventStore[T <: Event : TypeTag](manifest: Class[_]): EventStore[T] = {
     if (closed) throw new RuntimeException("Unit of work has been closed")
     eventStores.getOrElseUpdate(manifest, {
-      scope.resolve[DomainEventStore[T]]
-    }).asInstanceOf[DomainEventStore[T]]
+      scope.resolve[EventStore[T]]
+    }).asInstanceOf[EventStore[T]]
   }
 
   private def findManifest[T: TypeTag]: Class[_] = {
@@ -129,7 +129,7 @@ private[revenj] class LocatorDataContext(
     }
   }
 
-  override def submit[T <: DomainEvent : TypeTag](events: Seq[T]): Future[Unit] = {
+  override def submit[T <: Event : TypeTag](events: Seq[T]): Future[Unit] = {
     if (events.isEmpty) {
       Future.successful(())
     } else {

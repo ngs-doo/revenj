@@ -182,7 +182,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container
   }
 
-  def registerEvents[T <: DomainEvent : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
+  def registerEvents[T <: Event : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
     val mirror = runtimeMirror(loader)
     val javaClass = Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(p) =>

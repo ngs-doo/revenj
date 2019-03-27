@@ -4,6 +4,10 @@ import java.time.OffsetDateTime
 
 import scala.concurrent.Future
 
+trait Event
+
+trait Command extends Event with ValidationErrors
+
 /** Domain event represents an meaningful business event that occurred in the system.
   * It is a message that back-end system knows how to process and that will
   * change the state of the system.
@@ -29,17 +33,33 @@ import scala.concurrent.Future
   * }
   * }}}
   */
-trait DomainEvent extends Identifiable {
+trait DomainEvent extends Event with Identifiable {
 
   def queuedAt: OffsetDateTime
+}
+
+trait AsyncEvent extends DomainEvent {
+
   def processedAt: Option[OffsetDateTime]
+}
+
+trait CommandLog[T <: Command] extends Identifiable with NestedValue[T] {
+  def at: OffsetDateTime
+}
+
+trait AggregateDomainEvent[TAgg <: AggregateRoot] extends DomainEvent {
+  def apply(aggregate: TAgg): Unit
 }
 
 trait DomainEventHandler[T] {
   def handle(domainEvent: T): Unit
 }
 
-trait DomainEventStore[T <: DomainEvent] extends Repository[T] with SearchableRepository[T] {
+trait AggregateDomainEventHandler[TAgg <: AggregateRoot, TDE <: AggregateDomainEvent[TAgg]] {
+  def handle(domainEvent: TDE, aggregate: TAgg): Unit
+}
+
+trait EventStore[T <: Event] {
 
   def submit(events: Seq[T]): Future[IndexedSeq[String]]
 
@@ -48,17 +68,22 @@ trait DomainEventStore[T <: DomainEvent] extends Repository[T] with SearchableRe
     require(event ne null, "null value provided for event")
     submit(Seq(event)).map(_.head)
   }
+}
 
-  def mark(uris: Seq[String]): Future[Unit]
+trait DomainEventStore[T <: DomainEvent] extends EventStore[T] with Repository[T] with SearchableRepository[T] {
+}
 
-  def mark(uri: String): Future[Unit] = {
-    require(uri ne null, "null value provided for URI")
-    require(uri.length != 0, "empty value provided for URI")
-    mark(Seq(uri))
+trait AsyncDomainEventStore[T <: DomainEvent] extends DomainEventStore[T] {
+
+  def mark(events: Seq[T]): Future[Unit]
+
+  def mark(event: T): Future[Unit] = {
+    require(event ne null, "null value provided for event")
+    mark(Seq(event))
   }
 }
 
-trait EventStoreAspect[T <: DomainEvent] {
+trait EventStoreAspect[T <: Event] {
   def before(events: Seq[T]): Seq[T] = events
   def after(events: Seq[T]): Unit = {}
 }
