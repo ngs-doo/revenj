@@ -72,7 +72,7 @@ namespace Revenj.Utility
 			{
 				CurrentEstimate--;
 				stream.Reset();
-				stream.PoolID++;
+				stream.DisposeID = stream.PoolID;
 				return stream;
 			}
 			CurrentEstimate = MemoryPool.Count;
@@ -571,6 +571,7 @@ namespace Revenj.Utility
 				UsedBuffered = UsedReader = UsedWriter = false;
 				if (CurrentEstimate < SizeLimit || Blocks.Count > 10000)
 				{
+					PoolID += 2;
 					MemoryPool.Push(this);
 					CurrentEstimate++;
 				}
