@@ -18,9 +18,9 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 		{
 			SupportedMethods = new Dictionary<string, MethodCallDelegate>();
 			SupportedMethods.Add("IsSubsetOf", IsSubset);
-			SupportedMethods.Add("IsProperSubsetOf", IsSubset);
+			SupportedMethods.Add("IsProperSubsetOf", IsProperSubset);
 			SupportedMethods.Add("IsSupersetOf", IsSuperset);
-			SupportedMethods.Add("IsProperSupersetOf", IsSuperset);
+			SupportedMethods.Add("IsProperSupersetOf", IsProperSuperset);
 			SupportedMethods.Add("Overlaps", Overlaps);
 		}
 
@@ -53,6 +53,19 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			queryBuilder.Append(")");
 		}
 
+		private static void IsProperSubset(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			var type = methodCall.Object.Type.GetGenericArguments()[0];
+			var name = Revenj.DatabasePersistence.Postgres.NpgsqlTypes.TypeConverter.GetTypeName(type);
+			queryBuilder.Append("(array_upper(");
+			visitExpression(methodCall.Object);
+			queryBuilder.Append("::").Append(name).Append("[], 1) != array_upper(");
+			visitExpression(methodCall.Arguments[0]);
+			queryBuilder.Append("::").Append(name).Append("[], 1) AND ");
+			IsSubset(methodCall, queryBuilder, visitExpression);
+			queryBuilder.Append(")");
+		}
+
 		private static void IsSuperset(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
 		{
 			var type = methodCall.Object.Type.GetGenericArguments()[0];
@@ -63,6 +76,19 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			queryBuilder.Append(" @> ");
 			visitExpression(methodCall.Arguments[0]);
 			queryBuilder.Append("::").Append(name).Append("[]");
+			queryBuilder.Append(")");
+		}
+
+		private static void IsProperSuperset(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			var type = methodCall.Object.Type.GetGenericArguments()[0];
+			var name = Revenj.DatabasePersistence.Postgres.NpgsqlTypes.TypeConverter.GetTypeName(type);
+			queryBuilder.Append("(array_upper(");
+			visitExpression(methodCall.Object);
+			queryBuilder.Append("::").Append(name).Append("[], 1) != array_upper(");
+			visitExpression(methodCall.Arguments[0]);
+			queryBuilder.Append("::").Append(name).Append("[], 1) AND ");
+			IsSuperset(methodCall, queryBuilder, visitExpression);
 			queryBuilder.Append(")");
 		}
 
