@@ -160,7 +160,11 @@ object Utils {
         Some(mirror.runtimeClass(sym.asClass))
       case TypeRef(_, sym, args) if sym.fullName == "scala.Array" && args.size == 1 =>
         buildType(args.head, mirror, inContainer, erasedVersion) match {
-          case Some(typeArg) => Some(new GenArrType(typeArg))
+          case Some(typeArg) =>
+            typeArg match {
+              case cl: Class[_] => Some(java.lang.reflect.Array.newInstance(cl, 0).getClass)
+              case _ => Some(new GenArrType(typeArg))
+            }
           case _ => None
         }
       case TypeRef(_, sym, args) =>

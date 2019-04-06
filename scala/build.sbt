@@ -14,7 +14,7 @@ lazy val core = (project in file("revenj-core")
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "io.monix" %% "monix-reactive" % "2.3.3",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-      "com.dslplatform" %% "dsl-json-scala" % "1.9.0",
+      "com.dslplatform" %% "dsl-json-scala" % "1.9.2",
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.8",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.8",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.8",
