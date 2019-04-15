@@ -11,5 +11,5 @@ trait DataSourceCache[T <: Identifiable] extends DataCache[T] with SearchableRep
 }
 
 trait Cacheable {
-  def calculateRelationships: Map[Class[_], Seq[String]]
+  def getRelationships: Map[Class[_ <: Identifiable], Seq[String]]
 }
