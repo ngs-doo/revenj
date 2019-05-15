@@ -269,6 +269,38 @@ class ContainerCheck extends Specification with ScalaCheck {
       val result2 = container.tryResolve[Service]
       result2 === result1
     }
+    "same instance func" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      container.register[ServiceImpl](InstanceScope.Context)
+      container.registerFunc[Service](_.resolve[ServiceImpl], InstanceScope.Context)
+      val result1 = container.resolve[Service]
+      val result2 = container.resolve[ServiceImpl]
+      result1 === result2
+    }
+    "same instance as context" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      container.register[ServiceImpl](InstanceScope.Context)
+      container.registerAs[Service, ServiceImpl](InstanceScope.Context)
+      val result1 = container.resolve[Service]
+      val result2 = container.resolve[ServiceImpl]
+      val result3 = container.resolve[Service]
+      val result4 = container.resolve[ServiceImpl]
+      result1 !== result2
+      result1 === result3
+      result2 === result4
+    }
+    "same instance as context/transient" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      container.register[ServiceImpl](InstanceScope.Transient)
+      container.registerAs[Service, ServiceImpl](InstanceScope.Context)
+      val result1 = container.resolve[Service]
+      val result2 = container.resolve[ServiceImpl]
+      val result3 = container.resolve[Service]
+      val result4 = container.resolve[ServiceImpl]
+      result1 !== result2
+      result1 === result3
+      result2 !== result4
+    }
   }
 }
 
