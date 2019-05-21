@@ -40,14 +40,13 @@ lazy val akka = (project in file("revenj-akka")
 lazy val storage = (project in file("revenj-storage")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.1.0-SNAPSHOT",
+    version := "0.9.0",
     libraryDependencies ++= Seq(
+      "com.amazonaws" % "aws-java-sdk-s3" % "1.11.555",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
-    ),
-    publishLocal := {},
-    publish := {},
-    publishArtifact := false
+    )
   )
+  dependsOn(core)
 )
 
 lazy val tests = (project in file("tests")

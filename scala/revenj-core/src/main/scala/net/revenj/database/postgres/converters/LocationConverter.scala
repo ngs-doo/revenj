@@ -15,7 +15,7 @@ object LocationConverter extends Converter[Point2D] {
   def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: Point2D): Unit = {
     val pg = new PGobject
     pg.setType("point")
-    pg.setValue("(" + value.getX + "," + value.getY + ")")
+    pg.setValue(s"(${value.getX},${value.getY})")
     ps.setObject(index, pg)
   }
 
@@ -39,11 +39,7 @@ object LocationConverter extends Converter[Point2D] {
       reader.read(4)
       new Point2D.Double
     } else {
-      reader.read(context)
-      val x = DoubleConverter.parse(reader, context)
-      val y = DoubleConverter.parse(reader, context)
-      reader.read(context + 1)
-      new Point2D.Double(x, y)
+      parseRaw(reader, 0, context)
     }
   }
 
@@ -53,11 +49,7 @@ object LocationConverter extends Converter[Point2D] {
       reader.read(4)
       None
     } else {
-      reader.read(context)
-      val x = DoubleConverter.parse(reader, context)
-      val y = DoubleConverter.parse(reader, context)
-      reader.read(context + 1)
-      Some(new Point2D.Double(x, y))
+      Some(parseRaw(reader, 0, context))
     }
   }
 
@@ -78,9 +70,9 @@ object LocationConverter extends Converter[Point2D] {
 
     override def buildTuple(quote: Boolean): String = {
       if (quote) {
-        "'(" + value.getX + "," + value.getY + ")'"
+        s"'(${value.getX},${value.getY})'"
       } else {
-        "(" + value.getX + "," + value.getY + ")"
+        s"(${value.getX},${value.getY})"
       }
     }
   }

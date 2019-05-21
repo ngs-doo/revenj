@@ -15,7 +15,7 @@ object PointConverter extends Converter[Point] {
   def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: Point): Unit = {
     val pg = new PGobject
     pg.setType("point")
-    pg.setValue("(" + value.x + "," + value.y + ")")
+    pg.setValue(s"(${value.x},${value.y})")
     ps.setObject(index, pg)
   }
 
@@ -39,11 +39,7 @@ object PointConverter extends Converter[Point] {
       reader.read(4)
       new Point
     } else {
-      reader.read(context)
-      val x = IntConverter.parse(reader, context)
-      val y = IntConverter.parse(reader, context)
-      reader.read(context + 1)
-      new Point(x, y)
+      parseRaw(reader, 0, context)
     }
   }
 
@@ -53,11 +49,7 @@ object PointConverter extends Converter[Point] {
       reader.read(4)
       None
     } else {
-      reader.read(context)
-      val x = IntConverter.parse(reader, context)
-      val y = IntConverter.parse(reader, context)
-      reader.read(context + 1)
-      Some(new Point(x, y))
+      Some(parseRaw(reader, 0, context))
     }
   }
 
