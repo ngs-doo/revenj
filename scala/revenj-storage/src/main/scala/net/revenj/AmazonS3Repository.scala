@@ -5,7 +5,7 @@ import java.util.{Properties, UUID}
 
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest}
-import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.{AmazonS3, AmazonS3Client}
 import net.revenj.storage.{S3, S3Repository}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -13,11 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class AmazonS3Repository(
   properties: Properties,
   tryExecutionContext: Option[ExecutionContext],
-  tryClient: Option[AmazonS3Client]
+  tryS3: Option[AmazonS3]
 ) extends S3Repository {
 
   private val executionContext = tryExecutionContext.getOrElse(ExecutionContext.global)
-  private val s3Client = tryClient.getOrElse{
+  private val s3Client = tryS3.getOrElse{
     val s3AccessKey = Option(properties.getProperty("revenj.s3-user"))
     val s3SecretKey = Option(properties.getProperty("revenj.s3-secret"))
     val s3Region = Option(properties.getProperty("revenj.s3-region"))
@@ -31,7 +31,7 @@ class AmazonS3Repository(
 
   private val bucketName = Option(properties.getProperty("revenj.s3-bucket-name"))
   private def getBucketName(name: String) = {
-    val bn = Option(name).orElse(bucketName)
+    val bn = if (name == null || name.isEmpty) bucketName else Some(name)
     require(bn.isDefined && bn.get.nonEmpty, """Bucket name not specified for this S3 instance or system wide.
 Either specify revenj.s3-bucket-name in Properties as system wide name or provide a bucket name to this S3 instance""")
     bn.get
