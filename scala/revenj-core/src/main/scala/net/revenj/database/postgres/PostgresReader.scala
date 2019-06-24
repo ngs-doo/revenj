@@ -182,6 +182,9 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     positionInInput += count
   }
 
+  def bufferPosition: Int = positionInBuffer
+  def currentBuffer: Array[Char] = buffer
+
   def bufferToString(): String = {
     val len = positionInBuffer
     positionInBuffer = 0

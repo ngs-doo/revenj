@@ -142,7 +142,7 @@ object NumberConverter {
     if (value == Long.MinValue) {
       "-9223372036854775808".getChars(0, 20, buf, 1)
       1
-    } else if (value == 0) {
+    } else if (value == 0L) {
       buf(20) = '0'
       20
     } else {

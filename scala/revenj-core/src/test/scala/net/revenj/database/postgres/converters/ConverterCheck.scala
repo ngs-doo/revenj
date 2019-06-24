@@ -2,7 +2,7 @@ package net.revenj.database.postgres.converters
 
 import java.io.IOException
 import java.time.OffsetDateTime
-import java.util.{Base64, UUID}
+import java.util.{Base64, Random, UUID}
 
 import net.revenj.database.postgres.{PostgresReader, PostgresWriter}
 import org.specs2.ScalaCheck
@@ -213,6 +213,94 @@ class ConverterCheck extends Specification with ScalaCheck {
       reader.process(value)
       val result = LongConverter.parseCollection(reader, 0).toList
       longs === result
+    }
+  }
+
+  "decimals" >> {
+    "parse zero" >> {
+      val reader = new PostgresReader
+      val javaNumbers = (0 until 100).map ( i => java.math.BigDecimal.valueOf(0, i) )
+      val parsedNumbers = javaNumbers.map { jbd =>
+        reader.process(s"(${jbd.toPlainString})")
+        reader.read()
+        DecimalConverter.parse(reader, 0).bigDecimal
+      }
+      javaNumbers === parsedNumbers
+    }
+    "parse one" >> {
+      val reader = new PostgresReader
+      val numbers = (0 until 100).map ( i => BigDecimal(java.math.BigDecimal.valueOf(1, i-20)) )
+      val parsedNumbers = numbers.map { bd =>
+        reader.process(s"(${bd.bigDecimal.toPlainString})")
+        reader.read()
+        DecimalConverter.parse(reader, 0)
+      }
+      numbers === parsedNumbers
+    }
+    "random number parsing" >> {
+      val reader = new PostgresReader
+      val rnd = new Random(0)
+      var neg = Seq(BigDecimal(1), BigDecimal(1), BigDecimal(-1))
+      val scalaNumbers = (0 until 10000).map ( i => BigDecimal(rnd.nextDouble() * rnd.nextInt(1000))*neg(i%3) )
+      val parsedNumbers = scalaNumbers.map { jbd =>
+        reader.process(s"(${jbd.bigDecimal.toPlainString})")
+        reader.read()
+        DecimalConverter.parse(reader, 0)
+      }
+      scalaNumbers === parsedNumbers
+    }
+    "serializing zero" >> {
+      val writer = new PostgresWriter
+      val numbers = (0 until 100).map ( i => java.math.BigDecimal.valueOf(0, i) )
+      val tuples = numbers.map { jbd =>
+        DecimalConverter.toTuple(BigDecimal(jbd))
+      }
+      val arrTuple = ArrayTuple(tuples.toArray)
+      val sb = new mutable.StringBuilder()
+      sb.append("{")
+      numbers.foreach { n =>
+        sb.append(n.toPlainString)
+        sb.append(",")
+      }
+      sb.setLength(sb.length - 1)
+      sb.append('}')
+      sb.toString() === arrTuple.buildTuple(false)
+    }
+    "serializing one" >> {
+      val writer = new PostgresWriter
+      val numbers = (0 until 100).map ( i => java.math.BigDecimal.valueOf(1, i-20) )
+      val tuples = numbers.map { jbd =>
+        DecimalConverter.toTuple(BigDecimal(jbd))
+      }
+      val arrTuple = ArrayTuple(tuples.toArray)
+      val sb = new mutable.StringBuilder()
+      sb.append("{")
+      numbers.foreach { n =>
+        sb.append(n.toPlainString)
+        sb.append(",")
+      }
+      sb.setLength(sb.length - 1)
+      sb.append('}')
+      sb.toString() === arrTuple.buildTuple(false)
+    }
+    "random number serialization" >> {
+      val writer = new PostgresWriter
+      val rnd = new Random(0)
+      var neg = Seq(BigDecimal(1), BigDecimal(1), BigDecimal(-1))
+      val numbers = (0 until 10000).map ( i => BigDecimal(rnd.nextDouble() * rnd.nextInt(1000))*neg(i%3) )
+      val tuples = numbers.map { bd =>
+        DecimalConverter.toTuple(bd)
+      }
+      val arrTuple = ArrayTuple(tuples.toArray)
+      val sb = new mutable.StringBuilder()
+      sb.append("{")
+      numbers.foreach { n =>
+        sb.append(n.bigDecimal.toPlainString)
+        sb.append(",")
+      }
+      sb.setLength(sb.length - 1)
+      sb.append('}')
+      sb.toString() === arrTuple.buildTuple(false)
     }
   }
 }
