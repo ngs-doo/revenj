@@ -6,6 +6,8 @@ import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWri
 import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 import org.postgresql.util.PGobject
 
+import scala.collection.concurrent.TrieMap
+
 object JodaUtcTimestampConverter extends JodaTimestampConverter(true)
 
 object JodaLocalTimestampConverter extends JodaTimestampConverter(false)
@@ -53,6 +55,9 @@ class JodaTimestampConverter(asUtc: Boolean) extends Converter[DateTime] {
 object JodaTimestampConverter {
   private val MIN_DATE_TIME_UTC = DateTime.parse("0001-01-01T00:00:00Z")
   private val TIMESTAMP_REMINDER = Array[Int](100000, 10000, 1000, 100, 10, 1)
+
+  private val hourOffsets = (-23 to 23).map(DateTimeZone.forOffsetHours).toArray
+  private val millisOffsets = new TrieMap[Int, DateTimeZone]()
 
   def setParameter(sw: PostgresBuffer, ps: PreparedStatement, index: Int, value: DateTime): Unit = {
     val pg = new PGobject
@@ -152,6 +157,15 @@ object JodaTimestampConverter {
     end + 3
   }
 
+  private def hourOffset(offset: Int) = {
+    require(offset > -24 && offset < 24, s"Invalid hour offset provided: $offset")
+    hourOffsets(offset + 23)
+  }
+
+  private def millisOffset(offset: Int) = {
+    millisOffsets.getOrElseUpdate(offset, DateTimeZone.forOffsetMillis(offset))
+  }
+
   private def parseDateTime(reader: PostgresReader, context: Int, asUtc: Boolean): DateTime = {
     //TODO: BC after date for year < 0 ... not supported by .NET, but supported by Java
     val cur = reader.read(context)
@@ -197,20 +211,20 @@ object JodaTimestampConverter {
         }
         val pos = buf(max) == '+'
         if (asUtc) new DateTime(year, month, date, hour, minutes, seconds, nano / 1000, DateTimeZone.UTC).plusSeconds(if (pos) -offsetSeconds else offsetSeconds)
-        else if (offsetSeconds != 0) new DateTime(year, month, date, hour, minutes, seconds, nano / 1000, DateTimeZone.forOffsetMillis((if (pos) offsetSeconds else -offsetSeconds) * 1000))
+        else if (offsetSeconds != 0) new DateTime(year, month, date, hour, minutes, seconds, nano / 1000, millisOffset((if (pos) offsetSeconds else -offsetSeconds) * 1000))
         else new DateTime(year, month, date, hour, minutes, seconds, nano / 1000, DateTimeZone.UTC)
       } else if (len == 20 && buf(19) == 'Z') new DateTime(year, month, date, hour, minutes, seconds, 0, DateTimeZone.UTC)
       else if (len == 22) {
         val pos = buf(19) == '+'
         val offset = NumberConverter.read2(buf, 20)
         if (asUtc) new DateTime(year, month, date, hour, minutes, seconds, 0, DateTimeZone.UTC).plusHours(if (pos) -offset else offset)
-        else if (offset != 0) new DateTime(year, month, date, hour, minutes, seconds, 0, DateTimeZone.forOffsetHours(if (pos) offset else -offset))
+        else if (offset != 0) new DateTime(year, month, date, hour, minutes, seconds, 0, hourOffset(if (pos) offset else -offset))
         else new DateTime(year, month, date, hour, minutes, seconds, 0, DateTimeZone.UTC)
       } else if (len == 25) {
         val pos = buf(19) == '+'
         val offsetSeconds = NumberConverter.read2(buf, 20) * 3600 + NumberConverter.read2(buf, 23) * 60
         if (asUtc) new DateTime(year, month, date, hour, minutes, seconds, 0, DateTimeZone.UTC).plusSeconds(if (pos) -offsetSeconds else offsetSeconds)
-        else new DateTime(year, month, date, hour, minutes, seconds, 0, DateTimeZone.forOffsetMillis((if (pos) offsetSeconds else -offsetSeconds ) * 1000))
+        else new DateTime(year, month, date, hour, minutes, seconds, 0, millisOffset((if (pos) offsetSeconds else -offsetSeconds ) * 1000))
       } else {
         buf(10) = 'T'
         DateTime.parse(new String(buf, 0, len))
