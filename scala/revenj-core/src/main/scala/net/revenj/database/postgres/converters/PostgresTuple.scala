@@ -36,13 +36,45 @@ trait PostgresTuple {
   }
 }
 object PostgresTuple {
-  private val QUOTE_ESCAPE = new TrieMap[String, String]
-  private val SLASHES = {
+  private val quoteEscape = new TrieMap[String, String]
+  private val slashes = {
     val arr = new Array[String](20)
     for (i <- arr.indices) {
       arr(i) = "\\" * (1 << i)
     }
     arr
+  }
+  private val escapingCache = new TrieMap[String, String]()
+
+  private[converters] def prepareMapping(mappings: Option[(PostgresWriter, Char) => Unit]) : (String, PostgresWriter) => Unit = {
+    if (mappings.isDefined) quoteMapping(mappings.get)
+    else PostgresTuple.noQuoting
+  }
+
+  private def quoteMapping(mapping: (PostgresWriter, Char) => Unit)(quote: String, sw: PostgresWriter): Unit = {
+    var x = 0
+    while (x < quote.length) {
+      mapping(sw, quote.charAt(x))
+      x += 1
+    }
+  }
+
+  private def noQuoting(quote: String, sw: PostgresWriter): Unit = {
+    sw.write(quote)
+  }
+
+  private[converters] def nextEscape(input: String, next: Char) = {
+    if (input.length < 16) {
+      escapingCache.getOrElseUpdate(input, buildNextEscape(input, next))
+    } else {
+      buildNextEscape(input, next)
+    }
+  }
+  private def buildNextEscape(input: String, next: Char): String = {
+    val sb = new StringBuilder(input.length + 1)
+    sb.append(input)
+    sb.append(next)
+    sb.toString
   }
 
   val NULL: PostgresTuple = new NullTuple
@@ -87,34 +119,30 @@ object PostgresTuple {
   }
 
   def buildQuoteEscape(escaping: String): String = {
-    QUOTE_ESCAPE.get(escaping) match {
-      case Some(result) => result
-      case _ =>
-        var sb = new StringBuilder
-        sb.append('"')
-        var j = escaping.length - 1
-        while (j >= 0) {
-          if (escaping.charAt(j) == '1') {
-            val len = sb.length
-            var i = 0
-            while (i < len) {
-              sb.insert(i * 2, sb.charAt(i * 2))
-              i += 1
-            }
-          } else {
-            sb = new StringBuilder(sb.toString.replace("\\", "\\\\").replace("\"", "\\\""))
+    quoteEscape.getOrElseUpdate(escaping, {
+      var sb = new StringBuilder
+      sb.append('"')
+      var j = escaping.length - 1
+      while (j >= 0) {
+        if (escaping.charAt(j) == '1') {
+          val len = sb.length
+          var i = 0
+          while (i < len) {
+            sb.insert(i * 2, sb.charAt(i * 2))
+            i += 1
           }
-          j -= 1
+        } else {
+          sb = new StringBuilder(sb.toString.replace("\\", "\\\\").replace("\"", "\\\""))
         }
-        val newResult = sb.toString
-        QUOTE_ESCAPE.put(escaping, newResult)
-        newResult
-    }
+        j -= 1
+      }
+      sb.toString
+    })
   }
 
   def buildSlashEscape(len: Int): String = {
-    if (len < SLASHES.length) {
-      SLASHES(len)
+    if (len < slashes.length) {
+      slashes(len)
     } else {
       "\\" * (1 << len)
     }

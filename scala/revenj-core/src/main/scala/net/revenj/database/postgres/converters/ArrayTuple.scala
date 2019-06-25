@@ -48,24 +48,15 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
 
   def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     sw.write('{')
-    val newEscaping = escaping + "0"
+    val newEscaping = PostgresTuple.nextEscape(escaping, '0')
     lazy val quote = PostgresTuple.buildQuoteEscape(escaping)
-    lazy val mapQuote = mappings match {
-      case Some(m) => () => {
-        var x = 0
-        while (x < quote.length) {
-          m(sw, quote.charAt(x))
-          x += 1
-        }
-      }
-      case _ => () => sw.write(quote)
-    }
+    lazy val mapQuote = PostgresTuple.prepareMapping(mappings)
     val e = elements(0)
     if (e != null) {
       if (e.mustEscapeArray) {
-        mapQuote()
+        mapQuote(quote, sw)
         e.insertArray(sw, newEscaping, mappings)
-        mapQuote()
+        mapQuote(quote, sw)
       } else e.insertArray(sw, escaping, mappings)
     } else sw.write("NULL")
     var i = 1
@@ -74,9 +65,9 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
       val e = elements(i)
       if (e != null) {
         if (e.mustEscapeArray) {
-          mapQuote()
+          mapQuote(quote, sw)
           e.insertArray(sw, newEscaping, mappings)
-          mapQuote()
+          mapQuote(quote, sw)
         } else e.insertArray(sw, escaping, mappings)
       } else sw.write("NULL")
       i += 1

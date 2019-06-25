@@ -48,24 +48,15 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
 
   def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     sw.write('(')
-    val newEscaping = escaping + '1'
+    val newEscaping = PostgresTuple.nextEscape(escaping, '1')
     lazy val quote = PostgresTuple.buildQuoteEscape(escaping)
-    lazy val mapQuote = mappings match {
-      case Some(m) => () => {
-        var x = 0
-        while (x < quote.length) {
-          m(sw, quote.charAt(x))
-          x += 1
-        }
-      }
-      case _ => () => sw.write(quote)
-    }
+    lazy val mapQuote = PostgresTuple.prepareMapping(mappings)
     val p = properties(0)
     if (p != null) {
       if (p.mustEscapeRecord) {
-        mapQuote()
+        mapQuote(quote, sw)
         p.insertRecord(sw, newEscaping, mappings)
-        mapQuote()
+        mapQuote(quote, sw)
       } else p.insertRecord(sw, escaping, mappings)
     }
     var i = 1
@@ -74,9 +65,9 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
       val p = properties(i)
       if (p != null) {
         if (p.mustEscapeRecord) {
-          mapQuote()
+          mapQuote(quote, sw)
           p.insertRecord(sw, newEscaping, mappings)
-          mapQuote()
+          mapQuote(quote, sw)
         } else p.insertRecord(sw, escaping, mappings)
       }
       i += 1
