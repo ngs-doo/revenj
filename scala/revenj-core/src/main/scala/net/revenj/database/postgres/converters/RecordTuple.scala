@@ -1,6 +1,9 @@
 package net.revenj.database.postgres.converters
 
 import net.revenj.database.postgres.PostgresWriter
+import net.revenj.database.postgres.converters.PostgresTuple.buildNextEscape
+
+import scala.collection.concurrent.TrieMap
 
 class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
 
@@ -48,7 +51,7 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
 
   def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     sw.write('(')
-    val newEscaping = PostgresTuple.nextEscape(escaping, '1')
+    val newEscaping = RecordTuple.nextEscape(escaping)
     lazy val quote = PostgresTuple.buildQuoteEscape(escaping)
     lazy val mapQuote = PostgresTuple.prepareMapping(mappings)
     val p = properties(0)
@@ -79,6 +82,15 @@ class RecordTuple(properties: Array[PostgresTuple]) extends PostgresTuple {
 object RecordTuple {
   val EMPTY: PostgresTuple = new EmptyRecordTuple()
   val NULL: PostgresTuple = new NullTuple()
+
+  private val escapingCache = new TrieMap[String, String]()
+  private[converters] def nextEscape(input: String) = {
+    if (input.length < 16) {
+      escapingCache.getOrElseUpdate(input, buildNextEscape(input, '1'))
+    } else {
+      buildNextEscape(input, '1')
+    }
+  }
 
   def apply(properties: Array[PostgresTuple]): PostgresTuple = {
     if (properties == null) RecordTuple.NULL

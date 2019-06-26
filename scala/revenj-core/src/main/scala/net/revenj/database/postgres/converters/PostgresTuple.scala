@@ -44,7 +44,6 @@ object PostgresTuple {
     }
     arr
   }
-  private val escapingCache = new TrieMap[String, String]()
 
   private[converters] def prepareMapping(mappings: Option[(PostgresWriter, Char) => Unit]) : (String, PostgresWriter) => Unit = {
     if (mappings.isDefined) quoteMapping(mappings.get)
@@ -63,14 +62,7 @@ object PostgresTuple {
     sw.write(quote)
   }
 
-  private[converters] def nextEscape(input: String, next: Char) = {
-    if (input.length < 16) {
-      escapingCache.getOrElseUpdate(input, buildNextEscape(input, next))
-    } else {
-      buildNextEscape(input, next)
-    }
-  }
-  private def buildNextEscape(input: String, next: Char): String = {
+  private[converters] def buildNextEscape(input: String, next: Char): String = {
     val sb = new StringBuilder(input.length + 1)
     sb.append(input)
     sb.append(next)

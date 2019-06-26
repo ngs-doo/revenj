@@ -1,7 +1,9 @@
 package net.revenj.database.postgres.converters
 
+import net.revenj.database.postgres.converters.PostgresTuple.buildNextEscape
 import net.revenj.database.postgres.{PostgresReader, PostgresWriter}
 
+import scala.collection.concurrent.TrieMap
 import scala.collection.mutable.ArrayBuffer
 
 class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTuple {
@@ -48,7 +50,7 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
 
   def insertRecord(sw: PostgresWriter, escaping: String, mappings: Option[(PostgresWriter, Char) => Unit]): Unit = {
     sw.write('{')
-    val newEscaping = PostgresTuple.nextEscape(escaping, '0')
+    val newEscaping = ArrayTuple.nextEscape(escaping)
     lazy val quote = PostgresTuple.buildQuoteEscape(escaping)
     lazy val mapQuote = PostgresTuple.prepareMapping(mappings)
     val e = elements(0)
@@ -83,6 +85,15 @@ class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTup
 object ArrayTuple {
   val EMPTY: PostgresTuple = new EmptyArrayTuple
   val NULL: PostgresTuple = new NullTuple
+
+  private val escapingCache = new TrieMap[String, String]()
+  private[converters] def nextEscape(input: String) = {
+    if (input.length < 16) {
+      escapingCache.getOrElseUpdate(input, buildNextEscape(input, '0'))
+    } else {
+      buildNextEscape(input, '0')
+    }
+  }
 
   private class EmptyArrayTuple extends PostgresTuple {
     val mustEscapeRecord = false
