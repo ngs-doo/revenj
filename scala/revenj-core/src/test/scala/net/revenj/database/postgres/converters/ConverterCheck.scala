@@ -323,5 +323,39 @@ class ConverterCheck extends Specification with ScalaCheck {
       sb.append('}')
       sb.toString() === arrTuple.buildTuple(false)
     }
+    "parse special" >> {
+      val reader = new PostgresReader
+      val numbers = (1 to 20).flatMap { n =>
+        (0 to 20).flatMap { z =>
+          Seq(BigDecimal("-0." + ("0" * z) + ("9" * n)), BigDecimal("0." + ("0" * z) + ("9" * n)))
+        }
+      }
+      val parsedNumbers = numbers.map { bd =>
+        reader.process(s"(${bd.bigDecimal.toPlainString})")
+        reader.read()
+        DecimalConverter.parse(reader, 0)
+      }
+      numbers === parsedNumbers
+    }
+    "serialize special" >> {
+      val numbers = (1 to 20).flatMap { n =>
+        (0 to 20).flatMap { z =>
+          Seq(BigDecimal("-0." + ("0" * z) + ("9" * n)), BigDecimal("0." + ("0" * z) + ("9" * n)))
+        }
+      }
+      val tuples = numbers.map { bd =>
+        DecimalConverter.toTuple(bd)
+      }
+      val arrTuple = ArrayTuple(tuples.toArray)
+      val sb = new mutable.StringBuilder()
+      sb.append("{")
+      numbers.foreach { n =>
+        sb.append(n.bigDecimal.toPlainString)
+        sb.append(",")
+      }
+      sb.setLength(sb.length - 1)
+      sb.append('}')
+      sb.toString() === arrTuple.buildTuple(false)
+    }
   }
 }

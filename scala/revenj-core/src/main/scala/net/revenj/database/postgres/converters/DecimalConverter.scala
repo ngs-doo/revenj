@@ -23,12 +23,11 @@ object DecimalConverter extends Converter[BigDecimal] {
     var longValue = 0L
     var i = start
     if (isNeg) {
-      i += 1
       while (simpleNumber && i < len) {
         val ch = buf(i)
         i += 1
         if (ch == '.') {
-          if (dotIndex > 0) {
+          if (dotIndex >= 0) {
             simpleNumber = false
           }
           dotIndex = i - 1
@@ -43,7 +42,7 @@ object DecimalConverter extends Converter[BigDecimal] {
         val ch = buf(i)
         i += 1
         if (ch == '.') {
-          if (dotIndex > 0) {
+          if (dotIndex >= 0) {
             simpleNumber = false
           }
           dotIndex = i - 1
@@ -83,7 +82,7 @@ object DecimalConverter extends Converter[BigDecimal] {
       val offset = if (isNeg) 1 else 0
       if (buf(offset) == '0' && buf(offset + 1) == '.') {
         var x = 2 + offset
-        val maxLong = len - 19
+        val maxLong = len - 18
         while (only0 && x < maxLong) {
           only0 = buf(x) == '0'
           x += 1
