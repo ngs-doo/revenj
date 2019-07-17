@@ -3,7 +3,6 @@ package net.revenj.database.postgres.converters
 import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWriter}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 object ByteaConverter extends Converter[Array[Byte]] {
 
@@ -53,7 +52,7 @@ object ByteaConverter extends Converter[Array[Byte]] {
     builder.result()
   }
 
-  override def parseCollectionOption(reader: PostgresReader, context: Int): Option[ArrayBuffer[Array[Byte]]] = {
+  override def parseCollectionOption(reader: PostgresReader, context: Int): Option[scala.collection.IndexedSeq[Array[Byte]]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None
@@ -68,7 +67,7 @@ object ByteaConverter extends Converter[Array[Byte]] {
       if (cur == '}') {
         reader.read()
       }
-      val list = ArrayBuffer.newBuilder[Array[Byte]]
+      val list = new mutable.ArrayBuffer[Array[Byte]](2)
       while (cur != -1 && cur != '}') {
         cur = reader.read()
         if (cur == 'N') {
@@ -84,11 +83,11 @@ object ByteaConverter extends Converter[Array[Byte]] {
       } else {
         reader.read()
       }
-      Some(list.result())
+      Some(list)
     }
   }
 
-  override def parseNullableCollectionOption(reader: PostgresReader, context: Int): Option[ArrayBuffer[Option[Array[Byte]]]] = {
+  override def parseNullableCollectionOption(reader: PostgresReader, context: Int): Option[scala.collection.IndexedSeq[Option[Array[Byte]]]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None
@@ -103,7 +102,7 @@ object ByteaConverter extends Converter[Array[Byte]] {
       if (cur == '}') {
         reader.read()
       }
-      val list = ArrayBuffer.newBuilder[Option[Array[Byte]]]
+      val list = new mutable.ArrayBuffer[Option[Array[Byte]]](2)
       while (cur != -1 && cur != '}') {
         cur = reader.read()
         if (cur == 'N') {

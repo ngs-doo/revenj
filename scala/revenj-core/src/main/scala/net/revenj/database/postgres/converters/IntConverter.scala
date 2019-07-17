@@ -16,6 +16,15 @@ object IntConverter extends Converter[Int] {
 
   override def default() = 0
 
+  override def parse(reader: PostgresReader, context: Int): Int = {
+    val cur = reader.read()
+    if (cur == ',' || cur == ')') {
+      0
+    } else {
+      parseInt(reader, cur, ')')
+    }
+  }
+
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Int = parseInt(reader, start, ')')
 
   private def parseInt(reader: PostgresReader, start: Int, matchEnd: Char): Int = {

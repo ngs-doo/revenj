@@ -17,7 +17,7 @@ class EagerDataCache[T <: Identifiable, PK](
   dataChanges: DataChangeNotification,
   systemState: SystemState,
   extractKey: T => PK,
-  initialValues: Seq[T] = Nil
+  initialValues: scala.collection.Seq[T] = Nil
 ) extends DataSourceCache[T] with AutoCloseable {
 
   protected val cache = new TrieMap[String, T]()

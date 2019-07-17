@@ -5,12 +5,25 @@ import scala.collection.generic.CanBuildFrom
 
 object Guards {
 
-  def checkCollectionNulls[T <: AnyRef](values: Traversable[T]): Unit = {
+  def checkCollectionNulls[T <: AnyRef](values: Iterable[T]): Unit = {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
       while (iterator.hasNext) {
         if (iterator.next() eq null) {
+          throw new IllegalArgumentException("Null value found at index \"" + i + "\".")
+        }
+        i += 1
+      }
+    }
+  }
+
+  def checkCollectionNulls[T <: AnyRef](values: scala.collection.IndexedSeq[T]): Unit = {
+    if (values ne null) {
+      var i = 0
+      val size = values.size
+      while (i < size) {
+        if (values(i) eq null) {
           throw new IllegalArgumentException("Null value found at index \"" + i + "\".")
         }
         i += 1
@@ -30,7 +43,7 @@ object Guards {
     }
   }
 
-  def checkCollectionNulls[T <: AnyRef](values: Option[Traversable[T]]): Unit = {
+  def checkCollectionNulls[T <: AnyRef](values: Option[Iterable[T]]): Unit = {
     if ((values ne null) && values.isDefined) checkCollectionNulls(values.get)
   }
 
@@ -38,12 +51,26 @@ object Guards {
     if ((values ne null) && values.isDefined) checkArrayNulls(values.get)
   }
 
-  def checkCollectionOptionRefNulls[T <: AnyRef](values: Traversable[Option[T]]): Unit = {
+  def checkCollectionOptionRefNulls[T <: AnyRef](values: Iterable[Option[T]]): Unit = {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
       while (iterator.hasNext) {
         val oit = iterator.next()
+        if ((oit eq null) || oit.isDefined && (oit.get eq null)) {
+          throw new IllegalArgumentException("Null value found at index \"" + i + "\".")
+        }
+        i += 1
+      }
+    }
+  }
+
+  def checkCollectionOptionRefNulls[T <: AnyRef](values: scala.collection.IndexedSeq[Option[T]]): Unit = {
+    if (values ne null) {
+      var i = 0
+      val size = values.size
+      while (i < size) {
+        val oit = values(i)
         if ((oit eq null) || oit.isDefined && (oit.get eq null)) {
           throw new IllegalArgumentException("Null value found at index \"" + i + "\".")
         }
@@ -65,12 +92,25 @@ object Guards {
     }
   }
 
-  def checkCollectionOptionValNulls[T <: AnyVal](values: Traversable[Option[T]]): Unit = {
+  def checkCollectionOptionValNulls[T <: AnyVal](values: Iterable[Option[T]]): Unit = {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
       while (iterator.hasNext) {
         if (iterator.next() eq null) {
+          throw new IllegalArgumentException("Null value found at index \"" + i + "\".")
+        }
+        i += 1
+      }
+    }
+  }
+
+  def checkCollectionOptionValNulls[T <: AnyVal](values: scala.collection.IndexedSeq[Option[T]]): Unit = {
+    if (values ne null) {
+      var i = 0
+      val size = values.size
+      while (i < size) {
+        if (values(i) eq null) {
           throw new IllegalArgumentException("Null value found at index \"" + i + "\".")
         }
         i += 1
@@ -90,7 +130,7 @@ object Guards {
     }
   }
 
-  def checkCollectionOptionRefNulls[T <: AnyRef](values: Option[Traversable[Option[T]]]): Unit = {
+  def checkCollectionOptionRefNulls[T <: AnyRef](values: Option[Iterable[Option[T]]]): Unit = {
     if ((values ne null) && values.isDefined) checkCollectionOptionRefNulls(values.get)
   }
 
@@ -98,7 +138,7 @@ object Guards {
     if ((values ne null) && values.isDefined) checkArrayOptionRefNulls(values.get)
   }
 
-  def checkCollectionOptionValNulls[T <: AnyVal](values: Option[Traversable[Option[T]]]): Unit = {
+  def checkCollectionOptionValNulls[T <: AnyVal](values: Option[Iterable[Option[T]]]): Unit = {
     if ((values ne null) && values.isDefined) checkCollectionOptionValNulls(values.get)
   }
 
@@ -121,12 +161,31 @@ object Guards {
     if ((value ne null) && value.isDefined) checkScale(value.get, scale)
   }
 
-  def checkCollectionScale(values: Traversable[BigDecimal], scale: Int): Unit = {
+  def checkCollectionScale(values: Iterable[BigDecimal], scale: Int): Unit = {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
       while (iterator.hasNext) {
         val it = iterator.next()
+        if (it ne null) {
+          try {
+            it.setScale(scale)
+          } catch {
+            case e: ArithmeticException =>
+              throw new IllegalArgumentException("Invalid value for element at index " + i + ". Decimal places allowed: " + scale + ". Value: " + it, e)
+          }
+        }
+        i += 1
+      }
+    }
+  }
+
+  def checkCollectionScale(values: scala.collection.IndexedSeq[BigDecimal], scale: Int): Unit = {
+    if (values ne null) {
+      var i = 0
+      val size = values.size
+      while (i < size) {
+        val it = values(i)
         if (it ne null) {
           try {
             it.setScale(scale)
@@ -158,12 +217,32 @@ object Guards {
     }
   }
 
-  def checkCollectionOptionScale(values: Traversable[Option[BigDecimal]], scale: Int): Unit = {
+  def checkCollectionOptionScale(values: Iterable[Option[BigDecimal]], scale: Int): Unit = {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
       while (iterator.hasNext) {
         val oit = iterator.next()
+        if ((oit ne null) && oit.isDefined) {
+          val it = oit.get
+          try {
+            it.setScale(scale)
+          } catch {
+            case e: ArithmeticException =>
+              throw new IllegalArgumentException("Invalid value for element at index " + i + ". Decimal places allowed: " + scale + ". Value: " + it, e)
+          }
+        }
+        i += 1
+      }
+    }
+  }
+
+  def checkCollectionOptionScale(values: scala.collection.IndexedSeq[Option[BigDecimal]], scale: Int): Unit = {
+    if (values ne null) {
+      var i = 0
+      val size = values.size
+      while (i < size) {
+        val oit = values(i)
         if ((oit ne null) && oit.isDefined) {
           val it = oit.get
           try {
@@ -197,7 +276,7 @@ object Guards {
     }
   }
 
-  def checkCollectionScale(values: Option[Traversable[BigDecimal]], scale: Int): Unit = {
+  def checkCollectionScale(values: Option[Iterable[BigDecimal]], scale: Int): Unit = {
     if ((values ne null) && values.isDefined) checkCollectionScale(values.get, scale)
   }
 
@@ -205,7 +284,7 @@ object Guards {
     if ((values ne null) && values.isDefined) checkArrayScale(values.get, scale)
   }
 
-  def checkCollectionOptionScale(values: Option[Traversable[Option[BigDecimal]]], scale: Int): Unit = {
+  def checkCollectionOptionScale(values: Option[Iterable[Option[BigDecimal]]], scale: Int): Unit = {
     if ((values ne null) && values.isDefined) checkCollectionOptionScale(values.get, scale)
   }
 
@@ -325,12 +404,26 @@ object Guards {
     if ((value ne null) && value.isDefined) checkLength(value.get, length)
   }
 
-  def checkCollectionLength(values: Traversable[String], length: Int): Unit = {
+  def checkCollectionLength(values: Iterable[String], length: Int): Unit = {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
       while (iterator.hasNext) {
         val it = iterator.next()
+        if ((it ne null) && it.length > length) {
+          throw new IllegalArgumentException("Invalid value for element at index " + i + ". Maximum length allowed: " + length + ". Value: " + it)
+        }
+        i += 1
+      }
+    }
+  }
+
+  def checkCollectionLength(values: scala.collection.IndexedSeq[String], length: Int): Unit = {
+    if (values ne null) {
+      var i = 0
+      val size = values.size
+      while (i < size) {
+        val it = values(i)
         if ((it ne null) && it.length > length) {
           throw new IllegalArgumentException("Invalid value for element at index " + i + ". Maximum length allowed: " + length + ". Value: " + it)
         }
@@ -352,7 +445,7 @@ object Guards {
     }
   }
 
-  def checkCollectionOptionLength(values: Traversable[Option[String]], length: Int): Unit = {
+  def checkCollectionOptionLength(values: Iterable[Option[String]], length: Int): Unit = {
     if (values ne null) {
       var i = 0
       val iterator = values.toIterator
@@ -385,7 +478,7 @@ object Guards {
     }
   }
 
-  def checkCollectionLength(values: Option[Traversable[String]], length: Int): Unit = {
+  def checkCollectionLength(values: Option[Iterable[String]], length: Int): Unit = {
     if ((values ne null) && values.isDefined) checkCollectionLength(values.get, length)
   }
 
@@ -393,7 +486,7 @@ object Guards {
     if ((values ne null) && values.isDefined) checkArrayLength(values.get, length)
   }
 
-  def checkCollectionOptionLength(values: Option[Traversable[Option[String]]], length: Int): Unit = {
+  def checkCollectionOptionLength(values: Option[Iterable[Option[String]]], length: Int): Unit = {
     if ((values ne null) && values.isDefined) checkCollectionOptionLength(values.get, length)
   }
 

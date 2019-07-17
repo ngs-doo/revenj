@@ -16,6 +16,15 @@ object LongConverter extends Converter[Long] {
 
   override def default() = 0L
 
+  override def parse(reader: PostgresReader, context: Int): Long = {
+    val cur = reader.read()
+    if (cur == ',' || cur == ')') {
+      0L
+    } else {
+      parseLong(reader, cur, ')')
+    }
+  }
+
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Long = parseLong(reader, start, ')')
 
   private def parseLong(reader: PostgresReader, start: Int, matchEnd: Char): Long = {

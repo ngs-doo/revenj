@@ -12,6 +12,30 @@ object BoolConverter extends Converter[Boolean] {
 
   override def default() = false
 
+  private val someTrue = Some(true)
+  private val someFalse = Some(false)
+
+  override def parse(reader: PostgresReader, context: Int): Boolean = {
+    val cur = reader.read()
+    if (cur == ',' || cur == ')') {
+      false
+    } else {
+      reader.read()
+      cur == 't'
+    }
+  }
+
+  override def parseOption(reader: PostgresReader, context: Int): Option[Boolean] = {
+    val cur = reader.read()
+    if (cur == ',' || cur == ')') {
+      None
+    } else {
+      reader.read()
+      if (cur == 't') someTrue
+      else someFalse
+    }
+  }
+
   override def parseRaw(reader: PostgresReader, start: Int, context: Int): Boolean = {
     reader.read()
     start == 't'
@@ -35,10 +59,10 @@ object BoolConverter extends Converter[Boolean] {
     val cur = reader.read()
     if (cur == 't') {
       reader.read()
-      Some(true)
+      someTrue
     } else if (cur == 'f') {
       reader.read()
-      Some(false)
+      someFalse
     } else {
       reader.read(4)
       None
@@ -50,7 +74,7 @@ object BoolConverter extends Converter[Boolean] {
   }
 
   private class BooleanTuple(val value: Boolean) extends PostgresTuple {
-    val charValue = if (value) 't' else 'f'
+    val charValue: Char = if (value) 't' else 'f'
     val mustEscapeRecord = false
 
     val mustEscapeArray = false
@@ -60,7 +84,13 @@ object BoolConverter extends Converter[Boolean] {
     }
 
     override def buildTuple(quote: Boolean): String = {
-      if (quote) "'" + charValue + "'" else String.valueOf(charValue)
+      if (quote) {
+        val buf = new Array[Char](3)
+        buf(0) = '\''
+        buf(1) = charValue
+        buf(2) = '\''
+        new String(buf, 0, buf.length)
+      } else String.valueOf(charValue)
     }
   }
 

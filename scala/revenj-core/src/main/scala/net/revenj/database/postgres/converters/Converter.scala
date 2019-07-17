@@ -2,7 +2,7 @@ package net.revenj.database.postgres.converters
 
 import net.revenj.database.postgres.{PostgresBuffer, PostgresReader}
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable
 
 trait Converter[T] {
 
@@ -36,15 +36,20 @@ trait Converter[T] {
   def parseCollectionItem(reader: PostgresReader, context: Int): T
   def parseNullableCollectionItem(reader: PostgresReader, context: Int): Option[T]
 
-  def parseCollection(reader: PostgresReader, context: Int): ArrayBuffer[T] = {
-    parseCollectionOption(reader, context).getOrElse(ArrayBuffer.empty[T])
+  private val emptyCollection = scala.collection.IndexedSeq.empty[T]
+  private val someEmptyCollection = Some(scala.collection.IndexedSeq.empty[T])
+  private val emptyOptionCollection = scala.collection.IndexedSeq.empty[Option[T]]
+  private val someEmptyOptionCollection = Some(scala.collection.IndexedSeq.empty[Option[T]])
+
+  def parseCollection(reader: PostgresReader, context: Int): scala.collection.IndexedSeq[T] = {
+    parseCollectionOption(reader, context).getOrElse(emptyCollection)
   }
 
-  def parseNullableCollection(reader: PostgresReader, context: Int): ArrayBuffer[Option[T]] = {
-    parseNullableCollectionOption(reader, context).getOrElse(ArrayBuffer.empty[Option[T]])
+  def parseNullableCollection(reader: PostgresReader, context: Int): scala.collection.IndexedSeq[Option[T]] = {
+    parseNullableCollectionOption(reader, context).getOrElse(emptyOptionCollection)
   }
 
-  def parseCollectionOption(reader: PostgresReader, context: Int): Option[ArrayBuffer[T]] = {
+  def parseCollectionOption(reader: PostgresReader, context: Int): Option[scala.collection.IndexedSeq[T]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None
@@ -60,10 +65,10 @@ trait Converter[T] {
         } else {
           reader.read(2)
         }
-        Some(ArrayBuffer.empty[T])
+        someEmptyCollection
       } else {
         val innerContext = if (context == 0) 1 else context << 1
-        val list = ArrayBuffer.newBuilder[T]
+        val list = new mutable.ArrayBuffer[T](4)
         do {
           list += parseCollectionItem(reader, innerContext)
         } while (reader.last == ',')
@@ -72,12 +77,12 @@ trait Converter[T] {
         } else {
           reader.read()
         }
-        Some(list.result())
+        Some(list)
       }
     }
   }
 
-  def parseNullableCollectionOption(reader: PostgresReader, context: Int): Option[ArrayBuffer[Option[T]]] = {
+  def parseNullableCollectionOption(reader: PostgresReader, context: Int): Option[scala.collection.IndexedSeq[Option[T]]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None
@@ -93,10 +98,10 @@ trait Converter[T] {
         } else {
           reader.read(2)
         }
-        Some(ArrayBuffer.empty[Option[T]])
+        someEmptyOptionCollection
       } else {
         val innerContext = if (context == 0) 1 else context << 1
-        val list = ArrayBuffer.newBuilder[Option[T]]
+        val list = new mutable.ArrayBuffer[Option[T]](4)
         do {
           list += parseNullableCollectionItem(reader, innerContext)
         } while (reader.last == ',')
@@ -105,7 +110,7 @@ trait Converter[T] {
         } else {
           reader.read()
         }
-        Some(list.result())
+        Some(list)
       }
     }
   }

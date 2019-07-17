@@ -4,10 +4,10 @@ import java.awt.Point
 import java.awt.geom.Point2D
 import java.io.{File, IOException}
 import java.sql.Connection
+import java.util
 import java.util.UUID
-import java.util.concurrent.TimeUnit
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
 import monix.execution.Ack
@@ -18,7 +18,6 @@ import net.revenj.patterns._
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeAfterAll
-import ru.yandex.qatools.embed.service.PostgresEmbeddedService
 
 import example.test.Client.Tick
 import example.test.postgres._
@@ -26,18 +25,19 @@ import example.test._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-import scala.util.{Random, Try}
+import scala.util.{Failure, Random, Success, Try}
 import monix.eval.Task
 import monix.reactive.{Observable, Observer}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.FutureMatchers
 import org.specs2.specification.mutable.ExecutionEnvironment
+import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
 
 
 class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with FutureMatchers with ExecutionEnvironment {
   sequential
 
-  var tryDb: Try[PostgresEmbeddedService] = _
+  var tryDb: Try[EmbeddedPostgres] = _
 
   def beforeAll() = {
     tryDb = DbCheck.setupDatabase()
@@ -653,10 +653,10 @@ object DbCheck {
     }
   }
 
-  def setupDatabase(): Try[PostgresEmbeddedService] = {
-    Try {
-      val postgres = new PostgresEmbeddedService("localhost", 5555, "revenj", "revenj", "revenj", "target/db", true, 5000)
-      postgres.start()
+  def setupDatabase(): Try[EmbeddedPostgres] = {
+    try {
+      val postgres = new EmbeddedPostgres(ru.yandex.qatools.embed.postgresql.distribution.Version.Main.V11,"./target/db")
+      postgres.start(EmbeddedPostgres.cachedRuntimeConfig(new File("./target/db").toPath), "localhost", 5555, "revenj", "revenj", "revenj", new util.ArrayList[String](), new util.ArrayList[String]())
       Thread.sleep(200)
       val context = new TestContext
       context.put(Download.INSTANCE, "")
@@ -674,7 +674,11 @@ object DbCheck {
           throw new IOException("Unable to migrate database: " + context.error.toString)
         }
       }
-      postgres
+      Success(postgres)
+    } catch {
+      case ex: Throwable =>
+        ex.printStackTrace()
+        Failure(ex)
     }
   }
 }

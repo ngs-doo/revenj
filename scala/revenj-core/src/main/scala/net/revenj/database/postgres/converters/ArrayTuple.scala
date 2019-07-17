@@ -4,7 +4,7 @@ import net.revenj.database.postgres.converters.PostgresTuple.buildNextEscape
 import net.revenj.database.postgres.{PostgresReader, PostgresWriter}
 
 import scala.collection.concurrent.TrieMap
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable
 
 class ArrayTuple(private val elements: Array[PostgresTuple]) extends PostgresTuple {
   private val escapeRecord = elements.length > 1 || elements(0) != null && elements(0).mustEscapeRecord
@@ -137,7 +137,7 @@ object ArrayTuple {
     }
   }
 
-  def createIndexed[T](elements: IndexedSeq[T], converter: T => PostgresTuple): PostgresTuple = {
+  def createIndexed[T](elements: scala.collection.IndexedSeq[T], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
     } else if (elements.isEmpty) {
@@ -153,7 +153,7 @@ object ArrayTuple {
     }
   }
 
-  def createIndexedOption[T](elements: IndexedSeq[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
+  def createIndexedOption[T](elements: scala.collection.IndexedSeq[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
     } else if (elements.isEmpty) {
@@ -172,7 +172,7 @@ object ArrayTuple {
     }
   }
 
-  def createSeq[T](elements: Seq[T], converter: T => PostgresTuple): PostgresTuple = {
+  def createSeq[T](elements: scala.collection.Seq[T], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
     } else if (elements.isEmpty) {
@@ -189,7 +189,7 @@ object ArrayTuple {
     }
   }
 
-  def createSeqOption[T](elements: Seq[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
+  def createSeqOption[T](elements: scala.collection.Seq[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
     } else if (elements.isEmpty) {
@@ -209,7 +209,7 @@ object ArrayTuple {
     }
   }
 
-  def createSet[T](elements: Set[T], converter: T => PostgresTuple): PostgresTuple = {
+  def createSet[T](elements: scala.collection.Set[T], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
     } else if (elements.isEmpty) {
@@ -226,7 +226,7 @@ object ArrayTuple {
     }
   }
 
-  def createSetOption[T](elements: Set[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
+  def createSetOption[T](elements: scala.collection.Set[Option[T]], converter: T => PostgresTuple): PostgresTuple = {
     if (elements == null) {
       NULL
     } else if (elements.isEmpty) {
@@ -246,7 +246,10 @@ object ArrayTuple {
     }
   }
 
-  def parse[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int) => T, default: () => T): Option[ArrayBuffer[T]] = {
+  private val someEmptyCollection = Some(scala.collection.IndexedSeq.empty[Nothing])
+  private val someEmptyOptionCollection = Some(scala.collection.IndexedSeq.empty[Option[Nothing]])
+
+  def parse[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int) => T, default: () => T): Option[scala.collection.IndexedSeq[T]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None
@@ -262,9 +265,9 @@ object ArrayTuple {
         } else {
           reader.read(2)
         }
-        Some(ArrayBuffer.empty[T])
+        someEmptyCollection
       } else {
-        val result = new ArrayBuffer[T]()
+        val result = new mutable.ArrayBuffer[T](4)
         val arrayContext: Int = Math.max(context << 1, 1)
         val recordContext: Int = arrayContext << 1
         while (cur != -1 && cur != '}') {
@@ -295,7 +298,7 @@ object ArrayTuple {
     }
   }
 
-  def parseOption[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int) => T): Option[ArrayBuffer[Option[T]]] = {
+  def parseOption[T](reader: PostgresReader, context: Int, converter: (PostgresReader, Int) => T): Option[scala.collection.IndexedSeq[Option[T]]] = {
     var cur = reader.read()
     if (cur == ',' || cur == ')') {
       None
@@ -311,9 +314,9 @@ object ArrayTuple {
         } else {
           reader.read(2)
         }
-        Some(new ArrayBuffer[Option[T]](0))
+        someEmptyOptionCollection
       } else {
-        val result = new ArrayBuffer[Option[T]]()
+        val result = new mutable.ArrayBuffer[Option[T]](4)
         val arrayContext: Int = Math.max(context << 1, 1)
         val recordContext: Int = arrayContext << 1
         while (cur != -1 && cur != '}') {

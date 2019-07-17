@@ -32,6 +32,7 @@ class PostgresReader(private var serviceLocator: Option[ServiceLocator]) extends
     lastChar = -1
   }
 
+  //TODO: do processing directly on bytes
   def process(input: String): Unit = {
     this.input = input
     this.length = input.length
@@ -257,7 +258,7 @@ object PostgresReader {
         } else if (c == '/') {
           result(index) = sb.toString
           index += 1
-          if (index == result.length) throw new IOException("Invalid URI provided: " + uri + ". Number of expected parts: " + result.length)
+          if (index == result.length) throw new IOException(s"Invalid URI provided: $uri. Number of expected parts: ${result.length}")
           sb.setLength(0)
         } else {
           sb.append(c)
