@@ -271,7 +271,6 @@ class ConverterCheck extends Specification with ScalaCheck {
       scalaNumbers === parsedNumbers
     }
     "serializing zero" >> {
-      val writer = new PostgresWriter
       val numbers = (0 until 100).map ( i => java.math.BigDecimal.valueOf(0, i) )
       val tuples = numbers.map { jbd =>
         DecimalConverter.toTuple(BigDecimal(jbd))
@@ -288,7 +287,6 @@ class ConverterCheck extends Specification with ScalaCheck {
       sb.toString() === arrTuple.buildTuple(false)
     }
     "serializing one" >> {
-      val writer = new PostgresWriter
       val numbers = (0 until 100).map ( i => java.math.BigDecimal.valueOf(1, i-20) )
       val tuples = numbers.map { jbd =>
         DecimalConverter.toTuple(BigDecimal(jbd))

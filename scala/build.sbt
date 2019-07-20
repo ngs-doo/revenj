@@ -59,7 +59,8 @@ lazy val tests = (project in file("tests")
     libraryDependencies ++= Seq(
       "com.dslplatform" % "dsl-clc" % "1.9.7" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
-      "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.10" % Test
+      "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.10" % Test,
+      "org.slf4j" % "slf4j-log4j12" % "1.7.26" % Test
     ),
     dslNamespace in (Test, DSL) := "example",
     dslDslPath in (Test, DSL) := Seq((resourceDirectory in Test).value),

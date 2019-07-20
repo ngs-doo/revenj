@@ -10,6 +10,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
+import de.flapdoodle.embed.process.distribution.IVersion
 import monix.execution.Ack
 import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.{Container, InstanceScope, SystemState}
@@ -655,9 +656,23 @@ object DbCheck {
 
   def setupDatabase(): Try[EmbeddedPostgres] = {
     try {
-      val postgres = new EmbeddedPostgres(ru.yandex.qatools.embed.postgresql.distribution.Version.Main.V11,"./target/db")
-      postgres.start(EmbeddedPostgres.cachedRuntimeConfig(new File("./target/db").toPath), "localhost", 5555, "revenj", "revenj", "revenj", new util.ArrayList[String](), new util.ArrayList[String]())
-      Thread.sleep(200)
+      val version = new IVersion {
+        override def asInDownloadPath(): String = "11.4-2"
+      }
+      val postgres = new EmbeddedPostgres(version, "./target/db/data")
+      val args = util.Arrays.asList(
+        "-E", "UTF8",
+        "--locale=C",
+        "--lc-collate=C",
+        "--lc-ctype=C")
+      postgres.start(EmbeddedPostgres.cachedRuntimeConfig(new File("./target/db").toPath), "localhost", 5555, "revenj", "revenj", "revenj", args, util.Arrays.asList())
+      var i = 0
+      def isStarted = postgres.getProcess.isPresent && postgres.getProcess.get.isProcessRunning
+      do {
+        Thread.sleep(400)
+        i += 1
+      } while (i < 50 && !isStarted)
+      require(isStarted, "Postgres not started")
       val context = new TestContext
       context.put(Download.INSTANCE, "")
       context.put(Force.INSTANCE, "")
