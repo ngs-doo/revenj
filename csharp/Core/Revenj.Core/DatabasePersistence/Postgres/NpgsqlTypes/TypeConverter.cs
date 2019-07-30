@@ -49,7 +49,11 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 			else
 				canConvert = NpgsqlTypesHelper.TryGetNativeTypeInfo(type, out info);
 			if (!canConvert)
+			{
+				if (type.IsEnum)
+					return "\"{0}\".\"{1}\"".With(type.Namespace, type.Name);
 				throw new NpgsqlException("Can't convert " + type.FullName + " to native value");
+			}
 			return info.Name;
 		}
 	}
