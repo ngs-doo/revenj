@@ -10,7 +10,6 @@ import java.util.UUID
 import javax.sql.DataSource
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
-import de.flapdoodle.embed.process.distribution.IVersion
 import monix.execution.Ack
 import net.revenj.database.postgres.DbCheck.MyService
 import net.revenj.extensibility.{Container, InstanceScope, SystemState}
@@ -29,16 +28,15 @@ import scala.concurrent.duration.Duration
 import scala.util.{Failure, Random, Success, Try}
 import monix.eval.Task
 import monix.reactive.{Observable, Observer}
+import org.pgscala.embedded.{PostgresCluster, PostgresVersion}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.FutureMatchers
 import org.specs2.specification.mutable.ExecutionEnvironment
-import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres
-
 
 class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with FutureMatchers with ExecutionEnvironment {
   sequential
 
-  var tryDb: Try[EmbeddedPostgres] = _
+  var tryDb: Try[PostgresCluster] = _
 
   def beforeAll() = {
     tryDb = DbCheck.setupDatabase()
@@ -654,25 +652,16 @@ object DbCheck {
     }
   }
 
-  def setupDatabase(): Try[EmbeddedPostgres] = {
+  def setupDatabase(): Try[PostgresCluster] = {
     try {
-      val version = new IVersion {
-        override def asInDownloadPath(): String = "11.4-2"
-      }
-      val postgres = new EmbeddedPostgres(version, "./target/db/data")
-      val args = util.Arrays.asList(
-        "-E", "UTF8",
-        "--locale=C",
-        "--lc-collate=C",
-        "--lc-ctype=C")
-      postgres.start(EmbeddedPostgres.cachedRuntimeConfig(new File("./target/db").toPath), "localhost", 5555, "revenj", "revenj", "revenj", args, util.Arrays.asList())
+      val postgres = new PostgresCluster(PostgresVersion(11, 4, 3), new File("./target/db/data"), Map.empty)
+      val (process, feedback) = postgres.start()
       var i = 0
-      def isStarted = postgres.getProcess.isPresent && postgres.getProcess.get.isProcessRunning
-      do {
+      while (i < 10 && !feedback.isCompleted) {
         Thread.sleep(400)
         i += 1
-      } while (i < 50 && !isStarted)
-      require(isStarted, "Postgres not started")
+      }
+      require(feedback.isCompleted, "Postgres not started")
       val context = new TestContext
       context.put(Download.INSTANCE, "")
       context.put(Force.INSTANCE, "")

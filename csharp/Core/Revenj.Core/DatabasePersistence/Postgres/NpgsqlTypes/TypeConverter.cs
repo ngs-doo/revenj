@@ -43,15 +43,15 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 		public static string GetTypeName(Type type)
 		{
 			NpgsqlNativeTypeInfo info;
-			bool canConvert;
 			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-				canConvert = NpgsqlTypesHelper.TryGetNativeTypeInfo(type.GetGenericArguments()[0], out info);
-			else
-				canConvert = NpgsqlTypesHelper.TryGetNativeTypeInfo(type, out info);
+				type = type.GetGenericArguments()[0];
+			var canConvert = NpgsqlTypesHelper.TryGetNativeTypeInfo(type, out info);
 			if (!canConvert)
 			{
 				if (type.IsEnum)
 					return "\"{0}\".\"{1}\"".With(type.Namespace, type.Name);
+				if (type == typeof(TreePath))
+					return "ltree";
 				throw new NpgsqlException("Can't convert " + type.FullName + " to native value");
 			}
 			return info.Name;
