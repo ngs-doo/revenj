@@ -382,8 +382,10 @@ If you wish to resolve types not registered in the container, specify revenj.res
       Try {
         if (registration.lifetime != Transient) {
           val (self, reg) = prepareRegistration(registration, caller)
-          self synchronized {
-            if (reg.promoted) {
+          if (reg.instance.isDefined) {
+            reg.instance.get
+          } else self.synchronized {
+            if (reg.instance.isDefined) {
               reg.instance.get
             } else if (reg.promoting) {
               throw new ResolutionException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected", registration.signature)
@@ -406,8 +408,10 @@ If you wish to resolve types not registered in the container, specify revenj.res
     } else {
       if (registration.lifetime != Transient) {
         val (self, reg) = prepareRegistration(registration, caller)
-        self synchronized {
-          if (reg.promoted) {
+        if (reg.instance.isDefined) {
+          Success(reg.instance.get)
+        } else self.synchronized {
+          if (reg.instance.isDefined) {
             Success(reg.instance.get)
           } else if (reg.promoting) {
             Failure(new ResolutionException(s"Unable to resolve: ${registration.signature}. Circular dependencies in signature detected", registration.signature))
@@ -477,9 +481,9 @@ If you wish to resolve types not registered in the container, specify revenj.res
       closeables.add(service.asInstanceOf[AutoCloseable])
     }
     val ti = Utils.findTypeInfo(mirror.typeOf[T], mirror)
-    addToRegistry(new Registration[T](ti.actual, this, service, false))
+    addToRegistry(new Registration[T](ti.actual, this, service, parent.isEmpty))
     if (ti.actual != ti.erased) {
-      addToRegistry(new Registration[T](ti.erased, this, service, false))
+      addToRegistry(new Registration[T](ti.erased, this, service, parent.isEmpty))
     }
     this
   }
@@ -496,6 +500,10 @@ If you wish to resolve types not registered in the container, specify revenj.res
   override def registerInstance[T](manifest: JavaType, factory: () => T): this.type = {
     val resolution: Container => T = _ => factory.apply()
     addToRegistry(new Registration[T](manifest, this, resolution, InstanceScope.Singleton))
+  }
+
+  override def registerInstanceAs[T](manifest: JavaType, instance: T): this.type = {
+    addToRegistry(new Registration[T](manifest, this, instance, parent.isEmpty))
   }
 
   override def registerGenerics[T: TypeTag](factory: (Container, Array[JavaType]) => T, lifetime: InstanceScope = Transient): this.type = {
@@ -615,13 +623,13 @@ private object SimpleContainer {
       this(None, signature, owner, None, None, None, Some(factory), lifetime)
     }
 
-    var promoted: Boolean = false
+    var promoted: Boolean = instance.isDefined
     var promoting: Boolean = false
 
     def promoteToSingleton(value: T): Unit = {
+      this.instance = Some(value)
       promoted = true
       promoting = false
-      this.instance = Some(value)
     }
 
     def prepareSingleton(caller: SimpleContainer): Registration[T] = {
