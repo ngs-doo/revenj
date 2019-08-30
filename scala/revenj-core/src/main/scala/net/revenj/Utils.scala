@@ -5,13 +5,14 @@ import java.net.InetAddress
 import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
 import java.util.concurrent.ArrayBlockingQueue
-import javax.xml.parsers.{DocumentBuilderFactory, SAXParser, SAXParserFactory}
 
+import javax.xml.parsers.{DocumentBuilderFactory, SAXParser, SAXParserFactory}
 import org.w3c.dom.Document
 import org.xml.sax.InputSource
 
 import scala.collection.concurrent.TrieMap
 import scala.reflect.runtime.universe._
+import scala.runtime.Nothing$
 import scala.xml.TopScope
 import scala.xml.parsing.NoBindingFactoryAdapter
 
@@ -42,6 +43,13 @@ object Utils {
     (typeOf[Double], classOf[Double]),
     (typeOf[Char], classOf[Char])).foreach { case (t, c) =>
     typeCache.put(t, TypeCache(c, classOf[AnyRef]))
+  }
+  Seq(
+    (typeOf[Nothing], classOf[Nothing$]),
+    (typeOf[Any], classOf[AnyRef]),
+    (typeOf[Option[Nothing]], classOf[Option[AnyRef]]),
+    (typeOf[None.type], classOf[Option[AnyRef]])).foreach { case (t, c) =>
+    typeCache.put(t, TypeCache(c, c))
   }
 
   private val documentBuilder = {

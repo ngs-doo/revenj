@@ -11,7 +11,7 @@ import net.revenj.database.postgres.converters.JsonConverter
 import net.revenj.extensibility._
 import net.revenj.patterns._
 import net.revenj.security.PermissionManager
-import net.revenj.serialization.{JacksonSerialization, Serialization}
+import net.revenj.serialization.{DslJsonSerialization, JacksonSerialization, Serialization}
 import org.postgresql.ds.PGPoolingDataSource
 
 import scala.collection.concurrent.TrieMap
@@ -171,6 +171,8 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     ChangeNotification.registerContainer(container, databaseNotification)
     container.registerAs[JacksonSerialization, JacksonSerialization](InstanceScope.Singleton)
     container.registerAs[Serialization[String], JacksonSerialization](InstanceScope.Singleton)
+    container.registerAs[DslJsonSerialization, DslJsonSerialization](InstanceScope.Singleton)
+    //container.registerAs[Serialization[String], DslJsonSerialization](InstanceScope.Singleton)
     container.registerFunc[DataContext](c => LocatorDataContext.asDataContext(c, loader), InstanceScope.Context)
     container.registerFunc[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), InstanceScope.Transient)
     container.registerFunc[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), InstanceScope.Context)

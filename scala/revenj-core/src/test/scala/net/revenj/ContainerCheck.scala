@@ -301,6 +301,14 @@ class ContainerCheck extends Specification with ScalaCheck {
       result1 === result3
       result2 !== result4
     }
+    "generic with any" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      val g = new G[Any](1)
+      container.registerInstance[G[Any]](g)
+      val result = container.resolve[G[Any]]
+      result.instance === 1
+      g === result
+    }
   }
 }
 

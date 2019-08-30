@@ -6,7 +6,7 @@ lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
   settings(
-    version := "0.9.5",
+    version := "0.9.6",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.6",
       "joda-time" % "joda-time" % "2.9.9",   // TODO: will be removed
@@ -28,7 +28,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "0.9.5",
+  version := "0.9.6",
   libraryDependencies ++= Seq(
     "com.typesafe" % "config" % "1.3.2",
     "com.typesafe.akka" %% "akka-http-core" % "10.0.15"
@@ -40,7 +40,7 @@ lazy val akka = (project in file("revenj-akka")
 lazy val storage = (project in file("revenj-storage")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "0.9.5",
+    version := "0.9.6",
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-s3" % "1.11.578",
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test
@@ -57,7 +57,7 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "com.dslplatform" % "dsl-clc" % "1.9.7" % Test,
+      "com.dslplatform" % "dsl-clc" % "1.9.8" % Test,
       "org.specs2" %% "specs2-scalacheck" % "3.8.6" % Test,
       "org.pgscala.embedded" %% "pgscala-embedded" % "0.2.4" % Test
     ),
