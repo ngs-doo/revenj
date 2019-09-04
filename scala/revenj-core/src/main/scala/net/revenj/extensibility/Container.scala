@@ -44,7 +44,13 @@ trait Container extends ServiceLocator with AutoCloseable {
 
   def registerFunc[T: TypeTag](factory: Container => T, lifetime: InstanceScope = Transient): this.type
 
+  @deprecated("avoid using this unbounded method. Prefer bounded ones instead", "0.9.6")
+  def registerFuncAs[T](manifest: Type, factory: Container => T, lifetime: InstanceScope = Transient): this.type
+
   def registerGenerics[T: TypeTag](factory: (Container, Array[Type]) => T, lifetime: InstanceScope = Transient): this.type
 
   def createScope(): Container
+
+  @deprecated("avoid using this unbounded method. Prefer bounded ones instead", "0.9.6")
+  def resolveClass[T](manifest: Class[T]): T
 }

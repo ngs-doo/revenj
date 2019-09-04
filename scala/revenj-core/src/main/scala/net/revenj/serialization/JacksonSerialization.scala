@@ -65,6 +65,8 @@ class JacksonSerialization(
     }
   }
 
+  def serialize(value: Any, stream: OutputStream, manifest: Type): Try[Unit] = serialize(value, stream)
+
   private[revenj] def deserialize(manifest: Type, content: Array[Byte], length: Int): Try[Any] = {
     Try {
       val javaType = mapper.getTypeFactory.constructType(manifest)

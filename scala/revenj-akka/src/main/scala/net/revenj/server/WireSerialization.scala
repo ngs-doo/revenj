@@ -10,7 +10,11 @@ import scala.util.Try
 import scala.reflect.runtime.universe._
 
 trait WireSerialization {
-  def serialize(value: Any, stream: OutputStream, accept: String): Try[String]
+  def serialize(value: Any, stream: OutputStream, contentType: String, manifest: Type): Try[String]
+  def serialize(value: Any, stream: OutputStream, contentType: String): Try[String] = {
+    if (value != null) serialize(value, stream, contentType, value.getClass)
+    else serialize(null, stream, contentType, classOf[AnyRef])
+  }
 
   def serialize(value: Any, accept: String): Try[ByteArrayOutputStream] = {
     Try {

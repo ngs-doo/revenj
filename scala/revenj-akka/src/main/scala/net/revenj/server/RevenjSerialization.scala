@@ -13,7 +13,7 @@ private[revenj] class RevenjSerialization(jackson: JacksonSerialization, loader:
   private val passThrough = new PassThroughSerialization()
   private val mirror = runtimeMirror(loader)
 
-  override def serialize(value: Any, stream: OutputStream, accept: String): Try[String] = {
+  override def serialize(value: Any, stream: OutputStream, contentType: String, manifest: Type): Try[String] = {
     jackson.serialize(value, stream).map(_ => "application/json")
   }
 

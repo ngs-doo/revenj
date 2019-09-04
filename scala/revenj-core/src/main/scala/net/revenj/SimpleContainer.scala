@@ -238,6 +238,24 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     resolve(ti.actual).map(_.asInstanceOf[T])
   }
 
+  override def resolveClass[T](manifest: Class[T]): T = {
+    if (!closed) {
+      tryResolve(manifest, this) match {
+        case Success(result) => result match {
+          case t: T@unchecked => t
+          case _ => throw new ReflectiveOperationException(s"Invalid type resolved. Expecting: ${manifest}. Resolved: ${result.getClass}")
+        }
+        case Failure(e) => throw e
+      }
+    } else {
+      if (parent.isDefined) {
+        parent.get.resolveClass(manifest)
+      } else {
+        throw new ReflectiveOperationException("Container has been closed")
+      }
+    }
+  }
+
   private def tryResolve(paramType: JavaType, caller: SimpleContainer): Try[AnyRef] = {
     getRegistration(paramType) match {
       case Some(registration) =>
@@ -494,6 +512,11 @@ If you wish to resolve types not registered in the container, specify revenj.res
     if (ti.actual != ti.erased) {
       addToRegistry(new Registration[T](ti.erased, this, factory, lifetime))
     }
+    this
+  }
+
+  override def registerFuncAs[T](manifest: JavaType, factory: Container => T, lifetime: InstanceScope = Transient): this.type = {
+    addToRegistry(new Registration[T](manifest, this, factory, lifetime))
     this
   }
 

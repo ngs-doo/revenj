@@ -132,6 +132,11 @@ object Utils {
     override def toString: String = typeName
   }
 
+  def javaType[T : TypeTag](mirror: Mirror): JavaType = {
+    val tpe = typeOf[T]
+    findType(tpe, mirror).getOrElse(sys.error(s"Unable to find java version of type for $tpe"))
+  }
+
   private[revenj] def findType(tpe: Type, mirror: Mirror): Option[JavaType] = {
     val ft = typeCache.get(tpe)
     if (ft.isDefined) Some(ft.get.actual)
