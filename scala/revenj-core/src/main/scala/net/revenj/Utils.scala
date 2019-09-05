@@ -32,6 +32,7 @@ object Utils {
   private val typeCache = new TrieMap[Type, TypeCache]
   private val genericsCache = new TrieMap[String, GenericType]
 
+  private val sharedBuilder = ThreadLocal.withInitial[java.lang.StringBuilder](() => new java.lang.StringBuilder())
 
   Seq(
     (typeOf[Byte], classOf[Byte]),
@@ -133,7 +134,7 @@ object Utils {
   }
 
   def javaType[T : TypeTag](mirror: Mirror): JavaType = {
-    val tpe = typeOf[T]
+    val tpe = mirror.typeOf[T]
     findType(tpe, mirror).getOrElse(sys.error(s"Unable to find java version of type for $tpe"))
   }
 
@@ -192,7 +193,8 @@ object Utils {
 
 
   private[revenj] def makeGenericType(container: Class[_], arguments: List[JavaType]): ParameterizedType = {
-    val sb = new StringBuilder
+    val sb = sharedBuilder.get()
+    sb.setLength(0)
     sb.append(container.getTypeName)
     sb.append("<")
     sb.append(arguments.head.getTypeName)
@@ -208,7 +210,8 @@ object Utils {
   }
 
   def makeGenericType(container: Class[_], argument: JavaType, arguments: JavaType*): ParameterizedType = {
-    val sb = new StringBuilder
+    val sb = sharedBuilder.get()
+    sb.setLength(0)
     sb.append(container.getTypeName)
     sb.append("<")
     sb.append(argument.getTypeName)

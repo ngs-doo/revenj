@@ -25,8 +25,8 @@ class JacksonSerialization(
   jackson: Option[ObjectMapper],
   loader: ClassLoader) extends Serialization[String] {
 
-  val mirror = runtimeMirror(loader)
-  val mapper = jackson.getOrElse(new ObjectMapper)
+  private val mirror = runtimeMirror(loader)
+  private val mapper = jackson.getOrElse(new ObjectMapper)
     .configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true)
     .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

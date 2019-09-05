@@ -1,5 +1,6 @@
 package net.revenj.serialization
 
+import java.io.{InputStream, OutputStream}
 import java.lang.reflect
 import java.nio.charset.StandardCharsets
 
@@ -17,7 +18,7 @@ class DslJsonSerialization(
 ) extends Serialization[String] {
 
   private val dslJson = {
-    val dslSettings = settings.getOrElse(Settings.withRuntime().withContext(locator).`with`(new ConfigureScala).includeServiceLoader())
+    val dslSettings = settings.getOrElse(Settings.withRuntime().withContext(locator).`with`(new ConfigureScala).withJavaConverters(true).includeServiceLoader())
     json.getOrElse(new DslJson[ServiceLocator](dslSettings))
   }
   private val dslJsonScala = new DslJsonScala(dslJson)
@@ -57,6 +58,26 @@ class DslJsonSerialization(
     }
   }
 
+  private val success = Success(())
+
+  def serializeRuntime(value: Any, stream: OutputStream, manifest: reflect.Type): Try[_] = {
+    val encoder = dslJson.tryFindWriter(manifest).asInstanceOf[JsonWriter.WriteObject[Any]]
+    if (encoder == null) {
+      Failure(new ConfigurationException(s"Unable to find encoder for $manifest"))
+    } else {
+      val writer = localWriter.get()
+      writer.reset(stream)
+      try {
+        encoder.write(writer, value)
+        success
+      } catch {
+        case ex: Throwable => Failure(ex)
+      } finally {
+        writer.reset()
+      }
+    }
+  }
+
   override def deserialize[T: universe.TypeTag](input: String): Try[T] = {
     Try(dslJsonScala.decoder[T]) match {
       case Success(decoder) =>
@@ -71,17 +92,48 @@ class DslJsonSerialization(
     }
   }
 
-  override private[revenj] def deserializeRuntime[T](input: String, manifest: reflect.Type) = {
+  override private[revenj] def deserializeRuntime[T](input: String, manifest: reflect.Type): Try[T] = {
     val decoder = dslJson.tryFindReader(manifest).asInstanceOf[JsonReader.ReadObject[T]]
     if (decoder == null) {
       Failure(new ConfigurationException(s"Unable to find decoder for $manifest"))
     } else {
-        val bytes = input.getBytes(StandardCharsets.UTF_8)
-        val reader = localReader.get().process(bytes, bytes.length)
-        Try {
-          reader.read()
-          decoder.read(reader)
-        }
+      val bytes = input.getBytes(StandardCharsets.UTF_8)
+      val reader = localReader.get().process(bytes, bytes.length)
+      Try {
+        reader.read()
+        decoder.read(reader)
+      }
+    }
+  }
+
+  def deserializeRuntime(input: InputStream, manifest: reflect.Type): Try[Any] = {
+    val decoder = dslJson.tryFindReader(manifest)
+    if (decoder == null) {
+      Failure(new ConfigurationException(s"Unable to find decoder for $manifest"))
+    } else {
+      val reader = localReader.get().process(input)
+      try {
+        reader.read()
+        val result = decoder.read(reader)
+        Success(result)
+      } catch {
+        case ex: Throwable => Failure(ex)
+      } finally {
+        reader.process(null)
+      }
+    }
+  }
+
+  def deserializeRuntime(bytes: Array[Byte], length: Int, manifest: reflect.Type): Try[Any] = {
+    val decoder = dslJson.tryFindReader(manifest)
+    if (decoder == null) {
+      Failure(new ConfigurationException(s"Unable to find decoder for $manifest"))
+    } else {
+      val reader = localReader.get().process(bytes, length)
+      Try {
+        reader.read()
+        decoder.read(reader)
+      }
     }
   }
 }

@@ -2,27 +2,36 @@ package net.revenj.server
 
 import java.io.{InputStream, OutputStream}
 import java.lang.reflect.Type
+import java.nio.charset.StandardCharsets
 
 import net.revenj.Utils
-import net.revenj.serialization.{JacksonSerialization, Serialization}
+import net.revenj.serialization.{DslJsonSerialization, Serialization}
 
 import scala.util.{Failure, Try}
 import scala.reflect.runtime.universe._
 
-private[revenj] class RevenjSerialization(jackson: JacksonSerialization, loader: ClassLoader) extends WireSerialization {
+private[revenj] class RevenjSerialization(
+  dslJson: DslJsonSerialization,
+  loader: ClassLoader
+) extends WireSerialization {
   private val passThrough = new PassThroughSerialization()
   private val mirror = runtimeMirror(loader)
 
+  private val NULL = "null".getBytes(StandardCharsets.UTF_8)
   override def serialize(value: Any, stream: OutputStream, contentType: String, manifest: Type): Try[String] = {
-    jackson.serialize(value, stream).map(_ => "application/json")
+    if (value != null) {
+      dslJson.serializeRuntime(value, stream, manifest).map(_ => "application/json")
+    } else {
+      Try(stream.write(NULL)).map(_ => "application/json")
+    }
   }
 
   override def deserialize(manifest: Type, content: Array[Byte], length: Int, contentType: String): Try[Any] = {
-    jackson.deserialize(manifest, content, length)
+    dslJson.deserializeRuntime(content, length, manifest)
   }
 
   override def deserialize(manifest: Type, stream: InputStream, contentType: String): Try[Any] = {
-    jackson.deserialize(manifest, stream).map(_ => "application/json")
+    dslJson.deserializeRuntime(stream, manifest)
   }
 
   override def deserialize[T: TypeTag](content: Array[Byte], length: Int, contentType: String): Try[T] = {
@@ -40,9 +49,9 @@ private[revenj] class RevenjSerialization(jackson: JacksonSerialization, loader:
   }
 
   override def find[TFormat: TypeTag](): Option[Serialization[TFormat]] = {
-    val format = typeOf[TFormat]
+    val format = mirror.typeOf[TFormat]
     if (typeOf[Any] == format || typeOf[AnyRef] == format) Some(passThrough.asInstanceOf[Serialization[TFormat]])
-    else if (typeOf[String] == format) Some(jackson.asInstanceOf[Serialization[TFormat]])
+    else if (typeOf[String] == format) Some(dslJson.asInstanceOf[Serialization[TFormat]])
     else None
   }
 }
