@@ -15,6 +15,7 @@ lazy val core = (project in file("revenj-core")
       "io.monix" %% "monix-reactive" % "2.3.3",
       "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
       "com.dslplatform" %% "dsl-json-scala" % "1.9.3",
+      "com.dslplatform" % "dsl-json-joda" % "1.9.3", // TODO: will be removed
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.9",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.9",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.9",

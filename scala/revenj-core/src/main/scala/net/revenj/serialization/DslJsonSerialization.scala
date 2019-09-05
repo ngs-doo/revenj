@@ -4,8 +4,8 @@ import java.io.{InputStream, OutputStream}
 import java.lang.reflect
 import java.nio.charset.StandardCharsets
 
-import com.dslplatform.json.{ConfigurationException, ConfigureScala, DslJson, DslJsonScala, JsonReader, JsonWriter}
-import com.dslplatform.json.runtime.Settings
+import com.dslplatform.json.{ConfigurationException, ConfigureJodaTime, ConfigureScala, DslJson, DslJsonScala, JsonReader, JsonWriter}
+import com.dslplatform.json.runtime.{ScalaEnumAsTraitAnalyzer, Settings}
 import net.revenj.patterns.ServiceLocator
 
 import scala.reflect.runtime.universe
@@ -18,7 +18,11 @@ class DslJsonSerialization(
 ) extends Serialization[String] {
 
   private val dslJson = {
-    val dslSettings = settings.getOrElse(Settings.withRuntime().withContext(locator).`with`(new ConfigureScala).withJavaConverters(true).includeServiceLoader())
+    val dslSettings = settings.getOrElse(Settings.withRuntime().withContext(locator)
+      .`with`(new ConfigureScala).`with`(new ConfigureJodaTime)
+      .resolveReader(ScalaEnumAsTraitAnalyzer.Reader)
+      .resolveWriter(ScalaEnumAsTraitAnalyzer.Writer)
+      .withJavaConverters(true).includeServiceLoader())
     json.getOrElse(new DslJson[ServiceLocator](dslSettings))
   }
   private val dslJsonScala = new DslJsonScala(dslJson)
@@ -106,8 +110,8 @@ class DslJsonSerialization(
     }
   }
 
-  def deserializeRuntime(input: InputStream, manifest: reflect.Type): Try[Any] = {
-    val decoder = dslJson.tryFindReader(manifest)
+  def deserializeRuntime[T](input: InputStream, manifest: reflect.Type): Try[T] = {
+    val decoder = dslJson.tryFindReader(manifest).asInstanceOf[JsonReader.ReadObject[T]]
     if (decoder == null) {
       Failure(new ConfigurationException(s"Unable to find decoder for $manifest"))
     } else {
@@ -124,8 +128,8 @@ class DslJsonSerialization(
     }
   }
 
-  def deserializeRuntime(bytes: Array[Byte], length: Int, manifest: reflect.Type): Try[Any] = {
-    val decoder = dslJson.tryFindReader(manifest)
+  def deserializeRuntime[T](bytes: Array[Byte], length: Int, manifest: reflect.Type): Try[T] = {
+    val decoder = dslJson.tryFindReader(manifest).asInstanceOf[JsonReader.ReadObject[T]]
     if (decoder == null) {
       Failure(new ConfigurationException(s"Unable to find decoder for $manifest"))
     } else {
