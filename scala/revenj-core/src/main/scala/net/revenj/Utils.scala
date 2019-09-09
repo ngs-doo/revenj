@@ -186,6 +186,13 @@ object Utils {
         val typeArgs = args.flatMap(it => buildType(it, mirror, true, erasedVersion))
         if (typeArgs.size == args.size) Some(Utils.makeGenericType(symClass, typeArgs))
         else None
+      case ExistentialType(_, t) =>
+        t match {
+          case TypeRef(_, sym, _) =>
+            Some(mirror.runtimeClass(sym.asClass))
+          case _ =>
+            None
+        }
       case _ =>
         None
     }

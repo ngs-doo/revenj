@@ -13,17 +13,17 @@ import scala.util.{Failure, Success, Try}
 
 class DslJsonSerialization(
   locator: ServiceLocator,
-  settings: Option[DslJson.Settings[ServiceLocator]],
-  json: Option[DslJson[ServiceLocator]]
+  settings: Option[DslJson.Settings[ServiceLocator]]
 ) extends Serialization[String] {
 
   val dslJson: DslJson[ServiceLocator] = {
-    val dslSettings = settings.getOrElse(Settings.withRuntime().withContext(locator)
+    val dslSettings = settings.getOrElse(Settings.withRuntime().includeServiceLoader())
+      .withContext(locator)
       .`with`(new ConfigureScala).`with`(new ConfigureJodaTime)
       .resolveReader(ScalaEnumAsTraitAnalyzer.Reader)
       .resolveWriter(ScalaEnumAsTraitAnalyzer.Writer)
-      .withJavaConverters(true).includeServiceLoader())
-    json.getOrElse(new DslJson[ServiceLocator](dslSettings))
+      .withJavaConverters(true)
+    new DslJson[ServiceLocator](dslSettings)
   }
   private val dslJsonScala = new DslJsonScala(dslJson)
 

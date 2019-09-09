@@ -6,6 +6,7 @@ import java.net.{URL, URLClassLoader}
 import java.sql.Connection
 import java.util.{Properties, ServiceLoader, UUID}
 
+import com.dslplatform.json.DslJson
 import javax.sql.DataSource
 import net.revenj.database.postgres.converters.JsonConverter
 import net.revenj.extensibility._
@@ -150,7 +151,8 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     properties: Properties,
     classLoader: Option[ClassLoader],
     context: Option[ExecutionContext],
-    aspects: Seq[SystemAspect]): Container = {
+    aspects: Seq[SystemAspect]
+  ): Container = {
 
     val state = new RevenjSystemState
     val loader = classLoader.getOrElse(Thread.currentThread.getContextClassLoader)
@@ -173,6 +175,8 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     //container.registerAs[Serialization[String], JacksonSerialization](InstanceScope.Singleton)
     container.registerAs[DslJsonSerialization, DslJsonSerialization](InstanceScope.Singleton)
     container.registerAs[Serialization[String], DslJsonSerialization](InstanceScope.Singleton)
+    container.registerFunc[DslJson[ServiceLocator]](c => c.resolve[DslJsonSerialization].dslJson, InstanceScope.Singleton)
+    container.registerFunc[DslJson[_]](c => c.resolve[DslJsonSerialization].dslJson, InstanceScope.Singleton)
     container.registerFunc[DataContext](c => LocatorDataContext.asDataContext(c, loader), InstanceScope.Context)
     container.registerFunc[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), InstanceScope.Transient)
     container.registerFunc[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), InstanceScope.Context)
