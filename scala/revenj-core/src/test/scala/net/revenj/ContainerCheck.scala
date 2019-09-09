@@ -118,7 +118,7 @@ class ContainerCheck extends Specification with ScalaCheck {
       cg.instance1 === 6
       val p = container.tryResolve[CtorPartialGenerics[Long]]
       p.isFailure === true
-      p.failed.get.getMessage.contains("long is not registered in the container") === true
+      p.failed.get.getMessage.contains("net.revenj.ComplexGenerics<long, net.revenj.B> and class net.revenj.ComplexGenerics are not registered in the container.") === true
     }
     "generics and option" >> {
       val container = new SimpleContainer(false, cl)

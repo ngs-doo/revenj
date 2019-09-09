@@ -96,29 +96,6 @@ private[revenj] class SimpleContainer private(private val parent: Option[SimpleC
     }
   }
 
-  private def tryResolveType(paramType: ParameterizedType, caller: SimpleContainer): Try[AnyRef] = {
-    val typeInfo = typeCache.getOrElseUpdate(paramType, {
-      new TypeInfo(paramType)
-    })
-    if (typeInfo.rawClass.isEmpty) {
-      Failure(new ResolutionException(s"$paramType is not an instance of Class<?> and cannot be resolved", paramType))
-    } else {
-      getRegistration(typeInfo.rawClass.get) match {
-        case Some(registration) if registration.biFactory.isDefined && typeInfo.genericArguments.isDefined =>
-          Try {
-            registration.biFactory.get(caller, typeInfo.genericArguments.get)
-          }
-        case _ =>
-          if (typeInfo.constructors.isDefined && typeInfo.constructors.isEmpty && typeInfo.mappedType.isDefined) {
-            tryResolve(typeInfo.mappedType.get, caller)
-          } else {
-            val mappings = typeInfo.mappings
-            tryResolveTypeFrom(typeInfo, mappings, caller)
-          }
-      }
-    }
-  }
-
   private def tryResolveTypeFrom(typeInfo: TypeInfo, mappings: mutable.HashMap[JavaType, JavaType], caller: SimpleContainer): Try[AnyRef] = {
     typeInfo.constructors match {
       case Some(constructors) =>
@@ -330,7 +307,30 @@ If you wish to resolve types not registered in the container, specify revenj.res
             case pt: ParameterizedType if pt.getRawType == SimpleContainer.seqSignature =>
               resolveArray(pt.getActualTypeArguments.head).map(_.asInstanceOf[Array[_]].toSeq)
             case pt: ParameterizedType =>
-              tryResolveType(pt, caller)
+              val typeInfo = typeCache.getOrElseUpdate(pt, {
+                new TypeInfo(pt)
+              })
+              if (typeInfo.rawClass.isEmpty) {
+                Failure(new ResolutionException(s"$pt is not an instance of Class<?> and cannot be resolved", pt))
+              } else {
+                val ro = getRegistration(typeInfo.rawClass.get)
+                if (ro.isDefined && ro.get.biFactory.isDefined && typeInfo.genericArguments.isDefined) {
+                  Try(ro.get.biFactory.get(caller, typeInfo.genericArguments.get))
+                } else if (ro.isDefined || resolveUnknown) {
+                  if (typeInfo.constructors.isDefined && typeInfo.constructors.isEmpty && typeInfo.mappedType.isDefined) {
+                    tryResolve(typeInfo.mappedType.get, caller)
+                  } else {
+                    val mappings = typeInfo.mappings
+                    tryResolveTypeFrom(typeInfo, mappings, caller)
+                  }
+                } else if (typeInfo.rawClass.get.isInterface) {
+                    Failure(new ResolutionException(s"""$pt and ${typeInfo.rawClass.get} are not registered in the container.
+Since ${typeInfo.rawClass.get} is an interface, it must be registered into the container.""", paramType))
+                } else {
+                  Failure(new ResolutionException(s"""$pt and ${typeInfo.rawClass.get} are not registered in the container.
+If you wish to resolve types not registered in the container, specify revenj.resolveUnknown=true in Properties configuration.""", paramType))
+                }
+              }
             case _ =>
               resolveClass()
           }

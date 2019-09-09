@@ -17,7 +17,7 @@ class DslJsonSerialization(
   json: Option[DslJson[ServiceLocator]]
 ) extends Serialization[String] {
 
-  private val dslJson = {
+  val dslJson: DslJson[ServiceLocator] = {
     val dslSettings = settings.getOrElse(Settings.withRuntime().withContext(locator)
       .`with`(new ConfigureScala).`with`(new ConfigureJodaTime)
       .resolveReader(ScalaEnumAsTraitAnalyzer.Reader)
@@ -110,8 +110,8 @@ class DslJsonSerialization(
     }
   }
 
-  def deserializeRuntime[T](input: InputStream, manifest: reflect.Type): Try[T] = {
-    val decoder = dslJson.tryFindReader(manifest).asInstanceOf[JsonReader.ReadObject[T]]
+  def deserializeRuntime(input: InputStream, manifest: reflect.Type): Try[Any] = {
+    val decoder = dslJson.tryFindReader(manifest)
     if (decoder == null) {
       Failure(new ConfigurationException(s"Unable to find decoder for $manifest"))
     } else {
@@ -128,8 +128,8 @@ class DslJsonSerialization(
     }
   }
 
-  def deserializeRuntime[T](bytes: Array[Byte], length: Int, manifest: reflect.Type): Try[T] = {
-    val decoder = dslJson.tryFindReader(manifest).asInstanceOf[JsonReader.ReadObject[T]]
+  def deserializeRuntime(bytes: Array[Byte], length: Int, manifest: reflect.Type): Try[Any] = {
+    val decoder = dslJson.tryFindReader(manifest)
     if (decoder == null) {
       Failure(new ConfigurationException(s"Unable to find decoder for $manifest"))
     } else {

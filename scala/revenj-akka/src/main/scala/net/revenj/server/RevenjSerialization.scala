@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets
 import net.revenj.Utils
 import net.revenj.serialization.{DslJsonSerialization, Serialization}
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 import scala.reflect.runtime.universe._
 
 private[revenj] class RevenjSerialization(
@@ -27,20 +27,23 @@ private[revenj] class RevenjSerialization(
     }
   }
 
-  override def deserialize[T](manifest: Type, content: Array[Byte], length: Int, contentType: String): Try[T] = {
+  override def deserialize(manifest: Type, content: Array[Byte], length: Int, contentType: String): Try[Any] = {
     require(contentType == "application/json", "Only application/json content type is supported")
-    dslJson.deserializeRuntime[T](content, length, manifest)
+    dslJson.deserializeRuntime(content, length, manifest)
   }
 
-  override def deserialize[T](manifest: Type, stream: InputStream, contentType: String): Try[T] = {
+  override def deserialize(manifest: Type, stream: InputStream, contentType: String): Try[Any] = {
     require(contentType == "application/json", "Only application/json content type is supported")
-    dslJson.deserializeRuntime[T](stream, manifest)
+    dslJson.deserializeRuntime(stream, manifest)
   }
 
   override def deserialize[T: TypeTag](content: Array[Byte], length: Int, contentType: String): Try[T] = {
     require(contentType == "application/json", "Only application/json content type is supported")
     Utils.findType(mirror.typeOf[T], mirror) match {
-      case Some(tpe) => deserialize[T](tpe, content, length, contentType)
+      case Some(tpe) => deserialize(tpe, content, length, contentType) match {
+        case Success(value: T@unchecked) => Success(value)
+        case Failure(ex) => Failure(ex)
+      }
       case _ => Failure(new IllegalArgumentException(s"Unable to find Java type for: ${mirror.typeOf[T]}"))
     }
   }
@@ -48,7 +51,10 @@ private[revenj] class RevenjSerialization(
   override def deserialize[T: TypeTag](stream: InputStream, contentType: String): Try[T] = {
     require(contentType == "application/json", "Only application/json content type is supported")
     Utils.findType(mirror.typeOf[T], mirror) match {
-      case Some(tpe) => deserialize[T](tpe, stream, contentType)
+      case Some(tpe) => deserialize(tpe, stream, contentType) match {
+        case Success(value: T@unchecked) => Success(value)
+        case Failure(ex) => Failure(ex)
+      }
       case _ => Failure(new IllegalArgumentException(s"Unable to find Java type for: ${mirror.typeOf[T]}"))
     }
   }
