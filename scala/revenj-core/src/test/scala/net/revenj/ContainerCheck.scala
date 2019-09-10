@@ -3,11 +3,12 @@ package net.revenj
 import java.time.OffsetDateTime
 
 import net.revenj.extensibility.{Container, InstanceScope}
-import net.revenj.patterns.{AggregateDomainEvent, AggregateDomainEventHandler, AggregateRoot, DomainEventHandler}
+import net.revenj.patterns.{AggregateDomainEvent, AggregateDomainEventHandler, AggregateRoot, DomainEventHandler, ServiceLocator}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 
 import scala.util.Try
+import scala.reflect.runtime.universe
 
 class ContainerCheck extends Specification with ScalaCheck {
   sequential
@@ -309,6 +310,45 @@ class ContainerCheck extends Specification with ScalaCheck {
       result.instance === 1
       g === result
     }
+    "generics with type alias" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      val generics = new Generics[Int]
+      val g = generics.createSimple(5)
+      container.registerInstance(g)
+      val result = generics.resolveSimple(container)
+      result.instance === 5
+      g === result
+    }
+    "generics with type nested alias" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      val generics = new Generics[Int]
+      val cg = generics.createComplex(5, "a")
+      container.registerInstance(cg)
+      val resultA = generics.resolveComplex[String](container)
+      val resultB = container.resolve[ComplexGenerics[String, G[Int]]]
+      resultA === resultB
+      resultA.instance1 === "a"
+      resultA.instance2.instance === 5
+      cg === resultA
+    }
+    "generics with missing type" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      val generics: Generics[Int] = new Generics
+      val g = generics.createSimple(5)
+      container.registerInstance(g)
+      val result = generics.resolveSimple(container)
+      result.instance === 5
+      g === result
+    }
+    "generics with unknown type" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      val generics: Generics[_] = new Generics
+      val g = new G[Int](5)
+      container.registerInstance(g)
+      val result = generics.resolveSimple(container)
+      result.instance.asInstanceOf[Int] === 5
+      g === result
+    }
   }
 }
 
@@ -382,3 +422,18 @@ class ErrorInCollection {
 
 trait Service
 class ServiceImpl extends Service
+
+class Generics[T: universe.TypeTag] {
+  def createSimple(value: T): G[T] = {
+    new G[T](value)
+  }
+  def createComplex[T2](value1: T, value2: T2): ComplexGenerics[T2, G[T]] = {
+    new ComplexGenerics(new G[T](value1), value2)
+  }
+  def resolveSimple(locator: ServiceLocator): G[T] = {
+    locator.resolve[G[T]]
+  }
+  def resolveComplex[T3: universe.TypeTag](locator: ServiceLocator): ComplexGenerics[T3, G[T]] = {
+    locator.resolve[ComplexGenerics[T3, G[T]]]
+  }
+}

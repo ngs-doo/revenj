@@ -73,6 +73,7 @@ class DslJsonSerialization(
       writer.reset(stream)
       try {
         encoder.write(writer, value)
+        writer.flush()
         success
       } catch {
         case ex: Throwable => Failure(ex)

@@ -12,7 +12,6 @@ import org.xml.sax.InputSource
 
 import scala.collection.concurrent.TrieMap
 import scala.reflect.runtime.universe._
-import scala.runtime.Nothing$
 import scala.xml.TopScope
 import scala.xml.parsing.NoBindingFactoryAdapter
 
@@ -46,7 +45,7 @@ object Utils {
     typeCache.put(t, TypeCache(c, classOf[AnyRef]))
   }
   Seq(
-    (typeOf[Nothing], classOf[Nothing$]),
+    (typeOf[Nothing], classOf[AnyRef]),
     (typeOf[Any], classOf[AnyRef]),
     (typeOf[Option[Nothing]], classOf[Option[AnyRef]]),
     (typeOf[None.type], classOf[Option[AnyRef]])).foreach { case (t, c) =>
@@ -170,7 +169,7 @@ object Utils {
     if (ft.isDefined) {
       Some(if (inContainer && erasedVersion) ft.get.erased else ft.get.actual)
     } else tpe.dealias match {
-      case TypeRef(_, sym, args) if args.isEmpty =>
+      case TypeRef(_, sym, args) if args.isEmpty && sym.isClass =>
         Some(mirror.runtimeClass(sym.asClass))
       case TypeRef(_, sym, args) if sym.fullName == "scala.Array" && args.size == 1 =>
         buildType(args.head, mirror, inContainer, erasedVersion) match {
@@ -181,14 +180,16 @@ object Utils {
             }
           case _ => None
         }
-      case TypeRef(_, sym, args) =>
+      case TypeRef(_, sym, args) if args.nonEmpty && sym.isClass =>
         val symClass = mirror.runtimeClass(sym.asClass)
         val typeArgs = args.flatMap(it => buildType(it, mirror, true, erasedVersion))
         if (typeArgs.size == args.size) Some(Utils.makeGenericType(symClass, typeArgs))
+        //TODO: temporary hacky resolution to raw type
+        else if (typeArgs.isEmpty) Some(symClass)
         else None
       case ExistentialType(_, t) =>
         t match {
-          case TypeRef(_, sym, _) =>
+          case TypeRef(_, sym, _) if sym.isClass =>
             Some(mirror.runtimeClass(sym.asClass))
           case _ =>
             None
