@@ -5,7 +5,7 @@ import java.lang.reflect
 import java.nio.charset.StandardCharsets
 
 import com.dslplatform.json.{ConfigurationException, ConfigureJodaTime, ConfigureScala, DslJson, DslJsonScala, JsonReader, JsonWriter}
-import com.dslplatform.json.runtime.{ScalaEnumAsTraitAnalyzer, Settings}
+import com.dslplatform.json.runtime.{CustomScalaClassAnalyzer, ScalaEnumAsTraitAnalyzer, Settings}
 import net.revenj.patterns.ServiceLocator
 
 import scala.reflect.runtime.universe
@@ -20,6 +20,8 @@ class DslJsonSerialization(
     val dslSettings = settings.getOrElse(Settings.withRuntime().includeServiceLoader())
       .withContext(locator)
       .`with`(new ConfigureScala).`with`(new ConfigureJodaTime)
+      .resolveReader(CustomScalaClassAnalyzer.Reader)
+      .resolveWriter(CustomScalaClassAnalyzer.Writer)
       .resolveReader(ScalaEnumAsTraitAnalyzer.Reader)
       .resolveWriter(ScalaEnumAsTraitAnalyzer.Writer)
       .withJavaConverters(true)
