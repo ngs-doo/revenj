@@ -394,7 +394,7 @@ If you wish to resolve types not registered in the container, specify revenj.res
   }
 
   private def resolveRegistration(registration: Registration[AnyRef], caller: SimpleContainer): Try[AnyRef] = {
-    if (registration.instance.isDefined) {
+    if (registration.instance.isDefined && ((registration.owner eq caller) || (registration.lifetime eq InstanceScope.Singleton))) {
       Success(registration.instance.get)
     } else if (registration.singleFactory.isDefined) {
       Try {

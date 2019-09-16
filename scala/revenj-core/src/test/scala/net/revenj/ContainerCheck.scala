@@ -349,6 +349,17 @@ class ContainerCheck extends Specification with ScalaCheck {
       result.instance.asInstanceOf[Int] === 5
       g === result
     }
+    "context and singleton mixing" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      container.registerFunc[ServiceImpl](c => new ServiceImpl, lifetime = InstanceScope.Context)
+      container.registerFunc[Service](c => c.resolve[ServiceImpl], lifetime = InstanceScope.Context)
+      val topLevel = container.resolve[ServiceImpl]
+      val scope = container.createScope()
+      val scopeLevel1 = scope.resolve[ServiceImpl]
+      topLevel !=== scopeLevel1
+      val scopeLevel2 = scope.resolve[ServiceImpl]
+      scopeLevel1 === scopeLevel2
+    }
   }
 }
 
