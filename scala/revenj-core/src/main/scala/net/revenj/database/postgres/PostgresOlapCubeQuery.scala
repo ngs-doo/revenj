@@ -6,7 +6,6 @@ import javax.sql
 import net.revenj.patterns.{DataSource, OlapCubeQuery, ServiceLocator, Specification}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) extends OlapCubeQuery[T] {
@@ -28,15 +27,15 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
   val cubeFacts: Map[String, Function[String, String]]
   val cubeConverters: Map[String, (PostgresReader, Int) => Any]
 
-  private def validateInput(usedDimensions: Seq[String], usedFacts: Seq[String], customOrder: Seq[String]): Unit = {
+  private def validateInput(usedDimensions: scala.collection.Seq[String], usedFacts: scala.collection.Seq[String], customOrder: scala.collection.Seq[String]): Unit = {
     if (usedDimensions.isEmpty && usedFacts.isEmpty) throw new IllegalArgumentException("Cube must have at least one dimension or fact.")
-    usedDimensions foreach { d =>
+    usedDimensions.foreach { d =>
       if (!cubeDimensions.contains(d)) throw new IllegalArgumentException(s"Unknown dimension: $d. Use getDimensions method for available dimensions")
     }
-    usedFacts foreach { f =>
+    usedFacts.foreach { f =>
       if (!cubeFacts.contains(f)) throw new IllegalArgumentException(s"Unknown fact: $f. Use getFacts method for available facts")
     }
-    customOrder foreach { o =>
+    customOrder.foreach { o =>
       if (!usedDimensions.contains(o) && !usedFacts.contains(o)) throw new IllegalArgumentException(s"Invalid order: $o. Order can be only field from used dimensions and facts.")
     }
   }
@@ -61,20 +60,20 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     }
   }
 
-  protected def handleFilter(sb: StringBuilder, filter: Specification[T], parameters: ArrayBuffer[PreparedStatement => Unit]): Unit = {
+  protected def handleFilter(sb: StringBuilder, filter: Specification[T], parameters: mutable.ArrayBuffer[PreparedStatement => Unit]): Unit = {
     throw new IllegalArgumentException(s"Unable to handle filter: $filter")
   }
 
   def prepareSql(
     sb: StringBuilder,
     asRecord: Boolean,
-    usedDimensions: Seq[String],
-    usedFacts: Seq[String],
-    order: Seq[(String, Boolean)],
+    usedDimensions: scala.collection.Seq[String],
+    usedFacts: scala.collection.Seq[String],
+    order: scala.collection.Seq[(String, Boolean)],
     filter: Option[Specification[T]],
     limit: Option[Int],
     offset: Option[Int],
-    parameters: ArrayBuffer[PreparedStatement => Unit]): Unit = {
+    parameters: mutable.ArrayBuffer[PreparedStatement => Unit]): Unit = {
 
     validateInput(usedDimensions, usedFacts, order.map(_._1))
     val alias = "_it"
@@ -134,17 +133,17 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
     }
   }
 
-  def prepareConverters(usedDimensions: Seq[String], usedFacts: Seq[String]): Array[(PostgresReader, Int) => Any] = {
+  def prepareConverters(usedDimensions: scala.collection.Seq[String], usedFacts: scala.collection.Seq[String]): Array[(PostgresReader, Int) => Any] = {
     ((usedDimensions map cubeConverters.apply) ++ (usedFacts map cubeConverters.apply)).toArray
   }
 
   override def analyze(
-    usedDimensions: Seq[String],
-    usedFacts: Seq[String],
-    order: Seq[(String, Boolean)],
+    usedDimensions: scala.collection.Seq[String],
+    usedFacts: scala.collection.Seq[String],
+    order: scala.collection.Seq[(String, Boolean)],
     filter: Option[Specification[T]],
     limit: Option[Int],
-    offset: Option[Int]): Future[IndexedSeq[Map[String, Any]]] = {
+    offset: Option[Int]): Future[scala.collection.IndexedSeq[Map[String, Any]]] = {
     Future {
       val connection = getConnection()
       try {
@@ -157,12 +156,12 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
 
   def analyzeAsMap(
     connection: Connection,
-    usedDimensions: Seq[String],
-    usedFacts: Seq[String],
-    order: Seq[(String, Boolean)] = Nil,
+    usedDimensions: scala.collection.Seq[String],
+    usedFacts: scala.collection.Seq[String],
+    order: scala.collection.Seq[(String, Boolean)] = Nil,
     filter: Option[Specification[T]] = None,
     limit: Option[Int] = None,
-    offset: Option[Int] = None): IndexedSeq[Map[String, Any]] = {
+    offset: Option[Int] = None): scala.collection.IndexedSeq[Map[String, Any]] = {
 
     analyze(
       connection,
@@ -177,18 +176,18 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
 
   def analyze(
     connection: Connection,
-    usedDimensions: Seq[String],
-    usedFacts: Seq[String],
-    order: Seq[(String, Boolean)],
+    usedDimensions: scala.collection.Seq[String],
+    usedFacts: scala.collection.Seq[String],
+    order: scala.collection.Seq[(String, Boolean)],
     filter: Option[Specification[T]],
     limit: Option[Int],
-    offset: Option[Int]): IndexedSeq[Map[String, Any]] = {
+    offset: Option[Int]): scala.collection.IndexedSeq[Map[String, Any]] = {
 
     val sb = new StringBuilder
-    val params = new ArrayBuffer[PreparedStatement => Unit]()
+    val params = new mutable.ArrayBuffer[PreparedStatement => Unit]()
     prepareSql(sb, true, usedDimensions, usedFacts, order, filter, limit, offset, params)
     val converters = prepareConverters(usedDimensions, usedFacts)
-    val result = new ArrayBuffer[Map[String, Any]]()
+    val result = new mutable.ArrayBuffer[Map[String, Any]]()
     val ps = connection.prepareStatement(sb.toString)
     try {
       params foreach { p => p(ps) }
@@ -215,30 +214,30 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
 
   def stream(
     connection: Connection,
-    usedDimensions: Seq[String],
-    usedFacts: Seq[String],
-    order: Seq[(String, Boolean)] = Nil,
+    usedDimensions: scala.collection.Seq[String],
+    usedFacts: scala.collection.Seq[String],
+    order: scala.collection.Seq[(String, Boolean)] = Nil,
     filter: Option[Specification[T]] = None,
     limit: Option[Int] = None,
     offset: Option[Int] = None): ResultSet = {
 
     val sb = new StringBuilder
-    val params = new ArrayBuffer[PreparedStatement => Unit]()
+    val params = new mutable.ArrayBuffer[PreparedStatement => Unit]()
     prepareSql(sb, false, usedDimensions, usedFacts, order, filter, limit, offset, params)
     val ps = connection.prepareStatement(sb.toString)
-    params foreach { p => p(ps) }
+    params.foreach { p => p(ps) }
     ps.executeQuery()
   }
 
   def analyzeWith[R](
     builder: ResultSet => R,
     connection: Connection,
-    usedDimensions: Seq[String],
-    usedFacts: Seq[String],
-    order: Seq[(String, Boolean)] = Nil,
+    usedDimensions: scala.collection.Seq[String],
+    usedFacts: scala.collection.Seq[String],
+    order: scala.collection.Seq[(String, Boolean)] = Nil,
     filter: Option[Specification[T]] = None,
     limit: Option[Int] = None,
-    offset: Option[Int] = None): Seq[R] = {
+    offset: Option[Int] = None): scala.collection.Seq[R] = {
 
     analyze(
       builder,
@@ -255,19 +254,19 @@ abstract class PostgresOlapCubeQuery[T <: DataSource](locator: ServiceLocator) e
   def analyze[R](
     builder: ResultSet => R,
     connection: Connection,
-    usedDimensions: Seq[String],
-    usedFacts: Seq[String],
-    order: Seq[(String, Boolean)],
+    usedDimensions: scala.collection.Seq[String],
+    usedFacts: scala.collection.Seq[String],
+    order: scala.collection.Seq[(String, Boolean)],
     filter: Option[Specification[T]],
     limit: Option[Int],
-    offset: Option[Int]): Seq[R] = {
+    offset: Option[Int]): scala.collection.Seq[R] = {
 
     val sb = new StringBuilder
-    val params = new ArrayBuffer[PreparedStatement => Unit]()
+    val params = new mutable.ArrayBuffer[PreparedStatement => Unit]()
     prepareSql(sb, false, usedDimensions, usedFacts, order, filter, limit, offset, params)
     val ps = connection.prepareStatement(sb.toString)
-    params foreach { p => p(ps) }
-    val buffer = new ArrayBuffer[R]()
+    params.foreach { p => p(ps) }
+    val buffer = new mutable.ArrayBuffer[R]()
     val rs = ps.executeQuery()
     while (rs.next()) {
       buffer += builder(rs)

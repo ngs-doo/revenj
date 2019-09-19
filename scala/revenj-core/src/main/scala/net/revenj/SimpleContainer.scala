@@ -306,6 +306,8 @@ If you wish to resolve types not registered in the container, specify revenj.res
               resolveArray(gat.getGenericComponentType)
             case pt: ParameterizedType if pt.getRawType == SimpleContainer.seqSignature =>
               resolveArray(pt.getActualTypeArguments.head).map(_.asInstanceOf[Array[_]].toSeq)
+            case pt: ParameterizedType if pt.getRawType == SimpleContainer.immutableSeqSignature =>
+              resolveArray(pt.getActualTypeArguments.head).map(_.asInstanceOf[Array[_]].toIndexedSeq)
             case pt: ParameterizedType =>
               val typeInfo = typeCache.getOrElseUpdate(pt, {
                 new TypeInfo(pt)
@@ -555,6 +557,7 @@ private object SimpleContainer {
   private val typeCache = new TrieMap[JavaType, TypeInfo]
   private val typeNameMappings = new TrieMap[String, JavaType]
   private val seqSignature = classOf[scala.collection.Seq[_]]
+  private val immutableSeqSignature = classOf[scala.collection.immutable.Seq[_]]
 
   private class ResolutionException(msg: String, location: JavaType, val originalError: Option[Throwable] = None) extends ReflectiveOperationException(msg) {
     val chain = new mutable.ArrayBuffer[JavaType]()

@@ -42,14 +42,13 @@ object ByteaConverter extends Converter[Array[Byte]] {
 
   private def parseBytea(reader: PostgresReader, len: Int, context: Int): Array[Byte] = {
     var cur = reader.read(len + 1)
-    val builder = mutable.ArrayBuilder.make[Byte]()
-    builder.sizeHint(1024)
+    val builder = new java.io.ByteArrayOutputStream(512)
     while (cur != -1 && cur != '\\' && cur != '"') {
-      builder += ((charLookup(cur) << 4) + charLookup(reader.read())).toByte
+      builder.write((charLookup(cur) << 4) + charLookup(reader.read()))
       cur = reader.read()
     }
     reader.read(context)
-    builder.result()
+    builder.toByteArray
   }
 
   override def parseCollectionOption(reader: PostgresReader, context: Int): Option[scala.collection.IndexedSeq[Array[Byte]]] = {

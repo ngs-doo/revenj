@@ -83,11 +83,11 @@ private[revenj] class LocatorDataContext(
     getLookupRepository[T](findManifest[T]).find(uri)
   }
 
-  override def find[T <: Identifiable : TypeTag](uris: Seq[String]): Future[IndexedSeq[T]] = {
+  override def find[T <: Identifiable : TypeTag](uris: scala.collection.Seq[String]): Future[scala.collection.IndexedSeq[T]] = {
     getLookupRepository[T](findManifest[T]).find(uris)
   }
 
-  override def search[T <: DataSource : TypeTag](filter: Option[Specification[T]] = None, limit: Option[Int] = None, offset: Option[Int] = None): Future[IndexedSeq[T]] = {
+  override def search[T <: DataSource : TypeTag](filter: Option[Specification[T]] = None, limit: Option[Int] = None, offset: Option[Int] = None): Future[scala.collection.IndexedSeq[T]] = {
     getSearchableRepository[T](findManifest[T]).search(filter, limit, offset)
   }
 
@@ -99,7 +99,7 @@ private[revenj] class LocatorDataContext(
     getSearchableRepository[T](findManifest[T]).exists(filter)
   }
 
-  override def create[T <: AggregateRoot : TypeTag](aggregates: Seq[T]): Future[Unit] = {
+  override def create[T <: AggregateRoot : TypeTag](aggregates: scala.collection.Seq[T]): Future[Unit] = {
     if (aggregates.isEmpty) {
       Future.successful(())
     } else {
@@ -109,7 +109,7 @@ private[revenj] class LocatorDataContext(
     }
   }
 
-  override def updatePairs[T <: AggregateRoot : TypeTag](pairs: Seq[(T, T)]): Future[Unit] = {
+  override def updatePairs[T <: AggregateRoot : TypeTag](pairs: scala.collection.Seq[(T, T)]): Future[Unit] = {
     if (pairs.isEmpty) {
       Future.successful(())
     } else {
@@ -119,7 +119,7 @@ private[revenj] class LocatorDataContext(
     }
   }
 
-  override def delete[T <: AggregateRoot : TypeTag](aggregates: Seq[T]): Future[Unit] = {
+  override def delete[T <: AggregateRoot : TypeTag](aggregates: scala.collection.Seq[T]): Future[Unit] = {
     if (aggregates.isEmpty) {
       Future.successful(())
     } else {
@@ -129,7 +129,7 @@ private[revenj] class LocatorDataContext(
     }
   }
 
-  override def submit[T <: Event : TypeTag](events: Seq[T]): Future[Unit] = {
+  override def submit[T <: Event : TypeTag](events: scala.collection.Seq[T]): Future[Unit] = {
     if (events.isEmpty) {
       Future.successful(())
     } else {
@@ -144,8 +144,8 @@ private[revenj] class LocatorDataContext(
   }
 
   override def commit(): Future[Unit] = {
-    Future
-      .sequence[Any, Set](changes.toSet)
+    val allChanges = changes.synchronized(changes.toIndexedSeq)
+    Future.sequence(allChanges)
       .map(_ => {
         connection.get.commit()
         hasChanges = false
@@ -159,7 +159,7 @@ private[revenj] class LocatorDataContext(
           case _: Throwable => ()
         }
       }
-    ) map { _ =>
+    ).map { _ =>
       connection.get.rollback()
       hasChanges = false
     }

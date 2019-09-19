@@ -19,9 +19,9 @@ trait PersistableRepository[T <: AggregateRoot]
     * @return       future uris of newly created aggregates
     */
   def persist(
-    inserts: Seq[T],
-    updates: Seq[(T, T)],
-    deletes: Seq[T]): Future[IndexedSeq[String]]
+    inserts: scala.collection.Seq[T],
+    updates: scala.collection.Seq[(T, T)],
+    deletes: scala.collection.Seq[T]): Future[scala.collection.IndexedSeq[String]]
 
   /** Bulk insert.
     * Create multiple new {@link AggregateRoot aggregates}.
@@ -29,7 +29,7 @@ trait PersistableRepository[T <: AggregateRoot]
     * @param inserts new aggregate roots
     * @return       future uris of created aggregate roots
     */
-  def insert(inserts: Seq[T]): Future[IndexedSeq[String]] = {
+  def insert(inserts: scala.collection.Seq[T]): Future[scala.collection.IndexedSeq[String]] = {
     require(inserts ne null, "null value provided for inserts")
     persist(inserts, Seq.empty, Seq.empty)
   }
@@ -51,7 +51,7 @@ trait PersistableRepository[T <: AggregateRoot]
     * @param updates sequence of aggregate roots to update
     * @return       future for error checking
     */
-  def update(updates: Seq[T]): Future[Unit] = {
+  def update(updates: scala.collection.Seq[T]): Future[Unit] = {
     import scala.concurrent.ExecutionContext.Implicits.global
     require(updates ne null, "null value provided for updates")
     persist(Seq.empty, updates.map(it => (null.asInstanceOf[T], it)), Seq.empty).map(_ => ())
@@ -87,7 +87,7 @@ trait PersistableRepository[T <: AggregateRoot]
     * @param deletes aggregate roots to delete
     * @return       future for error checking
     */
-  def delete(deletes: Seq[T]): Future[Unit] = {
+  def delete(deletes: scala.collection.Seq[T]): Future[Unit] = {
     implicit val global = scala.concurrent.ExecutionContext.Implicits.global
     require(deletes ne null, "null value provided for deletes")
     persist(Seq.empty, Seq.empty, deletes).map(_ => ())
@@ -106,6 +106,6 @@ trait PersistableRepository[T <: AggregateRoot]
 }
 
 trait PersistableRepositoryAspect[T <: AggregateRoot] {
-  def before(inserts: Seq[T], updates: Seq[(T, T)], deletes: Seq[T]): Unit = {}
-  def after(inserts: Seq[T], updates: Seq[(T, T)], deletes: Seq[T]): Unit = {}
+  def before(inserts: scala.collection.Seq[T], updates: scala.collection.Seq[(T, T)], deletes: scala.collection.Seq[T]): Unit = {}
+  def after(inserts: scala.collection.Seq[T], updates: scala.collection.Seq[(T, T)], deletes: scala.collection.Seq[T]): Unit = {}
 }

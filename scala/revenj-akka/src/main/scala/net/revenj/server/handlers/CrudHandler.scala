@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
 import net.revenj.patterns.DomainModel
+import net.revenj.serialization.WireSerialization
 import net.revenj.server._
 import net.revenj.server.commands.Utils
 import net.revenj.server.commands.crud._

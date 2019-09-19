@@ -386,15 +386,15 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     observable
   }
 
-  private class LazyResult[T](name: String, dm: DomainModel, uris: Seq[String]) extends Function0[Future[IndexedSeq[T]]] {
-    private var result: Option[Future[IndexedSeq[T]]] = None
+  private class LazyResult[T](name: String, dm: DomainModel, uris: scala.collection.Seq[String]) extends Function0[Future[scala.collection.IndexedSeq[T]]] {
+    private var result: Option[Future[scala.collection.IndexedSeq[T]]] = None
 
-    override def apply(): Future[IndexedSeq[T]] = result match {
+    override def apply(): Future[scala.collection.IndexedSeq[T]] = result match {
       case Some(f) => f
       case _ =>
         val manifest = dm.find(name).getOrElse(throw new RuntimeException(s"Unable to find domain type: $name")).asInstanceOf[Class[_ <: Identifiable]]
         val repository = getRepository(manifest)
-        val found = repository.find(uris).map(_.asInstanceOf[IndexedSeq[T]])
+        val found = repository.find(uris).map(_.asInstanceOf[scala.collection.IndexedSeq[T]])
         result = Some(found)
         found
     }

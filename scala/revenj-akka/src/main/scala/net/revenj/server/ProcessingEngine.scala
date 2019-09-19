@@ -2,10 +2,10 @@ package net.revenj.server
 
 import java.io.IOException
 import java.sql.{Connection, SQLException}
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import net.revenj.extensibility.{Container, PluginLoader}
-import net.revenj.serialization.Serialization
+import net.revenj.serialization.{Serialization, WireSerialization}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future

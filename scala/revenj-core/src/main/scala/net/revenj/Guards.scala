@@ -1,8 +1,5 @@
 package net.revenj
 
-import scala.collection.GenTraversableLike
-import scala.collection.generic.CanBuildFrom
-
 object Guards {
 
   def checkCollectionNulls[T <: AnyRef](values: Iterable[T]): Unit = {
@@ -290,108 +287,6 @@ object Guards {
 
   def checkArrayOptionScale(values: Option[Array[Option[BigDecimal]]], scale: Int): Unit = {
     if ((values ne null) && values.isDefined) checkArrayOptionScale(values.get, scale)
-  }
-
-  def setScale(value: BigDecimal, scale: Int): BigDecimal = {
-    if (value ne null) {
-      value.setScale(scale, BigDecimal.RoundingMode.HALF_UP)
-    } else {
-      value
-    }
-  }
-
-  def setScale(value: Option[BigDecimal], scale: Int): Option[BigDecimal] = {
-    if ((value ne null) && value.isDefined) {
-      Some(setScale(value.get, scale))
-    } else {
-      value
-    }
-  }
-
-  def setCollectionScale[That, Repr](values: GenTraversableLike[BigDecimal, Repr], scale: Int)(implicit bf: CanBuildFrom[Repr, BigDecimal, That]): That = {
-    if (values != null) {
-      val builder = bf()
-      val iterator = values.toIterator
-      while (iterator.hasNext) {
-        builder += setScale(iterator.next(), scale)
-      }
-      builder.result
-    } else {
-      null.asInstanceOf[That]
-    }
-  }
-
-  def setArrayScale(values: Array[BigDecimal], scale: Int): Array[BigDecimal] = {
-    if (values ne null) {
-      val buffer = new Array[BigDecimal](values.length)
-      var i = 0
-      while (i < values.length) {
-        buffer(i) = setScale(values(i), scale)
-        i += 1
-      }
-      buffer
-    } else {
-      null
-    }
-  }
-
-  def setCollectionOptionScale[That, Repr](values: GenTraversableLike[Option[BigDecimal], Repr], scale: Int)(implicit bf: CanBuildFrom[Repr, Option[BigDecimal], That]): That = {
-    if (values != null) {
-      val builder = bf()
-      val iterator = values.toIterator
-      while (iterator.hasNext) {
-        builder += setScale(iterator.next(), scale)
-      }
-      builder.result
-    } else {
-      values.asInstanceOf[That]
-    }
-  }
-
-  def setArrayOptionScale(values: Array[Option[BigDecimal]], scale: Int): Array[Option[BigDecimal]] = {
-    if (values ne null) {
-      val buffer = new Array[Option[BigDecimal]](values.length)
-      var i = 0
-      while (i < values.length) {
-        buffer(i) = setScale(values(i), scale)
-        i += 1
-      }
-      buffer
-    } else {
-      null
-    }
-  }
-
-  def setCollectionScale[That, Repr](values: Option[GenTraversableLike[BigDecimal, Repr]], scale: Int)(implicit bf: CanBuildFrom[Repr, BigDecimal, That]): Option[That] = {
-    if ((values ne null) && values.isDefined) {
-      Some(setCollectionScale(values.get, scale))
-    } else {
-      values.asInstanceOf[Option[That]]
-    }
-  }
-
-  def setArrayScale(values: Option[Array[BigDecimal]], scale: Int): Option[Array[BigDecimal]] = {
-    if ((values ne null) && values.isDefined) {
-      Some(setArrayScale(values.get, scale))
-    } else {
-      values
-    }
-  }
-
-  def setCollectionOptionScale[That, Repr](values: Option[GenTraversableLike[Option[BigDecimal], Repr]], scale: Int)(implicit bf: CanBuildFrom[Repr, Option[BigDecimal], That]): Option[That] = {
-    if ((values ne null) && values.isDefined) {
-      Some(setCollectionOptionScale(values.get, scale))
-    } else {
-      values.asInstanceOf[Option[That]]
-    }
-  }
-
-  def setArrayOptionScale(values: Option[Array[Option[BigDecimal]]], scale: Int): Option[Array[Option[BigDecimal]]] = {
-    if ((values ne null) && values.isDefined) {
-      Some(setArrayOptionScale(values.get, scale))
-    } else {
-      values
-    }
   }
 
   def checkLength(value: String, length: Int): Unit = {

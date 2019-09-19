@@ -27,17 +27,17 @@ object DataChangeNotification {
     case object Local extends Source
   }
 
-  class NotifyInfo(val name: String, val operation: Operation, val source: Source, val uris: IndexedSeq[String])
-  class NotifyWith[T](name: String, operation: Operation, source: Source, uris: IndexedSeq[String], val info: T)
+  class NotifyInfo(val name: String, val operation: Operation, val source: Source, val uris: scala.collection.IndexedSeq[String])
+  class NotifyWith[T](name: String, operation: Operation, source: Source, uris: scala.collection.IndexedSeq[String], val info: T)
     extends NotifyInfo(name, operation, source, uris)
   object NotifyInfo {
-    def apply(name: String, operation: Operation, source: Source, uris: IndexedSeq[String]): NotifyInfo = {
+    def apply(name: String, operation: Operation, source: Source, uris: scala.collection.IndexedSeq[String]): NotifyInfo = {
       new NotifyInfo(name, operation, source, uris)
     }
-    def apply[T <: Identifiable](name: String, operation: Operation, objects: Seq[T]): NotifyWith[Seq[T]] = {
+    def apply[T <: Identifiable](name: String, operation: Operation, objects: scala.collection.Seq[T]): NotifyWith[scala.collection.Seq[T]] = {
       new NotifyWith(name, operation, DataChangeNotification.Source.Local, objects.map(_.URI).toIndexedSeq, objects)
     }
   }
-  case class TrackInfo[T](uris: IndexedSeq[String], result: Function0[Future[IndexedSeq[T]]])
+  case class TrackInfo[T](uris: scala.collection.IndexedSeq[String], result: Function0[Future[scala.collection.IndexedSeq[T]]])
 
 }

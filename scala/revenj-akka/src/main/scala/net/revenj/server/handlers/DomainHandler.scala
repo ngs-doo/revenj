@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
 import net.revenj.patterns.{AggregateRoot, DomainModel}
+import net.revenj.serialization.WireSerialization
 import net.revenj.server._
 import net.revenj.server.commands.reporting.PopulateReport
 import net.revenj.server.commands.{SubmitAggregateEvent, SubmitEvent, Utils}

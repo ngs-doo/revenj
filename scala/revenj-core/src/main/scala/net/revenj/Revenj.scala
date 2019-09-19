@@ -12,7 +12,7 @@ import net.revenj.database.postgres.converters.JsonConverter
 import net.revenj.extensibility._
 import net.revenj.patterns._
 import net.revenj.security.PermissionManager
-import net.revenj.serialization.{DslJsonSerialization, JacksonSerialization, Serialization}
+import net.revenj.serialization.{DslJsonSerialization, JacksonSerialization, Serialization, WireSerialization}
 import org.postgresql.ds.PGPoolingDataSource
 
 import scala.collection.concurrent.TrieMap
@@ -151,7 +151,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     properties: Properties,
     classLoader: Option[ClassLoader],
     context: Option[ExecutionContext],
-    aspects: Seq[SystemAspect]
+    aspects: scala.collection.Seq[SystemAspect]
   ): Container = {
 
     val state = new RevenjSystemState
@@ -177,6 +177,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.registerAs[Serialization[String], DslJsonSerialization](InstanceScope.Singleton)
     container.registerFunc[DslJson[ServiceLocator]](c => c.resolve[DslJsonSerialization].dslJson, InstanceScope.Singleton)
     container.registerFunc[DslJson[_]](c => c.resolve[DslJsonSerialization].dslJson, InstanceScope.Singleton)
+    container.registerAs[WireSerialization, RevenjSerialization](InstanceScope.Singleton)
     container.registerFunc[DataContext](c => LocatorDataContext.asDataContext(c, loader), InstanceScope.Context)
     container.registerFunc[UnitOfWork](c => LocatorDataContext.asUnitOfWork(c, loader), InstanceScope.Transient)
     container.registerFunc[Function1[Connection, DataContext]](c => conn => LocatorDataContext.asDataContext(conn, c, loader), InstanceScope.Context)
@@ -198,7 +199,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
         }
       case _ => throw new IllegalArgumentException(s"Unable to detect type: ${mirror.typeOf[T]}")
     }
-    def processHandlers[X: TypeTag](gt: ParameterizedType, eventHandlers: Seq[Class[DomainEventHandler[X]]]): Unit = {
+    def processHandlers[X: TypeTag](gt: ParameterizedType, eventHandlers: scala.collection.Seq[Class[DomainEventHandler[X]]]): Unit = {
       eventHandlers foreach { h =>
         container.registerType(h, h, InstanceScope.Context)
         container.registerType(gt, h, InstanceScope.Context)

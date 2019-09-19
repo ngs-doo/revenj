@@ -1,14 +1,14 @@
-package net.revenj.server
+package net.revenj
 
 import java.io.{InputStream, OutputStream}
 import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
 
-import net.revenj.Utils
-import net.revenj.serialization.{DslJsonSerialization, Serialization}
+import net.revenj.RevenjSerialization.PassThroughSerialization
+import net.revenj.serialization.{DslJsonSerialization, Serialization, WireSerialization}
 
-import scala.util.{Failure, Success, Try}
 import scala.reflect.runtime.universe._
+import scala.util.{Failure, Success, Try}
 
 private[revenj] class RevenjSerialization(
   dslJson: DslJsonSerialization,
@@ -64,5 +64,16 @@ private[revenj] class RevenjSerialization(
     if (typeOf[Any] == format || typeOf[AnyRef] == format) Some(passThrough.asInstanceOf[Serialization[TFormat]])
     else if (typeOf[String] == format) Some(dslJson.asInstanceOf[Serialization[TFormat]])
     else None
+  }
+}
+private object RevenjSerialization {
+  private class PassThroughSerialization extends Serialization[Any] {
+    override def serialize[T: TypeTag](value: T): Try[Any] = Success(value)
+
+    override private[revenj] def serializeRuntime(value: Any, manifest: Type): Try[Any] = Success(value)
+
+    override def deserialize[T: TypeTag](input: Any): Try[T] = Success(input.asInstanceOf[T])
+
+    override private[revenj] def deserializeRuntime[T](input: Any, manifest: Type): Try[T] = Success(input.asInstanceOf[T])
   }
 }

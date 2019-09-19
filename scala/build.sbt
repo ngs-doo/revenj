@@ -6,13 +6,13 @@ lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
   settings(
-    version := "0.9.7-SNAPSHOT",
+    version := "0.9.7",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.6", // "42.2.8",
       "joda-time" % "joda-time" % "2.10.3",   // TODO: will be removed
       "org.joda" % "joda-convert" % "2.2.1", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix-reactive" % "2.3.3", // "3.0.0",
+      "io.monix" %% "monix-reactive" % "3.0.0",
       "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
       "com.dslplatform" %% "dsl-json-scala" % "1.9.3",
       "com.dslplatform" % "dsl-json-joda" % "1.9.3", // TODO: will be removed
@@ -31,8 +31,9 @@ lazy val akka = (project in file("revenj-akka")
   settings(
   version := "0.9.7",
   libraryDependencies ++= Seq(
-    "com.typesafe" % "config" % "1.3.4",
-    "com.typesafe.akka" %% "akka-http-core" % "10.0.15", // "10.1.9",
+      "com.typesafe" % "config" % "1.3.4",
+      "com.typesafe.akka" %% "akka-http" % "10.1.9",
+      "com.typesafe.akka" %% "akka-stream" % "2.5.23"
     )
   )
   dependsOn(core)
@@ -102,29 +103,15 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
     "-language:_",
     "-target:jvm-1.8",
     "-unchecked",
-    "-Xexperimental",
     "-Xfuture",
     "-Xlint:_",
     "-Xverify",
-    "-Yno-adapted-args",
     "-Yrangepos",
-    "-Yrepl-sync",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused-import",
-    "-Ywarn-unused"
-  ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 11)) => Seq(
-      "-Yclosure-elim",
-      "-Yconst-opt",
-      "-Ydead-code",
-      "-Yinline",
-      "-Yinline-warnings:false"
-    )
-    case _ => Seq(
-      "-opt:_"
-    )
-  }),
+    "-Ywarn-unused",
+    "-opt:_"
+  ),
 
   unmanagedSourceDirectories in Compile := Seq((scalaSource in Compile).value),
   unmanagedSourceDirectories in Test := Seq((scalaSource in Test).value)

@@ -5,7 +5,8 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
 import akka.http.scaladsl.model.Uri.Path
 import akka.stream.Materializer
 import akka.util.ByteString
-import net.revenj.server.{ProcessingEngine, ServerCommandDescription, WireSerialization}
+import net.revenj.serialization.WireSerialization
+import net.revenj.server.{ProcessingEngine, ServerCommandDescription}
 import net.revenj.server.commands.Utils
 
 import scala.collection.mutable

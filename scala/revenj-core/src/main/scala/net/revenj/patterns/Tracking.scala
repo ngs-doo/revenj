@@ -5,5 +5,5 @@ trait ChangeTracking[T] extends Comparable[T] {
 }
 
 trait DependencyTracking {
-  def getDependencies: Map[Class[_ <: Identifiable], Seq[Any]]
+  def getDependencies: scala.collection.Map[Class[_ <: Identifiable], scala.collection.Seq[Any]]
 }

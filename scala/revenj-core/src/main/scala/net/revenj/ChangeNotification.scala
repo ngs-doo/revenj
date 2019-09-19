@@ -65,7 +65,7 @@ private [revenj] object ChangeNotification {
           Some(new ChangeNotification(clazz, notification, reactive))
         case genCol: ParameterizedType if genCol.getActualTypeArguments.length == 1 && genCol.getRawType.isInstanceOf[Class[_]] =>
           (genCol.getRawType, genCol.getActualTypeArguments.head) match {
-            case (seq: Class[_], elem: Class[_]) if classOf[Seq[_]].isAssignableFrom(seq) =>
+            case (seq: Class[_], elem: Class[_]) if classOf[scala.collection.Seq[_]].isAssignableFrom(seq) =>
               Some(new ChangeNotification(elem, notification, reactive))
             case _ =>
               None

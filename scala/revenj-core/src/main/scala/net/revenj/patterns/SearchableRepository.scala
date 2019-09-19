@@ -22,7 +22,7 @@ trait SearchableRepository[T <: DataSource] {
   def search(
       specification: Option[Specification[T]] = None,
       limit: Option[Int] = None,
-      offset: Option[Int] = None): Future[IndexedSeq[T]]
+      offset: Option[Int] = None): Future[scala.collection.IndexedSeq[T]]
 
   /** Returns the number of elements satisfying provided specification.
     *

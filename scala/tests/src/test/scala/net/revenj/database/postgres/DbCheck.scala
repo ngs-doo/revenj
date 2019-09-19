@@ -314,7 +314,10 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val changes = container.resolve[DataChangeNotification]
         var changed = false
-        changes.track[TestMe].doOnNext(_ => changed = true).subscribe()
+        changes.track[TestMe].doOnNext { _ =>
+          changed = true
+          monix.eval.Task.unit
+        }.subscribe()
         val ctx = container.resolve[DataContext]
         val ev = TestMe(x = 103)
         changed === false
@@ -337,7 +340,10 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
         val changes = container.resolve[DataChangeNotification]
         var changed = 0
-        changes.track[TestMe].doOnNext(_ => changed += 1).subscribe()
+        changes.track[TestMe].doOnNext { _ =>
+          changed += 1
+          monix.eval.Task.unit
+        }.subscribe()
         val ctx = container.resolve[DataContext]
         val ev = TestMe(x = 104)
         changed === 0
@@ -366,9 +372,9 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val obs2 = container.resolve[Observable[Function0[Future[TestMe]]]]
         val obs3 = container.resolve[Observable[Task[Seq[TestMe]]]]
         var (l1, l2, l3) = (false, false, false)
-        obs1.doOnNext(_ => l1 = true).subscribe()
-        obs2.doOnNext(_ => l2 = true).subscribe()
-        obs3.doOnNext(_ => l3 = true).subscribe()
+        obs1.doOnNext { _ => l1 = true; monix.eval.Task.unit }.subscribe()
+        obs2.doOnNext { _ => l2 = true; monix.eval.Task.unit }.subscribe()
+        obs3.doOnNext { _ => l3 = true; monix.eval.Task.unit }.subscribe()
         val ctx = container.resolve[DataContext]
         val ev = TestMe(x = 101)
         val uri = Await.result(ctx.submit(ev), Duration.Inf)

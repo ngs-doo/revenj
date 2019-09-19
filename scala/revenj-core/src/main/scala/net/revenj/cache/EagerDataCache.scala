@@ -2,6 +2,7 @@ package net.revenj.cache
 
 import java.time.OffsetDateTime
 
+import monix.eval.Task
 import monix.reactive.Observable
 import monix.reactive.subjects.PublishSubject
 import net.revenj.extensibility.SystemState
@@ -30,7 +31,7 @@ class EagerDataCache[T <: Identifiable, PK](
 
   systemState.change
     .filter(it => it.id == "notification" && it.detail == "started")
-    .doOnNext(_ => invalidateAll())
+    .doOnNext(_ => Task.fromFuture(invalidateAll()))
     .subscribe()(monix.execution.Scheduler.Implicits.global)
 
   if (initialValues.nonEmpty) {
@@ -46,7 +47,7 @@ class EagerDataCache[T <: Identifiable, PK](
       n.operation match {
         case Operation.Insert | Operation.Update =>
           n match {
-            case nw: NotifyWith[Seq[T]@unchecked] =>
+            case nw: NotifyWith[scala.collection.Seq[T]@unchecked] =>
               if (nw.info != null && nw.info.nonEmpty) {
                 change(nw.info, Nil, version, force = true)
               }
@@ -59,10 +60,10 @@ class EagerDataCache[T <: Identifiable, PK](
       }
     }.subscribe()(monix.execution.Scheduler.Implicits.global)
 
-  def set(instances: Seq[T]): Unit = change(instances, Nil, currentVersion, force = true)
-  def remove(uris: Seq[String]): Unit = change(Nil, uris, currentVersion, force = true)
+  def set(instances: scala.collection.Seq[T]): Unit = change(instances, Nil, currentVersion, force = true)
+  def remove(uris: scala.collection.Seq[String]): Unit = change(Nil, uris, currentVersion, force = true)
 
-  private def change(newInstances: Seq[T], oldUris: Seq[String], oldVersion: Int, force: Boolean): Unit = {
+  private def change(newInstances: scala.collection.Seq[T], oldUris: scala.collection.Seq[String], oldVersion: Int, force: Boolean): Unit = {
     if (newInstances != null && oldUris != null && (newInstances.nonEmpty || oldUris.nonEmpty)) {
       val shouldInvalidateAll = if (force || oldVersion == currentVersion) {
         val diff = oldUris.diff(newInstances.map(_.URI))
@@ -87,12 +88,12 @@ class EagerDataCache[T <: Identifiable, PK](
   }
 
   def get(uri: String): Option[T] = if (uri != null) cache.get(uri) else None
-  def items: Seq[T] = cache.values.toIndexedSeq
+  def items: scala.collection.Seq[T] = cache.values.toIndexedSeq
 
   def version: Int = currentVersion
   def changedOn: OffsetDateTime = lastChange
 
-  override def invalidate(uris: Seq[String]): Future[Unit] = {
+  override def invalidate(uris: scala.collection.Seq[String]): Future[Unit] = {
     if (uris != null && uris.nonEmpty) {
       implicit val global = scala.concurrent.ExecutionContext.Implicits.global
       val version = currentVersion
@@ -114,7 +115,7 @@ class EagerDataCache[T <: Identifiable, PK](
     Future.successful(get(uri))
   }
 
-  override def find(uris: Seq[String]): Future[IndexedSeq[T]] = {
+  override def find(uris: scala.collection.Seq[String]): Future[scala.collection.IndexedSeq[T]] = {
     if (uris != null) {
       Future.successful(uris.flatMap(get).toIndexedSeq)
     } else {
@@ -122,7 +123,7 @@ class EagerDataCache[T <: Identifiable, PK](
     }
   }
 
-  override def search(specification: Option[Specification[T]], limit: Option[Int], offset: Option[Int]): Future[IndexedSeq[T]] = {
+  override def search(specification: Option[Specification[T]], limit: Option[Int], offset: Option[Int]): Future[scala.collection.IndexedSeq[T]] = {
     val items = cache.values.toIndexedSeq
     val filtered = if (specification.isDefined) items.filter(specification.get) else items
     val skipped = if (offset.isDefined) filtered.drop(offset.get) else filtered

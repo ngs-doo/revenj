@@ -5,7 +5,7 @@ import net.revenj.Utils
 import scala.reflect.runtime.universe._
 
 trait PluginLoader {
-  def find[T : TypeTag]: Seq[Class[T]]
+  def find[T : TypeTag]: scala.collection.Seq[Class[T]]
 
   @deprecated("Use resolve without class argument", "0.5.0")
   def resolve[T : TypeTag](container: Container, manifest: Class[T]): Array[T] = {

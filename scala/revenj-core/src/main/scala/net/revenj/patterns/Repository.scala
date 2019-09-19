@@ -16,7 +16,7 @@ trait Repository[T <: Identifiable] {
     * @param uris sequence of unique identifiers
     * @return future to found domain objects
     */
-  def find(uris: Seq[String]): Future[IndexedSeq[T]]
+  def find(uris: scala.collection.Seq[String]): Future[scala.collection.IndexedSeq[T]]
 
   /** Returns a domain object uniquely represented with its URI.
     * If object is not found, an exception will be thrown

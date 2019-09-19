@@ -353,12 +353,16 @@ class ContainerCheck extends Specification with ScalaCheck {
       val container: Container = new SimpleContainer(false, cl)
       container.registerFunc[ServiceImpl](c => new ServiceImpl, lifetime = InstanceScope.Context)
       container.registerFunc[Service](c => c.resolve[ServiceImpl], lifetime = InstanceScope.Context)
-      val topLevel = container.resolve[ServiceImpl]
+      val topLevel1 = container.resolve[ServiceImpl]
       val scope = container.createScope()
       val scopeLevel1 = scope.resolve[ServiceImpl]
-      topLevel !=== scopeLevel1
+      topLevel1 !=== scopeLevel1
       val scopeLevel2 = scope.resolve[ServiceImpl]
       scopeLevel1 === scopeLevel2
+      val scopeLevel3 = scope.resolve[Service]
+      scopeLevel2 === scopeLevel3
+      val topLevel2 = container.resolve[Service]
+      topLevel1 === topLevel2
     }
   }
 }

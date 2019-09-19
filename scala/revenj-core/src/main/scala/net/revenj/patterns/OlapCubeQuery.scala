@@ -32,14 +32,14 @@ trait OlapCubeQuery[T <: DataSource] {
   val facts: Set[String]
 
   def analyze(
-      dimensions: Seq[String],
-      facts: Seq[String],
-      order: Seq[(String, Boolean)] = Seq.empty,
+      dimensions: scala.collection.Seq[String],
+      facts: scala.collection.Seq[String],
+      order: scala.collection.Seq[(String, Boolean)] = Seq.empty,
       filter: Option[Specification[T]] = None,
       limit: Option[Int] = None,
-      offset: Option[Int] = None): Future[IndexedSeq[Map[String, Any]]]
+      offset: Option[Int] = None): Future[scala.collection.IndexedSeq[Map[String, Any]]]
 
-  def analyze(dimensionsAndFacts: Seq[String], filter: Specification[T]): Future[IndexedSeq[Map[String, Any]]] = {
+  def analyze(dimensionsAndFacts: scala.collection.Seq[String], filter: Specification[T]): Future[scala.collection.IndexedSeq[Map[String, Any]]] = {
     analyze(
       dimensionsAndFacts.filter(dimensions.contains),
       dimensionsAndFacts.filter(facts.contains),
@@ -102,7 +102,7 @@ object OlapCubeQuery {
       this
     }
 
-    def analyze(specification: Option[Specification[T]] = None): Future[IndexedSeq[Map[String, Any]]] = {
+    def analyze(specification: Option[Specification[T]] = None): Future[scala.collection.IndexedSeq[Map[String, Any]]] = {
       query.analyze(dimensions.result(), facts.result(), order.result(), specification, resultLimit, resultOffset)
     }
   }

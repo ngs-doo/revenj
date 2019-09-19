@@ -62,7 +62,7 @@ object Utils {
     dbf.setNamespaceAware(false)
     dbf.newDocumentBuilder
   }
-  private val documentParsers = {
+  private lazy val documentParsers = {
     val cpu = Runtime.getRuntime.availableProcessors
     val res = new ArrayBlockingQueue[SAXParser](cpu)
     0 until cpu foreach { _ => res.offer(initializeParser()) }

@@ -27,13 +27,13 @@ class PersistAggregateRoot(domainModel: DomainModel) extends ServerCommand {
     } else {
       val insertData =
         if (arg.get.ToInsert.isEmpty) Success(Nil)
-        else input.deserializeRuntime(arg.get.ToInsert.get, classOf[Seq[AggregateRoot]], manifest.get)
+        else input.deserializeRuntime(arg.get.ToInsert.get, classOf[scala.collection.Seq[AggregateRoot]], manifest.get)
       val updateData =
         if (arg.get.ToUpdate.isEmpty) Success(Nil)
-        else input.deserializeRuntime(arg.get.ToUpdate.get, classOf[Seq[RootPair[AggregateRoot]]], classOf[RootPair[AggregateRoot]], manifest.get)
+        else input.deserializeRuntime(arg.get.ToUpdate.get, classOf[scala.collection.Seq[RootPair[AggregateRoot]]], classOf[RootPair[AggregateRoot]], manifest.get)
       val deleteData =
         if (arg.get.ToDelete.isEmpty) Success(Nil)
-        else input.deserializeRuntime(arg.get.ToDelete.get, classOf[Seq[AggregateRoot]], manifest.get)
+        else input.deserializeRuntime(arg.get.ToDelete.get, classOf[scala.collection.Seq[AggregateRoot]], manifest.get)
       if (insertData.isFailure || updateData.isFailure || deleteData.isFailure) {
         //TODO: reason
         CommandResult.badRequest(s"Error deserializing provided input for: ${arg.get.RootName}.")

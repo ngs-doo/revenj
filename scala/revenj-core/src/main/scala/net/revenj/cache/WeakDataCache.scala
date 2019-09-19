@@ -3,7 +3,7 @@ package net.revenj.cache
 import net.revenj.patterns.{DataCache, Identifiable, Repository}
 
 import scala.collection.concurrent.TrieMap
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable
 import scala.concurrent.Future
 import scala.ref.WeakReference
 
@@ -12,7 +12,7 @@ class WeakDataCache[T <: Identifiable](repository: Repository[T]) extends DataCa
   private lazy val cache = WeakReference(new TrieMap[String, T]())
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  override def invalidate(uris: Seq[String]): Future[Unit] = {
+  override def invalidate(uris: scala.collection.Seq[String]): Future[Unit] = {
     Future.successful {
       cache.get match {
         case Some(wr) if uris != null && uris.nonEmpty =>
@@ -32,9 +32,9 @@ class WeakDataCache[T <: Identifiable](repository: Repository[T]) extends DataCa
     }
   }
 
-  private def findAndCache(uris: Seq[String]) = {
+  private def findAndCache(uris: scala.collection.Seq[String]) = {
     val wr = cache()
-    repository.find(uris) map { found =>
+    repository.find(uris).map { found =>
       found.foreach ( it => wr.put(it.URI, it) )
       found
     }
@@ -51,10 +51,10 @@ class WeakDataCache[T <: Identifiable](repository: Repository[T]) extends DataCa
     }
 
   }
-  override def find(uris: Seq[String]): Future[IndexedSeq[T]] = {
+  override def find(uris: scala.collection.Seq[String]): Future[scala.collection.IndexedSeq[T]] = {
     cache.get match {
       case Some(wr) if uris != null && uris.nonEmpty =>
-        val found = new ArrayBuffer[T]()
+        val found = new mutable.ArrayBuffer[T]()
         val missing = uris.flatMap { uri =>
           wr.get(uri) match {
             case Some(f) =>
@@ -65,7 +65,7 @@ class WeakDataCache[T <: Identifiable](repository: Repository[T]) extends DataCa
           }
         }
         if (missing.nonEmpty) {
-          findAndCache(missing) map { items =>
+          findAndCache(missing).map { items =>
             found ++ items
           }
         } else {

@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.headers.CustomHeader
 import akka.stream.Materializer
 import akka.util.ByteString
 import net.revenj.patterns.{DomainModel, ServiceLocator}
+import net.revenj.serialization.WireSerialization
 import net.revenj.server._
 
 import scala.collection.immutable

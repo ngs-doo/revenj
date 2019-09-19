@@ -3,7 +3,7 @@ package net.revenj.patterns
 import java.time.OffsetDateTime
 
 trait History[T <: ObjectHistory] extends Identifiable {
-  def snapshots: Seq[Snapshot[T]]
+  def snapshots: scala.collection.Seq[Snapshot[T]]
 }
 
 trait Snapshot[T <: ObjectHistory] extends Identifiable {

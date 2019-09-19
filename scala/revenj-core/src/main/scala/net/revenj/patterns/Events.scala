@@ -61,7 +61,7 @@ trait AggregateDomainEventHandler[TAgg <: AggregateRoot, TDE <: AggregateDomainE
 
 trait EventStore[T <: Event] {
 
-  def submit(events: Seq[T]): Future[IndexedSeq[String]]
+  def submit(events: scala.collection.Seq[T]): Future[scala.collection.IndexedSeq[String]]
 
   def submit(event: T): Future[String] = {
     implicit val global = scala.concurrent.ExecutionContext.Implicits.global
@@ -75,7 +75,7 @@ trait DomainEventStore[T <: DomainEvent] extends EventStore[T] with Repository[T
 
 trait AsyncDomainEventStore[T <: DomainEvent] extends DomainEventStore[T] {
 
-  def mark(events: Seq[T]): Future[Unit]
+  def mark(events: scala.collection.Seq[T]): Future[Unit]
 
   def mark(event: T): Future[Unit] = {
     require(event ne null, "null value provided for event")
@@ -84,6 +84,6 @@ trait AsyncDomainEventStore[T <: DomainEvent] extends DomainEventStore[T] {
 }
 
 trait EventStoreAspect[T <: Event] {
-  def before(events: Seq[T]): Seq[T] = events
-  def after(events: Seq[T]): Unit = {}
+  def before(events: scala.collection.Seq[T]): scala.collection.Seq[T] = events
+  def after(events: scala.collection.Seq[T]): Unit = {}
 }

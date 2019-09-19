@@ -1,4 +1,4 @@
-package net.revenj.server
+package net.revenj.serialization
 
 import scala.collection.mutable
 import scala.util.Try

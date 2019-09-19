@@ -15,7 +15,7 @@ private[revenj] class ServicesPluginLoader(loader: ClassLoader) extends PluginLo
   private val UTF8: Charset = Charset.forName("UTF-8")
   private val mirror = runtimeMirror(loader)
 
-  def find[T: TypeTag]: Seq[Class[T]] = {
+  def find[T: TypeTag]: scala.collection.Seq[Class[T]] = {
     val plugins = new ArrayBuffer[Class[T]]()
     val scalaType = mirror.typeOf[T].dealias
     val javaTypeName = Utils.findType(scalaType, mirror).map(_.getTypeName).getOrElse(scalaType.toString).replace(" ", "")
