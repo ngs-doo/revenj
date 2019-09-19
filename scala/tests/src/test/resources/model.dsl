@@ -17,7 +17,7 @@ module test {
 		v.d;
 		v.dd;
 		vvv;
-		hasV;
+		hasV; // bug in copy: hasV = if (hasV == null) false else hasV
 		hasA;
 		calculated hasV2 from 'it => it.hasV';
 		calculated bool hasA2 from 'it => it.hasA2';

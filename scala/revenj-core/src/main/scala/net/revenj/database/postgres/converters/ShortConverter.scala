@@ -1,6 +1,6 @@
 package net.revenj.database.postgres.converters
 
-import net.revenj.database.postgres.{PostgresBuffer, PostgresReader, PostgresWriter}
+import net.revenj.database.postgres.{PostgresBuffer, PostgresReader}
 
 object ShortConverter extends Converter[Short] {
   override def serializeURI(sw: PostgresBuffer, value: Short): Unit = {
@@ -52,5 +52,5 @@ object ShortConverter extends Converter[Short] {
     }
   }
 
-  override def toTuple(value: Short): PostgresTuple = IntConverter.toTuple(value)
+  override def toTuple(value: Short): PostgresTuple = ShortConverter.toTuple(value)
 }

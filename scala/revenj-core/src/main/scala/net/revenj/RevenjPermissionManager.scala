@@ -3,8 +3,7 @@ package net.revenj
 import java.security.Principal
 import java.util.Properties
 
-import monix.reactive.Observable
-import net.revenj.patterns.{SearchableRepository, ServiceLocator}
+import net.revenj.patterns.ServiceLocator
 import net.revenj.security.{GlobalPermission, PermissionManager, RolePermission, UserPrincipal}
 
 private[revenj] class RevenjPermissionManager(
@@ -36,8 +35,8 @@ private[revenj] class RevenjPermissionManager(
     } else false
   }
 
-  private var globalPermissions = staticGlobalPermissions.getOrElse(Nil).map(it => it.name -> it.isAllowed).toMap
-  private var rolePermissions = staticRolePermissions.getOrElse(Nil).groupBy(_.name)
+  private val globalPermissions = staticGlobalPermissions.getOrElse(Nil).map(it => it.name -> it.isAllowed).toMap
+  private val rolePermissions = staticRolePermissions.getOrElse(Nil).groupBy(_.name)
 
   private var cache = Map.empty[String, Boolean]
 /*

@@ -261,7 +261,7 @@ class ConverterCheck extends Specification with ScalaCheck {
     "random number parsing" >> {
       val reader = new PostgresReader
       val rnd = new Random(0)
-      var neg = Seq(BigDecimal(1), BigDecimal(1), BigDecimal(-1))
+      val neg = Seq(BigDecimal(1), BigDecimal(1), BigDecimal(-1))
       val scalaNumbers = (0 until 10000).map ( i => BigDecimal(rnd.nextDouble() * rnd.nextInt(1000))*neg(i%3) )
       val parsedNumbers = scalaNumbers.map { jbd =>
         reader.process(s"(${jbd.bigDecimal.toPlainString})")
@@ -303,9 +303,8 @@ class ConverterCheck extends Specification with ScalaCheck {
       sb.toString() === arrTuple.buildTuple(false)
     }
     "random number serialization" >> {
-      val writer = new PostgresWriter
       val rnd = new Random(0)
-      var neg = Seq(BigDecimal(1), BigDecimal(1), BigDecimal(-1))
+      val neg = Seq(BigDecimal(1), BigDecimal(1), BigDecimal(-1))
       val numbers = (0 until 10000).map ( i => BigDecimal(rnd.nextDouble() * rnd.nextInt(1000))*neg(i%3) )
       val tuples = numbers.map { bd =>
         DecimalConverter.toTuple(bd)

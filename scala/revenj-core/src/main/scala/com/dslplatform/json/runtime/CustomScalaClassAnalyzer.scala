@@ -269,7 +269,7 @@ object CustomScalaClassAnalyzer {
       val defMethod = defaults.find(_.name.toString.endsWith("$" + (i + 1))).flatMap { d =>
         val name = d.name.toString
         raw.getDeclaredMethods.find(_.getName == name).map { m =>
-          () => m.invoke(null, Array():_*)
+          () => m.invoke(null)
         }
       }
       val pName = if (p.name.toString.contains("$")) names.map(it => it(i)) else Some(p.name.toString)
@@ -386,7 +386,7 @@ object CustomScalaClassAnalyzer {
       val defMethod = defaults.find(_.name.toString.endsWith("$" + (i + 1))).flatMap { d =>
         val name = d.name.toString
         companion.getClass.getDeclaredMethods.find(_.getName == name).map { m =>
-          () => m.invoke(companion, Array():_*)
+          () => m.invoke(companion)
         }
       }
       val pName = if (p.name.toString.contains("$")) names.map(it => it(i)) else Some(p.name.toString)
@@ -496,7 +496,7 @@ object CustomScalaClassAnalyzer {
     val rawMethods = raw.getMethods
     methods.foreach { case (g, _) =>
       val gName = g.name.toString
-      rawMethods.find(m => m.getParameterCount == 0 && m.getName.equals(gName)).foreach { jm =>
+      rawMethods.find(m => m.getParameterCount == 0 && m.getName == gName).foreach { jm =>
         Try(TypeAnalysis.convertType(g.typeSignature.resultType, genericsByName)).foreach { t =>
           if (analyzeMethods(jm, t, raw, json, foundWrite, foundRead, index, genericMappings)) {
             index += 1
