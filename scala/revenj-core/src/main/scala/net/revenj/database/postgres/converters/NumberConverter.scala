@@ -101,6 +101,43 @@ object NumberConverter {
     value
   }
 
+  def serialize(value: Short, buf: Array[Char]): Int = {
+    if (value == Short.MinValue) {
+      "-32768".getChars(0, 6, buf, 0)
+      0
+    } else if (value == 0) {
+      buf(5) = '0'
+      5
+    } else {
+      var q = 0
+      var r = 0
+      var charPos = 5
+      var offset = 0
+      var i = 0
+      if (value < 0) {
+        i = -value
+        offset = 0
+      } else {
+        i = value.toInt
+        offset = 1
+      }
+      var v = 0
+      while (charPos > 0 && i != 0) {
+        q = i / 100
+        r = i - ((q << 6) + (q << 5) + (q << 2))
+        i = q
+        v = NUMBERS(r)
+        buf(charPos) = v.toByte.toChar
+        charPos -= 1
+        buf(charPos) = (v >> 8).toChar
+        charPos -= 1
+      }
+      val zeroBased = v >> 24
+      buf(charPos + zeroBased) = '-'
+      charPos + offset + zeroBased
+    }
+  }
+
   def serialize(value: Int, buf: Array[Char]): Int = {
     if (value == Int.MinValue) {
       "-2147483648".getChars(0, 11, buf, 0)
