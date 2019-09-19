@@ -3,50 +3,47 @@ package net.revenj.database.postgres
 import java.awt.Point
 import java.awt.geom.Point2D
 import java.io.{File, IOException}
-import java.sql.Connection
-import java.util
+import java.sql.{Connection, DriverManager}
 import java.util.UUID
 
-import javax.sql.DataSource
 import com.dslplatform.compiler.client.parameters._
 import com.dslplatform.compiler.client.{Context, Main}
+import example.test.Client.Tick
+import example.test._
+import example.test.postgres._
+import javax.sql.DataSource
+import monix.eval.Task
 import monix.execution.Ack
-import net.revenj.database.postgres.DbCheck.MyService
+import monix.reactive.{Observable, Observer}
+import net.revenj.database.postgres.DbCheck.{Db, MyService}
 import net.revenj.extensibility.{Container, InstanceScope, SystemState}
 import net.revenj.patterns.DataChangeNotification.NotifyInfo
 import net.revenj.patterns._
+import org.pgscala.embedded.{PostgresCluster, PostgresVersion}
 import org.specs2.ScalaCheck
+import org.specs2.concurrent.ExecutionEnv
+import org.specs2.matcher.FutureMatchers
 import org.specs2.mutable.Specification
 import org.specs2.specification.BeforeAfterAll
 
-import example.test.Client.Tick
-import example.test.postgres._
-import example.test._
-
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
 import scala.util.{Failure, Random, Success, Try}
-import monix.eval.Task
-import monix.reactive.{Observable, Observer}
-import org.pgscala.embedded.{PostgresCluster, PostgresVersion}
-import org.specs2.concurrent.ExecutionEnv
-import org.specs2.matcher.FutureMatchers
-import org.specs2.specification.mutable.ExecutionEnvironment
 
-class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with FutureMatchers with ExecutionEnvironment {
+class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with FutureMatchers {
   sequential
 
   var tryDb: Try[PostgresCluster] = _
 
-  def beforeAll() = {
+  def beforeAll(): Unit = {
     tryDb = DbCheck.setupDatabase()
   }
-  def afterAll() = {
+  def afterAll(): Unit = {
     if (tryDb.isSuccess) {
       tryDb.get.stop()
     }
   }
-  val jdbcUrl = "jdbc:postgresql://localhost:5555/revenj?user=revenj&password=revenj"
+  val jdbcUrl = s"jdbc:postgresql://${Db.Address}:${Db.Port}/${Db.Name}?user=${Db.Role}&password=${Db.Pass}"
   implicit val duration = Duration.Inf
 
   implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
@@ -559,10 +556,10 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
       "will read the old value" >> {
         val rnd = new Random()
         val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
-        val c1 = Client(id = rnd.nextInt(), points = 42)
+        val c1 = Client(id = rnd.nextLong(), points = 42)
         val ctx = container.resolve[DataContext]
         Await.result(ctx.create(c1), Duration.Inf)
-        val c2 = Client(id = rnd.nextInt(), points = 22, parent = Some(c1), parents = Seq(c1))
+        val c2 = Client(id = rnd.nextLong(), points = 22, parent = Some(c1), parents = Seq(c1))
         Await.result(ctx.create(c2), Duration.Inf)
         val found = Await.result(ctx.find[Client](c2.URI), Duration.Inf).get
         c2.parentURI === found.parentURI
@@ -585,7 +582,6 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
 }
 
 object DbCheck {
-
   class ExampleEventHandler extends DomainEventHandler[TestMe] {
     override def handle(domainEvent: TestMe): Unit = {
       if (domainEvent.URI.isEmpty) {
@@ -652,22 +648,48 @@ object DbCheck {
     }
   }
 
+  object Db {
+    val Address = "127.0.0.1"
+    val Port = 5432
+
+    val Catalog = "postgres"
+    val Name = "revenj"
+
+    val Role = "revenj"
+    val Pass = "revenj"
+  }
+
   def setupDatabase(): Try[PostgresCluster] = {
     try {
-      val postgres = new PostgresCluster(PostgresVersion(11, 4, 3), new File("./target/db/data"), Map.empty)
-      val (process, feedback) = postgres.start()
-      var i = 0
-      while (i < 10 && !feedback.isCompleted) {
-        Thread.sleep(400)
-        i += 1
+      // initialise cluster
+      val postgres = new PostgresCluster(PostgresVersion.`11`, new File("target/dbcheck").getCanonicalFile, Map(
+        "listen_addresses" -> s"'${Db.Address}'",
+        "port" -> s"${Db.Port}",
+      ))
+      postgres.initialize(Db.Role, Db.Pass)
+      val (_, clusterReady) = postgres.start()
+      Await.result(clusterReady, 60.seconds)
+
+      // initialise the role & database
+      Class.forName("org.postgresql.Driver")
+      val connection = DriverManager.getConnection(s"jdbc:postgresql://${Db.Address}:${Db.Port}/${Db.Catalog}?user=${Db.Role}&password=${Db.Pass}")
+      try {
+        val stmt = connection.createStatement()
+        try {
+          stmt.execute(s"""CREATE DATABASE ${Db.Name} OWNER ${Db.Role} ENCODING 'utf8' TEMPLATE template1""")
+        } finally {
+          stmt.close()
+        }
+      } finally {
+        connection.close()
       }
-      require(feedback.isCompleted, "Postgres not started")
+
       val context = new TestContext
       context.put(Download.INSTANCE, "")
       context.put(Force.INSTANCE, "")
       context.put(ApplyMigration.INSTANCE, "")
       context.put(DisablePrompt.INSTANCE, "")
-      context.put(PostgresConnection.INSTANCE, "localhost:5555/revenj?user=revenj&password=revenj")
+      context.put(PostgresConnection.INSTANCE, s"${Db.Address}:${Db.Port}/${Db.Name}?user=${Db.Role}&password=${Db.Pass}")
       val file = getClass.getResource("/model.dsl")
       context.put(DslPath.INSTANCE, file.getFile)
       val params = Main.initializeParameters(context, ".")
