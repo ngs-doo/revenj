@@ -395,7 +395,10 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
         val ds = container.resolve[DataSource]
         val con = ds.getConnection
         var migration = false
-        state.change.filter(_.id == "migration").doOnNext(_ => migration = true).subscribe()
+        state.change.filter(_.id == "migration").doOnNext { _ =>
+          migration = true
+          monix.eval.Task.unit
+        }.subscribe()
         val stmt = con.createStatement()
         stmt.execute("SELECT pg_notify('migration', 'new')")
         stmt.close()
@@ -656,7 +659,7 @@ object DbCheck {
 
   object Db {
     val Address = "127.0.0.1"
-    val Port = 5432
+    val Port = 5555
 
     val Catalog = "postgres"
     val Name = "revenj"
