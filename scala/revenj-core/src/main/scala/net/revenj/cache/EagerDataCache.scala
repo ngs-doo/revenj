@@ -3,8 +3,8 @@ package net.revenj.cache
 import java.time.OffsetDateTime
 
 import monix.eval.Task
-import monix.reactive.Observable
-import monix.reactive.subjects.PublishSubject
+import monix.reactive.{MulticastStrategy, Observable}
+import monix.reactive.subjects.ConcurrentSubject
 import net.revenj.extensibility.SystemState
 import net.revenj.patterns.DataChangeNotification.{NotifyWith, Operation}
 import net.revenj.patterns._
@@ -24,7 +24,7 @@ class EagerDataCache[T <: Identifiable, PK](
   protected val cache = new TrieMap[String, T]()
   private var lookup: Map[PK, T] = Map.empty
   private var currentVersion = 0
-  private val versionChangeSubject = PublishSubject[Int]()
+  private val versionChangeSubject = ConcurrentSubject[Int](MulticastStrategy.publish)(monix.execution.Scheduler.Implicits.global)
   private var lastChange = OffsetDateTime.now()
   def changes: Observable[Int] = versionChangeSubject.map(identity)
   def currentLookup: Map[PK, T] = lookup

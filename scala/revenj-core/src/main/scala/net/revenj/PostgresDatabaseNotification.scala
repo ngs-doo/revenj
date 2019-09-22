@@ -3,12 +3,11 @@ package net.revenj
 import java.io.{Closeable, IOException}
 import java.sql.{Connection, SQLException, Statement}
 import java.util.Properties
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import monix.execution.Cancelable
-import monix.reactive.Observable
+import monix.reactive.{MulticastStrategy, Observable, subjects}
 import monix.reactive.observers.Subscriber
-import monix.reactive.subjects.PublishSubject
 import net.revenj.database.postgres.{ConnectionFactory, PostgresReader}
 import net.revenj.database.postgres.converters.StringConverter
 import net.revenj.extensibility.SystemState
@@ -31,7 +30,7 @@ private [revenj] class PostgresDatabaseNotification(
   locator: ServiceLocator
 ) extends EagerNotification with Closeable {
 
-  private val subject = PublishSubject[DataChangeNotification.NotifyInfo]()
+  private val subject = subjects.ConcurrentSubject[DataChangeNotification.NotifyInfo](MulticastStrategy.publish)(monix.execution.Scheduler.Implicits.global)
   private val notificationStream = subject.map(identity)
   private val repositories = new TrieMap[Class[_], AnyRef]
   private val targets = new TrieMap[String, Set[Class[_]]]

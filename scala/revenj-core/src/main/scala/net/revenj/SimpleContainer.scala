@@ -501,9 +501,9 @@ If you wish to resolve types not registered in the container, specify revenj.res
       closeables.add(service.asInstanceOf[AutoCloseable])
     }
     val ti = Utils.findTypeInfo(mirror.typeOf[T], mirror)
-    addToRegistry(new Registration[T](ti.actual, this, service, parent.isEmpty))
+    addToRegistry(new Registration[T](ti.actual, this, service, true))
     if (ti.actual != ti.erased) {
-      addToRegistry(new Registration[T](ti.erased, this, service, parent.isEmpty))
+      addToRegistry(new Registration[T](ti.erased, this, service, true))
     }
     this
   }

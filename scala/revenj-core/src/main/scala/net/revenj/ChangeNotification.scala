@@ -4,8 +4,8 @@ import java.lang.reflect.ParameterizedType
 
 import monix.eval.Task
 import monix.execution.Scheduler
-import monix.reactive.Observable
-import monix.reactive.subjects.PublishSubject
+import monix.reactive.{MulticastStrategy, Observable}
+import monix.reactive.subjects.ConcurrentSubject
 import net.revenj.extensibility.Container
 import net.revenj.patterns.DataChangeNotification._
 
@@ -14,7 +14,7 @@ import scala.concurrent.Future
 
 private [revenj] class ChangeNotification[T](manifest: Class[T], notifications: PostgresDatabaseNotification, reactive: Option[Scheduler]) {
   private implicit val scheduler = reactive.getOrElse(monix.execution.Scheduler.Implicits.global)
-  private val subject = PublishSubject[TrackInfo[T]]
+  private val subject = ConcurrentSubject[TrackInfo[T]](MulticastStrategy.publish)(scheduler)
   private val subscription = notifications.track[T](manifest).subscribe(subject)
   private val lazySeqChanges = subject.map(_.result)
   private val lazyFlattenChanges = subject.flatMap { it =>

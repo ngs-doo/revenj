@@ -22,6 +22,8 @@ object WebServer {
   private[this] def parseArgs(args: Array[String]): (String, Int) = {
     if (args.isEmpty) {
       ("localhost", 8080)
+    } else if (args.length == 1) {
+      ("localhost", args(0).toInt)
     } else {
       (args(0), args(1).toInt)
     }
@@ -83,7 +85,7 @@ object WebServer {
 
     val binding = Http().bindAndHandle(routes, address, port)
     println(s"Starting server at $url ...")
-    binding foreach { bind =>
+    binding.foreach { _ =>
       println(s"Started server at $url")
     }
     revenj.registerInstance(new Shutdown(binding, system, url), handleClose = true)
@@ -94,7 +96,7 @@ object WebServer {
   private class Shutdown(binding: Future[ServerBinding], system: ActorSystem, url: String) extends AutoCloseable {
     override def close(): Unit = {
       import scala.concurrent.ExecutionContext.Implicits.global
-      binding foreach { bind =>
+      binding.foreach { bind =>
         println(s"Shutting down server at $url ...")
         bind.unbind() map { _ =>
           system.terminate()

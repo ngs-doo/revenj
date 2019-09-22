@@ -364,6 +364,21 @@ class ContainerCheck extends Specification with ScalaCheck {
       val topLevel2 = container.resolve[Service]
       topLevel1 === topLevel2
     }
+    "register instance will propagate through context" >> {
+      val container: Container = new SimpleContainer(false, cl)
+      val s1 = new ServiceImpl
+      container.registerInstance[Service](s1, handleClose = false)
+      val s2 = new ServiceImpl
+      val scope = container.createScope()
+      scope.registerInstance[Service](s2, handleClose = false)
+      val nested = scope.createScope()
+      val s3 = nested.resolve[Service]
+      val s4 = scope.resolve[Service]
+      val s5 = container.resolve[Service]
+      s3 === s2
+      s4 === s2
+      s5 === s1
+    }
   }
 }
 
