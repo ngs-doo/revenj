@@ -167,7 +167,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.registerInstance[PluginLoader](new ServicesPluginLoader(loader))
     val domainModel = new SimpleDomainModel(loader)
     container.registerInstance[DomainModel](domainModel, handleClose = false)
-    val databaseNotification = new PostgresDatabaseNotification(dataSource, Some(domainModel), properties, state, container)
+    val databaseNotification = new PostgresDatabaseNotification(dataSource, Some(domainModel), properties, state, context, container)
     container.registerInstance[EagerNotification](databaseNotification, handleClose = false)
     container.registerInstance[DataChangeNotification](databaseNotification, handleClose = true)
     ChangeNotification.registerContainer(container, databaseNotification)

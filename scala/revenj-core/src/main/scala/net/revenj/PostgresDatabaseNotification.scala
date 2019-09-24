@@ -6,8 +6,9 @@ import java.util.Properties
 
 import javax.sql.DataSource
 import monix.execution.Cancelable
-import monix.reactive.{MulticastStrategy, Observable, subjects}
+import monix.reactive.Observable
 import monix.reactive.observers.Subscriber
+import monix.reactive.subjects.PublishSubject
 import net.revenj.database.postgres.{ConnectionFactory, PostgresReader}
 import net.revenj.database.postgres.converters.StringConverter
 import net.revenj.extensibility.SystemState
@@ -27,10 +28,11 @@ private [revenj] class PostgresDatabaseNotification(
   domainModel: Option[DomainModel],
   properties: Properties,
   systemState: SystemState,
+  customContext: Option[ExecutionContext],
   locator: ServiceLocator
 ) extends EagerNotification with Closeable {
 
-  private val subject = subjects.ConcurrentSubject[DataChangeNotification.NotifyInfo](MulticastStrategy.publish)(monix.execution.Scheduler.Implicits.global)
+  private val subject = PublishSubject[DataChangeNotification.NotifyInfo]()
   private val notificationStream = subject.map(identity)
   private val repositories = new TrieMap[Class[_], AnyRef]
   private val targets = new TrieMap[String, Set[Class[_]]]
@@ -178,13 +180,13 @@ private [revenj] class PostgresDatabaseNotification(
         case Some(ids) if ids.nonEmpty =>
           op match {
             case "Update" =>
-              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Update, Source.Database, ids))
+              notify(DataChangeNotification.NotifyInfo(ident, Operation.Update, Source.Database, ids))
             case "Change" =>
-              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Change, Source.Database, ids))
+              notify(DataChangeNotification.NotifyInfo(ident, Operation.Change, Source.Database, ids))
             case "Delete" =>
-              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Delete, Source.Database, ids))
+              notify(DataChangeNotification.NotifyInfo(ident, Operation.Delete, Source.Database, ids))
             case _ =>
-              subject.onNext(DataChangeNotification.NotifyInfo(ident, Operation.Insert, Source.Database, ids))
+              notify(DataChangeNotification.NotifyInfo(ident, Operation.Insert, Source.Database, ids))
           }
         case _ =>
       }
@@ -346,7 +348,9 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
   }
 
   def notify(info: NotifyInfo): Unit = {
-    subject.onNext(info)
+    subject.synchronized {
+      subject.onNext(info)
+    }
   }
 
   def notifications: Observable[NotifyInfo] = {
@@ -357,13 +361,11 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     track[T](manifest.runtimeClass.asInstanceOf[Class[T]])
   }
 
-  class TrackObservable() extends Observable[NotifyInfo] {
+  private class TrackObservable() extends Observable[NotifyInfo] {
     override def unsafeSubscribeFn(subscriber: Subscriber[NotifyInfo]): Cancelable = {
       subject.unsafeSubscribeFn(subscriber)
     }
   }
-
-  private implicit val ctx = ExecutionContext.Implicits.global
 
   private [revenj] def track[T](manifest: Class[T]): Observable[TrackInfo[T]] = {
     val dm = domainModel.get
@@ -379,7 +381,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
         ns.toSet
       })
       set.contains(manifest)
-    } map { it =>
+    }.map { it =>
       TrackInfo[T](it.uris, new LazyResult[T](it.name, dm, it.uris))
     }
     observable
@@ -387,6 +389,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
 
   private class LazyResult[T](name: String, dm: DomainModel, uris: scala.collection.Seq[String]) extends Function0[Future[scala.collection.IndexedSeq[T]]] {
     private var result: Option[Future[scala.collection.IndexedSeq[T]]] = None
+    private implicit val ctx: ExecutionContext = customContext.getOrElse(ExecutionContext.Implicits.global)
 
     override def apply(): Future[scala.collection.IndexedSeq[T]] = result match {
       case Some(f) => f

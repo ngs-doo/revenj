@@ -1,14 +1,14 @@
 package net.revenj
 
-import monix.reactive.{MulticastStrategy, Observable}
-import monix.reactive.subjects.ConcurrentSubject
+import monix.reactive.Observable
+import monix.reactive.subjects.PublishSubject
 import net.revenj.extensibility.{Container, SystemState}
 
 private[revenj] class RevenjSystemState extends SystemState {
   private var systemBooting = true
   private var systemReady = false
-  private val changeSubject = ConcurrentSubject[SystemState.SystemEvent](MulticastStrategy.publish)(monix.execution.Scheduler.Implicits.global)
-  private val startupSubject = ConcurrentSubject[Container](MulticastStrategy.publish)(monix.execution.Scheduler.Implicits.global)
+  private val changeSubject = PublishSubject[SystemState.SystemEvent]()
+  private val startupSubject = PublishSubject[Container]()
   private val changeEvents = changeSubject.map(identity)
   private val startupEvents = startupSubject.map(identity)
 
@@ -27,6 +27,8 @@ private[revenj] class RevenjSystemState extends SystemState {
   def change: Observable[SystemState.SystemEvent] = changeEvents
 
   def notify(value: SystemState.SystemEvent): Unit = {
-    changeSubject.onNext(value)
+    this.synchronized {
+      changeSubject.onNext(value)
+    }
   }
 }

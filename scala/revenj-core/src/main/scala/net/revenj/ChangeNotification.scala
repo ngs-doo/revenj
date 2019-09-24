@@ -5,19 +5,20 @@ import java.lang.reflect.ParameterizedType
 import monix.eval.Task
 import monix.execution.Scheduler
 import monix.reactive.{MulticastStrategy, Observable}
-import monix.reactive.subjects.ConcurrentSubject
+import monix.reactive.subjects.{ConcurrentSubject, PublishSubject}
 import net.revenj.extensibility.Container
 import net.revenj.patterns.DataChangeNotification._
 
 import scala.concurrent.Future
 
-
 private [revenj] class ChangeNotification[T](manifest: Class[T], notifications: PostgresDatabaseNotification, reactive: Option[Scheduler]) {
-  private implicit val scheduler = reactive.getOrElse(monix.execution.Scheduler.Implicits.global)
-  private val subject = ConcurrentSubject[TrackInfo[T]](MulticastStrategy.publish)(scheduler)
-  private val subscription = notifications.track[T](manifest).subscribe(subject)
-  private val lazySeqChanges = subject.map(_.result)
-  private val lazyFlattenChanges = subject.flatMap { it =>
+  private implicit val scheduler: Scheduler = reactive.getOrElse(monix.execution.Scheduler.Implicits.global)
+  private val syncSubject = PublishSubject[TrackInfo[T]]()
+  private val asyncSubject = ConcurrentSubject[TrackInfo[T]](MulticastStrategy.publish)(scheduler)
+  private val syncSubscription = notifications.track[T](manifest).subscribe(syncSubject)
+  private val asyncSubscription = notifications.track[T](manifest).subscribe(asyncSubject)
+  private val lazySeqChanges = syncSubject.map(_.result)
+  private val lazyFlattenChanges = syncSubject.flatMap { it =>
     val results = new Array[Function0[Future[T]]](it.uris.size)
     var i = 0
     while (i < results.length) {
@@ -27,8 +28,8 @@ private [revenj] class ChangeNotification[T](manifest: Class[T], notifications: 
     }
     Observable(results:_*)
   }
-  private val futureSeqChanges = subject.map(_.result())
-  private val futureFlattenChanges = subject.flatMap { it =>
+  private val futureSeqChanges = asyncSubject.map(_.result())
+  private val futureFlattenChanges = asyncSubject.flatMap { it =>
     val results = new Array[Future[T]](it.uris.size)
     var i = 0
     while (i < results.length) {
@@ -38,8 +39,8 @@ private [revenj] class ChangeNotification[T](manifest: Class[T], notifications: 
     }
     Observable(results:_*)
   }
-  private val taskSeqChanges = subject.map ( it => Task.defer({ Task.fromFuture(it.result()) }) )
-  private val taskFlattenChanges = subject.flatMap { it =>
+  private val taskSeqChanges = asyncSubject.map ( it => Task.defer({ Task.fromFuture(it.result()) }) )
+  private val taskFlattenChanges = asyncSubject.flatMap { it =>
     val results = new Array[Task[T]](it.uris.size)
     var i = 0
     while (i < results.length) {
@@ -51,7 +52,8 @@ private [revenj] class ChangeNotification[T](manifest: Class[T], notifications: 
   }
 
   def close(): Unit = {
-    subscription.cancel()
+    syncSubscription.cancel()
+    asyncSubscription.cancel()
   }
 }
 
