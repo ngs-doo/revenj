@@ -17,9 +17,19 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			new[]
 			{
 				typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string) }),
+				typeof(string).GetMethod("CompareOrdinal", new[] { typeof(string), typeof(string) }),
 				typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(bool) }),
 				typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) })
 			}.ToList();
+
+		private static string FindOperator(ExpressionType type)
+		{
+			if (type == ExpressionType.LessThan) return " < ";
+			if (type == ExpressionType.LessThanOrEqual) return " <= ";
+			if (type == ExpressionType.GreaterThan) return " > ";
+			if (type == ExpressionType.GreaterThanOrEqual) return " >= ";
+			return null;
+		}
 
 		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
 		{
@@ -35,6 +45,15 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 					return false;
 
 				return CompareString(expression.NodeType == ExpressionType.Equal, ceMethod, queryBuilder, visitExpression);
+			}
+			var compareOperator = FindOperator(expression.NodeType);
+			if (compareOperator != null)
+			{
+				var ceZero = be.Right as ConstantExpression ?? be.Left as ConstantExpression;
+				var ceMethod = be.Left as MethodCallExpression ?? be.Right as MethodCallExpression;
+				if (ceZero == null || ceMethod == null || !ceZero.Value.Equals(0) || !CompareMethods.Contains(ceMethod.Method))
+					return false;
+				return CompareStringSimple(compareOperator, ceMethod, queryBuilder, visitExpression);
 			}
 			return false;
 		}
@@ -129,6 +148,20 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 				else return false;
 			}
 
+			queryBuilder.Append(")");
+			return true;
+		}
+
+		private static bool CompareStringSimple(string compareOperator, MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression)
+		{
+			var count = methodCall.Arguments.Count;
+			if (count != 2)
+				return false;
+
+			queryBuilder.Append("(");
+			visitExpression(methodCall.Arguments[0]);
+			queryBuilder.Append(compareOperator);
+			visitExpression(methodCall.Arguments[1]);
 			queryBuilder.Append(")");
 			return true;
 		}
