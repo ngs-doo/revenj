@@ -421,6 +421,14 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     currentStream = None
   }
 
+  def reset(): Unit = {
+    if (!isClosed) {
+      currentStream.foreach { stream =>
+        closeStream(stream)
+      }
+    }
+  }
+
   def close(): Unit = {
     isClosed = true
     currentStream match {
