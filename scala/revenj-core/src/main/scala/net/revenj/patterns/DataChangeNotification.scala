@@ -10,6 +10,8 @@ trait DataChangeNotification {
   def notifications: Observable[DataChangeNotification.NotifyInfo]
 
   def track[T : ClassTag](implicit manifest: ClassTag[T]): Observable[DataChangeNotification.TrackInfo[T]]
+
+  def reset(): Unit
 }
 
 object DataChangeNotification {

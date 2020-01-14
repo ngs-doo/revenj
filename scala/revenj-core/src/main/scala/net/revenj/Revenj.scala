@@ -8,6 +8,7 @@ import java.util.{Properties, ServiceLoader, UUID}
 
 import com.dslplatform.json.DslJson
 import javax.sql.DataSource
+import net.revenj.database.postgres.DatabaseNotificationQueue
 import net.revenj.database.postgres.converters.JsonConverter
 import net.revenj.extensibility._
 import net.revenj.patterns._
@@ -170,6 +171,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     val databaseNotification = new PostgresDatabaseNotification(dataSource, Some(domainModel), properties, state, context, container)
     container.registerInstance[EagerNotification](databaseNotification, handleClose = false)
     container.registerInstance[DataChangeNotification](databaseNotification, handleClose = true)
+    container.register[DatabaseNotificationQueue](InstanceScope.Context)
     ChangeNotification.registerContainer(container, databaseNotification)
     container.registerAs[JacksonSerialization, JacksonSerialization](InstanceScope.Singleton)
     //container.registerAs[Serialization[String], JacksonSerialization](InstanceScope.Singleton)

@@ -14,12 +14,12 @@ lazy val core = (project in file("revenj-core")
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "io.monix" %% "monix-reactive" % "3.1.0",
       "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
-      "com.dslplatform" %% "dsl-json-scala" % "1.9.4",
-      "com.dslplatform" % "dsl-json-joda" % "1.9.4", // TODO: will be removed
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.9.9",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.9.9",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.9.9",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.9.9",
+      "com.dslplatform" %% "dsl-json-scala" % "1.9.5",
+      "com.dslplatform" % "dsl-json-joda" % "1.9.5", // TODO: will be removed
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.10.2",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.10.2",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.10.2",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.10.2",
       "org.specs2" %% "specs2-scalacheck" % "4.7.1" % Test,
     ),
     dslResourcePath in (Test, DSL) := Some((resourceDirectory in Test).value / "META-INF" / "services")
