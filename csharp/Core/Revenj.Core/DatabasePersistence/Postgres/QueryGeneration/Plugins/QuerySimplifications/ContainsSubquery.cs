@@ -37,11 +37,10 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.QuerySimplifications
 			var ce = parts.MainFrom.FromExpression as ConstantExpression;
 			var pe = parts.MainFrom.FromExpression as ParameterExpression;
 			var ma = parts.MainFrom.FromExpression as MemberExpression;
-			return ce != null
-				? SimplifyConstantExpression(query, parts, exp, ce)
-				: ma != null
-				? SimplifyMemberExpression(query, parts, exp, ma)
-				: exp + " = ANY(" + (pe != null ? query.Context.Name + "\"" + pe.Name + "\"" : parts.GetSqlExpression(parts.MainFrom.FromExpression)) + ")";
+			return ce != null ? SimplifyConstantExpression(query, parts, exp, ce)
+				: ma != null ? SimplifyExpression(query, parts, exp, ma)
+				: pe != null ? SimplifyExpression(query, parts, exp, pe)
+				: exp + " = ANY(" + parts.GetSqlExpression(parts.MainFrom.FromExpression) + ")";
 		}
 
 		private string SimplifyConstantExpression(QueryParts query, SubqueryParts parts, string exp, ConstantExpression ce)
@@ -59,10 +58,13 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.QuerySimplifications
 			return exp + " = " + query.FormatObject(ce.Value);
 		}
 
-		private string SimplifyMemberExpression(QueryParts query, SubqueryParts parts, string exp, MemberExpression ma)
+		private string SimplifyExpression(QueryParts query, SubqueryParts parts, string exp, Expression e)
 		{
-			return exp + " IN (SELECT " + query.GetSqlExpression(parts.Selector)
-					+ " FROM unnest(" + query.GetSqlExpression(ma) + ") \"" + query.MainFrom.ItemName + "\")";
+			var source = query.GetSqlExpression(e);
+			var qsre = parts.Selector as QuerySourceReferenceExpression;
+			if (qsre != null && qsre.ReferencedQuerySource.Equals(query.MainFrom))
+				return exp + " = ANY(" + source + ")";
+			return exp + " IN (SELECT " + query.GetSqlExpression(parts.Selector) + " FROM unnest(" + source + ") \"" + query.MainFrom.ItemName + "\")";
 		}
 
 		private string FormatInQuery(string exp, object[] array, SubqueryParts query)
