@@ -192,6 +192,13 @@ namespace Revenj.DatabasePersistence.Postgres.QueryGeneration.Visitors
 				return expression;
 			}
 
+			var sb = new StringBuilder();
+			foreach (var candidate in Query.ExpressionMatchers)
+			{
+				if (candidate.TryMatch(expression, sb, exp => VisitExpression(exp), Query.Context, Query.ConverterFactory))
+					return expression;
+			}
+
 			throw new FrameworkException("Unsupported method call: " + expression.Method.Name
 				+ " in query " + FormattingExpressionTreeVisitor.Format(expression) + ".");
 		}
