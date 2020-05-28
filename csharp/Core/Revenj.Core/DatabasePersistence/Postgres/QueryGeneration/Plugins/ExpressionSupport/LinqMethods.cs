@@ -22,7 +22,7 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			SupportedMethods = new Dictionary<MethodInfo, MethodCallDelegate>();
 			SupportedMethods.Add(typeof(Enumerable).GetMethod("ToArray"), ArrayAgg);
 			SupportedMethods.Add(typeof(Enumerable).GetMethod("ToList"), ArrayAgg);
-			SupportedMethods.Add(typeof(CollectionExtensions).GetMethod("ToSet"), ArrayAgg);
+			SupportedMethods.Add(typeof(CollectionExtensions).GetMethod("ToSet"), ArrayAggDistinct);
 		}
 
 		public bool TryMatch(Expression expression, StringBuilder queryBuilder, Action<Expression> visitExpression, QueryContext context, IPostgresConverterFactory converter)
@@ -40,9 +40,21 @@ namespace Revenj.DatabasePersistence.Postgres.Plugins.ExpressionSupport
 			return false;
 		}
 
+		private static void ArrayAggDistinct(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, IPostgresConverterFactory converter)
+		{
+			ArrayAggMethod(methodCall, queryBuilder, visitExpression, converter, true);
+		}
+
 		private static void ArrayAgg(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, IPostgresConverterFactory converter)
 		{
+			ArrayAggMethod(methodCall, queryBuilder, visitExpression, converter, false);
+		}
+
+		private static void ArrayAggMethod(MethodCallExpression methodCall, StringBuilder queryBuilder, Action<Expression> visitExpression, IPostgresConverterFactory converter, bool distinct)
+		{
 			queryBuilder.Append("(SELECT array_agg(");
+			if (distinct)
+				queryBuilder.Append("DISTINCT ");
 			var sqe = methodCall.Arguments[0] as SubQueryExpression;
 			var alias = "\"-sq-\"";
 			if (sqe != null)
