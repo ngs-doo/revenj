@@ -156,7 +156,6 @@ class FormBare<T> extends React.Component<IForm<T>, IFormState<T>> {
             <section className={classNames(styles.Buttons, { [styles.Static]: staticButtonsOnMobile })}>
               <Button
                 className={classNames(styles.Button, submitButtonClassName)}
-                variant='outline-primary'
                 type='submit'
                 disabled={submitting || disableSubmit}
               >

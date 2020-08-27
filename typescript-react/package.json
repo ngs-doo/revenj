@@ -7,7 +7,7 @@
     "@types/redux-form": "^8.2.7",
     "classnames": "^2.2.6",
     "react-test-renderer": "^16.13.1",
-    "redux-form": "^8.3.6"
+    "redux-form": "8.3.6"
   },
   "description": "Core library for DSL-generated React/TypeScript code",
   "devDependencies": {
@@ -77,7 +77,8 @@
   "peerDependencies": {
     "react": "^16.0.0",
     "react-dom": "^16.12.0",
-    "react-redux": "^7.1.0"
+    "react-redux": "^7.1.0",
+    "redux-form": "8.3.6"
   },
   "repository": "https://github.com/ngs-doo/revenj",
   "scripts": {
@@ -94,5 +95,5 @@
     "test:watch": "react-scripts test --env=jsdom"
   },
   "source": "src/index.ts",
-  "version": "1.0.2"
+  "version": "1.0.3"
 }

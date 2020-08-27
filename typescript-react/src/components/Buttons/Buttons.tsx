@@ -68,7 +68,6 @@ export class Buttons extends React.PureComponent<IButtons> {
         : (
           <Button
             key={index}
-            variant='outline-info'
             className={styles.Button}
             href={btn.href}
             onClick={btn.onClick}

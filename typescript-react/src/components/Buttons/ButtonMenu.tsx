@@ -51,7 +51,6 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
     return (
       <div className={classNames(className, styles.ButtonMenu, { [styles.ButtonMenuDefault]: children == null })}>
         <Button
-          variant='outline-primary'
           disabled={disabled}
           className={classNames(styles.ButtonMenuToggle, buttonClassName)}
           onClick={this.open}
