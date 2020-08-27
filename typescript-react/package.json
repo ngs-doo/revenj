@@ -66,6 +66,7 @@
   },
   "files": [
     "dist",
+    "scripts",
     "README.md"
   ],
   "license": "MIT",
