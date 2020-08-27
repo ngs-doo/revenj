@@ -1,0 +1,65 @@
+.ButtonOptions {
+  font-size: 14px;
+  display: flex;
+  height: 42px;
+  border: 1px solid #DDDDDD;
+  border-radius: 3px;
+
+  .ButtonOption {
+    flex: 1;
+    height: 40px;
+    width: 40px;
+    margin: 0;
+    color: black;
+    background-color: white;
+    border: 0;
+    border-right: 1px solid #DDDDDD;
+    box-shadow: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+
+    &Active {
+      font-weight: bold;
+      color: white;
+      background-color: #49AFCD;
+    }
+
+    &Disabled {
+      color: #999999;
+      cursor: not-allowed;
+    }
+
+    &:first-child {
+      border-top-left-radius: 3px;
+      border-bottom-left-radius: 3px;
+    }
+
+    &:last-child {
+      border-right: 0;
+      border-top-right-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.Pagination {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    margin-bottom: 64px;
+  }
+
+  .Label {
+    @media (max-width: 767px) {
+      margin: 8px 0;
+      text-align: center;
+    }
+  }
+}

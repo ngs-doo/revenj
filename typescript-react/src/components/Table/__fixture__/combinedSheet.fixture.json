@@ -1,0 +1,1529 @@
+{
+  "items": [
+    {
+      "bla": 44,
+      "clientDetails": {
+        "clientId": 1485,
+        "clientExternalId": "01440143",
+        "clientType": "Individual",
+        "clientDisplayName": "Bacon ipsum dolor amet bacon ribeye ham hock spare ribs tri-tip rump frankfurter leberkas drumstick sausage strip steak tongue."
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2342,
+          "accountExternalId": "A001083",
+          "subscribed": "100.00",
+          "overdue": "100.00",
+          "total": "100.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1425,
+        "clientExternalId": "05253442",
+        "clientType": "Corporate",
+        "clientDisplayName": "ETS BONTE DE DIEU"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2047,
+          "accountExternalId": "A000788",
+          "subscribed": "100.00",
+          "overdue": "100.00",
+          "total": "100.00",
+          "balance": "1904.30",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1365,
+        "clientExternalId": "05755520",
+        "clientType": "Corporate",
+        "clientDisplayName": "Sample Company"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 1921,
+          "accountExternalId": "A000663",
+          "subscribed": "100.00",
+          "overdue": "100.00",
+          "total": "100.00",
+          "balance": "4878.32",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1171,
+        "clientExternalId": "10000263",
+        "clientType": "Individual",
+        "clientDisplayName": "Max Payne"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1397,
+          "productExternalId": "12AGDA",
+          "accountId": 2292,
+          "accountExternalId": "A001033",
+          "total": "1083.33",
+          "fee": "0.00",
+          "overdue": "0.00",
+          "penalty": "0.00",
+          "olbPrincipal": "10000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1358,
+        "clientExternalId": "123456",
+        "clientType": "Individual",
+        "clientDisplayName": "Joe Doe"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1037,
+          "productExternalId": "WS",
+          "accountId": 1968,
+          "accountExternalId": "A000709",
+          "subscribed": "10.00",
+          "overdue": "10.00",
+          "total": "10.00",
+          "balance": "310.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1334,
+        "clientExternalId": "16443666",
+        "clientType": "Corporate",
+        "clientDisplayName": "APT Company"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1108,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1750,
+          "accountExternalId": "A000492",
+          "subscribed": "200.00",
+          "overdue": "1300.00",
+          "total": "1300.00",
+          "balance": "1300.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1194,
+        "clientExternalId": "17122675",
+        "clientType": "Individual",
+        "clientDisplayName": "Mihaela Calis"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1069,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1250,
+          "accountExternalId": "A000068",
+          "subscribed": "200.00",
+          "overdue": "200.00",
+          "total": "200.00",
+          "balance": "2100.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1037,
+          "productExternalId": "WS",
+          "accountId": 1502,
+          "accountExternalId": "A000246",
+          "subscribed": "10.00",
+          "overdue": "300.00",
+          "total": "300.00",
+          "balance": "230.11",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1195,
+        "clientExternalId": "32332713",
+        "clientType": "Individual",
+        "clientDisplayName": "Alberta Dede Aryee"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1605,
+          "productExternalId": "E01234",
+          "accountId": 2363,
+          "accountExternalId": "A001104",
+          "total": "264.36",
+          "fee": "0.00",
+          "overdue": "264.36",
+          "penalty": "0.00",
+          "olbPrincipal": "5000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1074,
+          "productExternalId": "L0023",
+          "accountId": 1414,
+          "accountExternalId": "A000163",
+          "total": "2.50",
+          "fee": "0.00",
+          "overdue": "2.50",
+          "penalty": "0.00",
+          "olbPrincipal": "500.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1291,
+        "clientExternalId": "34420141",
+        "clientType": "Individual",
+        "clientDisplayName": "Confidence Achodo Cheire"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1602,
+          "productExternalId": "01234",
+          "accountId": 2299,
+          "accountExternalId": "A001040",
+          "total": "208.84",
+          "fee": "0.00",
+          "overdue": "208.84",
+          "penalty": "0.00",
+          "olbPrincipal": "3960.21",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1168,
+        "clientExternalId": "35437432",
+        "clientType": "Individual",
+        "clientDisplayName": "Meghan Markle"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1397,
+          "productExternalId": "12AGDA",
+          "accountId": 2291,
+          "accountExternalId": "A001032",
+          "total": "5166.67",
+          "fee": "0.00",
+          "overdue": "0.00",
+          "penalty": "0.00",
+          "olbPrincipal": "50000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1160,
+        "clientExternalId": "36600706",
+        "clientType": "Individual",
+        "clientDisplayName": "ivana Jones"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1584,
+          "productExternalId": "F01",
+          "accountId": 2400,
+          "accountExternalId": "A001141",
+          "total": "691.00",
+          "fee": "0.00",
+          "overdue": "691.00",
+          "penalty": "0.00",
+          "olbPrincipal": "9857.67",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1345,
+        "clientExternalId": "46537412",
+        "clientType": "Individual",
+        "clientDisplayName": "Vamsi Krishna Ithamraju"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1138,
+          "productExternalId": "00000200",
+          "accountId": 1828,
+          "accountExternalId": "A000570",
+          "subscribed": "100.00",
+          "overdue": "3700.00",
+          "total": "3700.00",
+          "balance": "1607.98",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1108,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1829,
+          "accountExternalId": "A000571",
+          "subscribed": "200.00",
+          "overdue": "1800.00",
+          "total": "1800.00",
+          "balance": "800.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1283,
+        "clientExternalId": "47177400",
+        "clientType": "Corporate",
+        "clientDisplayName": "Oradian"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1108,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1506,
+          "accountExternalId": "A000250",
+          "subscribed": "200.00",
+          "overdue": "800.00",
+          "total": "800.00",
+          "balance": "1800.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1333,
+        "clientExternalId": "52736331",
+        "clientType": "Individual",
+        "clientDisplayName": "Petra test Rajko"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1581,
+          "productExternalId": "123415634",
+          "accountId": 2163,
+          "accountExternalId": "A000904",
+          "total": "13.88",
+          "fee": "0.00",
+          "overdue": "0.00",
+          "penalty": "0.00",
+          "olbPrincipal": "13.88",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1469,
+        "clientExternalId": "565023950465065",
+        "clientType": "Individual",
+        "clientDisplayName": "John Smith"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2367,
+          "accountExternalId": "A001108",
+          "subscribed": "100.00",
+          "overdue": "100.00",
+          "total": "100.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1161,
+        "clientExternalId": "61634223",
+        "clientType": "Individual",
+        "clientDisplayName": "James Jones"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1651,
+          "productExternalId": "HORTATEST1",
+          "accountId": 2321,
+          "accountExternalId": "A001062",
+          "total": "12.78",
+          "fee": "0.00",
+          "overdue": "12.78",
+          "penalty": "0.00",
+          "olbPrincipal": "80.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": [
+        {
+          "productId": 1108,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1469,
+          "accountExternalId": "A000215",
+          "subscribed": "200.00",
+          "overdue": "2100.00",
+          "total": "2100.00",
+          "balance": "455.94",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1177,
+        "clientExternalId": "62525330",
+        "clientType": "Individual",
+        "clientDisplayName": "Mary Perry"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1030,
+          "productExternalId": "DP-005",
+          "accountId": 1159,
+          "accountExternalId": "98921307",
+          "subscribed": "200.00",
+          "overdue": "1000.00",
+          "total": "1000.00",
+          "balance": "2733.70",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1481,
+        "clientExternalId": "62541362",
+        "clientType": "Individual",
+        "clientDisplayName": "Josip Test Test"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2324,
+          "accountExternalId": "A001065",
+          "subscribed": "100.00",
+          "overdue": "100.00",
+          "total": "100.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1164,
+        "clientExternalId": "70332117",
+        "clientType": "Individual",
+        "clientDisplayName": "Luka Zammora"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1030,
+          "productExternalId": "DP-005",
+          "accountId": 1119,
+          "accountExternalId": "90138150",
+          "subscribed": "200.00",
+          "overdue": "6000.00",
+          "total": "6000.00",
+          "balance": "7606.66",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1278,
+        "clientExternalId": "71461321",
+        "clientType": "Individual",
+        "clientDisplayName": "Ivana Lobby"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1069,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1437,
+          "accountExternalId": "A000186",
+          "subscribed": "200.00",
+          "overdue": "2600.00",
+          "total": "2600.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1277,
+        "clientExternalId": "72562436",
+        "clientType": "Individual",
+        "clientDisplayName": "Luther in Motion Blissett"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1069,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1428,
+          "accountExternalId": "A000177",
+          "subscribed": "400.00",
+          "overdue": "3600.00",
+          "total": "3600.00",
+          "balance": "1188.67",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1423,
+        "clientExternalId": "73340222",
+        "clientType": "Corporate",
+        "clientDisplayName": "Ana Test"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2045,
+          "accountExternalId": "A000786",
+          "subscribed": "100.00",
+          "overdue": "2000.00",
+          "total": "2000.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1489,
+        "clientExternalId": "73773052",
+        "clientType": "Individual",
+        "clientDisplayName": "Nippur Aranibar"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2359,
+          "accountExternalId": "A001100",
+          "subscribed": "100.00",
+          "overdue": "100.00",
+          "total": "100.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1367,
+        "clientExternalId": "76171122",
+        "clientType": "Individual",
+        "clientDisplayName": "Martina Rimay"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 1941,
+          "accountExternalId": "A000683",
+          "subscribed": "100.00",
+          "overdue": "5300.00",
+          "total": "5300.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1483,
+        "clientExternalId": "77075522",
+        "clientType": "Individual",
+        "clientDisplayName": "Josip Test3"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2332,
+          "accountExternalId": "A001073",
+          "subscribed": "100.00",
+          "overdue": "100.00",
+          "total": "100.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1204,
+        "clientExternalId": "77353235",
+        "clientType": "Individual",
+        "clientDisplayName": "Nicolas Albert Marie Schweitzer"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1355,
+          "productExternalId": "PCL2",
+          "accountId": 1867,
+          "accountExternalId": "A000609",
+          "total": "4166.67",
+          "fee": "0.00",
+          "overdue": "4166.67",
+          "penalty": "0.00",
+          "olbPrincipal": "500000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1425,
+          "productExternalId": "BUSINESSLOANWP",
+          "accountId": 1919,
+          "accountExternalId": "A000661",
+          "total": "548445.68",
+          "fee": "0.00",
+          "overdue": "94559.60",
+          "penalty": "453886.08",
+          "olbPrincipal": "183593.18",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1292,
+          "productExternalId": "2312312132",
+          "accountId": 1786,
+          "accountExternalId": "A000528",
+          "total": "2353.68",
+          "fee": "0.00",
+          "overdue": "0.00",
+          "penalty": "0.00",
+          "olbPrincipal": "22292.26",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1270,
+          "productExternalId": "DEPED",
+          "accountId": 1759,
+          "accountExternalId": "A000501",
+          "total": "5282.72",
+          "fee": "0.00",
+          "overdue": "5282.72",
+          "penalty": "0.00",
+          "olbPrincipal": "45454.60",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1470,
+          "productExternalId": "SALARYKING",
+          "accountId": 1938,
+          "accountExternalId": "A000680",
+          "total": "9455.96",
+          "fee": "0.00",
+          "overdue": "9455.96",
+          "penalty": "0.00",
+          "olbPrincipal": "27269.88",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1056,
+          "productExternalId": "LN002",
+          "accountId": 1508,
+          "accountExternalId": "A000252",
+          "total": "119.50",
+          "fee": "0.00",
+          "overdue": "58.24",
+          "penalty": "61.26",
+          "olbPrincipal": "38.24",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1329,
+        "clientExternalId": "86573013",
+        "clientType": "Individual",
+        "clientDisplayName": "Isabelita Perez"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1108,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1707,
+          "accountExternalId": "A000449",
+          "subscribed": "200.00",
+          "overdue": "2289.00",
+          "total": "2289.00",
+          "balance": "111.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1426,
+        "clientExternalId": "A0134940",
+        "clientType": "Individual",
+        "clientDisplayName": "Sefou Fagbohoun Fagbohoun"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2058,
+          "accountExternalId": "A000799",
+          "subscribed": "100.00",
+          "overdue": "500.00",
+          "total": "500.00",
+          "balance": "1500.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1433,
+        "clientExternalId": "A080002160",
+        "clientType": "Individual",
+        "clientDisplayName": "NANGBE Fabrice"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2081,
+          "accountExternalId": "A000822",
+          "subscribed": "100.00",
+          "overdue": "2000.00",
+          "total": "2000.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1424,
+        "clientExternalId": "A140419401B",
+        "clientType": "Individual",
+        "clientDisplayName": "NANSIROU Sikira Sikira"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2049,
+          "accountExternalId": "A000790",
+          "subscribed": "100.00",
+          "overdue": "2000.00",
+          "total": "2000.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1463,
+        "clientExternalId": "BDUNAJ2",
+        "clientType": "Individual",
+        "clientDisplayName": "Bo Bo"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1397,
+          "productExternalId": "12AGDA",
+          "accountId": 2294,
+          "accountExternalId": "A001035",
+          "total": "1083.33",
+          "fee": "0.00",
+          "overdue": "0.00",
+          "penalty": "0.00",
+          "olbPrincipal": "10000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1041,
+        "clientExternalId": "CL-004",
+        "clientType": "Individual",
+        "clientDisplayName": "Jonah Ellis"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1290,
+          "productExternalId": "HIS",
+          "accountId": 1783,
+          "accountExternalId": "A000525",
+          "subscribed": "800.00",
+          "overdue": "7400.00",
+          "total": "7400.00",
+          "balance": "3215.15",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1289,
+          "productExternalId": "DP-006",
+          "accountId": 1784,
+          "accountExternalId": "A000526",
+          "subscribed": "800.00",
+          "overdue": "290600.00",
+          "total": "290600.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1108,
+        "clientExternalId": "CL-016",
+        "clientType": "Individual",
+        "clientDisplayName": "Mia Cole"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1533,
+          "productExternalId": "ARPID",
+          "accountId": 2102,
+          "accountExternalId": "A000843",
+          "total": "460.84",
+          "fee": "2.50",
+          "overdue": "458.34",
+          "penalty": "0.00",
+          "olbPrincipal": "3749.99",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1020,
+        "clientExternalId": "CL-047",
+        "clientType": "Individual",
+        "clientDisplayName": "Aidan Soto"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1117,
+          "productExternalId": "L0023",
+          "accountId": 1624,
+          "accountExternalId": "A000366",
+          "total": "2.50",
+          "fee": "0.00",
+          "overdue": "2.50",
+          "penalty": "0.00",
+          "olbPrincipal": "500.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1581,
+          "productExternalId": "123415634",
+          "accountId": 2318,
+          "accountExternalId": "A001059",
+          "total": "209.22",
+          "fee": "0.00",
+          "overdue": "104.61",
+          "penalty": "0.00",
+          "olbPrincipal": "1000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1074,
+          "productExternalId": "L0023",
+          "accountId": 1412,
+          "accountExternalId": "A000161",
+          "total": "12.12",
+          "fee": "0.00",
+          "overdue": "12.12",
+          "penalty": "0.00",
+          "olbPrincipal": "326.84",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1056,
+          "productExternalId": "LN002",
+          "accountId": 1585,
+          "accountExternalId": "A000327",
+          "total": "29.92",
+          "fee": "0.00",
+          "overdue": "14.62",
+          "penalty": "0.68",
+          "olbPrincipal": "403.80",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1581,
+          "productExternalId": "123415634",
+          "accountId": 2317,
+          "accountExternalId": "A001058",
+          "total": "209.22",
+          "fee": "0.00",
+          "overdue": "104.61",
+          "penalty": "0.00",
+          "olbPrincipal": "1000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2196,
+          "accountExternalId": "A000937",
+          "subscribed": "100.00",
+          "overdue": "848.00",
+          "total": "848.00",
+          "balance": "152.41",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1053,
+        "clientExternalId": "CL-057",
+        "clientType": "Individual",
+        "clientDisplayName": "Mara Carver"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1055,
+          "productExternalId": "HIS",
+          "accountId": 1174,
+          "accountExternalId": "00856201",
+          "subscribed": "500.00",
+          "overdue": "2500.00",
+          "total": "2500.00",
+          "balance": "2741.13",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1074,
+        "clientExternalId": "CL-058",
+        "clientType": "Individual",
+        "clientDisplayName": "Holly Nolan"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1652,
+          "productExternalId": "HORTATEST2",
+          "accountId": 2322,
+          "accountExternalId": "A001063",
+          "total": "10.60",
+          "fee": "0.00",
+          "overdue": "10.60",
+          "penalty": "0.00",
+          "olbPrincipal": "20.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1099,
+        "clientExternalId": "CL-062",
+        "clientType": "Individual",
+        "clientDisplayName": "Adam Rigel Zamora"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1117,
+          "productExternalId": "L0023",
+          "accountId": 1515,
+          "accountExternalId": "A000257",
+          "total": "2.00",
+          "fee": "0.00",
+          "overdue": "2.00",
+          "penalty": "0.00",
+          "olbPrincipal": "400.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1482,
+          "productExternalId": "54321245",
+          "accountId": 1951,
+          "accountExternalId": "A000693",
+          "total": "52.88",
+          "fee": "0.00",
+          "overdue": "52.88",
+          "penalty": "0.00",
+          "olbPrincipal": "679.27",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": [
+        {
+          "productId": 1037,
+          "productExternalId": "WS",
+          "accountId": 1463,
+          "accountExternalId": "A000209",
+          "subscribed": "10.00",
+          "overdue": "10.00",
+          "total": "10.00",
+          "balance": "271.40",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1096,
+          "productExternalId": "STEP - COMPULSORY  COLLATERAL SAVINGS",
+          "accountId": 1465,
+          "accountExternalId": "A000211",
+          "subscribed": "200.00",
+          "overdue": "200.00",
+          "total": "200.00",
+          "balance": "2406.85",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1038,
+          "productExternalId": "NWDD",
+          "accountId": 1520,
+          "accountExternalId": "A000262",
+          "subscribed": "100.00",
+          "overdue": "1400.00",
+          "total": "1400.00",
+          "balance": "3937.01",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1247,
+          "productExternalId": "SMD\"",
+          "accountId": 1739,
+          "accountExternalId": "A000481",
+          "subscribed": "1000.00",
+          "overdue": "17000.00",
+          "total": "17000.00",
+          "balance": "14329.31",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1076,
+        "clientExternalId": "CL-068",
+        "clientType": "Individual",
+        "clientDisplayName": "Julie Payne"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1055,
+          "productExternalId": "HIS",
+          "accountId": 1313,
+          "accountExternalId": "A000131",
+          "subscribed": "500.00",
+          "overdue": "3000.00",
+          "total": "3000.00",
+          "balance": "3565.24",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1029,
+        "clientExternalId": "CL-070",
+        "clientType": "Individual",
+        "clientDisplayName": "Hermione Rivers"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1037,
+          "productExternalId": "WS",
+          "accountId": 1175,
+          "accountExternalId": "18101352",
+          "subscribed": "10.00",
+          "overdue": "120.00",
+          "total": "120.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1037,
+          "productExternalId": "WS",
+          "accountId": 1500,
+          "accountExternalId": "99999999911",
+          "subscribed": "40.00",
+          "overdue": "1720.00",
+          "total": "1720.00",
+          "balance": "234.91",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1037,
+          "productExternalId": "WS",
+          "accountId": 1499,
+          "accountExternalId": "A000244",
+          "subscribed": "40.00",
+          "overdue": "2120.00",
+          "total": "2120.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1018,
+        "clientExternalId": "CL-075",
+        "clientType": "Individual",
+        "clientDisplayName": "Ann Gallagher"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1233,
+          "productExternalId": "LN111",
+          "accountId": 1723,
+          "accountExternalId": "A000465",
+          "total": "12500.00",
+          "fee": "0.00",
+          "overdue": "12500.00",
+          "penalty": "0.00",
+          "olbPrincipal": "37500.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1608,
+          "productExternalId": "77000121",
+          "accountId": 2216,
+          "accountExternalId": "A000957",
+          "total": "1500.00",
+          "fee": "0.00",
+          "overdue": "1500.00",
+          "penalty": "0.00",
+          "olbPrincipal": "6000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1047,
+          "productExternalId": "GNRLN",
+          "accountId": 2003,
+          "accountExternalId": "A000744",
+          "total": "3125.00",
+          "fee": "0.00",
+          "overdue": "3125.00",
+          "penalty": "0.00",
+          "olbPrincipal": "36111.10",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1258,
+          "productExternalId": "414153111",
+          "accountId": 2215,
+          "accountExternalId": "A000956",
+          "total": "4648.31",
+          "fee": "0.00",
+          "overdue": "4512.92",
+          "penalty": "135.39",
+          "olbPrincipal": "46112.08",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1397,
+          "productExternalId": "12AGDA",
+          "accountId": 2290,
+          "accountExternalId": "A001031",
+          "total": "1083.33",
+          "fee": "0.00",
+          "overdue": "0.00",
+          "penalty": "0.00",
+          "olbPrincipal": "10000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": [
+        {
+          "productId": 1578,
+          "productExternalId": "000535",
+          "accountId": 2151,
+          "accountExternalId": "A000892",
+          "subscribed": "200.00",
+          "overdue": "7800.00",
+          "total": "7800.00",
+          "balance": "2150.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1216,
+        "clientExternalId": "CL00011",
+        "clientType": "Individual",
+        "clientDisplayName": "ABIODUN IYAMU"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1117,
+          "productExternalId": "L0023",
+          "accountId": 1517,
+          "accountExternalId": "A000259",
+          "total": "17.70",
+          "fee": "0.00",
+          "overdue": "17.70",
+          "penalty": "0.00",
+          "olbPrincipal": "396.40",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1561,
+          "productExternalId": "TAYTEST",
+          "accountId": 2107,
+          "accountExternalId": "A000848",
+          "total": "4133.93",
+          "fee": "0.00",
+          "overdue": "4133.93",
+          "penalty": "0.00",
+          "olbPrincipal": "31530.01",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1505,
+          "productExternalId": "MF1",
+          "accountId": 2285,
+          "accountExternalId": "A001026",
+          "total": "1843.18",
+          "fee": "1009.00",
+          "overdue": "167.50",
+          "penalty": "666.68",
+          "olbPrincipal": "1000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1619,
+          "productExternalId": "400W",
+          "accountId": 2227,
+          "accountExternalId": "A000968",
+          "total": "5045.18",
+          "fee": "0.00",
+          "overdue": "5045.18",
+          "penalty": "0.00",
+          "olbPrincipal": "28441.22",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1594,
+          "productExternalId": "3930",
+          "accountId": 2277,
+          "accountExternalId": "A001018",
+          "total": "1000.00",
+          "fee": "0.00",
+          "overdue": "933.33",
+          "penalty": "66.67",
+          "olbPrincipal": "10000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1222,
+          "productExternalId": "L0023",
+          "accountId": 1740,
+          "accountExternalId": "A000482",
+          "total": "15.89",
+          "fee": "0.00",
+          "overdue": "15.89",
+          "penalty": "0.00",
+          "olbPrincipal": "12.20",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1607,
+          "productExternalId": "213918",
+          "accountId": 2214,
+          "accountExternalId": "A000955",
+          "total": "5006.95",
+          "fee": "0.00",
+          "overdue": "4965.28",
+          "penalty": "41.67",
+          "olbPrincipal": "95833.33",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": [
+        {
+          "productId": 1549,
+          "productExternalId": "000535",
+          "accountId": 2043,
+          "accountExternalId": "A000784",
+          "subscribed": "50.00",
+          "overdue": "1000.00",
+          "total": "1000.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1577,
+          "productExternalId": "SCH",
+          "accountId": 2305,
+          "accountExternalId": "A001046",
+          "subscribed": "10000.00",
+          "overdue": "29898.00",
+          "total": "29898.00",
+          "balance": "102.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        },
+        {
+          "productId": 1577,
+          "productExternalId": "SCH",
+          "accountId": 2341,
+          "accountExternalId": "A001082",
+          "subscribed": "10000.00",
+          "overdue": "49930.00",
+          "total": "49930.00",
+          "balance": "10076.62",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1226,
+        "clientExternalId": "CL00021",
+        "clientType": "Individual",
+        "clientDisplayName": "ROSELINE LAWANI"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1604,
+          "productExternalId": "DBPG1",
+          "accountId": 2223,
+          "accountExternalId": "A000964",
+          "total": "10023.75",
+          "fee": "0.00",
+          "overdue": "10023.75",
+          "penalty": "0.00",
+          "olbPrincipal": "29700.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": []
+    },
+    {
+      "clientDetails": {
+        "clientId": 1434,
+        "clientExternalId": "CLI-1891",
+        "clientType": "Individual",
+        "clientDisplayName": "Maximilian Minimal"
+      },
+      "loanAccounts": [
+        {
+          "productId": 1397,
+          "productExternalId": "12AGDA",
+          "accountId": 2293,
+          "accountExternalId": "A001034",
+          "total": "1083.33",
+          "fee": "0.00",
+          "overdue": "0.00",
+          "penalty": "0.00",
+          "olbPrincipal": "10000.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2209,
+          "accountExternalId": "A000950",
+          "subscribed": "100.00",
+          "overdue": "800.00",
+          "total": "900.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1372,
+        "clientExternalId": "Marko3000",
+        "clientType": "Individual",
+        "clientDisplayName": "ME ME"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2090,
+          "accountExternalId": "A000831",
+          "subscribed": "100.00",
+          "overdue": "1900.00",
+          "total": "1900.00",
+          "balance": "100.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    },
+    {
+      "clientDetails": {
+        "clientId": 1474,
+        "clientExternalId": "Schete",
+        "clientType": "Individual",
+        "clientDisplayName": "Schete Schete"
+      },
+      "loanAccounts": [],
+      "depositAccounts": [
+        {
+          "productId": 1409,
+          "productExternalId": "CBUBDO",
+          "accountId": 2306,
+          "accountExternalId": "A001047",
+          "subscribed": "100.00",
+          "overdue": "200.00",
+          "total": "200.00",
+          "balance": "0.00",
+          "canBackdate": true,
+          "hasPaymentOnDate": false
+        }
+      ]
+    }
+  ],
+  "meta": { "total": 45, "page": 1, "perPage": 100 }
+}

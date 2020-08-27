@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`data marshalling asserting assertArray should explode on non-arrays 1`] = `"Expected an array, but value is null"`;
+
+exports[`data marshalling asserting assertArray should explode on non-arrays 2`] = `"Expected an array, but value is [object Object]"`;
+
+exports[`data marshalling asserting assertArray should explode on non-arrays 3`] = `"Expected an array, but value is [object Set]"`;
+
+exports[`data marshalling asserting assertEnum should test that the value is one of the provided values 1`] = `"Value Other is not a valid member of enumeration Status"`;
+
+exports[`data marshalling asserting assertEnum should test that the value is one of the provided values 2`] = `"Value INACTIVE is not a valid member of enumeration Status"`;
+
+exports[`data marshalling asserting assertEnum should test that the value is one of the provided values 3`] = `"Value is required, but is not set!"`;
+
+exports[`data marshalling asserting assertInt should explode on non-integers 1`] = `"Expected an Int, but value is bla"`;
+
+exports[`data marshalling asserting assertInt should explode on non-integers 2`] = `"Expected an Int, but value is null"`;
+
+exports[`data marshalling asserting assertInt should explode on non-integers 3`] = `"Expected an Int, but value is 1.55"`;
+
+exports[`data marshalling asserting assertLong should explode on non-longs 1`] = `"Expected a Long, but value is bla"`;
+
+exports[`data marshalling asserting assertLong should explode on non-longs 2`] = `"Expected a Long, but value is null"`;
+
+exports[`data marshalling asserting assertLong should explode on non-longs 3`] = `"Expected a Long, but value is 1.55"`;
+
+exports[`data marshalling asserting assertPresence should raise an error if the value is not present, but required 1`] = `"Value is required, but is not set!"`;
+
+exports[`data marshalling asserting assertPresence should raise an error if the value is not present, but required 2`] = `"Value is required, but is not set!"`;
+
+exports[`data marshalling asserting assertS3 should throw if bad S3 value is provided 1`] = `"S3 length: Expected a Long, but value is potato"`;
+
+exports[`data marshalling asserting assertS3 should throw if bad S3 value is provided 2`] = `"S3 key: Expected a String, but value is undefined"`;
+
+exports[`data marshalling asserting assertS3 should throw if bad S3 value is provided which has missing properties 1`] = `"S3 key: Expected a String, but value is undefined"`;
+
+exports[`data marshalling asserting assertS3 should throw if bad S3 value is provided which has missing properties 2`] = `"S3 key: Expected a String, but value is undefined"`;
+
+exports[`data marshalling asserting assertShort should assert valid Short range 1`] = `"Number -32769 out of Short range"`;
+
+exports[`data marshalling asserting assertShort should assert valid Short range 2`] = `"Number 32768 out of Short range"`;
+
+exports[`data marshalling asserting assertShort should explode on non-shorts 1`] = `"Expected an Int, but value is bla"`;
+
+exports[`data marshalling asserting assertShort should explode on non-shorts 2`] = `"Expected an Int, but value is null"`;
+
+exports[`data marshalling asserting assertShort should explode on non-shorts 3`] = `"Expected an Int, but value is 1.55"`;
+
+exports[`data marshalling asserting assertString should also validate length if specified 1`] = `"Maximum length is 3, but received string of length 7"`;
+
+exports[`data marshalling asserting assertString should also validate length if specified 2`] = `"Maximum length is 3, but received string of length 9"`;
+
+exports[`data marshalling asserting assertString should explode on non-strings 1`] = `"Expected a String, but value is null"`;
+
+exports[`data marshalling asserting assertString should explode on non-strings 2`] = `"Expected a String, but value is 12"`;
+
+exports[`data marshalling asserting assertString should explode on non-strings 3`] = `"Expected a String, but value is [object Object]"`;
+
+exports[`data marshalling asserting deserializeBinary should explode on non-strings 1`] = `"Expected a String, but value is null"`;
+
+exports[`data marshalling asserting deserializeBinary should explode on non-strings 2`] = `"Expected a String, but value is 2"`;
+
+exports[`data marshalling asserting deserializeBinary should explode on non-strings 3`] = `"Expected a String, but value is [object Object]"`;
+
+exports[`data marshalling asserting deserializeMap should explode on non-lookups 1`] = `"Expected a dictionary object, but value is null"`;
+
+exports[`data marshalling asserting deserializeMap should explode on non-lookups 2`] = `"Expected a dictionary object, but value is "`;
+
+exports[`data marshalling asserting deserializeMap should explode on non-lookups 3`] = `"Expected a dictionary object, but value is [object Map]"`;
+
+exports[`data marshalling asserting deserializeMap should explode on non-lookups 4`] = `"Expected a dictionary object, but value is [object Set]"`;
+
+exports[`data marshalling asserting deserializeMap should explode on non-lookups 5`] = `
+"Expected a dictionary object, but value is () => {
+        return;
+      }"
+`;
+
+exports[`data marshalling asserting deserializeResultSet should explode on invalid shapes 1`] = `"Expected an array, but value is [object Object]"`;
+
+exports[`data marshalling asserting deserializeResultSet should explode on invalid shapes 2`] = `"Expected a result set of shape [columns[], types[], ...values[]], but received [object Map]"`;
+
+exports[`data marshalling asserting deserializeResultSet should explode on invalid shapes 3`] = `"Expected a result set of shape [columns[], types[], ...values[]], but received "`;
+
+exports[`data marshalling asserting deserializeSet should explode on non-arrays 1`] = `"Expected an array, but value is null"`;
+
+exports[`data marshalling asserting deserializeSet should explode on non-arrays 2`] = `"Expected an array, but value is [object Object]"`;
+
+exports[`data marshalling asserting deserializeSet should explode on non-arrays 3`] = `"Expected an array, but value is [object Set]"`;
+
+exports[`data marshalling asserting serializeBinary should explode on non-strings 1`] = `"Expected a String, but value is null"`;
+
+exports[`data marshalling asserting serializeBinary should explode on non-strings 2`] = `"Expected a String, but value is 2"`;
+
+exports[`data marshalling asserting serializeBinary should explode on non-strings 3`] = `"Expected a String, but value is [object Object]"`;
+
+exports[`data marshalling asserting serializeMap should explode on non-maps 1`] = `"Expected a Map, but value is null"`;
+
+exports[`data marshalling asserting serializeMap should explode on non-maps 2`] = `"Expected a Map, but value is [object Object]"`;
+
+exports[`data marshalling asserting serializeMap should explode on non-maps 3`] = `"Expected a Map, but value is "`;
+
+exports[`data marshalling asserting serializeResultSet should explode on invalid shapes 1`] = `"Expected a ResultSet, but received [object Object]"`;
+
+exports[`data marshalling asserting serializeResultSet should explode on invalid shapes 2`] = `"Expected a ResultSet, but received [object Object]"`;
+
+exports[`data marshalling asserting serializeResultSet should explode on invalid shapes 3`] = `"Expected a ResultSet, but received "`;
+
+exports[`data marshalling asserting serializeSet should explode on non-sets 1`] = `"Expected a Set, but value is null"`;
+
+exports[`data marshalling asserting serializeSet should explode on non-sets 2`] = `"Expected a Set, but value is [object Object]"`;
+
+exports[`data marshalling asserting serializeSet should explode on non-sets 3`] = `"Expected a Set, but value is "`;

@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Instafin marshalling defaulting to empty object should explode on deserialization if undefined and required 1`] = `"Value is required, but is not set!"`;
+
+exports[`Instafin marshalling more complex serialize (mocking DSL generation) should report nested errors with the correct path 1`] = `
+"Serializing failed on field \\"pets[0].name\\" of type String:
+    Value is required, but is not set!"
+`;
+
+exports[`Instafin marshalling more complex serialize (mocking DSL generation) should report nested errors with the correct path 2`] = `
+"Serializing failed on field \\"tagIDs[0]\\" of type Int:
+    Expected an Int, but value is NaN"
+`;
+
+exports[`Instafin marshalling more complex serialize (mocking DSL generation) should report shallow errors with the correct path 1`] = `
+"Serializing failed on field \\"name\\" of type String:
+    Value is required, but is not set!"
+`;
+
+exports[`Instafin marshalling more complex serialize (mocking DSL generation) should respect provided root labels 1`] = `
+"Serializing failed on field \\"fakeroot.name\\" of type String:
+    Value is required, but is not set!"
+`;
+
+exports[`Instafin marshalling more complex serialize (mocking DSL generation) should validate requiredness of root concept 1`] = `"Value is required, but is not set!"`;

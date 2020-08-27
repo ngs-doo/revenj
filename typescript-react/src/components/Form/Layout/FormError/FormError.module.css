@@ -1,0 +1,38 @@
+@value warningColor #FEEFB3;
+@value warningBorderColor #D3D3D3;
+@value errorColor #CC3300;
+@value errorSecondaryColor #FEEAEA;
+@value errorBorderColor #DE3536;
+
+.message {
+  display: table;
+  padding: 15px;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.1;
+  margin: 5px 0;
+
+  :global {
+
+    .fa {
+      padding-right: 5px;
+    }
+  }
+
+  &.error {
+    border: 1px solid errorBorderColor;
+    color: errorColor;
+    background-color: errorSecondaryColor;
+  }
+
+  &.warning {
+    border: 1px solid warningBorderColor;
+    background-color: warningColor;
+  }
+
+  &.fabulous {
+    color: white;
+    background-color: #FF69B4;
+    border: 1px solid #DE3B8C;
+  }
+}

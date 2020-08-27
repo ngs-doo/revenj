@@ -1,0 +1,51 @@
+@value loginBodyColor #F3F7F8;
+@value btnPrimaryColor #1C9DDB;
+@value fieldMaxWidth 255px;
+@value fieldMinWidth 175px;
+@value fieldMargin 16px;
+
+@value titleColor #083144;
+@value alTitleColor #6B8792;
+@value disabledComponentColor #EEEEEE;
+
+@value regionCodeWidth 98px;
+@value phoneNumberWidth 108px;
+
+.Buttons {
+  &.Static {
+    @media (max-width: 980px) {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px;
+      box-shadow: -1px -1px 3px 0 btnPrimaryColor;
+      background-color: loginBodyColor;
+      z-index: 1001;
+    }
+  }
+}
+
+.Button {
+  margin-top: 16px;
+  margin-right: 16px;
+}
+
+.FormComponent {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  .Errors {
+    width: 100%;
+  }
+
+  .Buttons {
+    width: 100%;
+  }
+
+  @media (max-width: 980px) {
+    margin-bottom: 72px;
+  }
+}

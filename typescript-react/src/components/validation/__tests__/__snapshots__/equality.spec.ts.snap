@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validation isEqualCreator should return an error message if input value is not a multiple of base value 1`] = `"Value must be equal to 44."`;
+
+exports[`validation isEqualCreator should return an error message if input value is not a multiple of base value 2`] = `"Value must be equal to asdf."`;
+
+exports[`validation isEqualCreator should return an error message if input value is not a multiple of base value 3`] = `"Value must be equal to false."`;
+
+exports[`validation isEqualCreator should return an error message if input value is not a multiple of base value 4`] = `"Value must be equal to -7."`;
+
+exports[`validation isEqualCreator should return an error message if input value is not a multiple of base value 5`] = `"Value must be equal to 1,2,3."`;
+
+exports[`validation isEqualCreator should return an error message if input value is not a multiple of base value 6`] = `"Value must be equal to [object Object]."`;

@@ -1,0 +1,52 @@
+@value themeLightGrey #8098A1;
+
+.Description {
+  position: relative;
+  cursor: pointer;
+
+  &::before {
+    font-size: 12px;
+    font-weight: bold;
+    content: '?';
+    color: #BEBEBE;
+  }
+
+  & > div {
+    display: none;
+    min-width: 180px;
+    max-width: 480px;
+    letter-spacing: 0.15px;
+    line-height: 2rem;
+    white-space: pre-line;
+  }
+
+  &:hover > div,
+  &:active > div {
+    display: block;
+  }
+}
+
+.Label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  .Description {
+    margin-bottom: 6px;
+  }
+}
+
+.IconTooltip {
+  min-width: 180px;
+  max-width: 480px;
+}
+
+.Icon {
+  margin-left: 8px;
+  color: themeLightGrey;
+}
+
+/* Fixes description label spacing with checkboxes, borked from Bootstrap */
+:global .checkbox :local .Label {
+  padding: 0;
+}

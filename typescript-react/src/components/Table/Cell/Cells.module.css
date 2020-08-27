@@ -1,0 +1,73 @@
+@value clickableHoverColor #005580;
+@value clickableLinkColor #1477A7;
+
+.PlaceholderValue {
+  text-align: center;
+  font-weight: 300;
+}
+
+.Clickable {
+  color: clickableLinkColor !important;
+
+  &:hover {
+    color: clickableHoverColor !important;
+    text-decoration: underline;
+  }
+
+  cursor: pointer;
+}
+
+.StatusCell {
+  font-size: 12px;
+  font-weight: bold;
+
+  .Label {
+    text-shadow: none;
+    position: relative;
+    margin: 0;
+    padding: 2px 8px 2px 24px;
+    background-color: transparent;
+    border: 1px solid currentColor;
+    border-radius: 100px;
+    text-transform: uppercase;
+
+    &::before {
+      position: absolute;
+      content: '';
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      border-radius: 100px;
+      background-color: currentColor;
+      opacity: 0.125;
+    }
+
+    &::after {
+      position: absolute;
+      content: '';
+      top: 50%;
+      left: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 100%;
+      background-color: currentColor;
+      transform: translateY(-50%);
+    }
+  }
+}
+
+.TooltipCell {
+  color: clickableLinkColor;
+
+  &:hover {
+    color: clickableHoverColor;
+  }
+}
+
+.FieldCell {
+  margin-top: 16px;
+  min-width: unset;
+  width: 100%;
+  text-align: left !important;
+}

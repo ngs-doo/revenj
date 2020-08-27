@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validation checkedOneOfCreator should return undefined message if all of the selected fields aren't checked 1`] = `"At least one checkboxbox has to be checked"`;
+
+exports[`validation gtFieldCreator should return an error message if the input value is not greater than the dependant field 1`] = `"A pancake value must be greater than the value of field Minimal amount of sonic screwdrivers"`;
+
+exports[`validation gtFieldCreator should return an error message if the input value is not greater than the dependant field 2`] = `"A pancake value must be greater than the value of field Minimal amount of sonic screwdrivers"`;
+
+exports[`validation gteFieldCreator should return an error message if the input value is not greater than or equal to the dependant field 1`] = `"A pancake value must be greater than or equal to the value of field Minimal amount of sonic screwdrivers"`;
+
+exports[`validation ltFieldCreator should return an error message if the input value is not less than the dependant field 1`] = `"A pancake value must be less than the value of field Minimal amount of sonic screwdrivers"`;
+
+exports[`validation ltFieldCreator should return an error message if the input value is not less than the dependant field 2`] = `"A pancake value must be less than the value of field Minimal amount of sonic screwdrivers"`;
+
+exports[`validation lteFieldCreator should return an error message if the input value is not less than or equal to the dependant field 1`] = `"A pancake value must be less than or equal to the value of field Minimal amount of sonic screwdrivers"`;
+
+exports[`validation requireAtLeastOneOfCreator should return an error message if none of dependant fields are set 1`] = `"At least one of: Minimum amount of sonic screwdrivers, Maximum amount of sonic screwdrivers is required"`;
+
+exports[`validation requiredIfCheckedCreator should return an error message if the input value is not set but dependant field is set 1`] = `"Required"`;
+
+exports[`validation requiredIfSetCreator should return an error message if the input value is not set but dependant field is set 1`] = `"Required"`;
+
+exports[`validation uniqueAmongstCreator should return an error if input value is not unique amongst selected form fields 1`] = `"Input value 'Deneb' is not unique amongst 'Deneb', 'Deneb', 'Aldebaran'"`;

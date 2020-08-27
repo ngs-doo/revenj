@@ -1,0 +1,5 @@
+@value mobileDetailBackground from '../Table.css';
+
+.DetailRowWrapper {
+  background: mobileDetailBackground;
+}
