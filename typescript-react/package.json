@@ -78,7 +78,7 @@
     "react-dom": "^16.12.0",
     "react-redux": "^7.1.0"
   },
-  "repository": "the-overengineer/revenj",
+  "repository": "https://github.com/ngs-doo/revenj",
   "scripts": {
     "build": "microbundle-crl --no-compress --format modern,cjs",
     "deploy": "gh-pages -d example/build",
