@@ -7,6 +7,7 @@ const problematicIndexJsPath = path.resolve(
 );
 const fixedPath = problematicIndexJsPath.replace(/\.js$/, '.mjs');
 
+console.log('Revenj: running prebuild script');
 if (fs.existsSync(problematicIndexJsPath)) {
   console.log(
     `Fixing dependency index file: ${problematicIndexJsPath} -> ${fixedPath}`,

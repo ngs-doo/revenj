@@ -83,7 +83,7 @@
   "scripts": {
     "build": "microbundle-crl --no-compress --format modern,cjs",
     "deploy": "gh-pages -d example/build",
-    "postinstall": "npx ./scripts/postinstall.js",
+    "prebuild": "npx ./scripts/postinstall.js",
     "predeploy": "cd example && yarn install && yarn run build",
     "prepare": "run-s build",
     "start": "microbundle-crl watch --no-compress --format modern,cjs",
@@ -94,5 +94,5 @@
     "test:watch": "react-scripts test --env=jsdom"
   },
   "source": "src/index.ts",
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
