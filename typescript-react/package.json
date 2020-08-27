@@ -94,5 +94,5 @@
     "test:watch": "react-scripts test --env=jsdom"
   },
   "source": "src/index.ts",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
