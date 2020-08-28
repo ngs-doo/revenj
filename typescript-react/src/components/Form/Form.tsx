@@ -166,6 +166,7 @@ class FormBare<T> extends React.Component<IForm<T>, IFormState<T>> {
                   <Button
                     className={styles.Button}
                     type='button'
+                    variant='outline-primary'
                     onClick={onCancel}
                   >
                     {cancelButtonText}

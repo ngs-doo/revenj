@@ -237,7 +237,7 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
       <ListPresenterComponent>
         {
           (ctx) => (
-            ctx!.isLoaded && ctx!.isLoading ? (
+            ctx!.isLoaded || !ctx!.isLoading ? (
               <GridComponent
                 definition={this.getDefinition()}
                 maxResults={maxResults}
