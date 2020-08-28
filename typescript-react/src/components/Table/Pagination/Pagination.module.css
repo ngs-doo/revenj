@@ -18,13 +18,13 @@
     cursor: pointer;
     -webkit-appearance: none;
 
-    &Active {
+    &.Active {
       font-weight: bold;
       color: white;
       background-color: #49AFCD;
     }
 
-    &Disabled {
+    &.Disabled {
       color: #999999;
       cursor: not-allowed;
     }

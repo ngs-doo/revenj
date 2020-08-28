@@ -34,8 +34,8 @@ export class ButtonOptions<T> extends React.PureComponent<IButtonOptions<T>> {
               className={classNames(
                 styles.ButtonOption,
                 {
-                  [styles.ButtonOptionActive]: option.value === value,
-                  [styles.ButtonOptionDisabled]: option.disabled,
+                  [styles.Active]: option.value === value,
+                  [styles.Disabled]: option.disabled,
                 },
               )}
               onClick={option.onClick}

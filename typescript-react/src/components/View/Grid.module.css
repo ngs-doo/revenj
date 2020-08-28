@@ -9,6 +9,7 @@
   .Search {
     display: flex;
     justify-content: flex-end;
+    border: 1px solid lightgray;
 
     .InputContainer {
       width: 100%;
@@ -31,7 +32,7 @@
   }
 
   :global .btn.btn-xs {
-    margin-right: 8px;
+    margin-right: 4px;
   }
 }
 

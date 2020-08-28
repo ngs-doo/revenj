@@ -13,7 +13,7 @@ export interface IInput extends IBaseComponentProps<string | number> {
 
 export type InputFieldPublicProps = FormFieldProps<IInput>;
 
-const InputComponent: React.FC<InputFieldPublicProps> = ({ containerClassName, input, type, autoComplete, className, id, onChange, onBlur, onFocus, ...props }) => (
+const InputComponent: React.FC<InputFieldPublicProps> = ({ containerClassName, meta, input, type, autoComplete, className, id, onChange, onBlur, onFocus, ...props }) => (
   <div className={containerClassName}>
     <FormControl
       {...input}
