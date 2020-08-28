@@ -49,7 +49,7 @@ export class Buttons extends React.PureComponent<IButtons> {
         </div>
       );
     } else {
-      const buttonComponent = btn.href != null && !btn.isExternalUrl
+      const buttonComponent = btn.url != null && !btn.isExternalUrl
         ? (
           <NavigationContext.Consumer>
             {
@@ -57,7 +57,7 @@ export class Buttons extends React.PureComponent<IButtons> {
                 <Link
                   key={index}
                   className={classNames('btn btn-info', styles.Button)}
-                  to={btn.href!}
+                  to={btn.url!}
                 >
                   {btn.label}
                 </Link>
@@ -69,7 +69,7 @@ export class Buttons extends React.PureComponent<IButtons> {
           <Button
             key={index}
             className={styles.Button}
-            href={btn.href}
+            href={btn.url}
             onClick={btn.onClick}
             disabled={btn.disabled}
           >

@@ -2,7 +2,7 @@ export interface ISimpleButton {
   className?: string;
   disabled?: boolean;
   label: string;
-  href?: string;
+  url?: string;
   isExternalUrl?: boolean;
   tooltip?: string;
   onClick?: () => void;

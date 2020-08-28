@@ -89,7 +89,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
   }
 
   private renderButtonMenuItem = (item: ISimpleButton, itemIndex: number) => {
-    const itemComponent = item.href ? this.renderLink(item, itemIndex) : this.renderButton(item, itemIndex);
+    const itemComponent = item.url ? this.renderLink(item, itemIndex) : this.renderButton(item, itemIndex);
     return item.tooltip && !isNullOrEmpty(item.tooltip)
       ? (
         <TooltipOnHover
@@ -118,7 +118,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
     item.isExternalUrl ? (
       <a
         key={index}
-        href={item.href!}
+        href={item.url!}
         className={classNames(item.className, styles.ButtonMenuDropdownItem)}
       >
         {item.label}
@@ -129,7 +129,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
           ({ Link }) => (
             <Link
               key={index}
-              to={item.href!}
+              to={item.url!}
               className={classNames(item.className, styles.ButtonMenuDropdownItem)}
             >
               {item.label}

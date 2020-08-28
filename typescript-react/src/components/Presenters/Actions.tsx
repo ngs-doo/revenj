@@ -10,7 +10,7 @@ interface ISimpleButtonAction {
   className?: string;
   disabled?: boolean;
   label: string;
-  href?: string;
+  url?: string;
   isVisible?: (actionsProps: IActions) => boolean;
   onClick?: (actionProps?: IActions) => void;
 }
@@ -19,7 +19,6 @@ interface IComponentActionButton {
   Component: React.ComponentType<{}>;
   isVisible?: (actionsProps: IActions) => boolean;
 }
-
 
 export type IActionButton = ISimpleButtonAction | IComponentActionButton;
 
