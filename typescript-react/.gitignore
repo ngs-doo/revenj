@@ -4,6 +4,9 @@
 # dependencies
 node_modules
 
+# example, not needed until we have one
+example
+
 # builds
 build
 dist

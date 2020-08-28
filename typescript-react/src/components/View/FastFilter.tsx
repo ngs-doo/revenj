@@ -28,7 +28,7 @@ export class FastFilter extends React.PureComponent<IFastFilter> {
           // TODO: @bigd -> when inputs get hit with a refact-o-hammer this 'as any's can be dropped
           meta={{} as any}
           hideLabel
-          {...{placeholder: 'Search...'}}
+          {...{ placeholder: 'Search...', 'data-qa-element-id': 'fast-search' }}
         />
       </section>
     );

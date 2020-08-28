@@ -1,6 +1,6 @@
 # revenj
 
-> Core library for DSL-generated React/TypeScript code
+> A React-Typescript core library for creating Front-End applications quickly and easily
 
 [![NPM](https://img.shields.io/npm/v/revenj.svg)](https://www.npmjs.com/package/revenj) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -9,6 +9,14 @@
 ```bash
 npm install --save revenj
 ```
+
+or
+
+```bash
+yarn add revenj
+```
+
+## About
 
 ## Usage
 
@@ -24,7 +32,3 @@ class Example extends Component {
   }
 }
 ```
-
-## License
-
-MIT © [the-overengineer](https://github.com/the-overengineer)

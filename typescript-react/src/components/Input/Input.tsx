@@ -13,18 +13,19 @@ export interface IInput extends IBaseComponentProps<string | number> {
 
 export type InputFieldPublicProps = FormFieldProps<IInput>;
 
-const InputComponent: React.FC<InputFieldPublicProps> = (props) => (
-  <div className={props.containerClassName}>
+const InputComponent: React.FC<InputFieldPublicProps> = ({ containerClassName, input, type, autoComplete, className, id, onChange, onBlur, onFocus, ...props }) => (
+  <div className={containerClassName}>
     <FormControl
-      {...props.input}
-      type={props.type}
-      autoComplete={props.autoComplete}
+      {...input}
+      {...props}
+      type={type}
+      autoComplete={autoComplete}
       formNoValidate
-      className={props.className}
-      id={props.id}
-      onChange={(e: any) => props.onChange?.(e, e.target.value)}
-      onBlur={(e: React.FocusEvent<HTMLInputElement>) => props.onBlur?.(e, e.target.value)}
-      onFocus={(e: React.FocusEvent<HTMLInputElement>) => props.onFocus?.(e, e.target.value)}
+      className={className}
+      id={id}
+      onChange={(e: any) => onChange?.(e, e.target.value)}
+      onBlur={(e: React.FocusEvent<HTMLInputElement>) => onBlur?.(e, e.target.value)}
+      onFocus={(e: React.FocusEvent<HTMLInputElement>) => onFocus?.(e, e.target.value)}
     />
   </div>
 );
