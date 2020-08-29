@@ -32,8 +32,9 @@ export class DslApplication extends React.PureComponent<IDslApplication, IDslApp
     notification: { notifyError: this.props.notifyError, notifySuccess: this.props.notifySuccess, notifyWarning: this.props.notifyWarning },
   };
 
-  public componentDidMount() {
-    initializeApplication(this.props.api, this.props.marshalling);
+  public constructor(props: IDslApplication) {
+    super(props);
+    initializeApplication(props.api, props.marshalling);
   }
 
   public componentDidUpdate(prevProps: IDslApplication) {
