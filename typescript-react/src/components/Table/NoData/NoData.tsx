@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import * as React from 'react';
 
 import styles from './NoData.module.css';
@@ -11,7 +12,7 @@ export class NoData extends React.PureComponent<INoDataProps> {
 
   public render() {
     return (
-      <div className={styles.noData}>{this.props.noDataContent}</div>
+      <div className={classNames(styles.noData, 'jsNoData')}>{this.props.noDataContent}</div>
     );
   }
 }

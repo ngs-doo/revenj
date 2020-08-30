@@ -33,8 +33,10 @@ export class ButtonOptions<T> extends React.PureComponent<IButtonOptions<T>> {
               disabled={option.disabled}
               className={classNames(
                 styles.ButtonOption,
+                'jsOption',
                 {
                   [styles.Active]: option.value === value,
+                  jsActiveOption: option.value === value,
                   [styles.Disabled]: option.disabled,
                 },
               )}
@@ -109,12 +111,12 @@ export class Pagination extends React.Component<IPagination, IPaginationState> {
     }
 
     return (
-      <div className={classNames(className, styles.Pagination)}>
+      <div className={classNames(className, styles.Pagination, 'jsPagination')}>
         <div className={styles.PagesContainer}>
           {
             showPageJump ? (
               <ButtonOptions
-                className={styles.Pages}
+                className={classNames(styles.Pages, 'jsPages')}
                 options={this.getPages()}
                 value={page}
               />
@@ -134,7 +136,7 @@ export class Pagination extends React.Component<IPagination, IPaginationState> {
         {
           showPageSizeOptions ? (
             <ButtonOptions
-              className={styles.PageSizes}
+              className={classNames(styles.PageSizes, 'jsPageSizes')}
               options={this.getPageSizeOptions()}
               value={pageSize}
             />

@@ -52,7 +52,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
       <div className={classNames(className, styles.ButtonMenu, { [styles.ButtonMenuDefault]: children == null })}>
         <Button
           disabled={disabled}
-          className={classNames(styles.ButtonMenuToggle, buttonClassName)}
+          className={classNames(styles.ButtonMenuToggle, 'jsMenuToggle', buttonClassName)}
           onClick={this.open}
         >
           {
@@ -108,7 +108,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
     <div
       key={index}
       onClick={item.onClick}
-      className={classNames(styles.ButtonMenuDropdownItem, {[styles.DisabledBtn]: item.disabled})}
+      className={classNames(styles.ButtonMenuDropdownItem, 'jsMenuItem', {[styles.DisabledBtn]: item.disabled})}
     >
       {item.label}
     </div>
@@ -119,7 +119,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
       <a
         key={index}
         href={item.url!}
-        className={classNames(item.className, styles.ButtonMenuDropdownItem)}
+        className={classNames(item.className, 'jsMenuItem', styles.ButtonMenuDropdownItem)}
       >
         {item.label}
       </a>
