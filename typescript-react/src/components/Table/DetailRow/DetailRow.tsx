@@ -34,7 +34,7 @@ export class DetailRow<T> extends React.PureComponent<IDetailRowProps<T>> {
       <div className={classNames(styles.DetailRowWrapper, 'table-detail-row')}>
         { hasFoldedColumns
           ? (
-            <div className={styles.FoldedColumnsWrapper}>
+            <div className={classNames(styles.FoldedColumnsWrapper, 'jsFoldedWrapper')}>
               <Folded { ...(this.props as any) } />
             </div>
           )

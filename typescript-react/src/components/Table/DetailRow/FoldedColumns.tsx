@@ -36,7 +36,7 @@ export class FoldedColumns<T> extends React.PureComponent<IDetailRowProps<T>> {
     }, []);
 
     return (
-      <div className={classNames(styles.FoldedColumnsWrapper, getRowState && getRowState(data))}>
+      <div className={classNames(styles.FoldedColumnsWrapper, '.jsFoldedWrapper', getRowState && getRowState(data))}>
         { columns
           .map((column, index) => {
             // #TODO @bigd -> murderify this :any
@@ -51,12 +51,12 @@ export class FoldedColumns<T> extends React.PureComponent<IDetailRowProps<T>> {
             return (
               <div
                 key={index}
-                className={styles.FoldedColumnContainer}
+                className={classNames(styles.FoldedColumnContainer, 'jsFoldedColumn')}
               >
-                <div className={styles.FoldedColumnName}>
+                <div className={classNames(styles.FoldedColumnName, 'jsColumnName')}>
                   { column.Header ? <column.Header /> : column.title }
                 </div>
-                <div className={styles.FoldedColumnValue}>
+                <div className={classNames(styles.FoldedColumnValue, 'jsColumnValue')}>
                   <Cell { ...column } { ...cellProps } { ...data } value={value} />
                 </div>
               </div>
