@@ -31,7 +31,7 @@ export class LinkCell<T> extends React.PureComponent<ICellProps<T, string>> {
     const target = openInNewTab ? '_blank' : '';
 
     const isExternalUrl = (typeof isExternal === 'function')
-      ? isExternal(original)
+      ? isExternal(original, linkUrl as string)
       : Boolean(isExternal);
 
     const isDownloadLink = Boolean(download);
