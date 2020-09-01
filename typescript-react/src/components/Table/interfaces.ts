@@ -95,7 +95,7 @@ export interface IColumnConfig<T> {
   style?: any;
   title: string;
   weight?: number;
-  isExternal?: boolean | ((row: T) => boolean);
+  isExternal?: boolean | ((row: T, url: string) => boolean);
   isVisible?: boolean | (() => boolean);
   actions?: Array<IActionInfo<T>>;
   onClick?: ICellEventHandler<T>;
@@ -210,7 +210,7 @@ export interface ICellInternalProps<T, V> {
   url?: string;
   download?: boolean;
   openInNewTab?: boolean;
-  isExternal?: boolean | ((row: T) => boolean);
+  isExternal?: boolean | ((row: T, url: string) => boolean);
   constructUrl?: IConstructUrl<T>;
   onClick?: ICellEventHandler<T>;
   onChange?: ICellEventHandler<T>;
