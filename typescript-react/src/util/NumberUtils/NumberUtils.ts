@@ -57,7 +57,7 @@ export const percentageValue = (percent: Numeric, amount: Numeric): string => {
 };
 
 export const floor = (a: Numeric): string => {
-  return parseBigNum(a).toPrecision(0, 1).toString();
+  return parseBigNum(a).floor().toString();
 };
 
 export const round = (a: Numeric, decimals: number): string => {

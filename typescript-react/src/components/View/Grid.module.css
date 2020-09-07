@@ -1,4 +1,5 @@
 .Grid {
+  margin-top: 8px;
 
   .Header {
     height: 61px;
@@ -9,6 +10,7 @@
   .Search {
     display: flex;
     justify-content: flex-end;
+    max-height: 46px;
     border: 1px solid lightgray;
 
     .InputContainer {

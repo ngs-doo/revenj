@@ -29,7 +29,6 @@
     align-items: center;
     flex-wrap: wrap;
     width: 800px;
-    max-width: 100%;
 
     .LabelContainer {
       margin-right: 16px;

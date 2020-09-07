@@ -32,7 +32,7 @@ export const initializeApplication = (
 
 export const getApplicationConfiguration = (): ApplicationConfiguration => {
   if (config == null) {
-    throw new Error('Application was not configured correctly. Did you call `initializeApplication` from \'revenj\'?');
+    throw new Error('Application was not configured correctly. Did you wrap your app into `<DslApplication>` from \'revenj\'?');
   }
 
   return config;
