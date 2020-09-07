@@ -6,11 +6,11 @@
 .ButtonMenu {
   position: relative;
 
-  &Default {
+  &.Default {
     width: toggleWidth;
   }
 
-  &Dropdown {
+  .Dropdown {
     position: absolute;
     top: 38px;
     right: 0;
@@ -19,15 +19,7 @@
     background-color: white;
     border: 1px solid themeTeal;
 
-    &Section {
-      padding: 8px 0;
-
-      &:not(:last-child) {
-        border-bottom: 1px solid themeTeal;
-      }
-    }
-
-    &Item {
+    .Item {
       display: block;
       width: 100%;
       padding: 8px 16px;

@@ -236,25 +236,23 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
     return (
       <ListPresenterComponent>
         {
-          (ctx) => (
-            ctx!.isLoaded || !ctx!.isLoading ? (
-              <GridComponent
-                definition={this.getDefinition()}
-                maxResults={maxResults}
-                fastSearch={fastSearch}
-                className={className}
-                dynamic={dynamic}
-                footerLabel={footerLabel}
-                pagination={Boolean(pagination) || (ctx!.page != null && ctx!.perPage != null)}
-                page={ctx!.page}
-                perPage={ctx!.perPage}
-                pages={ctx!.totalCount != null ? Math.ceil(ctx!.totalCount / ctx!.perPage!) : undefined}
-                totalCount={ctx!.totalCount}
-                onPaginationChange={ctx!.onChangePagination}
-                items={this.transformItems(ctx!.items)}
-              />
-            ) : <Loading />
-          )
+          (ctx) => ctx!.isLoaded ? (
+            <GridComponent
+              definition={this.getDefinition()}
+              maxResults={maxResults}
+              fastSearch={fastSearch}
+              className={className}
+              dynamic={dynamic}
+              footerLabel={footerLabel}
+              pagination={Boolean(pagination) || (ctx!.page != null && ctx!.perPage != null)}
+              page={ctx!.page}
+              perPage={ctx!.perPage}
+              pages={ctx!.totalCount != null ? Math.ceil(ctx!.totalCount / ctx!.perPage!) : undefined}
+              totalCount={ctx!.totalCount}
+              onPaginationChange={ctx!.onChangePagination}
+              items={this.transformItems(ctx!.items)}
+            />
+          ) : ctx!.isLoading ? <Loading /> : null
         }
       </ListPresenterComponent>
     );

@@ -49,10 +49,10 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
     const { buttonClassName, children, className, disabled, dropdownClassName, buttons } = this.props;
 
     return (
-      <div className={classNames(className, styles.ButtonMenu, { [styles.ButtonMenuDefault]: children == null })}>
+      <div className={classNames(className, styles.ButtonMenu, { [styles.Default]: children == null })}>
         <Button
           disabled={disabled}
-          className={classNames(styles.ButtonMenuToggle, 'jsMenuToggle', buttonClassName)}
+          className={classNames(styles.Toggle, 'jsMenuToggle', buttonClassName)}
           onClick={this.open}
         >
           {
@@ -65,7 +65,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
               classNames='fade'
               timeout={200}
             >
-              <main className={classNames(styles.ButtonMenuDropdown, dropdownClassName)}>
+              <main className={classNames(styles.Dropdown, dropdownClassName)}>
                 {
                   buttons.map((item, itemIndex) => {
                     if (isComponentButton(item)) {
@@ -108,7 +108,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
     <div
       key={index}
       onClick={item.onClick}
-      className={classNames(styles.ButtonMenuDropdownItem, 'jsMenuItem', {[styles.DisabledBtn]: item.disabled})}
+      className={classNames(styles.Item, 'jsMenuItem', {[styles.DisabledBtn]: item.disabled})}
     >
       {item.label}
     </div>
@@ -119,7 +119,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
       <a
         key={index}
         href={item.url!}
-        className={classNames(item.className, 'jsMenuItem', styles.ButtonMenuDropdownItem)}
+        className={classNames(item.className, 'jsMenuItem', styles.Item)}
       >
         {item.label}
       </a>
@@ -130,7 +130,7 @@ export class ButtonMenu extends React.PureComponent<IButtonMenu, IButtonMenuStat
             <Link
               key={index}
               to={item.url!}
-              className={classNames(item.className, styles.ButtonMenuDropdownItem)}
+              className={classNames(item.className, styles.Item)}
             >
               {item.label}
             </Link>
