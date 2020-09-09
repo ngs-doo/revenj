@@ -16,8 +16,8 @@ export const FormError = ({ message, type }: IFormError) => {
     return null;
   }
   return (
-    <span className={classNames(styles.message, { [styles.error]: type === ErrorType.Error, [styles.warning]: type === ErrorType.Warning, [styles.fabulous]: type === ErrorType.QAPink })}>
-      <i className='fa fa-exclamation-circle' aria-hidden='true'/>{message}
+    <span className={classNames(styles.Message, { [styles.Error]: type === ErrorType.Error, [styles.Warning]: type === ErrorType.Warning, [styles.Fabulous]: type === ErrorType.QAPink })}>
+      <i className={classNames('fa fa-exclamation-circle', styles.Icon)} aria-hidden='true'/>{message}
     </span>
   );
 };

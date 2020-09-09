@@ -4,7 +4,7 @@
 @value errorSecondaryColor #FEEAEA;
 @value errorBorderColor #DE3536;
 
-.message {
+.Message {
   display: table;
   padding: 15px;
   font-size: 14px;
@@ -12,25 +12,22 @@
   line-height: 1.1;
   margin: 5px 0;
 
-  :global {
-
-    .fa {
-      padding-right: 5px;
-    }
+  .Icon {
+    padding-right: 5px;
   }
 
-  &.error {
+  &.Error {
     border: 1px solid errorBorderColor;
     color: errorColor;
     background-color: errorSecondaryColor;
   }
 
-  &.warning {
+  &.Warning {
     border: 1px solid warningBorderColor;
     background-color: warningColor;
   }
 
-  &.fabulous {
+  &.Fabulous {
     color: white;
     background-color: #FF69B4;
     border: 1px solid #DE3B8C;

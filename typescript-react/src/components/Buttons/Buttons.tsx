@@ -56,7 +56,7 @@ export class Buttons extends React.PureComponent<IButtons> {
               ({ Link }) => (
                 <Link
                   key={index}
-                  className={classNames('btn btn-info', styles.Button)}
+                  className={classNames('btn btn-primary', styles.Button)}
                   to={btn.url!}
                 >
                   {btn.label}

@@ -12,7 +12,7 @@
     font-weight: 500;
     line-height: 1;
     margin: 16px 0;
-    color: #6b8792;
+    color: #6B8792;
     text-transform: uppercase;
   }
 
@@ -51,8 +51,14 @@
 }
 
 .Section.Titled .Section.Titled .Section.Titled .Title {
-  font-size: 15px;
+  font-size: 13px;
+  color: #6B8792;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
+.Section.Titled .Section.Titled .Section.Titled .Section.Titled .Title {
+  font-size: 14px;
   color: #4A5559;
   text-transform: none;
-  font-weight: normal;
 }
