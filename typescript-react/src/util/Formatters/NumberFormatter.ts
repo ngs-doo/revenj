@@ -1,9 +1,23 @@
-import BigNumber, { Format } from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 
 import * as NumberUtils from '../NumberUtils/NumberUtils';
 
 export const isNumber = NumberUtils.isNumber;
 
+interface Format {
+  /** the decimal separator */
+  decimalSeparator?: string;
+  /** the grouping separator of the integer part */
+  groupSeparator?: string;
+  /** the primary grouping size of the integer part */
+  groupSize?: number;
+  /** the secondary grouping size of the integer part */
+  secondaryGroupSize?: number;
+  /** the grouping separator of the fraction part */
+  fractionGroupSeparator?: string;
+  /** the grouping size of the fraction part */
+  fractionGroupSize?: number;
+}
 
 export interface INumberFormat extends Format {
   precision: number;

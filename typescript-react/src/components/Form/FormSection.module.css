@@ -62,3 +62,8 @@
   color: #4A5559;
   text-transform: none;
 }
+
+/* Indent deeper sections, as we've run out of special title styles */
+.Section.Titled .Section.Titled .Section.Titled .Section.Titled .Section.Titled .Section {
+  margin-left: 32px;
+}
