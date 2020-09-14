@@ -3,11 +3,12 @@ import {
   IBootConfig,
   Marshaller,
 } from '../marshalling';
+import type { Serialized } from '../marshalling';
 
 export type { IBootConfig };
 
 export interface IApiService {
-  onSubmit: <T>(nameWithModule: string, domainObject: T) => Promise<T>;
+  onSubmit: <T>(nameWithModule: string, domainObject: Serialized<T>) => Promise<Serialized<T>>;
 }
 
 class ApplicationConfiguration {

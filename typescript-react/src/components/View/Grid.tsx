@@ -252,7 +252,11 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
               onPaginationChange={ctx!.onChangePagination}
               items={this.transformItems(ctx!.items)}
             />
-          ) : ctx!.isLoading ? <Loading /> : null
+          )  : ctx!.isLoading ? (
+            <section className={styles.Loading}>
+              <Loading />
+            </section>
+          ): null
         }
       </ListPresenterComponent>
     );

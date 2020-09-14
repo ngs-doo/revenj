@@ -8,7 +8,7 @@ import { INavigationContext, NavigationContext } from '../Navigation/NavigationC
 import { INotificationContext, NotificationContext } from '../Notification/NotificationContext';
 import { LoaderContext, ILoaderContext } from '../Loader/Loader';
 
-export interface IDslApplication extends IApiContext, II18nContext, INavigationContext, INotificationContext, ILoaderContext, IFieldRegistryContext {
+export interface IDslApplication extends IApiContext, Partial<II18nContext>, INavigationContext, INotificationContext, ILoaderContext, IFieldRegistryContext {
   api: IApiService;
   marshalling: IBootConfig;
 }
@@ -23,13 +23,17 @@ export interface IDslApplicationState {
 }
 
 export class DslApplication extends React.PureComponent<IDslApplication, IDslApplicationState> {
+  public static defaultProps: Partial<IDslApplication> = {
+    localize: (it) => it,
+  };
+
   public state: IDslApplicationState = {
     api: { ExportButton: this.props.ExportButton, onExport: this.props.onExport, getS3DownloadUrl: this.props.getS3DownloadUrl },
-    i18n: { localize: this.props.localize },
+    i18n: { localize: this.props.localize! },
     fields: { Fields: this.props.Fields, defaults: this.props.defaults, validators: this.props.validators },
     loading: { LoadingComponent: this.props.LoadingComponent },
     navigation: { Link: this.props.Link },
-    notification: { notifyError: this.props.notifyError, notifySuccess: this.props.notifySuccess, notifyWarning: this.props.notifyWarning },
+    notification: { notifyError: this.props.notifyError },
   };
 
   public constructor(props: IDslApplication) {
@@ -46,13 +50,13 @@ export class DslApplication extends React.PureComponent<IDslApplication, IDslApp
 
     if (this.props.localize !== prevProps.localize) {
       this.setState({
-        i18n: { localize: this.props.localize },
+        i18n: { localize: this.props.localize! },
       });
     }
 
-    if (this.props.notifyError !== prevProps.notifyError || this.props.notifySuccess !== prevProps.notifySuccess || this.props.notifyWarning !== prevProps.notifyWarning) {
+    if (this.props.notifyError !== prevProps.notifyError) {
       this.setState({
-        notification: { notifyError: this.props.notifyError, notifySuccess: this.props.notifySuccess, notifyWarning: this.props.notifyWarning },
+        notification: { notifyError: this.props.notifyError },
       });
     }
 
