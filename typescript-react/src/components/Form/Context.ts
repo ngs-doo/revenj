@@ -3,6 +3,7 @@ import { FormErrors } from 'redux-form';
 
 import { Serialized } from '../../marshalling/Marshaller';
 import { FormType } from './interfaces';
+import { IExternalFormField } from './FormField';
 
 // TODO: Move to generated code?
 export interface IGeneratedConcept<T> {
@@ -87,3 +88,15 @@ export interface IGlobalFormsContext {
 export const GlobalFormsContext = React.createContext<IGlobalFormsContext>({
   isGroupVisible: () => true,
 });
+
+export type FormControlDescriptor<T, K extends keyof T> = Partial<Omit<IExternalFormField<T, K, T[K]>, 'name'>> & { visible?: boolean; };
+
+export type IFormControlContext<T> = {
+  [K in keyof T]?: T[K] extends Array<any>
+    ? FormControlDescriptor<T, K>
+    : T[K] extends string | number | boolean
+      ? FormControlDescriptor<T, K>
+      : (IFormControlContext<T[K]> | FormControlDescriptor<T, K>)
+}
+
+export const FormControlContext = React.createContext<IFormControlContext<any> | undefined>(undefined);

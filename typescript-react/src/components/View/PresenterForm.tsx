@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { CreatePresenterContext, UpdatePresenterContext } from '../Form/Context';
+import { CreatePresenterContext, UpdatePresenterContext, FormControlContext, IFormControlContext } from '../Form/Context';
 import { Form } from '../Form/Form';
 import { FormType } from '../Form/interfaces';
 import { Loading } from '../Loader/Loader';
@@ -13,6 +13,7 @@ export interface IPresenterFormPublicProps<T> {
   cancelButtonText?: string;
   initialValues?: Partial<T>;
   readOnly?: boolean;
+  configuration?: IFormControlContext<T>;
   onSubmitSuccess?: (data: T) => void;
   onCancel?: () => void;
 }
@@ -28,7 +29,7 @@ interface IPresenterForm<T> extends IPresenterFormPublicProps<T>, IPresenterForm
 
 class PresenterFormBare<T = any> extends React.PureComponent<IPresenterForm<T>> {
   public render() {
-    const { activeItem, conceptName, children, initialValues, formType, readOnly, onSubmit, ...props } = this.props;
+    const { activeItem, conceptName, configuration, children, initialValues, formType, readOnly, onSubmit, ...props } = this.props;
 
     const classNameForType = {
       dslCreateForm: formType === FormType.Create,
@@ -36,7 +37,7 @@ class PresenterFormBare<T = any> extends React.PureComponent<IPresenterForm<T>> 
       dslViewForm: formType === FormType.View,
     };
 
-    return formType === FormType.Create || activeItem != null ? (
+    const child = formType === FormType.Create || activeItem != null ? (
       <Form<T>
         {...props}
         formType={formType}
@@ -49,7 +50,17 @@ class PresenterFormBare<T = any> extends React.PureComponent<IPresenterForm<T>> 
       >
         {children}
       </Form>
-    ) : <Loading />;
+    ) : (
+      <Loading />
+    );
+
+    return configuration ? (
+      <FormControlContext.Provider value={configuration}>
+        {child}
+      </FormControlContext.Provider>
+    ) : (
+      child
+    );
   }
 }
 

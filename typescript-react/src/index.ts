@@ -41,6 +41,7 @@ export {
 
 export type { Serialized };
 export { ErrorType, FormType } from './components/Form/interfaces';
+export type { IFormControlContext } from './components/Form/Context';
 
 export {
   ColumnType,

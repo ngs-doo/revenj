@@ -7,6 +7,8 @@ import * as Validator from '../validation';
 import {
   FormElement,
   IFormContext,
+  FormControlDescriptor,
+  FormControlContext,
 } from './Context';
 import { FormType } from './interfaces';
 
@@ -224,7 +226,31 @@ export class FormField<T, K extends DeepKeyOf<T>, P = any, V = any> extends Reac
       <FormElement>
         {
           (context: IFormContext<any> | undefined) => context ? (
-            <FormFieldInternal {...this.props} {...context} readOnly={this.props.readOnly || context.readOnly} />
+            <FormControlContext.Consumer>
+              {
+                (configContext) => {
+                  const configProps: FormControlDescriptor<T, any> = get(configContext, this.props.name as any, {})!;
+                  if (configProps.visible === false) {
+                    return null;
+                  }
+
+                  const spreadProps = {
+                    ...this.props.props,
+                    ...configProps.props,
+                  };
+
+                  return (
+                    <FormFieldInternal
+                      {...this.props}
+                      {...context}
+                      {...configProps as any}
+                      props={spreadProps}
+                      readOnly={this.props.readOnly || context.readOnly || configProps?.readOnly}
+                    />
+                  );
+                }
+              }
+            </FormControlContext.Consumer>
           ) : null
         }
       </FormElement>
