@@ -1,0 +1,441 @@
+/* Sizing */
+@value mobileHeaderMinHeight       44px;
+@value mobileRowMinHeight          65px;
+@value mobileLeftPadding           16px;
+@value mobileRightPadding          16px;
+@value desktopHeaderMinHeight       48px;
+@value desktopRowMinHeight          48px;
+
+/* Colors */
+@value mobileTableBackground       #FFFFFF;
+@value mobileTableHeaderBackground #E2E7E9;
+@value mobileTableHeaderColor      #6B8792;
+@value mobileTableRowColor         #212121;
+@value mobileRowBorderColor        #BBD0D8;
+@value mobileExpandedRowColor      #DEE8EB;
+@value mobileDetailBackground      #F0F6F7;
+@value mobileExpanderColor         #D3D2D3;
+@value desktopTableHeaderBackground  #E6EAEC;
+@value desktopTableHeaderColor       #003144;
+@value desktopTableRowColor          #67757B;
+@value desktopTableEvenRowBackground #F2F4F5;
+@value desktopTableOddRowBackground  #FFFFFF;
+@value desktopRowBorderColor         #B4C1C6;
+@value desktopExpanderBackground     #FFFFFF;
+@value footerColor                  #083144;
+@value redRowColor                  #CC3300;
+@value greenRowColor                #20A026;
+@value sortingIndicatorColor        rgba(0, 0, 0, 0.6);
+@value greyRowColour #C8C8C8;
+@value warningColor #FEEFB3;
+@value errorColor #CC3300;
+@value errorSecondaryColor #FEEAEA;
+
+
+/* Font */
+@value mobileFontFamily            'Helvetica Neue', Helvetica, Arial, sans-serif;
+@value mobileHeaderFontSize        15px;
+@value mobileRowFontSize           16px;
+@value desktopHeaderFontSize       15px;
+@value desktopRowFontSize          15px;
+
+/* Pagination */
+@value buttonColor #2F96B4;
+@value buttonTextColor #FFFFFF;
+
+:global .ReactTable {
+  background: mobileTableBackground;
+  font-family: mobileFontFamily;
+}
+
+:global .ReactTable .rt-table {
+  background-color: mobileTableBackground;
+}
+
+:global .ReactTable .rt-thead {
+  background-color: mobileTableHeaderBackground;
+  color: mobileTableHeaderColor;
+  font-weight: 500;
+  box-sizing: border-box;
+  border-bottom: 1px solid mobileRowBorderColor;
+
+  @media (min-width: 980px) {
+    background-color: desktopTableHeaderBackground;
+    color: desktopTableHeaderColor;
+    border-color: desktopRowBorderColor;
+  }
+}
+
+:global .ReactTable .rt-thead.-header {
+  box-shadow: none;
+}
+
+:global .ReactTable .rt-tr-group {
+  box-sizing: border-box;
+  border-bottom: 1px solid mobileRowBorderColor !important;
+
+  @media (min-width: 980px) {
+    border-color: desktopRowBorderColor;
+  }
+}
+
+:global .ReactTable .rt-th {
+  min-height: mobileHeaderMinHeight;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  border-right: none !important;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: initial;
+  font-size: mobileHeaderFontSize;
+
+  @media (min-width: 980px) {
+    font-size: desktopHeaderFontSize;
+    min-height: desktopHeaderMinHeight;
+  }
+}
+
+:global .ReactTable .rt-th:focus {
+  outline: none;
+}
+
+:global .ReactTable .rt-th {
+  padding-left: mobileLeftPadding !important;
+}
+
+:global .ReactTable .rt-th:last-child {
+  padding-right: mobileRightPadding;
+}
+
+:global .ReactTable .rt-th.-cursor-pointer {
+  transition: box-shadow 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0s;
+  cursor: pointer;
+
+  &.-sort-asc {
+    box-shadow: sortingIndicatorColor  0 0 inset;
+  }
+
+  &.-sort-desc {
+    box-shadow: sortingIndicatorColor x 0 0 inset;
+  }
+}
+
+:global .ReactTable .rt-tr.-even {
+  @media (min-width: 980px) {
+    background-color: desktopTableEvenRowBackground;
+  }
+}
+
+:global .ReactTable .rt-tr.-odd {
+  @media (min-width: 980px) {
+    background-color: desktopTableOddRowBackground;
+  }
+}
+
+:global .ReactTable .rt-tr-group.-expanded {
+
+  .rt-tr.-even + div {
+    @media (min-width: 980px) {
+      background-color: desktopExpanderBackground;
+    }
+  }
+}
+
+:global .ReactTable .rt-tr-group.-expanded {
+
+  .rt-tr.-odd + div {
+    @media (min-width: 980px) {
+      background-color: desktopExpanderBackground;
+    }
+  }
+}
+
+:global .ReactTable .rt-td {
+  color: mobileTableRowColor;
+  min-height: mobileRowMinHeight;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  border-right: none !important;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: initial;
+  font-size: mobileRowFontSize;
+  text-align: center;
+
+  @media (min-width: 980px) {
+    font-size: desktopRowFontSize;
+    min-height: desktopRowMinHeight;
+    color: desktopTableRowColor;
+  }
+}
+
+:global .ReactTable .rt-td {
+  padding-left: mobileLeftPadding;
+
+  > .form-group {
+    width: 100%;
+  }
+}
+
+:global .ReactTable .rt-td:last-child {
+  padding-right: mobileRightPadding;
+}
+
+:global .ReactTable .-pagination {
+  box-shadow: none;
+}
+
+:global .ReactTable .rt-tr {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+:global .ReactTable .GreenText .rt-td,
+:global .ReactTable .GreenText.-expanded {
+  color: greenRowColor !important;
+}
+
+:global .ReactTable .RedText .rt-td,
+:global .ReactTable .RedText.-expanded {
+  color: redRowColor !important;
+}
+
+:global .ReactTable .Grey .rt-td,
+:global .ReactTable .Grey.-expanded {
+  color: greyRowColour !important;
+}
+
+:global .ReactTable .Warning .rt-td,
+:global .ReactTable .Warning.-expanded {
+  background-color: warningColor !important;
+
+  .table-detail-row {
+    background-color: warningColor !important;
+  }
+}
+
+:global .ReactTable .Error .rt-td,
+:global .ReactTable .Error.-expanded {
+  color: errorColor;
+  background-color: errorSecondaryColor !important;
+
+  .table-detail-row {
+    background-color: errorSecondaryColor !important;
+  }
+}
+
+:global .ReactTable .CrossedOut .rt-td,
+:global .ReactTable .CrossedOut.-expanded {
+  text-decoration: line-through !important;
+}
+
+:global .ReactTable .rt-tfoot .rt-tr .rt-td {
+  text-transform: uppercase;
+  color: footerColor;
+}
+
+/* Extra css */
+
+:global .-expanded {
+  position: relative;
+  background: mobileExpandedRowColor;
+
+  @media (min-width: 980px) {
+
+    > div:nth-child(2) {
+      border: 1px solid desktopRowBorderColor;
+      border-bottom: 0;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+      z-index: 1;
+    }
+  }
+}
+
+.PullLeft {
+  justify-content: flex-start !important;
+  text-align: start !important;
+}
+
+.PullRight {
+  justify-content: flex-end !important;
+  text-align: end !important;
+}
+
+/* #TODO @bigd -> make these classes actually act as they should */
+
+:global .Error {
+  background: red;
+}
+
+:global .Warning {
+  background: yellow;
+}
+
+:global .-pagination {
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  flex-wrap: wrap;
+
+  .-previous {
+    order: 1;
+  }
+
+  .-center {
+    order: 2;
+  }
+
+  .-next {
+    order: 3;
+  }
+
+  /* 500px is specific to pagination component of the tables and will probably go away soon */
+  @media (max-width: 500px) {
+
+    .-previous {
+      order: 2;
+      margin-right: 16px;
+    }
+
+    .-center {
+      order: 1;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+    }
+
+    .-next {
+      order: 3;
+    }
+  }
+
+  > .-previous,
+  > .-next {
+    flex: 1 auto;
+    display: flex;
+    flex-direction: row;
+    min-width: 96px;
+
+    > .-btn {
+      flex: 1 1;
+      margin-bottom: 0;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.42857143;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+      touch-action: manipulation;
+      user-select: none;
+      background-color: buttonColor;
+      color: buttonTextColor;
+      border: none;
+      border-radius: 2px;
+      background-image: none;
+      padding: 8px 12px;
+      transition: background-color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+
+      &:active {
+        outline: 0;
+        color: #FFFFFF;
+        background-color: #31B0D5;
+        border-color: #269ABC;
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      }
+
+      &:hover {
+        color: #FFFFFF;
+        background-color: #31B0D5;
+        border-color: #269ABC;
+      }
+
+      &:focus {
+        outline: 0;
+        color: #FFFFFF;
+        background-color: #31B0D5;
+        border-color: #1B6D85;
+      }
+
+      &[disabled] {
+        cursor: not-allowed;
+        box-shadow: none;
+        opacity: 0.5;
+      }
+    }
+  }
+
+  > .-center {
+    flex: 1 1;
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+    padding: 4px 16px;
+    align-items: center;
+    justify-content: center;
+    min-width: 240px;
+    max-width: 320px;
+
+    > .select-wrap .-pageSizeOptions {
+      flex: 1 1;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    > .-pageInfo {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      box-sizing: border-box;
+      padding: 0 4px;
+
+      > .-totalPages {
+        box-sizing: border-box;
+        padding: 0 8px;
+      }
+
+      > .-pageJump {
+        box-sizing: border-box;
+        padding: 0 8px;
+
+        > input {
+          display: block;
+          width: 100%;
+          height: 34px;
+          padding: 6px 4px;
+          font-size: 14px;
+          line-height: 1.42857143;
+          color: #555555;
+          background-color: #FFFFFF;
+          background-image: none;
+          border: 1px solid #CCCCCC;
+          border-radius: 4px;
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+
+          &:focus {
+            border-color: #66AFE9 !important;
+            outline: 0;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+          }
+        }
+      }
+    }
+  }
+}
+
+:global .TableContainer {
+  width: 100%;
+}

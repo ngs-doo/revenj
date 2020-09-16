@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`formField HOC should render without crashing 1`] = `
+<form>
+  <div
+    className="FormField form-group"
+  >
+    <div
+      className="LabelContainer"
+    >
+      <label
+        className="form-label"
+      >
+        Test Label
+      </label>
+    </div>
+    <div
+      className="Component"
+    >
+      <div>
+        <input
+          autoComplete="nope"
+          className="form-control"
+          data-qa-element-id="field"
+          id="Test Field"
+          label="Test Label"
+          name="field"
+          noValidate={true}
+          onBlur={[Function]}
+          onChange={[Function]}
+          onDragStart={[Function]}
+          onDrop={[Function]}
+          onFocus={[Function]}
+          value=""
+        />
+      </div>
+    </div>
+  </div>
+</form>
+`;

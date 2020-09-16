@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`data marshalling serialize simple deserialization basic processing should explode with a descriptive error if the value is required but not present 1`] = `
+"Deserializing failed on field \\"test\\" of type Int:
+    Value is required, but is not set!"
+`;
+
+exports[`data marshalling serialize simple serialization basic processing should explode with a descriptive error if the value is required but not present 1`] = `
+"Serializing failed on field \\"test\\" of type Int:
+    Value is required, but is not set!"
+`;

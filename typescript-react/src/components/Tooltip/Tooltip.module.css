@@ -1,0 +1,91 @@
+@value warningColor #FEEFB3;
+@value errorColor #CC3300;
+@value textColor #FFFFFF;
+@value default #7D7D7D;
+@value infoColor #3E9CC7;
+
+.tip {
+  color: textColor;
+  background: default;
+  padding: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  z-index: 5;
+
+  &.bottom {
+    margin-top: 5px;
+  }
+
+  &.top {
+    margin-bottom: 5px;
+  }
+
+  &.error {
+    background: errorColor;
+
+    &::before {
+      border-right: 7px solid errorColor;
+      border-right-color: errorColor;
+    }
+  }
+
+  &.warning {
+    background: warningColor;
+    color: #9F6000;
+
+    &::before {
+      border-right: 7px solid warningColor;
+      border-right-color: warningColor;
+    }
+  }
+
+  &.info {
+    background: infoColor;
+    z-index: 7;
+
+    &::before {
+      border-right: 7px solid infoColor;
+      border-right-color: infoColor;
+      z-index: 8;
+    }
+  }
+}
+
+.tip::before {
+  content: '';
+  position: absolute;
+  display: inline-block;
+  border-top: 7px solid transparent;
+  border-right: 7px solid default;
+  border-bottom: 7px solid transparent;
+  border-right-color: default;
+  z-index: 6;
+  left: 10px;
+}
+
+.bottom.tip::before {
+  top: -10px;
+  transform: rotate(90deg);
+}
+
+.top.tip::before {
+  bottom: -10px;
+  transform: rotate(-90deg);
+}
+
+.TooltipHoverContainer {
+  position: relative;
+
+  .HoverTooltip {
+    position: absolute;
+    left: 0;
+
+    &.bottom {
+      top: 100%;
+    }
+
+    &.top {
+      bottom: 100%;
+    }
+  }
+}

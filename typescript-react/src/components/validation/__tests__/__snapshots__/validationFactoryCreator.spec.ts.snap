@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validation validatorCreatorFactory should not catch the error from getValidatorBaseValue if it throws 1`] = `"It indeed faild because reasons!"`;
+
+exports[`validation validatorCreatorFactory should not catch the error from getValidatorErrorMessage if it throws 1`] = `"It indeed failed!"`;
+
+exports[`validation validatorCreatorFactory should not catch the error from getValueFromBase if it throws 1`] = `"It indeed failed!"`;
+
+exports[`validation validatorCreatorFactory should not catch the error from getValueFromInput if it throws 1`] = `"It indeed failed!"`;

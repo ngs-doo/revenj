@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validation gtOrdAlphaCreator should return a custom error message on failure when value is not greater than 1`] = `"This makes no sense! Be greater than BBB!"`;
+
+exports[`validation gtOrdAlphaCreator should return a custom error message on failure when value is not greater than 2`] = `"This makes no sense! Be greater than BBB!"`;
+
+exports[`validation gtOrdAlphaCreator should return an error message on value that is less than or equal 1`] = `"Value must be greater than BBB."`;
+
+exports[`validation gtOrdAlphaCreator should return an error message on value that is less than or equal 2`] = `"Value must be greater than BBB."`;
+
+exports[`validation gtOrdCreator should return a custom error message on failure when value is not greater than 1`] = `"This quick brown fox can only jump over more than 10 lazy dogs."`;
+
+exports[`validation gtOrdCreator should return a custom error message on failure when value is not greater than 2`] = `"This quick brown fox can only jump over more than 10 lazy dogs."`;
+
+exports[`validation gtOrdCreator should return a custom error message on failure when value is not greater than 3`] = `"This makes no sense! Be greater than 100!"`;
+
+exports[`validation gtOrdCreator should return a custom error message on failure when value is not greater than 4`] = `"This makes no sense! Be greater than 100!"`;
+
+exports[`validation gtOrdCreator should return an error message on value that is less than or equal 1`] = `"Value must be greater than 10."`;
+
+exports[`validation gtOrdCreator should return an error message on value that is less than or equal 2`] = `"Value must be greater than 10."`;
+
+exports[`validation gtOrdCreator should return an error message on value that is less than or equal 3`] = `"Value must be greater than 100."`;
+
+exports[`validation gtOrdCreator should return an error message on value that is less than or equal 4`] = `"Value must be greater than 100."`;
+
+exports[`validation gteOrdAlphaCreator should return a custom error message on failure when value is not greater than or equal 1`] = `"This makes no sense! Be greater than or equal to BBB!"`;
+
+exports[`validation gteOrdAlphaCreator should return an error message on value that is less than 1`] = `"Value must be greater than or equal to BBB"`;
+
+exports[`validation gteOrdCreator should return a custom error message on failure when value is not greater than or equal 1`] = `"This quick brown fox can only jump over 10 or more lazy dogs."`;
+
+exports[`validation gteOrdCreator should return a custom error message on failure when value is not greater than or equal 2`] = `"This makes no sense! Be greater than or equal to 100!"`;
+
+exports[`validation gteOrdCreator should return an error message on value that is less than 1`] = `"Value must be greater than or equal to 10"`;
+
+exports[`validation gteOrdCreator should return an error message on value that is less than 2`] = `"Value must be greater than or equal to 100"`;
+
+exports[`validation inInterval should return a validation error message is not inside the interval 1`] = `"Value is not in valid range <10, 20>"`;
+
+exports[`validation inInterval should return a validation error message is not inside the interval 2`] = `"Value is not in valid range <10, 20>"`;
+
+exports[`validation inInterval should return a validation error message is not inside the interval 3`] = `"Value is not in valid range <10, 20>"`;
+
+exports[`validation inInterval should return a validation error message is not inside the interval 4`] = `"Value is not in valid range <10, 20>"`;
+
+exports[`validation inInterval should return a validation error message is not inside the interval 5`] = `"Value is not in valid range <10, 20>"`;
+
+exports[`validation inInterval should return a validation error message is not inside the interval 6`] = `"Value is not in valid range <10, 20>"`;
+
+exports[`validation inInterval should throw if range values or input supplied are not treatable as numbers 1`] = `"not a number could not be parsed!"`;
+
+exports[`validation inInterval should throw if range values or input supplied are not treatable as numbers 2`] = `"fifteen could not be parsed!"`;
+
+exports[`validation inSegment should return a validation error message is not inside the segment 1`] = `"Value is not in valid range [10, 20]"`;
+
+exports[`validation inSegment should return a validation error message is not inside the segment 2`] = `"Value is not in valid range [10, 20]"`;
+
+exports[`validation inSegment should return a validation error message is not inside the segment 3`] = `"Value is not in valid range [10, 20]"`;
+
+exports[`validation inSegment should return a validation error message is not inside the segment 4`] = `"Value is not in valid range [10, 20]"`;
+
+exports[`validation inSegment should return a validation error message is not inside the segment 5`] = `"Value is not in valid range [10, 20]"`;
+
+exports[`validation inSegment should return a validation error message is not inside the segment 6`] = `"Value is not in valid range [10, 20]"`;
+
+exports[`validation inSegment should throw if range values or input supplied are not treatable as numbers 1`] = `"not a number could not be parsed!"`;
+
+exports[`validation inSegment should throw if range values or input supplied are not treatable as numbers 2`] = `"fifteen could not be parsed!"`;
+
+exports[`validation ltOrdAlphaCreator should return a custom error message on failure when value is not less than 1`] = `"This makes no sense! Be less than BBB!"`;
+
+exports[`validation ltOrdAlphaCreator should return a custom error message on failure when value is not less than 2`] = `"This makes no sense! Be less than BBB!"`;
+
+exports[`validation ltOrdAlphaCreator should return an error message on value that is greater than or equal 1`] = `"Value must be less than BBB"`;
+
+exports[`validation ltOrdAlphaCreator should return an error message on value that is greater than or equal 2`] = `"Value must be less than BBB"`;
+
+exports[`validation ltOrdCreator should return a custom error message on failure when value is not less than 1`] = `"This quick brown fox can only jump under 10 lazy dogs."`;
+
+exports[`validation ltOrdCreator should return a custom error message on failure when value is not less than 2`] = `"This quick brown fox can only jump under 10 lazy dogs."`;
+
+exports[`validation ltOrdCreator should return a custom error message on failure when value is not less than 3`] = `"This makes no sense! Be less than 100!"`;
+
+exports[`validation ltOrdCreator should return a custom error message on failure when value is not less than 4`] = `"This makes no sense! Be less than 100!"`;
+
+exports[`validation ltOrdCreator should return an error message on value that is greater than or equal 1`] = `"Value must be less than 10"`;
+
+exports[`validation ltOrdCreator should return an error message on value that is greater than or equal 2`] = `"Value must be less than 10"`;
+
+exports[`validation ltOrdCreator should return an error message on value that is greater than or equal 3`] = `"Value must be less than 100"`;
+
+exports[`validation ltOrdCreator should return an error message on value that is greater than or equal 4`] = `"Value must be less than 100"`;
+
+exports[`validation lteOrdAlphaCreator should return a custom error message on failure when value is not less than or equal 1`] = `"This makes no sense! Be less than or equal to BBB!"`;
+
+exports[`validation lteOrdAlphaCreator should return an error message on value that is not less than or equal 1`] = `"Value must be less than or equal to BBB"`;
+
+exports[`validation lteOrdCreator should return a custom error message on failure when value is not less than or equal 1`] = `"This quick brown fox can only jump under 10 or less lazy dogs."`;
+
+exports[`validation lteOrdCreator should return a custom error message on failure when value is not less than or equal 2`] = `"This makes no sense! Be less than or equal to 100!"`;
+
+exports[`validation lteOrdCreator should return an error message on value that is not less than or equal 1`] = `"Value must be less than or equal to 10"`;
+
+exports[`validation lteOrdCreator should return an error message on value that is not less than or equal 2`] = `"Value must be less than or equal to 100"`;

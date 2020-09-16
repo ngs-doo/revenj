@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validation afterTheDateCreator should return an error message if the input date is before or same as some date 1`] = `"Date must be after 14 Mar 2018"`;
+
+exports[`validation afterTheDateCreator should return an error message if the input date is before or same as some date 2`] = `"Date must be after 14 Mar 2018"`;
+
+exports[`validation afterTheDateCreator should return an error message if the input date is before or same as some date 3`] = `"Date must be after 14 Mar 2018"`;
+
+exports[`validation afterTheDateCreator should return an error message if the input date is before or same as some date 4`] = `"Date must be after 14 Mar 2018"`;
+
+exports[`validation notInTheFuture should return an error message if the input date is in the future 1`] = `"Date can't be set in the future."`;
+
+exports[`validation notInThePast should return an error message if the input date is in the past 1`] = `"Date can't be set in the past."`;
+
+exports[`validation sameAsOrAfterFieldCreator should return an error message if input date is before the field date 1`] = `"Date must be same as or after After"`;
+
+exports[`validation sameAsOrAfterTheDateCreator should return an error message if the input date is before some date 1`] = `"Date must be after or same as 14 Mar 2018"`;
+
+exports[`validation sameAsOrAfterTheDateCreator should return an error message if the input date is before some date 2`] = `"Date must be after or same as 14 Mar 2018"`;
+
+exports[`validation sameAsOrBeforeFieldCreator should return an error message if input date is before the field date 1`] = `"Date must be same as or before Before"`;
+
+exports[`validation sameAsOrBeforeTheDateCreator should return an error message if the input date is after some date 1`] = `"Date must be before or same as 14 Mar 2018"`;
+
+exports[`validation sameAsOrBeforeTheDateCreator should return an error message if the input date is after some date 2`] = `"Date must be before or same as 14 Mar 2018"`;

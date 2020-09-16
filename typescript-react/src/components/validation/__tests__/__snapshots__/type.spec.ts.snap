@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 1`] = `"Value must be an integer."`;
+
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 2`] = `"Value must be an integer."`;
+
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 3`] = `"Value must be an integer."`;
+
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 4`] = `"Value must be an integer."`;
+
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 5`] = `"Value must be an integer."`;
+
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 6`] = `"Value must be an integer."`;
+
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 7`] = `"Value must be an integer."`;
+
+exports[`validation isNumberCreator should return an error when value exists but is not treatable as a numeric value 1`] = `"Value must be a number."`;
+
+exports[`validation isNumberCreator should return an error when value exists but is not treatable as a numeric value 2`] = `"Value must be a number."`;
+
+exports[`validation isNumberCreator should return an error when value exists but is not treatable as a numeric value 3`] = `"Value must be a number."`;

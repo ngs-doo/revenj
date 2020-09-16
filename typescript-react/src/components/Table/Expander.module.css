@@ -1,0 +1,11 @@
+@value mobileExpanderColor from './Table.css';
+
+.Expander {
+  color: mobileExpanderColor;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+:global .rt-td.rt-expandable {
+  padding-left: 11px;
+}

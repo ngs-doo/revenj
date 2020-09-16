@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validation exactLength should return an error message if the input has a different length 1`] = `"Required length of field is exactly 5"`;
+
+exports[`validation exactLength should return an error message if the input has a different length 2`] = `"Required length of field is exactly 5"`;
+
+exports[`validation exactLength should return an error message if the input has a different length 3`] = `"Required length of field is exactly 5"`;
+
+exports[`validation exactLength should return an error message if the input has a different length 4`] = `"Required length of field is exactly 5"`;
+
+exports[`validation maxLength should return an error message if input value is longer than maxLength 1`] = `"Maximum length of field is 20"`;
+
+exports[`validation maxLength should use the digit count as length for numbers (regression test for IN-8549) 1`] = `"Maximum length of field is 3"`;
+
+exports[`validation minLength should return an error message if input value is shorter than minLength 1`] = `"Minimum length of field is 7"`;
+
+exports[`validation minLength should use the digit count as length for numbers (regression test for IN-8549) 1`] = `"Minimum length of field is 3"`;

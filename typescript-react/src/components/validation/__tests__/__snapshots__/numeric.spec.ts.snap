@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validation multipleOfFactorCreator should return an error message if input value is not a multiple of base value 1`] = `"Value must be a multiple of 7."`;
+
+exports[`validation multipleOfFactorCreator should return an error message if input value is not a multiple of base value 2`] = `"Value must be a multiple of 7."`;

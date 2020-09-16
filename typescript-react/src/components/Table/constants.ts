@@ -1,0 +1,6 @@
+export const DEFAULT_RESIZE_HANDLE_THROTTLE = 250;
+export const DEFAULT_EXPANDER_WIDTH = 51;
+export const DEFAULT_MIN_COLUMN_WIDTH = 140;
+export const DEFAULT_MIN_TABLE_WIDTH = 320;
+export const DEFAULT_COLUMN_WEIGHT = 1.0;
+export const DEFAULT_PAGE_SIZE = 10;

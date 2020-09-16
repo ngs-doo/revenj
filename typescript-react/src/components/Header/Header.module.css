@@ -1,0 +1,22 @@
+.Header {
+  display: flex;
+  margin-bottom: 32px;
+  padding: 8px 0;
+  justify-content: space-between;
+  align-items: center;
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+}
+
+.Title {
+  margin: 0;
+
+  @media (max-width: 767px) {
+    font-size: 24px;
+    padding: 24px 0;
+  }
+}

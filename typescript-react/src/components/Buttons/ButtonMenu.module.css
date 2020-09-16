@@ -1,0 +1,52 @@
+@value themeTeal #B5D7E4;
+@value dropdownLayer 10;
+
+@value toggleWidth 37px;
+
+.ButtonMenu {
+  position: relative;
+
+  &.Default {
+    width: toggleWidth;
+  }
+
+  .Dropdown {
+    position: absolute;
+    top: 38px;
+    right: 0;
+    width: 200px;
+    z-index: dropdownLayer;
+    background-color: white;
+    border: 1px solid themeTeal;
+
+    .Item {
+      display: block;
+      width: 100%;
+      padding: 8px 16px;
+      cursor: pointer;
+      color: black;
+      word-break: break-word;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+        text-decoration: none;
+        color: inherit;
+      }
+    }
+
+    .DisabledBtn {
+      cursor: not-allowed;
+      color: #CCCCCC;
+      background-color: transparent;
+    }
+  }
+
+  .External {
+    display: flex;
+  }
+}
+
+.Tooltip {
+  min-width: 200px !important;
+  margin-left: 10px;
+}
