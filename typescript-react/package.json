@@ -69,7 +69,7 @@
     "scripts",
     "README.md"
   ],
-  "license": "BSD-3-Clause License",
+  "license": "BSD-3-Clause",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "module": "dist/index.modern.js",

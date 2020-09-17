@@ -23,6 +23,10 @@ export interface IFields {
   [key: string]: React.ComponentType<IExternalFormField<any, any, any>>;
 }
 
+export interface IVisibilityFunctions {
+  [key: string]: (...args: any[]) => boolean;
+}
+
 // NOTE: This is not typesafe, unfortunately. It would be nice to figure out a way to constrain these in some way, otherwise
 // it will be possible for the generated code to produce some weird results. This is not a problem per se, since we can make
 // sure the generated code generally makes sense, but user-defined defaults and validators might be wonky
@@ -30,6 +34,7 @@ export interface IFieldRegistryContext {
   Fields: IFields;
   validators: { [key: string]: Validator<any, any, any> | ((...args: any[]) => Validator<any, any, any>) };
   defaults: { [key: string]: any };
+  Visibility: IVisibilityFunctions;
 }
 
 const ImplementationMissing: React.FC<IExternalFormField<any, any, any>> = () => {
@@ -53,6 +58,7 @@ const defaultContext: IFieldRegistryContext = {
   },
   defaults: {},
   validators: {},
+  Visibility: {},
 };
 
 export const FieldRegistryContext = React.createContext<IFieldRegistryContext>(defaultContext);

@@ -8,9 +8,10 @@ import { INavigationContext, NavigationContext } from '../Navigation/NavigationC
 import { INotificationContext, NotificationContext } from '../Notification/NotificationContext';
 import { LoaderContext, ILoaderContext } from '../Loader/Loader';
 
-export interface IDslApplication extends IApiContext, Partial<II18nContext>, INavigationContext, INotificationContext, ILoaderContext, IFieldRegistryContext {
+export interface IDslApplication extends IApiContext, Partial<II18nContext>, INavigationContext, INotificationContext, ILoaderContext, Omit<IFieldRegistryContext, 'Visibility'> {
   api: IApiService;
   marshalling: IBootConfig;
+  Visibility?: IFieldRegistryContext['Visibility'];
 }
 
 export interface IDslApplicationState {
@@ -30,7 +31,7 @@ export class DslApplication extends React.PureComponent<IDslApplication, IDslApp
   public state: IDslApplicationState = {
     api: { ExportButton: this.props.ExportButton, onExport: this.props.onExport, getS3DownloadUrl: this.props.getS3DownloadUrl },
     i18n: { localize: this.props.localize! },
-    fields: { Fields: this.props.Fields, defaults: this.props.defaults, validators: this.props.validators },
+    fields: { Fields: this.props.Fields, defaults: this.props.defaults, validators: this.props.validators, Visibility: this.props.Visibility ?? {} },
     loading: { LoadingComponent: this.props.LoadingComponent },
     navigation: { Link: this.props.Link },
     notification: { notifyError: this.props.notifyError },
@@ -66,9 +67,14 @@ export class DslApplication extends React.PureComponent<IDslApplication, IDslApp
       });
     }
 
-    if (this.props.Fields !== prevProps.Fields || this.props.defaults !== prevProps.defaults || this.props.validators !== prevProps.validators) {
+    if (
+      this.props.Fields !== prevProps.Fields ||
+      this.props.defaults !== prevProps.defaults ||
+      this.props.validators !== prevProps.validators ||
+      this.props.Visibility !== prevProps.Visibility
+    ) {
       this.setState({
-        fields: { Fields: this.props.Fields, defaults: this.props.defaults, validators: this.props.validators },
+        fields: { Fields: this.props.Fields, defaults: this.props.defaults, validators: this.props.validators, Visibility: this.props.Visibility ?? {} },
       });
     }
 

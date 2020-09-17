@@ -63,16 +63,16 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
           name={Array.isArray(name) ? name.join('.') : name as string}
           {...extraProps}
         >
-          <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName() }}>
+          <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName(), clearOnUnmount: true }}>
             {childElement}
           </FormContextProvider>
         </FormSection>
       );
     } else {
       return (
-        <React.Fragment>
+        <FormContextProvider value={{ ...rest, sectionName, clearOnUnmount: true }}>
           {childElement}
-        </React.Fragment>
+        </FormContextProvider>
       );
     }
   }
