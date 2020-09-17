@@ -64,6 +64,7 @@ export const CreatePresenterContext = React.createContext<ICreatePresenterContex
 
 export interface IFormContext<T> {
   form: string;
+  clearOnUnmount?: boolean;
   formType?: FormType;
   sectionName?: string;
   initialValues?: Partial<T>;
@@ -89,7 +90,7 @@ export const GlobalFormsContext = React.createContext<IGlobalFormsContext>({
   isGroupVisible: () => true,
 });
 
-export type FormControlDescriptor<T, K extends keyof T> = Partial<Omit<IExternalFormField<T, K, T[K]>, 'name'>> & { visible?: boolean; };
+export type FormControlDescriptor<T, K extends keyof T> = Partial<Omit<IExternalFormField<T, K, T[K]>, 'name'>>;
 
 export type IFormControlContext<T> = {
   [K in keyof T]?: T[K] extends Array<any>

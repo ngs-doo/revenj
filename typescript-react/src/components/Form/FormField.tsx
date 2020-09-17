@@ -9,6 +9,7 @@ import {
   IFormContext,
   FormControlDescriptor,
   FormControlContext,
+  FormValueContext,
 } from './Context';
 import { FormType } from './interfaces';
 
@@ -42,6 +43,8 @@ export interface IFormFieldPublicProps<T, K extends DeepKeyOf<T>, P, V = any> {
   defaultValue?: DeepTypeOf<T, K> & V;
   prefillOnMount?: boolean;
   clearOnUnmount?: boolean;
+  // When not specified or true/true-returning, the field will be visible, otherwise it will not render
+  visible?: boolean | ((values: Partial<T>) => boolean);
   props?: Partial<P>;
   format?(value?: DeepTypeOf<T, K> & V): DeepTypeOf<T, K> & V;
   parse?(value?: DeepTypeOf<T, K> & V): DeepTypeOf<T, K> & V;
@@ -230,7 +233,8 @@ export class FormField<T, K extends DeepKeyOf<T>, P = any, V = any> extends Reac
               {
                 (configContext) => {
                   const configProps: FormControlDescriptor<T, any> = get(configContext, this.props.name as any, {})!;
-                  if (configProps.visible === false) {
+                  const visible = this.props.visible ?? configProps.visible;
+                  if (visible === false) {
                     return null;
                   }
 
@@ -239,15 +243,29 @@ export class FormField<T, K extends DeepKeyOf<T>, P = any, V = any> extends Reac
                     ...configProps.props,
                   };
 
-                  return (
+                  const field = (
                     <FormFieldInternal
                       {...this.props}
                       {...context}
                       {...configProps as any}
                       props={spreadProps}
                       readOnly={this.props.readOnly || context.readOnly || configProps?.readOnly}
+                      // Fields that can appear and vanish must be able to clear themselves when unmounting, we don't want stale invisible values
+                      clearOnUnmount={this.props.clearOnUnmount || context.clearOnUnmount || configProps.clearOnUnmount || visible != null}
                     />
                   );
+
+                  if (typeof visible === 'function') {
+                    return (
+                      <FormValueContext.Consumer>
+                        {
+                          (values) => visible(values) ? field : null
+                        }
+                      </FormValueContext.Consumer>
+                    );
+                  }
+
+                  return field;
                 }
               }
             </FormControlContext.Consumer>
