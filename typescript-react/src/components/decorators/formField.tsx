@@ -148,13 +148,13 @@ export const formField = <InnerComponentProps extends IBaseComponentProps<any>>(
           inverted,
           inline,
           initialValidation,
-          meta: { touched, error, warning },
+          meta: { active, touched, error, warning },
           tooltipClassName,
           description,
         } = this.props;
 
         const processedError = error && processNestedErrors(error, name);
-        const shouldShowValidation = touched || initialValidation || forceInitialValidation;
+        const shouldShowValidation = !active && (touched || initialValidation || forceInitialValidation);
         const isInverted = invertable && inverted;
         const controlId = id
           ? undefined
