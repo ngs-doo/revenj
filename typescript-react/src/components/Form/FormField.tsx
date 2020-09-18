@@ -5,8 +5,7 @@ import { Field } from 'redux-form';
 import { get } from '../../util/FunctionalUtils/FunctionalUtils';
 import * as Validator from '../validation';
 import {
-  FormElement,
-  IFormContext,
+  FormContext,
   FormControlDescriptor,
   FormControlContext,
   FormValueContext,
@@ -31,13 +30,13 @@ export interface IFormFieldPublicProps<T, K extends DeepKeyOf<T>, P, V = any> {
   hideRequiredStar?: boolean;
   component: React.ComponentType<P>;
   description?: string;
-  disabled?: boolean;
-  readOnly?: boolean;
+  disabled?: boolean | ((values: Partial<T>) => boolean);
+  readOnly?: boolean | ((values: Partial<T>) => boolean);
   inline?: boolean;
   label?: string;
   name: K;
   placeholder?: string;
-  required?: boolean;
+  required?: boolean | ((values: Partial<T>) => boolean)
   validate?: Array<Validator.Validator<DeepTypeOf<T, K> & V, T, P>>;
   warn?: Array<Validator.Validator<DeepTypeOf<T, K> & V, T, P>>;
   defaultValue?: DeepTypeOf<T, K> & V;
@@ -223,55 +222,41 @@ export class FormFieldInternal<T, K extends DeepKeyOf<T>, P = any, V = any> exte
     this.props.change(key, value)
 }
 
-export class FormField<T, K extends DeepKeyOf<T>, P = any, V = any> extends React.PureComponent<IFormFieldPublicProps<T, K, P, V>> {
-  public render() {
-    return (
-      <FormElement>
-        {
-          (context: IFormContext<any> | undefined) => context ? (
-            <FormControlContext.Consumer>
-              {
-                (configContext) => {
-                  const configProps: FormControlDescriptor<T, any> = get(configContext, this.props.name as any, {})!;
-                  const visible = this.props.visible ?? configProps.visible;
-                  if (visible === false) {
-                    return null;
-                  }
+export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IFormFieldPublicProps<T, K, P, V>) {
+  const context = React.useContext(FormContext);
+  const configContext = React.useContext(FormControlContext);
+  const values = React.useContext(FormValueContext);
 
-                  const spreadProps = {
-                    ...this.props.props,
-                    ...configProps.props,
-                  };
-
-                  const field = (
-                    <FormFieldInternal
-                      {...this.props}
-                      {...context}
-                      {...configProps as any}
-                      props={spreadProps}
-                      readOnly={this.props.readOnly || context.readOnly || configProps?.readOnly}
-                      // Fields that can appear and vanish must be able to clear themselves when unmounting, we don't want stale invisible values
-                      clearOnUnmount={this.props.clearOnUnmount || context.clearOnUnmount || configProps.clearOnUnmount || visible != null}
-                    />
-                  );
-
-                  if (typeof visible === 'function') {
-                    return (
-                      <FormValueContext.Consumer>
-                        {
-                          (values) => visible(values) ? field : null
-                        }
-                      </FormValueContext.Consumer>
-                    );
-                  }
-
-                  return field;
-                }
-              }
-            </FormControlContext.Consumer>
-          ) : null
-        }
-      </FormElement>
-    );
+  if (context == null) {
+    return null;
   }
+
+  const configProps: FormControlDescriptor<T, any> = get(configContext, props.name as any, {})!;
+  const visible = configProps.visible ?? props.visible;
+  const required = configProps.required ?? props.required;
+  const disabled = configProps.disabled ?? props.disabled;
+  const readOnly = configProps.readOnly ?? context.readOnly ?? props.readOnly;
+
+  if (visible === false || (typeof visible === 'function' && !visible(values))) {
+    return null;
+  }
+
+  const spreadProps = {
+    ...props.props,
+    ...configProps.props,
+  };
+
+  return (
+    <FormFieldInternal
+      {...props}
+      {...context}
+      {...configProps as any}
+      props={spreadProps}
+      required={typeof required === 'function' ? required(values) : required}
+      readOnly={typeof readOnly === 'function' ? readOnly(values) : readOnly}
+      disabled={typeof disabled === 'function' ? disabled(values) : disabled}
+      // Fields that can appear and vanish must be able to clear themselves when unmounting, we don't want stale invisible values
+      clearOnUnmount={props.clearOnUnmount || context.clearOnUnmount || configProps.clearOnUnmount || visible != null}
+    />
+  );
 }

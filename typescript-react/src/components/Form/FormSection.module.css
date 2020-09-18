@@ -27,6 +27,14 @@
   &.Vertical > .Items {
     flex-direction: column;
     align-items: flex-start;
+
+    /* NOTE: Ideally, we would have CSS-in-JS at this point, since it's an UI lib, but we can at least force generated code to behave */
+    & > {
+      :global .dslField {
+        max-width: 100%;
+        width: 100%;
+      }
+    }
   }
 
   .Header {
