@@ -13,7 +13,7 @@ export const WithVisibility: React.FC<IWithVisibility> = React.memo(({ predicate
   <FieldRegistryContext.Consumer>
     {
       (ctx) => (
-        <FieldRegistryContext.Provider value={{ ...ctx, Visibility: { ...ctx.Visibility, ...predicates }}}>
+        <FieldRegistryContext.Provider value={{ ...ctx, visibility: { ...ctx.visibility, ...predicates }}}>
           {children}
         </FieldRegistryContext.Provider>
       )
@@ -21,7 +21,7 @@ export const WithVisibility: React.FC<IWithVisibility> = React.memo(({ predicate
   </FieldRegistryContext.Consumer>
 ));
 
-export const WithControlOverrides: React.FC<Partial<IFieldRegistryContext>> = React.memo(({ Fields, validators, defaults, Visibility, children }) => (
+export const WithControlOverrides: React.FC<Partial<IFieldRegistryContext>> = React.memo(({ Fields, validators, defaults, visibility, children }) => (
   <FieldRegistryContext.Consumer>
     {
       (ctx) => (
@@ -31,7 +31,7 @@ export const WithControlOverrides: React.FC<Partial<IFieldRegistryContext>> = Re
             Fields: { ...ctx.Fields, ...Fields },
             validators: { ...ctx.validators, ...validators },
             defaults: { ...ctx.defaults, ...defaults },
-            Visibility: { ...ctx.Visibility, ...Visibility },
+            visibility: { ...ctx.visibility, ...visibility },
           }}
         >
           {children}

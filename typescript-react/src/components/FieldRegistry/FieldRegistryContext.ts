@@ -34,7 +34,7 @@ export interface IFieldRegistryContext {
   Fields: IFields;
   validators: { [key: string]: Validator<any, any, any> | ((...args: any[]) => Validator<any, any, any>) };
   defaults: { [key: string]: any };
-  Visibility: IVisibilityFunctions;
+  visibility: IVisibilityFunctions;
 }
 
 const ImplementationMissing: React.FC<IExternalFormField<any, any, any>> = () => {
@@ -59,7 +59,7 @@ const defaultContext: IFieldRegistryContext = {
   },
   defaults: {},
   validators: {},
-  Visibility: {},
+  visibility: {},
 };
 
 export const FieldRegistryContext = React.createContext<IFieldRegistryContext>(defaultContext);
