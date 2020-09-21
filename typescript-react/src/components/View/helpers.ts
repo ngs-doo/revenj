@@ -6,6 +6,7 @@ import {
   IRowsConfig,
   IColumnConfig,
 } from '../Table/Table';
+import { localizeTextIfMarked } from '../I18n/service';
 
 export const anyFieldMatchesQuery = <T>(item: T, query: string): boolean =>
   Object.values(item).some((value) =>
@@ -64,11 +65,10 @@ export const localizeDefinition = <T extends any[]>(
   }
 
   return conf.map((row: IColumnConfig<any>) => {
-    // TODO change to "has localization path" once that field is added to dsl and add default message
-    if (row.title.split('.')[0] === 'general') {
-      row.title = formatMessage(row.title);
+    return {
+      ...row,
+      title: localizeTextIfMarked(formatMessage, row.title),
     }
-    return row;
   });
 };
 

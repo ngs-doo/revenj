@@ -4,6 +4,8 @@ import { Field } from 'redux-form';
 
 import { get } from '../../util/FunctionalUtils/FunctionalUtils';
 import * as Validator from '../validation';
+import { I18nContext } from '../I18n/I18n';
+import { localizeTextIfMarked } from '../I18n/service';
 import {
   FormContext,
   FormControlDescriptor,
@@ -226,6 +228,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
   const context = React.useContext(FormContext);
   const configContext = React.useContext(FormControlContext);
   const values = React.useContext(FormValueContext);
+  const { localize } = React.useContext(I18nContext);
 
   if (context == null) {
     return null;
@@ -236,6 +239,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
   const required = configProps.required ?? props.required;
   const disabled = configProps.disabled ?? props.disabled;
   const readOnly = configProps.readOnly ?? context.readOnly ?? props.readOnly;
+  const rawLabel = configProps.label ?? props.label;
 
   if (visible === false || (typeof visible === 'function' && !visible(values))) {
     return null;
@@ -255,6 +259,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
       required={typeof required === 'function' ? required(values) : required}
       readOnly={typeof readOnly === 'function' ? readOnly(values) : readOnly}
       disabled={typeof disabled === 'function' ? disabled(values) : disabled}
+      label={rawLabel ? localizeTextIfMarked(localize, rawLabel) : undefined}
       // Fields that can appear and vanish must be able to clear themselves when unmounting, we don't want stale invisible values
       clearOnUnmount={props.clearOnUnmount || context.clearOnUnmount || configProps.clearOnUnmount || visible != null}
     />

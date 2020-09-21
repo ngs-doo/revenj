@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import * as React from 'react';
 
 import { Internationalised } from '../I18n/I18n';
+import { localizeTextIfMarked } from '../I18n/service';
 import { IActionButton } from './Actions';
 import {
   IListPresenterPublicProps,
@@ -33,7 +34,7 @@ export class Report<T, R extends DeepKeyOf<T>> extends React.PureComponent<IRepo
             <div className={classNames('theme-modern', styles.Presenter, className)}>
               <ListPresenter domainObject={domainObject} {...props}>
                 <Presenter
-                  title={this.getLocalizedTitle(localize)}
+                  title={localizeTextIfMarked(localize, title)}
                   actions={actions}
                   domainObject={domainObject}
                   userRoles={userRoles || new Set()}
@@ -53,15 +54,4 @@ export class Report<T, R extends DeepKeyOf<T>> extends React.PureComponent<IRepo
   }
 
   private onForbidden = () => this.props.onForbidden?.();
-
-  private getLocalizedTitle = (formatMessage: (message: string) => string) => {
-    const { title } = this.props;
-
-    // TODO change to "has localization path" once that field is added to dsl and add default message
-    if (title.split('.')[0] === 'general') {
-      return formatMessage(title);
-    }
-
-    return title;
-  }
 }

@@ -1,6 +1,9 @@
 import classNames from 'classnames';
 import * as React from 'react';
 
+import { Internationalised } from '../I18n/I18n';
+import { localizeTextIfMarked } from '../I18n/service';
+
 import styles from './FormSection.module.css';
 
 interface ISection {
@@ -35,22 +38,28 @@ export class Section extends React.PureComponent<ISection, ISectionState> {
         }
         {
           title ? (
-            <header
-              className={styles.Header}
-              onClick={this.props.keepExpanded ? undefined : this.onToggleCollapse}
-            >
-              <div className={classNames(styles.Title, titleClassName)}>{title}</div>
+            <Internationalised>
               {
-                !keepExpanded ? (
-                  <i
-                    className={classNames('fa', styles.Toggle, {
-                      'fa-chevron-down dslCollapsedHeader': !expanded,
-                      'fa-chevron-up dslExpandedHeader': expanded,
-                    })}
-                  />
-                ) : null
+                ({ localize}) => (
+                  <header
+                    className={styles.Header}
+                    onClick={this.props.keepExpanded ? undefined : this.onToggleCollapse}
+                  >
+                    <div className={classNames(styles.Title, titleClassName)}>{localizeTextIfMarked(localize, title)}</div>
+                    {
+                      !keepExpanded ? (
+                        <i
+                          className={classNames('fa', styles.Toggle, {
+                            'fa-chevron-down dslCollapsedHeader': !expanded,
+                            'fa-chevron-up dslExpandedHeader': expanded,
+                          })}
+                        />
+                      ) : null
+                    }
+                  </header>
+                )
               }
-            </header>
+            </Internationalised>
           ) : null
         }
       </section>

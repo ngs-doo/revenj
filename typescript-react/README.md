@@ -195,9 +195,12 @@ In general, the function should handle the following:
 
 ### <a id="localize"></a> `localize`
 
-An optional function of the type `(message: string) => string`. It will be invoked, if specified, to process strings. The implementation is entirely up the function, and it may use some special token to identify what to localize.
+An optional function of the type `(message: string) => string`. It will be invoked, if specified, to process strings. The implementation is entirely up the function, and it may use some special token to identify what to localize. For DSL, localization will be invoked for presenter titles, group titles, grid cell column titles, and field labels, **iff** the string starts with a prefix `i18n:`. Everything after `:` will be considered to be the identifier and will be passed to your `localize` implementation.
 
-:warning: The API is currently not invoked everywhere in the framework, and full support will be added in the future
+For example, if your field label is `i18n:global.username`, your localize function will be called with `'global.username'`, and will be expected to resolve a label for it.
+
+If this function is not defined, all labels will be left unprocessed, and will merely return the original string.
+
 
 ### <a id="loading-component"></a> `LoadingComponent`
 
