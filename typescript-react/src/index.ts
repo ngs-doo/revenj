@@ -50,7 +50,7 @@ export {
 } from './ResultSet/ResultSet';
 export { Marshaller } from './marshalling';
 export * from './components';
-export type { IGridPublicProps, IPresenterFormPublicProps, ITooltip } from './components';
+export type { IGridPublicProps, IPresenterFormPublicProps, ITooltip, IExportButton } from './components';
 export { RowState } from './components/Table/interfaces';
 export type { IRowInfo } from './components/Table/interfaces';
 export * from './util/presenter';

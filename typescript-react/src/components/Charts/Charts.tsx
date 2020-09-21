@@ -6,6 +6,8 @@ import { CurrencyFormatter } from '../../util/Formatters/CurrencyFormatter';
 import * as FunctionalUtils from '../../util/FunctionalUtils/FunctionalUtils';
 import * as SortUtils from '../../util/SortUtils/SortUtils';
 import { ListPresenterContext } from '../Form/Context';
+import { I18nContext } from '../I18n/I18n';
+import { localizeTextIfMarked } from '../I18n/service';
 
 import { colors } from './Theme';
 import {
@@ -293,6 +295,9 @@ interface IChartFromDefinition<T> {
 }
 
 export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefinition<T>> {
+  public static contextType = I18nContext;
+  public context!: React.ContextType<typeof I18nContext>;
+
   public render() {
     const { className, items, definition } = this.props;
 
@@ -302,7 +307,7 @@ export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefini
           className={className}
           items={items}
           xs={definition.xs}
-          title={definition.title}
+          title={definition.title ? localizeTextIfMarked(this.context.localize, definition.title) : undefined}
           ys={definition.ys}
           horizontal={definition.horizontal}
           stacked={definition.stacked}
@@ -314,7 +319,7 @@ export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefini
           className={className}
           items={items}
           xs={definition.xs}
-          title={definition.title}
+          title={definition.title ? localizeTextIfMarked(this.context.localize, definition.title) : undefined}
           y={definition.y}
           isDoughnut={definition.type === ChartType.Doughnut}
         />

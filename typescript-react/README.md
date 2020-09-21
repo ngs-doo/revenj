@@ -81,14 +81,28 @@ export class App extends Component<{}> {
 
 Component to render on [presenters](#presenter) or [report presenters](#report-presenter) that have a defined Templater export. It should render a button that starts an export on click. It receives the following properties:
 
-| Name | Required | Type | Description |
-|------|---------:|------|-------------|
-| className | No | `string` | Class name |
-| conceptOverride | No | `string` | Name of the command invoked to export, instead of the default. Can be passed in in user-level code |
-| filterField | No | `string` | JSON path under which the submitted fields are. Used in cases where there is a UI form specified over some filter which resides deeper in a DSL structure |
-| template | Yes | `string` | Name of the template used, specified via `templater` DSL concept |
-
-:warning: Consider this property **unstable**. The current implementation requires more manual work than should be necessary.
+```ts
+interface IExportButton {
+  /**
+   * Basic styling passed to your component, it should apply on the top level
+   */
+  className?: string;
+  /**
+   * Whether the button is disabled (e.g., exporting or data not ready)
+   */
+  disabled?: boolean;
+  /**
+   * Unique string identifier of template. When using DSL, passed in from `templater` expression on a presenter.
+   */
+  templateType: string;
+  /**
+   * Function invoked when the button is clicked. The component may pass a custom template if your application
+   * supports multi-template. Otherwise, it may just be invoked without any arguments. See `onExport` in DslApplication
+   * configuration for the handler that may or may not support custom templates, which you implement yourself.
+   */
+  onDownload: (customTemplate?: string) => Promise<void>;
+}
+```
 
 ### <a id="s3"></a> `getS3DownloadUrl`
 
@@ -181,9 +195,12 @@ In general, the function should handle the following:
 
 ### <a id="localize"></a> `localize`
 
-An optional function of the type `(message: string) => string`. It will be invoked, if specified, to process strings. The implementation is entirely up the function, and it may use some special token to identify what to localize.
+An optional function of the type `(message: string) => string`. It will be invoked, if specified, to process strings. The implementation is entirely up the function, and it may use some special token to identify what to localize. For DSL, localization will be invoked for presenter titles, group titles, grid cell column titles, and field labels, **iff** the string starts with a prefix `i18n:`. Everything after `:` will be considered to be the identifier and will be passed to your `localize` implementation.
 
-:warning: The API is currently not invoked everywhere in the framework, and full support will be added in the future
+For example, if your field label is `i18n:global.username`, your localize function will be called with `'global.username'`, and will be expected to resolve a label for it.
+
+If this function is not defined, all labels will be left unprocessed, and will merely return the original string.
+
 
 ### <a id="loading-component"></a> `LoadingComponent`
 
@@ -252,6 +269,7 @@ interface IFields {
   Currency: React.ComponentType<IExternalFormField<any, any, MoneyStr>>; // Money default
   DatePicker: React.ComponentType<IExternalFormField<any, any, DateStr>>; // Date default
   DateTimePicker: React.ComponentType<IExternalFormField<any, any, TimestampStr>>; // Timestamp default
+  EnumSelect: React.ComponentType<IExternalFormField<any, any, any>>; // Enum or enum collection default
   Link: React.ComponentType<IExternalFormField<any, any, string>>; // URL default
   Number: React.ComponentType<IExternalFormField<any, any, Numeric>>; // Int/Long/Short/Float/Double default
   Select: React.ComponentType<IExternalFormField<any, any, any>>; // Default for enum

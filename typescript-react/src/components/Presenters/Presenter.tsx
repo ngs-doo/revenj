@@ -3,6 +3,8 @@ import * as React from 'react';
 
 import { IGeneratedConcept } from '../Form/Context';
 import { Header } from '../Header/Header';
+import { Internationalised } from '../I18n/I18n';
+import { localizeTextIfMarked } from '../I18n/service';
 
 import { Actions, IActionButton } from './Actions';
 
@@ -30,33 +32,39 @@ export class Presenter<T> extends React.PureComponent<IPresenter<T>> {
     const { actions, children, title, exportFile, filterField, reportEntryCommandName, userRoles } = this.props;
 
     return (
-      <div className={classNames('theme-modern', styles.Presenter)}>
-        {/* Presenters without a title don't get to have a header at all */}
+      <Internationalised>
         {
-          title ? (
-            <Header title={title}>
-              <Actions
-                actions={actions ?? []}
-                templateType={exportFile}
-                reportEntryCommandName={reportEntryCommandName}
-                userRoles={userRoles}
-                filterField={filterField}
-              />
-            </Header>
-          ) : (
-            <div className={styles.ActionsContainer}>
-              <Actions
-                actions={actions ?? []}
-                templateType={exportFile}
-                reportEntryCommandName={reportEntryCommandName}
-                userRoles={userRoles}
-                filterField={filterField}
-              />
+          ({ localize }) => (
+            <div className={classNames('theme-modern', styles.Presenter)}>
+              {/* Presenters without a title don't get to have a header at all */}
+              {
+                title ? (
+                  <Header title={localizeTextIfMarked(localize, title)}>
+                    <Actions
+                      actions={actions ?? []}
+                      templateType={exportFile}
+                      reportEntryCommandName={reportEntryCommandName}
+                      userRoles={userRoles}
+                      filterField={filterField}
+                    />
+                  </Header>
+                ) : (
+                  <div className={styles.ActionsContainer}>
+                    <Actions
+                      actions={actions ?? []}
+                      templateType={exportFile}
+                      reportEntryCommandName={reportEntryCommandName}
+                      userRoles={userRoles}
+                      filterField={filterField}
+                    />
+                  </div>
+                )
+              }
+              {children}
             </div>
           )
         }
-        {children}
-      </div>
+      </Internationalised>
     );
   }
 

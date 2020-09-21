@@ -44,6 +44,7 @@ export type {
   IRichChartDefinition,
 } from './Charts/types';
 export { DslApplication } from './DslApplication/DslApplication';
+export type { IExportButton } from './Api/ApiContext';
 export { Grid, GridComponent } from './View/Grid';
 export type { IGridPublicProps } from './View/Grid';
 export { Actions } from './Presenters/Actions';
@@ -58,4 +59,4 @@ export { ListPresenter } from './Presenters/ListPresenter';
 export { Report } from './Presenters/ReportPresenter';
 export { ViewEditPresenter } from './Presenters/ViewEditPresenter';
 export { FieldRegistryContext } from './FieldRegistry/FieldRegistryContext';
-export { WithVisibility } from './FieldRegistry/WithVisibility';
+export { WithVisibility, WithControlOverrides } from './FieldRegistry/WithOverrides';
