@@ -10,12 +10,12 @@ export interface IFields {
   Currency: React.ComponentType<IExternalFormField<any, any, MoneyStr>>;
   DatePicker: React.ComponentType<IExternalFormField<any, any, DateStr>>;
   DateTimePicker: React.ComponentType<IExternalFormField<any, any, TimestampStr>>;
+  EnumSelect: React.ComponentType<IExternalFormField<any, any, any>>;
   Link: React.ComponentType<IExternalFormField<any, any, string>>;
   Number: React.ComponentType<IExternalFormField<any, any, Numeric>>;
   Select: React.ComponentType<IExternalFormField<any, any, any>>;
   Multiselect: React.ComponentType<IExternalFormField<any, any, any[]>>;
   S3FileInput: React.ComponentType<IExternalFormField<any, any, S3>>;
-  ShortText: React.ComponentType<IExternalFormField<any, any, string>>;
   Text: React.ComponentType<IExternalFormField<any, any, string>>;
   Textarea: React.ComponentType<IExternalFormField<any, any, TextStr>>;
 

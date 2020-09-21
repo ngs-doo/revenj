@@ -252,6 +252,7 @@ interface IFields {
   Currency: React.ComponentType<IExternalFormField<any, any, MoneyStr>>; // Money default
   DatePicker: React.ComponentType<IExternalFormField<any, any, DateStr>>; // Date default
   DateTimePicker: React.ComponentType<IExternalFormField<any, any, TimestampStr>>; // Timestamp default
+  EnumSelect: React.ComponentType<IExternalFormField<any, any, any>>; // Enum or enum collection default
   Link: React.ComponentType<IExternalFormField<any, any, string>>; // URL default
   Number: React.ComponentType<IExternalFormField<any, any, Numeric>>; // Int/Long/Short/Float/Double default
   Select: React.ComponentType<IExternalFormField<any, any, any>>; // Default for enum
