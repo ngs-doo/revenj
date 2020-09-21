@@ -47,6 +47,7 @@ const defaultContext: IFieldRegistryContext = {
     Currency: ImplementationMissing,
     DatePicker: ImplementationMissing,
     DateTimePicker: ImplementationMissing,
+    EnumSelect: ImplementationMissing,
     Link: ImplementationMissing,
     Number: ImplementationMissing,
     Select: ImplementationMissing,

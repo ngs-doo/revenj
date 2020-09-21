@@ -44,6 +44,7 @@ export type {
   IRichChartDefinition,
 } from './Charts/types';
 export { DslApplication } from './DslApplication/DslApplication';
+export type { IExportButton } from './Api/ApiContext';
 export { Grid, GridComponent } from './View/Grid';
 export type { IGridPublicProps } from './View/Grid';
 export { Actions } from './Presenters/Actions';

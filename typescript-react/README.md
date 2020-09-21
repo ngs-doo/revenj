@@ -81,14 +81,28 @@ export class App extends Component<{}> {
 
 Component to render on [presenters](#presenter) or [report presenters](#report-presenter) that have a defined Templater export. It should render a button that starts an export on click. It receives the following properties:
 
-| Name | Required | Type | Description |
-|------|---------:|------|-------------|
-| className | No | `string` | Class name |
-| conceptOverride | No | `string` | Name of the command invoked to export, instead of the default. Can be passed in in user-level code |
-| filterField | No | `string` | JSON path under which the submitted fields are. Used in cases where there is a UI form specified over some filter which resides deeper in a DSL structure |
-| template | Yes | `string` | Name of the template used, specified via `templater` DSL concept |
-
-:warning: Consider this property **unstable**. The current implementation requires more manual work than should be necessary.
+```ts
+interface IExportButton {
+  /**
+   * Basic styling passed to your component, it should apply on the top level
+   */
+  className?: string;
+  /**
+   * Whether the button is disabled (e.g., exporting or data not ready)
+   */
+  disabled?: boolean;
+  /**
+   * Unique string identifier of template. When using DSL, passed in from `templater` expression on a presenter.
+   */
+  templateType: string;
+  /**
+   * Function invoked when the button is clicked. The component may pass a custom template if your application
+   * supports multi-template. Otherwise, it may just be invoked without any arguments. See `onExport` in DslApplication
+   * configuration for the handler that may or may not support custom templates, which you implement yourself.
+   */
+  onDownload: (customTemplate?: string) => Promise<void>;
+}
+```
 
 ### <a id="s3"></a> `getS3DownloadUrl`
 

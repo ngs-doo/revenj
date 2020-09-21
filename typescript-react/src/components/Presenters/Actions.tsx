@@ -1,8 +1,12 @@
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { ApiConsumer } from '../Api/ApiContext';
+import { ApiContext } from '../Api/ApiContext';
 import { Buttons } from '../Buttons/Buttons';
+import {
+  ListPresenterComponent,
+  UpdatePresenterContext,
+} from '../Form/Context';
 
 import styles from './Presenter.module.css';
 
@@ -37,10 +41,15 @@ export interface IActions {
 }
 
 export class Actions extends React.PureComponent<IActions> {
+  public static contextType = ApiContext;
+  public context!: React.ContextType<typeof ApiContext>;
+
   private get buttons(): IActionButton[] {
     const { actions } = this.props;
 
-    const visibleActions = actions.filter((action) => action.isVisible == null || action.isVisible(this.props));
+    const visibleActions = actions.filter(
+      (action) => action.isVisible == null || action.isVisible(this.props),
+    );
 
     return visibleActions.map((action) => {
       if (isComponentButton(action)) {
@@ -48,40 +57,58 @@ export class Actions extends React.PureComponent<IActions> {
       } else {
         return {
           ...action,
-          onClick: action.onClick != null ? () => action.onClick!(this.props) : undefined,
+          onClick: () => action.onClick?.(this.props),
         };
       }
     });
   }
 
   public render() {
-    const { reportEntryCommandName, templateType, filterField } = this.props;
     return (
-      <ApiConsumer>
-        {
-          (ctx) => {
-            const ExportButton = ctx!.ExportButton;
-            return (
-              <div className={classNames(styles.Actions, 'dslActions')}>
-                <Buttons
-                  buttons={this.buttons}
-                  maxVisibleButtons={3}
-                />
-                {
-                  templateType != null ? (
-                    <ExportButton
-                      className={styles.ExportButton}
-                      template={templateType}
-                      filterField={filterField}
-                      conceptOverride={reportEntryCommandName}
-                    />
-                  ) : null
-                }
-              </div>
-            )
+      <div className={classNames(styles.Actions, 'dslActions')}>
+        <Buttons buttons={this.buttons} maxVisibleButtons={3} />
+        {this.renderExportButton()}
+      </div>
+    );
+  }
+
+  private renderExportButton = () => {
+    const { templateType, reportEntryCommandName, filterField } = this.props;
+    const { ExportButton } = this.context!;
+
+    if (templateType == null) {
+      return null;
+    }
+
+    // Only one of these will be rendered, as a presenter cannot be a list and a dashboard at the same time.
+    // Create context obviously makes no sense, as there is nothing to export yet
+    return (
+      <React.Fragment>
+        <ListPresenterComponent>
+          {
+            (context) => context != null ? (
+              <ExportButton
+                className={styles.ExportButton}
+                templateType={templateType}
+                onDownload={(customTemplate?: string) => context!.onExport(templateType!, customTemplate, reportEntryCommandName, filterField)}
+                disabled={context.isExporting || context.isLoading}
+              />
+            ) : null
           }
-        }
-      </ApiConsumer>
+        </ListPresenterComponent>
+        <UpdatePresenterContext.Consumer>
+          {
+            (context) => context != null ? (
+              <ExportButton
+                className={styles.ExportButton}
+                templateType={templateType}
+                onDownload={(customTemplate?: string) => context!.onExport(templateType!, customTemplate, reportEntryCommandName)}
+                disabled={context.isExporting || context.isLoading}
+              />
+            ) : null
+          }
+        </UpdatePresenterContext.Consumer>
+      </React.Fragment>
     );
   }
 }
