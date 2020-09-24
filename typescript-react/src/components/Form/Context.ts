@@ -90,14 +90,19 @@ export const GlobalFormsContext = React.createContext<IGlobalFormsContext>({
   isGroupVisible: () => true,
 });
 
-export type FormControlDescriptor<T, K extends keyof T> = Partial<Omit<IExternalFormField<T, K, T[K]>, 'name'>>;
+export type FormControlDescriptor<T, K extends keyof T, V> = Partial<Omit<IExternalFormField<T, K, T[K]>, 'name' | 'visible' | 'required' | 'disabled' | 'readOnly'>> & {
+  disabled?: boolean | ((values: Partial<V>) => boolean);
+  readOnly?: boolean | ((values: Partial<V>) => boolean);
+  required?: boolean | ((values: Partial<V>) => boolean);
+  visible?: boolean | ((values: Partial<V>) => boolean);
+}
 
-export type IFormControlContext<T> = {
+export type IFormControlContext<T, V = T> = {
   [K in keyof T]?: T[K] extends Array<any>
-    ? FormControlDescriptor<T, K>
+    ? FormControlDescriptor<T, K, V>
     : T[K] extends string | number | boolean
-      ? FormControlDescriptor<T, K>
-      : (IFormControlContext<T[K]> | FormControlDescriptor<T, K>)
+      ? FormControlDescriptor<T, K, V>
+      : (IFormControlContext<T[K], V> | FormControlDescriptor<T, K, V>)
 }
 
 export const FormControlContext = React.createContext<IFormControlContext<any> | undefined>(undefined);
