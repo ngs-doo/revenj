@@ -1,41 +1,41 @@
 .Grid {
   margin-top: 8px;
+}
 
-  .Header {
-    height: 61px;
-    display: flex;
-    justify-content: space-between;
+.Header {
+  height: 61px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.Search {
+  display: flex;
+  justify-content: flex-end;
+  max-height: 46px;
+  border: 1px solid lightgray;
+}
+
+.InputContainer {
+  width: 100%;
+}
+
+.Search :global .form-group {
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .InputContainer {
+    max-width: 240px;
   }
+}
 
-  .Search {
-    display: flex;
-    justify-content: flex-end;
-    max-height: 46px;
-    border: 1px solid lightgray;
+.Max {
+  display: inline-block;
+  margin: 16px 0;
+}
 
-    .InputContainer {
-      width: 100%;
-    }
-
-    :global .form-group {
-      margin-bottom: 0;
-    }
-
-    @media (min-width: 768px) {
-      .InputContainer {
-        max-width: 240px;
-      }
-    }
-  }
-
-  .Max {
-    display: inline-block;
-    margin: 16px 0;
-  }
-
-  :global .btn.btn-xs {
-    margin-right: 4px;
-  }
+.Grid :global .btn.btn-xs {
+  margin-right: 4px;
 }
 
 .Button {

@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { Numeric } from '../../util/NumberUtils/NumberUtils';
 import { IExternalFormField } from '../Form/FormField';
 import { Validator } from '../validation';
 
@@ -10,14 +9,19 @@ export interface IFields {
   Currency: React.ComponentType<IExternalFormField<any, any, MoneyStr>>;
   DatePicker: React.ComponentType<IExternalFormField<any, any, DateStr>>;
   DateTimePicker: React.ComponentType<IExternalFormField<any, any, TimestampStr>>;
+  Decimal: React.ComponentType<IExternalFormField<any, any, DecimalStr>>;
+  Double: React.ComponentType<IExternalFormField<any, any, Double>>;
   EnumSelect: React.ComponentType<IExternalFormField<any, any, any>>;
+  Float: React.ComponentType<IExternalFormField<any, any, Double>>;
+  Integer: React.ComponentType<IExternalFormField<any, any, Int>>;
   Link: React.ComponentType<IExternalFormField<any, any, string>>;
-  Number: React.ComponentType<IExternalFormField<any, any, Numeric>>;
+  Long: React.ComponentType<IExternalFormField<any, any, Long>>;
   Select: React.ComponentType<IExternalFormField<any, any, any>>;
   Multiselect: React.ComponentType<IExternalFormField<any, any, any[]>>;
   S3FileInput: React.ComponentType<IExternalFormField<any, any, S3>>;
   Text: React.ComponentType<IExternalFormField<any, any, string>>;
-  Textarea: React.ComponentType<IExternalFormField<any, any, TextStr>>;
+  Short: React.ComponentType<IExternalFormField<any, any, Short>>;
+  LongText: React.ComponentType<IExternalFormField<any, any, TextStr>>;
 
   // Any additional components
   [key: string]: React.ComponentType<IExternalFormField<any, any, any>>;
@@ -47,15 +51,20 @@ const defaultContext: IFieldRegistryContext = {
     Currency: ImplementationMissing,
     DatePicker: ImplementationMissing,
     DateTimePicker: ImplementationMissing,
+    Decimal: ImplementationMissing,
+    Double: ImplementationMissing,
     EnumSelect: ImplementationMissing,
+    Float: ImplementationMissing,
+    Integer: ImplementationMissing,
     Link: ImplementationMissing,
-    Number: ImplementationMissing,
+    Long: ImplementationMissing,
+    LongText: ImplementationMissing,
     Select: ImplementationMissing,
     Multiselect: ImplementationMissing,
     S3FileInput: ImplementationMissing,
+    Short: ImplementationMissing,
     ShortText: ImplementationMissing,
     Text: ImplementationMissing,
-    Textarea: ImplementationMissing,
   },
   defaults: {},
   validators: {},

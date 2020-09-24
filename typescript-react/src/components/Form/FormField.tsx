@@ -236,7 +236,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
 
   const configProps: FormControlDescriptor<any, any, T> = get(configContext, props.name as any, {});
   const visible = configProps?.visible ?? props.visible;
-  const required = configProps?.required ?? props.required;
+  const required = context.forceOptional !== true && (configProps?.required ?? props.required);
   const disabled = configProps?.disabled ?? props.disabled;
   const readOnly = configProps?.readOnly ?? context.readOnly ?? props.readOnly;
   const rawLabel = configProps?.label ?? props.label;

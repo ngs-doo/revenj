@@ -58,8 +58,10 @@
   font-weight: 500;
   box-sizing: border-box;
   border-bottom: 1px solid mobileRowBorderColor;
+}
 
-  @media (min-width: 980px) {
+@media (min-width: 980px) {
+  :global .ReactTable .rt-thead {
     background-color: desktopTableHeaderBackground;
     color: desktopTableHeaderColor;
     border-color: desktopRowBorderColor;
@@ -73,8 +75,10 @@
 :global .ReactTable .rt-tr-group {
   box-sizing: border-box;
   border-bottom: 1px solid mobileRowBorderColor !important;
+}
 
-  @media (min-width: 980px) {
+@media (min-width: 980px) {
+  :global .ReactTable .rt-tr-group {
     border-color: desktopRowBorderColor;
   }
 }
@@ -93,7 +97,10 @@
   text-overflow: initial;
   font-size: mobileHeaderFontSize;
 
-  @media (min-width: 980px) {
+}
+
+@media (min-width: 980px) {
+  :global .ReactTable .rt-th {
     font-size: desktopHeaderFontSize;
     min-height: desktopHeaderMinHeight;
   }
@@ -114,43 +121,37 @@
 :global .ReactTable .rt-th.-cursor-pointer {
   transition: box-shadow 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0s;
   cursor: pointer;
-
-  &.-sort-asc {
-    box-shadow: sortingIndicatorColor  0 0 inset;
-  }
-
-  &.-sort-desc {
-    box-shadow: sortingIndicatorColor x 0 0 inset;
-  }
 }
 
-:global .ReactTable .rt-tr.-even {
-  @media (min-width: 980px) {
+:global .ReactTable .rt-th.-cursor-pointer.-sort-asc {
+  box-shadow: sortingIndicatorColor  0 0 inset;
+}
+
+:global .ReactTable .rt-th.-cursor-pointer.-sort-desc {
+  box-shadow: sortingIndicatorColor x 0 0 inset;
+}
+
+@media (min-width: 980px) {
+  :global .ReactTable .rt-tr.-even {
     background-color: desktopTableEvenRowBackground;
   }
 }
 
-:global .ReactTable .rt-tr.-odd {
-  @media (min-width: 980px) {
+@media (min-width: 980px) {
+  :global .ReactTable .rt-tr.-odd {
     background-color: desktopTableOddRowBackground;
   }
 }
 
-:global .ReactTable .rt-tr-group.-expanded {
-
-  .rt-tr.-even + div {
-    @media (min-width: 980px) {
-      background-color: desktopExpanderBackground;
-    }
+@media (min-width: 980px) {
+  :global .ReactTable .rt-tr-group.-expanded .rt-tr.-even + div {
+    background-color: desktopExpanderBackground;
   }
 }
 
-:global .ReactTable .rt-tr-group.-expanded {
-
-  .rt-tr.-odd + div {
-    @media (min-width: 980px) {
+@media (min-width: 980px) {
+  :global .ReactTable .rt-tr-group.-expanded .rt-tr.-odd + div {
       background-color: desktopExpanderBackground;
-    }
   }
 }
 
@@ -169,8 +170,10 @@
   text-overflow: initial;
   font-size: mobileRowFontSize;
   text-align: center;
+}
 
-  @media (min-width: 980px) {
+@media (min-width: 980px) {
+  :global .ReactTable .rt-td {
     font-size: desktopRowFontSize;
     min-height: desktopRowMinHeight;
     color: desktopTableRowColor;
@@ -179,10 +182,10 @@
 
 :global .ReactTable .rt-td {
   padding-left: mobileLeftPadding;
+}
 
-  > .form-group {
-    width: 100%;
-  }
+:global .ReactTable .rt-td > .form-group {
+  width: 100%;
 }
 
 :global .ReactTable .rt-td:last-child {
@@ -217,10 +220,11 @@
 :global .ReactTable .Warning .rt-td,
 :global .ReactTable .Warning.-expanded {
   background-color: warningColor !important;
+}
 
-  .table-detail-row {
-    background-color: warningColor !important;
-  }
+:global .ReactTable .Warning .rt-td .table-detail-row,
+:global .ReactTable .Warning.-expanded .table-detail-row {
+  background-color: warningColor !important;
 }
 
 :global .ReactTable .Error .rt-td,
@@ -228,9 +232,11 @@
   color: errorColor;
   background-color: errorSecondaryColor !important;
 
-  .table-detail-row {
-    background-color: errorSecondaryColor !important;
-  }
+}
+
+:global .ReactTable .Error .rt-td .table-detail-row,
+:global .ReactTable .Error.-expanded .table-detail-row {
+  background-color: errorSecondaryColor !important;
 }
 
 :global .ReactTable .CrossedOut .rt-td,
@@ -248,15 +254,14 @@
 :global .-expanded {
   position: relative;
   background: mobileExpandedRowColor;
+}
 
-  @media (min-width: 980px) {
-
-    > div:nth-child(2) {
-      border: 1px solid desktopRowBorderColor;
-      border-bottom: 0;
-      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
-      z-index: 1;
-    }
+@media (min-width: 980px) {
+  :global .-expanded > div:nth-child(2) {
+    border: 1px solid desktopRowBorderColor;
+    border-bottom: 0;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+    z-index: 1;
   }
 }
 
@@ -288,152 +293,158 @@
   justify-content: space-between;
   padding: 16px 0;
   flex-wrap: wrap;
+}
+
+.-previous {
+  order: 1;
+}
+
+.-center {
+  order: 2;
+}
+
+.-next {
+  order: 3;
+}
+
+/* 500px is specific to pagination component of the tables and will probably go away soon */
+@media (max-width: 500px) {
 
   .-previous {
-    order: 1;
+    order: 2;
+    margin-right: 16px;
   }
 
   .-center {
-    order: 2;
+    order: 1;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
   }
 
   .-next {
     order: 3;
   }
+}
 
-  /* 500px is specific to pagination component of the tables and will probably go away soon */
-  @media (max-width: 500px) {
-
-    .-previous {
-      order: 2;
-      margin-right: 16px;
-    }
-
-    .-center {
-      order: 1;
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 100% !important;
-    }
-
-    .-next {
-      order: 3;
-    }
-  }
-
-  > .-previous,
-  > .-next {
+:global .-pagination > .-previous,
+:global .-pagination > .-next {
     flex: 1 auto;
     display: flex;
     flex-direction: row;
     min-width: 96px;
+}
 
-    > .-btn {
-      flex: 1 1;
-      margin-bottom: 0;
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 1.42857143;
-      text-align: center;
-      white-space: nowrap;
-      vertical-align: middle;
-      touch-action: manipulation;
-      user-select: none;
-      background-color: buttonColor;
-      color: buttonTextColor;
-      border: none;
-      border-radius: 2px;
-      background-image: none;
-      padding: 8px 12px;
-      transition: background-color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-
-      &:active {
-        outline: 0;
-        color: #FFFFFF;
-        background-color: #31B0D5;
-        border-color: #269ABC;
-        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-      }
-
-      &:hover {
-        color: #FFFFFF;
-        background-color: #31B0D5;
-        border-color: #269ABC;
-      }
-
-      &:focus {
-        outline: 0;
-        color: #FFFFFF;
-        background-color: #31B0D5;
-        border-color: #1B6D85;
-      }
-
-      &[disabled] {
-        cursor: not-allowed;
-        box-shadow: none;
-        opacity: 0.5;
-      }
-    }
-  }
-
-  > .-center {
+:global .-pagination > .-previous > .-btn,
+:global .-pagination > .-next > .-btn {
     flex: 1 1;
-    display: flex;
-    flex-direction: row;
-    box-sizing: border-box;
-    padding: 4px 16px;
-    align-items: center;
-    justify-content: center;
-    min-width: 240px;
-    max-width: 320px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    touch-action: manipulation;
+    user-select: none;
+    background-color: buttonColor;
+    color: buttonTextColor;
+    border: none;
+    border-radius: 2px;
+    background-image: none;
+    padding: 8px 12px;
+    transition: background-color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
 
-    > .select-wrap .-pageSizeOptions {
-      flex: 1 1;
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-    }
+:global .-pagination > .-previous > .-btn:active,
+:global .-pagination > .-next > .-btn:active {
+  outline: 0;
+  color: #FFFFFF;
+  background-color: #31B0D5;
+  border-color: #269ABC;
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
 
-    > .-pageInfo {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      box-sizing: border-box;
-      padding: 0 4px;
+:global .-pagination > .-previous > .-btn:hover,
+:global .-pagination > .-next > .-btn:hover {
+  color: #FFFFFF;
+  background-color: #31B0D5;
+  border-color: #269ABC;
+}
 
-      > .-totalPages {
-        box-sizing: border-box;
-        padding: 0 8px;
-      }
+:global .-pagination > .-previous > .-btn:focus,
+:global .-pagination > .-next > .-btn:focus {
+  outline: 0;
+  color: #FFFFFF;
+  background-color: #31B0D5;
+  border-color: #1B6D85;
+}
 
-      > .-pageJump {
-        box-sizing: border-box;
-        padding: 0 8px;
+:global .-pagination > .-previous > .-btn[disabled],
+:global .-pagination > .-next > .-btn[disabled] {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.5;
+}
 
-        > input {
-          display: block;
-          width: 100%;
-          height: 34px;
-          padding: 6px 4px;
-          font-size: 14px;
-          line-height: 1.42857143;
-          color: #555555;
-          background-color: #FFFFFF;
-          background-image: none;
-          border: 1px solid #CCCCCC;
-          border-radius: 4px;
-          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-          transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+:global .-pagination .-center {
+  flex: 1 1;
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+  padding: 4px 16px;
+  align-items: center;
+  justify-content: center;
+  min-width: 240px;
+  max-width: 320px;
+}
 
-          &:focus {
-            border-color: #66AFE9 !important;
-            outline: 0;
-            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
-          }
-        }
-      }
-    }
-  }
+:global .-pagination .-center > .select-wrap .-pageSizeOptions {
+  flex: 1 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+
+:global .-pagination .-center  > .-pageInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 4px;
+}
+
+:global .-pagination .-center  > .-pageInfo > .-totalPages {
+  box-sizing: border-box;
+  padding: 0 8px;
+}
+
+:global .-pagination .-center  > .-pageInfo > .-pageJump {
+  box-sizing: border-box;
+  padding: 0 8px;
+}
+
+:global .-pagination .-center  > .-pageInfo > .-pageJump > input {
+  display: block;
+  width: 100%;
+  height: 34px;
+  padding: 6px 4px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555555;
+  background-color: #FFFFFF;
+  background-image: none;
+  border: 1px solid #CCCCCC;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+:global .-pagination .-center  > .-pageInfo > .-pageJump > input:focus {
+  border-color: #66AFE9 !important;
+  outline: 0;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
 }
 
 :global .TableContainer {

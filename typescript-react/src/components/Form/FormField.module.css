@@ -1,21 +1,17 @@
 @value required-color #FF0000;
 
-.Required {
-  > div > label {
-    &:not(:empty)::after {
-      content: '*';
-      padding: 0 2px;
-      color: required-color;
-    }
-  }
+.Required > div > label:not(:empty)::after {
+  content: '*';
+  padding: 0 2px;
+  color: required-color;
 }
 
 .Field {
   flex: 1;
   margin-right: 16px;
   position: relative;
+}
 
-  .Component {
-    flex: 1;
-  }
+.Field .Component {
+  flex: 1;
 }

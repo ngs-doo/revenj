@@ -1,8 +1,10 @@
 .Presenter {
   position: relative;
   margin-bottom: 32px;
+}
 
-  @media (max-width: 767px) {
+@media (max-width: 767px) {
+  .Presenter {
     padding: 0 12px;
   }
 }
@@ -10,16 +12,18 @@
 .Actions {
   display: flex;
   justify-content: flex-end;
+}
 
-  @media (max-width: 767px) {
+@media (max-width: 767px) {
+  .Actions {
     position: static;
     top: 8px;
     right: 16px;
   }
+}
 
-  .ExportButton {
-    margin-left: 8px;
-  }
+.ExportButton {
+  margin-left: 8px;
 }
 
 .ActionsContainer {
@@ -32,8 +36,10 @@
   display: flex;
   justify-content: flex-start;
   margin-top: 16px;
+}
 
-  @media (max-width: 767px) {
+@media (max-width: 767px) {
+  .FooterActions {
     margin-bottom: 64px;
   }
 }

@@ -1,0 +1,51 @@
+.Container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 80px 40px;
+}
+
+.Loader {
+  display: flex;
+  justify-content: space-between;
+  min-width: 150px;
+}
+
+.Dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 100%;
+  background-color: #B2B2B2;
+}
+
+.First {
+  animation: pulse 2s linear infinite;
+}
+
+.Second {
+  animation: pulse 2s linear infinite;
+  animation-delay: 0.75s;
+}
+
+.Third {
+  animation: pulse 2s linear infinite;
+  animation-delay: 1.25s;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+}

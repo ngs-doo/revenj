@@ -10,8 +10,8 @@ export interface IGeneratedConcept<T> {
   readonly domainObjectName: string;
   readonly roles: any[];
   new(...args: any[]): T;
-  serialize(data: T): Serialized<T>;
-  deserialize(data: Serialized<T>): T;
+  serialize(data: T | undefined): Serialized<T> | undefined;
+  deserialize(data: Serialized<T> | undefined): T | undefined;
 }
 
 export type ISubmittable<T> = IGeneratedConcept<T> & {
@@ -69,6 +69,7 @@ export interface IFormContext<T> {
   sectionName?: string;
   initialValues?: Partial<T>;
   readOnly?: boolean;
+  forceOptional?: boolean;
   submitErrors?: FormErrors<T>;
   reset: () => void;
   change: <K extends DeepKeyOf<T>>(field: K, value: DeepTypeOf<T, K>) => void;

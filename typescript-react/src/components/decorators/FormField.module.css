@@ -2,8 +2,10 @@
   min-width: min(255px, 100%);
   max-width: min(255px, 100%);
   flex: 1 0 100%;
+}
 
-  @media (max-width: 767px) {
+@media (max-width: 767px) {
+  .FormField {
     min-width: 100%;
     max-width: 100%;
   }
@@ -15,11 +17,12 @@
   justify-content: flex-start;
   min-height: 36px;
 
-  .Description {
-    position: relative;
-    margin-bottom: 6px;
-    z-index: 10;
-  }
+}
+
+.Description {
+  position: relative;
+  margin-bottom: 6px;
+  z-index: 10;
 }
 
 @media (min-width: 768px) {
@@ -30,22 +33,22 @@
     flex-wrap: wrap;
     width: 800px;
     max-width: 100%;
+  }
 
-    .LabelContainer {
-      margin-right: 16px;
-      flex: 1;
-    }
+  .LabelContainer {
+    margin-right: 16px;
+    flex: 1;
   }
 }
 
 .Component {
   flex: 1;
+}
 
-  .Error & {
-    border-color: error;
-  }
+.Error .Component {
+  border-color: error;
+}
 
-  .Warning & {
-    border-color: warning;
-  }
+.Warning .Component {
+  border-color: warning;
 }

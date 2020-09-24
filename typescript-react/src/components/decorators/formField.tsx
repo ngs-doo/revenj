@@ -32,9 +32,9 @@ export interface IFormFieldWrapper {
 
 export interface IBaseComponentProps<T> {
   className?: string;
-  onChange?: (event: React.ChangeEvent<any>, value: T) => void;
-  onBlur?: (event: React.FocusEvent<any>, value: T) => void;
-  onFocus?: (event: React.FocusEvent<any>, value: T) => void;
+  onChange?: (event: React.ChangeEvent<any> | T) => void;
+  onBlur?: (event: React.FocusEvent<any> | T) => void;
+  onFocus?: (event: React.FocusEvent<any> | T) => void;
 }
 
 const formFieldProps = [

@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-import { IVisibilityFunctions, IFieldRegistryContext, FieldRegistryContext } from './FieldRegistryContext';
+import { IExternalFormField } from '../Form/FormField';
+import {
+  FieldRegistryContext,
+  IFieldRegistryContext,
+  IVisibilityFunctions,
+} from './FieldRegistryContext';
 
 interface IWithVisibility {
   predicates: IVisibilityFunctions;
@@ -21,7 +26,13 @@ export const WithVisibility: React.FC<IWithVisibility> = React.memo(({ predicate
   </FieldRegistryContext.Consumer>
 ));
 
-export const WithControlOverrides: React.FC<Partial<IFieldRegistryContext>> = React.memo(({ Fields, validators, defaults, visibility, children }) => (
+interface IWithControlOverrides extends Partial<Omit<IFieldRegistryContext, 'Fields'>> {
+  Fields: {
+    [key: string]: React.ComponentType<IExternalFormField<any, any, any>>;
+  }
+}
+
+export const WithControlOverrides: React.FC<Partial<IWithControlOverrides>> = React.memo(({ Fields, validators, defaults, visibility, children }) => (
   <FieldRegistryContext.Consumer>
     {
       (ctx) => (

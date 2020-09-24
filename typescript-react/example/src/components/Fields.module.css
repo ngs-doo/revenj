@@ -1,0 +1,11 @@
+.Input {
+  width: 100%;
+  border-radius: 0;
+  border: 1px solid #C3C3C3;
+  padding: 8px 4px;
+  text-indent: 4px;
+}
+
+.Textarea {
+  margin-right: 100% !important;
+}

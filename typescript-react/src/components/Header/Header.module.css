@@ -4,8 +4,10 @@
   padding: 8px 0;
   justify-content: space-between;
   align-items: center;
+}
 
-  @media (max-width: 767px) {
+@media (max-width: 767px) {
+  .Header {
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
@@ -14,8 +16,10 @@
 
 .Title {
   margin: 0;
+}
 
-  @media (max-width: 767px) {
+@media (max-width: 767px) {
+  .Title {
     font-size: 24px;
     padding: 24px 0;
   }

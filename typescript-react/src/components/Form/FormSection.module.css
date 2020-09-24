@@ -6,51 +6,49 @@
   width: 100%;
   display: flex;
   flex-direction: column-reverse;
+}
 
-  .Title {
-    font-size: 17px;
-    font-weight: 500;
-    line-height: 1;
-    margin: 16px 0;
-    color: #6B8792;
-    text-transform: uppercase;
-  }
+.Section .Title {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1;
+  margin: 16px 0;
+  color: #6B8792;
+  text-transform: uppercase;
+}
 
-  > .Items {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-end;
-  }
+.Section > .Items {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
 
-  &.Vertical > .Items {
-    flex-direction: column;
-    align-items: flex-start;
+.Section.Vertical > .Items {
+  flex-direction: column;
+  align-items: flex-start;
+}
 
-    /* NOTE: Ideally, we would have CSS-in-JS at this point, since it's an UI lib, but we can at least force generated code to behave */
-    & > {
-      :global .dslField {
-        max-width: 100%;
-        width: 100%;
-      }
-    }
-  }
+/* NOTE: Ideally, we would have CSS-in-JS at this point, since it's an UI lib, but we can at least force generated code to behave */
+.Section.Vertical > .Items :global .dslField {
+  max-width: 100%;
+  width: 100%;
+}
 
-  .Header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-  }
+.Section .Header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
 
-  &.Titled:not(:last-child) > .Items {
-    margin-bottom: 16px;
-  }
+.Section.Titled:not(:last-child) > .Items {
+  margin-bottom: 16px;
+}
 
-  .Items:empty + .Header {
-    display: none;
-  }
+.Section .Items:empty + .Header {
+  display: none;
 }
 
 .Section.Titled .Section.Titled .Title {

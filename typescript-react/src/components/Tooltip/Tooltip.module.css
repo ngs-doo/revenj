@@ -11,44 +11,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   position: absolute;
   z-index: 5;
-
-  &.bottom {
-    margin-top: 5px;
-  }
-
-  &.top {
-    margin-bottom: 5px;
-  }
-
-  &.error {
-    background: errorColor;
-
-    &::before {
-      border-right: 7px solid errorColor;
-      border-right-color: errorColor;
-    }
-  }
-
-  &.warning {
-    background: warningColor;
-    color: #9F6000;
-
-    &::before {
-      border-right: 7px solid warningColor;
-      border-right-color: warningColor;
-    }
-  }
-
-  &.info {
-    background: infoColor;
-    z-index: 7;
-
-    &::before {
-      border-right: 7px solid infoColor;
-      border-right-color: infoColor;
-      z-index: 8;
-    }
-  }
 }
 
 .tip::before {
@@ -63,6 +25,44 @@
   left: 10px;
 }
 
+.tip.bottom {
+  margin-top: 5px;
+}
+
+.tip.top {
+  margin-bottom: 5px;
+}
+
+.tip.error {
+  background: errorColor;
+}
+
+.tip.error::before {
+  border-right: 7px solid errorColor;
+  border-right-color: errorColor;
+}
+
+.tip.warning {
+  background: warningColor;
+  color: #9F6000;
+}
+
+.tip.warning::before {
+  border-right: 7px solid warningColor;
+  border-right-color: warningColor;
+}
+
+.tip.info {
+  background: infoColor;
+  z-index: 7;
+}
+
+.tip.info::before {
+  border-right: 7px solid infoColor;
+  border-right-color: infoColor;
+  z-index: 8;
+}
+
 .bottom.tip::before {
   top: -10px;
   transform: rotate(90deg);
@@ -75,17 +75,17 @@
 
 .TooltipHoverContainer {
   position: relative;
+}
 
-  .HoverTooltip {
-    position: absolute;
-    left: 0;
+.HoverTooltip {
+  position: absolute;
+  left: 0;
+}
 
-    &.bottom {
-      top: 100%;
-    }
+.HoverTooltip.bottom {
+  top: 100%;
+}
 
-    &.top {
-      bottom: 100%;
-    }
-  }
+.HoverTooltip.top {
+  bottom: 100%;
 }
