@@ -23,6 +23,10 @@
     background-color: loginBodyColor;
     z-index: 5;
   }
+
+  .FormComponent {
+    padding-bottom: 64px;
+  }
 }
 
 .Button {
