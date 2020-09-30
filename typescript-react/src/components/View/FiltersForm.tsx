@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import * as React from 'react';
 
 import { set } from '../../util/FunctionalUtils/FunctionalUtils';
-import { ListPresenterComponent } from '../Form/Context';
+import { FormControlContext, IFormControlContext, ListPresenterComponent } from '../Form/Context';
 import { Form } from '../Form/Form';
 
 import styles from './Form.module.css';
@@ -10,6 +10,7 @@ import styles from './Form.module.css';
 interface IFormPublicProps<T> {
   initialValues?: Partial<T>;
   formUnderKey?: string | string[];
+  configuration?: IFormControlContext<T>;
   hideSubmit?: boolean;
 }
 
@@ -29,9 +30,9 @@ const processOnSubmit = <T, R>(onSubmit: (data: R) => Promise<R>, formUnderKey?:
 
 export class FiltersForm<T> extends React.PureComponent<IForm<T>> {
   public render() {
-    const { children, formUnderKey, hideSubmit, initialValues } = this.props;
+    const { children, configuration, formUnderKey, hideSubmit, initialValues } = this.props;
 
-    return (
+    const child = (
       <ListPresenterComponent>
         {
           (ctx) => (
@@ -49,6 +50,14 @@ export class FiltersForm<T> extends React.PureComponent<IForm<T>> {
           )
         }
       </ListPresenterComponent>
+    );
+
+    return configuration ? (
+      <FormControlContext.Provider value={configuration}>
+        {child}
+      </FormControlContext.Provider>
+    ) : (
+      child
     );
   }
 }
