@@ -20,3 +20,7 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# dsl-generated
+example/src/dsl
+example/api/dsl
