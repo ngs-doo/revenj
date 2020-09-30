@@ -11,25 +11,25 @@
   font-weight: normal;
   line-height: 1.1;
   margin: 5px 0;
+}
 
-  .Icon {
+.Icon {
     padding-right: 5px;
   }
 
-  &.Error {
-    border: 1px solid errorBorderColor;
-    color: errorColor;
-    background-color: errorSecondaryColor;
-  }
+.Message.Error {
+  border: 1px solid errorBorderColor;
+  color: errorColor;
+  background-color: errorSecondaryColor;
+}
 
-  &.Warning {
-    border: 1px solid warningBorderColor;
-    background-color: warningColor;
-  }
+.Message.Warning {
+  border: 1px solid warningBorderColor;
+  background-color: warningColor;
+}
 
-  &.Fabulous {
-    color: white;
-    background-color: #FF69B4;
-    border: 1px solid #DE3B8C;
-  }
+.Message.Fabulous {
+  color: white;
+  background-color: #FF69B4;
+  border: 1px solid #DE3B8C;
 }

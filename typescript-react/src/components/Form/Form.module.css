@@ -11,18 +11,21 @@
 @value regionCodeWidth 98px;
 @value phoneNumberWidth 108px;
 
-.Buttons {
-  &.Static {
-    @media (max-width: 980px) {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      padding: 10px;
-      box-shadow: -1px -1px 3px 0 btnPrimaryColor;
-      background-color: loginBodyColor;
-      z-index: 5;
-    }
+
+@media (max-width: 980px) {
+  .Buttons.Static {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    box-shadow: -1px -1px 3px 0 btnPrimaryColor;
+    background-color: loginBodyColor;
+    z-index: 5;
+  }
+
+  .FormComponent {
+    padding-bottom: 64px;
   }
 }
 
@@ -36,16 +39,18 @@
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-end;
+}
 
-  .Errors {
-    width: 100%;
-  }
+.Errors {
+  width: 100%;
+}
 
-  .Buttons {
-    width: 100%;
-  }
+.Buttons {
+  width: 100%;
+}
 
-  @media (max-width: 980px) {
+@media (max-width: 980px) {
+  .FormComponent {
     margin-bottom: 72px;
   }
 }

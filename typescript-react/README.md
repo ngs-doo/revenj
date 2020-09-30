@@ -543,7 +543,7 @@ DSL also supports additional behaviour, such automated pagination support on the
 When using DSL Platform to generate your front-end, you will need to run the [CLI](https://github.com/ngs-doo/dsl-compiler-client) to generate your TypeScript code. Assuming your DSL code is in the `dsl` folder and you want the generated code to go into `src/dsl`, you can run the following:
 
 ```bash
-java -jar dsl-clc.jar dsl=./dsl typescript=./src/dsl
+java -jar dsl-clc.jar dsl=./dsl react=./src/dsl download
 ```
 
 It will generate the following subfolders:

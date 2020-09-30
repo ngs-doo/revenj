@@ -1,7 +1,7 @@
 .Buttons {
   display: flex;
+}
 
-  .Button {
-    margin-left: 4px;
-  }
+.Button {
+  margin-left: 4px;
 }

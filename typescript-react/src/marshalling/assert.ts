@@ -159,6 +159,7 @@ export const assertEnum = <T>(values: T[], name: string) => (it: T, isRequired: 
   }
 
   if (!values.includes(it)) {
+    console.log(values, it);
     throw new Error(`Value ${it} is not a valid member of enumeration ${name}`);
   }
 

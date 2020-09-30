@@ -10,8 +10,8 @@ export interface IGeneratedConcept<T> {
   readonly domainObjectName: string;
   readonly roles: any[];
   new(...args: any[]): T;
-  serialize(data: T): Serialized<T>;
-  deserialize(data: Serialized<T>): T;
+  serialize(data: T | undefined): Serialized<T> | undefined;
+  deserialize(data: Serialized<T> | undefined): T | undefined;
 }
 
 export type ISubmittable<T> = IGeneratedConcept<T> & {
@@ -69,6 +69,7 @@ export interface IFormContext<T> {
   sectionName?: string;
   initialValues?: Partial<T>;
   readOnly?: boolean;
+  forceOptional?: boolean;
   submitErrors?: FormErrors<T>;
   reset: () => void;
   change: <K extends DeepKeyOf<T>>(field: K, value: DeepTypeOf<T, K>) => void;
@@ -90,14 +91,19 @@ export const GlobalFormsContext = React.createContext<IGlobalFormsContext>({
   isGroupVisible: () => true,
 });
 
-export type FormControlDescriptor<T, K extends keyof T> = Partial<Omit<IExternalFormField<T, K, T[K]>, 'name'>>;
+export type FormControlDescriptor<T, K extends keyof T, V> = Partial<Omit<IExternalFormField<T, K, T[K]>, 'name' | 'visible' | 'required' | 'disabled' | 'readOnly'>> & {
+  disabled?: boolean | ((values: Partial<V>) => boolean);
+  readOnly?: boolean | ((values: Partial<V>) => boolean);
+  required?: boolean | ((values: Partial<V>) => boolean);
+  visible?: boolean | ((values: Partial<V>) => boolean);
+}
 
-export type IFormControlContext<T> = {
+export type IFormControlContext<T, V = T> = {
   [K in keyof T]?: T[K] extends Array<any>
-    ? FormControlDescriptor<T, K>
+    ? FormControlDescriptor<T, K, V>
     : T[K] extends string | number | boolean
-      ? FormControlDescriptor<T, K>
-      : (IFormControlContext<T[K]> | FormControlDescriptor<T, K>)
+      ? FormControlDescriptor<T, K, V>
+      : (IFormControlContext<T[K], V> | FormControlDescriptor<T, K, V>)
 }
 
 export const FormControlContext = React.createContext<IFormControlContext<any> | undefined>(undefined);

@@ -1,0 +1,76 @@
+{
+  "name": "revenj-example",
+  "homepage": ".",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "yarn build:dsl && react-app-rewired start",
+    "build:dsl": "java -jar scripts/dsl-clc.jar dsl=./dsl react=./src/dsl download",
+    "api:dsl": "java -jar scripts/dsl-clc.jar dsl=./dsl typescript=./api/dsl download",
+    "build:ts": "react-app-rewired build",
+    "build": "yarn build:dsl && yarn build:ts",
+    "test": "react-app-rewired test",
+    "eject": "node ../node_modules/react-scripts/bin/react-scripts.js eject",
+    "api:run": "ts-node --project api/tsconfig.json api/index.ts",
+    "api": "yarn api:dsl && yarn api:run"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "link:../node_modules/@testing-library/jest-dom",
+    "@testing-library/react": "link:../node_modules/@testing-library/react",
+    "@testing-library/user-event": "link:../node_modules/@testing-library/user-event",
+    "@types/classnames": "^2.2.10",
+    "@types/jest": "link:../node_modules/@types/jest",
+    "@types/node": "link:../node_modules/@types/node",
+    "@types/react": "link:../node_modules/@types/react",
+    "@types/react-dom": "link:../node_modules/@types/react-dom",
+    "@types/react-router": "^5.1.8",
+    "@types/react-router-dom": "^5.1.5",
+    "@types/react-toastify": "^4.1.0",
+    "classnames": "^2.2.6",
+    "customize-cra": "^1.0.0",
+    "react": "link:../node_modules/react",
+    "react-app-rewired": "^2.1.6",
+    "react-dom": "link:../node_modules/react-dom",
+    "react-redux": "link:../node_modules/react-redux",
+    "react-router": "^5.2.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "link:../node_modules/react-scripts",
+    "react-toastify": "^4.0.8",
+    "redux": "^4.0.4",
+    "redux-form": "link:../node_modules/redux-form",
+    "revenj": "link:..",
+    "typescript": "link:../node_modules/typescript"
+  },
+  "devDependencies": {
+    "@babel/plugin-syntax-object-rest-spread": "^7.8.3",
+    "@types/bignumber.js": "^5.0.0",
+    "@types/body-parser": "^1.19.0",
+    "@types/express": "^4.17.8",
+    "@types/uuid": "^8.3.0",
+    "bignumber.js": "^9.0.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "ts-node": "^9.0.0",
+    "uuid": "^8.3.0"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "proxy": "http://localhost:8080",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "resolutions": {
+    "react": "16.13.1",
+    "react-dom": "16.13.1"
+  }
+}

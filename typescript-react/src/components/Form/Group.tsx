@@ -18,6 +18,7 @@ interface IGroupPublicProps<T> {
   vertical?: boolean;
   borderless?: boolean;
   title?: string;
+  optional?: boolean;
   visibility?: string | ((values: Partial<T>) => boolean);
   height?: number;
   className?: string;
@@ -36,7 +37,7 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
   public context: React.ContextType<typeof FormContext>;
 
   public render() {
-    const { borderless, children, containerClassName, className, vertical, name, visibility, values, height, ...props } = this.props;
+    const { borderless, children, containerClassName, className, vertical, name, visibility, optional, values, height, ...props } = this.props;
     const { sectionName, ...rest } = this.context!;
 
     if (!this.isVisible()) {
@@ -63,14 +64,14 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
           name={Array.isArray(name) ? name.join('.') : name as string}
           {...extraProps}
         >
-          <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName(), clearOnUnmount: true }}>
+          <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName(), clearOnUnmount: true, forceOptional: optional ?? undefined }}>
             {childElement}
           </FormContextProvider>
         </FormSection>
       );
     } else {
       return (
-        <FormContextProvider value={{ ...rest, sectionName, clearOnUnmount: true }}>
+        <FormContextProvider value={{ ...rest, sectionName, clearOnUnmount: true, forceOptional: optional ?? undefined }}>
           {childElement}
         </FormContextProvider>
       );

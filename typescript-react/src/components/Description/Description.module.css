@@ -3,37 +3,38 @@
 .Description {
   position: relative;
   cursor: pointer;
-
-  &::before {
-    font-size: 12px;
-    font-weight: bold;
-    content: '?';
-    color: #BEBEBE;
-  }
-
-  & > div {
-    display: none;
-    min-width: 180px;
-    max-width: 480px;
-    letter-spacing: 0.15px;
-    line-height: 2rem;
-    white-space: pre-line;
-  }
-
-  &:hover > div,
-  &:active > div {
-    display: block;
-  }
 }
+
+.Description::before {
+  font-size: 12px;
+  font-weight: bold;
+  content: '?';
+  color: #BEBEBE;
+}
+
+.Description > div {
+  display: none;
+  min-width: 180px;
+  max-width: 480px;
+  letter-spacing: 0.15px;
+  line-height: 2rem;
+  white-space: pre-line;
+}
+
+.Description:hover > div,
+.Description:active > div {
+  display: block;
+}
+
 
 .Label {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+}
 
-  .Description {
-    margin-bottom: 6px;
-  }
+.Label .Description {
+  margin-bottom: 6px;
 }
 
 .IconTooltip {

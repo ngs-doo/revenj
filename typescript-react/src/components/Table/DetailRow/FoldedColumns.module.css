@@ -1,10 +1,10 @@
 .FoldedColumnsWrapper {
   box-sizing: border-box;
   padding: 10px 0;
+}
 
-  &:empty {
-    padding: 0;
-  }
+.FoldedColumnsWrapper:empty {
+  padding: 0;
 }
 
 .FoldedColumnContainer {
@@ -16,11 +16,11 @@
   font-size: 15px;
   transition: font-weight 120ms ease-in-out;
   cursor: pointer;
+}
 
-  &:hover {
-    font-weight: bold;
-    background: rgba(28, 157, 219, 0.1);
-  }
+.FoldedColumnContainer:hover {
+  font-weight: bold;
+  background: rgba(28, 157, 219, 0.1);
 }
 
 .FoldedColumnName {
