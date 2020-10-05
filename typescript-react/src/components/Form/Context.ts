@@ -70,6 +70,7 @@ export interface IFormContext<T> {
   initialValues?: Partial<T>;
   readOnly?: boolean;
   forceOptional?: boolean;
+  defaultInline?: boolean;
   submitErrors?: FormErrors<T>;
   reset: () => void;
   change: <K extends DeepKeyOf<T>>(field: K, value: DeepTypeOf<T, K>) => void;

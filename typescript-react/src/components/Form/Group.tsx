@@ -23,6 +23,7 @@ interface IGroupPublicProps<T> {
   height?: number;
   className?: string;
   containerClassName?: string;
+  columns?: 1 | 2 | 3;
 }
 
 interface IGroupInjectedProps<T> {
@@ -37,7 +38,20 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
   public context: React.ContextType<typeof FormContext>;
 
   public render() {
-    const { borderless, children, containerClassName, className, vertical, name, visibility, optional, values, height, ...props } = this.props;
+    const {
+      borderless,
+      children,
+      containerClassName,
+      columns,
+      className,
+      vertical,
+      name,
+      visibility,
+      optional,
+      values,
+      height,
+      ...props
+    } = this.props;
     const { sectionName, ...rest } = this.context!;
 
     if (!this.isVisible()) {
@@ -47,7 +61,19 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
     const childElement = (
       <Section
         {...props}
-        containerClassName={classNames(styles.Section, { [styles.Vertical]: vertical, [styles.Borderless]: borderless, [styles.Titled]: !!props.title }, className, 'dslGroup')}
+        containerClassName={classNames(
+          styles.Section,
+          {
+            [styles.Vertical]: vertical,
+            [styles.Borderless]: borderless,
+            [styles.Titled]: !!props.title,
+            [styles.SingleColumn]: columns === 1,
+            [styles.TwoColumns]: columns === 2,
+            [styles.ThreeColumns]: columns === 3,
+          },
+          className,
+          'dslGroup',
+        )}
         keepExpanded={!this.collapseInitially()}
       >
         {children}
@@ -64,14 +90,14 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
           name={Array.isArray(name) ? name.join('.') : name as string}
           {...extraProps}
         >
-          <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName(), clearOnUnmount: true, forceOptional: optional ?? undefined }}>
+          <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName(), clearOnUnmount: true, forceOptional: optional ?? undefined, defaultInline: vertical }}>
             {childElement}
           </FormContextProvider>
         </FormSection>
       );
     } else {
       return (
-        <FormContextProvider value={{ ...rest, sectionName, clearOnUnmount: true, forceOptional: optional ?? undefined }}>
+        <FormContextProvider value={{ ...rest, sectionName, clearOnUnmount: true, forceOptional: optional ?? undefined, defaultInline: vertical }}>
           {childElement}
         </FormContextProvider>
       );
