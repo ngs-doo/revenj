@@ -32,8 +32,10 @@
 
 /* NOTE: Ideally, we would have CSS-in-JS at this point, since it's an UI lib, but we can at least force generated code to behave */
 .Section.Vertical > .Items :global .dslField {
+  min-width: 100%;
   max-width: 100%;
   width: 100%;
+  margin-right: 0;
 }
 
 .Section .Header {
@@ -72,4 +74,51 @@
 /* Indent deeper sections, as we've run out of special title styles */
 .Section.Titled .Section.Titled .Section.Titled .Section.Titled .Section.Titled .Section {
   margin-left: 32px;
+}
+
+.Section.SingleColumn > .Items > :global(.dslField),
+.Section.SingleColumn > .Items > .Section {
+  width: 100%;
+  max-width: 100%;
+  margin-right: 0;
+}
+
+.Section.TwoColumns > .Items > :global(.dslField),
+.Section.TwoColumns > .Items > .Section.Vertical {
+  width: calc((100% - 16px) / 2);
+  max-width: calc((100% - 16px) / 2);
+  margin-right: 16px;
+}
+
+.Section.TwoColumns > .Items > :global(.dslField):nth-child(2),
+.Section.TwoColumns > .Items > .Section.Vertical:nth-child(2) {
+  margin-right: 0;
+}
+
+.Section.ThreeColumns > .Items > :global(.dslField),
+.Section.ThreeColumns > .Items > .Section.Vertical {
+  width: calc((100% - 32px) / 3);
+  max-width: calc((100% - 32px) / 3);
+  margin-right: 16px;
+}
+
+.Section.ThreeColumns > .Items > :global(.dslField):nth-child(3),
+.Section.ThreeColumns > .Items > .Section.Vertical:nth-child(3) {
+  margin-right: 0;
+}
+
+.Section.TwoColumns > .Items > .Section.Vertical,
+.Section.ThreeColumns > .Items > .Section.Vertical {
+  align-self: flex-start;
+}
+
+@media (max-width: 767px) {
+  .Section.TwoColumns > .Items > :global(.dslField),
+  .Section.TwoColumns > .Items > .Section.Vertical,
+  .Section.ThreeColumns > .Items > :global(.dslField),
+  .Section.ThreeColumns > .Items > .Section.Vertical {
+    width: 100%;
+    max-width: 100%;
+    margin-right: 0;
+  }
 }

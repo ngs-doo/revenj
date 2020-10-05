@@ -240,6 +240,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
   const disabled = configProps?.disabled ?? props.disabled;
   const readOnly = configProps?.readOnly ?? context.readOnly ?? props.readOnly;
   const rawLabel = configProps?.label ?? props.label;
+  const inline = configProps?.inline ?? props.inline ?? context.defaultInline;
 
   if (visible === false || (typeof visible === 'function' && !visible(values))) {
     return null;
@@ -260,6 +261,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
       readOnly={typeof readOnly === 'function' ? readOnly(values) : readOnly}
       disabled={typeof disabled === 'function' ? disabled(values) : disabled}
       label={rawLabel ? localizeTextIfMarked(localize, rawLabel) : undefined}
+      inline={inline}
       // Fields that can appear and vanish must be able to clear themselves when unmounting, we don't want stale invisible values
       clearOnUnmount={props.clearOnUnmount || context.clearOnUnmount || configProps.clearOnUnmount || visible != null}
     />
