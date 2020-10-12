@@ -69,6 +69,11 @@ object Utils {
     res
   }
 
+  private val productType = typeOf[Product]
+  private val scalaSerializeType = typeOf[Serializable]
+  private val javaSerializeType = typeOf[java.io.Serializable]
+  private val excludeTypes = Set(productType, scalaSerializeType, javaSerializeType)
+
   private def initializeParser() = {
     val f = SAXParserFactory.newInstance()
     f.setValidating(false)
@@ -187,6 +192,10 @@ object Utils {
         //TODO: temporary hacky resolution to raw type
         else if (typeArgs.isEmpty) Some(symClass)
         else None
+      case rt: RefinedType if rt.parents.size > 1 =>
+        val without = rt.parents.filterNot(excludeTypes.contains)
+        if (without.lengthCompare(1) == 0) buildType(without.head, mirror, inContainer, erasedVersion)
+        else None
       case ExistentialType(_, t) =>
         t match {
           case TypeRef(_, sym, _) if sym.isClass =>
@@ -198,7 +207,6 @@ object Utils {
         None
     }
   }
-
 
   private[revenj] def makeGenericType(container: Class[_], arguments: List[JavaType]): ParameterizedType = {
     val sb = sharedBuilder.get()

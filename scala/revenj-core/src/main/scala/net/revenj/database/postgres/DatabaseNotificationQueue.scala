@@ -11,7 +11,7 @@ class DatabaseNotificationQueue(
   private lazy val queue = new java.util.concurrent.LinkedBlockingQueue[net.revenj.patterns.DataChangeNotification.NotifyInfo]()
   private val inQueueMode = transactionConnection.isDefined && !transactionConnection.get.getAutoCommit
 
-  def notifyOrQueue[T <: Identifiable](connection: java.sql.Connection, name: String, insert: Seq[T], update: Seq[(T, T)], delete: Seq[T]): Unit = {
+  def notifyOrQueue[T <: Identifiable](connection: java.sql.Connection, name: String, insert: scala.collection.Seq[T], update: scala.collection.Seq[(T, T)], delete: scala.collection.Seq[T]): Unit = {
     if (inQueueMode && (transactionConnection.get eq connection)) {
       if (insert != null && insert.nonEmpty) queue.add(net.revenj.patterns.DataChangeNotification.NotifyInfo(name, net.revenj.patterns.DataChangeNotification.Operation.Insert, insert))
       if (update != null && update.nonEmpty) {
@@ -31,7 +31,7 @@ class DatabaseNotificationQueue(
     }
   }
 
-  def notifyOrQueue[T <: Identifiable](connection: java.sql.Connection, name: String, insert: Seq[T]): Unit = {
+  def notifyOrQueue[T <: Identifiable](connection: java.sql.Connection, name: String, insert: scala.collection.Seq[T]): Unit = {
     if (inQueueMode && (transactionConnection.get eq connection)) {
       if (insert != null && insert.nonEmpty) queue.add(net.revenj.patterns.DataChangeNotification.NotifyInfo(name, net.revenj.patterns.DataChangeNotification.Operation.Insert, insert))
     } else if (connection.getAutoCommit) {
