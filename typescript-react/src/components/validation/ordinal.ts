@@ -13,6 +13,13 @@ export interface IOrdAlphaValidatorCreatorFactory {
   (value: string): ValidatorCreator<string, string, any, any>;
 }
 
+export const eqOrdCreator: IOrdValidatorCreatorFactory = (value) =>
+  validatorCreatorFactory<Ord, Ord, any, any>({
+    getValidatorBaseValue: () => value,
+    getValidatorErrorMessage: (base, _input) => `Value must be equal to ${base}.`,
+    operator: operators.eq,
+  });
+
 export const gtOrdCreator: IOrdValidatorCreatorFactory = (value) =>
   validatorCreatorFactory<Ord, Ord, any, any>({
     getValidatorBaseValue: () => value,

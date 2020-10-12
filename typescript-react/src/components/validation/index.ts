@@ -85,6 +85,7 @@ export const multipleOfFactorCreator = (factor: Numeric, message?: string) =>
 
 export const requiredCreator = requireValidators.requiredCreator;
 
+export const eqCreator = ordinal.eqOrdCreator;
 export const ltCreator = ordinal.ltOrdCreator;
 export const lteCreator = ordinal.lteOrdCreator;
 export const gteCreator = ordinal.gteOrdCreator;
