@@ -90,14 +90,14 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
           name={Array.isArray(name) ? name.join('.') : name as string}
           {...extraProps}
         >
-          <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName(), clearOnUnmount: true, forceOptional: optional ?? undefined, defaultInline: vertical }}>
+          <FormContextProvider value={{ clearOnUnmount: true, ...rest, sectionName: this.getNestedSectionName(), forceOptional: optional ?? undefined, defaultInline: vertical }}>
             {childElement}
           </FormContextProvider>
         </FormSection>
       );
     } else {
       return (
-        <FormContextProvider value={{ ...rest, sectionName, clearOnUnmount: true, forceOptional: optional ?? undefined, defaultInline: vertical }}>
+        <FormContextProvider value={{ clearOnUnmount: true, ...rest, sectionName, forceOptional: optional ?? undefined, defaultInline: vertical }}>
           {childElement}
         </FormContextProvider>
       );
