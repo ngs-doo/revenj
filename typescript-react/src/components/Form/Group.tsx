@@ -24,6 +24,11 @@ interface IGroupPublicProps<T> {
   className?: string;
   containerClassName?: string;
   columns?: 1 | 2 | 3;
+  /**
+   * Works only on named groups. Set this if you want to preserve values (or handle their removal in another way)
+   * when the group stops being visible.
+   */
+  keepOnUmount?: boolean;
 }
 
 interface IGroupInjectedProps<T> {
@@ -36,6 +41,14 @@ export interface IGroup<T> extends IGroupPublicProps<T>, IGroupInjectedProps<T> 
 export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
   public static contextType = FormContext;
   public context: React.ContextType<typeof FormContext>;
+
+  public componentWillUnmount() {
+    if (this.props.name != null && this.props.keepOnUmount !== true) {
+      const { change } = this.context!;
+      const name = this.getNestedSectionName()!;
+      change(name, null);
+    }
+  }
 
   public render() {
     const {
