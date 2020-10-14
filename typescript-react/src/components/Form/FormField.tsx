@@ -234,9 +234,13 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
     return null;
   }
 
-  const configProps: FormControlDescriptor<any, any, T> = get(configContext, props.name as any, {});
+  const flatName = Array.isArray(props.name) ? props.name.join('.') : props.name as string;
+  const flatSection = Array.isArray(context.sectionName) ? context.sectionName.join('.') : context.sectionName as string;
+  const fullName = flatSection != null ? `${flatSection}.${flatName}` : flatName;
+  const configProps: FormControlDescriptor<any, any, T> = get(configContext, fullName as any, {});
   const visible = configProps?.visible ?? props.visible;
-  const required = context.forceOptional !== true && (configProps?.required ?? props.required);
+  //TODO: temporarly disable this until expected behavior is figured out
+  const required = configProps?.required ?? (props.required/* && context.forceOptional !== true*/);
   const disabled = configProps?.disabled ?? props.disabled;
   const readOnly = configProps?.readOnly ?? context.readOnly ?? props.readOnly;
   const rawLabel = configProps?.label ?? props.label;
