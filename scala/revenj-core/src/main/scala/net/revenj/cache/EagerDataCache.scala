@@ -91,7 +91,7 @@ class EagerDataCache[T <: Identifiable, PK](
   }
 
   def get(uri: String): Option[T] = if (uri != null) cache.get(uri) else None
-  def items: scala.collection.Seq[T] = cache.values.toIndexedSeq
+  def items: scala.collection.IndexedSeq[T] = cache.valuesIterator.toIndexedSeq
 
   def version: Int = currentVersion
   def changedOn: OffsetDateTime = lastChange
@@ -129,19 +129,19 @@ class EagerDataCache[T <: Identifiable, PK](
   }
 
   override def search(specification: Option[Specification[T]], limit: Option[Int], offset: Option[Int]): Future[scala.collection.IndexedSeq[T]] = {
-    val items = cache.values.toIndexedSeq
+    val items = cache.valuesIterator.toIndexedSeq
     val filtered = if (specification.isDefined) items.filter(specification.get) else items
     val skipped = if (offset.isDefined) filtered.drop(offset.get) else filtered
     Future.successful(if (limit.isDefined) skipped.take(limit.get) else skipped)
   }
 
   override def count(specification: Option[Specification[T]]): Future[Long] = {
-    val items = cache.values.toIndexedSeq
+    val items = cache.valuesIterator
     Future.successful(if (specification.isDefined) items.count(specification.get).toLong else items.size.toLong)
   }
 
   override def exists(specification: Option[Specification[T]]): Future[Boolean] = {
-    val items = cache.values.toIndexedSeq
+    val items = cache.valuesIterator
     Future.successful(if (specification.isDefined) items.exists(specification.get) else items.nonEmpty)
   }
 
