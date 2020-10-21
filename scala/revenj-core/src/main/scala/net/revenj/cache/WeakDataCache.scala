@@ -22,7 +22,7 @@ class WeakDataCache[T <: Identifiable](repository: Repository[T]) extends DataCa
     }
   }
 
-  private def findAndCache(uri: String) = {
+  private def findAndCache(uri: String): Future[Option[T]] = {
     repository.find(uri) map { found =>
       if (found.isDefined) {
         val wr = cache()
@@ -32,7 +32,7 @@ class WeakDataCache[T <: Identifiable](repository: Repository[T]) extends DataCa
     }
   }
 
-  private def findAndCache(uris: scala.collection.Seq[String]) = {
+  private def findAndCache(uris: scala.collection.Seq[String]): Future[scala.collection.IndexedSeq[T]] = {
     val wr = cache()
     repository.find(uris).map { found =>
       found.foreach ( it => wr.put(it.URI, it) )
