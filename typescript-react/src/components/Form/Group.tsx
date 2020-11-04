@@ -43,7 +43,7 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
   public context: React.ContextType<typeof FormContext>;
 
   public componentWillUnmount() {
-    if (this.props.name != null && this.props.keepOnUnmount !== true) {
+    if (this.props.name != null && this.props.keepOnUnmount === false) {
       const { change } = this.context!;
       const name = this.getNestedSectionName()!;
       change(name, null);
@@ -103,14 +103,14 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
           name={Array.isArray(name) ? name.join('.') : name as string}
           {...extraProps}
         >
-          <FormContextProvider value={{ clearOnUnmount: true, ...rest, sectionName: this.getNestedSectionName(), forceOptional: optional ?? undefined, defaultInline: vertical }}>
+          <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName(), forceOptional: optional ?? undefined, defaultInline: vertical }}>
             {childElement}
           </FormContextProvider>
         </FormSection>
       );
     } else {
       return (
-        <FormContextProvider value={{ clearOnUnmount: true, ...rest, sectionName, forceOptional: optional ?? undefined, defaultInline: vertical }}>
+        <FormContextProvider value={{ ...rest, sectionName, forceOptional: optional ?? undefined, defaultInline: vertical }}>
           {childElement}
         </FormContextProvider>
       );

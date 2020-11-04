@@ -255,6 +255,8 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
     ...configProps.props,
   };
 
+  const unmountSet = props.clearOnUnmount || context.clearOnUnmount || configProps.clearOnUnmount;
+
   return (
     <FormFieldInternal
       {...props}
@@ -267,7 +269,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
       label={rawLabel ? localizeTextIfMarked(localize, rawLabel) : undefined}
       inline={inline}
       // Fields that can appear and vanish must be able to clear themselves when unmounting, we don't want stale invisible values
-      clearOnUnmount={props.clearOnUnmount || context.clearOnUnmount || configProps.clearOnUnmount || visible != null}
+      clearOnUnmount={unmountSet || context.sectionName == null && unmountSet === undefined}
     />
   );
 }
