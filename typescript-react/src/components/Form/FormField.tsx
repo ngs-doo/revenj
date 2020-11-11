@@ -250,9 +250,17 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
     return null;
   }
 
+  var customDefault = {};
+  if (props.defaultValue !== undefined && context.formType === FormType.Create) {
+    const currentValue = get(values, fullName);
+    if (currentValue != null) {
+      customDefault = {defaultValue: currentValue};
+    }
+  }
+
   const spreadProps = {
     ...props.props,
-    ...configProps.props,
+    ...configProps.props
   };
 
   //respect non-null clearOnUnmount value when set (even false)
@@ -265,6 +273,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
       {...props}
       {...context}
       {...(configProps ?? {}) as any}
+      {...customDefault}
       props={spreadProps}
       required={typeof required === 'function' ? required(values) : required}
       readOnly={typeof readOnly === 'function' ? readOnly(values) : readOnly}
