@@ -14,6 +14,10 @@ exports[`validation isIntegerCreator should return an error when value exists bu
 
 exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 7`] = `"Value must be an integer."`;
 
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 8`] = `"Value must be an integer."`;
+
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 9`] = `"Value must be an integer."`;
+
 exports[`validation isNumberCreator should return an error when value exists but is not treatable as a numeric value 1`] = `"Value must be a number."`;
 
 exports[`validation isNumberCreator should return an error when value exists but is not treatable as a numeric value 2`] = `"Value must be a number."`;

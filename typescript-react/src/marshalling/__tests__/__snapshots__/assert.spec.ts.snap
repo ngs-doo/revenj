@@ -12,11 +12,15 @@ exports[`data marshalling asserting assertEnum should test that the value is one
 
 exports[`data marshalling asserting assertEnum should test that the value is one of the provided values 3`] = `"Value is required, but is not set!"`;
 
-exports[`data marshalling asserting assertInt should explode on non-integers 1`] = `"Expected an Int, but value is bla"`;
+exports[`data marshalling asserting assertInt should explode on non-integers 1`] = `"Expected an Int, but value is -2147483649"`;
 
-exports[`data marshalling asserting assertInt should explode on non-integers 2`] = `"Expected an Int, but value is null"`;
+exports[`data marshalling asserting assertInt should explode on non-integers 2`] = `"Expected an Int, but value is bla"`;
 
-exports[`data marshalling asserting assertInt should explode on non-integers 3`] = `"Expected an Int, but value is 1.55"`;
+exports[`data marshalling asserting assertInt should explode on non-integers 3`] = `"Expected an Int, but value is null"`;
+
+exports[`data marshalling asserting assertInt should explode on non-integers 4`] = `"Expected an Int, but value is 1.55"`;
+
+exports[`data marshalling asserting assertInt should explode on non-integers 5`] = `"Expected an Int, but value is 2147483648"`;
 
 exports[`data marshalling asserting assertLong should explode on non-longs 1`] = `"Expected a Long, but value is bla"`;
 

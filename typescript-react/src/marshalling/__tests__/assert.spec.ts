@@ -1,4 +1,8 @@
 import {
+  INT_MAX_VALUE,
+  INT_MIN_VALUE,
+} from '../../constants';
+import {
   ColumnType,
   TypescriptResultSet,
 } from '../../ResultSet/ResultSet';
@@ -66,14 +70,14 @@ ing`];
 
   describe('assertInt', () => {
     it('should pass through valid integers', () => {
-      const valids = [-10, 0, 235] as Int[];
+      const valids = [INT_MIN_VALUE, -10, 0, 235, INT_MAX_VALUE] as Int[];
       for (const valid of valids) {
         expect(Assert.assertInt(valid)).toBe(valid);
       }
     });
 
     it('should explode on non-integers', () => {
-      const invalids = ['bla', null, 1.55] as any[];
+      const invalids = [INT_MIN_VALUE - 1, 'bla', null, 1.55, INT_MAX_VALUE + 1] as any[];
       for (const invalid of invalids) {
         expect(() => Assert.assertInt(invalid)).toThrowErrorMatchingSnapshot();
       }

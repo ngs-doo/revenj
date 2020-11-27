@@ -1,6 +1,8 @@
 
 import { TypescriptResultSet } from '../ResultSet/ResultSet';
 import {
+  INT_MAX_VALUE,
+  INT_MIN_VALUE,
   SHORT_MAX_VALUE,
   SHORT_MIN_VALUE,
 } from '../constants';
@@ -45,7 +47,8 @@ export const assertString = <T extends string>(value: T, length?: number): T => 
 
 export const assertInt = <T extends Int>(value: T): T => {
   const number = Number.parseInt(String(value), 10) as T;
-  if (Number.isNaN(number) || typeof value !== 'number' || value !== number) {
+
+  if (Number.isNaN(number) || value > INT_MAX_VALUE || value < INT_MIN_VALUE || typeof value !== 'number' || value !== number) {
     throw new Error(`Expected an Int, but value is ${value}`);
   }
   return number;

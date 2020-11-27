@@ -4,6 +4,10 @@ import {
   isIntegerCreator,
   isNumberCreator,
 } from '../type';
+import {
+  INT_MAX_VALUE,
+  INT_MIN_VALUE,
+} from '../../../constants';
 
 describe('validation', () => {
   describe('isNumberCreator', () => {
@@ -37,6 +41,8 @@ describe('validation', () => {
       expect(isInteger(null as any, {})).toBeUndefined();
       expect(isInteger('0', {})).toBeUndefined();
       expect(isInteger('123', {})).toBeUndefined();
+      expect(isInteger(`${INT_MAX_VALUE}`, {})).toBeUndefined();
+      expect(isInteger(`${INT_MIN_VALUE}`)).toBeUndefined();
     });
 
     it('should return an error when value exists but is not treatable as an integer', () => {
@@ -54,6 +60,10 @@ describe('validation', () => {
       expect(isInteger('2.2', {})).toMatchSnapshot();
       expect(isInteger(new BigNumber(2.2), {})).toBeDefined();
       expect(isInteger(new BigNumber(2.2), {})).toMatchSnapshot();
+      expect(isInteger(INT_MAX_VALUE + 1, {})).toBeDefined();
+      expect(isInteger(INT_MAX_VALUE + 1, {})).toMatchSnapshot();
+      expect(isInteger(INT_MIN_VALUE - 1, {})).toBeDefined();
+      expect(isInteger(INT_MIN_VALUE - 1, {})).toMatchSnapshot();
     });
   });
 });

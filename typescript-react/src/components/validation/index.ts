@@ -1,4 +1,8 @@
 import {
+  INT_MAX_VALUE,
+  INT_MIN_VALUE,
+} from '../../constants';
+import {
   parseBigNum,
   Numeric,
   ZERO,
@@ -59,7 +63,7 @@ export const isNumberCreator = (message: string = 'Please enter a number') =>
     getValidatorErrorMessageOverride: message,
   });
 
-export const isIntegerCreator = (message: string = 'Must be a whole number') =>
+export const isIntegerCreator = (message: string = `Must be a whole number between ${INT_MIN_VALUE} and ${INT_MAX_VALUE}`) =>
   type.isIntegerCreator({
     getValidatorErrorMessageOverride: message,
   });
