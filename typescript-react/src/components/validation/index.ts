@@ -59,7 +59,7 @@ export const isNumberCreator = (message: string = 'Please enter a number') =>
     getValidatorErrorMessageOverride: message,
   });
 
-export const isIntegerCreator = (message: string = 'Must be a whole number') =>
+export const isIntegerCreator = (message: string = `Must be a whole number with up to 10 digits`) =>
   type.isIntegerCreator({
     getValidatorErrorMessageOverride: message,
   });
