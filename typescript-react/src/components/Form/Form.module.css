@@ -21,7 +21,7 @@
     padding: 10px;
     box-shadow: -1px -1px 3px 0 btnPrimaryColor;
     background-color: loginBodyColor;
-    z-index: 5;
+    z-index: 110;
   }
 
   .FormComponent {
