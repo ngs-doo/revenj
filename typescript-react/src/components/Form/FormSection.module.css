@@ -49,6 +49,10 @@
   margin-bottom: 16px;
 }
 
+.Section.Titled:not(:last-child) > .Items:empty {
+  margin-bottom: 0;
+}
+
 .Section .Items:empty + .Header {
   display: none;
 }
