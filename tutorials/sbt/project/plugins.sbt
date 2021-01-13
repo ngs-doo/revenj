@@ -1,0 +1,1 @@
+addSbtPlugin("com.dslplatform" % "sbt-dsl-platform" % "0.8.1")

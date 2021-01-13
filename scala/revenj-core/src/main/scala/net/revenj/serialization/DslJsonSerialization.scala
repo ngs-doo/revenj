@@ -3,9 +3,9 @@ package net.revenj.serialization
 import java.io.{InputStream, OutputStream}
 import java.lang.reflect
 import java.nio.charset.StandardCharsets
-
 import com.dslplatform.json.{ConfigurationException, ConfigureJodaTime, ConfigureScala, DslJson, DslJsonScala, JsonReader, JsonWriter}
-import com.dslplatform.json.runtime.{CustomScalaClassAnalyzer, ScalaEnumAsTraitAnalyzer, Settings}
+import com.dslplatform.json.runtime.Settings
+import com.fasterxml.jackson.annotation.JsonCreator
 import net.revenj.patterns.ServiceLocator
 
 import scala.reflect.runtime.universe
@@ -19,11 +19,8 @@ class DslJsonSerialization(
   val dslJson: DslJson[ServiceLocator] = {
     val dslSettings = settings.getOrElse(Settings.withRuntime().includeServiceLoader())
       .withContext(locator)
+      .creatorMarker(classOf[JsonCreator], true)
       .`with`(new ConfigureScala).`with`(new ConfigureJodaTime)
-      .resolveReader(CustomScalaClassAnalyzer.Reader)
-      .resolveWriter(CustomScalaClassAnalyzer.Writer)
-      .resolveReader(ScalaEnumAsTraitAnalyzer.Reader)
-      .resolveWriter(ScalaEnumAsTraitAnalyzer.Writer)
       .withJavaConverters(true)
     new DslJson[ServiceLocator](dslSettings)
   }

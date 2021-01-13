@@ -3,19 +3,23 @@ package net.revenj
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
-
 import net.revenj.RevenjSerialization.PassThroughSerialization
-import net.revenj.serialization.{DslJsonSerialization, Serialization, WireSerialization}
+import net.revenj.serialization.{DslJsonSerialization, JacksonSerialization, Serialization, WireSerialization}
 
+import java.util.Properties
 import scala.reflect.runtime.universe._
 import scala.util.{Failure, Success, Try}
 
 private[revenj] class RevenjSerialization(
   dslJson: DslJsonSerialization,
+  jackson: JacksonSerialization,
+  properties: Properties,
   loader: ClassLoader
 ) extends WireSerialization {
   private val passThrough = new PassThroughSerialization()
   private val mirror = runtimeMirror(loader)
+
+  private val useDslJson = properties.getProperty("revenj.serialization") == "dsl-json"
 
   import RevenjSerialization._
 
@@ -46,7 +50,11 @@ private[revenj] class RevenjSerialization(
       case _ =>
         require(contentType == "application/json", "Only application/json content type is supported")
         if (value != null) {
-          dslJson.serializeRuntime(value, stream, manifest).map(_ => "application/json")
+          if (useDslJson) {
+            dslJson.serializeRuntime(value, stream, manifest).map(_ => "application/json")
+          } else {
+            jackson.serialize(value, stream, manifest).map(_ => "application/json")
+          }
         } else {
           Try(stream.write(Null)).map(_ => "application/json")
         }
@@ -58,7 +66,11 @@ private[revenj] class RevenjSerialization(
       Success(content)
     } else {
       require(contentType == "application/json", "Only application/json content type is supported")
-      dslJson.deserializeRuntime(content, length, manifest)
+      if (useDslJson) {
+        dslJson.deserializeRuntime(content, length, manifest)
+      } else {
+        jackson.deserialize(manifest, content, length)
+      }
     }
   }
 
@@ -67,7 +79,11 @@ private[revenj] class RevenjSerialization(
       Success(stream)
     } else {
       require(contentType == "application/json", "Only application/json content type is supported")
-      dslJson.deserializeRuntime(stream, manifest)
+      if (useDslJson) {
+        dslJson.deserializeRuntime(stream, manifest)
+      } else {
+        jackson.deserialize(manifest, stream)
+      }
     }
   }
 
@@ -123,9 +139,14 @@ private[revenj] class RevenjSerialization(
 
   override def find[TFormat: TypeTag](): Option[Serialization[TFormat]] = {
     val format = mirror.typeOf[TFormat]
-    if (typeOf[Any] == format || typeOf[AnyRef] == format) Some(passThrough.asInstanceOf[Serialization[TFormat]])
-    else if (typeOf[String] == format) Some(dslJson.asInstanceOf[Serialization[TFormat]])
-    else None
+    if (typeOf[Any] == format || typeOf[AnyRef] == format) {
+      Some(passThrough.asInstanceOf[Serialization[TFormat]])
+    } else if (typeOf[String] == format) {
+      if (useDslJson) Some(dslJson.asInstanceOf[Serialization[TFormat]])
+      else Some(jackson.asInstanceOf[Serialization[TFormat]])
+    } else {
+      None
+    }
   }
 }
 private object RevenjSerialization {

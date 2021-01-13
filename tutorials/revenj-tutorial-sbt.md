@@ -94,63 +94,59 @@ To setup a minimalistic SBT project we need several sbt files:
 
 Plugins file is used to bring in the SBT DSL plugin so we can use it inside SBT. Plugins file should contain a line:
 
-    addSbtPlugin("com.dslplatform" % "sbt-dsl-platform" % "0.6.0")
+    addSbtPlugin("com.dslplatform" % "sbt-dsl-platform" % "0.8.1")
 
 Which will allow the usage of some dsl* tasks within SBT after we enable it in build.sbt which should end up looking like:
 
-    import com.dslplatform.compiler.client.parameters.{Targets, Settings => DslSettings}
-
-    libraryDependencies += "net.revenj" %% "revenj-akka" % "0.6.1"
+    import com.dslplatform.compiler.client.parameters.{Settings => DslSettings}
+    import com.dslplatform.compiler.client.parameters.Targets.{Option => DslTarget}
+    import com.dslplatform.sbt.SbtDslPlatformPlugin.autoImport.{dsl => revenj}
 
     name := "revenj-sbt-example"
     version := "1.0"
-    scalaVersion := "2.12.2"
+    scalaVersion := "2.13.4"
 
     enablePlugins(SbtDslPlatformPlugin)
-    dslNamespace := "example"
-    dslLibraries := Map(Targets.Option.REVENJ_SCALA -> unmanagedBase.value / "dsl-model.jar")
-    dslPostgres := "127.0.0.1:5432/revenj_sbt?user=revenj&password=revenj"
-    dslApplyMigration := true
-    dslSettings ++= Seq(DslSettings.Option.JACKSON)
-    dslForce := true
+
+    libraryDependencies += "net.revenj" %% "revenj-akka" % "1.1.1"
+
+    Compile/revenj/dslNamespace := "example"
+    Compile/revenj/dslSources += (DslTarget.REVENJ_SCALA -> sourceManaged.value / "main")
+    Compile/revenj/dslPostgres := "127.0.0.1:5432/revenj_sbt?user=revenj&password=revenj"
+    Compile/revenj/dslApplyMigration := true
+    Compile/revenj/dslSettings ++= Seq(DslSettings.Option.JACKSON)
+    Compile/revenj/dslResourcePath := Some((Compile/revenj/resourceDirectory).value / "META-INF" / "services")
+    Compile/revenj/dslForce := true
 
 This setup will configure DSL compiler so that:
 
  * base namespace for generated Scala files is `example`. For our `Person` object full name will be `example.cms.Person` as combination of both namespace, module and name
- * extra module jar file will be created in the `lib` folder. While this is not strictly required, a loot of tools don't work out of the box unless they can pick up such a dependency. This jar will contain all our compiled DSL model
+ * DSL managed sources will be created for REVENJ_SCALA target in source managed folder
  * Postgres database named `revenj_sbt` on localhost gets used and managed by SBT. Due to `dslApplyMigration` set to true it will also get migrated after a `dslMigrate` task is executed.
  * additional code is generated so [Jackson library](https://github.com/FasterXML/jackson-module-scala) can be used. Jackson is not often used in Scala projects due to problems with type system and primitives. But DSL compiler will inject additional boilerplate in the generated code so that such issues are mitigated.
  * force will simplify some operations by skipping on confirmations. Ideally it should not be used in real world projects
 
-By default dsl settings for path to DSL will point to `dsl` folder. Unless we want to change it with `dslDslPath` we can put our cms dsl there. To compile jar we need to issue a `dslLibrary` task to SBT.
+By default dsl settings for path to DSL will point to `dsl` folder. Unless we want to change it with `dslDslPath` we can put our cms dsl there. Our sources will be compiled along normal compilation process.
 Output should look something along the lines of:
 
-    > dslLibrary
+    > compile
+    [info] Found 1 DSL files
+    [info] Re-compiling DSL files...
     [info] Checking for latest compiler version due to download option
-    [info] dsl-compiler.exe at latest version (2017-05-26)
-    [info] Source for revenj.scala created in /home/rikard/revenj-sbt-example/target/dsl-temp/REVENJ_SCALA
-    [info] Compiling 11 Scala sources to /home/rikard/revenj-sbt-example/target/scala-2.12/dsl-platform-classes...
-    [warn] there were 8 deprecation warnings
-    [warn] there were four deprecation warnings (since 0.5.3)
-    [warn] there were 16 deprecation warnings (since 2.12.0)
-    [warn] there were 28 deprecation warnings in total; re-run with -deprecation for details
-    [warn] four warnings found
-    [info] Packaging /home/rikard/revenj-sbt-example/target/scala-2.12/revenj-sbt-example-dsl_2.12-1.0.jar ...
-    [info] Done packaging.
-    [info] Generated library for target revenj.scala in /home/rikard/revenj-sbt-example/lib/dsl-model.jar
-    [success] Total time: 27 s, completed Jun 1, 2017 10:53:35 AM
+    [info] dsl-compiler.exe at latest version (2020-09-29)
+    [info] Creating the source took 4 second(s)
+    [info] Source for revenj.scala created in /home/revenj/revenj-sbt-example/target/scala-2.13/src_managed/main
+    [success] Total time: 12 s, completed 13.01.2021. 19:38:53
 
-We also need to prepare database via `dslMigrate` task. If our DB user is a superuser we can create the DB through SBT. 
+We also need to prepare database via `dsl::dslMigrate` task. If our DB user is a superuser we can create the DB through SBT. 
 Output should look something along the lines of:
 
-    > dslMigrate
+    > dsl::dslMigrate
     [info] Checking for latest compiler version due to download option
-    [info] dsl-compiler.exe at latest version (2017-05-26)
-    [warn] Error connecting to the database.
-    [warn] FATAL: database "revenj_sbt" does not exist
-    Create a new database revenj_sbt (y/N): y
+    [info] dsl-compiler.exe at latest version (2020-09-29)
     [info] Creating SQL migration for Postgres ...
-    [info] Migration saved to /home/rikard/revenj-sbt-example/sql/postgres-sql-migration-1496309467408.sql
+    [info] Running the migration took 4 second(s)
+    [info] Migration saved to /home/revenj/revenj-sbt-example/sql/postgres-sql-migration-1610563274597.sql
     [info] New object Person will be created in schema cms
     [info] New property ID will be created for Person in cms
     [info] New property firstName will be created for Person in cms
@@ -173,8 +169,8 @@ Output should look something along the lines of:
     [info] New property type will be created for PhoneNumber in cms
     [info] New property number will be created for PhoneNumber in cms
     [info] Applying migration...
-    [info] Database migrated and script renamed to: applied-postgres-sql-migration-1496309467408.sql
-    [success] Total time: 20 s, completed Jun 1, 2017 11:31:08 AM
+    [info] Database migrated and script renamed to: applied-postgres-sql-migration-1610563274597.sql
+    [success] Total time: 5 s, completed 13.01.2021. 19:41:14
 
 Created SQL migration will contain a lot of boilerplate but it will prepare DB in such a way so it can be used in an object-relational way.
 
@@ -202,14 +198,12 @@ An example entry point to the application can be set up such as `Startup.scala` 
       }
     }
 
+Before we can start the app we need to setup modules which will be used. This is autowired by default via services which can be managed through `dsl::dslResource`. Resources should be added to `META-INF/services` path.
+
 Now we can start our app via `run` task in SBT. Output should look like:
 
     > run
-    [info] Checking for latest compiler version due to download option
-    [info] dsl-compiler.exe at latest version (2017-05-26)
-    [info] Source for revenj.scala created in /home/rikard/revenj-sbt-example/target/dsl-temp/REVENJ_SCALA
-    [info] Packaging /home/rikard/revenj-sbt-example/target/scala-2.12/revenj-sbt-example-dsl_2.12-1.0.jar ...
-    [info] Done packaging.
+    [info] Found 1 DSL files
     [info] Running Startup 
     Starting server at http://localhost:8080 ...
     Started server at http://localhost:8080
@@ -223,3 +217,5 @@ with content such as JSON from the example above which will insert an new person
 
 we should get a response from server giving out surrogate ID created for the person.
 Now our previous search command should return an value in the list.
+
+Same project can be found in the [repository](/tutorials/sbt/)

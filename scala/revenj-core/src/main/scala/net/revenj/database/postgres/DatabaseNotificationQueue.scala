@@ -40,12 +40,15 @@ class DatabaseNotificationQueue(
   }
 
   override def close(): Unit = {
-    if (transactionConnection.isDefined && (transactionConnection.get.getAutoCommit || transactionConnection.get.isClosed)) {
-      val iter = queue.iterator
-      while (iter.hasNext) {
-        notifications.notify(iter.next())
+    if (inQueueMode) {
+      val connection = transactionConnection.get
+      if (connection.isClosed || connection.getAutoCommit) {
+        val iter = queue.iterator
+        while (iter.hasNext) {
+          notifications.notify(iter.next())
+        }
+        queue.clear()
       }
-      queue.clear()
     }
   }
 }
