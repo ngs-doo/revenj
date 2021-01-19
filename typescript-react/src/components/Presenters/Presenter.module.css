@@ -7,6 +7,12 @@
   .Presenter {
     padding: 0 12px;
   }
+
+  :global .MobileBody {
+    :local .Presenter {
+      padding-bottom: 64px;
+    }
+  }
 }
 
 .Actions {
