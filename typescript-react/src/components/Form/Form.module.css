@@ -28,13 +28,6 @@
     margin-bottom: 72px;
     padding-bottom: 64px;
   }
-
-  :global .MobileBody {
-    :local .FormComponent {
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-  }
 }
 
 .Button {
