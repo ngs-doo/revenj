@@ -33,7 +33,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	{
 		public static readonly NpgsqlConnectedState Instance = new NpgsqlConnectedState();
 
-		private const string Exception_AuthenticationMethodNotSupported = "Only AuthenticationClearTextPassword and AuthenticationMD5Password supported for now. Received: {0}";
+		private const string Exception_AuthenticationMethodNotSupported = "Only AuthenticationClearTextPassword, AuthenticationMD5Password and AuthenticationSASL supported for now. Received: {0}";
 		private const string Log_AuthenticationClearTextRequest = "Server requested cleartext password authentication.";
 		private const string Log_AuthenticationMD5Request = "Server requested MD5 password authentication.";
 		private const string Log_AuthenticationOK = "AuthenticationOK received.";

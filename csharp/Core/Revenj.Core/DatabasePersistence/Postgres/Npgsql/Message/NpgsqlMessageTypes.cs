@@ -42,6 +42,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		Execute = (byte)'E',
 		Describe = (byte)'D',
 		Close = (byte)'C',
-		Sync = (byte)'S'
+		Sync = (byte)'S',
+		SASL = (byte)'p'
 	}
 }

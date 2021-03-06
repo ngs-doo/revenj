@@ -238,7 +238,7 @@ namespace Revenj.Utility
 					CurrentPosition += (int)offset;
 					break;
 				default:
-					CurrentPosition = TotalSize - (int)offset;
+					CurrentPosition = TotalSize + (int)offset;
 					break;
 			}
 			if (CurrentPosition > TotalSize)

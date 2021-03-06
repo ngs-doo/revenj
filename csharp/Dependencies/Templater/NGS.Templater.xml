@@ -4,78 +4,151 @@
         <name>NGS.Templater</name>
     </assembly>
     <members>
-        <member name="T:NGS.Templater.ITemplater">
+        <member name="T:NGS.Templater.Handled">
             <summary>
-            Provides access to low level API.
+            Specifying behavior of Templater after the handler.
+            Common usage of handler is to remove region of the document,
+            but various scenarios can be taken after the removal.
+            If handler is not relevant, Nothing should be returned,
+            which will result in invocation of next registered handler.
             </summary>
         </member>
-        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">
+        <member name="F:NGS.Templater.Handled.Nothing">
             <summary>
-            Metadata for each specific tag.
-            Metadata is used for value conversions and formatting.
+            Indicate that handler is not applicable and Templater should call next plugin
             </summary>
-            <param name="tag">Tag for which metadata is required</param>
-            <param name="all">True returns metadata for all matching tags, false returns metadata for just the first one</param>
-            <returns>String array of tag metadata. If tag is not found empty array will be returned</returns>
         </member>
-        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">
+        <member name="F:NGS.Templater.Handled.OtherHandlers">
             <summary>
-            Since there can be multiple tags with same id, metadata for each specific tag in sequence
-            can be obtained by passing in its index.
-            If tags doesn't exists at that index null will be returned.
+            Indicate that plugin is applicable, that next plugin should not be called, 
+            but normal processing should continue as usual - calling replace on the tag
             </summary>
-            <param name="tag">Tag for which metadata is required</param>
-            <param name="index">Tag index in sequence of same tag names</param>
-            <returns>Found metadata. null if tag/index does not exist</returns>
         </member>
-        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">
+        <member name="F:NGS.Templater.Handled.ThisTag">
             <summary>
-            Replace first specified tag with provided value.
-            Some document formats and value converters support complex values (DateTime, Image, ...)
+            Indicate that plugin has processed this tag, but has not processed nested or other tags.
+            If there are nested tags Templater will continue processing them as usual
             </summary>
-            <param name="tag">Tag to be replaced</param>
-            <param name="value">Replacement value (which can be formatted)</param>
-            <returns>Successful replacement</returns>
         </member>
-        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">
+        <member name="F:NGS.Templater.Handled.NestedTags">
             <summary>
-            Replace tag at the index in the sequence of same tag names with provided value.
-            Some document formats and value converters support complex values (DateTime, Image, ...)
-            Will return the index of the next same tag which is shared across context and should be replaced next.
-            If none is found it will return -1
+            When plugin handles this and nested tags. Templater will avoid calling into other plugins
+            and will not call into nested tags
             </summary>
-            <param name="tag">Tag to be replaced</param>
-            <param name="index">Tag index in sequence of same tag names</param>
-            <param name="value">Replacement value (which can be formatted)</param>
-            <returns>Index of the next shared tag</returns>
         </member>
-        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">
+        <member name="F:NGS.Templater.Handled.WholeObject">
             <summary>
-            Resize context which contains all specified tags.
-            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
+            If other tags on the same level are also handled by the plugin,
+            instruct Templater to avoid further processing of tags on this level
             </summary>
-            <param name="tags">Tags which specifies the context</param>
-            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
-            <returns>Context found and resized</returns>
         </member>
-        <member name="M:NGS.Templater.ITemplater.Clone(System.Int32)">
+        <member name="T:NGS.Templater.ImageInfo">
             <summary>
-            Clones a document.
+            Templater specific image type.
+            In cases when System.Drawing is not available or alternative library has to be used
+            this special type is recognized and processed by ITemplater implementations.
+            <para />
+            By default .NET image types such as System.Drawing.Image and Icon will work out-of-the-box by converting
+            their definition into this type.This can be disabled to avoid System.Drawing dependency
             </summary>
-            <param name="count">Number of clones to create</param>
-            <returns>An IEnumerable&lt;ITemplater&gt; with cloned tags, text and other document properties</returns>
         </member>
-        <member name="P:NGS.Templater.ITemplater.Tags">
+        <member name="F:NGS.Templater.ImageInfo.Content">
             <summary>
-            Recognized tags in the document.
-            Each tag is enumerated once.
+            Image content as stored on disk
             </summary>
+        </member>
+        <member name="F:NGS.Templater.ImageInfo.Extension">
+            <summary>
+            Image extension stored in the OOXML zip file.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.ImageInfo.Width">
+            <summary>
+            Width of the image.
+            Image is displayed depending on its size and resolution
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.ImageInfo.HorizontalResolution">
+            <summary>
+            Resolution of the image. 96 is the default resolution.
+            Image is displayed depending on its size and resolution.
+            <para />
+            Also known as DPI (dots per inch).
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.ImageInfo.Height">
+            <summary>
+            Height of the image.
+            Image is displayed depending on its size and resolution
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.ImageInfo.VerticalResolution">
+            <summary>
+            Resolution of the image. 96 is the default resolution.
+            Image is displayed depending on its size and resolution.
+            <para />
+            Also known as DPI (dots per inch).
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.ImageInfo.#ctor(System.IO.Stream,System.String,System.Int32,System.Int32,System.Single)">
+            <summary>
+            Create image from stream with same horizontal and vertical resolution.
+            This is native Templater image type.
+            </summary>
+            <param name="content">image stream</param>
+            <param name="extension">extension used to specify image type</param>
+            <param name="width">image width</param>
+            <param name="height">image height</param>
+            <param name="resolution">horizontal and vertical DPI</param>
+        </member>
+        <member name="M:NGS.Templater.ImageInfo.#ctor(System.IO.Stream,System.String,System.Int32,System.Single,System.Int32,System.Single)">
+            <summary>
+            Create image from stream
+            </summary>
+            <param name="content">image stream</param>
+            <param name="extension">extension used to specify image type</param>
+            <param name="width">image width</param>
+            <param name="horizontalResolution">horizontal DPI</param>
+            <param name="height">image height</param>
+            <param name="verticalResolution">vertical DPI</param>
         </member>
         <member name="T:NGS.Templater.IDocumentFactoryBuilder">
             <summary>
             Templater document factory builder. 
-            Should be used when custom plugins are provided.
+            <para />
+            Main point of configuration:
+            <list type="bullet">
+              <item>User defined plugins can be registered</item>
+              <item>Built-in plugins can be disabled or overridden</item>
+              <item>Tag patterns can be configured</item>
+              <item>Templater Editor integration can be set-up</item>
+              <item>Limits and guards can be specified</item>
+              <item>Custom XML library can be specified</item>
+            </list>
             </summary>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.Object,System.String,System.String,System.Object})">
+            <summary>
+            Register new navigation expression plugin.
+            Plugin works by accepting parent object, current evaluated object, member used for navigation and detected metadata.
+            It is only invoked when metadata is present and custom navigation separator is specified.
+            <para />
+            By default value is provided by member evaluation of parent object.
+            This means method or field evaluation, or value access in Dictionary via key/member.
+            <para />
+            Metadata is extracted between navigation separator and navigation char.
+            Example tag for semicolon navigation separator (:) and default navigation char (.):
+            <para />
+            [[items:at(1).property]]
+            <para />
+            will navigate from root object over items member and at(1) metadata
+            This way plugin can intercept default navigation over items member 
+            and instead of returning list will return second element of the list as a result.
+            <para />
+            All registered plugins will be called.
+            </summary>
+            <param name="navigation">navigation plugin</param>
+            <returns>itself</returns>
         </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.String,System.Object})">
             <summary>
@@ -83,19 +156,50 @@
             Plugin works by accepting object value and current metadata
             and returns the same object if plugin is not applicable
             or new value if plugin is applicable.
+            <para />
             Metadata can be parsed to extract arguments from it.
             </summary>
+            <example>
+            Setting up implementation for the plugin
+            <code>
+              static object FormatJoin(object value, string metadata)
+              {
+              	var ie = value as IEnumerable;
+              	return ie != null &amp;&amp; metadata == "join" 
+              		? string.Join(", ", ie.Cast&lt;object&gt;())
+              		: value;
+              }
+            </code>
+            </example>
             <param name="formatter">formatting plugin</param>
             <returns>itself</returns>
         </member>
-        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.String,System.String,NGS.Templater.ITemplater,System.Boolean})">
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.String,System.String,System.Int32,NGS.Templater.ITemplater,NGS.Templater.Handled})">
             <summary>
             Register new metadata handler.
             Plugin works by accepting object value, current metadata, 
-            current property (path) and ITemplater instance. It should return 
-            true when it wants to stop further processing of that tag.
+            current tag (path), tag position (or -1 when position is not used) and ITemplater instance. 
+            <para />
+            Returns instructions on how to continue with further processing.
+            <para />
             Metadata can be parsed to extract arguments from it.
             </summary>
+            <example>
+            Setting up implementation for the plugin
+            <code>
+              static Handled HandleCollapse(object value, string metadata, string tag, int position, ITemplater templater)
+              {
+              	if (metadata == "collapse" &amp;&amp; (value == null || value == string.Empty || value is bool &amp;&amp; (bool)value))
+              	{
+              		var resized = position == -1
+              			? templater.Resize(tag, 0)
+              			: templater.Resize(new[] { new TagPosition(tag, position) }, 0);
+              		if (resized) return Handled.NestedTags;
+              	}
+              	return Handled.Nothing;
+              }
+            </code>
+            </example>
             <param name="handler">handler plugin</param>
             <returns>itself</returns>
         </member>
@@ -110,20 +214,34 @@
             <param name="processor">processor plugin</param>
             <returns>itself</returns>
         </member>
-        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.Object})">
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Include(System.Func{System.Object,System.String,System.String[],System.Object})">
             <summary>
             Register new low level replace plugin.
             Replace plugins are called when low level Replace methods are invoked.
+            Plugin will receive input value, tag, metadata and should provide output value.
             </summary>
             <param name="replacer">replacer plugin</param>
             <returns>itself</returns>
         </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.WithMatcher(System.String)">
             <summary>
-            Customize tag matcher. Default tag regex is [-+@\w\s.,!?/]+
+            Customize tag matcher for all patterns. Default tag regex is [-+@\w\s.,!?/\:()]+
             Full matcher consists from more elements, this is just the base tag element.
             </summary>
             <param name="regex">custom tag matcher</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.WithMatcher(System.String,NGS.Templater.TagPattern)">
+            <summary>
+            Customize tag matcher for a specific pattern. Default tag regex is [-+@\w\s.,!?/]+
+            [[TAG]], {{TAG}} and &lt;&lt;TAG&gt;&gt; are enabled by default and use default tag regex.
+            Patterns can be disabled by using unmatchable regex for the specified pattern (such as [^\S\s]).
+            Different patterns can have different regexes.
+            <para />
+            Full matcher consists from more elements, this is just the base tag element.
+            </summary>
+            <param name="regex">custom tag matcher</param>
+            <param name="pattern">for existing tag pattern</param>
             <returns>itself</returns>
         </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.ResizeLimit(System.Int32)">
@@ -132,6 +250,137 @@
             To protect against badly designed documents where Templater resizes the wrong context, set this limit to the maximum expected nesting.
             </summary>
             <param name="limit">maximum nesting level</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.OnUnprocessed(System.Action{System.String,NGS.Templater.ITemplater,System.Collections.Generic.IEnumerable{System.String},System.Object})">
+            <summary>
+            Customize on unprocessed tags behavior - tags which did not matched input data.
+            By default unprocessed tags are left as-is (as a new tag with unprocessed appended as last metadata)
+            but sometimes its useful to remove them
+            or to replace them with a custom value (eg, from their metadata)
+            <para />
+            First argument is the current navigation prefix where the tags were not matched with input, 
+            the third tag enumerates all the relevant tags and the last argument is the object leaf currently processed
+            </summary>
+            <param name="handler">tags handler</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.BuiltInNavigation(System.Boolean)">
+            <summary>
+            Templater has few builtin navigation (such as at(index), ...)
+            If there is no use for them, they can be excluded from usage
+            </summary>
+            <param name="include">include all builtin navigation</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.BuiltInFormatters(System.Boolean)">
+            <summary>
+            Templater has a lot of builtin formatters (such as format, substring, ...)
+            While they can be overridden, if there is no use for them, 
+            they can be excluded from usage
+            </summary>
+            <param name="include">include all builtin formatters</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.BuiltInHandlers(System.Boolean)">
+            <summary>
+            Templater has few builtin handlers (such as collapse).
+            While they can't be overridden, they are only invoked if a matching metadata is found. 
+            If there is no use for them they can be excluded from usage
+            </summary>
+            <param name="include">include all builtin handlers</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.BuiltInLowLevelPlugins(System.Boolean)">
+            <summary>
+            Templater has few builtin low level plugins (such as System.Drawing.Image).
+            If those APIs are not available (as in case of Azure sandbox) plugins should be disabled.
+            </summary>
+            <param name="include">include all builtin low level plugins</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Streaming(System.Int32)">
+            <summary>
+            Configure the streaming size. Default is 16384.
+            When IEnumerable is used, it's processed by streaming algorithm.
+            Instead of loading all data into memory it's processed in chunk of streaming size.
+            If format supports flushing, it's flushed after specified size is reached.
+            To disable streaming use 0
+            </summary>
+            <param name="size">streaming chunk size</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Blacklist(System.Reflection.MemberInfo)">
+            <summary>
+            To disable navigation over certain methods blacklisting can be used.
+            Since some methods might reveal sensitive information,
+            such as: 'GetType().Assembly.Location' it's often useful to disable their evaluation.
+            </summary>
+            <param name="member">blacklist member access</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.SvgConverter(System.Func{System.Xml.Linq.XDocument,NGS.Templater.ImageInfo})">
+            <summary>
+            When adding SVG into documents, use additional converter for fallback image.
+            SVG can be displayed in new applications without converted image, 
+            but some applications support only fallback image.
+            <para />
+            By default SVG converter is not registered which means Templater
+            will only insert SVG image into target document.
+            <para />
+            Passing null means no SVG converter is used (which is the default behavior).
+            Returning null from the conversion will result in no fallback image.
+            </summary>
+            <param name="converter">svg to image converter</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.NavigateUsing(System.Char)">
+            <summary>
+            Change navigation character. Default navigation character is . (DOT)
+            <para />
+            To make navigation more familiar in some cases it is possible to change 
+            navigation character into more appropriate one, e.g.: / (SLASH)
+            <para />
+            Character must be included in tag regular expression, which can be customized if required.
+            </summary>
+            <param name="character">custom navigation character</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.NavigateSeparator(System.Char)">
+            <summary>
+            Change navigation separator. By default this is disabled.
+            <para />
+            To support metadata during navigation, 
+            custom expression can be used which will invoke metadata at appropriate place.
+            An example would be usage of built in at(index) metadata which can be enabled via : (SEMICOLON)
+            [[collection:at(2).name]] would provide third element of the collection without expanding the collection.
+            <para />
+            Character must be included in tag regular expression, which can be customized if required.
+            </summary>
+            <param name="character">custom navigation separator</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.ConfigureEditor">
+            <summary>
+            Configure document settings which are used in Templater Editor Add-In for Microsoft Office.
+            <para />
+            Instead of normal processing, schema can be embedded into OOXML documents which
+            will make document easier to manage from Microsoft Office.
+            <para />
+            This feature is not available in SOLO developer license.
+            </summary>
+            <returns>editor configuration</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.Sign(System.Security.Cryptography.X509Certificates.X509Certificate2)">
+            <summary>
+            Sign office document at the end of processing.
+            <para />
+            To prevent further changes to the document allow signing it with a certificate. 
+            This will make document final.
+            If any changes are made to the document signature validation will fail and user will know that
+            the document was changed after the signing.
+            </summary>
+            <param name="certificate">signing certificate</param>
             <returns>itself</returns>
         </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.Build">
@@ -155,39 +404,6 @@
             <param name="customer">License owner</param>
             <param name="license">License key</param>
             <returns>configured document factory</returns>
-        </member>
-        <member name="T:NGS.Templater.Configuration">
-            <summary>
-            Public entry point.
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.Configuration.Configure(System.String,System.String)">
-            <summary>
-            Create instance of document factory using provided license information.
-            </summary>
-            <param name="customer">License owner</param>
-            <param name="license">License key</param>
-            <returns>Document factory</returns>
-        </member>
-        <member name="M:NGS.Templater.Configuration.Configure(System.String)">
-            <summary>
-            Create instance of document factory using provided custom license file (default is 'templater.lic').
-            File can be embedded in assembly.
-            </summary>
-            <param name="path">Path to license file</param>
-            <returns>Document factory</returns>
-        </member>
-        <member name="P:NGS.Templater.Configuration.Builder">
-            <summary>
-            Create instance of document factory builder, so custom plugins can be provided.
-            </summary>
-        </member>
-        <member name="P:NGS.Templater.Configuration.Factory">
-            <summary>
-            Create instance of document factory.
-            License will be checked from 'templater.lic' file.
-            File can be embedded in assembly.
-            </summary>
         </member>
         <member name="T:NGS.Templater.IDocumentFactory">
             <summary>
@@ -224,25 +440,227 @@
             <param name="extension">Template extension</param>
             <returns>Template document interface</returns>
         </member>
+        <member name="T:NGS.Templater.ITemplater">
+            <summary>
+            Provides access to low level API.
+            Templater low level API is generic abstraction over documents.
+            Same abstraction is used for text, Word document, Excel workbook and PowerPoint presentation.
+            <para/>
+            There are only several basic operations this API can do:
+            <list type="bullet">
+              <item>inspect state via <see cref="P:NGS.Templater.ITemplater.Tags">tags</see> and <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">user defined metadata</see> and <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">positioned metadata</see></item>
+              <item>replace tags via <see cref="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">simple replace</see> and <see cref="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">positioned replace</see></item>
+              <item>duplicate (or remove) part of the region via <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">smart resize</see></item>
+              <item>duplicate (or remove) part of the region via <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{NGS.Templater.TagPosition},System.Int32)">explicit resize</see></item>
+              <item>clone the entire document via <see cref="M:NGS.Templater.ITemplater.Clone(System.Int32)">cloning</see></item>
+            </list>
+            <para/>
+            Part of the magic happens with special data types sent to replace (jagged arrays, DataTable, ImageInfo, Element, ...)
+            <para/>
+            Main magic happens in the resize method which takes care of detecting best context and performing operation on it.
+            <para/>
+            Most plugins are not invoked when Low-level API is used. Only low level replace plugin is invoked,
+            while handlers, formatters, navigation and others are not.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">
+            <summary>
+            User-defined metadata for tags.
+            For tag such as <c>[[my.tag]:format:custom]</c> only "format" and "custom" will be listed for the first tag.
+            Metadata can be used for value conversions and formatting via built-in and user defined plugins.
+            Plugins are registered during library initialization and should inspect the arguments to check if they are applicable.
+            <para/>
+            When there are multiple tags with the same path and all argument is passed to enumerate all metadata for this tag,
+            each metadata will be enumerated only once.
+            <para/>
+            For more detailed control there is <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">position based</see> API
+            </summary>
+            <param name="tag">Tag for which metadata is required</param>
+            <param name="all">True returns metadata for all matching tags, false returns metadata for just the first one</param>
+            <returns>String array of the tag metadata. If tag is not found empty array will be returned</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">
+            <summary>
+            Since there can be multiple tags with same path, metadata for each specific tag in sequence
+            can be obtained by passing in its index.
+            If tags doesn't exists at that index null will be returned.
+            <para />
+            This metadata also includes internal values used to keep track of tag placement.
+            Such metadata starts with <c>_ci:</c>
+            </summary>
+            <param name="tag">Tag for which metadata is required</param>
+            <param name="index">Tag index in sequence of same tag names</param>
+            <returns>Found metadata. null if tag/index does not exist</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">
+            <summary>
+            Replace first specified tag with provided value.
+            Some document formats and value converters support complex values
+            (<see cref="T:System.DateTime">Date</see>, <see cref="T:NGS.Templater.ImageInfo">image</see>, ...)
+            <para/>
+            For documents where Dynamic resize feature is supported, ResultSet or jagged arrays can be passed.
+            <para/>
+            To access underlying XML in some formats, <see cref="T:System.Xml.Linq.XElement">element</see> can be used
+            <para/>
+            Most other types will be converted to string via <c>.ToString()</c> method
+            <para/>
+            Low-level replace handlers will be invoked before final value is used in the document.
+            When default formatting of some type needs to be defined, this can be implemented via Low-level replace handler.
+            </summary>
+            <param name="tag">Tag to be replaced</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Successful replacement</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">
+            <summary>
+            Replace tag at the position in the sequence of same tag paths with provided value.
+            Some document formats and value converters support complex values
+            (<see cref="T:System.DateTime">Date</see>, <see cref="T:NGS.Templater.ImageInfo">image</see>, ...)
+            <para/>
+            For documents where Dynamic resize feature is supported, ResultSet or jagged arrays can be passed.
+            <para/>
+            To access underlying XML in some formats, <see cref="T:System.Xml.Linq.XElement">element</see> can be used
+            <para/>
+            Most other types will be converted to string via <c>.ToString()</c> method
+            <para/>
+            Index of the next tag with same path which is shared across context and should be replaced next will be returned.
+            If none is found it will return -1
+            <para/>
+            Low-level replace handlers will be invoked before final value is used in the document.
+            When default formatting of some type needs to be defined, this can be implemented via Low-level replace handler.
+            </summary>
+            <param name="tag">Tag to be replaced</param>
+            <param name="index">Tag index in sequence of same tag names</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Index of the next shared tag</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">
+            <summary>
+            Resize context which contains all specified tags.
+            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
+            Templater will use various assumptions to pick the best region for the detected tags.
+            Thus, document structure should closely match the tags usage, preferably through similar nesting structure.
+            <para />
+            If specified tags do not exist, they will be ignored.
+            <para />
+            When applicable this method will include additional tags with the same name which are part of the same context.
+            Specifying tag multiple times results in same behavior as tag being specified only once.
+            <para />
+            When tags are shared, resize will affect multiple contexts at once (table, list, chart, etc...)
+            When shared context is being processed, tag position info will be passed to handler plugin.
+            <para />
+            Resize with count = 0 means removing the context/region and all tags within that region (even if they were not specified)
+            <para />
+            Resize with count = 1 will bind the tags together which allows Templater to do smart replacement from high level API calls.
+            </summary>
+            <param name="tags">Tags which specifies the context</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{NGS.Templater.TagPosition},System.Int32)">
+            <summary>
+            Resize context which contains all specified tags.
+            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
+            <para/>
+            This method does not include additional tags, only the specified ones.
+            If multiple tags with the same name must be included, tags must be specified multiple times with the appropriate index.
+            <para/>
+            Each element of the tags collection consist from the tag and its position in the document.
+            <para/>
+            When tags are shared, resize will only affect specific context. Other shared contexts will be ignored.
+            <para/>
+            If unknown tag is specified or index is outside of boundary, exception will be thrown.
+            <para/>
+            Resize with count = 0 means removing the context/region and all tags within that region (even if they were not specified)
+            <para/>
+            Resize with count = 1 will not bind the tags together like the similar <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">resize</see> API.
+            </summary>
+            <param name="tags">exact tags which specify the context</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Clone(System.Int32)">
+            <summary>
+            Clones a document.
+            New low level API can be operated independently from the current one.
+            </summary>
+            <param name="count">Number of clones to create</param>
+            <returns>An <code>IEnumerable&lt;ITemplater&gt;</code> with cloned tags, text and other document properties</returns>
+        </member>
+        <member name="P:NGS.Templater.ITemplater.Tags">
+            <summary>
+            Recognized tags in the document.
+            Each tag is enumerated only once.
+            <para/>
+            If there are tags in nested documents, they are also enumerated here.
+            <para/>
+            Only the path of the tag is enumerated, so for <c>[[my.tag]]</c> only "my.tag" will be listed.
+            <para/>
+            To gather more information about tags <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">position metadata</see> API should be used
+            </summary>
+        </member>
         <member name="T:NGS.Templater.ITemplateDocument">
             <summary>
             Template document with analyzed tags.
             Modifies document in memory and saves changes on dispose.
+            <para />
+            Represents abstraction over specific document type (text, Word document, ...)
+            All such documents are processed with this same API which allows for code reuse across different templates.
             </summary>
         </member>
         <member name="M:NGS.Templater.ITemplateDocument.Process``1(``0)">
             <summary>
             Modifies document according to rules for specified data type.
             Tags are resolved from properties, fields, methods, column names, etc...
+            <para />
+            Plugins will be invoked when this API is used, such as formatters, navigations and handlers.
+            <para />
+            Templater will find the best processor type which will process input data with the appropriate rules.
+            <para />
+            Process method can be called multiple times if there are multiple root objects.
             </summary>
+            <example>
+              document.Process(new { table = dataTable });
+              document.Process(jsonDictionary);
+            </example>
             <typeparam name="T">Specific rules will be chosen based on this type</typeparam>
             <param name="data">Data for modifying tags</param>
             <returns>Itself</returns>
         </member>
         <member name="P:NGS.Templater.ITemplateDocument.Templater">
             <summary>
-            Provides access to low level API.
+            Provides access to low-level API.
+            <para />
+            Low-level API should mostly be used from plugins.
+            <para />
+            Common use case for using it is to check if all tags were processed and put out appropriate warning when they were not.
             </summary>
+        </member>
+        <member name="T:NGS.Templater.TagPosition">
+            <summary>
+            Exact tag position for Resize method.
+            When doing resize, instead of doing resize on the first tag in the document,
+            another one can be specified.
+            <para />
+            This allows for more advanced replacement/duplication scenarios and resolution of some problems which happen in tag sharing mode.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagPosition.Tag">
+            <summary>
+            Tag value to match. Metadata and brackets/braces/chevrons are not considered part of the tag.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagPosition.Position">
+            <summary>
+            Position of the tag in the document. If invalid position is specified, exception will be thrown.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.TagPosition.#ctor(System.String,System.Int32)">
+            <summary>
+            Prepare structure by defining tag and position arguments
+            </summary>
+            <param name="tag">tag value to match</param>
+            <param name="position">tag position in the document</param>
         </member>
         <member name="T:NGS.Templater.TemplaterHelper">
             <summary>
@@ -275,6 +693,244 @@
             <param name="tag">Tag which specifies the context</param>
             <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
             <returns>Context found and resized</returns>
+        </member>
+        <member name="M:NGS.Templater.TemplaterHelper.Resize(NGS.Templater.ITemplater,System.String,System.Int32,System.Int32)">
+            <summary>
+            Helper method with single argument for resize function with a position.
+            </summary>
+            <param name="templater">Templater</param>
+            <param name="tag">Tag which specifies the context</param>
+            <param name="position">Position of the tag in the document (within the same path)</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="T:NGS.Templater.IEditorConfigurationBuilder">
+            <summary>
+            Templater Editor integration is available for Reporting and Enterprise license.
+            Many options can be configured which will setup Templater Editor behavior.
+            This is useful when preparing document for tag definition and
+            for final processing of document when template setup can be changed into presentation setup.
+            <para />
+            Most configuration options will leave already existing values unless specific setting is provided.
+            <para />
+            This feature is not available in SOLO developer license.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.IEditorConfigurationBuilder.TagManagement(System.Boolean)">
+            <summary>
+            Is the user allowed to specify their own tags.
+            Most of the time this is not useful when application defined tags are available,
+            since only a fixed set of tags should be available.
+            </summary>
+            <param name="allow">allow user to add/remove tags</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IEditorConfigurationBuilder.TagListing(System.Boolean)">
+            <summary>
+            Show tag listing when opening up document.
+            This is useful as it will immediately show the list of available tags to the user.
+            Tags are listed from defined schema.
+            Schema is defined by running Templater with data (sample or real) and embedding it into the final document.
+            </summary>
+            <param name="show">list available tags</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IEditorConfigurationBuilder.TagDetection(System.Boolean)">
+            <summary>
+            Continuously run tag detection on any change in the document.
+            This is very useful to have enabled during template setup as
+            it will detect tag changes and run analysis for common issues
+            and best practices.
+            To see such list <see cref="M:NGS.Templater.IEditorConfigurationBuilder.IssuesListing(System.Boolean)"/> can be set
+            </summary>
+            <param name="enabled">enable tag detection and analysis</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IEditorConfigurationBuilder.IssuesListing(System.Boolean)">
+            <summary>
+            When tag detection and analysis is enabled, Templater Editor will
+            search for various issues in the document.
+            It will report errors, warnings and suggestions on what should be
+            resolved in the template before its sent for processing.
+            </summary>
+            <param name="show">list errors, warnings and suggestions</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IEditorConfigurationBuilder.AddAlias(System.String,System.String)">
+            <summary>
+            To simplify tag management long tags can be shortened via aliases.
+            This is especially useful in Word tables with many columns as long
+            tags will extends cell width to accommodate entire tag name.
+            </summary>
+            <param name="prefix">long tag prefix which can be replaced with alias</param>
+            <param name="alias">tag alias for specific prefix</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IEditorConfigurationBuilder.MetadataResolver(System.Func{System.Object,System.Collections.Generic.IDictionary{System.String,NGS.Templater.TagMetadata}})">
+            <summary>
+            To make tags more useful and friendly, additional metadata can be attached to schema.
+            This can be used to explain the tag purpose, how it should be used, along with
+            putting them in categories and providing example value.
+            <para />
+            Custom callback can be registered here which can provide additional metadata for specific object.
+            Metadata should specify every relevant property as a key with value pair consisting from its metadata description.
+            <para />
+            Depending on the use case Templater will provide type, DataTable or object instance relevant for the analysis.
+            When resolving dictionary metadata its useful to use specific dictionary instances for easier resolution.
+            </summary>
+            <param name="customResolver">provide additional metadata for specified type</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IEditorConfigurationBuilder.DebugLog(System.Boolean)">
+            <summary>
+            Capturing debug log will allow inspection of every Templater processing step.
+            <para />
+            This can help to better understand how Templater works, or diagnose an issue with processing.
+            </summary>
+            <param name="capture">capture debug log</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IEditorConfigurationBuilder.Configure(System.Boolean)">
+            <summary>
+            Finish configuring the Microsoft Office Templater Editor setup.
+            <para />
+            Instead of normal processing, schema can be embedded into OOXML documents.
+            At the end of the processing document will remain the same as the original 
+            template but schema will be embedded into the document which can be used 
+            from the Templater Editor.
+            <para />
+            If schema is not embedded, it will be stripped from the output document,
+            which is expected use case when creating the final document.
+            </summary>
+            <param name="embedSchema">embed schema</param>
+            <returns>continue with document builder</returns>
+        </member>
+        <member name="T:NGS.Templater.TagPattern">
+            <summary>
+            Supported tag patterns
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagPattern.BRACKETS">
+            <summary>
+            [[TAG]] pattern
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagPattern.BRACES">
+            <summary>
+            {{TAG}} pattern
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagPattern.CHEVRONS">
+            <summary>
+            &lt;&lt;TAG&gt;&gt; pattern
+            </summary>
+        </member>
+        <member name="T:NGS.Templater.TagMetadata">
+            <summary>
+            Additional metadata available in Templater Editor.
+            This is available in tag search/listing to provide more information about the tag to the user.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagMetadata.Status">
+            <summary>
+            Status of the tag. Inactive tags are hidden by default.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagMetadata.ActualType">
+            <summary>
+            When type is not really known or specific type should be used instead,
+            actual type can be specified to be used instead of the one Templater detected.
+            This is useful in dynamic scenarios when Templater is unable to pick the best type,
+            such as processing JSON.
+            <para />
+            It's also useful when there is type conversion going on, where some other type will 
+            actually be processed, instead of the one defined in the type signature due to low-level plugins.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagMetadata.Description">
+            <summary>
+            Description of the tag explaining its purpose.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagMetadata.Example">
+            <summary>
+            Value example used for this tag.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagMetadata.Category">
+            <summary>
+            Category which can be used for grouping tags.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.TagMetadata.#ctor(NGS.Templater.TagStatus,System.Type,System.String,System.String,System.String)">
+            <summary>
+            Create tag metadata description.
+            All parameters are optional, with status defaulting to Active.
+            </summary>
+            <param name="status">status of the tag</param>
+            <param name="actualType">when custom type will actually be used</param>
+            <param name="description">description of the tag</param>
+            <param name="example">value example for the tag</param>
+            <param name="category">category of the tag</param>
+        </member>
+        <member name="T:NGS.Templater.TagStatus">
+            <summary>
+            Status of the tag used in the Templater Editor.
+            <para />
+            Inactive tags are hidden by default, while deprecated tags are discouraged from its use.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagStatus.Active">
+            <summary>
+            The default active status for ordinary tags.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagStatus.Inactive">
+            <summary>
+            When tag can be used, but it's not expected that its used,
+            it can be marked as inactive and it will be hidden by default.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagStatus.Deprecated">
+            <summary>
+            When some tag will be removed in the future, 
+            or its use should be discouraged.
+            <para />
+            During analysis Templater will translate members with [Obsolete] attributes into appropriate (this) status
+            </summary>
+        </member>
+        <member name="T:NGS.Templater.Configuration">
+            <summary>
+            Public entry point.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.Configuration.Configure(System.String,System.String)">
+            <summary>
+            Create instance of document factory using provided license information.
+            </summary>
+            <param name="customer">License owner</param>
+            <param name="license">License key</param>
+            <returns>Document factory</returns>
+        </member>
+        <member name="M:NGS.Templater.Configuration.Configure(System.String)">
+            <summary>
+            Create instance of document factory using provided custom license file (default is 'templater.lic').
+            File can be embedded in assembly.
+            </summary>
+            <param name="path">Path to license file</param>
+            <returns>Document factory</returns>
+        </member>
+        <member name="P:NGS.Templater.Configuration.Builder">
+            <summary>
+            Create instance of document factory builder, so custom plugins can be provided.
+            </summary>
+        </member>
+        <member name="P:NGS.Templater.Configuration.Factory">
+            <summary>
+            Create instance of document factory.
+            License will be checked from 'templater.lic' file.
+            File can be embedded in assembly.
+            </summary>
         </member>
     </members>
 </doc>

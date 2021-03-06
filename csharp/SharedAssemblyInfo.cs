@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyCompany("DSL Platform")]
-[assembly: AssemblyCopyright("Copyright © DSL Platform 2019")]
+[assembly: AssemblyCopyright("Copyright © DSL Platform 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]

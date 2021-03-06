@@ -189,6 +189,7 @@
     <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlReadyState.cs" />
     <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlStartupState.cs" />
     <Compile Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlState.cs" />
+    <Compile Include="DatabasePersistence\Postgres\Npgsql\SCRAM.cs" />
     <Compile Include="DatabasePersistence\Postgres\PostgresConnectionPool.cs" />
     <Compile Include="DatabasePersistence\Postgres\PostgresDatabaseNotification.cs" />
     <Compile Include="DatabasePersistence\Postgres\PostgresDatabaseQuery.cs" />

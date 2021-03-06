@@ -489,7 +489,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			AuthenticationSCMCredential = 6,
 			AuthenticationGSS = 7,
 			AuthenticationGSSContinue = 8,
-			AuthenticationSSPI = 9
+			AuthenticationSSPI = 9,
+			AuthenticationSASL = 10,
+			AuthenticationSASLContinue = 11,
+			AuthenticationSASLFinal = 12
 		}
 
 		protected IEnumerable<IServerResponseObject> ProcessBackendResponses_Ver_3(NpgsqlConnector context)
@@ -502,6 +505,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				var buffer = context.TmpBuffer;
 				var queue = context.ArrayBuffer;
 				List<NpgsqlError> errors = null;
+				SCRAM scram = null;
 
 				for (; ; )
 				{
@@ -633,9 +637,45 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 									}
 
 #endif
+								case AuthenticationRequestType.AuthenticationSASL:
+									var saslAuthMechanism = PGUtil.ReadString(stream, queue);
+									if (saslAuthMechanism == "SCRAM-SHA-256")
+									{
+										stream.ReadByte();
+										scram = new SCRAM(saslAuthMechanism, context.UserName);
 
+										stream.WriteByte((byte)FrontEndMessageCode.SASL);
+										var schemeBytes = Encoding.UTF8.GetBytes(scram.Scheme);
+										var clientFirstMessageBytes = Encoding.UTF8.GetBytes(scram.getClientFirstMessage());
+										PGUtil.WriteInt32(stream, 9 + schemeBytes.Length + clientFirstMessageBytes.Length);
+										stream.Write(schemeBytes, 0, schemeBytes.Length);
+										stream.WriteByte(0);
+										PGUtil.WriteInt32(stream, clientFirstMessageBytes.Length);
+										stream.Write(clientFirstMessageBytes, 0, clientFirstMessageBytes.Length);
+										stream.Flush();
+									}
+									else throw new NpgsqlException("Only Scram SHA 256 is supported");
+									break;
+								case AuthenticationRequestType.AuthenticationSASLContinue:
+									if (scram == null) throw new NpgsqlException("Invalid authentication message");
+									var continueData = new byte[authDataLength];
+									PGUtil.CheckedStreamRead(stream, continueData, 0, authDataLength);
+									scram.parseServerFirstMessage(Encoding.UTF8.GetString(continueData));
+									scram.Password = Encoding.UTF8.GetString(context.Password);
+									var mesageBytes = Encoding.UTF8.GetBytes(scram.getClientFinalMessage());
+									stream.WriteByte((byte)FrontEndMessageCode.SASL);
+									PGUtil.WriteInt32(stream, 4 + mesageBytes.Length);
+									stream.Write(mesageBytes, 0, mesageBytes.Length);
+									stream.Flush();
+									break;
+								case AuthenticationRequestType.AuthenticationSASLFinal:
+									if (scram == null) throw new NpgsqlException("Invalid authentication message");
+									var finalData = new byte[authDataLength];
+									PGUtil.CheckedStreamRead(stream, finalData, 0, authDataLength);
+									scram.verifyServerSignature(Encoding.UTF8.GetString(finalData));
+									break;
 								default:
-									// Only AuthenticationClearTextPassword and AuthenticationMD5Password supported for now.
+									// Only AuthenticationClearTextPassword, AuthenticationMD5Password and AuthenticationSASL supported for now.
 									if (errors == null) errors = new List<NpgsqlError>();
 									errors.Add(
 										new NpgsqlError(String.Format(resman.GetString("Exception_AuthenticationMethodNotSupported"), authType)));
