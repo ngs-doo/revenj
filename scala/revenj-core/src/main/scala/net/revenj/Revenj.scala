@@ -193,7 +193,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
 
   def registerEvents[T <: Event : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
     val mirror = runtimeMirror(loader)
-    val javaClass = Utils.findType(mirror.typeOf[T], mirror) match {
+    lazy val javaClass = Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(p) =>
         p match {
           case cl: Class[_] => cl
@@ -207,31 +207,40 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
         container.registerType(gt, h, InstanceScope.Context)
       }
     }
-    val arrInst = java.lang.reflect.Array.newInstance(javaClass, 0)
-    val gt = Utils.makeGenericType(classOf[DomainEventHandler[_]], javaClass)
-    val agt = Utils.makeGenericType(classOf[DomainEventHandler[_]], arrInst.getClass)
-    val ft = Utils.makeGenericType(classOf[Function0[_]], javaClass)
-    val fgt = Utils.makeGenericType(classOf[DomainEventHandler[_]], ft)
-    val aft = Utils.makeGenericType(classOf[Function0[_]], arrInst.getClass)
-    val afgt = Utils.makeGenericType(classOf[DomainEventHandler[_]], aft)
+    lazy val arrInst = java.lang.reflect.Array.newInstance(javaClass, 0)
+    lazy val gt = Utils.makeGenericType(classOf[DomainEventHandler[_]], javaClass)
+    lazy val agt = Utils.makeGenericType(classOf[DomainEventHandler[_]], arrInst.getClass)
+    lazy val ft = Utils.makeGenericType(classOf[Function0[_]], javaClass)
+    lazy val fgt = Utils.makeGenericType(classOf[DomainEventHandler[_]], ft)
+    lazy val aft = Utils.makeGenericType(classOf[Function0[_]], arrInst.getClass)
+    lazy val afgt = Utils.makeGenericType(classOf[DomainEventHandler[_]], aft)
+    lazy val at = Utils.makeGenericType(classOf[EventStoreAspect[_]], javaClass)
     val simpleHandlers = plugins.find[DomainEventHandler[T]]
-    processHandlers(gt, simpleHandlers)
+    if (simpleHandlers.nonEmpty) {
+      processHandlers(gt, simpleHandlers)
+    }
     val simpleArrayHandlers = plugins.find[DomainEventHandler[Array[T]]]
-    processHandlers(agt, simpleArrayHandlers)
+    if (simpleArrayHandlers.nonEmpty) {
+      processHandlers(agt, simpleArrayHandlers)
+    }
     val funcHandlers = plugins.find[DomainEventHandler[Function0[T]]]
-    processHandlers(fgt, funcHandlers)
+    if (funcHandlers.nonEmpty) {
+      processHandlers(fgt, funcHandlers)
+    }
     val arrayFuncHandlers = plugins.find[DomainEventHandler[Function0[Array[T]]]]
-    processHandlers(afgt, arrayFuncHandlers)
+    if (arrayFuncHandlers.nonEmpty) {
+      processHandlers(afgt, arrayFuncHandlers)
+    }
     val aspects = plugins.find[EventStoreAspect[T]]
-    aspects foreach { a =>
+    aspects.foreach { a =>
       container.registerType(a, a, InstanceScope.Context)
-      container.registerType(gt, a, InstanceScope.Context)
+      container.registerType(at, a, InstanceScope.Context)
     }
   }
 
   def registerReports[R : TypeTag, T <: Report[R] : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
     val mirror = runtimeMirror(loader)
-    val resultClass = Utils.findType(mirror.typeOf[R], mirror) match {
+    lazy val resultClass = Utils.findType(mirror.typeOf[R], mirror) match {
       case Some(p) =>
         p match {
           case cl: Class[_] => cl
@@ -247,9 +256,9 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
         }
       case _ => throw new IllegalArgumentException(s"Unable to detect type: ${mirror.typeOf[T]}")
     }
-    val gt = Utils.makeGenericType(classOf[ReportAspect[_, _]], resultClass, reportClass)
+    lazy val gt = Utils.makeGenericType(classOf[ReportAspect[_, _]], resultClass, reportClass)
     val aspects = plugins.find[ReportAspect[R, T]]
-    aspects foreach { a =>
+    aspects.foreach { a =>
       container.registerType(a, a, InstanceScope.Context)
       container.registerType(gt, a, InstanceScope.Context)
     }
@@ -257,7 +266,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
 
   def registerAggregates[T <: AggregateRoot : TypeTag](container: Container, plugins: PluginLoader, loader: ClassLoader): Unit = {
     val mirror = runtimeMirror(loader)
-    val javaClass = Utils.findType(mirror.typeOf[T], mirror) match {
+    lazy val javaClass = Utils.findType(mirror.typeOf[T], mirror) match {
       case Some(p) =>
         p match {
           case cl: Class[_] => cl
@@ -265,11 +274,11 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
         }
       case _ => throw new IllegalArgumentException(s"Unable to detect type: ${mirror.typeOf[T]}")
     }
-    val gt = Utils.makeGenericType(classOf[PersistableRepositoryAspect[_]], javaClass)
+    lazy val at = Utils.makeGenericType(classOf[PersistableRepositoryAspect[_]], javaClass)
     val aspects = plugins.find[PersistableRepositoryAspect[T]]
-    aspects foreach { a =>
+    aspects.foreach { a =>
       container.registerType(a, a, InstanceScope.Context)
-      container.registerType(gt, a, InstanceScope.Context)
+      container.registerType(at, a, InstanceScope.Context)
     }
   }
 }
