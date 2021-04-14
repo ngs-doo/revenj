@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import * as React from 'react';
-import ReactTable, { TableCellRenderer } from 'react-table';
+import ReactTable, { ComponentPropsGetterC, TableCellRenderer } from 'react-table';
 import 'react-table/react-table.css';
 
 import './Table.css';
@@ -61,6 +61,7 @@ interface ITableProps<T> {
   columns: IRowConfig<T>;
   data: T[];
   foldableColumns?: boolean;
+  getTheadThProps?: ComponentPropsGetterC;
   minWidth?: number;
   pagination?: boolean;
   page?: number;
@@ -210,6 +211,7 @@ export class Table<T> extends React.Component<ITableProps<T>, ITableState<T>> {
           SubComponent={this.getSubComponent() ?? undefined}
           manual={!this.props.automaticPagination}
           PaginationComponent={this.renderPagination}
+          getTheadThProps={this.props.getTheadThProps}
         />
       </div>
     );
