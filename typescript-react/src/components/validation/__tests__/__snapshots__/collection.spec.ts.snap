@@ -8,11 +8,11 @@ exports[`validation exactLength should return an error message if the input has 
 
 exports[`validation exactLength should return an error message if the input has a different length 4`] = `"Required length of field is exactly 5"`;
 
-exports[`validation maxDecimalLength should not allow decimal numbers if maxDecimalLength is 0 1`] = `"Maximum decimal length of field is 0"`;
+exports[`validation maxDecimalLength should not allow decimal numbers if maxDecimalLength is 0 1`] = `"Maximum number of decimals is: 0"`;
 
-exports[`validation maxDecimalLength should return an error message if numeric input value is longer than maxDecimalLength 1`] = `"Maximum decimal length of field is 10"`;
+exports[`validation maxDecimalLength should return an error message if numeric input value is longer than maxDecimalLength 1`] = `"Maximum number of decimals is: 10"`;
 
-exports[`validation maxDecimalLength should return an error message if string input value is longer than maxDecimalLength 1`] = `"Maximum decimal length of field is 10"`;
+exports[`validation maxDecimalLength should return an error message if string input value is longer than maxDecimalLength 1`] = `"Maximum number of decimals is: 10"`;
 
 exports[`validation maxLength should return an error message if input value is longer than maxLength 1`] = `"Maximum length of field is 20"`;
 

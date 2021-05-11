@@ -18,7 +18,7 @@ export const maxDecimalLengthCreator = (
   operator?: (value: number) => (input: string | number) => boolean) =>
     validatorCreatorFactory<number, string | number, any, any>({
       getValidatorBaseValue: () => maxLength,
-      getValidatorErrorMessage: (value) => `Maximum decimal length of field is ${value}`,
+      getValidatorErrorMessage: (value) => `Maximum number of decimals is: ${value}`,
       operator: operator || ((value) => {
         const regex = new RegExp(`^-?[0-9]*\.[0-9]{0,${value}}$`);
         return (input) => regex.test(String(input));
