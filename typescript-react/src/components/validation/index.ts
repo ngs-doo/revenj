@@ -67,6 +67,9 @@ export const isIntegerCreator = (message: string = `Must be a whole number with 
 export const maxLengthCreator = (length: number) =>
   collection.maxLengthCreator(length)();
 
+export const maxDecimalLengthCreator = (length: number) =>
+  collection.maxDecimalLengthCreator(length)();
+
 export const exactLengthCreator = (length: number) =>
   collection.exactLengthCreator(length)();
 

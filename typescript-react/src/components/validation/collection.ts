@@ -13,6 +13,17 @@ export const maxLengthCreator = (
         value == null || (typeof input === 'number' ? String(input).length <= value : input.length <= value)),
     });
 
+export const maxDecimalLengthCreator = (
+  maxLength: number,
+  operator?: (value: number) => (input: string | number) => boolean) =>
+    validatorCreatorFactory<number, string | number, any, any>({
+      getValidatorBaseValue: () => maxLength,
+      getValidatorErrorMessage: (value) => `Maximum number of decimals is: ${value}`,
+      operator: operator || ((value) => {
+        const regex = new RegExp(`^-?[0-9]*\.[0-9]{0,${value}}$`);
+        return (input) => regex.test(String(input));
+    })});
+
 export const exactLengthCreator = (
   expectedLength: number,
   operator?: (value: number) => (input: string | any[]) => boolean) =>

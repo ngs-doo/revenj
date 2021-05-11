@@ -1,4 +1,4 @@
-import { exactLengthCreator, isInCreator, isNotInCreator, maxLengthCreator, minLengthCreator } from '../collection';
+import { exactLengthCreator, isInCreator, isNotInCreator, maxLengthCreator, maxDecimalLengthCreator, minLengthCreator } from '../collection';
 
 describe('validation', () => {
   describe('maxLength', () => {
@@ -19,6 +19,35 @@ describe('validation', () => {
       expect(maxLength3(1, {})).not.toBeDefined();
       expect(maxLength3(1234, {})).toBeDefined();
       expect(maxLength3(1234, {})).toMatchSnapshot();
+    });
+  });
+
+  describe('maxDecimalLength', () => {
+    it('should return undefined if input value is not longer than maxLength', () => {
+      const maxDecimalLength10 = maxDecimalLengthCreator(10)();
+      expect(maxDecimalLength10('12.01234567', {})).toBeUndefined();
+      expect(maxDecimalLength10('1.0123456789', {})).toBeUndefined();
+      expect(maxDecimalLength10(1.0123456789, {})).toBeUndefined();
+      expect(maxDecimalLength10('100', {})).toBeUndefined();
+    });
+
+    it('should return an error message if string input value is longer than maxDecimalLength', () => {
+      const maxDecimalLength10 = maxDecimalLengthCreator(10)();
+      expect(maxDecimalLength10('1.012345678901', {})).toBeDefined();
+      expect(maxDecimalLength10('1.012345678901', {})).toMatchSnapshot();
+    });
+
+    it('should return an error message if numeric input value is longer than maxDecimalLength', () => {
+      const maxDecimalLength10 = maxDecimalLengthCreator(10)();
+      expect(maxDecimalLength10(1.012345678901, {})).toBeDefined();
+      expect(maxDecimalLength10(1.012345678901, {})).toMatchSnapshot();
+    });
+
+    it('should not allow decimal numbers if maxDecimalLength is 0', () => {
+      const maxDecimalLength0 = maxDecimalLengthCreator(0)();
+      expect(maxDecimalLength0(1, {})).toBeUndefined();
+      expect(maxDecimalLength0('1.0', {})).toBeDefined();
+      expect(maxDecimalLength0('1.0', {})).toMatchSnapshot();
     });
   });
 
