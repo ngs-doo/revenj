@@ -95,6 +95,8 @@ interface IPieChart<T> {
   items: T[];
   xs: Array<keyof T>;
   y: keyof T;
+  options?: Chart.ChartConfiguration;
+  datasetOptions?: Chart.ChartDataSets;
 }
 
 export class PieChart<T> extends React.PureComponent<IPieChart<T>> {
@@ -112,13 +114,14 @@ export class PieChart<T> extends React.PureComponent<IPieChart<T>> {
   }
 
   private getOptions = (): Chart.ChartConfiguration => {
-    const { isDoughnut, title } = this.props;
+    const { datasetOptions, isDoughnut, title, options } = this.props;
     const type = isDoughnut ? 'doughnut' : 'pie';
     const dataGroups = this.getDataGroups();
     const data = {
       datasets: [{
         backgroundColor: colors,
         data: dataGroups.map(FunctionalUtils.snd),
+        ...datasetOptions,
       }],
       labels: dataGroups.map(FunctionalUtils.fst) as string[],
     };
@@ -139,6 +142,7 @@ export class PieChart<T> extends React.PureComponent<IPieChart<T>> {
             },
           },
         },
+        ...options,
       },
       type,
     };
@@ -183,6 +187,8 @@ export interface IRichChart<T> {
   items: T[];
   xs: Array<keyof T>;
   ys: Array<IDataGroup<T>>;
+  options?: Chart.ChartConfiguration;
+  datasetOptions?: Chart.ChartDataSets;
 }
 
 export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
@@ -200,7 +206,7 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
   }
 
   private getOptions = (): Chart.ChartConfiguration => {
-    const { horizontal, stacked, title } = this.props;
+    const { horizontal, stacked, title, options } = this.props;
     const type = horizontal ? 'horizontalBar' : 'bar';
     const data = {
       datasets: this.getDatasets(),
@@ -242,13 +248,14 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
             },
           },
         },
+        ...options,
       },
       type,
     };
   }
 
   private getDatasets = (): Chart.ChartDataSets[] => {
-    const { items, ys, horizontal, stacked } = this.props;
+    const { items, ys, horizontal, stacked, datasetOptions } = this.props;
     return ys.map((yConf, index): Chart.ChartDataSets => {
       const label = yConf.label
         ? yConf.label
@@ -256,16 +263,20 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
       const type = yConf.type != null && !horizontal
         ? (yConf.type === 'bar' ? yConf.type : 'line')
         : undefined;
+      const color = datasetOptions?.backgroundColor
+        ? datasetOptions.backgroundColor[index]
+        : colors[index];
 
       return {
-        backgroundColor: colors[index],
-        borderColor: yConf.type === 'line' ? colors[index] : undefined,
+        backgroundColor: color,
+        borderColor: yConf.type === 'line' ? color : undefined,
         data: items.map((item) => parseNumber(String(item[yConf.y]))),
         fill: yConf.type === 'area',
         label,
         order: yConf.type === 'line' ? 1 : 2,
         stack: stacked ? (yConf.stack || 'stack0') : undefined,
         type,
+        ...FunctionalUtils.omit(datasetOptions || {}, 'backgroundColor'),
       };
     });
   }
@@ -292,6 +303,8 @@ interface IChartFromDefinition<T> {
   className?: string;
   items: T[];
   definition: ChartDefinition<T>;
+  options?: Chart.ChartConfiguration;
+  datasetOptions?: Chart.ChartDataSets;
 }
 
 export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefinition<T>> {
@@ -299,7 +312,7 @@ export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefini
   public context!: React.ContextType<typeof I18nContext>;
 
   public render() {
-    const { className, items, definition } = this.props;
+    const { className, datasetOptions, items, definition, options } = this.props;
 
     if (definition.type === ChartType.Rich) {
       return (
@@ -311,6 +324,8 @@ export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefini
           ys={definition.ys}
           horizontal={definition.horizontal}
           stacked={definition.stacked}
+          options={options}
+          datasetOptions={datasetOptions}
         />
       );
     } else {
@@ -322,6 +337,8 @@ export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefini
           title={definition.title ? localizeTextIfMarked(this.context.localize, definition.title) : undefined}
           y={definition.y}
           isDoughnut={definition.type === ChartType.Doughnut}
+          options={options}
+          datasetOptions={datasetOptions}
         />
       );
     }
