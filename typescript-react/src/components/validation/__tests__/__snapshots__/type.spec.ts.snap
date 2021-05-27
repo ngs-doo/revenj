@@ -1,22 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 1`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 1`] = `"Must be a whole number"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 2`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 2`] = `"Must be a whole number with up to 10 digits"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 3`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 3`] = `"Must be a whole number with up to 10 digits"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 4`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 4`] = `"Must be a whole number with up to 10 digits"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 5`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 5`] = `"Must be a whole number"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 6`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 6`] = `"Must be a whole number"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 7`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 7`] = `"Must be a whole number"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 8`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 8`] = `"Must be a whole number with up to 10 digits"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 9`] = `"Value must be an integer."`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 9`] = `"Must be a whole number with up to 10 digits"`;
 
 exports[`validation isNumberCreator should return an error when value exists but is not treatable as a numeric value 1`] = `"Value must be a number."`;
 

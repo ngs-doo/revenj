@@ -11,7 +11,9 @@ import { validatorCreatorFactory } from './validatorCreatorFactory';
 ////////////////////////////////////////////////////////////////////////////////
 export const isIntegerCreator =
   validatorCreatorFactory<void, Numeric, any, any>({
-    getValidatorErrorMessage: () => `Value must be an integer.`,
+    getValidatorErrorMessage: (_, input) => !(Number(input) <= INT_MAX_VALUE && Number(input) >= INT_MIN_VALUE) ?
+      'Must be a whole number with up to 10 digits' :
+      'Must be a whole number',
     operator: () => (input) => {
       try {
         const aNumber = parseBigNum(input);
@@ -20,7 +22,7 @@ export const isIntegerCreator =
         if (typeof input === 'string') {
           return isInteger && /^(?:\+|-)?\d+$/.test(input);
         }
-        
+
         return isInteger;
       } catch {
         return false;
