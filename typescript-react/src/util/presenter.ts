@@ -1,3 +1,4 @@
+import React from 'react';
 import { FormType } from '../components/Form/interfaces';
 import { CellType, IActionInfo, IColumnConfig, IRowConfig } from '../components/Table/Table';
 
@@ -19,6 +20,7 @@ export const getTableActions = <T>(
   userRoles: Set<string>,
   getIdentifier: (item: T) => string,
   references: IReferences,
+  externalActions: Array<(row: T) => React.ReactElement<any>> = [],
 ): IRowConfig<T> => [
   {
     actions: [
@@ -38,6 +40,9 @@ export const getTableActions = <T>(
         onClick: (_: any, row: any) => navigateTo(FormType.Edit, getIdentifier(row)),
         tooltip: 'Edit',
       } : undefined,
+      ...externalActions.map((handler): IActionInfo<T> => ({
+        customComponent: handler,
+      })),
     ].filter((it) => it != null) as Array<IActionInfo<T>>,
     cellType: CellType.Actions,
     field: '',
