@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { FunctionalUtils } from '@oradian/core';
 import { storiesOf } from '@storybook/react';
 
 import {
@@ -8,6 +7,7 @@ import {
   RichChart,
 } from './Charts';
 import { DimensionType } from './types';
+import { FunctionalUtils } from '../..';
 
 interface IRow {
   bracket: string;
