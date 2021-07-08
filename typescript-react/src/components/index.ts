@@ -39,6 +39,9 @@ export {
 } from './Charts/types';
 export type {
   ChartDefinition,
+  IChartConfiguration,
+  IChartDataSets,
+  IChartOptions,
   IPieLikeChartDefinition,
   IChartDimension,
   IRichChartDefinition,

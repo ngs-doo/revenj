@@ -1,3 +1,11 @@
+import Chart from 'chart.js';
+
+export interface IChartConfiguration extends Chart.ChartConfiguration {};
+
+export interface IChartOptions extends Chart.ChartOptions {};
+
+export interface IChartDataSets extends Chart.ChartDataSets {};
+
 export enum ChartType {
   Pie = 'Pie',
   Doughnut = 'Doughnut',
@@ -24,6 +32,7 @@ export interface IPieLikeChartDefinition<T> extends IChartDefinitionCommonProps<
 export interface IChartDimension<T> {
   type: DimensionType;
   y: keyof T & string;
+  secondaryYAxis: boolean;
 }
 
 export interface IRichChartDefinition<T> extends IChartDefinitionCommonProps<T> {
