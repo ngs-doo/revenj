@@ -8,26 +8,24 @@ import * as SortUtils from '../../util/SortUtils/SortUtils';
 import { ListPresenterContext } from '../Form/Context';
 import { I18nContext } from '../I18n/I18n';
 import { localizeTextIfMarked } from '../I18n/service';
-
+import styles from './Charts.module.css';
+import { getLabel, getTopNLabels, parseNumber } from './helpers';
 import { colors } from './Theme';
-import {
-  getLabel,
-  getTopNLabels,
-  parseNumber,
-} from './helpers';
 import {
   ChartDefinition,
   ChartType,
   DimensionType,
+  IChartConfiguration,
+  IChartDataSets
 } from './types';
-
-import styles from './Charts.module.css';
 
 const MAX_PIE_GROUPS: number = 10;
 const OTHER_LABEL: string = 'Other';
+const PRIMARY_Y_AXIS_ID = 'primary';
+const SECONDARY_Y_AXIS_ID = 'secondary';
 
 export interface IChartJS {
-  options: Chart.ChartConfiguration;
+  options: IChartConfiguration;
   width?: number;
   height?: number;
   className?: string;
@@ -61,7 +59,7 @@ export class ChartJS extends React.PureComponent<IChartJS> {
     );
   }
 
-  private getOptions = (): Chart.ChartConfiguration => {
+  private getOptions = (): IChartConfiguration => {
     return {
       ...this.props.options,
       options: {
@@ -95,8 +93,8 @@ interface IPieChart<T> {
   items: T[];
   xs: Array<keyof T>;
   y: keyof T;
-  options?: Chart.ChartConfiguration;
-  datasetOptions?: Chart.ChartDataSets;
+  options?: IChartConfiguration;
+  datasetOptions?: IChartDataSets;
 }
 
 export class PieChart<T> extends React.PureComponent<IPieChart<T>> {
@@ -113,7 +111,7 @@ export class PieChart<T> extends React.PureComponent<IPieChart<T>> {
     );
   }
 
-  private getOptions = (): Chart.ChartConfiguration => {
+  private getOptions = (): IChartConfiguration => {
     const { datasetOptions, isDoughnut, title, options } = this.props;
     const type = isDoughnut ? 'doughnut' : 'pie';
     const dataGroups = this.getDataGroups();
@@ -175,6 +173,7 @@ interface IDataGroup<T> {
   label?: string;
   type?: DimensionType;
   stack?: string;
+  secondaryYAxis?: boolean;
 }
 
 export interface IRichChart<T> {
@@ -187,8 +186,9 @@ export interface IRichChart<T> {
   items: T[];
   xs: Array<keyof T>;
   ys: Array<IDataGroup<T>>;
-  options?: Chart.ChartConfiguration;
-  datasetOptions?: Chart.ChartDataSets;
+  options?: IChartConfiguration;
+  datasetOptions?: IChartDataSets;
+  secondaryYAxis?: boolean;
 }
 
 export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
@@ -205,19 +205,35 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
     );
   }
 
-  private getOptions = (): Chart.ChartConfiguration => {
-    const { horizontal, stacked, title, options } = this.props;
+  private getOptions = (): IChartConfiguration => {
+    const { horizontal, stacked, title, options, ys } = this.props;
     const type = horizontal ? 'horizontalBar' : 'bar';
     const data = {
       datasets: this.getDatasets(),
       labels: this.getLabels(),
     };
 
-    const ticks = {
+    const ticks = horizontal ? {
       beginFromZero: data.datasets.every((it: any) => it.data!.every((it: any) => it >= 0)),
       callback: (value: any) => CurrencyFormatter.formatNumber(value),
       suggestedMin: 0,
+    } : {};
+
+    const primaryYAxis = {
+      id: PRIMARY_Y_AXIS_ID,
+      stacked,
+      ticks,
+      position: 'left',
     };
+
+    const secondaryYAxis = {
+      id: SECONDARY_Y_AXIS_ID,
+      stacked,
+      ticks,
+      position: 'right',
+    };
+
+    const yAxes = ys.find((y) => y.secondaryYAxis) ? [primaryYAxis, secondaryYAxis] : [primaryYAxis];
 
     return {
       data,
@@ -226,12 +242,9 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
           // Depending on the main axis, the value axis will always be numeric
           xAxes: [{
             stacked,
-            ticks: horizontal ? ticks : {},
+            ticks,
           }],
-          yAxes: [{
-            stacked,
-            ticks: horizontal ? {} : ticks,
-          }],
+          yAxes,
         },
         title: {
           display: true,
@@ -254,9 +267,9 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
     };
   }
 
-  private getDatasets = (): Chart.ChartDataSets[] => {
+  private getDatasets = (): IChartDataSets[] => {
     const { items, ys, horizontal, stacked, datasetOptions } = this.props;
-    return ys.map((yConf, index): Chart.ChartDataSets => {
+    return ys.map((yConf, index): IChartDataSets => {
       const label = yConf.label
         ? yConf.label
         : String(yConf.y);
@@ -266,6 +279,7 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
       const color = datasetOptions?.backgroundColor
         ? datasetOptions.backgroundColor[index]
         : colors[index];
+      const yAxisID = yConf.secondaryYAxis ? SECONDARY_Y_AXIS_ID : PRIMARY_Y_AXIS_ID;
 
       return {
         backgroundColor: color,
@@ -276,6 +290,7 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
         order: yConf.type === 'line' ? 1 : 2,
         stack: stacked ? (yConf.stack || 'stack0') : undefined,
         type,
+        yAxisID,
         ...FunctionalUtils.omit(datasetOptions || {}, 'backgroundColor'),
       };
     });
@@ -303,8 +318,8 @@ interface IChartFromDefinition<T> {
   className?: string;
   items: T[];
   definition: ChartDefinition<T>;
-  options?: Chart.ChartConfiguration;
-  datasetOptions?: Chart.ChartDataSets;
+  options?: IChartConfiguration;
+  datasetOptions?: IChartDataSets;
 }
 
 export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefinition<T>> {
