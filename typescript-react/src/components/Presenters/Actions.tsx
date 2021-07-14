@@ -19,8 +19,6 @@ interface ISimpleButtonAction {
 interface IComponentActionButton {
   Component: React.ComponentType<IComponentButtonProps>;
   values?: any;
-  className?: string;
-  iconClassName?: string;
   isVisible?: (actionsProps: IActions) => boolean;
 }
 

@@ -21,9 +21,6 @@ export interface IComponentButtonProps extends ButtonProps {
 export interface IComponentButton extends ButtonProps {
   Component: React.ComponentType<IComponentButtonProps>;
   values?: any;
-  label?: string;
-  className?: string;
-  iconClassName?: string;
 }
 
 export type ButtonItem = ISimpleButton | IComponentButton;
