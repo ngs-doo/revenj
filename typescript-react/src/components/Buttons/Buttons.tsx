@@ -43,9 +43,14 @@ export class Buttons extends React.PureComponent<IButtons> {
 
   private renderButton = (btn: ButtonItem, index: number) => {
     if (isComponentButton(btn)) {
+      const { values, ...rest } = btn;
+
       return (
         <div key={index} className={styles.ComponentButton}>
-          <btn.Component />
+          <btn.Component
+            props={{ item: values }}
+            {...rest}
+          />
         </div>
       );
     } else {

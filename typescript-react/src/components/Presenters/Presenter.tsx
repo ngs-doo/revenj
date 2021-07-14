@@ -1,16 +1,16 @@
 import classNames from 'classnames';
 import * as React from 'react';
+import { connect } from 'react-redux';
+import { getFormValues } from 'redux-form';
 
 import { IGeneratedConcept } from '../Form/Context';
 import { Header } from '../Header/Header';
 import { Internationalised } from '../I18n/I18n';
 import { localizeTextIfMarked } from '../I18n/service';
-
 import { Actions, IActionButton } from './Actions';
-
 import styles from './Presenter.module.css';
 
-interface IPresenter<T> {
+interface IPresenterPublicProps<T> {
   title: string;
   presenterName: string;
   domainObject: IGeneratedConcept<T>;
@@ -22,14 +22,25 @@ interface IPresenter<T> {
   onForbidden: () => void;
 }
 
-export class Presenter<T> extends React.PureComponent<IPresenter<T>> {
+interface IPresenterStateProps<T> {
+  values?: T;
+}
+
+interface IPresenter<T> extends React.PropsWithChildren<IPresenterPublicProps<T>>, IPresenterStateProps<T> {}
+
+const mapStateToProps = (state: any, ownProps: IPresenterPublicProps<any>): IPresenterStateProps<any> => ({
+  values: getFormValues(ownProps.presenterName ?? ownProps.domainObject.domainObjectName)(state),
+});
+
+export class PresenterBare<T> extends React.PureComponent<IPresenter<T>> {
 
   public componentDidMount() {
     this.checkRoles();
   }
 
   public render() {
-    const { actions, children, title, exportFile, filterField, reportEntryCommandName, userRoles } = this.props;
+    const { actions, children, title, exportFile, filterField, reportEntryCommandName, userRoles, values } = this.props;
+    const actionsWithValues = actions?.map(a => ({ ...a, values }));
 
     return (
       <Internationalised>
@@ -41,7 +52,7 @@ export class Presenter<T> extends React.PureComponent<IPresenter<T>> {
                 title ? (
                   <Header title={localizeTextIfMarked(localize, title)}>
                     <Actions
-                      actions={actions ?? []}
+                      actions={actionsWithValues ?? []}
                       templateType={exportFile}
                       reportEntryCommandName={reportEntryCommandName}
                       userRoles={userRoles}
@@ -51,7 +62,7 @@ export class Presenter<T> extends React.PureComponent<IPresenter<T>> {
                 ) : (
                   <div className={styles.ActionsContainer}>
                     <Actions
-                      actions={actions ?? []}
+                      actions={actionsWithValues ?? []}
                       templateType={exportFile}
                       reportEntryCommandName={reportEntryCommandName}
                       userRoles={userRoles}
@@ -82,3 +93,5 @@ export class Presenter<T> extends React.PureComponent<IPresenter<T>> {
     }
   }
 }
+
+export const Presenter = connect(mapStateToProps)(PresenterBare) as React.ComponentType<IPresenterPublicProps<any>>;
