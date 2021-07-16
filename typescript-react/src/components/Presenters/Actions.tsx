@@ -3,11 +3,8 @@ import * as React from 'react';
 
 import { ApiContext } from '../Api/ApiContext';
 import { Buttons } from '../Buttons/Buttons';
-import {
-  ListPresenterComponent,
-  UpdatePresenterContext,
-} from '../Form/Context';
-
+import { IComponentButtonProps } from '../Buttons/interfaces';
+import { ListPresenterComponent, UpdatePresenterContext } from '../Form/Context';
 import styles from './Presenter.module.css';
 
 interface ISimpleButtonAction {
@@ -20,7 +17,8 @@ interface ISimpleButtonAction {
 }
 
 interface IComponentActionButton {
-  Component: React.ComponentType<{}>;
+  Component: React.ComponentType<IComponentButtonProps>;
+  values?: any;
   isVisible?: (actionsProps: IActions) => boolean;
 }
 

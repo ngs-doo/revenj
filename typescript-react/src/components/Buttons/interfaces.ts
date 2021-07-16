@@ -1,3 +1,5 @@
+import { ButtonProps } from "react-bootstrap/esm/Button";
+
 export interface ISimpleButton {
   className?: string;
   disabled?: boolean;
@@ -8,8 +10,17 @@ export interface ISimpleButton {
   onClick?: () => void;
 }
 
-export interface IComponentButton {
-  Component: React.ComponentType<{}>;
+export interface IComponentButtonProps extends ButtonProps { 
+  props?: {
+    item?: any;
+  };
+  label?: string;
+  className?: string;
+  iconClassName?: string;
+}
+export interface IComponentButton extends ButtonProps {
+  Component: React.ComponentType<IComponentButtonProps>;
+  values?: any;
 }
 
 export type ButtonItem = ISimpleButton | IComponentButton;
