@@ -64,6 +64,12 @@ class ListPresenterBare<T, R extends DeepKeyOf<T>> extends React.PureComponent<I
     }
   }
 
+  public componentDidUpdate(prevProps: IListPresenter<T, R>) {
+    if (prevProps.values !== this.props.values) {
+      this.onClear();
+    }
+  }
+
   public render() {
     const { children } = this.props;
 
