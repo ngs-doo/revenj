@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Revenj.Extensibility.Autofac.Builder;
 using Revenj.Extensibility.Autofac.Core;
 using Revenj.Extensibility.Autofac.Core.Activators.Delegate;
 using Revenj.Extensibility.Autofac.Core.Lifetime;
@@ -76,7 +77,7 @@ namespace Revenj.Extensibility.Autofac.Features.Collections
 						Guid.NewGuid(),
 						new DelegateActivator(elementArrayType, (c, p) =>
 						{
-							var elements = c.ComponentRegistry.RegistrationsFor(elementTypeService);
+							var elements = c.ComponentRegistry.RegistrationsFor(elementTypeService).OrderBy(cr => cr.GetRegistrationOrder());
 							var items = elements.Select(cr => c.ResolveComponent(service, cr, p)).ToArray();
 							var result = Array.CreateInstance(elementType, items.Length);
 							items.CopyTo(result, 0);

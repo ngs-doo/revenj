@@ -95,7 +95,8 @@ namespace Revenj.Extensibility.Autofac.Features.LazyDependencies
 			var rb = RegistrationBuilder.ForDelegate(
 				(c, p) => new Lazy<T>(() => (T)c.ResolveComponent(providedService, valueRegistration, p)))
 				.As(providedService)
-				.Targeting(valueRegistration);
+				.Targeting(valueRegistration)
+				.InheritRegistrationOrderFrom(valueRegistration);
 
 			return rb.CreateRegistration();
 		}

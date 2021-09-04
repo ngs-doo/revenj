@@ -77,7 +77,8 @@ namespace Revenj.Extensibility.Autofac.Features.Metadata
 					(T)c.ResolveComponent(providedService, valueRegistration, p),
 					valueRegistration.Target.Metadata))
 				.As(providedService)
-				.Targeting(valueRegistration);
+				.Targeting(valueRegistration)
+				.InheritRegistrationOrderFrom(valueRegistration);
 
 			return rb.CreateRegistration();
 		}

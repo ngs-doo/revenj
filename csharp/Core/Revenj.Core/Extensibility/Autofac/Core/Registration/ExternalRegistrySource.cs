@@ -25,8 +25,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Revenj.Extensibility.Autofac.Builder;
+using Revenj.Extensibility.Autofac.Core.Activators.Delegate;
+using Revenj.Extensibility.Autofac.Core.Lifetime;
 
 namespace Revenj.Extensibility.Autofac.Core.Registration
 {
@@ -35,17 +38,19 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 	/// Excludes most auto-generated registrations - currently has issues with
 	/// collection registrations.
 	/// </summary>
+	[SuppressMessage("Microsoft.ApiDesignGuidelines", "CA2213", Justification = "The creator of the component registry is responsible for disposal.")]
 	class ExternalRegistrySource : IRegistrationSource
 	{
-		readonly IComponentRegistry _registry;
+		private readonly IComponentRegistry _registry;
 
 		/// <summary>
-		/// Create an external registry source that draws components from
-		/// <paramref name="registry"/>.
+		/// Initializes a new instance of the <see cref="ExternalRegistrySource"/> class.
 		/// </summary>
 		/// <param name="registry">Component registry to pull registrations from.</param>
 		public ExternalRegistrySource(IComponentRegistry registry)
 		{
+			if (registry == null) throw new ArgumentNullException(nameof(registry));
+
 			_registry = registry;
 		}
 
@@ -58,50 +63,54 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 		/// <returns>Registrations providing the service.</returns>
 		public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
 		{
-#if !WINDOWS_PHONE
-			var seenRegistrations = new HashSet<IComponentRegistration>();
-			var seenServices = new HashSet<Service>();
-#else
-			var seenRegistrations = new List<IComponentRegistration>();
-			var seenServices = new List<Service>();
-#endif
-			var lastRunServices = new LinkedList<Service>();
-			lastRunServices.AddFirst(service);
+			// Issue #475: This method was refactored significantly to handle
+			// registrations made on the fly in parent lifetime scopes to correctly
+			// pass to child lifetime scopes.
 
-			while (lastRunServices.Count > 0)
-			{
-				var nextService = lastRunServices.First.Value;
-				lastRunServices.RemoveFirst();
-				seenServices.Add(nextService);
-				foreach (var registration in _registry.RegistrationsFor(nextService))
-				{
-					if (registration.IsAdapting() || seenRegistrations.Contains(registration))
-						continue;
+			// Issue #272: Taking from the registry the following registrations:
+			//   - non-adapting own registrations: wrap them with ExternalComponentRegistration
+			//   - if the registration is from the parent registry of this registry,
+			//     it is already wrapped with ExternalComponentRegistration,
+			//     share it as is
+			return _registry.RegistrationsFor(service)
+				.Where(r => r is ExternalComponentRegistration || !r.IsAdapting())
+				.Select(r =>
+					r as ExternalComponentRegistration ??
 
-					seenRegistrations.Add(registration);
-					foreach (var serv in registration.Services)
-					{
-						if (!seenServices.Contains(serv))
-							lastRunServices.AddLast(serv);
-					}
+						// equivalent to following registation builder
+						//    RegistrationBuilder.ForDelegate(r.Activator.LimitType, (c, p) => c.ResolveComponent(r, p))
+						//        .Targeting(r)
+						//        .As(service)
+						//        .ExternallyOwned()
+						//        .CreateRegistration()
 
-					var r = registration;
-					yield return RegistrationBuilder.ForDelegate((c, p) => c.ResolveComponent(service, r, p))
-						.Targeting(r)
-						.As(r.Services.ToArray())
-						.ExternallyOwned()
-						.CreateRegistration();
-				}
-			}
+					new ExternalComponentRegistration(
+						Guid.NewGuid(),
+						new DelegateActivator(r.Activator.LimitType, (c, p) => c.ResolveComponent(service, r, p)),
+						new CurrentScopeLifetime(),
+						InstanceSharing.None,
+						InstanceOwnership.ExternallyOwned,
+						new[] { service },
+						r.Metadata,
+						r));
 		}
 
 		/// <summary>
+		/// Gets a value indicating whether components are adapted from the same logical scope.
 		/// In this case because the components that are adapted do not come from the same
 		/// logical scope, we must return false to avoid duplicating them.
 		/// </summary>
-		public bool IsAdapterForIndividualComponents
+		public bool IsAdapterForIndividualComponents => false;
+
+		/// <summary>
+		///  ComponentRegistration subtyped only to distinguish it from other adapted registrations
+		/// </summary>
+		private class ExternalComponentRegistration : ComponentRegistration
 		{
-			get { return false; }
+			public ExternalComponentRegistration(Guid id, IInstanceActivator activator, IComponentLifetime lifetime, InstanceSharing sharing, InstanceOwnership ownership, IEnumerable<Service> services, IDictionary<string, object> metadata, IComponentRegistration target)
+				: base(id, activator, lifetime, sharing, ownership, services, metadata, target)
+			{
+			}
 		}
 	}
 }
