@@ -63,7 +63,8 @@ namespace Revenj.Extensibility.Autofac.Features.LightweightAdapters
 					{
 						var rb = RegistrationBuilder
 							.ForDelegate((c, p) => _activatorData.Adapter(c, p, c.ResolveComponent(service, r, Enumerable.Empty<Parameter>())))
-							.Targeting(r);
+							.Targeting(r)
+							.InheritRegistrationOrderFrom(r);
 
 						rb.RegistrationData.CopyFrom(_registrationData, true);
 

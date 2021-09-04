@@ -76,7 +76,8 @@ namespace Revenj.Extensibility.Autofac.Features.OwnedInstances
 						})
 						.ExternallyOwned()
 						.As(service)
-						.Targeting(r);
+						.Targeting(r)
+						.InheritRegistrationOrderFrom(r);
 
 					return rb.CreateRegistration();
 				});

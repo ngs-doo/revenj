@@ -50,7 +50,6 @@ namespace Revenj.Extensibility.Autofac.Builder
 		InstanceOwnership _ownership = InstanceOwnership.OwnedByLifetimeScope;
 		IComponentLifetime _lifetime = new CurrentScopeLifetime();
 		InstanceSharing _sharing = InstanceSharing.None;
-		readonly Dictionary<string, object> _metadata = new Dictionary<string, object>();
 		readonly List<EventHandler<PreparingEventArgs>> _preparingHandlers = new List<EventHandler<PreparingEventArgs>>();
 		readonly List<EventHandler<ActivatingEventArgs<object>>> _activatingHandlers = new List<EventHandler<ActivatingEventArgs<object>>>();
 		readonly List<EventHandler<ActivatedEventArgs<object>>> _activatedHandlers = new List<EventHandler<ActivatedEventArgs<object>>>();
@@ -64,6 +63,10 @@ namespace Revenj.Extensibility.Autofac.Builder
 		{
 			if (defaultService == null) throw new ArgumentNullException("defaultService");
 			_defaultService = defaultService;
+			Metadata = new Dictionary<string, object>
+			{
+				{ MetadataKeys.RegistrationOrderMetadataKey, SequenceGenerator.GetNextUniqueSequence() }
+			};
 		}
 
 		/// <summary>
@@ -135,7 +138,7 @@ namespace Revenj.Extensibility.Autofac.Builder
 		/// <summary>
 		/// Extended properties assigned to the component.
 		/// </summary>
-		public IDictionary<string, object> Metadata { get { return _metadata; } }
+		public IDictionary<string, object> Metadata { get; }
 
 		/// <summary>
 		/// Handlers for the Preparing event.
@@ -169,7 +172,7 @@ namespace Revenj.Extensibility.Autofac.Builder
 				_defaultService = that._defaultService;
 
 			AddAll(_services, that._services);
-			AddAll(Metadata, that.Metadata);
+			AddAll(Metadata, that.Metadata.Where(m => m.Key != MetadataKeys.RegistrationOrderMetadataKey));
 			AddAll(PreparingHandlers, that.PreparingHandlers);
 			AddAll(ActivatingHandlers, that.ActivatingHandlers);
 			AddAll(ActivatedHandlers, that.ActivatedHandlers);

@@ -66,7 +66,8 @@ namespace Revenj.Extensibility.Autofac.Features.GeneratedFactories
 							.InstancePerLifetimeScope()
 							.ExternallyOwned()
 							.As(service)
-							.Targeting(r);
+							.Targeting(r)
+                            .InheritRegistrationOrderFrom(r);
 
 						return rb.CreateRegistration();
 					});
