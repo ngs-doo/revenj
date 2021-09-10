@@ -138,7 +138,7 @@ namespace Revenj.Extensibility.Autofac.Builder
 		/// <summary>
 		/// Extended properties assigned to the component.
 		/// </summary>
-		public IDictionary<string, object> Metadata { get; }
+		public IDictionary<string, object> Metadata { get; private set; }
 
 		/// <summary>
 		/// Handlers for the Preparing event.

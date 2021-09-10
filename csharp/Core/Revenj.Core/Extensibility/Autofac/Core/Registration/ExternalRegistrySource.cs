@@ -49,9 +49,10 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 		/// <param name="registry">Component registry to pull registrations from.</param>
 		public ExternalRegistrySource(IComponentRegistry registry)
 		{
-			if (registry == null) throw new ArgumentNullException(nameof(registry));
+			if (registry == null) throw new ArgumentNullException("registry");
 
 			_registry = registry;
+			IsAdapterForIndividualComponents = false;
 		}
 
 		/// <summary>
@@ -100,7 +101,7 @@ namespace Revenj.Extensibility.Autofac.Core.Registration
 		/// In this case because the components that are adapted do not come from the same
 		/// logical scope, we must return false to avoid duplicating them.
 		/// </summary>
-		public bool IsAdapterForIndividualComponents => false;
+		public bool IsAdapterForIndividualComponents { get; private set; }
 
 		/// <summary>
 		///  ComponentRegistration subtyped only to distinguish it from other adapted registrations

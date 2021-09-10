@@ -456,11 +456,13 @@
     <Compile Include="Extensibility\Autofac\Builder\IHideObjectMembers.cs" />
     <Compile Include="Extensibility\Autofac\Builder\IRegistrationBuilder.cs" />
     <Compile Include="Extensibility\Autofac\Builder\MetadataConfiguration.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\MetadataKeys.cs" />
     <Compile Include="Extensibility\Autofac\Builder\ReflectionActivatorData.cs" />
     <Compile Include="Extensibility\Autofac\Builder\RegistrationBuilder.cs" />
     <Compile Include="Extensibility\Autofac\Builder\RegistrationBuilderOfTLAR.cs" />
     <Compile Include="Extensibility\Autofac\Builder\RegistrationData.cs" />
     <Compile Include="Extensibility\Autofac\Builder\RegistrationExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Builder\RegistrationOrderExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Builder\SimpleActivatorData.cs" />
     <Compile Include="Extensibility\Autofac\Builder\SingleRegistrationStyle.cs" />
     <Compile Include="Extensibility\Autofac\Configuration\AssemblyElement.cs" />
@@ -605,6 +607,7 @@
     <Compile Include="Extensibility\Autofac\Util\ReflectionExtensions.cs" />
     <Compile Include="Extensibility\Autofac\Util\ReleaseAction.cs" />
     <Compile Include="Extensibility\Autofac\Util\SequenceExtensions.cs" />
+    <Compile Include="Extensibility\Autofac\Util\SequenceGenerator.cs" />
     <Compile Include="Extensibility\Autofac\Util\Silverlight\AllowPartiallyTrustedCallerAttribute.cs" />
     <Compile Include="Extensibility\Autofac\Util\Silverlight\SerializableAttribute.cs" />
     <Compile Include="Extensibility\Autofac\Util\Traverse.cs" />
