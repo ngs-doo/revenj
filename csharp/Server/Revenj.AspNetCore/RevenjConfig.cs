@@ -9,11 +9,11 @@ using System.Reflection;
 using Revenj.DomainPatterns;
 using Revenj.Utility;
 using Revenj.Processing;
-using Microsoft.AspNetCore.Hosting;
 using System.Security.Principal;
-using Microsoft.AspNetCore.Http;
 using Revenj.Security;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace Revenj.AspNetCore
 {
@@ -90,7 +90,7 @@ namespace Revenj.AspNetCore
 		}
 		public IWebHostBuilder Configure(string connectionString)
 		{
-			return Builder.ConfigureServices(services => SetupRevenjWith(connectionString, services));
+			return Builder.ConfigureServices((context, services) => SetupRevenjWith(connectionString, services));
 		}
 
 		private void SetupRevenjWith(string connectionString, IServiceCollection services)

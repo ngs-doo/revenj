@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Templater" Version="2.9.6" />
+    <PackageReference Include="Templater" Version="6.1.0" />
   </ItemGroup>
 
   <ItemGroup>

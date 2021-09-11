@@ -4,6 +4,40 @@
         <name>NGS.Templater</name>
     </assembly>
     <members>
+        <member name="T:NGS.Templater.ISpreadsheetConfigurationBuilder">
+            <summary>
+            This builder allows for customizing various Spreadsheet specific behaviors,
+            such as formulas and limits.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.ISpreadsheetConfigurationBuilder.FormulaWarnings(System.Boolean)">
+            <summary>
+            In some cases Excel will warn about inconsistent formulas.
+            While this setting can be set inside Office application,
+            this configuration allows to disable such features on created spreadsheets.
+            <para />
+            By default formula warnings are not ignored and Excel will report suspicious ones.
+            </summary>
+            <param name="ignore">ignore formulas on all changed sheets</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.ISpreadsheetConfigurationBuilder.NewSheetsLimit(System.Int32)">
+            <summary>
+            To prevent too large spreadsheets, specify maximum number of new sheets which can be added.
+            <para />
+            Sheets can be added through whole sheet resizing or whole workbook cloning.
+            <para />
+            By default sheet limits are not enabled.
+            </summary>
+            <param name="maximum">maximum number of newly created sheets</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.ISpreadsheetConfigurationBuilder.Configure">
+            <summary>
+            Finish configuring the Spreadsheet configuration setup.
+            </summary>
+            <returns>continue with document builder</returns>
+        </member>
         <member name="T:NGS.Templater.Handled">
             <summary>
             Specifying behavior of Templater after the handler.
@@ -299,6 +333,19 @@
             <param name="include">include all builtin low level plugins</param>
             <returns>itself</returns>
         </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.TypeVisibility(System.Boolean)">
+            <summary>
+            During type analysis, analyze <code>all</code> vs <code>only public</code> signatures.
+            <para />
+            By default this value is false as private classes can be passed into processing.
+            Since this does create some problems (it requires access visibility changes which can affect performance), this can be disabled.
+            <para />
+            If non public class has public base class or interface(s), their properties will be considered for usage
+            This value will be changed to false in future version.
+            </summary>
+            <param name="onlyPublic">will consider only public signatures</param>
+            <returns>itself</returns>
+        </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.Streaming(System.Int32)">
             <summary>
             Configure the streaming size. Default is 16384.
@@ -367,9 +414,18 @@
             Instead of normal processing, schema can be embedded into OOXML documents which
             will make document easier to manage from Microsoft Office.
             <para />
+            Processing debug log can be embedded into OOXML documents which will allow to inspect
+            how document looked at each step of processing.
+            <para />
             This feature is not available in SOLO developer license.
             </summary>
             <returns>editor configuration</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.ConfigureSpreadsheet">
+            <summary>
+            Fine tune specific behavior of spreadsheet processing.
+            </summary>
+            <returns>spreadsheet configuration</returns>
         </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.Sign(System.Security.Cryptography.X509Certificates.X509Certificate2)">
             <summary>
@@ -379,6 +435,8 @@
             This will make document final.
             If any changes are made to the document signature validation will fail and user will know that
             the document was changed after the signing.
+            <para />
+            This feature is not available in SOLO developer license.
             </summary>
             <param name="certificate">signing certificate</param>
             <returns>itself</returns>
@@ -418,26 +476,24 @@
             <param name="path">Path to template document file; this file will be overwritten with the processed document</param>
             <returns>Template document interface</returns>
         </member>
-        <member name="M:NGS.Templater.IDocumentFactory.Open(System.IO.Stream,System.String)">
-            <summary>
-            Opens a document from the specified stream. 
-            Stream will be overwritten with populated result and must support seek and write operation.
-            The extension string indicates the type of document in the stream.
-            </summary>
-            <param name="stream">Stream containing the template document; this stream will be used to output the processed document</param>
-            <param name="extension">Template extension</param>
-            <returns>Template document interface</returns>
-        </member>
-        <member name="M:NGS.Templater.IDocumentFactory.Open(System.IO.Stream,System.IO.Stream,System.String)">
+        <member name="M:NGS.Templater.IDocumentFactory.Open(System.IO.Stream,System.String,System.IO.Stream,System.Threading.CancellationToken)">
             <summary>
             Opens a document from the specified stream.
             Input stream is used for reading template.
             Output stream is used for writing populated document.
-            The extension string indicates the type of document in the stream.
+            The extension string indicates the type of document in the stream (eg: .docx, .xlsx, .csv, ...)
+            <para/>
+            Templater will check on various operations (eg: resize, document saving,...) if cancellation was requested
+            and throw appropriate exception in relevant case.
+            <para />
+            This can be used to prevent long running processing or memory exhaustion.
+            <para />
+            Same stream instance can be provided for input and output, in which case Templater will reset the stream and write output from the start of the stream.
             </summary>
             <param name="input">Stream containing the template document</param>
-            <param name="output">Result stream will be used to output the processed document</param>
             <param name="extension">Template extension</param>
+            <param name="output">Result stream will be used to output the processed document</param>
+            <param name="cancellationToken">Allow processing cancellation</param>
             <returns>Template document interface</returns>
         </member>
         <member name="T:NGS.Templater.ITemplater">
@@ -919,6 +975,31 @@
             </summary>
             <param name="path">Path to license file</param>
             <returns>Document factory</returns>
+        </member>
+        <member name="M:NGS.Templater.Configuration.Open(NGS.Templater.IDocumentFactory,System.IO.Stream,System.String)">
+            <summary>
+            Legacy API. Will be removed
+            <para />
+            Opens a document from the specified stream. 
+            Stream will be overwritten with populated result and must support seek and write operation.
+            The extension string indicates the type of document in the stream.
+            </summary>
+            <param name="factory">factory</param>
+            <param name="stream">Stream containing the template document; this stream will be used to output the processed document</param>
+            <param name="extension">template extension</param>
+            <returns>Template document interface</returns>
+        </member>
+        <member name="M:NGS.Templater.Configuration.Open(NGS.Templater.IDocumentFactory,System.IO.Stream,System.IO.Stream,System.String)">
+            <summary>
+            Legacy API. Will be removed
+            <para />
+            Exists for the purpose of argument reorder. New API has Stream, string, Stream order.
+            </summary>
+            <param name="factory">factory</param>
+            <param name="input">template stream</param>
+            <param name="output">output stream</param>
+            <param name="extension">template extension</param>
+            <returns>Template document interface</returns>
         </member>
         <member name="P:NGS.Templater.Configuration.Builder">
             <summary>
