@@ -102,10 +102,11 @@ namespace Revenj
 		/// <returns>byte value or -1 for end</returns>
 		public override int ReadByte()
 		{
-			var block = Blocks[CurrentPosition >> BlockShift];
 			if (CurrentPosition < TotalSize)
+			{
+			var block = Blocks[CurrentPosition >> BlockShift];
 				return block[CurrentPosition++ & BlockAnd];
-			else
+			}
 				return -1;
 		}
 
@@ -150,7 +151,7 @@ namespace Revenj
 					CurrentPosition += (int)offset;
 					break;
 				default:
-					CurrentPosition = TotalSize - (int)offset;
+					CurrentPosition = TotalSize + (int)offset;
 					break;
 			}
 			if (CurrentPosition > TotalSize)

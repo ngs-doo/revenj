@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Revenj.Client</id>
+    <title>Revenj client libraries</title>
+    <version>0.9.0</version>
+    <authors>NGS</authors>
+    <owners>NGS</owners>
+    <licenseUrl>https://github.com/ngs-doo/revenj/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/ngs-doo/revenj</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Client SDK for Revenj server</description>
+    <releaseNotes>
+0.9.0 - Initial release to Nuget
+	</releaseNotes>
+    <copyright>Copyright 2021 N.G.S.</copyright>
+    <tags>DDD DSL framework NOSQL</tags>
+    <summary>Revenj is a DDD-like framework for .NET and Mono with support for Postgres and Oracle databases. 
+It leverages ORDBMS features of the database, to provide typesafe NoSQL documents inside relational database.
+This package contains SDK for interaction with Revenj server.</summary>
+    <dependencies>
+      <group targetFramework=".NETFramework4.0">
+        <dependency id="protobuf-net" version="2.4.6" />
+        <dependency id="Serialize.Linq" version="1.8.1" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="protobuf-net" version="2.4.6" />
+        <dependency id="System.Configuration.ConfigurationManager" version="4.5.0" />
+        <dependency id="Serialize.Linq" version="1.8.1" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

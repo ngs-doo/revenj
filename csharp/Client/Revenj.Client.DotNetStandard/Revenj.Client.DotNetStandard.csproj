@@ -1,0 +1,89 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Revenj.Client</RootNamespace>
+    <AssemblyName>Revenj.Client</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\LitS3\AccessControl.cs" Link="LitS3\AccessControl.cs" />
+    <Compile Include="..\LitS3\AddObject.cs" Link="LitS3\AddObject.cs" />
+    <Compile Include="..\LitS3\Bucket.cs" Link="LitS3\Bucket.cs" />
+    <Compile Include="..\LitS3\BucketAccess.cs" Link="LitS3\BucketAccess.cs" />
+    <Compile Include="..\LitS3\CopyObject.cs" Link="LitS3\CopyObject.cs" />
+    <Compile Include="..\LitS3\CreateBucket.cs" Link="LitS3\CreateBucket.cs" />
+    <Compile Include="..\LitS3\DeleteBucket.cs" Link="LitS3\DeleteBucket.cs" />
+    <Compile Include="..\LitS3\DeleteObject.cs" Link="LitS3\DeleteObject.cs" />
+    <Compile Include="..\LitS3\GetAllBuckets.cs" Link="LitS3\GetAllBuckets.cs" />
+    <Compile Include="..\LitS3\GetBucketLocation.cs" Link="LitS3\GetBucketLocation.cs" />
+    <Compile Include="..\LitS3\GetObject.cs" Link="LitS3\GetObject.cs" />
+    <Compile Include="..\LitS3\HMACSHA1.cs" Link="LitS3\HMACSHA1.cs" />
+    <Compile Include="..\LitS3\Identity.cs" Link="LitS3\Identity.cs" />
+    <Compile Include="..\LitS3\ListEntries.cs" Link="LitS3\ListEntries.cs" />
+    <Compile Include="..\LitS3\ListObjects.cs" Link="LitS3\ListObjects.cs" />
+    <Compile Include="..\LitS3\ObjectTransfer.cs" Link="LitS3\ObjectTransfer.cs" />
+    <Compile Include="..\LitS3\RequestUtils.cs" Link="LitS3\RequestUtils.cs" />
+    <Compile Include="..\LitS3\S3Authorizer.cs" Link="LitS3\S3Authorizer.cs" />
+    <Compile Include="..\LitS3\S3ErrorCode.cs" Link="LitS3\S3ErrorCode.cs" />
+    <Compile Include="..\LitS3\S3Exception.cs" Link="LitS3\S3Exception.cs" />
+    <Compile Include="..\LitS3\S3Headers.cs" Link="LitS3\S3Headers.cs" />
+    <Compile Include="..\LitS3\S3Request.cs" Link="LitS3\S3Request.cs" />
+    <Compile Include="..\LitS3\S3Response.cs" Link="LitS3\S3Response.cs" />
+    <Compile Include="..\LitS3\S3Service.cs" Link="LitS3\S3Service.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\DomainEvent.cs" Link="Interface\DomainEvent.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\DomainObjects.cs" Link="Interface\DomainObjects.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\History.cs" Link="Interface\History.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Reporting.cs" Link="Interface\Reporting.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Repositories.cs" Link="Interface\Repositories.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\ServiceProvider.cs" Link="Interface\ServiceProvider.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Specification.cs" Link="Interface\Specification.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Templater.cs" Link="Interface\Templater.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Patterns\Tracking.cs" Link="Interface\Tracking.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Server\IApplicationProxy.cs" Link="Interface\IApplicationProxy.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Server\ICrudProxy.cs" Link="Interface\ICrudProxy.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Server\IDomainProxy.cs" Link="Interface\IDomainProxy.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Server\IReportingProxy.cs" Link="Interface\IReportingProxy.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Server\IStandardProxy.cs" Link="Interface\IStandardProxy.cs" />
+    <Compile Include="..\Revenj.Client.Interface\Storage\IS3Repository.cs" Link="Interface\IS3Repository.cs" />
+    <Compile Include="..\Revenj.Client\Configuration.cs" Link="Implementation\Configuration.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\ClientDomainStore.cs" Link="Implementation\ClientDomainStore.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\ClientPersistableRepository.cs" Link="Implementation\ClientPersistableRepository.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\ClientRepository.cs" Link="Implementation\ClientRepository.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\ClientSearchableRepository.cs" Link="Implementation\ClientSearchableRepository.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\ClientTemplaterService.cs" Link="Implementation\ClientTemplaterService.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\DictionaryServiceLocator.cs" Link="Implementation\DictionaryServiceLocator.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\History.cs" Link="Implementation\History.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\Search\ExpressionSpecification.cs" Link="Implementation\ExpressionSpecification.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\Search\GenericSearchFilter.cs" Link="Implementation\GenericSearchFilter.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\Search\GenericSpecification.cs" Link="Implementation\GenericSpecification.cs" />
+    <Compile Include="..\Revenj.Client\Patterns\Search\SearchBuilder.cs" Link="Implementation\SearchBuilder.cs" />
+    <Compile Include="..\Revenj.Client\Serialization\ProtobufSerialization.cs" Link="Implementation\ProtobufSerialization.cs" />
+    <Compile Include="..\Revenj.Client\Serialization\ProtoMemoryStream.cs" Link="Implementation\ProtoMemoryStream.cs" />
+    <Compile Include="..\Revenj.Client\Server\ApplicationProxy.cs" Link="Implementation\ApplicationProxy.cs" />
+    <Compile Include="..\Revenj.Client\Server\CrudProxy.cs" Link="Implementation\CrudProxy.cs" />
+    <Compile Include="..\Revenj.Client\Server\DomainProxy.cs" Link="Implementation\DomainProxy.cs" />
+    <Compile Include="..\Revenj.Client\Server\HttpClient.cs" Link="Implementation\HttpClient.cs" />
+    <Compile Include="..\Revenj.Client\Server\ProxyHelper.cs" Link="Implementation\ProxyHelper.cs" />
+    <Compile Include="..\Revenj.Client\Server\ReportingProxy.cs" Link="Implementation\ReportingProxy.cs" />
+    <Compile Include="..\Revenj.Client\Server\StandardProxy.cs" Link="Implementation\StandardProxy.cs" />
+    <Compile Include="..\Revenj.Client\Startup.cs" Link="Implementation\Startup.cs" />
+    <Compile Include="..\Revenj.Client\StaticLocator.cs" Link="Implementation\StaticLocator.cs" />
+    <Compile Include="..\Revenj.Client\Storage\S3\LitS3Repository.cs" Link="Implementation\LitS3Repository.cs" />
+    <Compile Include="..\Revenj.Client\Storage\S3\S3.cs" Link="Implementation\S3.cs" />
+    <Compile Include="..\Revenj.Client\Stream\ChunkedMemoryStream.cs" Link="Implementation\ChunkedMemoryStream.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Implementation\" />
+    <Folder Include="Interface\" />
+    <Folder Include="LitS3\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="protobuf-net" Version="2.4.6" />
+    <PackageReference Include="Serialize.Linq" Version="2.0.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

@@ -13,16 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Client.DotNet", "Cli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhoneTests", "Client\PhoneTests\PhoneTests.csproj", "{1D3753AD-3CDF-4C08-8250-B9A40AD553EF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revenj.Client.DotNetStandard", "Client\Revenj.Client.DotNetStandard\Revenj.Client.DotNetStandard.csproj", "{614A4F67-CE29-4B25-8935-1EC95A0808D7}"
+EndProject
 Global
-	GlobalSection(DslPlatformSolutionProperties) = preSolution
-		Client.Compile = True
-		Client.Target = Client\lib
-		Client.Dependencies = Client\Revenj.Client.DotNet\bin\Release
-		Portable.Target = Client\lib
-		Portable.Dependencies = Client\Revenj.Client.Portable\bin\Release
-		Php.Name = Php
-		Php.Target = Php
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -96,8 +89,30 @@ Global
 		{1D3753AD-3CDF-4C08-8250-B9A40AD553EF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{1D3753AD-3CDF-4C08-8250-B9A40AD553EF}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
 		{1D3753AD-3CDF-4C08-8250-B9A40AD553EF}.Release|x86.ActiveCfg = Release|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{614A4F67-CE29-4B25-8935-1EC95A0808D7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50323E43-65AE-40C9-ADF1-E1951285B93E}
+	EndGlobalSection
+	GlobalSection(DslPlatformSolutionProperties) = preSolution
+		Client.Compile = True
+		Client.Target = Client\lib
+		Client.Dependencies = Client\Revenj.Client.DotNet\bin\Release
+		Portable.Target = Client\lib
+		Portable.Dependencies = Client\Revenj.Client.Portable\bin\Release
 	EndGlobalSection
 EndGlobal
