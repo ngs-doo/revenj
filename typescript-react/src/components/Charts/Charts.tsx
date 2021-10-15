@@ -221,6 +221,7 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
 
     const primaryYAxis = {
       id: PRIMARY_Y_AXIS_ID,
+      offset: ys[0]?.type === 'bar',
       stacked,
       ticks,
       position: 'left',
@@ -228,6 +229,7 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
 
     const secondaryYAxis = {
       id: SECONDARY_Y_AXIS_ID,
+      offset: ys[1]?.type === 'bar',
       stacked,
       ticks,
       position: 'right',
