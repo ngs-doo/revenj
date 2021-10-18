@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button';
 
 import { isNullOrEmpty } from '../../util/StringUtils/StringUtils';
 import { NavigationContext } from '../Navigation/NavigationContext';
+import { ISimpleButtonAction } from '../Presenters/Actions';
 import { TooltipOnHover } from '../Tooltip/Tooltip';
 import { ButtonMenu } from './ButtonMenu';
 import { ButtonItem, isComponentButton } from './interfaces';
@@ -77,6 +78,7 @@ export class Buttons extends React.PureComponent<IButtons> {
             href={btn.url}
             onClick={btn.onClick}
             disabled={btn.disabled}
+            variant={(btn as ISimpleButtonAction).variant || 'primary'}
           >
             {btn.label}
           </Button>
