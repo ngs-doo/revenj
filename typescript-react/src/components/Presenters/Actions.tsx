@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import * as React from 'react';
+import { ButtonVariant } from 'react-bootstrap/esm/types';
 
 import { ApiContext } from '../Api/ApiContext';
 import { Buttons } from '../Buttons/Buttons';
@@ -7,11 +8,12 @@ import { IComponentButtonProps } from '../Buttons/interfaces';
 import { ListPresenterComponent, UpdatePresenterContext } from '../Form/Context';
 import styles from './Presenter.module.css';
 
-interface ISimpleButtonAction {
+export interface ISimpleButtonAction {
   className?: string;
   disabled?: boolean;
   label: string;
   url?: string;
+  variant?: ButtonVariant;
   isVisible?: (actionsProps: IActions) => boolean;
   onClick?: (actionProps?: IActions) => void;
 }
