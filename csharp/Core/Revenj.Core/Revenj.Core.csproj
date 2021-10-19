@@ -849,41 +849,6 @@
     <None Include="Security\Mono.Security\Mono.Security.Interface\README.md" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\NpgsqlTypes\NpgsqlTypesHelper.resx">
-      <DependentUpon>NpgsqlTypesHelper.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlCommand.resx">
-      <DependentUpon>NpgsqlCommand.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlCommandBuilder.resx">
-      <DependentUpon>NpgsqlCommandBuilder.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlConnection.resx">
-      <DependentUpon>NpgsqlConnection.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlConnectionStringBuilder.resx">
-      <DependentUpon>NpgsqlConnectionStringBuilder.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlException.resx">
-      <DependentUpon>NpgsqlException.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlRow.resx">
-      <DependentUpon>NpgsqlRow.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\NpgsqlTransaction.resx">
-      <DependentUpon>NpgsqlTransaction.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\PGUtil.resx">
-      <DependentUpon>PGUtil.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlReadyState.resx">
-      <DependentUpon>NpgsqlReadyState.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabasePersistence\Postgres\Npgsql\State\NpgsqlState.resx">
-      <DependentUpon>NpgsqlState.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="DatabasePersistence\Postgres\Npgsql\NpgsqlMetaData.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

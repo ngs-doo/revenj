@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.Composition;
 using System.Configuration;
+#if !NETSTANDARD2_0
 using System.IO;
 using Revenj.Api;
+#endif
 using Revenj.Extensibility;
 using Revenj.Processing;
 
@@ -23,18 +25,18 @@ namespace Revenj.Plugins.Aspects.Commands
 		{
 			if (!LogCommands)
 				return;
-
-			var processingInterceptor = new ProcessingCommandsIntercepter();
-			var restInterceptor = new RestCommandsIntercepter();
 			var aspectRegistrator = factory.Resolve<IAspectRegistrator>();
 
+			var processingInterceptor = new ProcessingCommandsIntercepter();
 			var tpe = typeof(IProcessingEngine);
-			var tcc = typeof(ICommandConverter);
-			var tre = typeof(IRestApplication);
 			aspectRegistrator.Before(
 				tpe,
 				tpe.GetMethod("Execute"),
 				(e, args) => processingInterceptor.LogCommands((dynamic)(args[0])));
+#if !NETSTANDARD2_0
+			var restInterceptor = new RestCommandsIntercepter();
+			var tcc = typeof(ICommandConverter);
+			var tre = typeof(IRestApplication);
 			aspectRegistrator.Around(
 				tcc,
 				tcc.GetMethod("PassThrough"),
@@ -45,6 +47,7 @@ namespace Revenj.Plugins.Aspects.Commands
 			aspectRegistrator.Around<IRestApplication, Stream, Stream>(
 				r => r.Post(null),
 				(_, s, bc) => restInterceptor.Post(s, bc));
+#endif
 		}
 	}
 }

@@ -40,7 +40,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	/// </summary>
 	internal abstract class NpgsqlRow : IStreamOwner
 	{
-		protected static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 		public abstract object this[int index] { get; }
 		public abstract int NumFields { get; }
 		public abstract bool IsDBNull(int index);
@@ -130,7 +129,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			if ((!allowCurrent || _reader.CurrentlyStreaming) ? index <= _lastIndex : index < _lastIndex)
 			{
 				throw new InvalidOperationException(
-					string.Format(resman.GetString("Row_Sequential_Field_Error"), index, _lastIndex + 1));
+					string.Format("Invalid attempt to read from column ordinal '{0}'. With CommandBehavior.SequentialAccess, you may only read from column ordinal '{1}' or greater.", index, _lastIndex + 1));
 			}
 			_reader.Skip(index - _lastIndex - 1);
 			_lastIndex = index;

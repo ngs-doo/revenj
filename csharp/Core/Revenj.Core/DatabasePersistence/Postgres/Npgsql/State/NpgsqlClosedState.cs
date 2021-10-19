@@ -104,7 +104,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						if (!result.AsyncWaitHandle.WaitOne(context.ConnectionTimeout * 1000, true))
 						{
 							socket.Close();
-							throw new Exception(resman.GetString("Exception_ConnectionTimeout"));
+							throw new Exception("Connection establishment timeout. Increase Timeout value in ConnectionString.");
 						}
 
 						socket.EndConnect(result);
@@ -120,7 +120,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 				if (socket == null || !socket.Connected)
 				{
-					throw new Exception(string.Format(resman.GetString("Exception_FailedConnection"), context.Host));
+					throw new Exception(string.Format("Failed to establish a connection to '{0}'.", context.Host));
 				}
 
 				Stream stream = new NpgsqlNetworkStream(context, socket, true);
@@ -157,7 +157,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					}
 					else if (context.SslMode == SslMode.Require)
 					{
-						throw new InvalidOperationException(resman.GetString("Exception_Ssl_RequestError"));
+						throw new InvalidOperationException("Ssl connection requested. No Ssl enabled connection from this host is configured.");
 					}
 				}
 

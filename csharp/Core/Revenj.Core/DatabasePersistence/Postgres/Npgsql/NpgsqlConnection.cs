@@ -31,7 +31,6 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
-using System.Resources;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Transactions;
@@ -61,7 +60,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	{
 		// Logging related values
 		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-		private static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 
 		// Parsed connection string cache
 		private static readonly Cache<NpgsqlConnectionStringBuilder> cache = new Cache<NpgsqlConnectionStringBuilder>();
@@ -461,7 +459,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			if (connector.Transaction != null)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_NoNestedTransactions"));
+				throw new InvalidOperationException("Nested/Concurrent transactions aren't supported.");
 			}
 
 			return new NpgsqlTransaction(this, level);
@@ -478,12 +476,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			// Check if there is any missing argument.
 			if (!settings.ContainsKey(Keywords.Host))
 			{
-				throw new ArgumentException(resman.GetString("Exception_MissingConnStrArg"),
+				throw new ArgumentException("Connection string argument missing!",
 											NpgsqlConnectionStringBuilder.GetKeyName(Keywords.Host));
 			}
 			if (!settings.ContainsKey(Keywords.UserName) && !settings.ContainsKey(Keywords.IntegratedSecurity))
 			{
-				throw new ArgumentException(resman.GetString("Exception_MissingConnStrArg"),
+				throw new ArgumentException("Connection string argument missing!",
 											NpgsqlConnectionStringBuilder.GetKeyName(Keywords.UserName));
 			}
 
@@ -541,7 +539,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			if (string.IsNullOrEmpty(dbName))
 			{
-				throw new ArgumentOutOfRangeException(String.Format(resman.GetString("Exception_InvalidDbName"), dbName), "dbName");
+				throw new ArgumentOutOfRangeException(String.Format("Invalid database name: {0}", dbName), "dbName");
 			}
 
 			String oldDatabaseName = Database;
@@ -871,7 +869,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			if (connector == null)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_ConnNotOpen"));
+				throw new InvalidOperationException("Connection is not open");
 			}
 		}
 
@@ -884,7 +882,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			if (connector != null)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_ConnOpen"));
+				throw new InvalidOperationException("Connection already open");
 			}
 		}
 

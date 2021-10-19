@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -38,11 +37,6 @@ namespace Revenj.DatabasePersistence.Postgres
 			ISystemState systemState,
 			IServiceProvider locator)
 		{
-			Contract.Requires(connectionInfo != null);
-			Contract.Requires(domainModel != null);
-			Contract.Requires(locator != null);
-			Contract.Requires(systemState != null);
-
 			this.DomainModel = domainModel;
 			this.Locator = locator;
 			this.SystemState = systemState;
@@ -211,6 +205,14 @@ namespace Revenj.DatabasePersistence.Postgres
 				TraceSource.TraceEvent(TraceEventType.Error, 5140, "{0}", ex);
 			}
 			Connection = null;
+			try
+			{
+				Subject.Dispose();
+			}
+			catch (Exception ex)
+			{
+				TraceSource.TraceEvent(TraceEventType.Error, 5141, "{0}", ex);
+			}
 		}
 	}
 }

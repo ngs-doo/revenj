@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -63,8 +62,6 @@ namespace Revenj.DomainPatterns
 
 		public ChangeNotifications(IDataChangeNotification notifications)
 		{
-			Contract.Requires(notifications != null);
-
 			Subscription = notifications.Track<TSource>().Subscribe(kv => Subject.OnNext(kv));
 			var source = Subject.AsObservable();
 			BulkChanges = source.Select(it => it.Value);
@@ -90,6 +87,7 @@ namespace Revenj.DomainPatterns
 		public void Dispose()
 		{
 			Subscription.Dispose();
+			Subject.Dispose();
 		}
 	}
 }

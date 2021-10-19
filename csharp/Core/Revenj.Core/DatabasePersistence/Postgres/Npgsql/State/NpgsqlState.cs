@@ -45,7 +45,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	internal abstract class NpgsqlState
 	{
 		protected static readonly Encoding ENCODING_UTF8 = Encoding.UTF8;
-		protected readonly static ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 
 		internal NpgsqlState()
 		{
@@ -366,7 +365,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						//"operation cancelled by user" or similar, so whatever the case, that is what we'll throw.
 						// Changed message again to report about the two possible timeouts: connection or command as the establishment timeout only was confusing users when the timeout was a command timeout.
 					}
-					throw new NpgsqlException(resman.GetString("Exception_ConnectionOrCommandTimeout"));
+					throw new NpgsqlException("A timeout has occured. If you were establishing a connection, increase Timeout value in ConnectionString. If you were executing a command, increase the CommandTimeout value in ConnectionString or in your NpgsqlCommand object.");
 				}
 				return ProcessBackendResponses_Ver_3(context);
 
@@ -678,7 +677,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 									// Only AuthenticationClearTextPassword, AuthenticationMD5Password and AuthenticationSASL supported for now.
 									if (errors == null) errors = new List<NpgsqlError>();
 									errors.Add(
-										new NpgsqlError(String.Format(resman.GetString("Exception_AuthenticationMethodNotSupported"), authType)));
+										new NpgsqlError(String.Format("Only AuthenticationClearTextPassword, AuthenticationMD5Password and AuthenticationSASL supported for now. Received: {0}", authType)));
 									throw new NpgsqlException(errors);
 							}
 							break;

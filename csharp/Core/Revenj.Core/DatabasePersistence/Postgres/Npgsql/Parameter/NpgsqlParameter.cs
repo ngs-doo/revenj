@@ -60,7 +60,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private Object value = null;
 		private Object npgsqlValue = null;
 		private Boolean sourceColumnNullMapping;
-		private static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 
 		private Boolean useCast = false;
 

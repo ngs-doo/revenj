@@ -31,13 +31,11 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Reflection;
-using System.Resources;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
 	public sealed class NpgsqlConnectionStringBuilder : DbConnectionStringBuilder
 	{
-		private static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 		private static readonly Dictionary<Keywords, object> defaults = new Dictionary<Keywords, object>();
 
 		private string originalConnectionString;
@@ -115,11 +113,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			int v = Convert.ToInt32(value);
 			if (v < min)
 			{
-				throw new ArgumentOutOfRangeException(String.Format(resman.GetString("Exception_IntegerKeyValMin"), key, min), key);
+				throw new ArgumentOutOfRangeException(String.Format("numeric value {0} in ConnectionString is below minimum value {1}", key, min), key);
 			}
 			else if (v > max)
 			{
-				throw new ArgumentOutOfRangeException(String.Format(resman.GetString("Exception_IntegerKeyValMax"), key, max), key);
+				throw new ArgumentOutOfRangeException(String.Format("numeric value {0} in ConnectionString exceeds maximum value {1}", key, max), key);
 			}
 			return v;
 		}
@@ -444,7 +442,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				case "APPLICATIONNAME":
 					return Keywords.ApplicationName;
 				default:
-					throw new ArgumentException(resman.GetString("Exception_WrongKeyVal"), key);
+					throw new ArgumentException("key=value argument incorrect in ConnectionString", key);
 			}
 		}
 
@@ -653,12 +651,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					case Keywords.MinPoolSize:
 					case Keywords.MaxPoolSize:
 					case Keywords.CommandTimeout:
-						exception_template = resman.GetString("Exception_InvalidIntegerKeyVal");
+						exception_template = "expecting {0}=[Numeric] value in ConnectionString";
 						break;
 					case Keywords.SSL:
 					case Keywords.Pooling:
 					case Keywords.SyncNotification:
-						exception_template = resman.GetString("Exception_InvalidBooleanKeyVal");
+						exception_template = "expecting {0}=[True/False] value in ConnectionString";
 						break;
 				}
 				if (!string.IsNullOrEmpty(exception_template))

@@ -29,6 +29,7 @@ namespace Revenj.DomainPatterns
 		public void Dispose()
 		{
 			Subscription.Dispose();
+			Subject.Dispose();
 		}
 	}
 }

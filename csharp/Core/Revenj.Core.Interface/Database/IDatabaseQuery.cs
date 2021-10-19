@@ -97,12 +97,10 @@ namespace Revenj.DatabasePersistence
 			string sql,
 			params object[] parameters)
 		{
-			Contract.Requires(query != null);
-			Contract.Requires(!string.IsNullOrWhiteSpace(sql));
-
 			var com = query.NewCommand();
 			com.CommandText = sql;
 			if (parameters != null)
+			{
 				foreach (var p in parameters)
 				{
 					var cp = com.CreateParameter();
@@ -113,6 +111,7 @@ namespace Revenj.DatabasePersistence
 					var index = sql.IndexOf('?');
 					sql = sql.Substring(0, index) + cp.ParameterName + sql.Substring(index + 1);
 				}
+			}
 			com.CommandText = sql;
 			return com;
 		}

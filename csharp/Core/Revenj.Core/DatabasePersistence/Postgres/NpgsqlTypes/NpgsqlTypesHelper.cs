@@ -44,9 +44,6 @@ namespace Revenj.DatabasePersistence.Postgres.NpgsqlTypes
 	/// </summary>
 	internal static class NpgsqlTypesHelper
 	{
-		// Logging related values
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-		private static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 
 		private struct MappingKey : IEquatable<MappingKey>
 		{

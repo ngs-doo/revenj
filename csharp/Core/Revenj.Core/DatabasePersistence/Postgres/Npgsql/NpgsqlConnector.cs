@@ -126,7 +126,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		private const String _planNamePrefix = "npgsqlplan";
 		private const String _portalNamePrefix = "npgsqlportal";
 
-		private Thread _notificationThread;
+		private CancellationTokenSource _notificationToken;
 
 		// The AutoResetEvent to synchronize processing threads.
 		internal AutoResetEvent _notificationAutoResetEvent;
@@ -748,8 +748,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				if (!SupportsApplicationName)
 				{
-					//TODO
-					//throw new InvalidOperationException(resman.GetString("Exception_ApplicationNameNotSupported"));
 					throw new InvalidOperationException("ApplicationName not supported.");
 				}
 
@@ -869,12 +867,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		internal void RemoveNotificationThread()
 		{
-			// Wait notification thread finish its work.
-			_notificationAutoResetEvent.WaitOne();
-
 			// Kill notification thread.
-			_notificationThread.Abort();
-			_notificationThread = null;
+			_notificationToken.Cancel();
+			_notificationToken = null;
 
 			// Special case in order to not get problems with thread synchronization.
 			// It will be turned to 0 when synch thread is created.
@@ -885,10 +880,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			_notificationThreadStopCount = 0;
 			_notificationAutoResetEvent.Set();
+			_notificationToken = new CancellationTokenSource();
 
-			NpgsqlContextHolder contextHolder = new NpgsqlContextHolder(this, CurrentState);
+			NpgsqlContextHolder contextHolder = new NpgsqlContextHolder(this, CurrentState, _notificationToken.Token);
 
-			_notificationThread = new Thread(new ThreadStart(contextHolder.ProcessServerMessages));
+			var _notificationThread = new Thread(new ThreadStart(contextHolder.ProcessServerMessages));
 
 			_notificationThread.Start();
 		}
@@ -965,18 +961,20 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			private readonly NpgsqlConnector connector;
 			private readonly NpgsqlState state;
+			private readonly CancellationToken token;
 
-			internal NpgsqlContextHolder(NpgsqlConnector connector, NpgsqlState state)
+			internal NpgsqlContextHolder(NpgsqlConnector connector, NpgsqlState state, CancellationToken token)
 			{
 				this.connector = connector;
 				this.state = state;
+				this.token = token;
 			}
 
 			internal void ProcessServerMessages()
 			{
 				try
 				{
-					while (true)
+					while (!token.IsCancellationRequested)
 					{
 						Thread.Sleep(1);
 						//To give runtime chance to release correctly the lock. See http://pgfoundry.org/forum/message.php?msg_id=1002650 for more information.
@@ -995,6 +993,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				catch (IOException ex)
 				{
 					this.connector._notificationException = ex;
+				}
+				finally
+				{
 					this.connector._notificationAutoResetEvent.Set();
 					this.connector.Close();
 				}

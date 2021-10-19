@@ -104,10 +104,10 @@ namespace Revenj
 		{
 			if (CurrentPosition < TotalSize)
 			{
-			var block = Blocks[CurrentPosition >> BlockShift];
+				var block = Blocks[CurrentPosition >> BlockShift];
 				return block[CurrentPosition++ & BlockAnd];
 			}
-				return -1;
+			return -1;
 		}
 
 		/// <summary>

@@ -45,8 +45,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	internal static class PGUtil
 	{
 		// Logging related values
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-		internal static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 		//TODO: What should this value be?
 		//There is an obvious balancing act in setting this value. The larger the value, the fewer times
 		//we need to use it and the more efficient we are in that regard. The smaller the value, the
@@ -325,7 +323,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			if (bytes.Length > n)
 			{
 				throw new ArgumentOutOfRangeException("the_string", the_string,
-													  string.Format(resman.GetString("LimStringWriteTooLarge"), the_string, n));
+													  string.Format("String too large", the_string, n));
 			}
 
 			network_stream.Write(bytes, 0, bytes.Length);
@@ -520,7 +518,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 		private static void StopWrite()
 		{
-			throw new NotSupportedException(PGUtil.resman.GetString("Read_Only_Write_Error"));
+			throw new NotSupportedException("The collection is read-only");
 		}
 
 		public TValue this[TKey key]

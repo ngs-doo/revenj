@@ -50,8 +50,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	public sealed class NpgsqlCommand : DbCommand, ICloneable
 	{
 		// Logging related values
-		private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-		private static readonly ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
+		//private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
 		private static readonly Regex parameterReplace = new Regex(@"([:@][\w\.]*)", RegexOptions.Singleline | RegexOptions.Compiled);
 		private static readonly Regex POSTGRES_TEXT_ARRAY = new Regex(@"^array\[+'", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
@@ -223,7 +222,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				if (value < 0)
 				{
-					throw new ArgumentOutOfRangeException(resman.GetString("Exception_CommandTimeoutLessZero"));
+					throw new ArgumentOutOfRangeException("CommandTimeout can't be less than zero.");
 				}
 
 				timeout = value;
@@ -287,7 +286,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				// See bug 1000581 for more details.
 				if (this.transaction != null && this.connection != null && this.Connector != null && this.Connector.Transaction != null)
 				{
-					throw new InvalidOperationException(resman.GetString("Exception_SetConnectionInTransaction"));
+					throw new InvalidOperationException("The Connection property can't be changed with an uncommited transaction.");
 				}
 
 				this.connection = value;
@@ -819,7 +818,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			// Check the connection state.
 			if (Connector == null || Connector.State == ConnectionState.Closed)
 			{
-				throw new InvalidOperationException(resman.GetString("Exception_ConnectionNotOpen"));
+				throw new InvalidOperationException("The Connection is not open.");
 			}
 			if (Connector.State != ConnectionState.Open)
 			{
@@ -1448,7 +1447,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			while (true);
 			if (!found)
 			{
-				throw new IndexOutOfRangeException(String.Format(resman.GetString("Exception_ParamNotInQuery"), parameterName));
+				throw new IndexOutOfRangeException(String.Format("Parameter {0} not found in query.", parameterName));
 			}
 			return result;
 		}
@@ -1471,7 +1470,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		internal NpgsqlException ClearPoolAndCreateException(Exception e)
 		{
 			Connection.ClearPool();
-			return new NpgsqlException(resman.GetString("Exception_ConnectionBroken"), e);
+			return new NpgsqlException("The Connection is broken.", e);
 		}
 
 		public override bool DesignTimeVisible

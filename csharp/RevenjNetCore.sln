@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Core.NetStandard", "Core\Revenj.Core\Revenj.Core.NetStandard.csproj", "{3E472630-22AF-47A0-9E44-3449EB990B43}"
 EndProject
@@ -27,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		SharedAssemblyInfo.cs = SharedAssemblyInfo.cs
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Revenj.Plugins.Aspects.NetStandard", "Plugins\Revenj.Plugins.Aspects\Revenj.Plugins.Aspects.NetStandard.csproj", "{5B9800C0-03A7-4DA5-95B1-E1CD8EAC1EF7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +64,10 @@ Global
 		{B8F0E839-F41C-4FB2-9F32-BD538A983E07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8F0E839-F41C-4FB2-9F32-BD538A983E07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8F0E839-F41C-4FB2-9F32-BD538A983E07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B9800C0-03A7-4DA5-95B1-E1CD8EAC1EF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B9800C0-03A7-4DA5-95B1-E1CD8EAC1EF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B9800C0-03A7-4DA5-95B1-E1CD8EAC1EF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B9800C0-03A7-4DA5-95B1-E1CD8EAC1EF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +80,7 @@ Global
 		{EF0BC366-47AC-40CD-A066-9CD745C05F5C} = {53F61E27-7AAF-4721-A174-EB79BD2CEC80}
 		{820A3AC1-0C8E-4CF1-9AF3-B8489968FCE5} = {7730F4AD-8643-4BE3-8BC5-585049B8D4FE}
 		{B8F0E839-F41C-4FB2-9F32-BD538A983E07} = {7730F4AD-8643-4BE3-8BC5-585049B8D4FE}
+		{5B9800C0-03A7-4DA5-95B1-E1CD8EAC1EF7} = {7730F4AD-8643-4BE3-8BC5-585049B8D4FE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CEC2D5C0-F953-49CB-8608-E5883ED36A5E}

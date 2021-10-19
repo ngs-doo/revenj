@@ -28,8 +28,6 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
-using System.Reflection;
-using System.Resources;
 using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
@@ -41,7 +39,6 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 	{
 		// Logging related values
 		//private static readonly String CLASSNAME = MethodBase.GetCurrentMethod().DeclaringType.Name;
-		private readonly static ResourceManager resman = new ResourceManager(MethodBase.GetCurrentMethod().DeclaringType);
 		//not used!?
 		//private NpgsqlRowUpdatingEventHandler rowUpdatingHandler;
 
@@ -147,7 +144,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				if (types == null)
 				{
 					throw new InvalidOperationException(
-						String.Format(resman.GetString("Exception_InvalidFunctionName"), command.CommandText));
+						String.Format("{0} does not exist in pg_proc", command.CommandText));
 				}
 
 				command.Parameters.Clear();
