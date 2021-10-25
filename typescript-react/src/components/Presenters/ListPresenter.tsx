@@ -38,6 +38,7 @@ export interface IListPresenterState<T, R extends DeepKeyOf<T>> {
   page: number;
   perPage: number;
   totalCount?: number;
+  values: T;
 }
 
 const mapStateToProps = (state: IObjectAny, ownProps: IListPresenterPublicProps<any, any>): IListPresenterStateProps<any> => ({
@@ -56,6 +57,7 @@ class ListPresenterBare<T, R extends DeepKeyOf<T>> extends React.PureComponent<I
     items: [] as DeepTypeOf<T, R>,
     page: 0,
     perPage: 20,
+    values: {} as T,
   };
 
   public componentDidMount() {
@@ -93,6 +95,7 @@ class ListPresenterBare<T, R extends DeepKeyOf<T>> extends React.PureComponent<I
     page: this.props.pagination ? this.state.page : undefined,
     perPage: this.props.pagination ? this.state.perPage : undefined,
     totalCount: this.props.pagination ? this.state.totalCount : undefined,
+    values: this.state.values,
   })
 
   private onSubmit = async (data: T): Promise<T> => {
@@ -128,6 +131,7 @@ class ListPresenterBare<T, R extends DeepKeyOf<T>> extends React.PureComponent<I
         formData: data, // Store form data to allow pagination to work
         isLoaded: true,
         items: get(response, resultField!)!,
+        values: response,
       });
 
       return response;
