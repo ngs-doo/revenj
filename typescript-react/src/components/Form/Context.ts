@@ -27,6 +27,7 @@ export interface IListPresenterContext<T, R extends DeepKeyOf<T>> {
   page?: number;
   perPage?: number;
   totalCount?: number;
+  values: T,
   onSubmit: (data: T) => Promise<T>;
   onClear: () => void;
   onChangePagination: (page: number, perPage: number) => Promise<T>;
