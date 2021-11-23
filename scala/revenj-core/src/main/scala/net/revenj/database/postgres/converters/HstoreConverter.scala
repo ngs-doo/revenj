@@ -89,6 +89,7 @@ object HstoreConverter extends Converter[Map[String, String]] {
             do {
               cur = reader.read()
             } while (cur == ' ')
+            cur = reader.read(quoteContext)
           }
         } else {
           cur = reader.read(quoteContext)

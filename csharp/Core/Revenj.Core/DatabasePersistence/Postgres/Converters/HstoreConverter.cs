@@ -110,6 +110,7 @@ namespace Revenj.DatabasePersistence.Postgres.Converters
 						return dict;
 					do { cur = reader.Read(); }
 					while (cur == ' ');
+					cur = reader.Read(quoteContext);
 				}
 				else
 				{

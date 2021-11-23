@@ -20,17 +20,17 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.8</version>
+			<version>2.13.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jdk8</artifactId>
-			<version>2.9.8</version>
+			<version>2.13.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>2.9.8</version>
+			<version>2.13.0</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -40,12 +40,12 @@
 		<dependency>
 			<groupId>hr.ngs.templater</groupId>
 			<artifactId>templater</artifactId>
-			<version>2.9.6</version>
+			<version>6.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

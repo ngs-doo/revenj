@@ -6,21 +6,21 @@ lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
   settings(
-    version := "1.1.4",
+    version := "1.2.0",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.2.6",
-      "joda-time" % "joda-time" % "2.10.3",   // TODO: will be removed
+      "joda-time" % "joda-time" % "2.10.13",   // TODO: will be removed
       "org.joda" % "joda-convert" % "2.2.1", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix-reactive" % "3.2.2",
+      "io.monix" %% "monix-reactive" % "3.4.0",
       "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
-      "com.dslplatform" %% "dsl-json-scala" % "1.9.8",
-      "com.dslplatform" % "dsl-json-joda" % "1.9.8", // TODO: will be removed
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.11.3",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.11.3",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.11.3",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.11.3",
-      "org.specs2" %% "specs2-scalacheck" % "4.7.1" % Test,
+      "com.dslplatform" %% "dsl-json-scala" % "1.9.9",
+      "com.dslplatform" % "dsl-json-joda" % "1.9.9", // TODO: will be removed
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.0",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.13.0",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.13.0",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.13.0",
+      "org.specs2" %% "specs2-scalacheck" % "4.13.0" % Test,
     ),
     dslResourcePath in (Test, DSL) := Some((resourceDirectory in Test).value / "META-INF" / "services")
   )
@@ -29,11 +29,11 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "1.1.4",
+  version := "1.2.0",
   libraryDependencies ++= Seq(
       "com.typesafe" % "config" % "1.3.4",
-      "com.typesafe.akka" %% "akka-http" % "10.2.1",
-      "com.typesafe.akka" %% "akka-stream" % "2.6.10"
+      "com.typesafe.akka" %% "akka-http" % "10.2.7",
+      "com.typesafe.akka" %% "akka-stream" % "2.6.17"
     )
   )
   dependsOn(core)
@@ -42,10 +42,10 @@ lazy val akka = (project in file("revenj-akka")
 lazy val storage = (project in file("revenj-storage")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "1.1.4",
+    version := "1.2.0",
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-s3" % "1.11.879",
-      "org.specs2" %% "specs2-scalacheck" % "4.7.1" % Test,
+      "com.amazonaws" % "aws-java-sdk-s3" % "1.12.115",
+      "org.specs2" %% "specs2-scalacheck" % "4.13.0" % Test,
     )
   )
   dependsOn(core)
@@ -62,7 +62,7 @@ lazy val tests = (project in file("tests")
       "com.dslplatform" % "dsl-clc" % "1.9.10" % Test,
       "org.specs2" %% "specs2-scalacheck" % "4.7.1" % Test,
       "org.pgscala.embedded" %% "pgscala-embedded" % "0.3.0-0-SNAPSHOT" % Test,
-      "ch.qos.logback" % "logback-classic" % "1.2.3" % Test,
+      "ch.qos.logback" % "logback-classic" % "1.2.7" % Test,
     ),
     resolvers += Resolver.sonatypeRepo("snapshots"), // remove after pgscala-embedded confirmed working
     dslNamespace in (Test, DSL) := "example",
@@ -96,7 +96,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   //resolvers += Resolver.mavenLocal,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.12.12", "2.13.4"),
+  crossScalaVersions := Seq("2.12.12", "2.13.6"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",

@@ -93,6 +93,7 @@ public abstract class HstoreConverter {
 					cur = reader.read();
 				}
 				while (cur == ' ');
+				cur = reader.read(quoteContext);
 			} else {
 				cur = reader.read(quoteContext);
 				do {

@@ -39,6 +39,8 @@ class DatabaseNotificationQueue(
     }
   }
 
+  def queueSize: Int = if (inQueueMode) queue.size else 0
+
   override def close(): Unit = {
     if (inQueueMode) {
       val connection = transactionConnection.get
