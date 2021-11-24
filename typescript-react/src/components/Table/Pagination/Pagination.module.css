@@ -9,7 +9,8 @@
 .ButtonOption {
   flex: 1;
   height: 40px;
-  width: 40px;
+  min-width: 40px;
+  max-width: fit-content;
   margin: 0;
   color: black;
   background-color: white;
