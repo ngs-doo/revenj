@@ -72,6 +72,7 @@ interface ITableProps<T> {
   containerClass?: string;
   noDataContent?: string;
   automaticPagination?: boolean;
+  pageSizeOptions?: number[];
   onPageChange?(index: number): void;
   onPageSizeChange?(size: number): void;
 }
@@ -218,14 +219,22 @@ export class Table<T> extends React.Component<ITableProps<T>, ITableState<T>> {
   }
 
   private renderPagination = (props: any) => {
-    const { data, BeforePaginationComponent, totalCount } = this.props;
+    const { data, BeforePaginationComponent, pageSizeOptions, totalCount } = this.props;
     return BeforePaginationComponent ? (
       <React.Fragment>
         { data && data.length > 0 ? <BeforePaginationComponent /> : null}
-        <Pagination {...props} totalCount={totalCount} />
+        <Pagination
+          {...props}
+          pageSizeOptions={pageSizeOptions || props.pageSizeOptions}
+          totalCount={totalCount}
+        />
       </React.Fragment>
     ) : (
-      <Pagination {...props} totalCount={totalCount} />
+      <Pagination
+        {...props}
+        pageSizeOptions={pageSizeOptions || props.pageSizeOptions}
+        totalCount={totalCount}
+      />
     );
   }
 
