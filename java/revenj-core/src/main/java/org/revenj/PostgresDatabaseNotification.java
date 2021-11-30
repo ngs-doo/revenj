@@ -4,7 +4,7 @@ import org.postgresql.PGNotification;
 import org.postgresql.core.BaseConnection;
 import org.postgresql.core.PGStream;
 import org.postgresql.util.HostSpec;
-import org.revenj.database.postgres.ConnectionFactory;
+import org.revenj.database.postgres.ConnectionFactoryRevenj;
 import org.revenj.extensibility.SystemState;
 import org.revenj.database.postgres.PostgresReader;
 import org.revenj.database.postgres.converters.StringConverter;
@@ -207,7 +207,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			String password = properties.containsKey("revenj.password") ? properties.getProperty("revenj.password") : parsed.getProperty("password", "");
 			String db = parsed.getProperty("PGDBNAME");
 			HostSpec host = new HostSpec(parsed.getProperty("PGHOST").split(",")[0], Integer.parseInt(parsed.getProperty("PGPORT").split(",")[0]));
-			PGStream pgStream = ConnectionFactory.openConnection(new HostSpec[] { host }, user, password, db, properties);
+			PGStream pgStream = ConnectionFactoryRevenj.openConnection(new HostSpec[] { host }, user, password, db, properties);
 			currentStream = pgStream;
 			retryCount = 0;
 			Listening listening = new Listening(pgStream);
