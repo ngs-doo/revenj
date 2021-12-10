@@ -65,12 +65,13 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+					<useIncrementalCompilation>false</useIncrementalCompilation>
 				</configuration>
 			</plugin>
             <plugin>
                 <groupId>com.dslplatform</groupId>
                 <artifactId>dsl-platform-maven-plugin</artifactId>
-                <version>1.2.0</version>
+                <version>1.2.2</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>
