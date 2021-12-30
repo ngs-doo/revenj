@@ -68,7 +68,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		if ("disabled".equals(properties.getProperty("revenj.notifications.status"))) {
 			isClosed = true;
 		} else if ("pooling".equals(properties.getProperty("revenj.notifications.type"))) {
-			setupPooling();
+			setupPolling();
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> isClosed = true));
 		} else {
 			setupListening();
@@ -76,7 +76,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		}
 	}
 
-	private boolean setupPooling() {
+	private boolean setupPolling() {
 		if (dataSource == null) return false;
 		retryCount++;
 		if (retryCount > 60) {
@@ -176,7 +176,7 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 						e.printStackTrace();
 					}
 					cleanupConnection(connection);
-					while (!isClosed && !setupPooling()) {
+					while (!isClosed && !setupPolling()) {
 						try {
 							Thread.sleep(1000);
 						} catch (InterruptedException ignore) {
@@ -203,11 +203,12 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 		Properties parsed = org.postgresql.Driver.parseURL(jdbcUrl, properties);
 		if (parsed == null) throw new RuntimeException("Unable to parse revenj.jdbcUrl");
 		try {
+			String applicationName = properties.getProperty("revenj.notifications.applicationName");
 			String user = properties.containsKey("revenj.user") ? properties.getProperty("revenj.user") : parsed.getProperty("user", "");
 			String password = properties.containsKey("revenj.password") ? properties.getProperty("revenj.password") : parsed.getProperty("password", "");
 			String db = parsed.getProperty("PGDBNAME");
 			HostSpec host = new HostSpec(parsed.getProperty("PGHOST").split(",")[0], Integer.parseInt(parsed.getProperty("PGPORT").split(",")[0]));
-			PGStream pgStream = ConnectionFactoryRevenj.openConnection(new HostSpec[] { host }, user, password, db, properties);
+			PGStream pgStream = ConnectionFactoryRevenj.openConnection(new HostSpec[] { host }, user, password, db, applicationName, properties);
 			currentStream = pgStream;
 			retryCount = 0;
 			Listening listening = new Listening(pgStream);

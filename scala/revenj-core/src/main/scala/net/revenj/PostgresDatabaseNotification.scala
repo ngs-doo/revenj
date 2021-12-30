@@ -3,13 +3,12 @@ package net.revenj
 import java.io.{Closeable, IOException}
 import java.sql.{Connection, SQLException, Statement}
 import java.util.Properties
-
 import javax.sql.DataSource
 import monix.execution.Cancelable
 import monix.reactive.Observable
 import monix.reactive.observers.Subscriber
 import monix.reactive.subjects.PublishSubject
-import net.revenj.database.postgres.{ConnectionFactory, PostgresReader}
+import net.revenj.database.postgres.{ConnectionFactoryRevenj, PostgresReader}
 import net.revenj.database.postgres.converters.StringConverter
 import net.revenj.extensibility.SystemState
 import net.revenj.patterns.DataChangeNotification.{NotifyInfo, Operation, Source, TrackInfo}
@@ -230,9 +229,10 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
         if (properties.containsKey("revenj.password")) properties.getProperty("revenj.password")
         else parsed.getProperty("password", "")
       }
-      val applicationName = Option(properties.getProperty("revenj.notifications.applicationName"))
+      val applicationName = properties.getProperty("revenj.notifications.applicationName")
       val db = parsed.getProperty("PGDBNAME")
-      val pgStream = ConnectionFactory.openConnection(hostSpecs(parsed), user, password, db, applicationName, properties)
+      val host = new HostSpec(parsed.getProperty("PGHOST").split(",").head, parsed.getProperty("PGPORT").split(",").head.toInt);
+      val pgStream = ConnectionFactoryRevenj.openConnection(Array(host), user, password, db, applicationName, properties);
       currentStream = Some(pgStream)
       retryCount = 0
       val listening = new Listening(pgStream)

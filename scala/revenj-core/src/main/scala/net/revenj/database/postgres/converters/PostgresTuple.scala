@@ -97,7 +97,7 @@ object PostgresTuple {
     sw.write(c)
   }
 
-  protected[converters] def escapeBulkCopy(sw: PostgresWriter, c: Char): Unit = {
+  def escapeBulkCopy(sw: PostgresWriter, c: Char): Unit = {
     c match {
       case '\\' => sw.write("\\\\")
       case '\t' => sw.write("\\t")

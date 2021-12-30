@@ -15,11 +15,14 @@ import javax.sql.DataSource
 import monix.eval.Task
 import monix.execution.Ack
 import monix.reactive.{Observable, Observer}
+import net.revenj.database.postgres.converters.IntConverter
 import net.revenj.database.postgres.DbCheck.{Db, MyService}
 import net.revenj.extensibility.{Container, InstanceScope, SystemState}
 import net.revenj.patterns.DataChangeNotification.NotifyInfo
 import net.revenj.patterns._
 import org.pgscala.embedded.{PostgresCluster, PostgresVersion}
+import org.postgresql.copy.CopyManager
+import org.postgresql.core.BaseConnection
 import org.specs2.ScalaCheck
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.matcher.FutureMatchers
@@ -280,6 +283,24 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
       container.close()
       find.URI === root.URI
       root.b === find.b
+    }
+    "copy" >> {
+      val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
+      val ds = container.resolve[DataSource]
+      val rnd = new Random()
+      val conn = ds.getConnection
+      val repo = container.resolve[ClientRepository]
+      val oldClients = repo.search(conn, None, None, None)
+      val client = Client(id = rnd.nextLong(), points = 42)
+      val pgWriter = new PostgresWriter
+      val converter = container.resolve[ClientConverter]
+      val bc = conn.unwrap(classOf[BaseConnection])
+      pgWriter.bulkInsert(bc, "test.\">tmp-Client-insert<\"", Seq(Array(IntConverter.toTuple(1), converter.toTuple(client))))
+      conn.createStatement().execute("SELECT * FROM test.\"persist_Client_internal\"(1, 0)")
+      val newClients = repo.search(conn, None, None, None)
+      conn.close()
+      container.close()
+      newClients.size === oldClients.size + 1
     }
   }
   "notifications" >> {

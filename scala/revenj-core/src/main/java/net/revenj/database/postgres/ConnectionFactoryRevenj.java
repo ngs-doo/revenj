@@ -4,7 +4,7 @@
  */
 // Copyright (c) 2004, Open Cloud Limited.
 
-package org.revenj.database.postgres;
+package net.revenj.database.postgres;
 
 import static org.postgresql.util.internal.Nullness.castNonNull;
 

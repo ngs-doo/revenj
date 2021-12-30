@@ -1,5 +1,13 @@
 package net.revenj.database.postgres
 
+import net.revenj.database.postgres.PostgresWriter.{EscapeBulk, NullCopy}
+import net.revenj.database.postgres.converters.PostgresTuple
+import org.postgresql.copy.CopyManager
+
+import java.nio.CharBuffer
+import java.nio.charset.StandardCharsets
+import org.postgresql.core.BaseConnection
+
 class PostgresWriter extends PostgresBuffer with AutoCloseable {
   private var buffer = new Array[Char](64)
   val tmp: Array[Char] = new Array[Char](64)
@@ -124,12 +132,55 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
     position = 0
     result
   }
+
+  def bulkInsert(connection: BaseConnection, table: String, data: Iterable[Array[PostgresTuple]]): Unit = {
+    reset()
+    data.foreach { tuples =>
+      val first = tuples.head
+      if (first != null && first != PostgresTuple.NULL) {
+        first.insertRecord(this, "", EscapeBulk)
+      } else {
+        write(NullCopy)
+      }
+      var i = 1
+      while (i < tuples.length) {
+        val t = tuples(i)
+        i += 1
+        write('\t')
+        if (t != null && t != PostgresTuple.NULL) {
+          t.insertRecord(this, "", EscapeBulk)
+        } else {
+          write(NullCopy)
+        }
+      }
+      write('\n')
+    }
+    if (position > 0) {
+      val byteBuffer = StandardCharsets.UTF_8.encode(CharBuffer.wrap(buffer, 0, position))
+      reset()
+      val copy = new CopyManager(connection)
+      val in = copy.copyIn(s"COPY $table FROM STDIN DELIMITER '\t'")
+      try {
+        in.writeToCopy(byteBuffer.array, 0, byteBuffer.limit)
+        in.endCopy()
+      } finally {
+        // see to it that we do not leave the connection locked
+        if (in.isActive) {
+          in.cancelCopy()
+        }
+      }
+    }
+  }
 }
 
 object PostgresWriter {
   def create(): PostgresWriter = {
     new PostgresWriter
   }
+
+  private val EscapeBulk = Some((sw, c) => PostgresTuple.escapeBulkCopy(sw, c))
+
+  private val NullCopy = Array('\\', 'N')
 
   def writeSimpleUriList(sb: StringBuilder, uris: Array[String]): Unit = {
     sb.append('\'')
