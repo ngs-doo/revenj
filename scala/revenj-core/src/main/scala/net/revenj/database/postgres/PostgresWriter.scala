@@ -1,12 +1,15 @@
 package net.revenj.database.postgres
 
-import net.revenj.database.postgres.PostgresWriter.{EscapeBulk, NullCopy}
-import net.revenj.database.postgres.converters.PostgresTuple
+import net.revenj.database.postgres.PostgresWriter.{CollectionDiff, EscapeBulk, NewTuple, NullCopy}
+import net.revenj.database.postgres.converters.{BoolConverter, IntConverter, PostgresTuple}
+import net.revenj.patterns.{Equality, Identifiable}
 import org.postgresql.copy.CopyManager
 
 import java.nio.CharBuffer
 import java.nio.charset.StandardCharsets
 import org.postgresql.core.BaseConnection
+
+import scala.collection.mutable.ArrayBuffer
 
 class PostgresWriter extends PostgresBuffer with AutoCloseable {
   private var buffer = new Array[Char](64)
@@ -171,11 +174,185 @@ class PostgresWriter extends PostgresBuffer with AutoCloseable {
       }
     }
   }
+
+  def bulkInsertSimple[T](
+    connection: BaseConnection,
+    collection: scala.collection.Seq[T],
+    target: String,
+    toTuple: T => PostgresTuple
+  ): Unit = {
+    if(collection.nonEmpty) {
+      bulkInsert(
+        connection,
+        target,
+        collection.zipWithIndex.map { case (item, ind) =>
+          Array[PostgresTuple](
+            IntConverter.toTuple(ind),
+            toTuple(item))
+        })
+    }
+  }
+
+  def bulkInsertPair[T](
+    connection: BaseConnection,
+    collection: scala.collection.Seq[(T, T)],
+    target: String,
+    toTupleUpdate: T => PostgresTuple,
+    toTupleTable: T => PostgresTuple
+  ): Unit = {
+    if(collection.nonEmpty) {
+      bulkInsert(
+        connection,
+        target,
+        collection.zipWithIndex.map { case ((oldValue, newValue), ind) =>
+          Array[PostgresTuple](
+            IntConverter.toTuple(ind),
+            if (oldValue == null) PostgresTuple.NULL else toTupleUpdate(oldValue),
+            if (newValue == null) PostgresTuple.NULL else toTupleTable(newValue))
+        })
+    }
+  }
+
+  def bulkInsertNew[T](
+    connection: BaseConnection,
+    collection: scala.collection.Seq[NewTuple[T]],
+    target: String,
+    toTuple: T => PostgresTuple
+  ): Unit = {
+    if(collection.nonEmpty) {
+      bulkInsert(
+        connection,
+        target,
+        collection.map { tuple =>
+          Array[PostgresTuple](
+            IntConverter.toTuple(tuple.index),
+            IntConverter.toTuple(tuple.element),
+            toTuple(tuple.value))
+        })
+    }
+  }
+
+  def bulkInsertDiff[T <: Equality[T] with Identifiable](
+    connection: BaseConnection,
+    collection: scala.collection.Seq[CollectionDiff[T]],
+    target: String,
+    toTuple: T => PostgresTuple
+  ): Unit = {
+    if(collection.nonEmpty) {
+      bulkInsert(
+        connection,
+        target,
+        collection.map { it =>
+          Array[PostgresTuple](
+            IntConverter.toTuple(it.index),
+            IntConverter.toTuple(it.element),
+            if (it.oldValue.isEmpty) PostgresTuple.NULL else toTuple(it.oldValue.get),
+            if (it.changedValue.isEmpty) PostgresTuple.NULL else toTuple(it.changedValue.get),
+            if (it.newValue.isEmpty) PostgresTuple.NULL else toTuple(it.newValue.get),
+            BoolConverter.toTuple(it.isNew))
+        })
+    }
+  }
+
 }
 
 object PostgresWriter {
   def create(): PostgresWriter = {
     new PostgresWriter
+  }
+
+  case class NewTuple[T](
+    index: Int,
+    element: Int,
+    value: T
+  )
+  case class CollectionDiff[T <: Equality[T] with Identifiable](
+    index: Int,
+    element: Int,
+    oldValue: Option[T],
+    changedValue: Option[T],
+    newValue: Option[T],
+    isNew: Boolean
+  )
+
+  def collectionNew[E, T](collection: scala.collection.Seq[E], access: E => Iterable[T]): scala.collection.Seq[NewTuple[T]] = {
+    if (collection.isEmpty) {
+      Seq.empty
+    } else {
+      val result = new ArrayBuffer[NewTuple[T]](collection.size * 2)
+      var ind = 0
+      collection.foreach { el =>
+        ind += 1
+        var subInd = 0
+        access(el).foreach { it =>
+          subInd += 1
+          result += NewTuple(ind, subInd, it)
+        }
+      }
+      result
+    }
+  }
+
+  def collectionDiff[E, T <: Equality[T] with Identifiable](pairs: scala.collection.Seq[(E, E)], access: E => Iterable[T]): scala.collection.Seq[CollectionDiff[T]] = {
+    if (pairs.isEmpty) {
+      Seq.empty
+    } else {
+      val result = new ArrayBuffer[CollectionDiff[T]](pairs.size * 2)
+      var ind = 0
+      pairs.foreach { case (l, r) =>
+        ind += 1
+        val oldList = if (l != null) access(l).toIndexedSeq.sortBy(_.URI) else IndexedSeq.empty
+        val newList = if (r != null) access(r).toIndexedSeq.sortBy(_.URI) else IndexedSeq.empty
+        var oldIndex = 0
+        var newIndex = 0
+        var subInd = 0
+        while (oldIndex < oldList.size || newIndex < newList.size) {
+          val oldVal = if (oldIndex < oldList.size) Some(oldList(oldIndex)) else None
+          val newVal = if (newIndex < newList.size) Some(newList(newIndex)) else None
+          subInd += 1
+          if (oldVal.isDefined && newVal.isDefined) {
+            val ov = oldVal.get
+            val nv = newVal.get
+            if (ov.URI == nv.URI) {
+              if (!ov.deepEquals(nv)) {
+                result += CollectionDiff(ind, subInd, oldVal, newVal, newVal, isNew = false)
+              }
+              oldIndex += 1
+              newIndex += 1
+            } else if (ov.URI < nv.URI) {
+              result += CollectionDiff(ind, subInd, oldVal, None, None, isNew = false)
+              oldIndex += 1
+            } else {
+              result += CollectionDiff(ind, subInd, None, None, newVal, isNew = true)
+              newIndex += 1
+            }
+          } else if (oldVal.isDefined) {
+            result += CollectionDiff(ind, subInd, oldVal, None, None, isNew = false)
+            oldIndex += 1
+          } else {
+            result += CollectionDiff(ind, subInd, None, None, newVal, isNew = true)
+            newIndex += 1
+          }
+        }
+      }
+      result
+    }
+  }
+
+  def objectDiff[E, T <: Equality[T] with Identifiable](pairs: scala.collection.Seq[(E, E)], access: E => T): scala.collection.Seq[(T, T)] = {
+    if (pairs.isEmpty) {
+      Seq.empty
+    } else {
+      val result = new ArrayBuffer[(T, T)](pairs.size)
+      pairs.foreach { case (l, r) =>
+        val ov: T = if (l != null) access(l) else null.asInstanceOf[T]
+        val nv: T = if (r != null) access(r) else null.asInstanceOf[T]
+        if (ov != null && nv == null || ov == null && nv != null || ov != null && nv != null && !ov.deepEquals(nv)) {
+          result += ov -> nv
+        }
+      }
+      result
+    }
   }
 
   private val EscapeBulk = Some((sw, c) => PostgresTuple.escapeBulkCopy(sw, c))
