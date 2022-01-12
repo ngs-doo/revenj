@@ -20,6 +20,7 @@ interface IPresenterPublicProps<T> {
   actions?: IActionButton[];
   userRoles: Set<string>;
   onForbidden: () => void;
+  roles?: string[];
 }
 
 interface IPresenterStateProps<T> {
@@ -81,8 +82,8 @@ export class PresenterBare<T> extends React.PureComponent<IPresenter<T>> {
 
   private checkRoles = () => {
     try {
-      const { userRoles, domainObject, onForbidden } = this.props;
-      const hasRole = domainObject.roles.length === 0 || userRoles.size === 0 || domainObject.roles.some((role) => userRoles.has(role));
+      const { userRoles, roles, onForbidden } = this.props;
+      const hasRole = roles == null || roles.length === 0 || userRoles.size === 0 || roles.some((role) => userRoles.has(role));
 
       if (!hasRole) {
         onForbidden();
