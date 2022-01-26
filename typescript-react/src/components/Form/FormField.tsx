@@ -3,14 +3,15 @@ import * as React from 'react';
 import { Field } from 'redux-form';
 
 import { get } from '../../util/FunctionalUtils/FunctionalUtils';
-import * as Validator from '../validation';
 import { I18nContext } from '../I18n/I18n';
 import { localizeTextIfMarked } from '../I18n/service';
+import * as Validator from '../validation';
 import {
   FormContext,
-  FormControlDescriptor,
   FormControlContext,
+  FormControlDescriptor,
   FormValueContext,
+  IFormContext,
 } from './Context';
 import { FormType } from './interfaces';
 
@@ -45,7 +46,7 @@ export interface IFormFieldPublicProps<T, K extends DeepKeyOf<T>, P, V = any> {
   prefillOnMount?: boolean;
   clearOnUnmount?: boolean;
   // When not specified or true/true-returning, the field will be visible, otherwise it will not render
-  visible?: boolean | ((values: Partial<T>) => boolean);
+  visible?: boolean | ((values: Partial<T>,  form?: IFormContext<any>) => boolean);
   props?: Partial<P>;
   format?(value?: DeepTypeOf<T, K> & V): DeepTypeOf<T, K> & V;
   parse?(value?: DeepTypeOf<T, K> & V): DeepTypeOf<T, K> & V;
@@ -246,7 +247,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
   const rawLabel = configProps?.label ?? props.label;
   const inline = configProps?.inline ?? props.inline ?? context.defaultInline;
 
-  if (visible === false || (typeof visible === 'function' && !visible(values))) {
+  if (visible === false || (typeof visible === 'function' && !visible(values, context))) {
     return null;
   }
 
