@@ -213,17 +213,17 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
       labels: this.getLabels(),
     };
 
-    const ticks = horizontal ? {
+    const ticks = {
       beginFromZero: data.datasets.every((it: any) => it.data!.every((it: any) => it >= 0)),
       callback: (value: any) => CurrencyFormatter.formatNumber(value),
       suggestedMin: 0,
-    } : {};
+    };
 
     const primaryYAxis = {
       id: PRIMARY_Y_AXIS_ID,
       offset: ys[0]?.type === 'bar',
       stacked,
-      ticks,
+      ticks: horizontal ? {} : ticks,
       position: 'left',
     };
 
@@ -231,7 +231,7 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
       id: SECONDARY_Y_AXIS_ID,
       offset: ys[1]?.type === 'bar',
       stacked,
-      ticks,
+      ticks: horizontal ? {} : ticks,
       position: 'right',
     };
 
@@ -244,7 +244,7 @@ export class RichChart<T> extends React.PureComponent<IRichChart<T>> {
           // Depending on the main axis, the value axis will always be numeric
           xAxes: [{
             stacked,
-            ticks,
+            ticks: horizontal ? ticks : {},
           }],
           yAxes,
         },
