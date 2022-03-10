@@ -57,7 +57,7 @@ export const percentageValue = (percent: Numeric, amount: Numeric): string => {
 };
 
 export const floor = (a: Numeric): string => {
-  return parseBigNum(a).floor().toString();
+  return parseBigNum(a).integerValue(BigNumber.ROUND_FLOOR).toString();
 };
 
 export const round = (a: Numeric, decimals: number): string => {
@@ -85,7 +85,7 @@ export const nonZero = (a?: Numeric): boolean => a != null && !parseBigNum(a).is
 export const isZero = (a?: Numeric): boolean => a != null && parseBigNum(a).isZero();
 
 export const eq = (a?: Numeric, b?: Numeric): boolean =>
-  a != null && b != null && parseBigNum(a).equals(b);
+  a != null && b != null && parseBigNum(a).isEqualTo(b);
 
 export const isNumeric = (a?: any): a is Numeric => {
   if (typeof a !== 'string' && typeof a !== 'number' && !(a instanceof BigNumber)) {
@@ -100,11 +100,11 @@ export const isNumeric = (a?: any): a is Numeric => {
 
 // TODO change to use more generic type later
 export const compare = (a: BigNumber, b: BigNumber): number => {
-  if (a.greaterThan(b)) {
+  if (a.isGreaterThan(b)) {
     return 1;
   }
 
-  if (a.lessThan(b)) {
+  if (a.isLessThan(b)) {
     return -1;
   }
 
@@ -131,7 +131,7 @@ export const equals = (a: Numeric, b: Numeric): boolean => {
   const bna = parseBigNum(a);
   const bnb = parseBigNum(b);
 
-  return bna.equals(bnb);
+  return bna.isEqualTo(bnb);
 };
 
 export const notEquals = (a: Numeric, b: Numeric): boolean =>
