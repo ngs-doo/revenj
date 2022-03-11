@@ -35,7 +35,7 @@ const MACHINE_FORMAT: Format = {
   groupSeparator: '',
 };
 
-export const MachineBigNumber = BigNumber.another({ FORMAT: MACHINE_FORMAT });
+export const MachineBigNumber = BigNumber.clone({ FORMAT: MACHINE_FORMAT });
 
 const formats: IFormats = {};
 
@@ -73,7 +73,7 @@ export const formatNumber = (number: any, pattern?: string): string => {
 
 // HACK: On instances where smallest denomination is 1, everything goes bad. In this case, we're trying to guess the decimal separator
 export const formatNumberToDecimals = (number: NumberUtils.Numeric, decimals: number): string => {
-  const existingFormat = BigNumber.config();
+  const existingFormat = BigNumber.config({});
   const format = {
     ...existingFormat,
     FORMAT: {
@@ -85,7 +85,7 @@ export const formatNumberToDecimals = (number: NumberUtils.Numeric, decimals: nu
           : '.',
     },
   };
-  const FormatBigNum = BigNumber.another(format);
+  const FormatBigNum = BigNumber.clone(format);
   return new FormatBigNum(number).toFormat(decimals);
 };
 
