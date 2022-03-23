@@ -64,8 +64,7 @@ export const formatNumber = (number: any, pattern?: string): string => {
   });
 
   if (format) {
-    const precision = format && format.precision ? format.precision : undefined;
-    return new BigNumber(number).toFormat(precision);
+    return new BigNumber(number).toFormat(format?.precision);
   } else {
     return '';
   }
