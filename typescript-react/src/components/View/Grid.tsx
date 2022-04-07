@@ -238,7 +238,7 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
         {
           (ctx) => ctx!.isLoaded ? (
             <GridComponent
-              definition={this.getDefinition()}
+              definition={this.getDefinition(ctx?.conceptName)}
               maxResults={maxResults}
               fastSearch={fastSearch}
               className={className}
@@ -262,11 +262,11 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
     );
   }
 
-  private getDefinition = () => {
+  private getDefinition = (conceptName?: string) => {
     const { definition: originalDefinition, footerLabel, localize } = this.props;
     const definition = mergeDefinition(originalDefinition, footerLabel);
 
-    return definition != null ? localizeDefinition(definition, localize) : definition;
+    return definition != null ? localizeDefinition(definition, localize, conceptName) : definition;
   }
 
   private transformItems = (items: Row[]) => {

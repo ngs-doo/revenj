@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 export interface II18nContext {
-  localize: (text: string, defaultValue?: string) => string;
+  localize: (path: string) => string | undefined;
 }
 
 const defaultI18n: II18nContext = {
-  localize: (text) => text,
+  localize: (_path) => undefined,
 };
 
 export const I18nContext = React.createContext<II18nContext>(defaultI18n);

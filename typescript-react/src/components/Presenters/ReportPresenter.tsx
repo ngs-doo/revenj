@@ -34,7 +34,7 @@ export class Report<T, R extends DeepKeyOf<T>> extends React.PureComponent<IRepo
             <div className={classNames('theme-modern', styles.Presenter, className)}>
               <ListPresenter domainObject={domainObject} {...props}>
                 <Presenter
-                  title={localizeTextIfMarked(localize, title)}
+                  title={localizeTextIfMarked(localize, title, presenterName!)}
                   actions={actions}
                   domainObject={domainObject}
                   userRoles={userRoles || new Set()}

@@ -58,16 +58,19 @@ export const mergeDefinition = <T extends any[]>(
 
 export const localizeDefinition = <T extends any[]>(
   conf: IRowsConfig<T>,
-  formatMessage: (key: string) => string,
+  formatMessage: (path: string) => string | undefined,
+  conceptName?: string,
 ) => {
   if (!formatMessage) {
     return conf;
   }
 
   return conf.map((row: IColumnConfig<any>) => {
+    const name = Array.isArray(row?.field) ? row.field.join('.') : row.field as string;
+    const path = `${conceptName}.${name}`;
     return {
       ...row,
-      title: localizeTextIfMarked(formatMessage, row.title),
+      title: localizeTextIfMarked(formatMessage, row.title, path),
     }
   });
 };

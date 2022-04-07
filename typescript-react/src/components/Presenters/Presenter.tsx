@@ -40,7 +40,7 @@ export class PresenterBare<T> extends React.PureComponent<IPresenter<T>> {
   }
 
   public render() {
-    const { actions, children, title, exportFile, filterField, reportEntryCommandName, userRoles, values } = this.props;
+    const { actions, children, title, exportFile, filterField, presenterName, reportEntryCommandName, userRoles, values } = this.props;
     const actionsWithValues = actions?.map(a => ({ ...a, values }));
 
     return (
@@ -51,7 +51,7 @@ export class PresenterBare<T> extends React.PureComponent<IPresenter<T>> {
               {/* Presenters without a title don't get to have a header at all */}
               {
                 title ? (
-                  <Header title={localizeTextIfMarked(localize, title)}>
+                  <Header title={localizeTextIfMarked(localize, title, presenterName)}>
                     <Actions
                       actions={actionsWithValues ?? []}
                       templateType={exportFile}
