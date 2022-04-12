@@ -1,8 +1,7 @@
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { Internationalised } from '../I18n/I18n';
-import { localizeTextIfMarked } from '../I18n/service';
+import { CustomisableText } from '../Label/Label';
 import { FormContext } from './Context';
 import styles from './FormSection.module.css';
 
@@ -42,28 +41,27 @@ export class Section extends React.PureComponent<ISection, ISectionState> {
         }
         {
           title ? (
-            <Internationalised>
+            <header
+              className={styles.Header}
+              onClick={this.props.keepExpanded ? undefined : this.onToggleCollapse}
+            >
+              <div className={classNames(styles.Title, titleClassName)}>
+                <CustomisableText
+                  defaultValue={title}
+                  paths={[titlePath]}
+                />
+              </div>
               {
-                ({ localize}) => (
-                  <header
-                    className={styles.Header}
-                    onClick={this.props.keepExpanded ? undefined : this.onToggleCollapse}
-                  >
-                    <div className={classNames(styles.Title, titleClassName)}>{localizeTextIfMarked(localize, title, titlePath)}</div>
-                    {
-                      !keepExpanded ? (
-                        <i
-                          className={classNames('fa', styles.Toggle, {
-                            'fa-chevron-down dslCollapsedHeader': !expanded,
-                            'fa-chevron-up dslExpandedHeader': expanded,
-                          })}
-                        />
-                      ) : null
-                    }
-                  </header>
-                )
+                !keepExpanded ? (
+                  <i
+                    className={classNames('fa', styles.Toggle, {
+                      'fa-chevron-down dslCollapsedHeader': !expanded,
+                      'fa-chevron-up dslExpandedHeader': expanded,
+                    })}
+                  />
+                ) : null
               }
-            </Internationalised>
+            </header>
           ) : null
         }
       </section>

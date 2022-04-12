@@ -2,16 +2,16 @@
 
 import classNames from 'classnames';
 import * as React from 'react';
-import ControlLabel from 'react-bootstrap/FormLabel';
-import FormGroup from 'react-bootstrap/FormGroup';
 import { CSSTransition } from 'react-transition-group';
 import { WrappedFieldProps } from 'redux-form';
+import FormGroup from 'react-bootstrap/FormGroup';
 
 import { omit } from '../../util/FunctionalUtils/FunctionalUtils';
 import { Description } from '../Description/Description';
 
 import styles from './FormField.module.css';
 import { Tooltip } from '../Tooltip/Tooltip';
+import { CustomisableLabel } from '../Label/Label';
 
 export interface IFormFieldWrapper {
   qa?: {
@@ -81,11 +81,13 @@ export type FormFieldProps<P = {}> = WrappedFieldProps & IFormFieldWrapper & { i
 // of borked select fields and possibly some others also
 export type PartialFormFieldProps<P = {}> = Partial<PartialWrappedFieldProps & IFormFieldWrapper & { id?: string } & P>;
 
-const renderLabel = function <P>({ description, externalLabel, hideLabel, label, labelClassName }: Partial<FormFieldProps<P>>) {
+const renderLabel = function <P>({ description, externalLabel, hideLabel, label, labelClassName, input, meta }: Partial<FormFieldProps<P>>) {
+  const path = `${meta?.form}.${input?.name}`;
+
   return externalLabel && !hideLabel
     ? (
       <div className={styles.LabelContainer}>
-        <ControlLabel className={labelClassName}>{label}</ControlLabel>
+          <CustomisableLabel defaultValue={label!} className={labelClassName} paths={[path]} />
         { description ? <Description className={styles.Description} message={description! as string} /> : null }
       </div>
     )

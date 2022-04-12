@@ -3,8 +3,6 @@ import * as React from 'react';
 import { Field } from 'redux-form';
 
 import { get } from '../../util/FunctionalUtils/FunctionalUtils';
-import { I18nContext } from '../I18n/I18n';
-import { localizeTextIfMarked } from '../I18n/service';
 import * as Validator from '../validation';
 import {
   FormContext,
@@ -230,7 +228,6 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
   const context = React.useContext(FormContext);
   const configContext = React.useContext(FormControlContext);
   const values = React.useContext(FormValueContext);
-  const { localize } = React.useContext(I18nContext);
 
   if (context == null) {
     return null;
@@ -239,8 +236,6 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
   const flatName = Array.isArray(props.name) ? props.name.join('.') : props.name as string;
   const flatSection = Array.isArray(context.sectionName) ? context.sectionName.join('.') : context.sectionName as string;
   const fullName = flatSection != null ? `${flatSection}.${flatName}` : flatName;
-  const presenterPath = `${context.form}.${fullName}`;
-  const structurePath = `${props.structure}.${flatName}`;
   const configProps: FormControlDescriptor<any, any, T> = get(configContext, fullName as any, {});
   const visible = configProps?.visible ?? props.visible;
   //TODO: temporarly disable this until expected behavior is figured out
@@ -282,7 +277,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
       required={typeof required === 'function' ? required(values) : required}
       readOnly={typeof readOnly === 'function' ? readOnly(values) : readOnly}
       disabled={typeof disabled === 'function' ? disabled(values) : disabled}
-      label={rawLabel ? localizeTextIfMarked(localize, rawLabel, presenterPath, structurePath) : undefined}
+      label={rawLabel}
       inline={inline}
       // Fields that can appear and vanish must be able to clear themselves when unmounting, we don't want stale invisible values
       clearOnUnmount={unmountValue}

@@ -5,8 +5,7 @@ import { getFormValues } from 'redux-form';
 
 import { IGeneratedConcept } from '../Form/Context';
 import { Header } from '../Header/Header';
-import { Internationalised } from '../I18n/I18n';
-import { localizeTextIfMarked } from '../I18n/service';
+import { CustomisableText } from '../Label/Label';
 import { Actions, IActionButton } from './Actions';
 import styles from './Presenter.module.css';
 
@@ -27,7 +26,7 @@ interface IPresenterStateProps<T> {
   values?: T;
 }
 
-interface IPresenter<T> extends React.PropsWithChildren<IPresenterPublicProps<T>>, IPresenterStateProps<T> {}
+interface IPresenter<T> extends React.PropsWithChildren<IPresenterPublicProps<T>>, IPresenterStateProps<T> { }
 
 const mapStateToProps = (state: any, ownProps: IPresenterPublicProps<any>): IPresenterStateProps<any> => ({
   values: getFormValues(ownProps.presenterName ?? ownProps.domainObject.domainObjectName)(state),
@@ -44,39 +43,38 @@ export class PresenterBare<T> extends React.PureComponent<IPresenter<T>> {
     const actionsWithValues = actions?.map(a => ({ ...a, values }));
 
     return (
-      <Internationalised>
+      <div className={classNames('theme-modern', styles.Presenter)}>
+        {/* Presenters without a title don't get to have a header at all */}
         {
-          ({ localize }) => (
-            <div className={classNames('theme-modern', styles.Presenter)}>
-              {/* Presenters without a title don't get to have a header at all */}
-              {
-                title ? (
-                  <Header title={localizeTextIfMarked(localize, title, presenterName)}>
-                    <Actions
-                      actions={actionsWithValues ?? []}
-                      templateType={exportFile}
-                      reportEntryCommandName={reportEntryCommandName}
-                      userRoles={userRoles}
-                      filterField={filterField}
-                    />
-                  </Header>
-                ) : (
-                  <div className={styles.ActionsContainer}>
-                    <Actions
-                      actions={actionsWithValues ?? []}
-                      templateType={exportFile}
-                      reportEntryCommandName={reportEntryCommandName}
-                      userRoles={userRoles}
-                      filterField={filterField}
-                    />
-                  </div>
-                )
-              }
-              {children}
+          title ? (
+            <Header title={
+              <CustomisableText
+                defaultValue={title}
+                paths={[presenterName]}
+              />
+            }>
+              <Actions
+                actions={actionsWithValues ?? []}
+                templateType={exportFile}
+                reportEntryCommandName={reportEntryCommandName}
+                userRoles={userRoles}
+                filterField={filterField}
+              />
+            </Header>
+          ) : (
+            <div className={styles.ActionsContainer}>
+              <Actions
+                actions={actionsWithValues ?? []}
+                templateType={exportFile}
+                reportEntryCommandName={reportEntryCommandName}
+                userRoles={userRoles}
+                filterField={filterField}
+              />
             </div>
           )
         }
-      </Internationalised>
+        {children}
+      </div>
     );
   }
 
