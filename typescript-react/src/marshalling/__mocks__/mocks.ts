@@ -10,12 +10,12 @@ import { Marshaller, Serialized } from '../Marshaller';
 * ```
 */
 export class Pet {
-  static serialize = (it: Pet | undefined, isRequired: boolean, path?: string): Serialized<Pet> | undefined => {
-    if (Pet.required.length === 0 && it == null && isRequired) {
+  static serialize = (it: Pet | undefined, isNonNullable: boolean, path?: string): Serialized<Pet> | undefined => {
+    if (Pet.required.length === 0 && it == null && isNonNullable) {
       return {} as any; // Hack since we can't infer whether required is empty externally
     }
 
-    if (Marshaller.Assert.assertPresence(it, isRequired) == null && !isRequired) {
+    if (Marshaller.Assert.assertPresence(it, isNonNullable) == null && !isNonNullable) {
       return;
     }
 
@@ -26,8 +26,8 @@ export class Pet {
     };
   }
 
-  static deserialize = (it: Serialized<Pet> | undefined, isRequired: boolean, path?: string): Serialized<Pet> | undefined => {
-    if (Marshaller.Assert.assertPresence(it, isRequired) == null && !isRequired) {
+  static deserialize = (it: Serialized<Pet> | undefined, isNonNullable: boolean, path?: string): Serialized<Pet> | undefined => {
+    if (Marshaller.Assert.assertPresence(it, isNonNullable) == null && !isNonNullable) {
       return;
     }
 
@@ -58,12 +58,12 @@ export class Pet {
 * ```
 */
 export class Person {
-  static serialize = (it: Person | undefined, isRequired: boolean, path?: string): Serialized<Person> | undefined => {
-    if (Person.required.length === 0 && it == null && isRequired) {
+  static serialize = (it: Person | undefined, isNonNullable: boolean, path?: string): Serialized<Person> | undefined => {
+    if (Person.required.length === 0 && it == null && isNonNullable) {
       return {} as any; // Hack since we can't infer whether required is empty externally
     }
 
-    if (Marshaller.Assert.assertPresence(it, isRequired) == null && !isRequired) {
+    if (Marshaller.Assert.assertPresence(it, isNonNullable) == null && !isNonNullable) {
       return;
     }
 
@@ -77,8 +77,8 @@ export class Person {
     };
   }
 
-  static deserialize = (it: Serialized<Person> | undefined, isRequired: boolean, path?: string): Serialized<Person> | undefined => {
-    if (Marshaller.Assert.assertPresence(it, isRequired) == null && !isRequired) {
+  static deserialize = (it: Serialized<Person> | undefined, isNonNullable: boolean, path?: string): Serialized<Person> | undefined => {
+    if (Marshaller.Assert.assertPresence(it, isNonNullable) == null && !isNonNullable) {
       return;
     }
 
@@ -153,12 +153,12 @@ export class Person {
 * ```
 */
 export class OptionalFields {
-  static serialize = (it: OptionalFields | undefined, isRequired: boolean, path?: string): Serialized<OptionalFields> | undefined => {
-    if (OptionalFields.required.length === 0 && it == null && isRequired) {
+  static serialize = (it: OptionalFields | undefined, isNonNullable: boolean, path?: string): Serialized<OptionalFields> | undefined => {
+    if (OptionalFields.required.length === 0 && it == null && isNonNullable) {
       return {} as any; // Hack since we can't infer whether required is empty externally
     }
 
-    if (Marshaller.Assert.assertPresence(it, isRequired) == null && !isRequired) {
+    if (Marshaller.Assert.assertPresence(it, isNonNullable) == null && !isNonNullable) {
       return;
     }
 
@@ -170,8 +170,8 @@ export class OptionalFields {
     };
   }
 
-  static deserialize = (it: Serialized<OptionalFields> | undefined, isRequired: boolean, path?: string): Serialized<OptionalFields> | undefined => {
-    if (Marshaller.Assert.assertPresence(it, isRequired) == null && !isRequired) {
+  static deserialize = (it: Serialized<OptionalFields> | undefined, isNonNullable: boolean, path?: string): Serialized<OptionalFields> | undefined => {
+    if (Marshaller.Assert.assertPresence(it, isNonNullable) == null && !isNonNullable) {
       return;
     }
 

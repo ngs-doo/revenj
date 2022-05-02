@@ -14,10 +14,10 @@ export enum MiddlewareStep {
  * Predicate over serialization/deserialization target and metadata
  * @param value The value being processed
  * @param typeName The name of the type of the value being processed
- * @param isRequired Is the value required
+ * @param isNonNullable Is the value non nullable
  * @param isBuiltInType Is the type a built-in type (versus a custom, user-defined type)
  */
-type TestPredicate<T> = (value: T, typeName: string, isRequired: boolean, isBuiltInType: boolean) => boolean;
+type TestPredicate<T> = (value: T, typeName: string, isNonNullable: boolean, isBuiltInType: boolean) => boolean;
 
 export type Serialized<DomObj> = {
   [K in keyof DomObj]: DomObj[K] extends Set<infer T>
@@ -99,72 +99,72 @@ interface IMarshaller {
    * If no serializer was registered, an identity function will be used.
    * Before or after serialization, depending on the flag, all serialization middleware are invoked, unless their guard indicates that they should not be.
    *
-   * If `value` is undefined/null and `isRequired` is `true`, an error will be thrown.
-   * If `value` is undefined/null and `isRequired` is `false`, `undefined` will be returned.
+   * If `value` is undefined/null and `isNonNullable` is `true`, an error will be thrown.
+   * If `value` is undefined/null and `isNonNullable` is `false`, `undefined` will be returned.
    * Otherwise, the serializer will be executed.
    * If an error occurs, an error with additional details and `path` will be thrown.
    *
    * @param value The value to serialize
    * @param typeName The name of the type being serializer, and for which to resolve a serializer
-   * @param isRequired Is the value required
+   * @param isNonNullable Is the value non nullable
    * @param path The JSON path of the value in the root object, for error reporting
    * @param isBuiltInType Is the type a built-in type (versus custom, user-defined)
    */
-  serialize: <T, R = T>(value: T | undefined | null, typeName: string, isRequired: boolean, path: string, isBuiltInType: boolean) => R | undefined;
+  serialize: <T, R = T>(value: T | undefined | null, typeName: string, isNonNullable: boolean, path: string, isBuiltInType: boolean) => R | undefined;
   /**
    * Serializes a value for sending it via some communication channel.
    * The serializer is passed explicitly.
    * Before serialization, all serialization middleware are invoked, unless their guard indicates that they should not be.
    *
-   * If `value` is undefined/null and `isRequired` is `true`, an error will be thrown.
-   * If `value` is undefined/null and `isRequired` is `false`, `undefined` will be returned.
+   * If `value` is undefined/null and `isNonNullable` is `true`, an error will be thrown.
+   * If `value` is undefined/null and `isNonNullable` is `false`, `undefined` will be returned.
    * Otherwise, the serializer will be executed.
    * If an error occurs, an error with additional details and `path` will be thrown.
    *
    * @param value The value to serialize
    * @param typeName The name of the type being serializer, used in guards only
    * @param formatter The function used as a serializer
-   * @param isRequired Is the value required
+   * @param isNonNullable Is the value non nullable
    * @param path The JSON path of the value in the root object, for error reporting
    * @param isBuiltInType Is the type a built-in type (versus custom, user-defined)
    */
-  serializeWith: <T, R = T>(value: T | undefined | null, typeName: string, formatter: CustomProcessor<T, R>, isRequired: boolean, path: string, isBuiltInType: boolean) => R | undefined;
+  serializeWith: <T, R = T>(value: T | undefined | null, typeName: string, formatter: CustomProcessor<T, R>, isNonNullable: boolean, path: string, isBuiltInType: boolean) => R | undefined;
   /**
    * Deserializes a value for receiving via some communication channel.
    * The deserializer will be resolved via `typeName`, in a case-insensitive manner, as defined through `registerDeserializer`.
    * If no deserializer was registered, an identity function will be used.
    * Before deserialization, all deserialization middleware are invoked, unless their guard indicates that they should not be.
    *
-   * If `value` is undefined/null and `isRequired` is `true`, an error will be thrown.
-   * If `value` is undefined/null and `isRequired` is `false`, `undefined` will be returned.
+   * If `value` is undefined/null and `isNonNullable` is `true`, an error will be thrown.
+   * If `value` is undefined/null and `isNonNullable` is `false`, `undefined` will be returned.
    * Otherwise, the deserializer will be executed.
    * If an error occurs, an error with additional details and `path` will be thrown.
    *
    * @param value The value to deserialize
    * @param typeName The name of the type being deserializer, and for which to resolve a deserializer
-   * @param isRequired Is the value required
+   * @param isNonNullable Is the value non nullable
    * @param path The JSON path of the value in the root object, for error reporting
    * @param isBuiltInType Is the type a built-in type (versus custom, user-defined)
    */
-  deserialize: <T, R = T>(value: T | undefined | null, typeName: string, isRequired: boolean, path: string, isBuiltInType: boolean) => R | undefined;
+  deserialize: <T, R = T>(value: T | undefined | null, typeName: string, isNonNullable: boolean, path: string, isBuiltInType: boolean) => R | undefined;
   /**
    * Deserializes a value for receiving via some communication channel.
    * The deserializer is passed explicitly.
    * Before deserialization, all deserialization middleware are invoked, unless their guard indicates that they should not be.
    *
-   * If `value` is undefined/null and `isRequired` is `true`, an error will be thrown.
-   * If `value` is undefined/null and `isRequired` is `false`, `undefined` will be returned.
+   * If `value` is undefined/null and `isNonNullable` is `true`, an error will be thrown.
+   * If `value` is undefined/null and `isNonNullable` is `false`, `undefined` will be returned.
    * Otherwise, the deserializer will be executed.
    * If an error occurs, an error with additional details and `path` will be thrown.
    *
    * @param value The value to deserialize
    * @param typeName The name of the type being deserializer, used in guards only
    * @param formatter The function used as a deserializer
-   * @param isRequired Is the value required
+   * @param isNonNullable Is the value non nullable
    * @param path The JSON path of the value in the root object, for error reporting
    * @param isBuiltInType Is the type a built-in type (versus custom, user-defined)
    */
-  deserializeWith: <T, R = T>(value: T | undefined | null, typeName: string, formatter: CustomProcessor<T, R>, isRequired: boolean, path: string, isBuiltInType: boolean) => R | undefined;
+  deserializeWith: <T, R = T>(value: T | undefined | null, typeName: string, formatter: CustomProcessor<T, R>, isNonNullable: boolean, path: string, isBuiltInType: boolean) => R | undefined;
 }
 
 export class Marshaller implements IMarshaller {
@@ -245,19 +245,19 @@ export class Marshaller implements IMarshaller {
     return this;
   }
 
-  public serializeWith<T, R = T>(value: T | undefined | null, typeName: string, formatter: CustomProcessor<T, R>, isRequired: boolean, path: string, isBuiltInType: boolean = false): R | undefined {
+  public serializeWith<T, R = T>(value: T | undefined | null, typeName: string, formatter: CustomProcessor<T, R>, isNonNullable: boolean, path: string, isBuiltInType: boolean = false): R | undefined {
     try {
       const result = this.serializeMiddleware.filter((it) => it.when !== MiddlewareStep.After).reduce((value, { process, test }) => {
-        return (test == null || test(value, typeName, isRequired, isBuiltInType)) ? process(value) : value;
+        return (test == null || test(value, typeName, isNonNullable, isBuiltInType)) ? process(value) : value;
       }, value);
 
-      if (Assert.assertPresence(result, isRequired) == null && !isRequired) {
+      if (Assert.assertPresence(result, isNonNullable) == null && !isNonNullable) {
         return;
       }
 
       const formatted = formatter(result as T, path);
       return this.serializeMiddleware.filter((it) => it.when === MiddlewareStep.After).reduce((value, { process, test }) => {
-        return (test == null || test(value, typeName, isRequired, isBuiltInType)) ? process(value) : value;
+        return (test == null || test(value, typeName, isNonNullable, isBuiltInType)) ? process(value) : value;
       }, formatted);
 
     } catch (error) {
@@ -265,44 +265,44 @@ export class Marshaller implements IMarshaller {
         throw error;
       }
       const message = error instanceof Error ? error.message : String(error);
-      throw new MarshallingError(`Serializing failed on field "${path}" of type ${typeName}${isRequired ? '' : '?'}:
+      throw new MarshallingError(`Serializing failed on field "${path}" of type ${typeName}${isNonNullable ? '' : '?'}:
     ${message}`);
     }
   }
 
-  public deserializeWith<T, R = T>(value: T | undefined | null, typeName: string, formatter: CustomProcessor<T, R>, isRequired: boolean, path: string, isBuiltInType: boolean = false): R | undefined {
+  public deserializeWith<T, R = T>(value: T | undefined | null, typeName: string, formatter: CustomProcessor<T, R>, isNonNullable: boolean, path: string, isBuiltInType: boolean = false): R | undefined {
 
     try {
       const result = this.deserializeMiddleware.filter((it) => it.when !== MiddlewareStep.After).reduce((value, { process, test }) => {
-        return (test == null || test(value, typeName, isRequired, isBuiltInType)) ? process(value) : value;
+        return (test == null || test(value, typeName, isNonNullable, isBuiltInType)) ? process(value) : value;
       }, value);
 
-      if (Assert.assertPresence(result, isRequired) == null && !isRequired) {
+      if (Assert.assertPresence(result, isNonNullable) == null && !isNonNullable) {
         return;
       }
 
       const formatted = formatter(result as T, path);
       return this.deserializeMiddleware.filter((it) => it.when === MiddlewareStep.After).reduce((value, { process, test }) => {
-        return (test == null || test(value, typeName, isRequired, isBuiltInType)) ? process(value) : value;
+        return (test == null || test(value, typeName, isNonNullable, isBuiltInType)) ? process(value) : value;
       }, formatted);
     } catch (error) {
       if (error instanceof MarshallingError) {
         throw error;
       }
       const message = error instanceof Error ? error.message : String(error);
-      throw new MarshallingError(`Deserializing failed on field "${path}" of type ${typeName}${isRequired ? '' : '?'}:
+      throw new MarshallingError(`Deserializing failed on field "${path}" of type ${typeName}${isNonNullable ? '' : '?'}:
     ${message}`);
     }
   }
 
-  public serialize<T, R = T>(value: T | undefined | null, typeName: string, isRequired: boolean, path: string, isBuiltInType: boolean = true): R | undefined {
+  public serialize<T, R = T>(value: T | undefined | null, typeName: string, isNonNullable: boolean, path: string, isBuiltInType: boolean = true): R | undefined {
     const formatter = (value: T) => this.resolveSerializer<T, R>(typeName)(value);
-    return this.serializeWith(value, typeName, formatter, isRequired, path, isBuiltInType);
+    return this.serializeWith(value, typeName, formatter, isNonNullable, path, isBuiltInType);
   }
 
-  public deserialize<T, R = T>(value: T | undefined | null, typeName: string, isRequired: boolean, path: string, isBuiltInType: boolean = true): R | undefined {
+  public deserialize<T, R = T>(value: T | undefined | null, typeName: string, isNonNullable: boolean, path: string, isBuiltInType: boolean = true): R | undefined {
     const formatter = (value: T) => this.resolveDeserializer<T, R>(typeName)(value);
-    return this.deserializeWith(value, typeName, formatter, isRequired, path, isBuiltInType);
+    return this.deserializeWith(value, typeName, formatter, isNonNullable, path, isBuiltInType);
   }
 
   protected resolveSerializer<T, R = T>(typeName: string): Processor<T, R> {

@@ -19,9 +19,9 @@ export const assertionWithErrorPrefix = <T>(prefix: string) => (assertion: (valu
     }
   };
 
-export const assertPresence = <T>(value: T, isRequired: boolean): T | undefined => {
+export const assertPresence = <T>(value: T, isNonNullable: boolean): T | undefined => {
   if (value == null) {
-    if (isRequired) {
+    if (isNonNullable) {
       throw new Error(`Value is required, but is not set!`);
     } else {
       return;
@@ -156,8 +156,8 @@ export const deserializeResultSet = (it: ResultSet): TypescriptResultSet => {
   return TypescriptResultSet.deserialize(assertArray(it));
 };
 
-export const assertEnum = <T>(values: T[], name: string) => (it: T, isRequired: boolean, _: string): T => {
-  if (assertPresence(it, isRequired) == null && !isRequired) {
+export const assertEnum = <T>(values: T[], name: string) => (it: T, isNonNullable: boolean, _: string): T => {
+  if (assertPresence(it, isNonNullable) == null && !isNonNullable) {
     return it;
   }
 
