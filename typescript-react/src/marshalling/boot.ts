@@ -34,24 +34,24 @@ export const initialize = ({ before, after }: IBootConfig) => {
     // Default required undefined objects (non-built-in) to empty objects to avoid having to do defaults
     .registerSerializerMiddleware(
       () => ({}),
-      (it, _, isRequired, isBuiltInType) => isRequired && !isBuiltInType && it == null,
+      (it, _, isNonNullable, isBuiltInType) => isNonNullable && !isBuiltInType && it == null,
     )
     // Default undefined required collections to empty collection instance to avoid having to do defaults
     .registerSerializerMiddleware(
       () => [],
-      (it, typeName, isRequired) => isRequired && it == null && ['list', 'array', 'streaming'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => isNonNullable && it == null && ['list', 'array', 'streaming'].includes(typeName.toLocaleLowerCase()),
     )
     .registerSerializerMiddleware(
       () => new Set(),
-      (it, typeName, isRequired) => isRequired && it == null && typeName.toLocaleLowerCase() === 'set',
+      (it, typeName, isNonNullable) => isNonNullable && it == null && typeName.toLocaleLowerCase() === 'set',
     )
     .registerSerializerMiddleware(
       () => new TypescriptResultSet([], []),
-      (it, typeName, isRequired) => isRequired && it == null && typeName.toLocaleLowerCase() === 'resultset',
+      (it, typeName, isNonNullable) => isNonNullable && it == null && typeName.toLocaleLowerCase() === 'resultset',
     )
     .registerSerializerMiddleware(
       () => null,
-      (it, typeName, isRequired) => !isRequired && it === '' && typeName.toLocaleLowerCase() === 'money',
+      (it, typeName, isNonNullable) => !isNonNullable && it === '' && typeName.toLocaleLowerCase() === 'money',
     )
     // Ensure sets, since forms will actually produce arrays
     .registerSerializerMiddleware(
@@ -61,23 +61,23 @@ export const initialize = ({ before, after }: IBootConfig) => {
     // Default booleans into false, so that we don't have to do redux-form active changes (quite expensive)
     .registerSerializerMiddleware(
       () => false,
-      (it, typeName, isRequired) => isRequired && typeName.toLocaleLowerCase() === 'boolean' && it == null,
+      (it, typeName, isNonNullable) => isNonNullable && typeName.toLocaleLowerCase() === 'boolean' && it == null,
     )
     // Don't actually _send_ false booleans, it's silly and wastes space when talking to Instafin
     .registerSerializerMiddleware(
       () => undefined,
-      (it, typeName, isRequired) => isRequired && typeName.toLocaleLowerCase() === 'boolean' && it === false,
+      (it, typeName, isNonNullable) => isNonNullable && typeName.toLocaleLowerCase() === 'boolean' && it === false,
       MiddlewareStep.After,
     )
     // Optional numbers can be "NaN" or empty string, and it chokes the whole thing
     .registerSerializerMiddleware(
       (_it) => undefined,
-      (it, typeName, isRequired) => ['Int', 'Long', 'Short'].includes(typeName) && !isRequired && (it === '' || Number.isNaN(it as any)),
+      (it, typeName, isNonNullable) => ['Int', 'Long', 'Short'].includes(typeName) && !isNonNullable && (it === '' || Number.isNaN(it as any)),
     )
     // Defaulting required numbers
     .registerSerializerMiddleware(
       (_it) => 0,
-      (it, typeName, isRequired) => ['Int', 'Long', 'Short'].includes(typeName) && isRequired && it == null,
+      (it, typeName, isNonNullable) => ['Int', 'Long', 'Short'].includes(typeName) && isNonNullable && it == null,
     )
     // Number unpacking from string fields
     .registerSerializerMiddleware(
@@ -91,22 +91,22 @@ export const initialize = ({ before, after }: IBootConfig) => {
     // Flatten optional empty strings into nothing on serialize
     .registerSerializerMiddleware(
       () => undefined,
-      (it, typeName, isRequired) => it === '' && !isRequired && ['string', 'text'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => it === '' && !isNonNullable && ['string', 'text'].includes(typeName.toLocaleLowerCase()),
     )
     // Flatten optional empty strings into nothing on deserialize
     .registerDeserializerMiddleware(
       () => undefined,
-      (it, typeName, isRequired) => it === '' && !isRequired && ['string', 'text'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => it === '' && !isNonNullable && ['string', 'text'].includes(typeName.toLocaleLowerCase()),
     )
     // Ensure required missing boolean fields are set to false (BE omits false to save up on cube config payloads)
     .registerDeserializerMiddleware(
       () => false,
-      (it, typeName, isRequired) => it == null && isRequired && typeName.toLocaleLowerCase() === 'boolean',
+      (it, typeName, isNonNullable) => it == null && isNonNullable && typeName.toLocaleLowerCase() === 'boolean',
     )
     // Ensure required missing short/int/long fields are set to 0 (BE omits false to save up on cube config payloads)
     .registerDeserializerMiddleware(
       () => 0,
-      (it, typeName, isRequired) => it == null && isRequired && ['long', 'int', 'short'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => it == null && isNonNullable && ['long', 'int', 'short'].includes(typeName.toLocaleLowerCase()),
       MiddlewareStep.Before,
     )
     // Collection types
