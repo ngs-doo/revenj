@@ -3,8 +3,6 @@ import * as React from 'react';
 import { Field } from 'redux-form';
 
 import { get } from '../../util/FunctionalUtils/FunctionalUtils';
-import { I18nContext } from '../I18n/I18n';
-import { localizeTextIfMarked } from '../I18n/service';
 import * as Validator from '../validation';
 import {
   FormContext,
@@ -48,6 +46,7 @@ export interface IFormFieldPublicProps<T, K extends DeepKeyOf<T>, P, V = any> {
   // When not specified or true/true-returning, the field will be visible, otherwise it will not render
   visible?: boolean | ((values: Partial<T>,  form?: IFormContext<any>) => boolean);
   props?: Partial<P>;
+  structure?: string;
   format?(value?: DeepTypeOf<T, K> & V): DeepTypeOf<T, K> & V;
   parse?(value?: DeepTypeOf<T, K> & V): DeepTypeOf<T, K> & V;
   normalize?(value?: DeepTypeOf<T, K> & V, previousValue?: DeepTypeOf<T, K> & V, allValues?: Partial<T>, allPreviousValues?: Partial<T>): DeepTypeOf<T, K> & V;
@@ -229,7 +228,6 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
   const context = React.useContext(FormContext);
   const configContext = React.useContext(FormControlContext);
   const values = React.useContext(FormValueContext);
-  const { localize } = React.useContext(I18nContext);
 
   if (context == null) {
     return null;
@@ -279,7 +277,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
       required={typeof required === 'function' ? required(values) : required}
       readOnly={typeof readOnly === 'function' ? readOnly(values) : readOnly}
       disabled={typeof disabled === 'function' ? disabled(values) : disabled}
-      label={rawLabel ? localizeTextIfMarked(localize, rawLabel) : undefined}
+      label={rawLabel}
       inline={inline}
       // Fields that can appear and vanish must be able to clear themselves when unmounting, we don't want stale invisible values
       clearOnUnmount={unmountValue}

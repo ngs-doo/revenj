@@ -5,7 +5,7 @@ import styles from './Header.module.css';
 
 interface IHeader {
   className?: string;
-  title: string;
+  title: string | React.ReactElement<any>;
 }
 
 export const Header: React.FC<IHeader> = ({ children, className, title }) => (

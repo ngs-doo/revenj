@@ -1,8 +1,6 @@
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { Internationalised } from '../I18n/I18n';
-import { localizeTextIfMarked } from '../I18n/service';
 import { IActionButton } from './Actions';
 import {
   IListPresenterPublicProps,
@@ -22,35 +20,29 @@ interface IReportPublicProps<T, R extends DeepKeyOf<T>> extends IListPresenterPu
   roles?: string[];
 }
 
-interface IReport<T, R extends DeepKeyOf<T>> extends IReportPublicProps<T, R> {}
+interface IReport<T, R extends DeepKeyOf<T>> extends IReportPublicProps<T, R> { }
 
 export class Report<T, R extends DeepKeyOf<T>> extends React.PureComponent<IReport<T, R>> {
   public render() {
     const { actions, children, className, domainObject, exportFile, presenterName, reportEntryCommandName, userRoles, title, roles, ...props } = this.props;
     return (
-      <Internationalised>
-        {
-          ({ localize }) => (
-            <div className={classNames('theme-modern', styles.Presenter, className)}>
-              <ListPresenter domainObject={domainObject} {...props}>
-                <Presenter
-                  title={localizeTextIfMarked(localize, title)}
-                  actions={actions}
-                  domainObject={domainObject}
-                  userRoles={userRoles || new Set()}
-                  reportEntryCommandName={reportEntryCommandName}
-                  exportFile={exportFile}
-                  presenterName={presenterName!}
-                  onForbidden={this.onForbidden}
-                  roles={roles ?? domainObject.roles}
-                >
-                  {children}
-                </Presenter>
-              </ListPresenter>
-            </div>
-          )
-        }
-      </Internationalised>
+      <div className={classNames('theme-modern', styles.Presenter, className)}>
+        <ListPresenter domainObject={domainObject} {...props}>
+          <Presenter
+            title={title}
+            actions={actions}
+            domainObject={domainObject}
+            userRoles={userRoles || new Set()}
+            reportEntryCommandName={reportEntryCommandName}
+            exportFile={exportFile}
+            presenterName={presenterName!}
+            onForbidden={this.onForbidden}
+            roles={roles ?? domainObject.roles}
+          >
+            {children}
+          </Presenter>
+        </ListPresenter>
+      </div>
     );
   }
 

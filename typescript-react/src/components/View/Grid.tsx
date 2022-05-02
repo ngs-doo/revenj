@@ -18,10 +18,10 @@ import { FastFilter } from './FastFilter';
 import {
   fastFilter,
   getResultSetColumnDefinitions,
-  localizeDefinition,
   mergeDefinition,
   unpackRow,
 } from './helpers';
+import { CustomisableText } from '../Label/Label';
 
 import styles from './Grid.module.css';
 
@@ -238,7 +238,7 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
         {
           (ctx) => ctx!.isLoaded ? (
             <GridComponent
-              definition={this.getDefinition()}
+              definition={this.getDefinition(ctx!.conceptName)}
               maxResults={maxResults}
               fastSearch={fastSearch}
               className={className}
@@ -262,11 +262,18 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
     );
   }
 
-  private getDefinition = () => {
-    const { definition: originalDefinition, footerLabel, localize } = this.props;
+  private getDefinition = (conceptName: string) => {
+    const { definition: originalDefinition, footerLabel } = this.props;
     const definition = mergeDefinition(originalDefinition, footerLabel);
 
-    return definition != null ? localizeDefinition(definition, localize) : definition;
+    return definition?.map((row: IColumnConfig<any>) => {
+      const name = Array.isArray(row?.field) ? row.field.join('.') : row.field as string;
+      const path = `${conceptName}.${name}`;
+      return {
+        ...row,
+        Header: () => <CustomisableText defaultValue={row.title} paths={[path]} />,
+      }
+    });
   }
 
   private transformItems = (items: Row[]) => {

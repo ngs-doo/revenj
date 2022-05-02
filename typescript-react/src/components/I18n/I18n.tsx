@@ -1,11 +1,15 @@
 import * as React from 'react';
 
 export interface II18nContext {
-  localize: (text: string, defaultValue?: string) => string;
+  customiseLabel: (path: string, value: string) => Promise<any>;
+  hasPermissions: boolean;
+  localize: (path: string) => string | undefined;
 }
 
 const defaultI18n: II18nContext = {
-  localize: (text) => text,
+  customiseLabel: (_path, _value) => Promise.resolve({}),
+  hasPermissions: false,
+  localize: (_path) => undefined,
 };
 
 export const I18nContext = React.createContext<II18nContext>(defaultI18n);

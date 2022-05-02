@@ -8,8 +8,9 @@ import { INavigationContext, NavigationContext } from '../Navigation/NavigationC
 import { INotificationContext, NotificationContext } from '../Notification/NotificationContext';
 import { LoaderContext, ILoaderContext } from '../Loader/Loader';
 
-export interface IDslApplication extends IApiContext, Partial<II18nContext>, INavigationContext, INotificationContext, ILoaderContext, Omit<IFieldRegistryContext, 'visibility'> {
+export interface IDslApplication extends IApiContext, INavigationContext, INotificationContext, ILoaderContext, Omit<IFieldRegistryContext, 'visibility'> {
   api: IApiService;
+  i18n: II18nContext;
   marshalling: IBootConfig;
   visibility?: IFieldRegistryContext['visibility'];
 }
@@ -24,13 +25,9 @@ export interface IDslApplicationState {
 }
 
 export class DslApplication extends React.PureComponent<IDslApplication, IDslApplicationState> {
-  public static defaultProps: Partial<IDslApplication> = {
-    localize: (it) => it,
-  };
-
   public state: IDslApplicationState = {
     api: { ExportButton: this.props.ExportButton, onExport: this.props.onExport, getS3DownloadUrl: this.props.getS3DownloadUrl },
-    i18n: { localize: this.props.localize! },
+    i18n: { customiseLabel: this.props.i18n.customiseLabel, hasPermissions: this.props.i18n.hasPermissions, localize: this.props.i18n!.localize },
     fields: { Fields: this.props.Fields, defaults: this.props.defaults, validators: this.props.validators, visibility: this.props.visibility ?? {} },
     loading: { LoadingComponent: this.props.LoadingComponent },
     navigation: { Link: this.props.Link },
@@ -49,9 +46,13 @@ export class DslApplication extends React.PureComponent<IDslApplication, IDslApp
       });
     }
 
-    if (this.props.localize !== prevProps.localize) {
+    if (this.props.i18n.customiseLabel !== prevProps.i18n.customiseLabel || this.props.i18n.hasPermissions !== prevProps.i18n.hasPermissions || this.props.i18n.localize !== prevProps.i18n.localize) {
       this.setState({
-        i18n: { localize: this.props.localize! },
+        i18n: {
+          customiseLabel: this.props.i18n.customiseLabel,
+          hasPermissions: this.props.i18n.hasPermissions,
+          localize: this.props.i18n.localize,
+        },
       });
     }
 

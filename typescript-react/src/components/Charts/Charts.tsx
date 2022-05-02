@@ -7,7 +7,6 @@ import * as FunctionalUtils from '../../util/FunctionalUtils/FunctionalUtils';
 import * as SortUtils from '../../util/SortUtils/SortUtils';
 import { ListPresenterContext } from '../Form/Context';
 import { I18nContext } from '../I18n/I18n';
-import { localizeTextIfMarked } from '../I18n/service';
 import styles from './Charts.module.css';
 import { getLabel, getTopNLabels, parseNumber } from './helpers';
 import { colors } from './Theme';
@@ -337,7 +336,7 @@ export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefini
           className={className}
           items={items}
           xs={definition.xs}
-          title={definition.title ? localizeTextIfMarked(this.context.localize, definition.title) : undefined}
+          title={definition?.title}
           ys={definition.ys}
           horizontal={definition.horizontal}
           stacked={definition.stacked}
@@ -351,7 +350,7 @@ export class ChartFromDefinition<T> extends React.PureComponent<IChartFromDefini
           className={className}
           items={items}
           xs={definition.xs}
-          title={definition.title ? localizeTextIfMarked(this.context.localize, definition.title) : undefined}
+          title={definition?.title}
           y={definition.y}
           isDoughnut={definition.type === ChartType.Doughnut}
           options={options}

@@ -11,7 +11,11 @@ exports[`formField HOC should render without crashing 1`] = `
       <label
         className="form-label"
       >
-        Test Label
+        <span
+          onClick={[Function]}
+        >
+          Test Label
+        </span>
       </label>
     </div>
     <div

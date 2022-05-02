@@ -4,9 +4,7 @@ import {
   CellType,
   FooterType,
   IRowsConfig,
-  IColumnConfig,
 } from '../Table/Table';
-import { localizeTextIfMarked } from '../I18n/service';
 
 export const anyFieldMatchesQuery = <T>(item: T, query: string): boolean =>
   Object.values(item).some((value) =>
@@ -54,22 +52,6 @@ export const mergeDefinition = <T extends any[]>(
     },
     ...conf.slice(1),
   ];
-};
-
-export const localizeDefinition = <T extends any[]>(
-  conf: IRowsConfig<T>,
-  formatMessage: (key: string) => string,
-) => {
-  if (!formatMessage) {
-    return conf;
-  }
-
-  return conf.map((row: IColumnConfig<any>) => {
-    return {
-      ...row,
-      title: localizeTextIfMarked(formatMessage, row.title),
-    }
-  });
 };
 
 export const getResultSetColumnDefinitions = (
