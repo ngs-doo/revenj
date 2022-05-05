@@ -21,7 +21,7 @@ import {
   mergeDefinition,
   unpackRow,
 } from './helpers';
-import { CustomisableText } from '../Label/Label';
+import { CustomizableText } from '../Label/Label';
 
 import styles from './Grid.module.css';
 
@@ -271,7 +271,7 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
       const path = `${conceptName}.${name}`;
       return {
         ...row,
-        Header: () => <CustomisableText defaultValue={row.title} paths={[path]} />,
+        Header: () => <CustomizableText defaultValue={row.title} paths={[path]} />,
       }
     });
   }

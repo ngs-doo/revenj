@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { CustomisableText } from '../Label/Label';
+import { CustomizableText } from '../Label/Label';
 import { FormContext } from './Context';
 import styles from './FormSection.module.css';
 
@@ -46,7 +46,7 @@ export class Section extends React.PureComponent<ISection, ISectionState> {
               onClick={this.props.keepExpanded ? undefined : this.onToggleCollapse}
             >
               <div className={classNames(styles.Title, titleClassName)}>
-                <CustomisableText
+                <CustomizableText
                   defaultValue={title}
                   paths={[titlePath]}
                 />

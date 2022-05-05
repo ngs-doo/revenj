@@ -5,7 +5,7 @@ import { getFormValues } from 'redux-form';
 
 import { IGeneratedConcept } from '../Form/Context';
 import { Header } from '../Header/Header';
-import { CustomisableText } from '../Label/Label';
+import { CustomizableText } from '../Label/Label';
 import { Actions, IActionButton } from './Actions';
 import styles from './Presenter.module.css';
 
@@ -48,7 +48,7 @@ export class PresenterBare<T> extends React.PureComponent<IPresenter<T>> {
         {
           title ? (
             <Header title={
-              <CustomisableText
+              <CustomizableText
                 defaultValue={title}
                 paths={[presenterName]}
               />

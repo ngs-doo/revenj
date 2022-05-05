@@ -27,7 +27,7 @@ export interface IDslApplicationState {
 export class DslApplication extends React.PureComponent<IDslApplication, IDslApplicationState> {
   public state: IDslApplicationState = {
     api: { ExportButton: this.props.ExportButton, onExport: this.props.onExport, getS3DownloadUrl: this.props.getS3DownloadUrl },
-    i18n: { customiseLabel: this.props.i18n.customiseLabel, hasPermissions: this.props.i18n.hasPermissions, localize: this.props.i18n!.localize },
+    i18n: { customizeLabel: this.props.i18n.customizeLabel, hasPermissions: this.props.i18n.hasPermissions, localize: this.props.i18n!.localize },
     fields: { Fields: this.props.Fields, defaults: this.props.defaults, validators: this.props.validators, visibility: this.props.visibility ?? {} },
     loading: { LoadingComponent: this.props.LoadingComponent },
     navigation: { Link: this.props.Link },
@@ -46,10 +46,10 @@ export class DslApplication extends React.PureComponent<IDslApplication, IDslApp
       });
     }
 
-    if (this.props.i18n.customiseLabel !== prevProps.i18n.customiseLabel || this.props.i18n.hasPermissions !== prevProps.i18n.hasPermissions || this.props.i18n.localize !== prevProps.i18n.localize) {
+    if (this.props.i18n.customizeLabel !== prevProps.i18n.customizeLabel || this.props.i18n.hasPermissions !== prevProps.i18n.hasPermissions || this.props.i18n.localize !== prevProps.i18n.localize) {
       this.setState({
         i18n: {
-          customiseLabel: this.props.i18n.customiseLabel,
+          customizeLabel: this.props.i18n.customizeLabel,
           hasPermissions: this.props.i18n.hasPermissions,
           localize: this.props.i18n.localize,
         },
