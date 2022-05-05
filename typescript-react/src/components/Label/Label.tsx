@@ -5,22 +5,22 @@ import ControlLabel from 'react-bootstrap/FormLabel';
 import { I18nContext } from '../I18n/I18n';
 import { localizeText } from '../I18n/service';
 
-interface ICustomisableProps {
+interface ICustomizableProps {
   className?: string;
   defaultValue: string;
   message?: string;
   paths: string[];
 }
 
-export const CustomisableText = ({ defaultValue, className, paths }: ICustomisableProps) => {
-  const { customiseLabel, hasPermissions, localize } = React.useContext(I18nContext);
+export const CustomizableText = ({ defaultValue, className, paths }: ICustomizableProps) => {
+  const { customizeLabel, hasPermissions, localize } = React.useContext(I18nContext);
   const [isEdit, setIsEdit] = React.useState(false);
   const [value, setValue] = React.useState(localizeText(localize, defaultValue, paths));
 
   const onEdit = async () => {
     if (hasPermissions) {
       try {
-        await customiseLabel(paths[0], value);
+        await customizeLabel(paths[0], value);
       } catch (error) {
         console.error(`Could not set ${paths[0]} to ${value}`);
         throw error;
@@ -56,10 +56,10 @@ export const CustomisableText = ({ defaultValue, className, paths }: ICustomisab
   );
 };
 
-export const CustomisableLabel = ({ defaultValue, className, paths }: ICustomisableProps) => {
+export const CustomizableLabel = ({ defaultValue, className, paths }: ICustomizableProps) => {
   return (
     <ControlLabel>
-      <CustomisableText
+      <CustomizableText
         defaultValue={defaultValue}
         className={className}
         paths={paths}

@@ -11,7 +11,7 @@ import { Description } from '../Description/Description';
 
 import styles from './FormField.module.css';
 import { Tooltip } from '../Tooltip/Tooltip';
-import { CustomisableLabel } from '../Label/Label';
+import { CustomizableLabel } from '../Label/Label';
 
 export interface IFormFieldWrapper {
   qa?: {
@@ -87,7 +87,7 @@ const renderLabel = function <P>({ description, externalLabel, hideLabel, label,
   return externalLabel && !hideLabel
     ? (
       <div className={styles.LabelContainer}>
-          <CustomisableLabel defaultValue={label!} className={labelClassName} paths={[path]} />
+          <CustomizableLabel defaultValue={label!} className={labelClassName} paths={[path]} />
         { description ? <Description className={styles.Description} message={description! as string} /> : null }
       </div>
     )
