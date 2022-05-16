@@ -116,15 +116,19 @@ export const deserializeSet = <T>(it: T[]): Set<T> => {
 };
 
 export const serializeMap = <K extends string | number, V>(it: Map<K, V>): Dictionary<K, V> => {
-  if (!(it instanceof Map)) {
-    throw new Error(`Expected a Map, but value is ${it}`);
+  if (it instanceof Map) {
+    const ret: Dictionary<K, V> = {} as Dictionary<K, V>;
+    it.forEach((value, key) => {
+      ret[key as any] = value;
+    });
+    return ret;
   }
 
-  const ret: Dictionary<K, V> = {} as Dictionary<K, V>;
-  it.forEach((value, key) => {
-    ret[key as any] = value;
-  });
-  return ret;
+  if (isObject(it)) {
+    return it;
+  }
+
+  throw new Error(`Expected a Map, but value is ${it}`);
 };
 
 export const deserializeMap = <K extends string | number, V>(it: Dictionary<K, V>): Map<K, V> => {

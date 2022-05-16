@@ -264,7 +264,6 @@ ing`];
     it('should explode on non-maps', () => {
       const badApples = [
         null,
-        {},
         [],
       ];
 
