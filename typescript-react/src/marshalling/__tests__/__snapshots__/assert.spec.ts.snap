@@ -100,9 +100,7 @@ exports[`data marshalling asserting serializeBinary should explode on non-string
 
 exports[`data marshalling asserting serializeMap should explode on non-maps 1`] = `"Expected a Map, but value is null"`;
 
-exports[`data marshalling asserting serializeMap should explode on non-maps 2`] = `"Expected a Map, but value is [object Object]"`;
-
-exports[`data marshalling asserting serializeMap should explode on non-maps 3`] = `"Expected a Map, but value is "`;
+exports[`data marshalling asserting serializeMap should explode on non-maps 2`] = `"Expected a Map, but value is "`;
 
 exports[`data marshalling asserting serializeResultSet should explode on invalid shapes 1`] = `"Expected a ResultSet, but received [object Object]"`;
 
