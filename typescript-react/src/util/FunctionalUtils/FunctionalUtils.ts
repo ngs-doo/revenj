@@ -486,7 +486,7 @@ export const get = <T, K extends DeepKeyOf<T>>(
   for (const fragment of normalizedPath) {
     if (index++ === normalizedPath.length - 1) {
       if (target instanceof Map) {
-        return target.get(fragment) || fallback;
+        return target.get(fragment) != null ? target.get(fragment) : fallback;
       }
 
       return target != null && target[fragment] != null
