@@ -465,6 +465,7 @@ describe('functional.ts', () => {
       }, ['a', '0', 'b c'] as any)).toBe(9);
     });
     expect(get(new Map([['a', 1]]), 'a' as any)).toBe(1);
+    expect(get(new Map([['a', false]]), 'a' as any)).toBe(false);
   });
 
   describe('set', () => {
