@@ -14,6 +14,7 @@ import * as ordinal from './ordinal';
 import * as requireValidators from './required';
 import * as text from './text';
 import * as type from './type';
+import * as utils from './utils'
 import {
   validatorCreatorFactory as factory,
   withPreprocessor,
@@ -175,6 +176,9 @@ export const validateIf = <I, F, P>(predicate: IPredicate | boolean, validator: 
   };
 
 export const externalIDLength = maxLengthCreator(64);
+export const getBaseValue = utils.getBaseValue;
+export const valueIsAbsent = utils.valueIsAbsent;
+export const resolveRelativePath = utils.resolveRelativePath;
 
 export const zeroToHundredInterval = inIntervalCreator({ min: 0, max: 100 })
   ({ getValidatorErrorMessageOverride: 'Value has to be larger than 0 and smaller than 100' });
