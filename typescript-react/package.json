@@ -86,7 +86,7 @@
   "scripts": {
     "build": "microbundle-crl --no-compress --format modern,cjs",
     "deploy": "gh-pages -d example/build",
-    "prebuild": "npx ./scripts/postinstall.js",
+    "prebuild": "node ./scripts/postinstall.js",
     "predeploy": "cd example && yarn install && yarn run build",
     "prepare": "run-s build",
     "start": "microbundle-crl watch --no-compress --format modern,cjs",

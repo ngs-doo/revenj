@@ -1,5 +1,6 @@
-@value mobileDetailBackground from '../Table.css';
+/* TODO: fix css loader to enable importing variables from css files on non-linux environment */
+
 
 .DetailRowWrapper {
-  background: mobileDetailBackground;
+  background: #F0F6F7;
 }
