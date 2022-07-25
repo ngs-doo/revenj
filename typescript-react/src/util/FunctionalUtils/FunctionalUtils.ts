@@ -149,10 +149,10 @@ export function dictionaryForIds<
   T extends { [key: string]: string | number } & any
 >(collection: T[], field: keyof T): IIdLookup<T> {
   return collection.reduce(
-    (acc: IIdLookup<T>, item: T) => ({
-      ...acc,
-      [String(get(item, field))]: item
-    }),
+    (acc: IIdLookup<T>, item: T) => {
+      acc[String(get(item, field))] = item;
+      return acc;
+    },
     {}
   );
 }
