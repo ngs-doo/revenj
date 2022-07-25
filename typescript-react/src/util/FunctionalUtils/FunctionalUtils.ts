@@ -115,7 +115,8 @@ export const filterValues = <T extends {}>(
 ) =>
   Object.keys(obj).reduce((acc, key: string) => {
     if (fn(obj[key as keyof T], key)) {
-      return { ...acc, [key]: obj[key as keyof T] };
+       acc[key] = obj[key as keyof T];
+       return acc;
     }
 
     return acc;
@@ -185,26 +186,22 @@ export const deepKeys = (
         )
       );
 
+      // don't use spread in reduce, because it's a significant performance hit for large datasets
       return producedKeys.length === 0
-        ? [
-            ...keys,
-            ...obj[key].map((_: any, index: number) => `${key}[${index}]`)
-          ]
-        : [...keys, ...producedKeys];
+        ? keys.concat(obj[key].map((_: any, index: number) => `${key}[${index}]`))
+        : keys.concat(producedKeys);
     } else if (
       obj[key] &&
       isObject(obj[key]) &&
       !Array.isArray(obj[key]) &&
       typeof obj[key] !== 'function'
     ) {
-      return [
-        ...keys,
-        ...deepKeys(obj[key], diveIntoArrays).map(
-          (deepKey) => `${key}.${deepKey}`
-        )
-      ];
+      return keys.concat(deepKeys(obj[key], diveIntoArrays).map(
+        (deepKey) => `${key}.${deepKey}`
+      ));
     } else {
-      return [...keys, key];
+      keys.push(key);
+      return keys;
     }
   }, []);
 };
@@ -349,7 +346,10 @@ export function mapValues<T, K extends number, R>(
 ): { [key: number]: R };
 export function mapValues(map: any, fn: IFunctionAny) {
   return Object.keys(map).reduce(
-    (acc, key) => ({ ...acc, [key]: fn(map[key], key) }),
+    (acc, key) => {
+      acc[key] = fn(map[key], key);
+      return acc;
+    },
     {}
   );
 }
