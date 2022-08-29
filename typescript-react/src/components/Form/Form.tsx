@@ -24,10 +24,28 @@ import {
   ErrorType,
   FormType,
 } from './interfaces';
+import { deepKeys } from '../../util/FunctionalUtils/FunctionalUtils';
 
 import styles from './Form.module.css';
 
 const genericError = 'Please correct all the required fields.';
+
+const scrollToFirstError = (errors: FormErrors<FormData, ErrorType> | undefined = {}) => {
+  const fieldNames = deepKeys(errors);
+
+  // select library and datepicker don't have a name attribute on input, so the only way to target them is through data-qa-element-id
+  // data-qa-element-id has an unfortunate naming, and changing it now would be a breaking change, would be much prettier if it was data-element-id
+  // adding another data attribute would just duplicate stuff, as it would have the same value as data-qa-element-id
+  for (const fieldName of fieldNames) {
+    const el = document.querySelectorAll(`[name="${fieldName}"], [data-qa-element-id="${fieldName}"] input`)[0] as HTMLElement;
+
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.focus({ preventScroll: true });
+      break;
+    }
+  }
+}
 
 interface IFormStateProps<T> {
   submitErrors?: FormErrors<T>;
@@ -182,7 +200,7 @@ class FormBare<T> extends React.Component<IForm<T>, IFormState<T>> {
 }
 
 const FormUntyped = compose(
-  reduxForm({}),
+  reduxForm({ onSubmitFail: scrollToFirstError }),
   connect(mapState), // Must happen after so values are not overriden
 )(FormBare as any) as unknown as React.ComponentClass<IFormPublicProps<any> & ConfigProps<any, any, any>>;
 
