@@ -119,10 +119,9 @@ namespace Revenj.Utility
 
 			public override IFormatProvider FormatProvider { get { return Invariant; } }
 
-			public override void Close()
-			{
-				Flush();
-			}
+			public override void Close() { Flush(); }
+
+			protected override void Dispose(bool disposing) { Flush(); }
 		}
 
 		/// <summary>
