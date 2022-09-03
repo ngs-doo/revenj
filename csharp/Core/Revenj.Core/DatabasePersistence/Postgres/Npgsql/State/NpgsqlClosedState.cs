@@ -32,8 +32,13 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+#if NETSTANDARD2_0
+using System.Net.Security;
+using System.Security.Authentication;
+#else
 using Mono.Security.Protocol.Tls;
 using SecurityProtocolType = Mono.Security.Protocol.Tls.SecurityProtocolType;
+#endif
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
 {
@@ -83,6 +88,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			return Dns.GetHostAddresses(HostName);
 		}
+
+#if NETSTANDARD2_0
+		private static bool DefaultUserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+			=> sslPolicyErrors == SslPolicyErrors.None;
+#endif
 
 		public override void Open(NpgsqlConnector context)
 		{
@@ -141,6 +151,21 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						//trigger the callback to fetch some certificates
 						context.DefaultProvideClientCertificatesCallback(clientCertificates);
 
+#if NETSTANDARD2_0
+						RemoteCertificateValidationCallback certificateValidationCallback;
+						if (context.TrustServerCertificate)
+							certificateValidationCallback = (sender, certificate, chain, errors) => true;
+						else if (context.UserCertificateValidationCallback != null)
+							certificateValidationCallback = context.UserCertificateValidationCallback;
+						else
+							certificateValidationCallback = DefaultUserCertificateValidationCallback;
+
+						var sslStream = new SslStream(stream, false, certificateValidationCallback);
+						sslStream.AuthenticateAsClient(context.Host, clientCertificates, 
+							SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12, 
+							context.CheckCertificateRevocation);
+						stream = sslStream;
+#else
 						stream = new SslClientStream(
 							stream,
 							context.Host,
@@ -154,6 +179,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							new CertificateValidationCallback(context.DefaultCertificateValidationCallback);
 						((SslClientStream)stream).PrivateKeyCertSelectionDelegate =
 							new PrivateKeySelectionCallback(context.DefaultPrivateKeySelectionCallback);
+
+#endif
 					}
 					else if (context.SslMode == SslMode.Require)
 					{

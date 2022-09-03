@@ -36,7 +36,11 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
+#if NETSTANDARD2_0
+using System.Net.Security;
+#else
 using Mono.Security.Protocol.Tls;
+#endif
 using Revenj.DatabasePersistence.Postgres.NpgsqlTypes;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
@@ -73,6 +77,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		internal event ProvideClientCertificatesCallback ProvideClientCertificatesCallback;
 
+#if !NETSTANDARD2_0
 		/// <summary>
 		/// Mono.Security.Protocol.Tls.CertificateSelectionCallback delegate.
 		/// </summary>
@@ -87,6 +92,17 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// Mono.Security.Protocol.Tls.PrivateKeySelectionCallback delegate.
 		/// </summary>
 		internal event PrivateKeySelectionCallback PrivateKeySelectionCallback;
+
+#else
+		/// <summary>
+		/// Verifies the remote Secure Sockets Layer (SSL) certificate used for authentication.
+		/// Ignored if <see cref="NpgsqlConnectionStringBuilder.TrustServerCertificate"/> is set.
+		/// </summary>
+		/// <remarks>
+		/// See <see href="https://msdn.microsoft.com/en-us/library/system.net.security.remotecertificatevalidationcallback(v=vs.110).aspx"/>
+		/// </remarks>
+		public RemoteCertificateValidationCallback UserCertificateValidationCallback { get; set; }
+#endif
 
 		private ConnectionState _connection_state;
 
@@ -248,6 +264,18 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		{
 			get { return settings.IntegratedSecurity; }
 		}
+
+#if NETSTANDARD2_0
+		internal Boolean TrustServerCertificate
+		{
+			get { return settings.TrustServerCertificate; }
+		}
+
+		internal Boolean CheckCertificateRevocation
+		{
+			get { return settings.CheckCertificateRevocation; }
+		}
+#endif
 
 		/// <summary>
 		/// Gets the current state of the connection.
@@ -485,6 +513,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 		}
 
+#if !NETSTANDARD2_0
 		/// <summary>
 		/// Default SSL CertificateSelectionCallback implementation.
 		/// </summary>
@@ -531,6 +560,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				return null;
 			}
 		}
+#endif
 
 		/// <summary>
 		/// Default SSL ProvideClientCertificatesCallback implementation.

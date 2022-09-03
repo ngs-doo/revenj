@@ -34,7 +34,11 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Transactions;
+#if NETSTANDARD2_0
+using System.Net.Security;
+#else
 using Mono.Security.Protocol.Tls;
+#endif
 using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Revenj.DatabasePersistence.Postgres.Npgsql
@@ -86,6 +90,16 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		internal ProvideClientCertificatesCallback ProvideClientCertificatesCallbackDelegate;
 
 
+#if NETSTANDARD2_0
+		/// <summary>
+		/// Verifies the remote Secure Sockets Layer (SSL) certificate used for authentication.
+		/// Ignored if <see cref="NpgsqlConnectionStringBuilder.TrustServerCertificate"/> is set.
+		/// </summary>
+		/// <remarks>
+		/// See <see href="https://msdn.microsoft.com/en-us/library/system.net.security.remotecertificatevalidationcallback(v=vs.110).aspx"/>
+		/// </remarks>
+		public RemoteCertificateValidationCallback UserCertificateValidationCallback { get; set; }
+#else
 		/// <summary>
 		/// Mono.Security.Protocol.Tls.CertificateSelectionCallback delegate.
 		/// </summary>
@@ -106,6 +120,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		public event PrivateKeySelectionCallback PrivateKeySelectionCallback;
 
 		internal PrivateKeySelectionCallback PrivateKeySelectionCallbackDelegate;
+#endif
 
 		// Set this when disposed is called.
 		private bool disposed = false;
@@ -154,9 +169,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			NotificationDelegate = new NotificationEventHandler(OnNotification);
 
 			ProvideClientCertificatesCallbackDelegate = new ProvideClientCertificatesCallback(DefaultProvideClientCertificatesCallback);
+#if !NETSTANDARD2_0
 			CertificateValidationCallbackDelegate = new CertificateValidationCallback(DefaultCertificateValidationCallback);
 			CertificateSelectionCallbackDelegate = new CertificateSelectionCallback(DefaultCertificateSelectionCallback);
 			PrivateKeySelectionCallbackDelegate = new PrivateKeySelectionCallback(DefaultPrivateKeySelectionCallback);
+#endif
 
 			// Fix authentication problems. See https://bugzilla.novell.com/show_bug.cgi?id=MONO77559 and 
 			// http://pgfoundry.org/forum/message.php?msg_id=1002377 for more info.
@@ -495,9 +512,13 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				connector = new NpgsqlConnector(this);
 
 				connector.ProvideClientCertificatesCallback += ProvideClientCertificatesCallbackDelegate;
+#if NETSTANDARD2_0
+				connector.UserCertificateValidationCallback = UserCertificateValidationCallback;
+#else
 				connector.CertificateSelectionCallback += CertificateSelectionCallbackDelegate;
 				connector.CertificateValidationCallback += CertificateValidationCallbackDelegate;
 				connector.PrivateKeySelectionCallback += PrivateKeySelectionCallbackDelegate;
+#endif
 
 				connector.Open();
 			}
@@ -585,9 +606,13 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				else
 				{
 					Connector.ProvideClientCertificatesCallback -= ProvideClientCertificatesCallbackDelegate;
+#if NETSTANDARD2_0
+					Connector.UserCertificateValidationCallback = UserCertificateValidationCallback;
+#else
 					Connector.CertificateSelectionCallback -= CertificateSelectionCallbackDelegate;
 					Connector.CertificateValidationCallback -= CertificateValidationCallbackDelegate;
 					Connector.PrivateKeySelectionCallback -= PrivateKeySelectionCallbackDelegate;
+#endif
 
 					if (Connector.Transaction != null)
 					{
@@ -776,6 +801,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		// Event handlers
 		//
 
+#if !NETSTANDARD2_0
 		/// <summary>
 		/// Default SSL CertificateSelectionCallback implementation.
 		/// </summary>
@@ -822,6 +848,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				return null;
 			}
 		}
+#endif
 
 		/// <summary>
 		/// Default SSL ProvideClientCertificatesCallback implementation.

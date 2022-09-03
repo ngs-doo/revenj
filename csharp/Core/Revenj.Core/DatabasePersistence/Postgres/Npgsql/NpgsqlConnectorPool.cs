@@ -377,9 +377,13 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			if (Connector != null)
 			{
 				Connector.ProvideClientCertificatesCallback += Connection.ProvideClientCertificatesCallbackDelegate;
+#if NETSTANDARD2_0
+				Connector.UserCertificateValidationCallback = Connection.UserCertificateValidationCallback;
+#else
 				Connector.CertificateSelectionCallback += Connection.CertificateSelectionCallbackDelegate;
 				Connector.CertificateValidationCallback += Connection.CertificateValidationCallbackDelegate;
 				Connector.PrivateKeySelectionCallback += Connection.PrivateKeySelectionCallbackDelegate;
+#endif
 
 				try
 				{
@@ -404,16 +408,24 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							NpgsqlConnector Spare = new NpgsqlConnector(Connection);
 
 							Spare.ProvideClientCertificatesCallback += Connection.ProvideClientCertificatesCallbackDelegate;
+#if NETSTANDARD2_0
+							Spare.UserCertificateValidationCallback = Connection.UserCertificateValidationCallback;
+#else
 							Spare.CertificateSelectionCallback += Connection.CertificateSelectionCallbackDelegate;
 							Spare.CertificateValidationCallback += Connection.CertificateValidationCallbackDelegate;
 							Spare.PrivateKeySelectionCallback += Connection.PrivateKeySelectionCallbackDelegate;
+#endif
 
 							Spare.Open();
 
 							Spare.ProvideClientCertificatesCallback -= Connection.ProvideClientCertificatesCallbackDelegate;
+#if NETSTANDARD2_0
+							Spare.UserCertificateValidationCallback = null;
+#else
 							Spare.CertificateSelectionCallback -= Connection.CertificateSelectionCallbackDelegate;
 							Spare.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;
 							Spare.PrivateKeySelectionCallback -= Connection.PrivateKeySelectionCallbackDelegate;
+#endif
 
 							Queue.EnqueueAvailable(Spare);
 						}
@@ -458,9 +470,13 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			}
 
 			Connector.ProvideClientCertificatesCallback -= Connection.ProvideClientCertificatesCallbackDelegate;
+#if NETSTANDARD2_0
+			Connector.UserCertificateValidationCallback = null;
+#else
 			Connector.CertificateSelectionCallback -= Connection.CertificateSelectionCallbackDelegate;
 			Connector.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;
 			Connector.PrivateKeySelectionCallback -= Connection.PrivateKeySelectionCallbackDelegate;
+#endif
 
 			bool inQueue = queue.RemoveBusy(Connector);
 
