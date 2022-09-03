@@ -4,6 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Revenj.Client</RootNamespace>
     <AssemblyName>Revenj.Client</AssemblyName>
+    <Version>0.9.0</Version>
+    <Company>Nova Generacija Softvera</Company>
+    <Authors>Nova Generacija Softvera</Authors>
   </PropertyGroup>
 
   <ItemGroup>
