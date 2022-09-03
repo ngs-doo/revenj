@@ -358,6 +358,24 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			set { SetValue(GetKeyName(Keywords.IntegratedSecurity), value); }
 		}
 
+        #if NETSTANDARD2_0
+        private bool _trustServerCertificate;
+
+        public bool TrustServerCertificate
+        {
+            get { return _trustServerCertificate; }
+            set { SetValue(GetKeyName(Keywords.TrustServerCertificate), value); }
+        }
+
+        private bool _checkCertificateRevocation;
+
+        public bool CheckCertificateRevocation
+        {
+            get { return _checkCertificateRevocation; }
+            set { SetValue(GetKeyName(Keywords.CheckCertificateRevocation), value); }
+        }
+#endif
+
 		private Version _compatible;
 		private static readonly Version THIS_VERSION = MethodBase.GetCurrentMethod().DeclaringType.Assembly.GetName().Version;
 		/// <summary>
@@ -441,6 +459,14 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					return Keywords.Compatible;
 				case "APPLICATIONNAME":
 					return Keywords.ApplicationName;
+				#if NETSTANDARD2_0
+                case "TRUSTSERVERCERTIFICATE":
+                case "TRUST SERVER CERTIFICATE":
+                    return Keywords.TrustServerCertificate;
+                case "CHECKCERTIFICATEREVOCATION":
+                case "CHECK CERTIFICATE REVOCATION":
+                    return Keywords.CheckCertificateRevocation;
+#endif
 				default:
 					throw new ArgumentException("key=value argument incorrect in ConnectionString", key);
 			}
@@ -638,6 +664,14 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					case Keywords.ApplicationName:
 						this._application_name = Convert.ToString(value);
 						break;
+#if NETSTANDARD2_0
+                    case Keywords.TrustServerCertificate:
+                        this._trustServerCertificate = ToBoolean(value);
+                        break;
+                    case Keywords.CheckCertificateRevocation:
+                        this._checkCertificateRevocation = ToBoolean(value);
+                        break;
+#endif
 				}
 			}
 			catch (InvalidCastException exception)
@@ -707,7 +741,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		UseExtendedTypes,
 		IntegratedSecurity,
 		Compatible,
-		ApplicationName
+		ApplicationName,
+		#if NETSTANDARD2_0
+        TrustServerCertificate,
+        CheckCertificateRevocation,
+		#endif
 	}
 
 	public enum SslMode
