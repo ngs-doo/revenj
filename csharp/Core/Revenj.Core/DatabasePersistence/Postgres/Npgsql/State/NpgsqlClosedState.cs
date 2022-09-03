@@ -89,10 +89,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			return Dns.GetHostAddresses(HostName);
 		}
 
-		#if NETSTANDARD2_0
+#if NETSTANDARD2_0
         private static bool DefaultUserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
             => sslPolicyErrors == SslPolicyErrors.None;
-		#endif
+#endif
 
 		public override void Open(NpgsqlConnector context)
 		{

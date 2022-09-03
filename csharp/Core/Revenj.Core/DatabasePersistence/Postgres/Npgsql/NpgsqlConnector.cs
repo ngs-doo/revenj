@@ -93,7 +93,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		/// </summary>
 		internal event PrivateKeySelectionCallback PrivateKeySelectionCallback;
 
-        #else
+#else
         /// <summary>
         /// Verifies the remote Secure Sockets Layer (SSL) certificate used for authentication.
         /// Ignored if <see cref="NpgsqlConnectionStringBuilder.TrustServerCertificate"/> is set.
@@ -102,7 +102,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
         /// See <see href="https://msdn.microsoft.com/en-us/library/system.net.security.remotecertificatevalidationcallback(v=vs.110).aspx"/>
         /// </remarks>
         public RemoteCertificateValidationCallback UserCertificateValidationCallback { get; set; }
-		#endif
+#endif
 
 		private ConnectionState _connection_state;
 
@@ -265,7 +265,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			get { return settings.IntegratedSecurity; }
 		}
 
-		#if NETSTANDARD2_0
+#if NETSTANDARD2_0
         internal Boolean TrustServerCertificate
         {
             get { return settings.TrustServerCertificate; }

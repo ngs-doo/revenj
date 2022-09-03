@@ -383,7 +383,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				Connector.CertificateSelectionCallback += Connection.CertificateSelectionCallbackDelegate;
 				Connector.CertificateValidationCallback += Connection.CertificateValidationCallbackDelegate;
 				Connector.PrivateKeySelectionCallback += Connection.PrivateKeySelectionCallbackDelegate;
-				#endif
+#endif
 
 				try
 				{
@@ -414,7 +414,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 							Spare.CertificateSelectionCallback += Connection.CertificateSelectionCallbackDelegate;
 							Spare.CertificateValidationCallback += Connection.CertificateValidationCallbackDelegate;
 							Spare.PrivateKeySelectionCallback += Connection.PrivateKeySelectionCallbackDelegate;
-							#endif
+#endif
 
 							Spare.Open();
 
@@ -425,7 +425,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
                             Spare.CertificateSelectionCallback -= Connection.CertificateSelectionCallbackDelegate;
                             Spare.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;
                             Spare.PrivateKeySelectionCallback -= Connection.PrivateKeySelectionCallbackDelegate;
-							#endif
+#endif
 
 							Queue.EnqueueAvailable(Spare);
 						}
@@ -476,7 +476,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			Connector.CertificateSelectionCallback -= Connection.CertificateSelectionCallbackDelegate;
 			Connector.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;
 			Connector.PrivateKeySelectionCallback -= Connection.PrivateKeySelectionCallbackDelegate;
-			#endif
+#endif
 
 			bool inQueue = queue.RemoveBusy(Connector);
 

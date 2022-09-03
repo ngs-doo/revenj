@@ -358,7 +358,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			set { SetValue(GetKeyName(Keywords.IntegratedSecurity), value); }
 		}
 
-        #if NETSTANDARD2_0
+#if NETSTANDARD2_0
         private bool _trustServerCertificate;
 
         public bool TrustServerCertificate
@@ -459,7 +459,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 					return Keywords.Compatible;
 				case "APPLICATIONNAME":
 					return Keywords.ApplicationName;
-				#if NETSTANDARD2_0
+#if NETSTANDARD2_0
                 case "TRUSTSERVERCERTIFICATE":
                 case "TRUST SERVER CERTIFICATE":
                     return Keywords.TrustServerCertificate;
@@ -742,10 +742,10 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		IntegratedSecurity,
 		Compatible,
 		ApplicationName,
-		#if NETSTANDARD2_0
+#if NETSTANDARD2_0
         TrustServerCertificate,
         CheckCertificateRevocation,
-		#endif
+#endif
 	}
 
 	public enum SslMode
