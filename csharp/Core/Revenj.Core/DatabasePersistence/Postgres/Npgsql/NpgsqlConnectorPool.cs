@@ -378,7 +378,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 			{
 				Connector.ProvideClientCertificatesCallback += Connection.ProvideClientCertificatesCallbackDelegate;
 #if NETSTANDARD2_0
-                Connector.UserCertificateValidationCallback = Connection.UserCertificateValidationCallback;
+				Connector.UserCertificateValidationCallback = Connection.UserCertificateValidationCallback;
 #else
 				Connector.CertificateSelectionCallback += Connection.CertificateSelectionCallbackDelegate;
 				Connector.CertificateValidationCallback += Connection.CertificateValidationCallbackDelegate;
@@ -409,7 +409,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 							Spare.ProvideClientCertificatesCallback += Connection.ProvideClientCertificatesCallbackDelegate;
 #if NETSTANDARD2_0
-                            Spare.UserCertificateValidationCallback = Connection.UserCertificateValidationCallback;
+							Spare.UserCertificateValidationCallback = Connection.UserCertificateValidationCallback;
 #else
 							Spare.CertificateSelectionCallback += Connection.CertificateSelectionCallbackDelegate;
 							Spare.CertificateValidationCallback += Connection.CertificateValidationCallbackDelegate;
@@ -420,11 +420,11 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 							Spare.ProvideClientCertificatesCallback -= Connection.ProvideClientCertificatesCallbackDelegate;
 #if NETSTANDARD2_0
-                            Spare.UserCertificateValidationCallback = null;
+							Spare.UserCertificateValidationCallback = null;
 #else
-                            Spare.CertificateSelectionCallback -= Connection.CertificateSelectionCallbackDelegate;
-                            Spare.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;
-                            Spare.PrivateKeySelectionCallback -= Connection.PrivateKeySelectionCallbackDelegate;
+							Spare.CertificateSelectionCallback -= Connection.CertificateSelectionCallbackDelegate;
+							Spare.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;
+							Spare.PrivateKeySelectionCallback -= Connection.PrivateKeySelectionCallbackDelegate;
 #endif
 
 							Queue.EnqueueAvailable(Spare);
@@ -471,7 +471,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 
 			Connector.ProvideClientCertificatesCallback -= Connection.ProvideClientCertificatesCallbackDelegate;
 #if NETSTANDARD2_0
-            Connector.UserCertificateValidationCallback = null;
+			Connector.UserCertificateValidationCallback = null;
 #else
 			Connector.CertificateSelectionCallback -= Connection.CertificateSelectionCallbackDelegate;
 			Connector.CertificateValidationCallback -= Connection.CertificateValidationCallbackDelegate;

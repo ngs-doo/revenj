@@ -90,8 +90,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 #if NETSTANDARD2_0
-        private static bool DefaultUserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-            => sslPolicyErrors == SslPolicyErrors.None;
+		private static bool DefaultUserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+			=> sslPolicyErrors == SslPolicyErrors.None;
 #endif
 
 		public override void Open(NpgsqlConnector context)
@@ -152,33 +152,33 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						context.DefaultProvideClientCertificatesCallback(clientCertificates);
 
 #if NETSTANDARD2_0
-                        RemoteCertificateValidationCallback certificateValidationCallback;
-                        if (context.TrustServerCertificate)
-                            certificateValidationCallback = (sender, certificate, chain, errors) => true;
-                        else if (context.UserCertificateValidationCallback != null)
-                            certificateValidationCallback = context.UserCertificateValidationCallback;
-                        else
-                            certificateValidationCallback = DefaultUserCertificateValidationCallback;
+						RemoteCertificateValidationCallback certificateValidationCallback;
+						if (context.TrustServerCertificate)
+							certificateValidationCallback = (sender, certificate, chain, errors) => true;
+						else if (context.UserCertificateValidationCallback != null)
+							certificateValidationCallback = context.UserCertificateValidationCallback;
+						else
+							certificateValidationCallback = DefaultUserCertificateValidationCallback;
 
 						var sslStream = new SslStream(stream, false, certificateValidationCallback);
-                        sslStream.AuthenticateAsClient(context.Host, clientCertificates, 
-                            SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12, 
-                            context.CheckCertificateRevocation);
-                        stream = sslStream;
+						sslStream.AuthenticateAsClient(context.Host, clientCertificates, 
+							SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12, 
+							context.CheckCertificateRevocation);
+						stream = sslStream;
 #else
-                        stream = new SslClientStream(
-                            stream,
-                            context.Host,
-                            true,
-                            SecurityProtocolType.Default,
-                            clientCertificates);
+						stream = new SslClientStream(
+							stream,
+							context.Host,
+							true,
+							SecurityProtocolType.Default,
+							clientCertificates);
 
-                        ((SslClientStream)stream).ClientCertSelectionDelegate =
-                            new CertificateSelectionCallback(context.DefaultCertificateSelectionCallback);
-                        ((SslClientStream)stream).ServerCertValidationDelegate =
-                            new CertificateValidationCallback(context.DefaultCertificateValidationCallback);
-                        ((SslClientStream)stream).PrivateKeyCertSelectionDelegate =
-                            new PrivateKeySelectionCallback(context.DefaultPrivateKeySelectionCallback);
+						((SslClientStream)stream).ClientCertSelectionDelegate =
+							new CertificateSelectionCallback(context.DefaultCertificateSelectionCallback);
+						((SslClientStream)stream).ServerCertValidationDelegate =
+							new CertificateValidationCallback(context.DefaultCertificateValidationCallback);
+						((SslClientStream)stream).PrivateKeyCertSelectionDelegate =
+							new PrivateKeySelectionCallback(context.DefaultPrivateKeySelectionCallback);
 
 #endif
 					}

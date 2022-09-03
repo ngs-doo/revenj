@@ -359,21 +359,21 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 #if NETSTANDARD2_0
-        private bool _trustServerCertificate;
+		private bool _trustServerCertificate;
 
-        public bool TrustServerCertificate
-        {
-            get { return _trustServerCertificate; }
-            set { SetValue(GetKeyName(Keywords.TrustServerCertificate), value); }
-        }
+		public bool TrustServerCertificate
+		{
+			get { return _trustServerCertificate; }
+			set { SetValue(GetKeyName(Keywords.TrustServerCertificate), value); }
+		}
 
-        private bool _checkCertificateRevocation;
+		private bool _checkCertificateRevocation;
 
-        public bool CheckCertificateRevocation
-        {
-            get { return _checkCertificateRevocation; }
-            set { SetValue(GetKeyName(Keywords.CheckCertificateRevocation), value); }
-        }
+		public bool CheckCertificateRevocation
+		{
+			get { return _checkCertificateRevocation; }
+			set { SetValue(GetKeyName(Keywords.CheckCertificateRevocation), value); }
+		}
 #endif
 
 		private Version _compatible;
@@ -460,12 +460,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 				case "APPLICATIONNAME":
 					return Keywords.ApplicationName;
 #if NETSTANDARD2_0
-                case "TRUSTSERVERCERTIFICATE":
-                case "TRUST SERVER CERTIFICATE":
-                    return Keywords.TrustServerCertificate;
-                case "CHECKCERTIFICATEREVOCATION":
-                case "CHECK CERTIFICATE REVOCATION":
-                    return Keywords.CheckCertificateRevocation;
+				case "TRUSTSERVERCERTIFICATE":
+				case "TRUST SERVER CERTIFICATE":
+					return Keywords.TrustServerCertificate;
+				case "CHECKCERTIFICATEREVOCATION":
+				case "CHECK CERTIFICATE REVOCATION":
+					return Keywords.CheckCertificateRevocation;
 #endif
 				default:
 					throw new ArgumentException("key=value argument incorrect in ConnectionString", key);
@@ -665,12 +665,12 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						this._application_name = Convert.ToString(value);
 						break;
 #if NETSTANDARD2_0
-                    case Keywords.TrustServerCertificate:
-                        this._trustServerCertificate = ToBoolean(value);
-                        break;
-                    case Keywords.CheckCertificateRevocation:
-                        this._checkCertificateRevocation = ToBoolean(value);
-                        break;
+					case Keywords.TrustServerCertificate:
+						this._trustServerCertificate = ToBoolean(value);
+						break;
+					case Keywords.CheckCertificateRevocation:
+						this._checkCertificateRevocation = ToBoolean(value);
+						break;
 #endif
 				}
 			}
@@ -743,8 +743,8 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		Compatible,
 		ApplicationName,
 #if NETSTANDARD2_0
-        TrustServerCertificate,
-        CheckCertificateRevocation,
+		TrustServerCertificate,
+		CheckCertificateRevocation,
 #endif
 	}
 

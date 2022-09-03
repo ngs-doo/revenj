@@ -78,7 +78,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		internal event ProvideClientCertificatesCallback ProvideClientCertificatesCallback;
 
 #if !NETSTANDARD2_0
-        /// <summary>
+		/// <summary>
 		/// Mono.Security.Protocol.Tls.CertificateSelectionCallback delegate.
 		/// </summary>
 		internal event CertificateSelectionCallback CertificateSelectionCallback;
@@ -94,14 +94,14 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		internal event PrivateKeySelectionCallback PrivateKeySelectionCallback;
 
 #else
-        /// <summary>
-        /// Verifies the remote Secure Sockets Layer (SSL) certificate used for authentication.
-        /// Ignored if <see cref="NpgsqlConnectionStringBuilder.TrustServerCertificate"/> is set.
-        /// </summary>
-        /// <remarks>
-        /// See <see href="https://msdn.microsoft.com/en-us/library/system.net.security.remotecertificatevalidationcallback(v=vs.110).aspx"/>
-        /// </remarks>
-        public RemoteCertificateValidationCallback UserCertificateValidationCallback { get; set; }
+		/// <summary>
+		/// Verifies the remote Secure Sockets Layer (SSL) certificate used for authentication.
+		/// Ignored if <see cref="NpgsqlConnectionStringBuilder.TrustServerCertificate"/> is set.
+		/// </summary>
+		/// <remarks>
+		/// See <see href="https://msdn.microsoft.com/en-us/library/system.net.security.remotecertificatevalidationcallback(v=vs.110).aspx"/>
+		/// </remarks>
+		public RemoteCertificateValidationCallback UserCertificateValidationCallback { get; set; }
 #endif
 
 		private ConnectionState _connection_state;
@@ -266,15 +266,15 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 		}
 
 #if NETSTANDARD2_0
-        internal Boolean TrustServerCertificate
-        {
-            get { return settings.TrustServerCertificate; }
-        }
+		internal Boolean TrustServerCertificate
+		{
+			get { return settings.TrustServerCertificate; }
+		}
 
-        internal Boolean CheckCertificateRevocation
-        {
-            get { return settings.CheckCertificateRevocation; }
-        }
+		internal Boolean CheckCertificateRevocation
+		{
+			get { return settings.CheckCertificateRevocation; }
+		}
 #endif
 
 		/// <summary>
