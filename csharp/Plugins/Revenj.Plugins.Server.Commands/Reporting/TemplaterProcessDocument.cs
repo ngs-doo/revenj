@@ -123,7 +123,7 @@ Example argument:
 			var ext = Path.GetExtension(argument.File);
 			var cms = ChunkedMemoryStream.Create();
 			using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
-			using (var document = TemplaterFactory.Open(fs, cms, ext))
+			using (var document = TemplaterFactory.Open(fs, ext, cms))
 			{
 				if (argument.GetSources != null)
 					foreach (var source in argument.GetSources)

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -21,6 +21,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Security\Mono.Security\**" />
+    <EmbeddedResource Remove="Security\Mono.Security\**" />
+    <None Remove="Security\Mono.Security\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\..\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
   </ItemGroup>
 
@@ -34,11 +40,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="protobuf-net" Version="2.4.0" />
     <PackageReference Include="System.ComponentModel.Composition" Version="4.5.0" />
-    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
     <PackageReference Include="System.Reactive.Core" Version="3.1.1" />
     <PackageReference Include="System.Reactive.Linq" Version="3.1.1" />
     <PackageReference Include="System.Security.Principal.Windows" Version="4.5.1" />
-    <PackageReference Include="Templater" Version="6.1.0" />
+    <PackageReference Include="Templater" Version="7.1.0" />
   </ItemGroup>
 
   <ItemGroup>
