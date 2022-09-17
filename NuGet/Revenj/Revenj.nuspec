@@ -40,7 +40,7 @@ This package contains common components shared across Revenj versions.</summary>
         <dependency id="System.Reactive.Linq" version="3.1.1" />
         <dependency id="Microsoft.CSharp" version="4.5.0" />
         <dependency id="System.ComponentModel.Composition" version="4.5.0" />
-        <dependency id="System.Drawing.Common" version="5.0.2" />
+        <dependency id="System.Drawing.Common" version="5.0.3" />
         <dependency id="System.Security.Principal.Windows" version="4.5.1" />
         <dependency id="System.Configuration.ConfigurationManager" version="4.5.0" />
       </group>
