@@ -14,8 +14,10 @@ import {
 } from './DateTimeCell';
 import { DecimalCell } from './DecimalCell';
 import { FieldCell } from './FieldCell';
+import { IntegerCell } from './IntegerCell';
 import { LinkCell } from './LinkCell';
 import { S3FileCell } from './S3FileCell';
+import { ShortCell } from './ShortCell';
 import { StatusCell } from './StatusCell';
 import { TextCell } from './TextCell';
 import { TooltipCell } from './TooltipCell';
@@ -28,13 +30,14 @@ export enum CellType {
   DateTime = 'DateTime',
   Decimal = 'Decimal',
   Field = 'Field',
+  Integer = 'Integer',
   Link = 'Link',
-  Number = 'Number',
   Status = 'Status',
   Text = 'Text',
   Object = 'Object',
   Tooltip = 'Tooltip',
   S3FileCell = 'S3FileCell',
+  Short = 'Short',
 }
 
 export const getCellComponent = <T>(column: IColumnConfig<T>) => {
@@ -45,13 +48,14 @@ export const getCellComponent = <T>(column: IColumnConfig<T>) => {
   case CellType.DateTime: return DateTimeCell;
   case CellType.Decimal: return DecimalCell;
   case CellType.Link: return LinkCell;
+  case CellType.Integer: return IntegerCell;
   case CellType.Status: return StatusCell;
   case CellType.Boolean: return BooleanCell;
   case CellType.Tooltip: return TooltipCell;
   case CellType.S3FileCell: return S3FileCell;
+  case CellType.Short: return ShortCell;
   case CellType.Field: return FieldCell;
   case CellType.Text:
-  case CellType.Number:
   case CellType.Object:
   default: return TextCell;
   }
@@ -70,8 +74,12 @@ export const getDefaultFormatter = <T>(column: IColumnConfig<T>): Function | und
 
 export const getDefaultAlignment = <T>(column: IColumnConfig<T>): ColumnAlignment => {
   switch (column.cellType) {
-      case CellType.Currency: return ColumnAlignment.Right;
-      default: return ColumnAlignment.Left;
+    case CellType.Currency:
+    case CellType.Decimal:
+    case CellType.Integer:
+    case CellType.Short:
+      return ColumnAlignment.Right;
+    default: return ColumnAlignment.Left;
   }
 };
 

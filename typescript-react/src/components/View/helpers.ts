@@ -65,13 +65,14 @@ export const getResultSetColumnDefinitions = (
           return CellType.Boolean;
         case ColumnType.Date:
           return CellType.Date;
+        case ColumnType.Float:
         case ColumnType.Decimal:
           return CellType.Decimal;
-        case ColumnType.Float:
         case ColumnType.Int:
         case ColumnType.Long:
+          return CellType.Integer;
         case ColumnType.Short:
-          return CellType.Number;
+          return CellType.Short;
         case ColumnType.Timestamp:
           return CellType.DateTime;
         case ColumnType.Url:
