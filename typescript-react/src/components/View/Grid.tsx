@@ -211,7 +211,9 @@ export class GridComponent<Row> extends React.PureComponent<IGridComponent<Row>,
       return CellType.Boolean;
     }
     if (typeof value === 'number') {
-      return CellType.Number;
+      return Number.isInteger(value)
+        ? CellType.Integer
+        : CellType.Decimal;
     }
     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
       return CellType.Date;
