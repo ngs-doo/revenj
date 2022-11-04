@@ -6,9 +6,9 @@ import scala.util.Try
 object Queries {
 
   trait CommandQuery[T <: net.revenj.patterns.Command] {
-    def from(input: Array[Byte], len: Int, contentType: String, arguments: Map[String, String]): Try[T]
+    def from(input: Array[Byte], len: Int, contentType: String, arguments: Map[String, scala.collection.Seq[String]]): Try[T]
 
-    def from(input: java.io.InputStream, contentType: String, arguments: Map[String, String]): Try[T]
+    def from(input: java.io.InputStream, contentType: String, arguments: Map[String, scala.collection.Seq[String]]): Try[T]
 
     def to(command: T, contentType: String, headers: mutable.Map[String, String], output: java.io.OutputStream): Try[_]
   }
