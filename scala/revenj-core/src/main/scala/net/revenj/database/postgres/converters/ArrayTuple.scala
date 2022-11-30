@@ -1,7 +1,10 @@
 package net.revenj.database.postgres.converters
 
+import net.revenj.database.postgres.PostgresWriter.{CollectionDiff, NewTuple}
 import net.revenj.database.postgres.converters.PostgresTuple.buildNextEscape
 import net.revenj.database.postgres.{PostgresReader, PostgresWriter}
+import net.revenj.patterns.{Equality, Identifiable}
+import org.postgresql.util.PGobject
 
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
@@ -346,4 +349,109 @@ object ArrayTuple {
       }
     }
   }
+
+  def toParameter(sw: PostgresWriter, arrayType: String, data: Iterable[Array[PostgresTuple]]): PGobject = {
+    sw.reset()
+    val array = new ArrayTuple(data.map(a => RecordTuple(a)).toArray)
+    val pgo = new PGobject
+    pgo.setType(arrayType)
+    array.buildTuple(sw, false)
+    pgo.setValue(sw.bufferToString())
+    sw.reset()
+    pgo
+  }
+
+  private def emptyPGO(arrayType: String): PGobject = {
+    val pgo = new PGobject
+    pgo.setType(arrayType)
+    pgo
+  }
+
+  def toParameterSimple[T](
+    sw: PostgresWriter,
+    collection: scala.collection.Seq[T],
+    arrayType: String,
+    toTuple: T => PostgresTuple
+  ): PGobject = {
+    if (collection.nonEmpty) {
+      toParameter(
+        sw,
+        arrayType,
+        collection.zipWithIndex.map { case (item, ind) =>
+          Array[PostgresTuple](
+            IntConverter.toTuple(ind),
+            toTuple(item))
+        })
+    } else {
+      emptyPGO(arrayType)
+    }
+  }
+
+  def toParameterPair[T](
+    sw: PostgresWriter,
+    collection: scala.collection.Seq[(T, T)],
+    arrayType: String,
+    toTupleUpdate: T => PostgresTuple,
+    toTupleTable: T => PostgresTuple
+  ): PGobject = {
+    if(collection.nonEmpty) {
+      toParameter(
+        sw,
+        arrayType,
+        collection.zipWithIndex.map { case ((oldValue, newValue), ind) =>
+          Array[PostgresTuple](
+            IntConverter.toTuple(ind),
+            if (oldValue == null) PostgresTuple.NULL else toTupleUpdate(oldValue),
+            if (newValue == null) PostgresTuple.NULL else toTupleTable(newValue))
+        })
+    } else {
+      emptyPGO(arrayType)
+    }
+  }
+
+  def toParameterNew[T](
+    sw: PostgresWriter,
+    collection: scala.collection.Seq[NewTuple[T]],
+    arrayType: String,
+    toTuple: T => PostgresTuple
+  ): PGobject = {
+    if(collection.nonEmpty) {
+      toParameter(
+        sw,
+        arrayType,
+        collection.map { tuple =>
+          Array[PostgresTuple](
+            IntConverter.toTuple(tuple.index),
+            IntConverter.toTuple(tuple.element),
+            toTuple(tuple.value))
+        })
+    } else {
+      emptyPGO(arrayType)
+    }
+  }
+
+  def toParameterDiff[T <: Equality[T] with Identifiable](
+    sw: PostgresWriter,
+    collection: scala.collection.Seq[CollectionDiff[T]],
+    arrayType: String,
+    toTuple: T => PostgresTuple
+  ): PGobject = {
+    if(collection.nonEmpty) {
+      toParameter(
+        sw,
+        arrayType,
+        collection.map { it =>
+          Array[PostgresTuple](
+            IntConverter.toTuple(it.index),
+            IntConverter.toTuple(it.element),
+            if (it.oldValue.isEmpty) PostgresTuple.NULL else toTuple(it.oldValue.get),
+            if (it.changedValue.isEmpty) PostgresTuple.NULL else toTuple(it.changedValue.get),
+            if (it.newValue.isEmpty) PostgresTuple.NULL else toTuple(it.newValue.get),
+            BoolConverter.toTuple(it.isNew))
+        })
+    } else {
+      emptyPGO(arrayType)
+    }
+  }
+
 }
