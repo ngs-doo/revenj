@@ -75,11 +75,19 @@ trait DomainEventStore[T <: DomainEvent] extends EventStore[T] with Repository[T
 
 trait AsyncDomainEventStore[T <: DomainEvent] extends DomainEventStore[T] {
 
-  def mark(events: scala.collection.Seq[T]): Future[Unit]
+  /**
+    * Mark event as processed. It will return the number of specified events which were marked as processed.
+    * If there was another concurrent marking, some events might be processed elsewhere.
+    *
+    * @param events events to mark
+    * @return number of marked events
+    */
+  def mark(events: scala.collection.Seq[T]): Future[Int]
 
-  def mark(event: T): Future[Unit] = {
+  def mark(event: T): Future[Boolean] = {
+    implicit val global = scala.concurrent.ExecutionContext.Implicits.global
     require(event ne null, "null value provided for event")
-    mark(Seq(event))
+    mark(Seq(event)).map(_ > 0)
   }
 }
 
