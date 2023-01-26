@@ -1,19 +1,10 @@
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { CellStatus, ICellProps } from '../interfaces';
+import { Status } from '../../Status/Status';
+import { ICellProps } from '../interfaces';
 
 import styles from './Cells.module.css';
-
-const getStatusStyle = (status: CellStatus) => {
-  switch (status) {
-  case CellStatus.Danger: return 'label-important';
-  case CellStatus.Info: return 'label-info';
-  case CellStatus.Success: return 'label-success';
-  case CellStatus.Warning:
-  default: return 'label-warning';
-  }
-};
 
 export class StatusCell<T> extends React.PureComponent<ICellProps<T, string>> {
   render() {
@@ -39,14 +30,11 @@ export class StatusCell<T> extends React.PureComponent<ICellProps<T, string>> {
       >
         { status != null
           ? (
-            <span
-              className={classNames(styles.Label, status.type != null ? getStatusStyle(status.type) : undefined)}
-              style={status.color ? { color: status.color } : undefined}
-            >
-              { formatter
-                ? formatter(status.label, row ? row._original : row)
-                : status.label }
-            </span>
+            <Status
+              color={status.color}
+              label={formatter ? formatter(status.label, row ? row._original : row) : status.label}
+              type={status.type}
+            />
           )
           : null }
       </div>

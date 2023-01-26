@@ -62,6 +62,7 @@ export function getCellProps<T>(column: IColumnConfig<T>) {
     actions: column.actions,
     aggregate: column.aggregate,
     className: column.className,
+    customComponent: column.customComponent,
     constructUrl: column.constructUrl,
     dateTimeFormat: column.dateTimeFormat,
     disabled: column.disabled,

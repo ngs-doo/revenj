@@ -8,6 +8,7 @@ import {
 import { ActionsCell } from './ActionsCell';
 import { BooleanCell } from './BooleanCell';
 import { CurrencyCell } from './CurrencyCell';
+import { CustomCell } from './CustomCell';
 import {
   DateCell,
   DateTimeCell,
@@ -26,6 +27,7 @@ export enum CellType {
   Actions = 'Actions',
   Boolean = 'Boolean',
   Currency = 'Currency',
+  Custom = 'Custom',
   Date = 'Date',
   DateTime = 'DateTime',
   Decimal = 'Decimal',
@@ -44,6 +46,7 @@ export const getCellComponent = <T>(column: IColumnConfig<T>) => {
   switch (column.cellType) {
   case CellType.Actions: return ActionsCell;
   case CellType.Currency: return CurrencyCell;
+  case CellType.Custom: return CustomCell;
   case CellType.Date: return DateCell;
   case CellType.DateTime: return DateTimeCell;
   case CellType.Decimal: return DecimalCell;

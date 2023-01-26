@@ -63,3 +63,4 @@ export { Report } from './Presenters/ReportPresenter';
 export { ViewEditPresenter } from './Presenters/ViewEditPresenter';
 export { FieldRegistryContext } from './FieldRegistry/FieldRegistryContext';
 export { WithVisibility, WithControlOverrides } from './FieldRegistry/WithOverrides';
+export { Status } from './Status/Status'
