@@ -1,0 +1,37 @@
+.Label {
+  background-color: transparent;
+  border-radius: 100px;
+  border: 1px solid currentColor;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+  padding: 2px 8px 2px 24px;
+  position: relative;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+.Label::before {
+  background-color: currentColor;
+  border-radius: 100px;
+  bottom: 0;
+  content: '';
+  left: 0;
+  opacity: 0.125;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.Label::after {
+  background-color: currentColor;
+  border-radius: 100%;
+  content: '';
+  height: 8px;
+  left: 8px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+}

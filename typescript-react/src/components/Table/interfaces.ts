@@ -72,6 +72,10 @@ export type IFieldProps<P extends GenericFormField> = Partial<P> & {
   getOptions?: <O = any>(index: number) => O[];
 };
 
+export interface ICustomComponentProps<T> {
+  (row: T): React.ReactElement<any>;
+};
+
 export interface IColumnConfig<T> {
   Cell?: any;
   Header?: React.ComponentType<any>;
@@ -81,6 +85,7 @@ export interface IColumnConfig<T> {
   alignment?: ColumnAlignment;
   cellType?: CellType;
   className?: string;
+  customComponent?: ICustomComponentProps<T>;
   dateTimeFormat?: string;
   field?: DeepKeyOf<T> | string;
   filterable?: boolean;
@@ -172,6 +177,7 @@ export interface IActionInfo<T> {
 export interface IColumnProps<T> {
   actions?: Array<IActionInfo<T>>;
   className?: string;
+  customComponent?: ICustomComponentProps<T>;
   styles?: { [key: string]: string | number };
   onClick?: ICellEventHandler<T>;
   onChange?: ICellEventHandler<T>;
@@ -203,6 +209,7 @@ export interface ICellInternalProps<T, V> {
   actions?: Array<IActionInfo<T>>;
   accessor?: DeepKeyOf<T> | IColumnAccessorFunction<T, V>;
   aggregate?: IColumnAggregateFunction<T, V>;
+  customComponent?: ICustomComponentProps<T>;
   dateTimeFormat?: string;
   formatter?: IColumnCellFormatFunction<T>;
   field: DeepKeyOf<T> | string;
