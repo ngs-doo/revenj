@@ -1,7 +1,6 @@
 package net.revenj.cache
 
 import java.time.OffsetDateTime
-
 import monix.eval.Task
 import monix.reactive.Observable
 import monix.reactive.subjects.PublishSubject
@@ -9,8 +8,10 @@ import net.revenj.extensibility.SystemState
 import net.revenj.patterns.DataChangeNotification.{NotifyWith, Operation}
 import net.revenj.patterns._
 
+import java.util.concurrent.Executors
 import scala.collection.concurrent.TrieMap
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class EagerDataCache[T <: Identifiable, PK](
   val name: String,
@@ -28,6 +29,9 @@ class EagerDataCache[T <: Identifiable, PK](
   private var lastChange = OffsetDateTime.now()
   def changes: Observable[Int] = versionChangeSubject.map(identity)
   def currentLookup: Map[PK, T] = lookup
+
+  private val syncThreadPool = Executors.newFixedThreadPool(1)
+  private val syncExecutor = ExecutionContext.fromExecutor(syncThreadPool)
 
   systemState.change
     .filter(it => it.id == "notification" && it.detail == "started")
@@ -123,12 +127,11 @@ class EagerDataCache[T <: Identifiable, PK](
   }
 
   override def invalidateAll(): Future[Unit] = {
-    //TODO: use context from ctor
-    implicit val global = scala.concurrent.ExecutionContext.Implicits.global
-    val version = currentVersion
-    repository.search().map { found =>
+    Future {
+      val version = currentVersion
+      val found = Await.result(repository.search(), Duration.Inf)
       change(found, cache.keys.toIndexedSeq, version, force = false)
-    }
+    }(syncExecutor)
   }
 
   override def find(uri: String): Future[Option[T]] = {
@@ -159,5 +162,6 @@ class EagerDataCache[T <: Identifiable, PK](
 
   def close(): Unit = {
     subscription.cancel()
+    syncThreadPool.shutdown()
   }
 }

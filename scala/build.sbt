@@ -6,7 +6,7 @@ lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
   settings(
-    version := "1.6.0",
+    version := "1.6.1",
     libraryDependencies ++= Seq(
       "org.postgresql" % "postgresql" % "42.3.1",
       "joda-time" % "joda-time" % "2.10.13",   // TODO: will be removed
@@ -14,8 +14,8 @@ lazy val core = (project in file("revenj-core")
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "io.monix" %% "monix-reactive" % "3.4.0",
       "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
-      "com.dslplatform" %% "dsl-json-scala" % "1.9.9",
-      "com.dslplatform" % "dsl-json-joda" % "1.9.9", // TODO: will be removed
+      "com.dslplatform" %% "dsl-json-scala" % "1.10.0",
+      "com.dslplatform" % "dsl-json-joda" % "1.10.0", // TODO: will be removed
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.1",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.13.1",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.13.1",
@@ -29,7 +29,7 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "1.6.0",
+  version := "1.6.1",
   libraryDependencies ++= Seq(
       "com.typesafe" % "config" % "1.3.4",
       "com.typesafe.akka" %% "akka-http" % "10.2.7",
@@ -42,7 +42,7 @@ lazy val akka = (project in file("revenj-akka")
 lazy val storage = (project in file("revenj-storage")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "1.6.0",
+    version := "1.6.1",
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-s3" % "1.12.115",
       "org.specs2" %% "specs2-scalacheck" % "4.13.0" % Test,
@@ -97,7 +97,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   //resolvers += Resolver.mavenLocal,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.12.15", "2.13.7"),
+  crossScalaVersions := Seq("2.12.17", "2.13.10"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",
