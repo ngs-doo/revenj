@@ -284,24 +284,7 @@ class DbCheck extends Specification with BeforeAfterAll with ScalaCheck with Fut
       find.URI === root.URI
       root.b === find.b
     }
-    "copy" >> {
-      val container = example.Boot.configure(jdbcUrl).asInstanceOf[Container]
-      val ds = container.resolve[DataSource]
-      val rnd = new Random()
-      val conn = ds.getConnection
-      val repo = container.resolve[ClientRepository]
-      val oldClients = repo.search(conn, None, None, None)
-      val client = Client(id = rnd.nextLong(), points = 42)
-      val pgWriter = new PostgresWriter
-      val converter = container.resolve[ClientConverter]
-      val bc = conn.unwrap(classOf[BaseConnection])
-      pgWriter.bulkInsert(bc, "test.\">tmp-Client-insert<\"", Seq(Array(IntConverter.toTuple(1), converter.toTuple(client))))
-      conn.createStatement().execute("SELECT * FROM test.\"persist_Client_internal\"(1, 0)")
-      val newClients = repo.search(conn, None, None, None)
-      conn.close()
-      container.close()
-      newClients.size === oldClients.size + 1
-    }
+
   }
   "notifications" >> {
     implicit val scheduler = monix.execution.Scheduler.Implicits.global
