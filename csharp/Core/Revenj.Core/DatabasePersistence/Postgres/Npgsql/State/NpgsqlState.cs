@@ -638,7 +638,9 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 #endif
 								case AuthenticationRequestType.AuthenticationSASL:
 									var saslAuthMechanism = PGUtil.ReadString(stream, queue);
-									if (saslAuthMechanism == "SCRAM-SHA-256")
+                                    if (saslAuthMechanism == "SCRAM-SHA-256-PLUS")
+                                        saslAuthMechanism = PGUtil.ReadString(stream, queue);
+                                    if (saslAuthMechanism == "SCRAM-SHA-256")
 									{
 										stream.ReadByte();
 										scram = new SCRAM(saslAuthMechanism, context.UserName);
