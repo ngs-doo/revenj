@@ -3,7 +3,7 @@
   <metadata>
     <id>Revenj.AspNetCore</id>
     <title>Revenj integration with AspNetCore</title>
-    <version>1.6.2</version>
+    <version>1.6.3</version>
     <authors>NGS</authors>
     <owners>NGS</owners>
     <licenseUrl>https://github.com/ngs-doo/revenj/blob/master/LICENSE</licenseUrl>
@@ -11,20 +11,21 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>.NET and Mono framework with support for Postgres and Oracle</description>
     <releaseNotes>
+1.6.3 - Sync with Revenj
 1.6.2 - Sync with Revenj
 1.6.1 - Sync with Revenj. Shutdown improvement
 1.6.0 - Sync with Revenj. AspNet compatibility
 1.5.1 - Implemented commands as middleware instead of MVC controllers
 1.5.0 - Initial support for AspNetCore
 	</releaseNotes>
-    <copyright>Copyright 2022 N.G.S.</copyright>
+    <copyright>Copyright 2023 N.G.S.</copyright>
     <tags>LINQ Postgres Oracle DDD DSL framework NOSQL</tags>
     <summary>Revenj is a DDD-like framework for .NET and Mono with support for Postgres and Oracle databases. 
 It leverages ORDBMS features of the database, to provide typesafe NoSQL documents inside relational database.
 This package contains common components shared across Revenj versions.</summary>
     <dependencies>
       <group targetFramework=".NETCoreApp3.1">
-        <dependency id="Revenj" version="[1.6.2]" />
+        <dependency id="Revenj" version="[1.6.3]" />
         <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2.0" />
       </group>
     </dependencies>
