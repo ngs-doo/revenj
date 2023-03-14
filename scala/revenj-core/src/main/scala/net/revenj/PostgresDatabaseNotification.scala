@@ -34,7 +34,7 @@ private [revenj] class PostgresDatabaseNotification(
   private val subject = PublishSubject[DataChangeNotification.NotifyInfo]()
   private val notificationStream = subject.map(identity)
   private val repositories = new TrieMap[Class[_], AnyRef]
-  private val targets = new TrieMap[String, Set[Class[_]]]
+  private val targets = new TrieMap[String, Set[String]]
   private var retryCount = 0
   private var isClosed = false
   private var currentStream: Option[PGStream] = None
@@ -103,6 +103,7 @@ private [revenj] class PostgresDatabaseNotification(
         val polling = new Polling(bc.get, stmt)
         val thread = new Thread(polling)
         thread.setDaemon(true)
+        thread.setName("Revenj Postgres polling")
         thread.start()
         true
       } else {
@@ -238,6 +239,7 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
       val listening = new Listening(pgStream)
       val thread = new Thread(listening)
       thread.setDaemon(true)
+      thread.setName("Revenj Postgres listening")
       thread.start()
       true
     } catch {
@@ -369,18 +371,19 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
 
   private [revenj] def track[T](manifest: Class[T]): Observable[TrackInfo[T]] = {
     val dm = domainModel.get
+    val name = manifest.getName
     val observable = new TrackObservable().filter { it =>
       val set = targets.getOrElseUpdate(it.name, {
-        val ns = new mutable.HashSet[Class[_]]()
+        val ns = new mutable.HashSet[String]()
         dm.find(it.name) match {
           case Some(dt) =>
-            ns += dt
-            ns ++= dt.getInterfaces
+            ns += dt.getName
+            ns ++= dt.getInterfaces.map(_.getName)
           case _ =>
         }
         ns.toSet
       })
-      set.contains(manifest)
+      set.contains(name)
     }.map { it =>
       TrackInfo[T](it.uris, new LazyResult[T](it.name, dm, it.uris))
     }
