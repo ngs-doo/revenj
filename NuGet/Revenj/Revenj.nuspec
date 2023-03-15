@@ -35,7 +35,7 @@ This package contains common components shared across Revenj versions.</summary>
       </group>
       <group targetFramework=".NETStandard2.0">
         <dependency id="Castle.Core" version="4.3.1" />
-        <dependency id="Templater" version="7.1.0" />
+        <dependency id="Templater" version="7.2.1" />
         <dependency id="Newtonsoft.Json" version="11.0.2" />
         <dependency id="protobuf-net" version="2.4.0" />
         <dependency id="System.Reactive.Linq" version="3.1.1" />

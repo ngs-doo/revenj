@@ -363,16 +363,10 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     track[T](manifest.runtimeClass.asInstanceOf[Class[T]])
   }
 
-  private class TrackObservable() extends Observable[NotifyInfo] {
-    override def unsafeSubscribeFn(subscriber: Subscriber[NotifyInfo]): Cancelable = {
-      subject.unsafeSubscribeFn(subscriber)
-    }
-  }
-
   private [revenj] def track[T](manifest: Class[T]): Observable[TrackInfo[T]] = {
     val dm = domainModel.get
     val name = manifest.getName
-    val observable = new TrackObservable().filter { it =>
+    notificationStream.filter { it =>
       val set = targets.getOrElseUpdate(it.name, {
         val ns = new mutable.HashSet[String]()
         dm.find(it.name) match {
@@ -387,7 +381,6 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
     }.map { it =>
       TrackInfo[T](it.uris, new LazyResult[T](it.name, dm, it.uris))
     }
-    observable
   }
 
   private class LazyResult[T](name: String, dm: DomainModel, uris: scala.collection.Seq[String]) extends Function0[Future[scala.collection.IndexedSeq[T]]] {
