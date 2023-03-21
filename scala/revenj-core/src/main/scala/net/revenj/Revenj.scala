@@ -167,6 +167,7 @@ If you wish to use custom jdbc driver provide custom data source instead of usin
     container.register[JsonConverter](InstanceScope.Singleton)
     container.registerInstance[PluginLoader](new ServicesPluginLoader(loader))
     val domainModel = new SimpleDomainModel(loader)
+    domainModel.setNamespace(properties.getProperty("revenj.namespace"))
     container.registerInstance[DomainModel](domainModel, handleClose = false)
     val databaseNotification = new PostgresDatabaseNotification(dataSource, Some(domainModel), properties, state, context, container)
     container.registerInstance[EagerNotification](databaseNotification, handleClose = false)
