@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import * as React from 'react';
 import { Field } from 'redux-form';
 
-import { get } from '../../util/FunctionalUtils/FunctionalUtils';
+import { get, flattenName } from '../../util/FunctionalUtils/FunctionalUtils';
 import * as Validator from '../validation';
 import {
   FormContext,
@@ -206,7 +206,7 @@ export class FormFieldInternal<T, K extends DeepKeyOf<T>, P = any, V = any> exte
 
   private getStringifiedName = (): string => {
     const { name } = this.props;
-    return Array.isArray(name) ? name.filter((it) => it != null).join('.') : name as string;
+    return flattenName(name);
   }
 
   private getNameWithSection = () => {
@@ -233,8 +233,8 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
     return null;
   }
 
-  const flatName = Array.isArray(props.name) ? props.name.join('.') : props.name as string;
-  const flatSection = Array.isArray(context.sectionName) ? context.sectionName.join('.') : context.sectionName as string;
+  const flatName = flattenName(props.name);
+  const flatSection = flattenName(context.sectionName);
   const fullName = flatSection != null ? `${flatSection}.${flatName}` : flatName;
   const configProps: FormControlDescriptor<any, any, T> = get(configContext, fullName as any, {});
   const visible = configProps?.visible ?? props.visible;
