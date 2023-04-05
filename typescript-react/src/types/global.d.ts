@@ -26,6 +26,7 @@ declare type IntegerStr = string & { __IntegerStrBrand__: void };
 declare type XmlStr = string & { __XmlBrand__: void };
 declare type ShortStr = string & { __ShortStrBrand__: void };
 declare type TreePathStr = string & { __TreePathBrand__: void };
+declare type StringMap = Map & { __StringMapBrand__: void };
 declare type Streaming<T> = Iterable<T>;
 declare type ResultSet = any[][];
 declare type S3 = {

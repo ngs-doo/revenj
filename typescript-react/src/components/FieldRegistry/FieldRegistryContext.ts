@@ -22,6 +22,7 @@ export interface IFields {
   Text: React.ComponentType<IExternalFormField<any, any, string>>;
   Short: React.ComponentType<IExternalFormField<any, any, Short>>;
   LongText: React.ComponentType<IExternalFormField<any, any, TextStr>>;
+  StringMap: React.ComponentType<IExternalFormField<any, any, StringMap>>;
 
   // Any additional components
   [key: string]: React.ComponentType<IExternalFormField<any, any, any>>;
@@ -64,6 +65,7 @@ const defaultContext: IFieldRegistryContext = {
     S3FileInput: ImplementationMissing,
     Short: ImplementationMissing,
     ShortText: ImplementationMissing,
+    StringMap: ImplementationMissing,
     Text: ImplementationMissing,
   },
   defaults: {},

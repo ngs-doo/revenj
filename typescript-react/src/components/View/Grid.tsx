@@ -11,7 +11,7 @@ import {
 } from '../Table/Table';
 import { Loading } from '../Loader/Loader';
 import { TypescriptResultSet } from '../../ResultSet/ResultSet';
-import { get, set } from '../../util/FunctionalUtils/FunctionalUtils';
+import { get, set, flattenName } from '../../util/FunctionalUtils/FunctionalUtils';
 import { Internationalised, IWithI18n } from '../I18n/I18n';
 import { ListPresenterComponent } from '../Form/Context';
 import { FastFilter } from './FastFilter';
@@ -269,7 +269,7 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
     const definition = mergeDefinition(originalDefinition, footerLabel);
 
     return definition?.map((row: IColumnConfig<any>) => {
-      const name = Array.isArray(row?.field) ? row.field.join('.') : row.field as string;
+      const name = flattenName(row?.field);
       const path = `${conceptName}.${name}`;
       return {
         ...row,

@@ -5,6 +5,7 @@ import {
   deepKeys,
   ensureSet,
   flatten,
+  flattenName,
   flatMap,
   get,
   groupBy,
@@ -619,6 +620,28 @@ describe('functional.ts', () => {
     it('should work for inserting at the last index', () => {
       expect(moveFromToIndex(xs, 1, 4)).toEqual([1, 3, 4, 5, 2]);
       expect(moveFromToIndex(xs, 3, 4)).toEqual([1, 2, 3, 4, 5]);
+    });
+  });
+
+  describe('flattenName', () => {
+    it('should return the same string as the one provided', () => {
+      expect(flattenName('name')).toEqual('name');
+      expect(flattenName('prefix.banes')).toEqual('prefix.name');
+    });
+
+    it('should flatten the name if an array is provided', () => {
+      expect(flattenName([])).toEqual('');
+      expect(flattenName(['first'])).toEqual('first');
+      expect(flattenName(['first', 'second'])).toEqual('first.second');
+      expect(flattenName(['first', 'second', 'third'])).toEqual('first.second.third');
+    });
+
+    it('should ignore undefined values and empty strings', () => {
+      expect(flattenName('')).toEqual('');
+      expect(flattenName(' ')).toEqual('');
+      expect(flattenName(null)).toEqual('');
+      expect(flattenName(undefined)).toEqual('');
+      expect(flattenName([undefined, 'value', null, '', ' '])).toEqual('value');
     });
   });
 });

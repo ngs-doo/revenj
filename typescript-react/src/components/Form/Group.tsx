@@ -9,6 +9,7 @@ import {
   GlobalFormsContext,
 } from './Context';
 import { Section } from './FormSection';
+import { flattenName } from '../../util/FunctionalUtils/FunctionalUtils';
 
 import styles from './FormSection.module.css';
 
@@ -100,7 +101,7 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
     if (name != null) {
       return (
         <FormSection
-          name={Array.isArray(name) ? name.join('.') : name as string}
+          name={flattenName(name)}
           {...extraProps}
         >
           <FormContextProvider value={{ ...rest, sectionName: this.getNestedSectionName(), forceOptional: optional ?? undefined, defaultInline: vertical }}>
