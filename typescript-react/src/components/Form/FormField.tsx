@@ -234,8 +234,7 @@ export function FormField<T, K extends DeepKeyOf<T>, P = any, V = any>(props: IF
   }
 
   const flatName = flattenName(props.name);
-  const flatSection = flattenName(context.sectionName);
-  const fullName = flatSection != null ? `${flatSection}.${flatName}` : flatName;
+  const fullName = context.sectionName != null ? `${flattenName(context.sectionName)}.${flatName}` : flatName;
   const configProps: FormControlDescriptor<any, any, T> = get(configContext, fullName as any, {});
   const visible = configProps?.visible ?? props.visible;
   //TODO: temporarly disable this until expected behavior is figured out

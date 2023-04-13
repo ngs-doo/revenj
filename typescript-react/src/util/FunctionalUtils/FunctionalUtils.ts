@@ -580,4 +580,4 @@ export const moveFromToIndex = <T>(xs: T[], i: number, j: number): T[] => {
 export const flattenName = <T>(name: T): string =>
   Array.isArray(name)
     ? name.filter((it) => it != null && it.trim() !== '').join('.')
-    : String(name);
+    : String(name ?? '');
