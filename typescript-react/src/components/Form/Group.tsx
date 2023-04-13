@@ -130,7 +130,7 @@ export class GroupBare<T = any> extends React.PureComponent<IGroup<T>> {
       return sectionName;
     }
 
-    const baseName = Array.isArray(name) ? name.join('.') : String(name);
+    const baseName = flattenName(name);
 
     return sectionName ? `${sectionName}.${baseName}` : baseName;
   }
