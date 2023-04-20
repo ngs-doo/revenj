@@ -17,6 +17,12 @@ export const CustomizableText = ({ defaultValue, className, paths }: ICustomizab
   const [isEdit, setIsEdit] = React.useState(false);
   const [value, setValue] = React.useState(localizeText(localize, defaultValue, paths));
 
+  React.useEffect(() => {
+    if (defaultValue !== value) {
+      setValue(localizeText(localize, defaultValue, paths));
+    }
+  }, [defaultValue]);
+
   const onEdit = async () => {
     if (hasPermissions) {
       try {
