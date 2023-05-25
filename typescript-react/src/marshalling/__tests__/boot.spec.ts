@@ -18,7 +18,7 @@ describe('Instafin marshalling', () => {
     expect(marshaller.deserialize(10.5, 'Double', true, 'test')).toEqual(10.5);
     expect(marshaller.deserialize('1000', 'Money', true, 'test')).toEqual('1000.00');
     expect(marshaller.deserialize('2000-01-01T20:00:00', 'Date', true, 'test')).toEqual('2000-01-01');
-    expect(marshaller.deserialize('2000-01-01T20:00:00', 'Timestamp', true, 'test')).toEqual('2000-01-01T20:00:00');
+    expect(marshaller.deserialize('2000-01-01T20:00:00', 'Timestamp', true, 'test')).toEqual('2000-01-01T20:00:00.000+00:00');
     expect(marshaller.deserialize('dGVzdA==', 'Binary', true, 'test')).toEqual('test');
   });
 
@@ -28,7 +28,7 @@ describe('Instafin marshalling', () => {
     expect(marshaller.serialize(10.5, 'Double', true, 'test')).toEqual(10.5);
     expect(marshaller.serialize('1000', 'Money', true, 'test')).toEqual('1000.00');
     expect(marshaller.serialize('2000-01-01T20:00:00', 'Date', true, 'test')).toEqual('2000-01-01');
-    expect(marshaller.serialize('2000-01-01T20:00:00', 'Timestamp', true, 'test')).toEqual('2000-01-01T20:00:00');
+    expect(marshaller.serialize('2000-01-01T20:00:00', 'Timestamp', true, 'test')).toEqual('2000-01-01T20:00:00.000+00:00');
     expect(marshaller.serialize('test', 'Binary', true, 'test')).toEqual('dGVzdA==');
   });
 

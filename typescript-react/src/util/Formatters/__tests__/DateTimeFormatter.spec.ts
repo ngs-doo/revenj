@@ -21,7 +21,7 @@ describe('DateTimeFormatter', () => {
   it('formatDateTime with timestamp', () => {
     const date = DateFormatter.formatDateTime('01 Jan 1971 00:00:00' as TimestampStr);
 
-    expect(date).toEqual('01 Jan 1971 00:00:00');
+    expect(date).toEqual('1971-01-01T00:00:00.000+00:00');
   });
 
   it('formatDateTime with timestamp and format', () => {
@@ -33,17 +33,17 @@ describe('DateTimeFormatter', () => {
   it('formatDisplayDateTime with timestamp and format', () => {
     const date = DateFormatter.formatDisplayDateTime('01 Jan 1971 00:00:00' as TimestampStr);
 
-    expect(date).toEqual('01 Jan 1971 00:00:00');
+    expect(date).toEqual('1971-01-01T00:00:00.000+00:00');
   });
 
   it('setFormat with undefined format', () => {
     DateFormatter.setFormat(undefined as any);
     const date = DateFormatter.formatDisplayDateTime('01 Jan 1971 00:00:00' as TimestampStr);
 
-    expect(date).toEqual('01 Jan 1971 00:00:00');
+    expect(date).toEqual('1971-01-01T00:00:00.000+00:00');
   });
 
-  it('setFormat with undefined format', () => {
+  it('setFormat with format', () => {
     DateFormatter.setFormat('HH MMM SS YYYY DD mm');
     const date = DateFormatter.formatDisplayDateTime('01 Jan 1971 00:00:00' as TimestampStr);
     const format = DateFormatter.getFormat();

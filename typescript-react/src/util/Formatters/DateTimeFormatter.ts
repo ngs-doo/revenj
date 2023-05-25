@@ -1,6 +1,6 @@
 import {
   time,
-  DateTimeFormat,
+  MachineDateTimeFormat,
 } from '../time/time';
 
 let dateTimeFormat: string;
@@ -14,7 +14,7 @@ export const DateTimeFormatter = {
         ? time(dateTime).format(format) as TimestampStr
         : dateTimeFormat
           ? time(dateTime).format(dateTimeFormat) as TimestampStr
-          : time(dateTime).format(DateTimeFormat)  as TimestampStr;
+          : time(dateTime).format(MachineDateTimeFormat)  as TimestampStr;
     }
   },
   formatDisplayDateTime: (date: TimestampStr) => DateTimeFormatter.formatDateTime(date, dateTimeFormat),

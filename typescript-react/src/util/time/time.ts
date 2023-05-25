@@ -9,7 +9,7 @@ export const DisplayDateFormat = 'DD MMM YYYY';
 export const InputDateFormat = 'DD/MM/YYYY';
 export const MachineDateFormat = 'YYYY-MM-DD';
 export const DateTimeFormat = 'DD MMM YYYY HH:mm:ss';
-export const MachineDateTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
+export const MachineDateTimeFormat = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 
 moment.tz.load(timezones as any);
 
