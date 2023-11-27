@@ -2,6 +2,7 @@ import {
   INT_MAX_VALUE,
   INT_MIN_VALUE,
 } from '../../constants';
+import { formatNumberToDecimals } from '../../util/Formatters/NumberFormatter';
 import { Numeric, parseBigNum } from '../../util/NumberUtils/NumberUtils';
 import { ValidateTrigger } from './interfaces';
 import { validatorCreatorFactory } from './validatorCreatorFactory';
@@ -9,11 +10,17 @@ import { validatorCreatorFactory } from './validatorCreatorFactory';
 ////////////////////////////////////////////////////////////////////////////////
 // Type validators                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+
+const INT_MIN_VALUE_STRING = formatNumberToDecimals(INT_MAX_VALUE, 0);
+const INT_MAX_VALUE_STRING = formatNumberToDecimals(INT_MIN_VALUE, 0);
+
+const NUMBER_NOT_IN_RANGE_ERROR = `Must be a whole number between ${INT_MIN_VALUE_STRING} and ${INT_MAX_VALUE_STRING}`;
+const DEFAULT_NUMBER_ERROR = 'Must be a whole number';
+
 export const isIntegerCreator =
   validatorCreatorFactory<void, Numeric, any, any>({
     getValidatorErrorMessage: (_, input) => !(Number(input) <= INT_MAX_VALUE && Number(input) >= INT_MIN_VALUE) ?
-      'Must be a whole number with up to 10 digits' :
-      'Must be a whole number',
+      NUMBER_NOT_IN_RANGE_ERROR : DEFAULT_NUMBER_ERROR,
     operator: () => (input) => {
       try {
         const aNumber = parseBigNum(input);
