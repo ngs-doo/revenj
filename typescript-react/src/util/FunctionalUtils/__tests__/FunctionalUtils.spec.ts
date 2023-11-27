@@ -304,11 +304,16 @@ describe('functional.ts', () => {
       expect(isEmpty({ bla: 1 })).toBe(false);
     });
 
+    it('should say number are not empty', () => {
+      expect(isEmpty(0)).toBe(false);
+      expect(isEmpty(-123)).toBe(false);
+      expect(isEmpty(123)).toBe(false);
+    });
+
     it('should say everything else is empty', () => {
       expect(isEmpty(null)).toBe(true);
       expect(isEmpty(false)).toBe(true);
       expect(isEmpty(true)).toBe(true);
-      expect(isEmpty(2)).toBe(true);
     });
   });
 

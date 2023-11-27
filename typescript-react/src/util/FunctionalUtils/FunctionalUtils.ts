@@ -307,6 +307,10 @@ export const isEmpty = (x: any): boolean => {
     return Object.keys(x).filter((k) => x[k] != null).length === 0;
   }
 
+  if (typeof x === 'number') {
+    return false;
+  }
+
   return true;
 };
 
