@@ -95,9 +95,9 @@ object Utils {
     }
 
     try {
-      adapter.scopeStack push TopScope
+      adapter.scopeStack +:= TopScope
       parser.parse(source, adapter)
-      adapter.scopeStack.pop()
+      adapter.scopeStack = adapter.scopeStack.tail
     } finally {
       documentParsers.offer(parser)
     }
