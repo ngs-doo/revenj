@@ -14,6 +14,7 @@ using Revenj.Security;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 
 namespace Revenj.AspNetCore
 {
@@ -27,11 +28,13 @@ namespace Revenj.AspNetCore
 		IRevenjConfig OnInitialize(ISystemAspect aspect);
 		IRevenjConfig SecurityCheck(IPermissionManager permissions);
 		IWebHostBuilder Configure(string connectionString);
+		IHostBuilder ConfigureHostBuilder(string connectionString);
 	}
 
 	internal class RevenjConfig : IRevenjConfig
 	{
-		private readonly IWebHostBuilder Builder;
+		private readonly IWebHostBuilder WebHostBuilder;
+		private readonly IHostBuilder HostBuilder;
 		private bool WithAspects;
 		private bool ReplaceProvider;
 		private readonly List<string> DllPlugins = new List<string>();
@@ -40,9 +43,14 @@ namespace Revenj.AspNetCore
 		private Extensibility.Setup.IContainerBuilder Container;
 		private IPermissionManager Permissions = new SkipPermissionChecks();
 
-		public RevenjConfig(IWebHostBuilder builder)
+		public RevenjConfig(IWebHostBuilder webHostBuilder)
 		{
-			this.Builder = builder;
+			this.WebHostBuilder = webHostBuilder;
+		}
+
+		public RevenjConfig(IHostBuilder hostBuilder)
+		{
+			this.HostBuilder = hostBuilder;
 		}
 
 		public IRevenjConfig WithAOP()
@@ -88,9 +96,18 @@ namespace Revenj.AspNetCore
 			this.Permissions = permissions;
 			return this;
 		}
+
 		public IWebHostBuilder Configure(string connectionString)
 		{
-			return Builder.ConfigureServices((context, services) => SetupRevenjWith(connectionString, services));
+			return WebHostBuilder.ConfigureServices((context, services) => SetupRevenjWith(connectionString, services));
+		}
+
+		public IHostBuilder ConfigureHostBuilder(string connectionString)
+		{
+			if (!ReplaceProvider)
+				throw new NotImplementedException("Revenj configuration is only supported on IHostBuilder if ReplaceProvider is set to true");
+			
+			return HostBuilder.UseServiceProviderFactory(new RevenjConfigFactory(connectionString, this));
 		}
 
 		private void SetupRevenjWith(string connectionString, IServiceCollection services)
