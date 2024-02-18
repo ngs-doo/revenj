@@ -21,6 +21,17 @@
             <param name="ignore">ignore formulas on all changed sheets</param>
             <returns>itself</returns>
         </member>
+        <member name="M:NGS.Templater.ISpreadsheetConfigurationBuilder.NumberAsTextWarnings(System.Boolean)">
+            <summary>
+            When text can be interpreted as numbers Excel will warn about number being displayed as text.
+            While this setting can be set inside Office application,
+            this configuration allows to disable such features on created spreadsheets.
+            <para />
+            By default numbers as text warnings are not ignored and Excel will report them.
+            </summary>
+            <param name="ignore">ignore text on all changed sheets</param>
+            <returns>itself</returns>
+        </member>
         <member name="M:NGS.Templater.ISpreadsheetConfigurationBuilder.NewSheetsLimit(System.Int32)">
             <summary>
             To prevent too large spreadsheets, specify maximum number of new sheets which can be added.
@@ -74,6 +85,12 @@
             <summary>
             If other tags on the same level are also handled by the plugin,
             instruct Templater to avoid further processing of tags on this level
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.Handled.CurrentContext">
+            <summary>
+            If other tags in the same context are also handled by the plugin,
+            instruct Templater to avoid further processing of tags in this context
             </summary>
         </member>
         <member name="T:NGS.Templater.ImageInfo">
@@ -145,6 +162,328 @@
             <param name="horizontalResolution">horizontal DPI</param>
             <param name="height">image height</param>
             <param name="verticalResolution">vertical DPI</param>
+        </member>
+        <member name="T:NGS.Templater.ITemplater">
+            <summary>
+            Provides access to low level API.
+            Templater low level API is generic abstraction over documents.
+            Same abstraction is used for text, Word document, Excel workbook and PowerPoint presentation.
+            <para/>
+            There are only several basic operations this API can do:
+            <list type="bullet">
+              <item>inspect state via <see cref="P:NGS.Templater.ITemplater.Tags">tags</see> and <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">user defined metadata</see> and <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">positioned metadata</see></item>
+              <item>replace tags via <see cref="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">simple replace</see> and <see cref="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">positioned replace</see></item>
+              <item>duplicate (or remove) part of the region via <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">smart resize</see></item>
+              <item>duplicate (or remove) part of the region via <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{NGS.Templater.TagPosition},System.Int32)">explicit resize</see></item>
+              <item>clone the entire document via <see cref="M:NGS.Templater.ITemplater.Clone(System.Int32)">cloning</see></item>
+            </list>
+            <para/>
+            Templater will recognize special data types sent to replace (jagged arrays, DataTable, ImageInfo, Element, ...)
+            and handle it in a smart way - eg, ImageInfo will be replaced with a picture, ResultSet will be treated as a table, ...
+            <para/>
+            When resize is performed, Templater will take special care of detecting best context and performing operation on it.
+            <para/>
+            Most plugins are not invoked when Low-level API is used. Only low level replace plugin is invoked,
+            while handlers, formatters, navigation and others are not.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">
+            <summary>
+            User-defined metadata for tags.
+            For tag such as <c>[[my.tag]:format:custom]</c> only "format" and "custom" will be listed for the first tag.
+            Metadata can be used for value conversions and formatting via built-in and user defined plugins.
+            Plugins are registered during library initialization and should inspect the arguments to check if they are applicable.
+            <para/>
+            When there are multiple tags with the same path and all argument is passed to enumerate all metadata for this tag,
+            each metadata will be enumerated only once.
+            <para/>
+            For more detailed control there is <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">position based</see> API
+            </summary>
+            <param name="tag">Tag for which metadata is required</param>
+            <param name="all">True returns metadata for all matching tags, false returns metadata for just the first one</param>
+            <returns>String array of the tag metadata. If tag is not found empty array will be returned</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">
+            <summary>
+            Since there can be multiple tags with same path, metadata for each specific tag in sequence
+            can be obtained by passing in its index.
+            If tags doesn't exists at that index null will be returned.
+            <para />
+            This metadata also includes internal values used to keep track of tag placement.
+            Such metadata starts with <c>_ci:</c>
+            </summary>
+            <param name="tag">Tag for which metadata is required</param>
+            <param name="index">Tag index in sequence of same tag names</param>
+            <returns>Found metadata. null if tag/index does not exist</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">
+            <summary>
+            Replace first specified tag with provided value.
+            Some document formats and value converters support complex values
+            (<see cref="T:System.DateTime">Date</see>, <see cref="T:NGS.Templater.ImageInfo">image</see>, ...)
+            <para/>
+            For documents where Dynamic resize feature is supported, ResultSet or jagged arrays can be passed.
+            <para/>
+            To access underlying XML in some formats, <see cref="T:System.Xml.Linq.XElement">element</see> can be used
+            <para/>
+            Most other types will be converted to string via <c>.ToString()</c> method
+            <para/>
+            Low-level replace handlers will be invoked before final value is used in the document.
+            When default formatting of some type needs to be defined, this can be implemented via Low-level replace handler.
+            </summary>
+            <param name="tag">Tag to be replaced</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Successful replacement</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">
+            <summary>
+            Replace tag at the position in the sequence of same tag paths with provided value.
+            Some document formats and value converters support complex values
+            (<see cref="T:System.DateTime">Date</see>, <see cref="T:NGS.Templater.ImageInfo">image</see>, ...)
+            <para/>
+            For documents where Dynamic resize feature is supported, ResultSet or jagged arrays can be passed.
+            <para/>
+            To access underlying XML in some formats, <see cref="T:System.Xml.Linq.XElement">element</see> can be used
+            <para/>
+            Most other types will be converted to string via <c>.ToString()</c> method
+            <para/>
+            Index of the next tag with same path which is shared across context and should be replaced next will be returned.
+            If none is found it will return -1
+            <para/>
+            Low-level replace handlers will be invoked before final value is used in the document.
+            When default formatting of some type needs to be defined, this can be implemented via Low-level replace handler.
+            </summary>
+            <param name="tag">Tag to be replaced</param>
+            <param name="index">Tag index in sequence of same tag names</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Index of the next shared tag</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">
+            <summary>
+            Resize context which contains all specified tags.
+            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
+            Templater will use various assumptions to pick the best region for the detected tags.
+            Thus, document structure should closely match the tags usage, preferably through similar nesting structure.
+            <para />
+            If specified tags do not exist, they will be ignored.
+            <para />
+            When applicable this method will include additional tags with the same name which are part of the same context.
+            Specifying tag multiple times results in same behavior as tag being specified only once.
+            <para />
+            When tags are shared, resize will affect multiple contexts at once (table, list, chart, etc...)
+            When shared context is being processed, tag position info will be passed to handler plugin.
+            <para />
+            Resize with count = 0 means removing the context/region and all tags within that region (even if they were not specified)
+            <para />
+            Resize with count = 1 will bind the tags together which allows Templater to do smart replacement from high level API calls.
+            </summary>
+            <param name="tags">Tags which specifies the context</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{NGS.Templater.TagPosition},System.Int32)">
+            <summary>
+            Resize context which contains all specified tags.
+            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
+            <para/>
+            This method does not include additional tags, only the specified ones.
+            If multiple tags with the same name must be included, tags must be specified multiple times with the appropriate index.
+            <para/>
+            Each element of the tags collection consist from the tag and its position in the document.
+            <para/>
+            When tags are shared, resize will only affect specific context. Other shared contexts will be ignored.
+            <para/>
+            If unknown tag is specified or index is outside of boundary, exception will be thrown.
+            <para/>
+            Resize with count = 0 means removing the context/region and all tags within that region (even if they were not specified)
+            <para/>
+            Resize with count = 1 will not bind the tags together like the similar <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">resize</see> API.
+            </summary>
+            <param name="tags">exact tags which specify the context</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="M:NGS.Templater.ITemplater.Clone(System.Int32)">
+            <summary>
+            Clones a document.
+            New low level API can be operated independently from the current one.
+            </summary>
+            <param name="count">Number of clones to create</param>
+            <returns>An <code>IEnumerable&lt;ITemplater&gt;</code> with cloned tags, text and other document properties</returns>
+        </member>
+        <member name="P:NGS.Templater.ITemplater.Tags">
+            <summary>
+            Recognized tags in the document.
+            Each tag is enumerated only once.
+            <para/>
+            If there are tags in nested documents, they are also enumerated here.
+            <para/>
+            Only the path of the tag is enumerated, so for <c>[[my.tag]]</c> only "my.tag" will be listed.
+            <para/>
+            To gather more information about tags <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">position metadata</see> API should be used
+            </summary>
+        </member>
+        <member name="T:NGS.Templater.IDocumentFactory">
+            <summary>
+            Creates template document interface
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactory.Open(System.String)">
+            <summary>
+            Opens a document from the specified path.
+            Templater will recognize the appropriate document format from the file extension.
+            </summary>
+            <param name="path">Path to template document file; this file will be overwritten with the processed document</param>
+            <returns>Template document interface</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactory.Open(System.IO.Stream,System.String,System.IO.Stream,System.Threading.CancellationToken)">
+            <summary>
+            Opens a document from the specified stream.
+            Input stream is used for reading template.
+            Output stream is used for writing populated document.
+            The extension string indicates the type of document in the stream (eg: .docx, .xlsx, .csv, ...)
+            <para/>
+            Templater will check on various operations (eg: resize, document saving,...) if cancellation was requested
+            and throw appropriate exception in relevant case.
+            <para />
+            This can be used to prevent long running processing or memory exhaustion.
+            <para />
+            Same stream instance can be provided for input and output, in which case Templater will reset the stream and write output from the start of the stream.
+            </summary>
+            <param name="input">Stream containing the template document</param>
+            <param name="extension">Template extension</param>
+            <param name="output">Result stream will be used to output the processed document</param>
+            <param name="cancellationToken">Allow processing cancellation</param>
+            <returns>Template document interface</returns>
+        </member>
+        <member name="T:NGS.Templater.ITemplateDocument">
+            <summary>
+            Template document with analyzed tags.
+            Modifies document in memory and saves changes on dispose.
+            <para />
+            Represents abstraction over specific document type (text, Word document, ...)
+            All such documents are processed with this same API which allows for code reuse across different templates.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.ITemplateDocument.Process``1(``0)">
+            <summary>
+            Modifies document according to rules for specified data type.
+            Tags are resolved from properties, fields, methods, column names, etc...
+            <para />
+            Plugins will be invoked when this API is used, such as formatters, navigations and handlers.
+            <para />
+            Templater will find the best processor type which will process input data with the appropriate rules.
+            <para />
+            Process method can be called multiple times if there are multiple root objects.
+            </summary>
+            <example>
+              document.Process(new { table = dataTable });
+              document.Process(jsonDictionary);
+            </example>
+            <typeparam name="T">Specific rules will be chosen based on this type</typeparam>
+            <param name="data">Data for modifying tags</param>
+            <returns>Itself</returns>
+        </member>
+        <member name="P:NGS.Templater.ITemplateDocument.Templater">
+            <summary>
+            Provides access to low-level API.
+            <para />
+            Low-level API should mostly be used from plugins.
+            <para />
+            Common use case for using it is to check if all tags were processed and put out appropriate warning when they were not.
+            </summary>
+        </member>
+        <member name="T:NGS.Templater.TagPosition">
+            <summary>
+            Exact tag position for Resize method.
+            When doing resize, instead of doing resize on the first tag in the document,
+            another one can be specified.
+            <para />
+            This allows for more advanced replacement/duplication scenarios and resolution of some problems which happen in tag sharing mode.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagPosition.Tag">
+            <summary>
+            Tag value to match. Metadata and brackets/braces/chevrons are not considered part of the tag.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.TagPosition.Position">
+            <summary>
+            Position of the tag in the document. If invalid position is specified, exception will be thrown.
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.TagPosition.#ctor(System.String,System.Int32)">
+            <summary>
+            Prepare structure by defining tag and position arguments
+            </summary>
+            <param name="tag">tag value to match</param>
+            <param name="position">tag position in the document</param>
+        </member>
+        <member name="T:NGS.Templater.TemplaterHelper">
+            <summary>
+            Helper methods for ITemplater
+            </summary>
+        </member>
+        <member name="M:NGS.Templater.TemplaterHelper.ReplaceAll(NGS.Templater.ITemplater,System.String,System.Object)">
+            <summary>
+            Helper method for replacing all occurrences of the specified tag with the provided value.
+            </summary>
+            <param name="templater">Templater which contains specified tags</param>
+            <param name="tag">Tag to be replaced</param>
+            <param name="value">Replacement value (which can be formatted)</param>
+            <returns>Number of replaced tags</returns>
+        </member>
+        <member name="M:NGS.Templater.TemplaterHelper.HasMetadata(NGS.Templater.ITemplater,System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Helper method for checking if any of the provided tags has specified metadata.
+            </summary>
+            <param name="templater">Templater</param>
+            <param name="tags">Tags to be checked</param>
+            <param name="metadata">Metadata for which to search for</param>
+            <returns>Metadata found at least once</returns>
+        </member>
+        <member name="M:NGS.Templater.TemplaterHelper.Resize(NGS.Templater.ITemplater,System.String,System.Int32)">
+            <summary>
+            Helper method with single argument for resize function.
+            </summary>
+            <param name="templater">Templater</param>
+            <param name="tag">Tag which specifies the context</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="M:NGS.Templater.TemplaterHelper.Resize(NGS.Templater.ITemplater,System.String,System.Int32,System.Int32)">
+            <summary>
+            Helper method with single argument for resize function with a position.
+            </summary>
+            <param name="templater">Templater</param>
+            <param name="tag">Tag which specifies the context</param>
+            <param name="position">Position of the tag in the document (within the same path)</param>
+            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
+            <returns>Context found and resized</returns>
+        </member>
+        <member name="T:NGS.Templater.RemovalOption">
+            <summary>
+            How to deal with tag detected in XML.
+            It can be removed from XML before calling the plugin,
+            after calling the plugin, or by the plugin itself.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.RemovalOption.BEFORE">
+            <summary>
+            Remove tag from XML before calling the plugin
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.RemovalOption.AFTER">
+            <summary>
+            Remove tag from XML after calling the plugin.
+            This is mostly for convenience to avoid manual tag removal from within the plugin.
+            </summary>
+        </member>
+        <member name="F:NGS.Templater.RemovalOption.MANUAL">
+            <summary>
+            In cases where we need to have absolute control over tag removal we can remove it manually from XML.
+            Cases could be to preserve the original tags until the last one was processed.
+            </summary>
         </member>
         <member name="T:NGS.Templater.IDocumentFactoryBuilder">
             <summary>
@@ -329,6 +668,10 @@
             <summary>
             Templater has few builtin low level plugins (such as System.Drawing.Image).
             If those APIs are not available (as in case of Azure sandbox) plugins should be disabled.
+            <para />
+            On .NET standard this API is disabled by default as recent version of .NET
+            do not support images cross platform anymore.
+            To activate it, configure builder with this argument set as true.
             </summary>
             <param name="include">include all builtin low level plugins</param>
             <returns>itself</returns>
@@ -381,6 +724,57 @@
             <param name="converter">svg to image converter</param>
             <returns>itself</returns>
         </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.XmlCombine(System.String,NGS.Templater.RemovalOption,System.Func{System.Xml.Linq.XElement,System.Xml.Linq.XElement[],System.String,System.String[],System.Xml.Linq.XElement[]})">
+            <summary>
+            To fine tune behavior of xml injection into the document allow for inspection
+            of provided and existing XML and passing in a final XML.
+            <para />
+            When built in plugins such as xml-replace or xml-merge are not sufficient,
+            a new plugin can be registered to fine tune the expected behavior.
+            <para />
+            Provided function will receive XML location where operation will be performed
+            along with the provided array of XML passed to Templater.
+            To cope with cases of multiple tags in same location,
+            relevant tag and its metadata are provided.
+            This can be used to figure out the order of tags since Templater
+            does not need to processed them in order they are defined.
+            It should return XML array as it wants that XML location to be replaced with.
+            <para />
+            This behavior will be triggered either on XML templater-xml=METADATA value or on
+            standard [[tag]:METADATA] tag definition.
+            <para />
+            If resulting array contains provided location, that XML instance will be preserved
+            but content will be adjusted to matched newly provided XML.
+            XML elements before the location will be injected before in output document,
+            while XML elements after the location will be added after.
+            If resulting XML does not contain location, XML elements will be added after location
+            and location will be removed from the output document.
+            <para />
+            There are 3 main option to deal with tag removal.
+            The most common one is remove tags before calling the plugin in which case
+            tagRemoval=RemovalOption.BEFORE.
+            In cases when we are interested in finding out order of the tags within the XML
+            but don't want to deal with actual XML mutation to remove the tag
+            tagRemoval=RemovalOption.AFTER will take care of removing the specific tag.
+            If full management of tags is required, tagRemoval=RemovalOption.MANUAL in which case
+            plugin should take special care of XML and tags inside as Templater will not try to
+            remove specific tags after processing.
+            </summary>
+            <param name="metadata">the keyword which triggers this operation</param>
+            <param name="tagRemoval">should tag be removed by Templater or plugin</param>
+            <param name="combine">function to perform XML combination consisting from location and input XML</param>
+            <returns>itself</returns>
+        </member>
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.XmlCombine(System.String,System.Func{System.Xml.Linq.XElement,System.Xml.Linq.XElement[],System.Xml.Linq.XElement[]})">
+            <summary>
+            This API exists to provide backward compatibility.
+            It will be removed in future versions.
+            It's analogous to calling new xmlCombine with tagRemoval=BEFORE
+            </summary>
+            <param name="metadata">the keyword which triggers this operation</param>
+            <param name="combine">function to perform XML combination consisting from location and input XML</param>
+            <returns>itself</returns>
+        </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.NavigateUsing(System.Char)">
             <summary>
             Change navigation character. Default navigation character is . (DOT)
@@ -393,7 +787,7 @@
             <param name="character">custom navigation character</param>
             <returns>itself</returns>
         </member>
-        <member name="M:NGS.Templater.IDocumentFactoryBuilder.NavigateSeparator(System.Char)">
+        <member name="M:NGS.Templater.IDocumentFactoryBuilder.NavigateSeparator(System.Char,System.Func{System.String,System.Int32})">
             <summary>
             Change navigation separator. By default this is disabled.
             <para />
@@ -403,8 +797,11 @@
             [[collection:at(2).name]] would provide third element of the collection without expanding the collection.
             <para />
             Character must be included in tag regular expression, which can be customized if required.
+            <para />
+            If findEnding parameter is not provided, Templater will assume parsing until closing parenthesis followed by separator or navigation char.
             </summary>
             <param name="character">custom navigation separator</param>
+            <param name="findEnding">find navigation ending</param>
             <returns>itself</returns>
         </member>
         <member name="M:NGS.Templater.IDocumentFactoryBuilder.ConfigureEditor">
@@ -462,303 +859,6 @@
             <param name="customer">License owner</param>
             <param name="license">License key</param>
             <returns>configured document factory</returns>
-        </member>
-        <member name="T:NGS.Templater.IDocumentFactory">
-            <summary>
-            Creates template document interface
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.IDocumentFactory.Open(System.String)">
-            <summary>
-            Opens a document from the specified path.
-            Templater will recognize the appropriate document format from the file extension.
-            </summary>
-            <param name="path">Path to template document file; this file will be overwritten with the processed document</param>
-            <returns>Template document interface</returns>
-        </member>
-        <member name="M:NGS.Templater.IDocumentFactory.Open(System.IO.Stream,System.String,System.IO.Stream,System.Threading.CancellationToken)">
-            <summary>
-            Opens a document from the specified stream.
-            Input stream is used for reading template.
-            Output stream is used for writing populated document.
-            The extension string indicates the type of document in the stream (eg: .docx, .xlsx, .csv, ...)
-            <para/>
-            Templater will check on various operations (eg: resize, document saving,...) if cancellation was requested
-            and throw appropriate exception in relevant case.
-            <para />
-            This can be used to prevent long running processing or memory exhaustion.
-            <para />
-            Same stream instance can be provided for input and output, in which case Templater will reset the stream and write output from the start of the stream.
-            </summary>
-            <param name="input">Stream containing the template document</param>
-            <param name="extension">Template extension</param>
-            <param name="output">Result stream will be used to output the processed document</param>
-            <param name="cancellationToken">Allow processing cancellation</param>
-            <returns>Template document interface</returns>
-        </member>
-        <member name="T:NGS.Templater.ITemplater">
-            <summary>
-            Provides access to low level API.
-            Templater low level API is generic abstraction over documents.
-            Same abstraction is used for text, Word document, Excel workbook and PowerPoint presentation.
-            <para/>
-            There are only several basic operations this API can do:
-            <list type="bullet">
-              <item>inspect state via <see cref="P:NGS.Templater.ITemplater.Tags">tags</see> and <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">user defined metadata</see> and <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">positioned metadata</see></item>
-              <item>replace tags via <see cref="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">simple replace</see> and <see cref="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">positioned replace</see></item>
-              <item>duplicate (or remove) part of the region via <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">smart resize</see></item>
-              <item>duplicate (or remove) part of the region via <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{NGS.Templater.TagPosition},System.Int32)">explicit resize</see></item>
-              <item>clone the entire document via <see cref="M:NGS.Templater.ITemplater.Clone(System.Int32)">cloning</see></item>
-            </list>
-            <para/>
-            Part of the magic happens with special data types sent to replace (jagged arrays, DataTable, ImageInfo, Element, ...)
-            <para/>
-            Main magic happens in the resize method which takes care of detecting best context and performing operation on it.
-            <para/>
-            Most plugins are not invoked when Low-level API is used. Only low level replace plugin is invoked,
-            while handlers, formatters, navigation and others are not.
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Boolean)">
-            <summary>
-            User-defined metadata for tags.
-            For tag such as <c>[[my.tag]:format:custom]</c> only "format" and "custom" will be listed for the first tag.
-            Metadata can be used for value conversions and formatting via built-in and user defined plugins.
-            Plugins are registered during library initialization and should inspect the arguments to check if they are applicable.
-            <para/>
-            When there are multiple tags with the same path and all argument is passed to enumerate all metadata for this tag,
-            each metadata will be enumerated only once.
-            <para/>
-            For more detailed control there is <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">position based</see> API
-            </summary>
-            <param name="tag">Tag for which metadata is required</param>
-            <param name="all">True returns metadata for all matching tags, false returns metadata for just the first one</param>
-            <returns>String array of the tag metadata. If tag is not found empty array will be returned</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">
-            <summary>
-            Since there can be multiple tags with same path, metadata for each specific tag in sequence
-            can be obtained by passing in its index.
-            If tags doesn't exists at that index null will be returned.
-            <para />
-            This metadata also includes internal values used to keep track of tag placement.
-            Such metadata starts with <c>_ci:</c>
-            </summary>
-            <param name="tag">Tag for which metadata is required</param>
-            <param name="index">Tag index in sequence of same tag names</param>
-            <returns>Found metadata. null if tag/index does not exist</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Object)">
-            <summary>
-            Replace first specified tag with provided value.
-            Some document formats and value converters support complex values
-            (<see cref="T:System.DateTime">Date</see>, <see cref="T:NGS.Templater.ImageInfo">image</see>, ...)
-            <para/>
-            For documents where Dynamic resize feature is supported, ResultSet or jagged arrays can be passed.
-            <para/>
-            To access underlying XML in some formats, <see cref="T:System.Xml.Linq.XElement">element</see> can be used
-            <para/>
-            Most other types will be converted to string via <c>.ToString()</c> method
-            <para/>
-            Low-level replace handlers will be invoked before final value is used in the document.
-            When default formatting of some type needs to be defined, this can be implemented via Low-level replace handler.
-            </summary>
-            <param name="tag">Tag to be replaced</param>
-            <param name="value">Replacement value (which can be formatted)</param>
-            <returns>Successful replacement</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.Replace(System.String,System.Int32,System.Object)">
-            <summary>
-            Replace tag at the position in the sequence of same tag paths with provided value.
-            Some document formats and value converters support complex values
-            (<see cref="T:System.DateTime">Date</see>, <see cref="T:NGS.Templater.ImageInfo">image</see>, ...)
-            <para/>
-            For documents where Dynamic resize feature is supported, ResultSet or jagged arrays can be passed.
-            <para/>
-            To access underlying XML in some formats, <see cref="T:System.Xml.Linq.XElement">element</see> can be used
-            <para/>
-            Most other types will be converted to string via <c>.ToString()</c> method
-            <para/>
-            Index of the next tag with same path which is shared across context and should be replaced next will be returned.
-            If none is found it will return -1
-            <para/>
-            Low-level replace handlers will be invoked before final value is used in the document.
-            When default formatting of some type needs to be defined, this can be implemented via Low-level replace handler.
-            </summary>
-            <param name="tag">Tag to be replaced</param>
-            <param name="index">Tag index in sequence of same tag names</param>
-            <param name="value">Replacement value (which can be formatted)</param>
-            <returns>Index of the next shared tag</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">
-            <summary>
-            Resize context which contains all specified tags.
-            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
-            Templater will use various assumptions to pick the best region for the detected tags.
-            Thus, document structure should closely match the tags usage, preferably through similar nesting structure.
-            <para />
-            If specified tags do not exist, they will be ignored.
-            <para />
-            When applicable this method will include additional tags with the same name which are part of the same context.
-            Specifying tag multiple times results in same behavior as tag being specified only once.
-            <para />
-            When tags are shared, resize will affect multiple contexts at once (table, list, chart, etc...)
-            When shared context is being processed, tag position info will be passed to handler plugin.
-            <para />
-            Resize with count = 0 means removing the context/region and all tags within that region (even if they were not specified)
-            <para />
-            Resize with count = 1 will bind the tags together which allows Templater to do smart replacement from high level API calls.
-            </summary>
-            <param name="tags">Tags which specifies the context</param>
-            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
-            <returns>Context found and resized</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{NGS.Templater.TagPosition},System.Int32)">
-            <summary>
-            Resize context which contains all specified tags.
-            Context can be row in a table, paragraph in a document or named group in a spreadsheet.
-            <para/>
-            This method does not include additional tags, only the specified ones.
-            If multiple tags with the same name must be included, tags must be specified multiple times with the appropriate index.
-            <para/>
-            Each element of the tags collection consist from the tag and its position in the document.
-            <para/>
-            When tags are shared, resize will only affect specific context. Other shared contexts will be ignored.
-            <para/>
-            If unknown tag is specified or index is outside of boundary, exception will be thrown.
-            <para/>
-            Resize with count = 0 means removing the context/region and all tags within that region (even if they were not specified)
-            <para/>
-            Resize with count = 1 will not bind the tags together like the similar <see cref="M:NGS.Templater.ITemplater.Resize(System.Collections.Generic.IEnumerable{System.String},System.Int32)">resize</see> API.
-            </summary>
-            <param name="tags">exact tags which specify the context</param>
-            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
-            <returns>Context found and resized</returns>
-        </member>
-        <member name="M:NGS.Templater.ITemplater.Clone(System.Int32)">
-            <summary>
-            Clones a document.
-            New low level API can be operated independently from the current one.
-            </summary>
-            <param name="count">Number of clones to create</param>
-            <returns>An <code>IEnumerable&lt;ITemplater&gt;</code> with cloned tags, text and other document properties</returns>
-        </member>
-        <member name="P:NGS.Templater.ITemplater.Tags">
-            <summary>
-            Recognized tags in the document.
-            Each tag is enumerated only once.
-            <para/>
-            If there are tags in nested documents, they are also enumerated here.
-            <para/>
-            Only the path of the tag is enumerated, so for <c>[[my.tag]]</c> only "my.tag" will be listed.
-            <para/>
-            To gather more information about tags <see cref="M:NGS.Templater.ITemplater.GetMetadata(System.String,System.Int32)">position metadata</see> API should be used
-            </summary>
-        </member>
-        <member name="T:NGS.Templater.ITemplateDocument">
-            <summary>
-            Template document with analyzed tags.
-            Modifies document in memory and saves changes on dispose.
-            <para />
-            Represents abstraction over specific document type (text, Word document, ...)
-            All such documents are processed with this same API which allows for code reuse across different templates.
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.ITemplateDocument.Process``1(``0)">
-            <summary>
-            Modifies document according to rules for specified data type.
-            Tags are resolved from properties, fields, methods, column names, etc...
-            <para />
-            Plugins will be invoked when this API is used, such as formatters, navigations and handlers.
-            <para />
-            Templater will find the best processor type which will process input data with the appropriate rules.
-            <para />
-            Process method can be called multiple times if there are multiple root objects.
-            </summary>
-            <example>
-              document.Process(new { table = dataTable });
-              document.Process(jsonDictionary);
-            </example>
-            <typeparam name="T">Specific rules will be chosen based on this type</typeparam>
-            <param name="data">Data for modifying tags</param>
-            <returns>Itself</returns>
-        </member>
-        <member name="P:NGS.Templater.ITemplateDocument.Templater">
-            <summary>
-            Provides access to low-level API.
-            <para />
-            Low-level API should mostly be used from plugins.
-            <para />
-            Common use case for using it is to check if all tags were processed and put out appropriate warning when they were not.
-            </summary>
-        </member>
-        <member name="T:NGS.Templater.TagPosition">
-            <summary>
-            Exact tag position for Resize method.
-            When doing resize, instead of doing resize on the first tag in the document,
-            another one can be specified.
-            <para />
-            This allows for more advanced replacement/duplication scenarios and resolution of some problems which happen in tag sharing mode.
-            </summary>
-        </member>
-        <member name="F:NGS.Templater.TagPosition.Tag">
-            <summary>
-            Tag value to match. Metadata and brackets/braces/chevrons are not considered part of the tag.
-            </summary>
-        </member>
-        <member name="F:NGS.Templater.TagPosition.Position">
-            <summary>
-            Position of the tag in the document. If invalid position is specified, exception will be thrown.
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.TagPosition.#ctor(System.String,System.Int32)">
-            <summary>
-            Prepare structure by defining tag and position arguments
-            </summary>
-            <param name="tag">tag value to match</param>
-            <param name="position">tag position in the document</param>
-        </member>
-        <member name="T:NGS.Templater.TemplaterHelper">
-            <summary>
-            Helper methods for ITemplater
-            </summary>
-        </member>
-        <member name="M:NGS.Templater.TemplaterHelper.ReplaceAll(NGS.Templater.ITemplater,System.String,System.Object)">
-            <summary>
-            Helper method for replacing all occurrences of the specified tag with the provided value.
-            </summary>
-            <param name="templater">Templater which contains specified tags</param>
-            <param name="tag">Tag to be replaced</param>
-            <param name="value">Replacement value (which can be formatted)</param>
-            <returns>Number of replaced tags</returns>
-        </member>
-        <member name="M:NGS.Templater.TemplaterHelper.HasMetadata(NGS.Templater.ITemplater,System.Collections.Generic.IEnumerable{System.String},System.String)">
-            <summary>
-            Helper method for checking if any of the provided tags has specified metadata.
-            </summary>
-            <param name="templater">Templater</param>
-            <param name="tags">Tags to be checked</param>
-            <param name="metadata">Metadata for which to search for</param>
-            <returns>Metadata found at least once</returns>
-        </member>
-        <member name="M:NGS.Templater.TemplaterHelper.Resize(NGS.Templater.ITemplater,System.String,System.Int32)">
-            <summary>
-            Helper method with single argument for resize function.
-            </summary>
-            <param name="templater">Templater</param>
-            <param name="tag">Tag which specifies the context</param>
-            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
-            <returns>Context found and resized</returns>
-        </member>
-        <member name="M:NGS.Templater.TemplaterHelper.Resize(NGS.Templater.ITemplater,System.String,System.Int32,System.Int32)">
-            <summary>
-            Helper method with single argument for resize function with a position.
-            </summary>
-            <param name="templater">Templater</param>
-            <param name="tag">Tag which specifies the context</param>
-            <param name="position">Position of the tag in the document (within the same path)</param>
-            <param name="count">Number of contexts after the resize operation; if the count value is zero, the specified context will be removed.</param>
-            <returns>Context found and resized</returns>
         </member>
         <member name="T:NGS.Templater.IEditorConfigurationBuilder">
             <summary>
@@ -975,31 +1075,6 @@
             </summary>
             <param name="path">Path to license file</param>
             <returns>Document factory</returns>
-        </member>
-        <member name="M:NGS.Templater.Configuration.Open(NGS.Templater.IDocumentFactory,System.IO.Stream,System.String)">
-            <summary>
-            Legacy API. Will be removed
-            <para />
-            Opens a document from the specified stream. 
-            Stream will be overwritten with populated result and must support seek and write operation.
-            The extension string indicates the type of document in the stream.
-            </summary>
-            <param name="factory">factory</param>
-            <param name="stream">Stream containing the template document; this stream will be used to output the processed document</param>
-            <param name="extension">template extension</param>
-            <returns>Template document interface</returns>
-        </member>
-        <member name="M:NGS.Templater.Configuration.Open(NGS.Templater.IDocumentFactory,System.IO.Stream,System.IO.Stream,System.String)">
-            <summary>
-            Legacy API. Will be removed
-            <para />
-            Exists for the purpose of argument reorder. New API has Stream, string, Stream order.
-            </summary>
-            <param name="factory">factory</param>
-            <param name="input">template stream</param>
-            <param name="output">output stream</param>
-            <param name="extension">template extension</param>
-            <returns>Template document interface</returns>
         </member>
         <member name="P:NGS.Templater.Configuration.Builder">
             <summary>
