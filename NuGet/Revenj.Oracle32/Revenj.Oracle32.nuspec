@@ -3,7 +3,7 @@
   <metadata>
     <id>Revenj.Oracle32</id>
     <title>Revenj Core (+ Oracle 32bit)</title>
-    <version>1.6.4</version>
+    <version>1.6.5</version>
     <authors>NGS</authors>
     <owners>NGS</owners>
     <licenseUrl>https://github.com/ngs-doo/revenj/blob/master/LICENSE</licenseUrl>
@@ -11,7 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>.NET and Mono framework with support for Postgres and Oracle</description>
     <releaseNotes>
-1.6.4 - Sync with Revenj
+1.6.5 - Sync with Revenj
 1.6.2 - Sync with Revenj
 1.6.1 - Sync with Revenj
 1.6.0 - Support for short data type
@@ -23,7 +23,7 @@
     <tags>LINQ Postgres Oracle DDD DSL framework NOSQL</tags>
     <summary>Revenj core provides API for usage of Revenj as a library from other frameworks such as ASP.NET.</summary>
     <dependencies>
-		<dependency id="Revenj" version="[1.6.4]" />
+		<dependency id="Revenj" version="[1.6.5]" />
     </dependencies>
   </metadata>
 </package>

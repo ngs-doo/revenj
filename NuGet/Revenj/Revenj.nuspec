@@ -3,7 +3,7 @@
   <metadata>
     <id>Revenj</id>
     <title>Revenj core libraries</title>
-    <version>1.6.4</version>
+    <version>1.6.5</version>
     <authors>NGS</authors>
     <owners>NGS</owners>
     <licenseUrl>https://github.com/ngs-doo/revenj/blob/master/LICENSE</licenseUrl>
@@ -11,7 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>.NET and Mono framework with support for Postgres and Oracle</description>
     <releaseNotes>
-1.6.4 - .NET 8 compatibility
+1.6.5 - .NET 8 compatibility
 1.6.3 - Postgres SCRAM fix with SSL
 1.6.2 - SSL fix for .NET core
 1.6.1 - Improved shutdown and tracing support
