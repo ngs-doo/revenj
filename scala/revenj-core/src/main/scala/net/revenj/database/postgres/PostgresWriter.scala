@@ -319,7 +319,7 @@ object PostgresWriter {
               }
               oldIndex += 1
               newIndex += 1
-            } else if (ov.URI < nv.URI) {
+            } else if (nv.URI != null && ov.URI < nv.URI) {
               result += CollectionDiff(ind, subInd, oldVal, None, None, isNew = false)
               oldIndex += 1
             } else {
