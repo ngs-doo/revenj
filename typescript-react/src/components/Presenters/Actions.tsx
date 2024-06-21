@@ -36,6 +36,7 @@ export interface IActions {
   templateType?: string;
   filterField?: string;
   actions: IActionButton[];
+  maxVisibleButtons?: number,
   // HACK: This is used to cache-bust on DSL generated pages, think about this... Rather generate actions?
   userRoles?: Set<any>;
 }
@@ -64,9 +65,11 @@ export class Actions extends React.PureComponent<IActions> {
   }
 
   public render() {
+    const { maxVisibleButtons } = this.props;
+
     return (
       <div className={classNames(styles.Actions, 'dslActions')}>
-        <Buttons buttons={this.buttons} maxVisibleButtons={3} />
+        <Buttons buttons={this.buttons} maxVisibleButtons={maxVisibleButtons ?? 3} />
         {this.renderExportButton()}
       </div>
     );
