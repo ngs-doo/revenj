@@ -4,12 +4,11 @@
  */
 // Copyright (c) 2004, Open Cloud Limited.
 
-package net.revenj.database.postgres;
+package org.postgresql.core.v3;
 
 import static org.postgresql.util.internal.Nullness.castNonNull;
 
 import org.postgresql.PGProperty;
-import org.postgresql.core.ConnectionFactory;
 import org.postgresql.core.PGStream;
 import org.postgresql.core.QueryExecutor;
 import org.postgresql.core.ServerVersion;
@@ -18,7 +17,7 @@ import org.postgresql.core.SocketFactoryFactory;
 import org.postgresql.core.Tuple;
 import org.postgresql.core.Utils;
 import org.postgresql.core.Version;
-import org.postgresql.core.v3.QueryExecutorImpl;
+import org.postgresql.gss.MakeGSS;
 import org.postgresql.hostchooser.CandidateHost;
 import org.postgresql.hostchooser.GlobalHostStatusTracker;
 import org.postgresql.hostchooser.HostChooser;
@@ -27,6 +26,9 @@ import org.postgresql.hostchooser.HostRequirement;
 import org.postgresql.hostchooser.HostStatus;
 import org.postgresql.jdbc.GSSEncMode;
 import org.postgresql.jdbc.SslMode;
+import org.postgresql.jdbc.SslNegotiation;
+import org.postgresql.plugin.AuthenticationRequestType;
+import org.postgresql.ssl.MakeSSL;
 import org.postgresql.sspi.ISSPIClient;
 import org.postgresql.util.GT;
 import org.postgresql.util.HostSpec;
@@ -34,13 +36,16 @@ import org.postgresql.util.MD5Digest;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.PSQLState;
 import org.postgresql.util.ServerErrorMessage;
-import org.postgresql.util.internal.Unsafe;
+import org.postgresql.util.internal.Nullness;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,9 +63,32 @@ import javax.net.SocketFactory;
  *
  * @author Oliver Jowett (oliver@opencloud.com), based on the previous implementation
  */
-public class ConnectionFactoryRevenj {
+public class ConnectionFactoryRevenj  {
 
-	private static final Logger LOGGER = Logger.getLogger(ConnectionFactoryRevenj.class.getName());
+	private static class StartupParam {
+		private final String key;
+		private final String value;
+
+		StartupParam(String key, String value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.key + "=" + this.value;
+		}
+
+		public byte[] getEncodedKey() {
+			return this.key.getBytes(StandardCharsets.UTF_8);
+		}
+
+		public byte[] getEncodedValue() {
+			return this.value.getBytes(StandardCharsets.UTF_8);
+		}
+	}
+
+	private static final Logger LOGGER = Logger.getLogger(ConnectionFactoryImpl.class.getName());
 	private static final int AUTH_REQ_OK = 0;
 	private static final int AUTH_REQ_KRB4 = 1;
 	private static final int AUTH_REQ_KRB5 = 2;
@@ -75,38 +103,10 @@ public class ConnectionFactoryRevenj {
 	private static final int AUTH_REQ_SASL_CONTINUE = 11;
 	private static final int AUTH_REQ_SASL_FINAL = 12;
 
-	/**
-	 * <p>Establishes and initializes a new connection.</p>
-	 *
-	 * <p>If the "protocolVersion" property is specified, only that protocol version is tried. Otherwise,
-	 * all protocols are tried in order, falling back to older protocols as necessary.</p>
-	 *
-	 * <p>Currently, protocol versions 3 (7.4+) is supported.</p>
-	 *
-	 * @param hostSpecs at least one host and port to connect to; multiple elements for round-robin
-	 *        failover
-	 * @param user the username to authenticate with; may not be null.
-	 * @param database the database on the server to connect to; may not be null.
-	 * @param info extra properties controlling the connection; notably, "password" if present
-	 *        supplies the password to authenticate with.
-	 * @return the new, initialized, connection
-	 * @throws SQLException if the connection could not be established.
-	 */
-	public static PGStream openConnection(HostSpec[] hostSpecs, String user, String password, String database, String appName, Properties info) throws SQLException {
-		String protoName = PGProperty.PROTOCOL_VERSION.get(info);
-
-		if (protoName == null || protoName.isEmpty() || "3".equals(protoName)) {
-			ConnectionFactoryRevenj connectionFactory = new ConnectionFactoryRevenj();
-			return connectionFactory.openConnectionImpl(hostSpecs, user, password, database, appName, info);
-		}
-
-		throw new PSQLException(
-				GT.tr("A connection could not be made using the requested protocol {0}.", protoName),
-				PSQLState.CONNECTION_UNABLE_TO_CONNECT);
-	}
+	private static final String IN_HOT_STANDBY = "in_hot_standby";
 
 	private ISSPIClient createSSPI(PGStream pgStream,
-								   String spnServiceClass,
+								   @Nullable String spnServiceClass,
 								   boolean enableNegotiate) {
 		try {
 			@SuppressWarnings("unchecked")
@@ -114,92 +114,116 @@ public class ConnectionFactoryRevenj {
 			return c.getDeclaredConstructor(PGStream.class, String.class, boolean.class)
 					.newInstance(pgStream, spnServiceClass, enableNegotiate);
 		} catch (Exception e) {
-			// This catched quite a lot exceptions, but until Java 7 there is no ReflectiveOperationException
+			// This caught quite a lot of exceptions, but until Java 7 there is no ReflectiveOperationException
 			throw new IllegalStateException("Unable to load org.postgresql.sspi.SSPIClient."
 					+ " Please check that SSPIClient is included in your pgjdbc distribution.", e);
 		}
 	}
 
-	private PGStream tryConnect(String user, String password, String database,
-								Properties info, SocketFactory socketFactory, HostSpec hostSpec,
+	private PGStream tryConnect(Properties info, SocketFactory socketFactory, HostSpec hostSpec,
 								SslMode sslMode, GSSEncMode gssEncMode)
 			throws SQLException, IOException {
 		int connectTimeout = PGProperty.CONNECT_TIMEOUT.getInt(info) * 1000;
+		String user = PGProperty.USER.getOrDefault(info);
+		String database = PGProperty.PG_DBNAME.getOrDefault(info);
+		SslNegotiation sslNegotiation = SslNegotiation.of(Nullness.castNonNull(PGProperty.SSL_NEGOTIATION.getOrDefault(info)));
 
-		PGStream newStream = new PGStream(socketFactory, hostSpec, connectTimeout);
-
-		// Set the socket timeout if the "socketTimeout" property has been set.
-		int socketTimeout = PGProperty.SOCKET_TIMEOUT.getInt(info);
-		if (socketTimeout > 0) {
-			newStream.setNetworkTimeout(socketTimeout * 1000);
+		if (user == null) {
+			throw new PSQLException(GT.tr("User cannot be null"), PSQLState.INVALID_NAME);
+		}
+		if (database == null) {
+			throw new PSQLException(GT.tr("Database cannot be null"), PSQLState.INVALID_NAME);
 		}
 
-		String maxResultBuffer = PGProperty.MAX_RESULT_BUFFER.get(info);
-		newStream.setMaxResultBuffer(maxResultBuffer);
-
-		// Enable TCP keep-alive probe if required.
-		boolean requireTCPKeepAlive = PGProperty.TCP_KEEP_ALIVE.getBoolean(info);
-		newStream.getSocket().setKeepAlive(requireTCPKeepAlive);
-
-		// Try to set SO_SNDBUF and SO_RECVBUF socket options, if requested.
-		// If receiveBufferSize and send_buffer_size are set to a value greater
-		// than 0, adjust. -1 means use the system default, 0 is ignored since not
-		// supported.
-
-		// Set SO_RECVBUF read buffer size
-		int receiveBufferSize = PGProperty.RECEIVE_BUFFER_SIZE.getInt(info);
-		if (receiveBufferSize > -1) {
-			// value of 0 not a valid buffer size value
-			if (receiveBufferSize > 0) {
-				newStream.getSocket().setReceiveBufferSize(receiveBufferSize);
-			} else {
-				LOGGER.log(Level.WARNING, "Ignore invalid value for receiveBufferSize: {0}", receiveBufferSize);
+		int maxSendBufferSize = PGProperty.MAX_SEND_BUFFER_SIZE.getInt(info);
+		PGStream newStream = new PGStream(socketFactory, hostSpec, connectTimeout, maxSendBufferSize);
+		try {
+			// Set the socket timeout if the "socketTimeout" property has been set.
+			int socketTimeout = PGProperty.SOCKET_TIMEOUT.getInt(info);
+			if (socketTimeout > 0) {
+				newStream.setNetworkTimeout(socketTimeout * 1000);
 			}
-		}
 
-		// Set SO_SNDBUF write buffer size
-		int sendBufferSize = PGProperty.SEND_BUFFER_SIZE.getInt(info);
-		if (sendBufferSize > -1) {
-			if (sendBufferSize > 0) {
-				newStream.getSocket().setSendBufferSize(sendBufferSize);
-			} else {
-				LOGGER.log(Level.WARNING, "Ignore invalid value for sendBufferSize: {0}", sendBufferSize);
+			String maxResultBuffer = PGProperty.MAX_RESULT_BUFFER.getOrDefault(info);
+			newStream.setMaxResultBuffer(maxResultBuffer);
+
+			// Enable TCP keep-alive probe if required.
+			boolean requireTCPKeepAlive = PGProperty.TCP_KEEP_ALIVE.getBoolean(info);
+			newStream.getSocket().setKeepAlive(requireTCPKeepAlive);
+
+			// Enable TCP no delay if required
+			boolean requireTCPNoDelay = PGProperty.TCP_NO_DELAY.getBoolean(info);
+			newStream.getSocket().setTcpNoDelay(requireTCPNoDelay);
+
+			// Try to set SO_SNDBUF and SO_RECVBUF socket options, if requested.
+			// If receiveBufferSize and send_buffer_size are set to a value greater
+			// than 0, adjust. -1 means use the system default, 0 is ignored since not
+			// supported.
+
+			// Set SO_RECVBUF read buffer size
+			int receiveBufferSize = PGProperty.RECEIVE_BUFFER_SIZE.getInt(info);
+			if (receiveBufferSize > -1) {
+				// value of 0 not a valid buffer size value
+				if (receiveBufferSize > 0) {
+					newStream.getSocket().setReceiveBufferSize(receiveBufferSize);
+				} else {
+					LOGGER.log(Level.WARNING, "Ignore invalid value for receiveBufferSize: {0}",
+							receiveBufferSize);
+				}
 			}
+
+			// Set SO_SNDBUF write buffer size
+			int sendBufferSize = PGProperty.SEND_BUFFER_SIZE.getInt(info);
+			if (sendBufferSize > -1) {
+				if (sendBufferSize > 0) {
+					newStream.getSocket().setSendBufferSize(sendBufferSize);
+				} else {
+					LOGGER.log(Level.WARNING, "Ignore invalid value for sendBufferSize: {0}", sendBufferSize);
+				}
+			}
+
+			if (LOGGER.isLoggable(Level.FINE)) {
+				LOGGER.log(Level.FINE, "Receive Buffer Size is {0}",
+						newStream.getSocket().getReceiveBufferSize());
+				LOGGER.log(Level.FINE, "Send Buffer Size is {0}",
+						newStream.getSocket().getSendBufferSize());
+			}
+
+			if (sslNegotiation != SslNegotiation.DIRECT) {
+				newStream =
+						enableGSSEncrypted(newStream, gssEncMode, hostSpec.getHost(), info, connectTimeout);
+			}
+			// if we have a security context then gss negotiation succeeded. Do not attempt SSL
+			// negotiation
+			if (!newStream.isGssEncrypted()) {
+				// Construct and send an SSL startup packet if requested.
+				newStream = enableSSL(newStream, sslMode, info, connectTimeout);
+			}
+
+			// Make sure to set network timeout again, in case the stream changed due to GSS or SSL
+			if (socketTimeout > 0) {
+				newStream.setNetworkTimeout(socketTimeout * 1000);
+			}
+
+			List<StartupParam> paramList = getParametersForStartup(user, database, info);
+			sendStartupPacket(newStream, paramList);
+
+			// Do authentication (until AuthenticationOk).
+			doAuthentication(newStream, hostSpec.getHost(), user, info);
+
+			return newStream;
+		} catch (Exception e) {
+			closeStream(newStream);
+			throw e;
 		}
-
-		if (LOGGER.isLoggable(Level.FINE)) {
-			LOGGER.log(Level.FINE, "Receive Buffer Size is {0}", newStream.getSocket().getReceiveBufferSize());
-			LOGGER.log(Level.FINE, "Send Buffer Size is {0}", newStream.getSocket().getSendBufferSize());
-		}
-
-		newStream = enableGSSEncrypted(newStream, gssEncMode, hostSpec.getHost(), user, info, connectTimeout);
-
-		// if we have a security context then gss negotiation succeeded. Do not attempt SSL negotiation
-		if (!newStream.isGssEncrypted()) {
-			// Construct and send an ssl startup packet if requested.
-			newStream = enableSSL(newStream, sslMode, info, connectTimeout);
-		}
-
-		// Make sure to set network timeout again, in case the stream changed due to GSS or SSL
-		if (socketTimeout > 0) {
-			newStream.setNetworkTimeout(socketTimeout * 1000);
-		}
-
-		List<String[]> paramList = getParametersForStartup(user, database, info);
-		sendStartupPacket(newStream, paramList);
-
-		// Do authentication (until AuthenticationOk).
-		doAuthentication(newStream, hostSpec.getHost(), user, password, info);
-
-		return newStream;
 	}
 
-	public PGStream openConnectionImpl(HostSpec[] hostSpecs, String user, String password, String database, String appName, Properties info) throws SQLException {
+	public PGStream openConnection(HostSpec[] hostSpecs, Properties info) throws SQLException {
 		SslMode sslMode = SslMode.of(info);
 		GSSEncMode gssEncMode = GSSEncMode.of(info);
 
 		HostRequirement targetServerType;
-		String targetServerTypeStr = castNonNull(PGProperty.TARGET_SERVER_TYPE.get(info));
+		String targetServerTypeStr = castNonNull(PGProperty.TARGET_SERVER_TYPE.getOrDefault(info));
 		try {
 			targetServerType = HostRequirement.getTargetServerType(targetServerTypeStr);
 		} catch (IllegalArgumentException ex) {
@@ -213,7 +237,7 @@ public class ConnectionFactoryRevenj {
 		HostChooser hostChooser =
 				HostChooserFactory.createHostChooser(hostSpecs, targetServerType, info);
 		Iterator<CandidateHost> hostIter = hostChooser.iterator();
-		Map<HostSpec, HostStatus> knownStates = new HashMap<HostSpec, HostStatus>();
+		Map<HostSpec, HostStatus> knownStates = new HashMap<>();
 		while (hostIter.hasNext()) {
 			CandidateHost candidateHost = hostIter.next();
 			HostSpec hostSpec = candidateHost.hostSpec;
@@ -239,7 +263,7 @@ public class ConnectionFactoryRevenj {
 			PGStream newStream = null;
 			try {
 				try {
-					newStream = tryConnect(user, password, database, info, socketFactory, hostSpec, sslMode, gssEncMode);
+					newStream = tryConnect(info, socketFactory, hostSpec, sslMode, gssEncMode);
 				} catch (SQLException e) {
 					if (sslMode == SslMode.PREFER
 							&& PSQLState.INVALID_AUTHORIZATION_SPECIFICATION.getState().equals(e.getSQLState())) {
@@ -248,14 +272,13 @@ public class ConnectionFactoryRevenj {
 						Throwable ex = null;
 						try {
 							newStream =
-									tryConnect(user, password, database, info, socketFactory, hostSpec, SslMode.DISABLE,gssEncMode);
+									tryConnect(info, socketFactory, hostSpec, SslMode.DISABLE, gssEncMode);
 							LOGGER.log(Level.FINE, "Downgraded to non-encrypted connection for host {0}",
 									hostSpec);
-						} catch (SQLException ee) {
+						} catch (SQLException | IOException ee) {
 							ex = ee;
-						} catch (IOException ee) {
-							ex = ee; // Can't use multi-catch in Java 6 :(
 						}
+
 						if (ex != null) {
 							log(Level.FINE, "sslMode==PREFER, however non-SSL connection failed as well", ex);
 							// non-SSL failed as well, so re-throw original exception
@@ -269,7 +292,7 @@ public class ConnectionFactoryRevenj {
 						Throwable ex = null;
 						try {
 							newStream =
-									tryConnect(user, password, database, info, socketFactory, hostSpec, SslMode.REQUIRE, gssEncMode);
+									tryConnect(info, socketFactory, hostSpec, SslMode.REQUIRE, gssEncMode);
 							LOGGER.log(Level.FINE, "Upgraded to encrypted connection for host {0}",
 									hostSpec);
 						} catch (SQLException ee) {
@@ -295,8 +318,7 @@ public class ConnectionFactoryRevenj {
 				// CheckerFramework can't infer newStream is non-nullable
 				castNonNull(newStream);
 				// Do final startup.
-				QueryExecutor queryExecutor = new QueryExecutorImpl(newStream, user, database,
-						cancelSignalTimeout, info);
+				QueryExecutor queryExecutor = new QueryExecutorImpl(newStream, cancelSignalTimeout, info);
 
 				// Check Primary or Secondary
 				HostStatus hostStatus = HostStatus.ConnectOK;
@@ -310,7 +332,7 @@ public class ConnectionFactoryRevenj {
 					continue;
 				}
 
-				runInitialQueries(queryExecutor, appName, info);
+				runInitialQueries(queryExecutor, info);
 
 				// And we're done.
 				return newStream;
@@ -356,41 +378,41 @@ public class ConnectionFactoryRevenj {
 				PSQLState.CONNECTION_UNABLE_TO_CONNECT);
 	}
 
-	private List<String[]> getParametersForStartup(String user, String database, Properties info) {
-		List<String[]> paramList = new ArrayList<String[]>();
-		paramList.add(new String[]{"user", user});
-		paramList.add(new String[]{"database", database});
-		paramList.add(new String[]{"client_encoding", "UTF8"});
-		paramList.add(new String[]{"DateStyle", "ISO"});
-		paramList.add(new String[]{"TimeZone", createPostgresTimeZone()});
+	private List<StartupParam> getParametersForStartup(String user, String database, Properties info) {
+		List<StartupParam> paramList = new ArrayList<>();
+		paramList.add(new StartupParam("user", user));
+		paramList.add(new StartupParam("database", database));
+		paramList.add(new StartupParam("client_encoding", "UTF8"));
+		paramList.add(new StartupParam("DateStyle", "ISO"));
+		paramList.add(new StartupParam("TimeZone", createPostgresTimeZone()));
 
-		Version assumeVersion = ServerVersion.from(PGProperty.ASSUME_MIN_SERVER_VERSION.get(info));
+		Version assumeVersion = ServerVersion.from(PGProperty.ASSUME_MIN_SERVER_VERSION.getOrDefault(info));
 
 		if (assumeVersion.getVersionNum() >= ServerVersion.v9_0.getVersionNum()) {
 			// User is explicitly telling us this is a 9.0+ server so set properties here:
-			paramList.add(new String[]{"extra_float_digits", "3"});
-			String appName = PGProperty.APPLICATION_NAME.get(info);
+			paramList.add(new StartupParam("extra_float_digits", "3"));
+			String appName = PGProperty.APPLICATION_NAME.getOrDefault(info);
 			if (appName != null) {
-				paramList.add(new String[]{"application_name", appName});
+				paramList.add(new StartupParam("application_name", appName));
 			}
 		} else {
 			// User has not explicitly told us that this is a 9.0+ server so stick to old default:
-			paramList.add(new String[]{"extra_float_digits", "2"});
+			paramList.add(new StartupParam("extra_float_digits", "2"));
 		}
 
-		String replication = PGProperty.REPLICATION.get(info);
+		String replication = PGProperty.REPLICATION.getOrDefault(info);
 		if (replication != null && assumeVersion.getVersionNum() >= ServerVersion.v9_4.getVersionNum()) {
-			paramList.add(new String[]{"replication", replication});
+			paramList.add(new StartupParam("replication", replication));
 		}
 
-		String currentSchema = PGProperty.CURRENT_SCHEMA.get(info);
+		String currentSchema = PGProperty.CURRENT_SCHEMA.getOrDefault(info);
 		if (currentSchema != null) {
-			paramList.add(new String[]{"search_path", currentSchema});
+			paramList.add(new StartupParam("search_path", currentSchema));
 		}
 
-		String options = PGProperty.OPTIONS.get(info);
+		String options = PGProperty.OPTIONS.getOrDefault(info);
 		if (options != null) {
-			paramList.add(new String[]{"options", options});
+			paramList.add(new StartupParam("options", options));
 		}
 
 		return paramList;
@@ -411,6 +433,9 @@ public class ConnectionFactoryRevenj {
 	/**
 	 * Convert Java time zone to postgres time zone. All others stay the same except that GMT+nn
 	 * changes to GMT-nn and vise versa.
+	 * If you provide GMT+/-nn postgres uses POSIX rules which has a positive sign for west of Greenwich
+	 * JAVA uses ISO rules which the positive sign is east of Greenwich
+	 * To make matters more interesting postgres will always report in ISO
 	 *
 	 * @return The current JVM time zone in postgresql format.
 	 */
@@ -436,11 +461,7 @@ public class ConnectionFactoryRevenj {
 		return start + tz.substring(4);
 	}
 
-	private boolean credentialCacheExists() {
-		return Unsafe.credentialCacheExists();
-	}
-
-	private PGStream enableGSSEncrypted(PGStream pgStream, GSSEncMode gssEncMode, String host, String user, Properties info,
+	private PGStream enableGSSEncrypted(PGStream pgStream, GSSEncMode gssEncMode, String host, Properties info,
 										int connectTimeout)
 			throws IOException, PSQLException {
 
@@ -453,18 +474,35 @@ public class ConnectionFactoryRevenj {
 			return pgStream;
 		}
 
-		// If there is not credential cache there is little point in attempting this
-		if (!credentialCacheExists()) {
-			if ( gssEncMode == GSSEncMode.REQUIRE ) {
-				throw new PSQLException("GSSAPI encryption required but was impossible (possibly no credential cache)", PSQLState.CONNECTION_REJECTED);
-			} else {
-				return pgStream;
-			}
+    /*
+     at this point gssEncMode is either PREFER or REQUIRE
+     libpq looks to see if there is a ticket in the cache before asking
+     the server if it supports encrypted GSS connections or not.
+     since the user has specifically asked or either prefer or require we can
+     assume they want it.
+     */
+    /*
+    let's see if the server will allow a GSS encrypted connection
+     */
+		String user = PGProperty.USER.getOrDefault(info);
+		if (user == null) {
+			throw new PSQLException("GSSAPI encryption required but was impossible user is null", PSQLState.CONNECTION_REJECTED);
 		}
 
 		// attempt to acquire a GSS encrypted connection
-		String password = PGProperty.PASSWORD.get(info);
 		LOGGER.log(Level.FINEST, " FE=> GSSENCRequest");
+
+		int gssTimeout = PGProperty.SSL_RESPONSE_TIMEOUT.getInt(info);
+		int currentTimeout = pgStream.getNetworkTimeout();
+
+		// if the current timeout is less than sslTimeout then
+		// use the smaller timeout. We could do something tricky
+		// here to not set it in that case but this is pretty readable
+		if (currentTimeout > 0 && currentTimeout < gssTimeout) {
+			gssTimeout = currentTimeout;
+		}
+
+		pgStream.setNetworkTimeout(gssTimeout);
 
 		// Send GSSEncryption request packet
 		pgStream.sendInteger4(8);
@@ -473,6 +511,7 @@ public class ConnectionFactoryRevenj {
 		pgStream.flush();
 		// Now get the response from the backend, one of N, E, S.
 		int beresp = pgStream.receiveChar();
+		pgStream.setNetworkTimeout(currentTimeout);
 		switch (beresp) {
 			case 'E':
 				LOGGER.log(Level.FINEST, " <=BE GSSEncrypted Error");
@@ -485,7 +524,9 @@ public class ConnectionFactoryRevenj {
 
 				// We have to reconnect to continue.
 				pgStream.close();
-				return new PGStream(pgStream.getSocketFactory(), pgStream.getHostSpec(), connectTimeout);
+				int maxSendBufferSize = PGProperty.MAX_SEND_BUFFER_SIZE.getInt(info);
+				return new PGStream(pgStream.getSocketFactory(), pgStream.getHostSpec(), connectTimeout,
+						maxSendBufferSize);
 
 			case 'N':
 				LOGGER.log(Level.FINEST, " <=BE GSSEncrypted Refused");
@@ -501,19 +542,23 @@ public class ConnectionFactoryRevenj {
 			case 'G':
 				LOGGER.log(Level.FINEST, " <=BE GSSEncryptedOk");
 				try {
-					org.postgresql.gss.MakeGSS.authenticate(true, pgStream, host, user, password,
-							PGProperty.JAAS_APPLICATION_NAME.get(info),
-							PGProperty.KERBEROS_SERVER_NAME.get(info), false, // TODO: fix this
-							PGProperty.JAAS_LOGIN.getBoolean(info),
-							PGProperty.LOG_SERVER_ERROR_DETAIL.getBoolean(info));
+					AuthenticationPluginManager.withPassword(AuthenticationRequestType.GSS, info, password -> {
+						MakeGSS.authenticate(true, pgStream, host, user, password,
+								PGProperty.JAAS_APPLICATION_NAME.getOrDefault(info),
+								PGProperty.KERBEROS_SERVER_NAME.getOrDefault(info), false, // TODO: fix this
+								PGProperty.JAAS_LOGIN.getBoolean(info),
+								PGProperty.LOG_SERVER_ERROR_DETAIL.getBoolean(info));
+						return void.class;
+					});
 					return pgStream;
 				} catch (PSQLException ex) {
 					// allow the connection to proceed
-					if ( gssEncMode == GSSEncMode.PREFER) {
+					if (gssEncMode == GSSEncMode.PREFER) {
 						// we have to reconnect to continue
 						return new PGStream(pgStream, connectTimeout);
 					}
 				}
+				// fallthrough
 
 			default:
 				throw new PSQLException(GT.tr("An error occurred while setting up the GSS Encoded connection."),
@@ -531,9 +576,25 @@ public class ConnectionFactoryRevenj {
 			// Allow ==> start with plaintext, use encryption if required by server
 			return pgStream;
 		}
+		SslNegotiation sslNegotiation = SslNegotiation.of(Nullness.castNonNull(PGProperty.SSL_NEGOTIATION.getOrDefault(info)));
 
-		LOGGER.log(Level.FINEST, " FE=> SSLRequest");
+		LOGGER.log(Level.FINEST, () -> String.format(" FE=> SSLRequest %s", sslNegotiation.value()));
 
+		int sslTimeout = PGProperty.SSL_RESPONSE_TIMEOUT.getInt(info);
+		int currentTimeout = pgStream.getNetworkTimeout();
+
+		// if the current timeout is less than sslTimeout then
+		// use the smaller timeout. We could do something tricky
+		// here to not set it in that case but this is pretty readable
+		if (currentTimeout > 0 && currentTimeout < sslTimeout) {
+			sslTimeout = currentTimeout;
+		}
+
+		pgStream.setNetworkTimeout(sslTimeout);
+		if (sslNegotiation == SslNegotiation.DIRECT) {
+			MakeSSL.convert(pgStream, info);
+			return pgStream;
+		}
 		// Send SSL request packet
 		pgStream.sendInteger4(8);
 		pgStream.sendInteger2(1234);
@@ -542,6 +603,8 @@ public class ConnectionFactoryRevenj {
 
 		// Now get the response from the backend, one of N, E, S.
 		int beresp = pgStream.receiveChar();
+		pgStream.setNetworkTimeout(currentTimeout);
+
 		switch (beresp) {
 			case 'E':
 				LOGGER.log(Level.FINEST, " <=BE SSLError");
@@ -570,7 +633,7 @@ public class ConnectionFactoryRevenj {
 				LOGGER.log(Level.FINEST, " <=BE SSLOk");
 
 				// Server supports ssl
-				org.postgresql.ssl.MakeSSL.convert(pgStream, info);
+				MakeSSL.convert(pgStream, info);
 				return pgStream;
 
 			default:
@@ -579,17 +642,15 @@ public class ConnectionFactoryRevenj {
 		}
 	}
 
-	private void sendStartupPacket(PGStream pgStream, List<String[]> params)
+	private void sendStartupPacket(PGStream pgStream, List<StartupParam> params)
 			throws IOException {
 		if (LOGGER.isLoggable(Level.FINEST)) {
 			StringBuilder details = new StringBuilder();
-			for (int i = 0; i < params.size(); ++i) {
+			for (int i = 0; i < params.size(); i++) {
 				if (i != 0) {
 					details.append(", ");
 				}
-				details.append(params.get(i)[0]);
-				details.append("=");
-				details.append(params.get(i)[1]);
+				details.append(params.get(i).toString());
 			}
 			LOGGER.log(Level.FINEST, " FE=> StartupPacket({0})", details);
 		}
@@ -597,9 +658,9 @@ public class ConnectionFactoryRevenj {
 		// Precalculate message length and encode params.
 		int length = 4 + 4;
 		byte[][] encodedParams = new byte[params.size() * 2][];
-		for (int i = 0; i < params.size(); ++i) {
-			encodedParams[i * 2] = params.get(i)[0].getBytes(StandardCharsets.UTF_8);
-			encodedParams[i * 2 + 1] = params.get(i)[1].getBytes(StandardCharsets.UTF_8);
+		for (int i = 0; i < params.size(); i++) {
+			encodedParams[i * 2] = params.get(i).getEncodedKey();
+			encodedParams[i * 2 + 1] = params.get(i).getEncodedValue();
 			length += encodedParams[i * 2].length + 1 + encodedParams[i * 2 + 1].length + 1;
 		}
 
@@ -618,7 +679,7 @@ public class ConnectionFactoryRevenj {
 		pgStream.flush();
 	}
 
-	private void doAuthentication(PGStream pgStream, String host, String user, String password, Properties info) throws IOException, SQLException {
+	private void doAuthentication(PGStream pgStream, String host, String user, Properties info) throws IOException, SQLException {
 		// Now get the response from the backend, either an error message
 		// or an authentication request
 
@@ -626,7 +687,7 @@ public class ConnectionFactoryRevenj {
 		ISSPIClient sspiClient = null;
 
 		/* SCRAM authentication state, if used */
-		org.postgresql.jre7.sasl.ScramAuthenticator scramAuthenticator = null;
+		ScramAuthenticator scramAuthenticator = null;
 
 		try {
 			authloop: while (true) {
@@ -663,23 +724,23 @@ public class ConnectionFactoryRevenj {
 									LOGGER.log(Level.FINEST, " <=BE AuthenticationReqMD5(salt={0})", Utils.toHexString(md5Salt));
 								}
 
-								if (password == null) {
-									throw new PSQLException(
-											GT.tr(
-													"The server requested password-based authentication, but no password was provided."),
-											PSQLState.CONNECTION_REJECTED);
-								}
-
-								byte[] digest =
-										MD5Digest.encode(user.getBytes(StandardCharsets.UTF_8), password.getBytes(StandardCharsets.UTF_8), md5Salt);
+								byte[] digest = AuthenticationPluginManager.withEncodedPassword(
+										AuthenticationRequestType.MD5_PASSWORD, info,
+										encodedPassword -> MD5Digest.encode(user.getBytes(StandardCharsets.UTF_8),
+												encodedPassword, md5Salt)
+								);
 
 								if (LOGGER.isLoggable(Level.FINEST)) {
 									LOGGER.log(Level.FINEST, " FE=> Password(md5digest={0})", new String(digest, StandardCharsets.US_ASCII));
 								}
 
-								pgStream.sendChar('p');
-								pgStream.sendInteger4(4 + digest.length + 1);
-								pgStream.send(digest);
+								try {
+									pgStream.sendChar('p');
+									pgStream.sendInteger4(4 + digest.length + 1);
+									pgStream.send(digest);
+								} finally {
+									Arrays.fill(digest, (byte) 0);
+								}
 								pgStream.sendChar(0);
 								pgStream.flush();
 
@@ -690,18 +751,12 @@ public class ConnectionFactoryRevenj {
 								LOGGER.log(Level.FINEST, "<=BE AuthenticationReqPassword");
 								LOGGER.log(Level.FINEST, " FE=> Password(password=<not shown>)");
 
-								if (password == null) {
-									throw new PSQLException(
-											GT.tr(
-													"The server requested password-based authentication, but no password was provided."),
-											PSQLState.CONNECTION_REJECTED);
-								}
-
-								byte[] encodedPassword = password.getBytes(StandardCharsets.UTF_8);
-
-								pgStream.sendChar('p');
-								pgStream.sendInteger4(4 + encodedPassword.length + 1);
-								pgStream.send(encodedPassword);
+								AuthenticationPluginManager.withEncodedPassword(AuthenticationRequestType.CLEARTEXT_PASSWORD, info, encodedPassword -> {
+									pgStream.sendChar('p');
+									pgStream.sendInteger4(4 + encodedPassword.length + 1);
+									pgStream.send(encodedPassword);
+									return void.class;
+								});
 								pgStream.sendChar(0);
 								pgStream.flush();
 
@@ -727,7 +782,7 @@ public class ConnectionFactoryRevenj {
 								 * GSSAPI and the other end isn't using Kerberos for SSPI then authentication will
 								 * fail.
 								 */
-								final String gsslib = PGProperty.GSS_LIB.get(info);
+								final String gsslib = PGProperty.GSS_LIB.getOrDefault(info);
 								final boolean usespnego = PGProperty.USE_SPNEGO.getBoolean(info);
 
 								boolean useSSPI = false;
@@ -744,7 +799,7 @@ public class ConnectionFactoryRevenj {
 											"Using JSSE GSSAPI, gssapi requested by server and gsslib=sspi not forced");
 								} else {
 									/* Determine if SSPI is supported by the client */
-									sspiClient = createSSPI(pgStream, PGProperty.SSPI_SERVICE_CLASS.get(info),
+									sspiClient = createSSPI(pgStream, PGProperty.SSPI_SERVICE_CLASS.getOrDefault(info),
 											/* Use negotiation for SSPI, or if explicitly requested for GSS */
 											areq == AUTH_REQ_SSPI || (areq == AUTH_REQ_GSS && usespnego));
 
@@ -772,11 +827,14 @@ public class ConnectionFactoryRevenj {
 									castNonNull(sspiClient).startSSPI();
 								} else {
 									/* Use JGSS's GSSAPI for this request */
-									org.postgresql.gss.MakeGSS.authenticate(false, pgStream, host, user, password,
-											PGProperty.JAAS_APPLICATION_NAME.get(info),
-											PGProperty.KERBEROS_SERVER_NAME.get(info), usespnego,
-											PGProperty.JAAS_LOGIN.getBoolean(info),
-											PGProperty.LOG_SERVER_ERROR_DETAIL.getBoolean(info));
+									AuthenticationPluginManager.withPassword(AuthenticationRequestType.GSS, info, password -> {
+										MakeGSS.authenticate(false, pgStream, host, user, password,
+												PGProperty.JAAS_APPLICATION_NAME.getOrDefault(info),
+												PGProperty.KERBEROS_SERVER_NAME.getOrDefault(info), usespnego,
+												PGProperty.JAAS_LOGIN.getBoolean(info),
+												PGProperty.LOG_SERVER_ERROR_DETAIL.getBoolean(info));
+										return void.class;
+									});
 								}
 								break;
 
@@ -788,39 +846,30 @@ public class ConnectionFactoryRevenj {
 								break;
 
 							case AUTH_REQ_SASL:
-								LOGGER.log(Level.FINEST, " <=BE AuthenticationSASL");
-
-								if (password == null) {
-									throw new PSQLException(
-											GT.tr(
-													"The server requested SCRAM-based authentication, but no password was provided."),
-											PSQLState.CONNECTION_REJECTED);
-								}
-								if (password.equals("")) {
-									throw new PSQLException(
-											GT.tr(
-													"The server requested SCRAM-based authentication, but the password is an empty string."),
-											PSQLState.CONNECTION_REJECTED);
-								}
-								scramAuthenticator = new org.postgresql.jre7.sasl.ScramAuthenticator(user, castNonNull(password), pgStream);
-								scramAuthenticator.processServerMechanismsAndInit();
-								scramAuthenticator.sendScramClientFirstMessage();
-								// This works as follows:
-								// 1. When tests is run from IDE, it is assumed SCRAM library is on the classpath
-								// 2. In regular build for Java < 8 this `if` is deactivated and the code always throws
-								if (false) {
-									throw new PSQLException(GT.tr(
-											"SCRAM authentication is not supported by this driver. You need JDK >= 8 and pgjdbc >= 42.2.0 (not \".jre\" versions)",
-											areq), PSQLState.CONNECTION_REJECTED);
-								}
+								scramAuthenticator = AuthenticationPluginManager.withPassword(AuthenticationRequestType.SASL, info, password -> {
+									if (password == null) {
+										throw new PSQLException(
+												GT.tr(
+														"The server requested SCRAM-based authentication, but no password was provided."),
+												PSQLState.CONNECTION_REJECTED);
+									}
+									if (password.length == 0) {
+										throw new PSQLException(
+												GT.tr(
+														"The server requested SCRAM-based authentication, but the password is an empty string."),
+												PSQLState.CONNECTION_REJECTED);
+									}
+									return new ScramAuthenticator(password, pgStream, info);
+								});
+								scramAuthenticator.handleAuthenticationSASL();
 								break;
 
 							case AUTH_REQ_SASL_CONTINUE:
-								castNonNull(scramAuthenticator).processServerFirstMessage(msgLen - 4 - 4);
+								castNonNull(scramAuthenticator).handleAuthenticationSASLContinue(msgLen - 4 - 4);
 								break;
 
 							case AUTH_REQ_SASL_FINAL:
-								castNonNull(scramAuthenticator).verifyServerSignature(msgLen - 4 - 4);
+								castNonNull(scramAuthenticator).handleAuthenticationSASLFinal(msgLen - 4 - 4);
 								break;
 
 							case AUTH_REQ_OK:
@@ -856,9 +905,9 @@ public class ConnectionFactoryRevenj {
 
 	}
 
-	private void runInitialQueries(QueryExecutor queryExecutor, String appName, Properties info)
+	private void runInitialQueries(QueryExecutor queryExecutor, Properties info)
 			throws SQLException {
-		String assumeMinServerVersion = PGProperty.ASSUME_MIN_SERVER_VERSION.get(info);
+		String assumeMinServerVersion = PGProperty.ASSUME_MIN_SERVER_VERSION.getOrDefault(info);
 		if (Utils.parseServerVersionStr(assumeMinServerVersion) >= ServerVersion.v9_0.getVersionNum()) {
 			// We already sent the parameter values in the StartupMessage so skip this
 			return;
@@ -866,7 +915,7 @@ public class ConnectionFactoryRevenj {
 
 		final int dbVersion = queryExecutor.getServerVersionNum();
 
-		if (dbVersion >= ServerVersion.v9_0.getVersionNum()) {
+		if (PGProperty.GROUP_STARTUP_PARAMETERS.getBoolean(info) && dbVersion >= ServerVersion.v9_0.getVersionNum()) {
 			SetupQueryRunner.run(queryExecutor, "BEGIN", false);
 		}
 
@@ -874,7 +923,7 @@ public class ConnectionFactoryRevenj {
 			SetupQueryRunner.run(queryExecutor, "SET extra_float_digits = 3", false);
 		}
 
-		appName = appName != null ? appName : PGProperty.APPLICATION_NAME.get(info);
+		String appName = PGProperty.APPLICATION_NAME.getOrDefault(info);
 		if (appName != null && dbVersion >= ServerVersion.v9_0.getVersionNum()) {
 			StringBuilder sql = new StringBuilder();
 			sql.append("SET application_name = '");
@@ -883,16 +932,50 @@ public class ConnectionFactoryRevenj {
 			SetupQueryRunner.run(queryExecutor, sql.toString(), false);
 		}
 
-		if (dbVersion >= ServerVersion.v9_0.getVersionNum()) {
+		if (PGProperty.GROUP_STARTUP_PARAMETERS.getBoolean(info) && dbVersion >= ServerVersion.v9_0.getVersionNum()) {
 			SetupQueryRunner.run(queryExecutor, "COMMIT", false);
 		}
 	}
 
+	/**
+	 * Since PG14 there is GUC_REPORT ParamStatus {@code in_hot_standby} which is set to "on"
+	 * when the server is in archive recovery or standby mode. In driver's lingo such server is called
+	 * {@link org.postgresql.hostchooser.HostRequirement#secondary}.
+	 * Previously {@code transaction_read_only} was used as a workable substitute.
+	 * However {@code transaction_read_only} could have been manually overridden on the primary server
+	 * by database user leading to a false positives: ie server is effectively read-only but
+	 * technically is "primary" (not in a recovery/standby mode).
+	 *
+	 * <p>This method checks whether {@code in_hot_standby} GUC was reported by the server
+	 * during initial connection:</p>
+	 *
+	 * <ul>
+	 * <li>{@code in_hot_standby} was reported and the value was "on" then the server is a replica
+	 * and database is read-only by definition, false is returned.</li>
+	 * <li>{@code in_hot_standby} was reported and the value was "off"
+	 * then the server is indeed primary but database may be in
+	 * read-only mode nevertheless. We proceed to conservatively {@code show transaction_read_only}
+	 * since users may not be expecting a readonly connection for {@code targetServerType=primary}</li>
+	 * <li>If {@code in_hot_standby} has not been reported we fallback to pre v14 behavior.</li>
+	 * </ul>
+	 *
+	 * <p>Do not confuse {@code hot_standby} and {@code in_hot_standby} ParamStatuses</p>
+	 *
+	 * @see <a href="https://www.postgresql.org/docs/current/protocol-flow.html#PROTOCOL-ASYNC">GUC_REPORT documentation</a>
+	 * @see <a href="https://www.postgresql.org/docs/current/hot-standby.html">Hot standby documentation</a>
+	 * @see <a href="https://www.postgresql.org/message-id/flat/1700970.cRWpxnom9y@hammer.magicstack.net">in_hot_standby patch thread v10</a>
+	 * @see <a href="https://www.postgresql.org/message-id/flat/CAF3%2BxM%2B8-ztOkaV9gHiJ3wfgENTq97QcjXQt%2BrbFQ6F7oNzt9A%40mail.gmail.com">in_hot_standby patch thread v14</a>
+	 *
+	 */
 	private boolean isPrimary(QueryExecutor queryExecutor) throws SQLException, IOException {
+		String inHotStandby = queryExecutor.getParameterStatus(IN_HOT_STANDBY);
+		if ("on".equalsIgnoreCase(inHotStandby)) {
+			return false;
+		}
 		Tuple results = SetupQueryRunner.run(queryExecutor, "show transaction_read_only", true);
 		Tuple nonNullResults = castNonNull(results);
-		String value = queryExecutor.getEncoding().decode(castNonNull(nonNullResults.get(0)));
-		return value.equalsIgnoreCase("off");
+		String queriedTransactionReadonly = queryExecutor.getEncoding().decode(castNonNull(nonNullResults.get(0)));
+		return "off".equalsIgnoreCase(queriedTransactionReadonly);
 	}
 
 	/**
@@ -900,11 +983,12 @@ public class ConnectionFactoryRevenj {
 	 *
 	 * @param newStream The stream to close.
 	 */
-	protected void closeStream(PGStream newStream) {
+	protected void closeStream(@Nullable PGStream newStream) {
 		if (newStream != null) {
 			try {
 				newStream.close();
 			} catch (IOException e) {
+				LOGGER.log(Level.WARNING, "Failed to closed stream with error: {0}", e);
 			}
 		}
 	}

@@ -6,21 +6,20 @@ lazy val core = (project in file("revenj-core")
   settings (commonSettings ++ publishSettings)
   enablePlugins(SbtDslPlatformPlugin)
   settings(
-    version := "1.6.6",
+    version := "1.7.0",
     libraryDependencies ++= Seq(
-      "org.postgresql" % "postgresql" % "42.3.1",
-      "joda-time" % "joda-time" % "2.10.13",   // TODO: will be removed
-      "org.joda" % "joda-convert" % "2.2.1", // TODO: will be removed
+      "org.postgresql" % "postgresql" % "42.7.4",
+      "joda-time" % "joda-time" % "2.13.0",   // TODO: will be removed
+      "org.joda" % "joda-convert" % "2.2.3", // TODO: will be removed
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "io.monix" %% "monix-reactive" % "3.4.0",
-      "org.scala-lang.modules" %% "scala-xml" % "2.2.0",
-      "com.dslplatform" %% "dsl-json-scala" % "1.10.0",
-      "com.dslplatform" % "dsl-json-joda" % "1.10.0", // TODO: will be removed
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.1",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.13.1",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.13.1",
-      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.13.1",
-      "org.specs2" %% "specs2-scalacheck" % "4.13.0" % Test,
+      "io.monix" %% "monix-reactive" % "3.4.1",
+      "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
+      "com.dslplatform" %% "dsl-json-scala" % "2.0.2",
+      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.18.0",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % "2.18.0",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.18.0",
+      "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.18.0",
+      "org.specs2" %% "specs2-scalacheck" % "4.20.8" % Test,
     ),
     dslResourcePath in (Test, DSL) := Some((resourceDirectory in Test).value / "META-INF" / "services")
   )
@@ -29,10 +28,10 @@ lazy val core = (project in file("revenj-core")
 lazy val akka = (project in file("revenj-akka")
   settings (commonSettings ++ publishSettings)
   settings(
-  version := "1.6.6",
+  version := "1.7.0",
   libraryDependencies ++= Seq(
-      "com.typesafe" % "config" % "1.3.4",
-      "com.typesafe.akka" %% "akka-http" % "10.2.7",
+      "com.typesafe" % "config" % "1.4.3",
+      "com.typesafe.akka" %% "akka-http" % "10.2.10",
       "com.typesafe.akka" %% "akka-stream" % "2.6.17"
     )
   )
@@ -42,10 +41,10 @@ lazy val akka = (project in file("revenj-akka")
 lazy val storage = (project in file("revenj-storage")
   settings (commonSettings ++ publishSettings)
   settings(
-    version := "1.6.6",
+    version := "1.7.0",
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-s3" % "1.12.115",
-      "org.specs2" %% "specs2-scalacheck" % "4.13.0" % Test,
+      "com.amazonaws" % "aws-java-sdk-s3" % "1.12.773",
+      "org.specs2" %% "specs2-scalacheck" % "4.20.8" % Test,
     )
   )
   dependsOn(core)
@@ -59,10 +58,10 @@ lazy val tests = (project in file("tests")
     name := "integration-tests",
     version := "0.0.0",
     libraryDependencies ++= Seq(
-      "com.dslplatform" % "dsl-clc" % "1.9.10" % Test,
-      "org.specs2" %% "specs2-scalacheck" % "4.7.1" % Test,
+      "com.dslplatform" % "dsl-clc" % "2.1.0" % Test,
+      "org.specs2" %% "specs2-scalacheck" % "4.20.8" % Test,
       "org.pgscala.embedded" %% "pgscala-embedded" % "0.3.0-0-SNAPSHOT" % Test,
-      "ch.qos.logback" % "logback-classic" % "1.2.7" % Test,
+      "ch.qos.logback" % "logback-classic" % "1.5.8" % Test,
     ),
     resolvers += Resolver.sonatypeRepo("snapshots"), // remove after pgscala-embedded confirmed working
     dslNamespace in (Test, DSL) := "example",
@@ -97,7 +96,7 @@ lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   //resolvers += Resolver.mavenLocal,
 
   scalaVersion := crossScalaVersions.value.head,
-  crossScalaVersions := Seq("2.12.17", "2.13.10"),
+  crossScalaVersions := Seq("2.13.14"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",

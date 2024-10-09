@@ -19,7 +19,7 @@ class ProcessingEngine private(
 
   private val serverCommands: Map[Class[_ <: ServerCommand], ServerCommand] = commands.map(c => c.getClass -> c).toMap
 
-  def this(container: Container, dataSource: DataSource, serialization: WireSerialization, extensibility: Option[PluginLoader]) {
+  def this(container: Container, dataSource: DataSource, serialization: WireSerialization, extensibility: Option[PluginLoader]) = {
     this(container,
       dataSource,
       serialization,

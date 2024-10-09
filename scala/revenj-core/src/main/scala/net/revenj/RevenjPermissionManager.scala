@@ -2,9 +2,10 @@ package net.revenj
 
 import java.security.Principal
 import java.util.Properties
-
 import net.revenj.patterns.ServiceLocator
 import net.revenj.security.{GlobalPermission, PermissionManager, RolePermission, UserPrincipal}
+
+import scala.annotation.tailrec
 
 private[revenj] class RevenjPermissionManager(
   properties: Properties,
@@ -29,7 +30,7 @@ private[revenj] class RevenjPermissionManager(
 
   private val defaultPermissions = {
     val permissions = properties.getProperty("revenj.permissions")
-    if (permissions != null && permissions.length > 0) {
+    if (permissions != null && permissions.nonEmpty) {
       if (!permissions.equalsIgnoreCase("open") && !permissions.equalsIgnoreCase("closed")) throw new RuntimeException("Invalid revenj.permission settings found: '" + permissions + "'.\n" + "Allowed values are open and closed")
       "open" == permissions
     } else false
@@ -39,6 +40,10 @@ private[revenj] class RevenjPermissionManager(
   private val rolePermissions = staticRolePermissions.getOrElse(Nil).groupBy(_.name)
 
   private var cache = Map.empty[String, Boolean]
+
+  override def invalidate(): Unit = {
+    cache = Map.empty[String, Boolean]
+  }
 /*
   import monix.execution.Scheduler.Implicits.global
 
@@ -63,6 +68,7 @@ private[revenj] class RevenjPermissionManager(
     }
   }.subscribe()
 */
+  @tailrec
   private def checkOpen(parts: Array[String], len: Int): Boolean = {
     if (len < 0) defaultPermissions
     else {
@@ -74,7 +80,7 @@ private[revenj] class RevenjPermissionManager(
     }
   }
 
-  private def implies(principal: Principal, role: String) = {
+  private def implies(principal: Principal, role: String): Boolean = {
     principal match {
       case up: UserPrincipal => up.implies(role)
       case _ => principal.getName == role

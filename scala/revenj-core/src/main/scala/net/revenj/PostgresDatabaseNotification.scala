@@ -8,12 +8,13 @@ import monix.execution.Cancelable
 import monix.reactive.Observable
 import monix.reactive.observers.Subscriber
 import monix.reactive.subjects.PublishSubject
-import net.revenj.database.postgres.{ConnectionFactoryRevenj, PostgresReader}
+import net.revenj.database.postgres.PostgresReader
 import net.revenj.database.postgres.converters.StringConverter
 import net.revenj.extensibility.SystemState
 import net.revenj.patterns.DataChangeNotification.{NotifyInfo, Operation, Source, TrackInfo}
 import net.revenj.patterns._
-import org.postgresql.PGNotification
+import org.postgresql.{PGNotification, PGProperty}
+import org.postgresql.core.v3.ConnectionFactoryRevenj
 import org.postgresql.core.{BaseConnection, Notification, PGStream}
 import org.postgresql.util.HostSpec
 
@@ -233,7 +234,12 @@ Either disable notifications (revenj.notifications.status=disabled), change it t
       val applicationName = properties.getProperty("revenj.notifications.applicationName")
       val db = parsed.getProperty("PGDBNAME")
       val host = new HostSpec(parsed.getProperty("PGHOST").split(",").head, parsed.getProperty("PGPORT").split(",").head.toInt);
-      val pgStream = ConnectionFactoryRevenj.openConnection(Array(host), user, password, db, applicationName, properties);
+      val newProps = new Properties(properties)
+      newProps.setProperty(PGProperty.USER.getName, user)
+      newProps.setProperty(PGProperty.PASSWORD.getName, password)
+      newProps.setProperty(PGProperty.PG_DBNAME.getName, db)
+      newProps.setProperty(PGProperty.APPLICATION_NAME.getName, applicationName)
+      val pgStream = new ConnectionFactoryRevenj().openConnection(Array(host), newProps)
       currentStream = Some(pgStream)
       retryCount = 0
       val listening = new Listening(pgStream)
