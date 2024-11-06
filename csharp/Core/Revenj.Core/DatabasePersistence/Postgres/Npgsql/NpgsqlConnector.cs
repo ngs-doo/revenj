@@ -30,7 +30,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -1020,7 +1019,7 @@ namespace Revenj.DatabasePersistence.Postgres.Npgsql
 						this.connector._notificationAutoResetEvent.Set();
 					}
 				}
-				catch (IOException ex)
+				catch (Exception ex)
 				{
 					this.connector._notificationException = ex;
 				}
