@@ -1,7 +1,8 @@
 package net.revenj.storage
 
-import java.io.InputStream
+import software.amazon.awssdk.services.s3.model.DeleteObjectResponse
 
+import java.io.InputStream
 import scala.concurrent.Future
 
 trait S3Repository {
@@ -20,7 +21,7 @@ trait S3Repository {
 		mimeType: Option[String] = None,
 		metadata: Map[String, String] = Map.empty): Future[S3]
 
-	def delete(bucket: String, key: String): Future[Unit]
+	def delete(bucket: String, key: String): Future[DeleteObjectResponse]
 
-	def delete(s3: S3): Future[Unit] = delete(s3.bucket, s3.key)
+	def delete(s3: S3): Future[DeleteObjectResponse] = delete(s3.bucket, s3.key)
 }
