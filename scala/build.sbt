@@ -43,7 +43,7 @@ lazy val storage = (project in file("revenj-storage")
   settings(
     version := "1.7.0",
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-s3" % "1.12.773",
+      "software.amazon.awssdk" % "s3" % "2.29.21",
       "org.specs2" %% "specs2-scalacheck" % "4.20.8" % Test,
     )
   )

@@ -1,19 +1,21 @@
 package net.revenj
 
+import net.revenj.storage.{S3, S3Repository}
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model._
+
 import java.io.InputStream
 import java.util.{Properties, UUID}
-
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
-import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest}
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3Client}
-import net.revenj.storage.{S3, S3Repository}
-
 import scala.concurrent.{ExecutionContext, Future}
+import scala.jdk.CollectionConverters._
 
 class AmazonS3Repository(
   properties: Properties,
   tryExecutionContext: Option[ExecutionContext],
-  tryS3: Option[AmazonS3]
+  tryS3: Option[S3Client]
 ) extends S3Repository {
 
   private val executionContext = tryExecutionContext.getOrElse(ExecutionContext.global)
@@ -23,9 +25,9 @@ class AmazonS3Repository(
     val s3Region = Option(properties.getProperty("revenj.s3-region"))
     require(s3AccessKey.isDefined && s3AccessKey.get.nonEmpty, "S3 configuration is missing. Please add revenj.s3-user")
     require(s3SecretKey.isDefined && s3SecretKey.get.nonEmpty, "S3 configuration is missing. Please add revenj.s3-secret")
-    val builder = AmazonS3Client.builder()
-    builder.setCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(s3AccessKey.get, s3SecretKey.get)))
-    s3Region.foreach(builder.setRegion)
+    val builder = S3Client.builder()
+    builder.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(s3AccessKey.get, s3SecretKey.get)))
+    s3Region.foreach(r => builder.region(Region.of(r)))
     builder.build()
   }
 
@@ -39,17 +41,24 @@ Either specify revenj.s3-bucket-name in Properties as system wide name or provid
 
   override def get(bucket: String, key: String): Future[InputStream] = {
     Future {
-      s3Client.getObject(bucket, key).getObjectContent
+      s3Client.getObject(GetObjectRequest.builder()
+        .bucket(bucket)
+        .key(key)
+        .build()
+      )
     }(executionContext)
   }
 
   override def upload(stream: InputStream, length: Long): Future[S3] = {
     val bn = getBucketName("")
     val key = UUID.randomUUID.toString
-    val om = new ObjectMetadata()
-    om.setContentLength(length)
+    val putObjectRequest = PutObjectRequest.builder()
+      .bucket(bn)
+      .key(key)
+      .contentLength(length)
+      .build()
     Future {
-      s3Client.putObject(new PutObjectRequest(bn, key, stream, om))
+      s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(stream, length))
       S3(bn, key, length)
     }(executionContext)
   }
@@ -64,21 +73,26 @@ Either specify revenj.s3-bucket-name in Properties as system wide name or provid
     metadata: Map[String, String]
   ): Future[S3] = {
     val bn = getBucketName(bucket)
-    val om = new ObjectMetadata()
-    om.setContentLength(length)
-    mimeType.foreach(om.setContentType)
-    metadata.foreach { case (k, v) =>
-      om.addUserMetadata(k, v)
-    }
+    val putObjectRequestBuilder = PutObjectRequest.builder()
+      .bucket(bn)
+      .key(key)
+      .contentLength(length)
+      .metadata(metadata.asJava)
+    mimeType.foreach(putObjectRequestBuilder.contentType)
+    val putObjectRequest = putObjectRequestBuilder.build()
     Future {
-      s3Client.putObject(new PutObjectRequest(bn, key, stream, om))
+      s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(stream, length))
       S3(bn, key, length, name, mimeType, metadata)
     }(executionContext)
   }
 
-  override def delete(bucket: String, key: String): Future[Unit] = {
+  override def delete(bucket: String, key: String): Future[DeleteObjectResponse] = {
+    val deleteObjectRequest = DeleteObjectRequest.builder()
+      .bucket(bucket)
+      .key(key)
+      .build()
     Future {
-      s3Client.deleteObject(bucket, key)
+      s3Client.deleteObject(deleteObjectRequest)
     }(executionContext)
   }
 }
