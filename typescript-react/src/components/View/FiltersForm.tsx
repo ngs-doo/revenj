@@ -30,13 +30,14 @@ const processOnSubmit = <T, R>(onSubmit: (data: R) => Promise<R>, formUnderKey?:
 
 export class FiltersForm<T> extends React.PureComponent<IForm<T>> {
   public render() {
-    const { children, configuration, formUnderKey, hideSubmit, initialValues } = this.props;
+    const { children, configuration, formUnderKey, hideSubmit, initialValues, ...rest } = this.props;
 
     const child = (
       <ListPresenterComponent>
         {
           (ctx) => (
             <Form
+              {...rest}
               form={ctx!.conceptName}
               className={classNames(styles.Form, 'dslFiltersForm')}
               initialValues={initialValues as any}

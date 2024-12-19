@@ -2,11 +2,11 @@
 
 exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 1`] = `"Must be a whole number"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 2`] = `"Must be a whole number with up to 10 digits"`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 2`] = `"Must be a whole number between 2,147,483,647 and -2,147,483,648"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 3`] = `"Must be a whole number with up to 10 digits"`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 3`] = `"Must be a whole number between 2,147,483,647 and -2,147,483,648"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 4`] = `"Must be a whole number with up to 10 digits"`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 4`] = `"Must be a whole number between 2,147,483,647 and -2,147,483,648"`;
 
 exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 5`] = `"Must be a whole number"`;
 
@@ -14,9 +14,9 @@ exports[`validation isIntegerCreator should return an error when value exists bu
 
 exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 7`] = `"Must be a whole number"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 8`] = `"Must be a whole number with up to 10 digits"`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 8`] = `"Must be a whole number between 2,147,483,647 and -2,147,483,648"`;
 
-exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 9`] = `"Must be a whole number with up to 10 digits"`;
+exports[`validation isIntegerCreator should return an error when value exists but is not treatable as an integer 9`] = `"Must be a whole number between 2,147,483,647 and -2,147,483,648"`;
 
 exports[`validation isNumberCreator should return an error when value exists but is not treatable as a numeric value 1`] = `"Value must be a number."`;
 
