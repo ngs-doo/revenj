@@ -7,6 +7,7 @@ import {
 } from './NumberFormatter';
 
 export const CurrencyFormat = '#,##0.00';
+export const MachineCurrencyFormat = '#0.00';
 
 export enum CurrencySymbolPlacement {
   Prefix = 'Prefix',
@@ -33,8 +34,7 @@ export class CurrencyFormatterClass {
   }
 
   machineFormatCurrency = (number: NumberUtils.Numeric) => {
-    const format = (this.currencyFormat || CurrencyFormat).replace(',', '');
-    return formatNumber(new MachineBigNumber(number).toString(), format);
+    return formatNumber(new MachineBigNumber(number).toString(), MachineCurrencyFormat);
   }
 
   formatNumber = (number: NumberUtils.Numeric): string => {
