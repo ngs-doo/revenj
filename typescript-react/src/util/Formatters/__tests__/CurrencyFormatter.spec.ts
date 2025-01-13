@@ -71,4 +71,55 @@ describe('Currency Formatter', () => {
       expect(machineFormatter('1')).toBe('1.00');
     });
   });
+
+  describe('machineFormatCurrency', () => {
+    const testCases = [
+      // Valid integers
+      { input: '1', output: '1.00' },
+      { input: '12', output: '12.00' },
+      { input: '123', output: '123.00' },
+      { input: '1234', output: '1234.00' },
+      { input: '12345', output: '12345.00' },
+      { input: '123456789', output: '123456789.00' },
+      // Valid zero and negative numbers
+      { input: '0', output: '0.00' },
+      { input: '-1', output: '-1.00' },
+      { input: '-12345', output: '-12345.00' },
+      // Valid decimals
+      { input: '1.1', output: '1.10' },
+      { input: '1.123', output: '1.12' },
+      { input: '1234.5678', output: '1234.57' },
+      { input: '1000000000000.23', output: '1000000000000.23' },
+      // Input with leading zeros
+      { input: '000123', output: '123.00' },
+      { input: '0000', output: '0.00' },
+      // Input with trailing dot
+      { input: '123.', output: '123.00' },
+      { input: '123.0', output: '123.00' },
+      // Invalid inputs
+      { input: '', output: '' },
+      { input: 'abc', output: '' },
+      { input: '12abc', output: '' },
+      { input: '1.2.3', output: '' },
+    ];
+
+    const formats = [
+      '#0',
+      '#,##0',
+      '#.##0',
+      '#,##0.00',
+      '#.##0,00',
+      '#,##,##0',
+    ];
+
+    formats.forEach((format) => {
+      it(`should format correctly according to the ${format} format`, () => {
+        CurrencyFormatter.setFormat(format);
+
+        testCases.forEach(({ input, output }) => {
+          expect(CurrencyFormatter.machineFormatCurrency(input)).toBe(output);
+        });
+      });
+    });
+  });
 });
