@@ -6,57 +6,31 @@
 
 package org.postgresql.core.v3;
 
-import static org.postgresql.util.internal.Nullness.castNonNull;
-
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.postgresql.PGProperty;
-import org.postgresql.core.PGStream;
-import org.postgresql.core.QueryExecutor;
-import org.postgresql.core.ServerVersion;
-import org.postgresql.core.SetupQueryRunner;
-import org.postgresql.core.SocketFactoryFactory;
-import org.postgresql.core.Tuple;
-import org.postgresql.core.Utils;
-import org.postgresql.core.Version;
+import org.postgresql.core.*;
 import org.postgresql.gss.MakeGSS;
-import org.postgresql.hostchooser.CandidateHost;
-import org.postgresql.hostchooser.GlobalHostStatusTracker;
-import org.postgresql.hostchooser.HostChooser;
-import org.postgresql.hostchooser.HostChooserFactory;
-import org.postgresql.hostchooser.HostRequirement;
-import org.postgresql.hostchooser.HostStatus;
+import org.postgresql.hostchooser.*;
 import org.postgresql.jdbc.GSSEncMode;
 import org.postgresql.jdbc.SslMode;
 import org.postgresql.jdbc.SslNegotiation;
 import org.postgresql.plugin.AuthenticationRequestType;
 import org.postgresql.ssl.MakeSSL;
 import org.postgresql.sspi.ISSPIClient;
-import org.postgresql.util.GT;
-import org.postgresql.util.HostSpec;
-import org.postgresql.util.MD5Digest;
-import org.postgresql.util.PSQLException;
-import org.postgresql.util.PSQLState;
-import org.postgresql.util.ServerErrorMessage;
+import org.postgresql.util.*;
 import org.postgresql.util.internal.Nullness;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
+import javax.net.SocketFactory;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import javax.net.SocketFactory;
+import static org.postgresql.util.internal.Nullness.castNonNull;
 
 /**
  * ConnectionFactory implementation for version 3 (7.4+) connections.

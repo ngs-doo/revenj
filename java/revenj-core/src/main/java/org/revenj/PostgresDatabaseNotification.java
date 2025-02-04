@@ -1,14 +1,18 @@
 package org.revenj;
 
 import org.postgresql.PGNotification;
+import org.postgresql.PGProperty;
 import org.postgresql.core.BaseConnection;
 import org.postgresql.core.PGStream;
+import org.postgresql.core.v3.ConnectionFactoryRevenj;
 import org.postgresql.util.HostSpec;
-import org.revenj.database.postgres.ConnectionFactoryRevenj;
-import org.revenj.extensibility.SystemState;
 import org.revenj.database.postgres.PostgresReader;
 import org.revenj.database.postgres.converters.StringConverter;
-import org.revenj.patterns.*;
+import org.revenj.extensibility.SystemState;
+import org.revenj.patterns.DomainModel;
+import org.revenj.patterns.EagerNotification;
+import org.revenj.patterns.Repository;
+import org.revenj.patterns.ServiceLocator;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
@@ -208,7 +212,12 @@ final class PostgresDatabaseNotification implements EagerNotification, Closeable
 			String password = properties.containsKey("revenj.password") ? properties.getProperty("revenj.password") : parsed.getProperty("password", "");
 			String db = parsed.getProperty("PGDBNAME");
 			HostSpec host = new HostSpec(parsed.getProperty("PGHOST").split(",")[0], Integer.parseInt(parsed.getProperty("PGPORT").split(",")[0]));
-			PGStream pgStream = ConnectionFactoryRevenj.openConnection(new HostSpec[] { host }, user, password, db, applicationName, properties);
+			Properties newProps = new Properties(properties);
+			newProps.setProperty(PGProperty.USER.getName(), user);
+			newProps.setProperty(PGProperty.PASSWORD.getName(), password);
+			newProps.setProperty(PGProperty.PG_DBNAME.getName(), db);
+			newProps.setProperty(PGProperty.APPLICATION_NAME.getName(), applicationName);
+			PGStream pgStream = new ConnectionFactoryRevenj().openConnection(new HostSpec[] { host }, newProps);
 			currentStream = pgStream;
 			retryCount = 0;
 			Listening listening = new Listening(pgStream);
