@@ -96,5 +96,5 @@
     "test:watch": "react-scripts test --env=jsdom"
   },
   "source": "src/index.ts",
-  "version": "1.9.15"
+  "version": "1.9.16"
 }

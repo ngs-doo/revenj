@@ -16,6 +16,8 @@ describe('Instafin marshalling', () => {
     expect(marshaller.deserialize(10, 'Int', true, 'test')).toEqual(10);
     expect(marshaller.deserialize(10, 'Long', true, 'test')).toEqual(10);
     expect(marshaller.deserialize(10.5, 'Double', true, 'test')).toEqual(10.5);
+    expect(marshaller.deserialize(10.5, 'Float', true, 'test')).toEqual(10.5);
+    expect(marshaller.deserialize('10.5', 'Decimal', true, 'test')).toEqual('10.5');
     expect(marshaller.deserialize('1000', 'Money', true, 'test')).toEqual('1000.00');
     expect(marshaller.deserialize('2000-01-01T20:00:00', 'Date', true, 'test')).toEqual('2000-01-01');
     expect(marshaller.deserialize('2000-01-01T20:00:00', 'Timestamp', true, 'test')).toEqual('2000-01-01T20:00:00.000+00:00');
@@ -26,10 +28,54 @@ describe('Instafin marshalling', () => {
     expect(marshaller.serialize(10, 'Int', true, 'test')).toEqual(10);
     expect(marshaller.serialize(10, 'Long', true, 'test')).toEqual(10);
     expect(marshaller.serialize(10.5, 'Double', true, 'test')).toEqual(10.5);
+    expect(marshaller.deserialize(10.5, 'Float', true, 'test')).toEqual(10.5);
+    expect(marshaller.serialize('10.5', 'Decimal', true, 'test')).toEqual('10.5');
     expect(marshaller.serialize('1000', 'Money', true, 'test')).toEqual('1000.00');
     expect(marshaller.serialize('2000-01-01T20:00:00', 'Date', true, 'test')).toEqual('2000-01-01');
     expect(marshaller.serialize('2000-01-01T20:00:00', 'Timestamp', true, 'test')).toEqual('2000-01-01T20:00:00.000+00:00');
     expect(marshaller.serialize('test', 'Binary', true, 'test')).toEqual('dGVzdA==');
+  });
+
+  it('should serialize nullable simple types when sending an empty string', () => {
+    expect(marshaller.serialize('', 'Int', false, 'test')).toEqual(undefined);
+    expect(marshaller.serialize('', 'Long', false, 'test')).toEqual(undefined);
+    expect(marshaller.serialize('', 'Double', false, 'test')).toEqual(undefined);
+    expect(marshaller.serialize('', 'Float', false, 'test')).toEqual(undefined);
+    expect(marshaller.serialize('', 'Decimal', false, 'test')).toEqual(undefined);
+    expect(marshaller.serialize('', 'Money', false, 'test')).toEqual(undefined);
+    expect(marshaller.serialize('', 'Date', false, 'test')).toEqual(undefined);
+    expect(marshaller.serialize('', 'Timestamp', false, 'test')).toEqual(undefined);
+    expect(marshaller.serialize('', 'Binary', false, 'test')).toEqual(undefined);
+  });
+
+  it('should deserialize nullable simple types when sending an empty string', () => {
+    expect(marshaller.deserialize('', 'Int', false, 'test')).toEqual(undefined);
+    expect(marshaller.deserialize('', 'Long', false, 'test')).toEqual(undefined);
+    expect(marshaller.deserialize('', 'Double', false, 'test')).toEqual(undefined);
+    expect(marshaller.deserialize('', 'Float', false, 'test')).toEqual(undefined);
+    expect(marshaller.deserialize('', 'Decimal', false, 'test')).toEqual(undefined);
+    expect(marshaller.deserialize('', 'Money', false, 'test')).toEqual(undefined);
+    expect(marshaller.deserialize('', 'Date', false, 'test')).toEqual(undefined);
+    expect(marshaller.deserialize('', 'Timestamp', false, 'test')).toEqual(undefined);
+    expect(marshaller.deserialize('', 'Binary', false, 'test')).toEqual(undefined);
+  });
+
+  it('should default to 0 when serializing non-nullable numbers', () => {
+    expect(marshaller.serialize(undefined, 'Int', true, 'test')).toEqual(0);
+    expect(marshaller.serialize(undefined, 'Long', true, 'test')).toEqual(0);
+    expect(marshaller.serialize(undefined, 'Double', true, 'test')).toEqual(0);
+    expect(marshaller.serialize(undefined, 'Float', true, 'test')).toEqual(0);
+    expect(marshaller.serialize(undefined, 'Decimal', true, 'test')).toEqual('0');
+    expect(marshaller.serialize(undefined, 'Money', true, 'test')).toEqual('0.00');
+  });
+
+  it('should default to 0 when deserializing non-nullable numbers', () => {
+    expect(marshaller.deserialize(undefined, 'Int', true, 'test')).toEqual(0);
+    expect(marshaller.deserialize(undefined, 'Long', true, 'test')).toEqual(0);
+    expect(marshaller.deserialize(undefined, 'Double', true, 'test')).toEqual(0);
+    expect(marshaller.deserialize(undefined, 'Float', true, 'test')).toEqual(0);
+    expect(marshaller.deserialize(undefined, 'Decimal', true, 'test')).toEqual('0');
+    expect(marshaller.deserialize(undefined, 'Money', true, 'test')).toEqual('0.00');
   });
 
   it('should serialize Array, List, and Set to array', () => {

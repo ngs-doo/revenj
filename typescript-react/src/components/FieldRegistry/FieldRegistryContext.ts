@@ -12,7 +12,7 @@ export interface IFields {
   Decimal: React.ComponentType<IExternalFormField<any, any, DecimalStr>>;
   Double: React.ComponentType<IExternalFormField<any, any, Double>>;
   EnumSelect: React.ComponentType<IExternalFormField<any, any, any>>;
-  Float: React.ComponentType<IExternalFormField<any, any, Double>>;
+  Float: React.ComponentType<IExternalFormField<any, any, Float>>;
   Integer: React.ComponentType<IExternalFormField<any, any, Int>>;
   Link: React.ComponentType<IExternalFormField<any, any, string>>;
   Long: React.ComponentType<IExternalFormField<any, any, Long>>;

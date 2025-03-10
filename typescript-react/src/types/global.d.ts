@@ -15,6 +15,7 @@ declare type Long = number & { __LongBrand__: void };
 declare type Int = number & { __IntBrand__: void };
 declare type Short = number & { __ShortBrand__: void };
 declare type Double = number & { __DoubleBrand__: void };
+declare type Float = number & { __FloatBrand__: void };
 declare type DecimalStr = string & { __DecimalStrBrand__: void };
 declare type BinaryStr = string & { __BinaryStrBrand__: void };
 declare type UUID = string & { __UUIDBrand__: void };
