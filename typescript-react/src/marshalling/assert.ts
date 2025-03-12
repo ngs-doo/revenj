@@ -7,6 +7,8 @@ import {
   SHORT_MIN_VALUE,
 } from '../constants';
 import { isObject } from '../util/FunctionalUtils/FunctionalUtils';
+import { formatNumber } from '../util/Formatters/NumberFormatter';
+import { isNumber } from '../util/NumberUtils/NumberUtils';
 
 type Dictionary<K extends string | number, V> = K extends string ? { [key: string]: V }: { [key: number]: V };
 
@@ -74,6 +76,14 @@ export const assertShort = <T extends Short>(value: T): T => {
 export const assertFloatingPoint = <T extends number>(value: T): T => {
   const number = Number.parseFloat(String(value)) as T;
   if (Number.isNaN(number) || typeof value !== 'number') {
+    throw new Error(`Expected a floating-point number, but value is ${value}`);
+  }
+  return number;
+};
+
+export const assertDecimal = <T extends DecimalStr>(value: T): T => {
+  const number = formatNumber(value) as T;
+  if (!isNumber(number)) {
     throw new Error(`Expected a floating-point number, but value is ${value}`);
   }
   return number;

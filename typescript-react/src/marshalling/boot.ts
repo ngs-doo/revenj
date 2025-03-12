@@ -72,12 +72,12 @@ export const initialize = ({ before, after }: IBootConfig) => {
     // Optional numbers can be "NaN" or empty string, and it chokes the whole thing
     .registerSerializerMiddleware(
       (_it) => undefined,
-      (it, typeName, isNonNullable) => ['Int', 'Long', 'Short'].includes(typeName) && !isNonNullable && (it === '' || Number.isNaN(it as any)),
+      (it, typeName, isNonNullable) => ['Int', 'Long', 'Short', 'Decimal', 'Double', 'Float', 'Money'].includes(typeName) && !isNonNullable && (it === '' || Number.isNaN(it as any)),
     )
     // Defaulting required numbers
     .registerSerializerMiddleware(
       (_it) => 0,
-      (it, typeName, isNonNullable) => ['Int', 'Long', 'Short'].includes(typeName) && isNonNullable && it == null,
+      (it, typeName, isNonNullable) => ['Int', 'Long', 'Short', 'Decimal', 'Double', 'Float', 'Money'].includes(typeName) && isNonNullable && it == null,
     )
     // Number unpacking from string fields
     .registerSerializerMiddleware(
@@ -91,22 +91,28 @@ export const initialize = ({ before, after }: IBootConfig) => {
     // Flatten optional empty strings into nothing on serialize
     .registerSerializerMiddleware(
       () => undefined,
-      (it, typeName, isNonNullable) => it === '' && !isNonNullable && ['string', 'text'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => it === '' && !isNonNullable && ['string', 'text', 'date', 'timestamp', 'binary'].includes(typeName.toLocaleLowerCase()),
     )
     // Flatten optional empty strings into nothing on deserialize
     .registerDeserializerMiddleware(
       () => undefined,
-      (it, typeName, isNonNullable) => it === '' && !isNonNullable && ['string', 'text'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => it === '' && !isNonNullable && ['string', 'text', 'date', 'timestamp', 'binary'].includes(typeName.toLocaleLowerCase()),
     )
     // Ensure required missing boolean fields are set to false (BE omits false to save up on cube config payloads)
     .registerDeserializerMiddleware(
       () => false,
       (it, typeName, isNonNullable) => it == null && isNonNullable && typeName.toLocaleLowerCase() === 'boolean',
     )
-    // Ensure required missing short/int/long fields are set to 0 (BE omits false to save up on cube config payloads)
+    // Ensure required missing short/int/long/decimal/double fields are set to 0 (BE omits false to save up on cube config payloads)
     .registerDeserializerMiddleware(
       () => 0,
-      (it, typeName, isNonNullable) => it == null && isNonNullable && ['long', 'int', 'short'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => it == null && isNonNullable && ['long', 'int', 'short', 'decimal', 'double', 'float', 'money'].includes(typeName.toLocaleLowerCase()),
+      MiddlewareStep.Before,
+    )
+    // Ensure optional missing short/int/long/decimal/double fields are set to undefined (BE omits false to save up on cube config payloads)
+    .registerDeserializerMiddleware(
+      () => undefined,
+      (it, typeName, isNonNullable) => it === '' && !isNonNullable && ['long', 'int', 'short', 'decimal', 'double', 'float', 'money'].includes(typeName.toLocaleLowerCase()),
       MiddlewareStep.Before,
     )
     // Collection types
@@ -127,6 +133,8 @@ export const initialize = ({ before, after }: IBootConfig) => {
     .registerFormatter<Int>('Int', Assert.assertInt)
     .registerFormatter<Long>('Long', Assert.assertLong)
     .registerFormatter<Double>('Double', Assert.assertFloatingPoint)
+    .registerFormatter<Float>('Float', Assert.assertFloatingPoint)
+    .registerFormatter<DecimalStr>('Decimal', Assert.assertDecimal)
     .registerFormatter<MoneyStr>('Money', assertCurrency)
     .registerSerializer<BinaryStr>('Binary', Assert.serializeBinary)
     .registerDeserializer<BinaryStr>('Binary', Assert.deserializeBinary)
