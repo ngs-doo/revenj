@@ -250,10 +250,15 @@ export const existsDeepDiff = (objA: IObjectAny, objB: IObjectAny) =>
   existsDeepDiffBy((a, b) => a === b, objA, objB);
 
 export const deduplicateBy = <T>(key: keyof T, items: T[]): T[] => {
-  const uniqueProps = Array.from(new Set(items.map((item: T) => item[key])));
-  return uniqueProps.map((value) =>
-    items.find((item: T) => item[key] === value)
-  ) as T[];
+  const existing = new Map<T[keyof T], T>();
+
+  for (const item of items) {
+    if (!existing.has(item[key])) {
+      existing.set(item[key], item);
+    }
+  }
+
+  return Array.from(existing.values());
 };
 
 export const valueOrNull = <T>(x: T): T | null => {
@@ -295,7 +300,7 @@ export const pick = <T, K extends keyof T>(o: T, ...keys: K[]): Pick<T, K> => {
 export const isObject = isPlainObject;
 
 export const isEmpty = (x: any): boolean => {
-  if (!x) {
+  if (x == null || x === '') {
     return true;
   }
 
@@ -572,7 +577,7 @@ export const moveFromToIndex = <T>(xs: T[], i: number, j: number): T[] => {
   const x = xs[i];
   const result = [...xs];
 
-  if (i === j - 1) {
+  if (i === j || i < 0 || i >= xs.length || j < 0 || j >= xs.length) {
     return result;
   }
 
@@ -584,4 +589,4 @@ export const moveFromToIndex = <T>(xs: T[], i: number, j: number): T[] => {
 export const flattenName = <T>(name: T): string =>
   Array.isArray(name)
     ? name.filter((it) => it != null && it.trim() !== '').join('.')
-    : String(name ?? '');
+    : String(name ?? '').trim();

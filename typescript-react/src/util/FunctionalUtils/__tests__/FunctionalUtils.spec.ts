@@ -81,7 +81,7 @@ describe('functional.ts', () => {
       expect(deepKeys(obj).sort()).toEqual(expectedPaths.sort());
     });
 
-    it.only('should dive into arrays if the flag is set to do so', () => {
+    it('should dive into arrays if the flag is set to do so', () => {
       const obj = {
         a: [1, 2, 3],
         b: [
@@ -215,6 +215,21 @@ describe('functional.ts', () => {
 
     it('should do nothing if there are no duplicates', () => {
       expect(deduplicateBy('name', items)).toEqual(items);
+    });
+
+    it('should return an empty array when given an empty array', () => {
+      expect(deduplicateBy('id', [])).toEqual([]);
+    });
+
+    it('should return only one item if all elements have the same key value', () => {
+      const duplicateItems = [
+        { id: 1, name: 'One' },
+        { id: 1, name: 'Duplicate One' },
+        { id: 1, name: 'Duplicate Two' },
+      ];
+      const deduped = deduplicateBy('id', duplicateItems);
+      expect(deduped.length).toBe(1);
+      expect(deduped[0].name).toBe('One');
     });
   });
 
@@ -624,14 +639,27 @@ describe('functional.ts', () => {
 
     it('should work for inserting at the last index', () => {
       expect(moveFromToIndex(xs, 1, 4)).toEqual([1, 3, 4, 5, 2]);
-      expect(moveFromToIndex(xs, 3, 4)).toEqual([1, 2, 3, 4, 5]);
+      expect(moveFromToIndex(xs, 3, 4)).toEqual([1, 2, 3, 5, 4]);
+    });
+
+    it('should return the same array when using the same index both times', () => {
+      expect(moveFromToIndex(xs, 0, 0)).toEqual([1, 2, 3, 4, 5]);
+      expect(moveFromToIndex(xs, 3, 3)).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    it('should return the same array when an index is negative or out of bounds', () => {
+      expect(moveFromToIndex(xs, -1, 2)).toEqual([1, 2, 3, 4, 5]);
+      expect(moveFromToIndex(xs, 1, -2)).toEqual([1, 2, 3, 4, 5]);
+      expect(moveFromToIndex(xs, 1, 10)).toEqual([1, 2, 3, 4, 5]);
+      expect(moveFromToIndex(xs, 10, 1)).toEqual([1, 2, 3, 4, 5]);
+      expect(moveFromToIndex(xs, -1, 10)).toEqual([1, 2, 3, 4, 5]);
     });
   });
 
   describe('flattenName', () => {
     it('should return the same string as the one provided', () => {
       expect(flattenName('name')).toEqual('name');
-      expect(flattenName('prefix.banes')).toEqual('prefix.name');
+      expect(flattenName('prefix.name')).toEqual('prefix.name');
     });
 
     it('should flatten the name if an array is provided', () => {
