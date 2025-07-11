@@ -70,14 +70,19 @@ Either specify revenj.s3-bucket-name in Properties as system wide name or provid
     length: Long,
     name: Option[String],
     mimeType: Option[String],
-    metadata: Map[String, String]
+    metadata: Map[String, String],
+    tags: Map[String, String]
   ): Future[S3] = {
     val bn = getBucketName(bucket)
+    val javaTags = tags.map { case (key, value) =>
+      Tag.builder().key(key).value(value).build()
+    }.toSet.asJava
     val putObjectRequestBuilder = PutObjectRequest.builder()
       .bucket(bn)
       .key(key)
       .contentLength(length)
       .metadata(metadata.asJava)
+      .tagging(Tagging.builder().tagSet(javaTags).build())
     mimeType.foreach(putObjectRequestBuilder.contentType)
     val putObjectRequest = putObjectRequestBuilder.build()
     Future {

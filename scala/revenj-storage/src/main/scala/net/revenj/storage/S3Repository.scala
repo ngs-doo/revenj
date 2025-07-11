@@ -19,7 +19,8 @@ trait S3Repository {
 		length: Long,
 		name: Option[String] = None,
 		mimeType: Option[String] = None,
-		metadata: Map[String, String] = Map.empty): Future[S3]
+		metadata: Map[String, String] = Map.empty,
+		tags: Map[String, String] = Map.empty): Future[S3]
 
 	def delete(bucket: String, key: String): Future[DeleteObjectResponse]
 
