@@ -5,6 +5,8 @@ import {
   INT_MIN_VALUE,
   SHORT_MAX_VALUE,
   SHORT_MIN_VALUE,
+  LONG_MAX_VALUE,
+  LONG_MIN_VALUE,
 } from '../constants';
 import { isObject } from '../util/FunctionalUtils/FunctionalUtils';
 import { formatNumber } from '../util/Formatters/NumberFormatter';
@@ -56,12 +58,22 @@ export const assertInt = <T extends Int>(value: T): T => {
   return number;
 };
 
+/**
+ * Asserts that a given value is within the range of a 64-bit signed Long.
+ * This is necessary because JavaScript loses numeric precision beyond Number.MAX_SAFE_INTEGER.
+ * Ideally, serialization should be done using strings and deserialized into BigInt or a bignum,
+ * but for now, this approach is acceptable.
+ */
 export const assertLong = <T extends Long>(value: T): T => {
-  const number = Number.parseInt(String(value), 10) as T;
-  if (Number.isNaN(number) || typeof value !== 'number' || value !== number) {
+  try {
+    const number = BigInt(value);
+    if (number < BigInt(LONG_MIN_VALUE) || number > BigInt(LONG_MAX_VALUE)) {
+      throw new Error(`Expected a Long, but value is ${value}`);
+    }
+    return number.toString() as unknown as T;
+  } catch (error) {
     throw new Error(`Expected a Long, but value is ${value}`);
   }
-  return number;
 };
 
 export const assertShort = <T extends Short>(value: T): T => {
@@ -176,7 +188,6 @@ export const assertEnum = <T>(values: T[], name: string) => (it: T, isNonNullabl
   }
 
   if (!values.includes(it)) {
-    console.log(values, it);
     throw new Error(`Value ${it} is not a valid member of enumeration ${name}`);
   }
 

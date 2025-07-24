@@ -82,11 +82,11 @@ export const initialize = ({ before, after }: IBootConfig) => {
     // Number unpacking from string fields
     .registerSerializerMiddleware(
       (it: string) => Number.parseInt(it, 10),
-      (it, typeName) => it != null && typeof it === 'string' && ['Int', 'Long', 'Short'].includes(typeName),
+      (it, typeName) => it != null && typeof it === 'string' && ['Int', 'Short'].includes(typeName),
     )
     .registerSerializerMiddleware(
       (it: string) => Number.parseFloat(it),
-      (it, typeName) => it != null && typeof it === 'string' && ['Long', 'Double'].includes(typeName),
+      (it, typeName) => it != null && typeof it === 'string' && ['Float', 'Double'].includes(typeName),
     )
     // Flatten optional empty strings into nothing on serialize
     .registerSerializerMiddleware(
@@ -106,7 +106,12 @@ export const initialize = ({ before, after }: IBootConfig) => {
     // Ensure required missing short/int/long/decimal/double fields are set to 0 (BE omits false to save up on cube config payloads)
     .registerDeserializerMiddleware(
       () => 0,
-      (it, typeName, isNonNullable) => it == null && isNonNullable && ['long', 'int', 'short', 'decimal', 'double', 'float', 'money'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => it == null && isNonNullable && ['int', 'short', 'decimal', 'double', 'float', 'money'].includes(typeName.toLocaleLowerCase()),
+      MiddlewareStep.Before,
+    )
+    .registerDeserializerMiddleware(
+      () => '0',
+      (it, typeName, isNonNullable) => it == null && isNonNullable && ['long'].includes(typeName.toLocaleLowerCase()),
       MiddlewareStep.Before,
     )
     // Ensure optional missing short/int/long/decimal/double fields are set to undefined (BE omits false to save up on cube config payloads)
