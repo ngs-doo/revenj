@@ -11,7 +11,7 @@ declare interface INumberFormatter {
 // Custom branded types
 declare type DateStr = string & { __DateStrBrand__: void };
 declare type TimestampStr = string & { __TimestampStrBrand__: void };
-declare type Long = number & { __LongBrand__: void };
+declare type Long = string & { __LongBrand__: void };
 declare type Int = number & { __IntBrand__: void };
 declare type Short = number & { __ShortBrand__: void };
 declare type Double = number & { __DoubleBrand__: void };

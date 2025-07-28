@@ -1,6 +1,8 @@
 import {
   INT_MAX_VALUE,
   INT_MIN_VALUE,
+  LONG_MAX_VALUE,
+  LONG_MIN_VALUE,
 } from '../../constants';
 import {
   ColumnType,
@@ -11,6 +13,7 @@ import {
   SHORT_MIN_VALUE,
 } from '../../constants';
 import * as Assert from '../assert';
+import { parseBigNum } from '../../util/NumberUtils/NumberUtils';
 
 describe('data marshalling asserting', () => {
   describe('assertPresence', () => {
@@ -88,20 +91,52 @@ ing`];
 
   describe('assertLong', () => {
     it('should pass through valid longs', () => {
-      const valids = [-10, 0, 235] as Long[];
+      const valids = [
+        '-10',
+        '0',
+        '235',
+        '-1',
+        '1',
+        '-9007199254740995',
+        '-9007199254740999',
+        '9007199254740995',
+        '9007199254740999',
+        Number.MIN_SAFE_INTEGER.toString(),
+        Number.MAX_SAFE_INTEGER.toString(),
+        LONG_MAX_VALUE.toString(),
+        LONG_MIN_VALUE.toString(),
+      ] as Long[];
       for (const valid of valids) {
         expect(Assert.assertLong(valid)).toBe(valid);
       }
     });
 
     it('should explode on non-longs', () => {
-      const invalids = ['bla', null, 1.55] as any[];
+      const invalids = [
+        'bla',
+        null,
+        1.55,
+        Number.MAX_VALUE,
+        Number.MIN_VALUE,
+        Number.POSITIVE_INFINITY,
+        Number.NEGATIVE_INFINITY,
+      ] as any[];
       for (const invalid of invalids) {
         expect(() => Assert.assertLong(invalid)).toThrowErrorMatchingSnapshot();
       }
     });
 
-    it.skip('should assert valid Long range', () => { return; }); // TODO: Some nice day
+    it('should assert valid Long range', () => {
+      const minValid = LONG_MIN_VALUE.toString();
+      const maxValud = LONG_MAX_VALUE.toString();
+      expect(Assert.assertLong(minValid)).toBe(minValid);
+      expect(Assert.assertLong(maxValud)).toBe(maxValud);
+
+      const bellowMin = parseBigNum(LONG_MIN_VALUE).minus(1).toString();
+      const aboveMax = parseBigNum(LONG_MAX_VALUE).plus(1).toString();
+      expect(() => Assert.assertLong(bellowMin)).toThrowErrorMatchingSnapshot();
+      expect(() => Assert.assertLong(aboveMax)).toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('assertShort', () => {
@@ -374,7 +409,7 @@ ing`];
       const s3 = {
         bucket: 'test',
         key: '58d33650-1f54-4190-b9f6-f85d0b889350',
-        length: 1024 as Long,
+        length: '1024',
         metadata: {
           type: 'personal document',
         },

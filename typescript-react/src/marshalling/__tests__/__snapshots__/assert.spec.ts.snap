@@ -22,11 +22,23 @@ exports[`data marshalling asserting assertInt should explode on non-integers 4`]
 
 exports[`data marshalling asserting assertInt should explode on non-integers 5`] = `"Expected an Int, but value is 2147483648"`;
 
+exports[`data marshalling asserting assertLong should assert valid Long range 1`] = `"Expected a Long, but value is -9223372036854775809"`;
+
+exports[`data marshalling asserting assertLong should assert valid Long range 2`] = `"Expected a Long, but value is 9223372036854775808"`;
+
 exports[`data marshalling asserting assertLong should explode on non-longs 1`] = `"Expected a Long, but value is bla"`;
 
 exports[`data marshalling asserting assertLong should explode on non-longs 2`] = `"Expected a Long, but value is null"`;
 
 exports[`data marshalling asserting assertLong should explode on non-longs 3`] = `"Expected a Long, but value is 1.55"`;
+
+exports[`data marshalling asserting assertLong should explode on non-longs 4`] = `"Expected a Long, but value is 1.7976931348623157e+308"`;
+
+exports[`data marshalling asserting assertLong should explode on non-longs 5`] = `"Expected a Long, but value is 5e-324"`;
+
+exports[`data marshalling asserting assertLong should explode on non-longs 6`] = `"Expected a Long, but value is Infinity"`;
+
+exports[`data marshalling asserting assertLong should explode on non-longs 7`] = `"Expected a Long, but value is -Infinity"`;
 
 exports[`data marshalling asserting assertPresence should raise an error if the value is not present, but required 1`] = `"Value is required, but is not set!"`;
 
