@@ -71,7 +71,7 @@ export const assertLong = <T extends Long>(value: T): T => {
       throw new Error(`Expected a Long, but value is ${value}`);
     }
     if (number >= Number.MIN_SAFE_INTEGER && number <= Number.MAX_SAFE_INTEGER) {
-      return Number.parseInt(String(value), 10) as T;
+      return Number.parseInt(String(value), 10) as unknown as T;
     }
     return number.toString() as unknown as T;
   } catch (error) {
