@@ -92,17 +92,17 @@ ing`];
   describe('assertLong', () => {
     it('should pass through valid longs', () => {
       const valids = [
-        '-10',
-        '0',
-        '235',
-        '-1',
-        '1',
+        -10,
+        0,
+        235,
+        -1,
+        1,
         '-9007199254740995',
         '-9007199254740999',
         '9007199254740995',
         '9007199254740999',
-        Number.MIN_SAFE_INTEGER.toString(),
-        Number.MAX_SAFE_INTEGER.toString(),
+        Number.MIN_SAFE_INTEGER,
+        Number.MAX_SAFE_INTEGER,
         LONG_MAX_VALUE.toString(),
         LONG_MIN_VALUE.toString(),
       ] as Long[];
@@ -409,7 +409,7 @@ ing`];
       const s3 = {
         bucket: 'test',
         key: '58d33650-1f54-4190-b9f6-f85d0b889350',
-        length: '1024',
+        length: 1024,
         metadata: {
           type: 'personal document',
         },

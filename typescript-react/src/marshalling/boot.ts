@@ -106,12 +106,7 @@ export const initialize = ({ before, after }: IBootConfig) => {
     // Ensure required missing short/int/long/decimal/double fields are set to 0 (BE omits false to save up on cube config payloads)
     .registerDeserializerMiddleware(
       () => 0,
-      (it, typeName, isNonNullable) => it == null && isNonNullable && ['int', 'short', 'decimal', 'double', 'float', 'money'].includes(typeName.toLocaleLowerCase()),
-      MiddlewareStep.Before,
-    )
-    .registerDeserializerMiddleware(
-      () => '0',
-      (it, typeName, isNonNullable) => it == null && isNonNullable && ['long'].includes(typeName.toLocaleLowerCase()),
+      (it, typeName, isNonNullable) => it == null && isNonNullable && ['long', 'int', 'short', 'decimal', 'double', 'float', 'money'].includes(typeName.toLocaleLowerCase()),
       MiddlewareStep.Before,
     )
     // Ensure optional missing short/int/long/decimal/double fields are set to undefined (BE omits false to save up on cube config payloads)

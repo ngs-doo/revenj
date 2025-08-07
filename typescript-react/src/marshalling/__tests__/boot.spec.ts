@@ -14,7 +14,8 @@ describe('Instafin marshalling', () => {
 
   it('should deserialize simple types', () => {
     expect(marshaller.deserialize(10, 'Int', true, 'test')).toEqual(10);
-    expect(marshaller.deserialize(10, 'Long', true, 'test')).toEqual('10');
+    expect(marshaller.deserialize(10, 'Long', true, 'test')).toEqual(10);
+    expect(marshaller.serialize('9007199254740995', 'Long', true, 'test')).toEqual('9007199254740995');
     expect(marshaller.deserialize(10.5, 'Double', true, 'test')).toEqual(10.5);
     expect(marshaller.deserialize(10.5, 'Float', true, 'test')).toEqual(10.5);
     expect(marshaller.deserialize('10.5', 'Decimal', true, 'test')).toEqual('10.5');
@@ -26,7 +27,8 @@ describe('Instafin marshalling', () => {
 
   it('should serialize simple types', () => {
     expect(marshaller.serialize(10, 'Int', true, 'test')).toEqual(10);
-    expect(marshaller.serialize(10, 'Long', true, 'test')).toEqual('10');
+    expect(marshaller.serialize(10, 'Long', true, 'test')).toEqual(10);
+    expect(marshaller.serialize('9007199254740995', 'Long', true, 'test')).toEqual('9007199254740995');
     expect(marshaller.serialize(10.5, 'Double', true, 'test')).toEqual(10.5);
     expect(marshaller.deserialize(10.5, 'Float', true, 'test')).toEqual(10.5);
     expect(marshaller.serialize('10.5', 'Decimal', true, 'test')).toEqual('10.5');
@@ -62,7 +64,7 @@ describe('Instafin marshalling', () => {
 
   it('should default to 0 when serializing non-nullable numbers', () => {
     expect(marshaller.serialize(undefined, 'Int', true, 'test')).toEqual(0);
-    expect(marshaller.serialize(undefined, 'Long', true, 'test')).toEqual('0');
+    expect(marshaller.serialize(undefined, 'Long', true, 'test')).toEqual(0);
     expect(marshaller.serialize(undefined, 'Double', true, 'test')).toEqual(0);
     expect(marshaller.serialize(undefined, 'Float', true, 'test')).toEqual(0);
     expect(marshaller.serialize(undefined, 'Decimal', true, 'test')).toEqual('0');
@@ -71,7 +73,7 @@ describe('Instafin marshalling', () => {
 
   it('should default to 0 when deserializing non-nullable numbers', () => {
     expect(marshaller.deserialize(undefined, 'Int', true, 'test')).toEqual(0);
-    expect(marshaller.deserialize(undefined, 'Long', true, 'test')).toEqual('0');
+    expect(marshaller.deserialize(undefined, 'Long', true, 'test')).toEqual(0);
     expect(marshaller.deserialize(undefined, 'Double', true, 'test')).toEqual(0);
     expect(marshaller.deserialize(undefined, 'Float', true, 'test')).toEqual(0);
     expect(marshaller.deserialize(undefined, 'Decimal', true, 'test')).toEqual('0');
