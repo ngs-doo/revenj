@@ -70,6 +70,9 @@ export const assertLong = <T extends Long>(value: T): T => {
     if (number < BigInt(LONG_MIN_VALUE) || number > BigInt(LONG_MAX_VALUE)) {
       throw new Error(`Expected a Long, but value is ${value}`);
     }
+    if (number >= Number.MIN_SAFE_INTEGER && number <= Number.MAX_SAFE_INTEGER) {
+      return Number.parseInt(String(value), 10) as T;
+    }
     return number.toString() as unknown as T;
   } catch (error) {
     throw new Error(`Expected a Long, but value is ${value}`);
