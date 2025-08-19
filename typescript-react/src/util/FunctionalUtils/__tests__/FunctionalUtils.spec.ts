@@ -1,4 +1,5 @@
 // tslint:disable:rule no-construct
+import BigNumber from 'bignumber.js';
 import {
   concatUnique,
   deduplicateBy,
@@ -19,6 +20,7 @@ import {
   squashObject,
   takeWhile,
   valueOrNull,
+  isObject,
 } from '../FunctionalUtils';
 
 interface IThing {
@@ -675,6 +677,57 @@ describe('functional.ts', () => {
       expect(flattenName(null)).toEqual('');
       expect(flattenName(undefined)).toEqual('');
       expect(flattenName([undefined, 'value', null, '', ' '])).toEqual('value');
+    });
+  });
+
+  describe('isObject', () => {
+    it('should return true for plain objects', () => {
+      expect(isObject({})).toBe(true);
+      expect(isObject({ key: 'value' })).toBe(true);
+      expect(isObject({
+        numbers: {
+          int: 123,
+          decimal: 123.45,
+          bigInt: BigInt(123123123123123123),
+          bigNumb: new BigNumber(123123123123123123.12),
+          number: 123,
+        },
+        string: 'sample',
+        symbol: Symbol('sym'),
+        bool: true,
+        null: null,
+        undefined: undefined,
+      })).toBe(true);
+    });
+
+    test('should return true for null-prototype objects', () => {
+      const obj = Object.assign(Object.create(null), { abc: 123 });
+      expect(isObject(obj)).toBe(true);
+    });
+
+    it('should return false for arrays', () => {
+      expect(isObject([])).toBe(false);
+      expect(isObject([1, 2, 3])).toBe(false);
+    });
+
+    it('should return false for primitives', () => {
+      expect(isObject(123)).toBe(false);
+      expect(isObject('string')).toBe(false);
+      expect(isObject(true)).toBe(false);
+      expect(isObject(BigInt(123))).toBe(false);
+      expect(isObject(Symbol('sym'))).toBe(false);
+      expect(isObject(null)).toBe(false);
+      expect(isObject(undefined)).toBe(false);
+    });
+
+    it('should return false for functions', () => {
+      expect(isObject(function() {})).toBe(false);
+      expect(isObject(() => {})).toBe(false);
+    });
+
+    it('should return false for instances of custom classes', () => {
+      class Custom {}
+      expect(isObject(new Custom())).toBe(false);
     });
   });
 });
