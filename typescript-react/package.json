@@ -46,7 +46,7 @@
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-standard": "^4.0.1",
     "gh-pages": "^6.0.0",
-    "is-plain-object": "^2.0.4",
+    "is-plain-object": "^5.0.0",
     "microbundle-crl": "^0.13.10",
     "moment": "^2.29.4",
     "moment-timezone": "oradian/moment-timezone",
@@ -97,5 +97,5 @@
     "test:watch": "react-scripts test --env=jsdom"
   },
   "source": "src/index.ts",
-  "version": "1.9.19"
+  "version": "1.9.20"
 }

@@ -1,5 +1,5 @@
 import fastDeepEqual from 'fast-deep-equal';
-import isPlainObject from 'is-plain-object';
+import { isPlainObject } from 'is-plain-object';
 
 export const mapOrElse = (
   value: any,
