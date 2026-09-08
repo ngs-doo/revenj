@@ -1,5 +1,12 @@
+import BigNumber from 'bignumber.js';
+
+import { CurrencyFormat, CurrencyFormatter } from '../CurrencyFormatter';
 import {
+  constructFormat,
   formatNumberToDecimals,
+  getBigNumberConfig,
+  getBigNumberConstructor,
+  getPrecision,
   parseNumberIncludingMachineFormat,
 } from '../NumberFormatter';
 
@@ -114,34 +121,215 @@ describe('NumberFormatter', () => {
   });
 
   describe('formatNumberToDecimals', () => {
-    it('should format a number to a given number of decimals', () => {
-      expect(formatNumberToDecimals(100.25, 2)).toBe('100.25');
-      expect(formatNumberToDecimals('100.25', 2)).toBe('100.25');
-      expect(formatNumberToDecimals(25.5, 1)).toBe('25.5');
-      expect(formatNumberToDecimals(1000.5, 1)).toBe('1000.5');
-      expect(formatNumberToDecimals('100', 0)).toBe('100');
-      expect(formatNumberToDecimals(0, 2)).toBe('0.00');
-      expect(formatNumberToDecimals(-5.5, 2)).toBe('-5.50');
-      expect(formatNumberToDecimals(1000000, 0)).toBe('1000000');
+    describe('when precision is provided', () => {
+      beforeEach(() => {
+        CurrencyFormatter.setFormat('#0.00');
+      });
+
+      afterEach(() => {
+        CurrencyFormatter.setFormat(CurrencyFormat);
+      });
+
+      it('should format a number to a given number of decimals', () => {
+        expect(formatNumberToDecimals(100.25, 2)).toBe('100.25');
+        expect(formatNumberToDecimals('100.25', 2)).toBe('100.25');
+        expect(formatNumberToDecimals(25.5, 1)).toBe('25.5');
+        expect(formatNumberToDecimals(1000.5, 1)).toBe('1000.5');
+        expect(formatNumberToDecimals('100', 0)).toBe('100');
+        expect(formatNumberToDecimals(0, 2)).toBe('0.00');
+        expect(formatNumberToDecimals(-5.5, 2)).toBe('-5.50');
+        expect(formatNumberToDecimals(1000000, 0)).toBe('1000000');
+      });
+
+      it('should round the numbers if they have too many decimals', () => {
+        expect(formatNumberToDecimals('100.5', 0)).toBe('101');
+        expect(formatNumberToDecimals('100.25', 1)).toBe('100.3');
+        expect(formatNumberToDecimals('100.24', 1)).toBe('100.2');
+        expect(formatNumberToDecimals('1.5', 0)).toBe('2');
+        expect(formatNumberToDecimals(123.456, 2)).toBe('123.46');
+        expect(formatNumberToDecimals('0.001', 2)).toBe('0.00');
+      });
+
+      it('should append decimals when insufficient precision is provided', () => {
+        expect(formatNumberToDecimals(100, 2)).toBe('100.00');
+        expect(formatNumberToDecimals(1000, 2)).toBe('1000.00');
+        expect(formatNumberToDecimals('10.55', 4)).toBe('10.5500');
+      });
+
+      it('should return NaN for values that are not numbers', () => {
+        expect(formatNumberToDecimals('abc', 2)).toBe('NaN');
+      });
     });
 
-    it('should round the numbers if they have too many decimals', () => {
-      expect(formatNumberToDecimals('100.5', 0)).toBe('101');
-      expect(formatNumberToDecimals('100.25', 1)).toBe('100.3');
-      expect(formatNumberToDecimals('100.24', 1)).toBe('100.2');
-      expect(formatNumberToDecimals('1.5', 0)).toBe('2');
-      expect(formatNumberToDecimals(123.456, 2)).toBe('123.46');
-      expect(formatNumberToDecimals('0.001', 2)).toBe('0.00');
+    describe('when no precision is given', () => {
+      afterEach(() => {
+        CurrencyFormatter.setFormat(CurrencyFormat);
+      });
+
+      describe('"#,##0.00" format ("," group, "." decimal)', () => {
+        beforeEach(() => {
+          CurrencyFormatter.setFormat('#,##0.00');
+        });
+
+        it('preserves the value decimals', () => {
+          expect(formatNumberToDecimals('100')).toBe('100');
+          expect(formatNumberToDecimals('100.25')).toBe('100.25');
+          expect(formatNumberToDecimals(25.5)).toBe('25.5');
+          expect(formatNumberToDecimals('123.456')).toBe('123.456');
+          expect(formatNumberToDecimals(0)).toBe('0');
+          expect(formatNumberToDecimals(-5.5)).toBe('-5.5');
+        });
+
+        it('groups thousands while preserving decimals', () => {
+          expect(formatNumberToDecimals('1000.5')).toBe('1,000.5');
+          expect(formatNumberToDecimals(1000000)).toBe('1,000,000');
+          expect(formatNumberToDecimals('1234567.89')).toBe('1,234,567.89');
+        });
+
+        it('preserves trailing zeros the value was given with', () => {
+          expect(formatNumberToDecimals('0.50')).toBe('0.50');
+          expect(formatNumberToDecimals('1.500')).toBe('1.500');
+          expect(formatNumberToDecimals('100.00')).toBe('100.00');
+        });
+
+        it('does not round', () => {
+          expect(formatNumberToDecimals('0.001')).toBe('0.001');
+          expect(formatNumberToDecimals('123.4567')).toBe('123.4567');
+        });
+      });
+
+      describe('"#.##0,00" format ("." group, "," decimal)', () => {
+        beforeEach(() => {
+          CurrencyFormatter.setFormat('#.##0,00');
+        });
+
+        it('preserves the value decimals', () => {
+          expect(formatNumberToDecimals('100')).toBe('100');
+          expect(formatNumberToDecimals('100.25')).toBe('100,25');
+          expect(formatNumberToDecimals(25.5)).toBe('25,5');
+          expect(formatNumberToDecimals('123.456')).toBe('123,456');
+          expect(formatNumberToDecimals(0)).toBe('0');
+          expect(formatNumberToDecimals(-5.5)).toBe('-5,5');
+        });
+
+        it('groups thousands while preserving decimals', () => {
+          expect(formatNumberToDecimals('1000.5')).toBe('1.000,5');
+          expect(formatNumberToDecimals(1000000)).toBe('1.000.000');
+          expect(formatNumberToDecimals('1234567.89')).toBe('1.234.567,89');
+        });
+
+        it('preserves trailing zeros the value was given with', () => {
+          expect(formatNumberToDecimals('0.50')).toBe('0,50');
+          expect(formatNumberToDecimals('1.500')).toBe('1,500');
+          expect(formatNumberToDecimals('100.00')).toBe('100,00');
+        });
+
+        it('does not round', () => {
+          expect(formatNumberToDecimals('0.001')).toBe('0,001');
+          expect(formatNumberToDecimals('123.4567')).toBe('123,4567');
+        });
+      });
+
+      describe('"#.##0" format ("." group, "," decimal)', () => {
+        beforeEach(() => {
+          CurrencyFormatter.setFormat('#.##0');
+        });
+
+        it('preserves the value decimals', () => {
+          expect(formatNumberToDecimals('100')).toBe('100');
+          expect(formatNumberToDecimals('100.25')).toBe('100,25');
+          expect(formatNumberToDecimals(25.5)).toBe('25,5');
+          expect(formatNumberToDecimals('123.456')).toBe('123,456');
+          expect(formatNumberToDecimals(0)).toBe('0');
+          expect(formatNumberToDecimals(-5.5)).toBe('-5,5');
+        });
+
+        it('groups thousands while preserving decimals', () => {
+          expect(formatNumberToDecimals('1000.5')).toBe('1.000,5');
+          expect(formatNumberToDecimals(1000000)).toBe('1.000.000');
+          expect(formatNumberToDecimals('1234567.89')).toBe('1.234.567,89');
+        });
+
+        it('preserves trailing zeros the value was given with', () => {
+          expect(formatNumberToDecimals('0.50')).toBe('0,50');
+          expect(formatNumberToDecimals('1.500')).toBe('1,500');
+          expect(formatNumberToDecimals('100.00')).toBe('100,00');
+        });
+
+        it('does not round', () => {
+          expect(formatNumberToDecimals('0.001')).toBe('0,001');
+          expect(formatNumberToDecimals('123.4567')).toBe('123,4567');
+        });
+      });
+    });
+  });
+
+  describe('caching', () => {
+    const getConfig = (pattern: string): BigNumber.Config => ({
+      FORMAT: constructFormat(pattern) as BigNumber.Format,
     });
 
-    it('should append decimals when insufficient precision is provided', () => {
-      expect(formatNumberToDecimals(100, 2)).toBe('100.00');
-      expect(formatNumberToDecimals(1000, 2)).toBe('1000.00');
-      expect(formatNumberToDecimals('10.55', 4)).toBe('10.5500');
+    describe('getBigNumberConfig', () => {
+      const decimalSeparatorFor = (pattern: string) =>
+        getBigNumberConfig(getConfig(pattern)).FORMAT!.decimalSeparator;
+
+      it('keeps the declared decimal separator', () => {
+        expect(decimalSeparatorFor('#.##0,00')).toBe(',');
+        expect(decimalSeparatorFor('#,##0.00')).toBe('.');
+      });
+
+      it('derives a decimal separator when the format declares none', () => {
+        expect(decimalSeparatorFor('#.##0')).toBe(',');
+        expect(decimalSeparatorFor('#,##0')).toBe('.');
+      });
+
+      it('returns the same cached config for the same config', () => {
+        const config = getConfig('#.##0,00');
+
+        expect(getBigNumberConfig(config)).toBe(getBigNumberConfig(config));
+      });
     });
 
-    it('should return NaN for values that are not numbers', () => {
-      expect(formatNumberToDecimals('abc', 2)).toBe('NaN');
+    describe('getBigNumberConstructor', () => {
+      it('returns a BigNumber constructor configured with the format', () => {
+        const BigNum = getBigNumberConstructor(getConfig('#.##0,00'));
+
+        expect(typeof BigNum).toBe('function');
+        expect(new BigNum('1234.5').toFormat(2)).toBe('1.234,50');
+      });
+
+      it('derives the decimal separator when the format declares none', () => {
+        const BigNum = getBigNumberConstructor(getConfig('#.##0'));
+
+        expect(new BigNum('1234.5').toFormat(2)).toBe('1.234,50');
+      });
+
+      it('returns the same cached constructor for the same config', () => {
+        const config = getConfig('#,##0.00');
+
+        expect(getBigNumberConstructor(config)).toBe(
+          getBigNumberConstructor(config),
+        );
+      });
+
+      it('returns different constructors for different formats', () => {
+        expect(getBigNumberConstructor(getConfig('#,##0.00'))).not.toBe(
+          getBigNumberConstructor(getConfig('#.##0,00')),
+        );
+      });
+    });
+
+    describe('getPrecision', () => {
+      it('returns the precision declared by the format', () => {
+        expect(getPrecision(getConfig('#,##0.00'))).toBe(2);
+        expect(getPrecision(getConfig('#.##0,00'))).toBe(2);
+        expect(getPrecision(getConfig('#,##0.000'))).toBe(3);
+        expect(getPrecision(getConfig('#.##0'))).toBe(0);
+      });
+
+      it('defaults to zero when the config has no format', () => {
+        expect(getPrecision({} as BigNumber.Config)).toBe(0);
+      });
     });
   });
 });

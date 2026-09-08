@@ -1,9 +1,12 @@
+import BigNumber from 'bignumber.js';
+
 import * as NumberUtils from '../NumberUtils/NumberUtils';
 import {
   constructFormat,
   formatNumber,
   INumberFormat,
   MachineBigNumber,
+  setNumberConfig,
 } from './NumberFormatter';
 
 export const CurrencyFormat = '#,##0.00';
@@ -26,6 +29,10 @@ export class CurrencyFormatterClass {
     }
     this.currencyFormat = format ? format : CurrencyFormat;
     this.format = constructFormat(this.currencyFormat);
+    if (this.format != null) {
+      BigNumber.config({ FORMAT: this.format });
+      setNumberConfig({ FORMAT: this.format });
+    }
   }
 
   setCurrencySymbol = (symbol: string, placement: CurrencySymbolPlacement) => {

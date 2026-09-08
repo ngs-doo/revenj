@@ -4,6 +4,15 @@
 # dependencies
 node_modules
 
+# yarn (berry) - ignore caches/state, keep committed bits
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
 # builds
 build
 dist

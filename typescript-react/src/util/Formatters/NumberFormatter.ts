@@ -38,6 +38,76 @@ const MACHINE_FORMAT: Format = {
 export const MachineBigNumber = BigNumber.clone({ FORMAT: MACHINE_FORMAT });
 
 const formats: IFormats = {};
+const precisions = new WeakMap<object, number>();
+const bigNumberConfigs = new WeakMap<object, BigNumber.Config>();
+const bigNumberConstructors = new WeakMap<object, typeof BigNumber>();
+
+let numberConfig: BigNumber.Config = BigNumber.config({});
+
+export const setNumberConfig = (config: BigNumber.Config): void => {
+  numberConfig = config;
+};
+
+export const getPrecision = (config: BigNumber.Config): number => {
+  const format = config.FORMAT as INumberFormat | undefined;
+  if (format == null) {
+    return 0;
+  }
+
+  const cached = precisions.get(format);
+  if (cached != null) {
+    return cached;
+  }
+
+  const precision = format.precision ?? 0;
+  precisions.set(format, precision);
+
+  return precision;
+};
+
+export const getBigNumberConfig = (config: BigNumber.Config): BigNumber.Config => {
+  const format = config.FORMAT;
+  if (format == null) {
+    return config;
+  }
+
+  const cached = bigNumberConfigs.get(format);
+  if (cached != null) {
+    return cached;
+  }
+
+  const derived: BigNumber.Config = {
+    ...config,
+    FORMAT: {
+      ...format,
+      decimalSeparator: format.decimalSeparator !== ''
+        ? format.decimalSeparator
+        : format.groupSeparator === '.'
+          ? ','
+          : '.',
+    },
+  };
+  bigNumberConfigs.set(format, derived);
+
+  return derived;
+};
+
+export const getBigNumberConstructor = (config: BigNumber.Config): typeof BigNumber => {
+  const format = config.FORMAT;
+  if (format == null) {
+    return BigNumber.clone(getBigNumberConfig(config));
+  }
+
+  const cached = bigNumberConstructors.get(format);
+  if (cached != null) {
+    return cached;
+  }
+
+  const constructor = BigNumber.clone(getBigNumberConfig(config));
+  bigNumberConstructors.set(format, constructor);
+
+  return constructor;
+};
 
 /**
  * Format given number to a string. If formatting fails, empty string.
@@ -71,21 +141,17 @@ export const formatNumber = (number: any, pattern?: string): string => {
 };
 
 // HACK: On instances where smallest denomination is 1, everything goes bad. In this case, we're trying to guess the decimal separator
-export const formatNumberToDecimals = (number: NumberUtils.Numeric, decimals: number): string => {
-  const existingFormat = BigNumber.config({});
-  const format = {
-    ...existingFormat,
-    FORMAT: {
-      ...existingFormat.FORMAT,
-      decimalSeparator: existingFormat.FORMAT!.decimalSeparator !== ''
-        ? existingFormat.FORMAT!.decimalSeparator
-        : existingFormat.FORMAT!.groupSeparator === '.'
-          ? ','
-          : '.',
-    },
-  };
-  const FormatBigNum = BigNumber.clone(format);
-  return new FormatBigNum(number).toFormat(decimals);
+export const formatNumberToDecimals = (number: NumberUtils.Numeric, decimals?: number): string => {
+  const FormatBigNum = getBigNumberConstructor(numberConfig);
+
+  if (decimals != null) {
+    return new FormatBigNum(number).toFormat(decimals);
+  }
+
+  const fraction = String(number).split(MACHINE_FORMAT.decimalSeparator!)[1];
+  const precision = fraction != null ? fraction.length : 0;
+
+  return new FormatBigNum(number).toFormat(precision);
 };
 
 /**

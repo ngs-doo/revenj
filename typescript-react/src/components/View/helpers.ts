@@ -1,4 +1,5 @@
 import { ColumnType, TypescriptResultSet } from '../../ResultSet/ResultSet';
+import { formatNumberToDecimals } from '../../util/Formatters/NumberFormatter';
 import { isObject } from '../../util/FunctionalUtils/FunctionalUtils';
 import {
   CellType,
@@ -99,6 +100,13 @@ export const getResultSetColumnDefinitions = (
             Array.isArray(it) ? it.map(String).join(', ') : String(it);
         case ColumnType.Null:
           return () => '—';
+        case ColumnType.Decimal:
+        case ColumnType.Float:
+          return (it: any) => formatNumberToDecimals(it);
+        case ColumnType.Int:
+        case ColumnType.Long:
+        case ColumnType.Short:
+          return (it: any) => formatNumberToDecimals(it, 0);
         default:
           return;
       }
