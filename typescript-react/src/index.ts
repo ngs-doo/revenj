@@ -52,7 +52,7 @@ export { Marshaller } from './marshalling';
 export * from './components';
 export type { IGridPublicProps, IPresenterFormPublicProps, ITooltip, IExportButton } from './components';
 export { RowState } from './components/Table/interfaces';
-export type { IRowInfo } from './components/Table/interfaces';
+export type { IGetRowState, IRowInfo } from './components/Table/interfaces';
 export * from './util/presenter';
 
 export { Assert };
