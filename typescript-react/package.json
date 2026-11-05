@@ -88,7 +88,6 @@
     "build": "run-s prebuild build:bundle",
     "build:bundle": "microbundle-crl --no-compress --format modern,cjs",
     "deploy": "gh-pages -d example/build",
-    "postpack": "mv package.tgz ${npm_package_name}-v${npm_package_version}.tgz",
     "prebuild": "node ./scripts/postinstall.js",
     "predeploy": "cd example && yarn install && yarn run build",
     "prepack": "run-s build",
@@ -102,5 +101,5 @@
   },
   "packageManager": "yarn@4.9.2",
   "source": "src/index.ts",
-  "version": "1.9.22"
+  "version": "1.9.23"
 }

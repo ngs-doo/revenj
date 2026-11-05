@@ -17,6 +17,7 @@ export * from './Form/Group';
 export * from './Form/Form';
 export * from './Form/GlobalFormError';
 export { Header } from './Header/Header';
+export * from './Label/Label';
 export * from './Tooltip/Tooltip';
 export * from './Table/Table';
 export { Validator };

@@ -5,7 +5,7 @@ import ControlLabel from 'react-bootstrap/FormLabel';
 import { I18nContext } from '../I18n/I18n';
 import { localizeText } from '../I18n/service';
 
-interface ICustomizableProps {
+export interface ICustomizableProps {
   className?: string;
   defaultValue: string;
   message?: string;
@@ -37,7 +37,7 @@ export const CustomizableText = ({ defaultValue, className, paths }: ICustomizab
   }
 
   const onClick = async (e: React.MouseEvent) => {
-    if (hasPermissions && e.ctrlKey) {
+    if (hasPermissions && (e.ctrlKey || e.metaKey)) {
       setIsEdit(true);
     }
   }
