@@ -9,6 +9,7 @@ import {
   IRowConfig,
   Table,
 } from '../Table/Table';
+import { IGetRowState } from '../Table/interfaces';
 import { Loading } from '../Loader/Loader';
 import { TypescriptResultSet } from '../../ResultSet/ResultSet';
 import { get, set, flattenName } from '../../util/FunctionalUtils/FunctionalUtils';
@@ -33,6 +34,7 @@ export interface IGridPublicProps<Row> {
   definition: IRowConfig<Row>;
   footerLabel?: string;
   maxResults?: number;
+  getRowState?: IGetRowState<Row>;
 }
 
 interface IGrid<Row> extends IGridPublicProps<Row>, IWithI18n {}
@@ -89,6 +91,7 @@ export class GridComponent<Row> extends React.PureComponent<IGridComponent<Row>,
       page,
       perPage,
       pages,
+      getRowState,
     } = this.props;
     const { query } = this.state;
 
@@ -117,6 +120,7 @@ export class GridComponent<Row> extends React.PureComponent<IGridComponent<Row>,
           columns={this.getDefinition()}
           data={this.getItems() ?? []}
           foldableColumns
+          getRowState={getRowState}
           pagination={pagination}
           automaticPagination={this.automaticallyPaginate()}
           page={page}
@@ -225,7 +229,7 @@ export class GridComponent<Row> extends React.PureComponent<IGridComponent<Row>,
   }
 }
 
-class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
+class GridBare<Row> extends React.PureComponent<IGrid<Row>> {
   public render() {
     const {
       maxResults,
@@ -234,6 +238,7 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
       className,
       dynamic,
       footerLabel,
+      getRowState,
     } = this.props;
     return (
       <ListPresenterComponent>
@@ -246,6 +251,7 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
               className={className}
               dynamic={dynamic}
               footerLabel={footerLabel}
+              getRowState={getRowState}
               pagination={Boolean(pagination) || (ctx!.page != null && ctx!.perPage != null)}
               page={ctx!.page}
               perPage={ctx!.perPage}
@@ -264,11 +270,11 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
     );
   }
 
-  private getDefinition = (conceptName: string) => {
+  private getDefinition = (conceptName: string): IRowConfig<Row> => {
     const { definition: originalDefinition, footerLabel } = this.props;
     const definition = mergeDefinition(originalDefinition, footerLabel);
 
-    return definition?.map((row: IColumnConfig<any>) => {
+    return definition?.map((row: IColumnConfig<Row>) => {
       const name = flattenName(row?.field);
       const path = `${conceptName}.${name}`;
       return {
@@ -278,13 +284,13 @@ class GridBare<Row> extends React.PureComponent<IGrid<Row[]>> {
     });
   }
 
-  private transformItems = (items: Row[]) => {
+  private transformItems = (items: Row[]): Row[] => {
     const { dynamic } = this.props;
     if (dynamic && items != null) {
       if (items instanceof TypescriptResultSet) {
         return items;
       } else {
-        return items.map(unpackRow);
+        return items.map(unpackRow) as Row[];
       }
     } else {
       return items;
