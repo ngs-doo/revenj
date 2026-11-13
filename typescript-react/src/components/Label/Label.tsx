@@ -15,13 +15,11 @@ export interface ICustomizableProps {
 export const CustomizableText = ({ defaultValue, className, paths }: ICustomizableProps) => {
   const { customizeLabel, hasPermissions, localize } = React.useContext(I18nContext);
   const [isEdit, setIsEdit] = React.useState(false);
-  const [value, setValue] = React.useState(localizeText(localize, defaultValue, paths));
+  // draft is only used while editing; the displayed value is always derived from the current
+  // localization (SMD) state, so labels keep updating after SMD loads/changes post-mount
+  const [draft, setDraft] = React.useState('');
 
-  React.useEffect(() => {
-    if (defaultValue !== value) {
-      setValue(localizeText(localize, defaultValue, paths));
-    }
-  }, [defaultValue]);
+  const value = isEdit ? draft : localizeText(localize, defaultValue, paths);
 
   const onEdit = async () => {
     if (hasPermissions) {
@@ -38,6 +36,7 @@ export const CustomizableText = ({ defaultValue, className, paths }: ICustomizab
 
   const onClick = async (e: React.MouseEvent) => {
     if (hasPermissions && (e.ctrlKey || e.metaKey)) {
+      setDraft(value);
       setIsEdit(true);
     }
   }
@@ -47,7 +46,7 @@ export const CustomizableText = ({ defaultValue, className, paths }: ICustomizab
       <FormControl
         autoFocus
         onBlur={onEdit}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => setDraft(e.target.value)}
         type='text'
         value={value}
       />
